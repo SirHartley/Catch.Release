@@ -18,6 +18,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
     public static final String FOLLOWER_ID = "catchrelease_follower";
     public static final String STATE_DINNER_ID = "catchrelease_state_dinner";
     public static final String CLAIM_ASSAY_ID = "catchrelease_claim_assay";
+    public static final String MANDATE_ID = "catchrelease_mandate";
 
     public static void register() {
         DistressCallFramework.registerProvider(PROVIDER_ID, new CatchReleaseDistressProvider());
@@ -28,7 +29,11 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
         if (!FishingIntro.isComplete()) return false;
         if (!Global.getSector().getIntelManager().getIntel(FleetQuest.class).isEmpty()) return false;
 
-        return FleetQuestEncounter.countLive() == 0 && typeFor(spec) != null;
+        FleetQuestType type = typeFor(spec);
+        if (type == null) return false;
+        if (type == FleetQuestType.MANDATE && !FleetQuestType.isNearAbyssal(system)) return false;
+
+        return FleetQuestEncounter.countLive() == 0;
     }
 
     @Override
@@ -70,6 +75,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
         if (FOLLOWER_ID.equals(spec.id)) return FleetQuestType.FOLLOWER;
         if (STATE_DINNER_ID.equals(spec.id)) return FleetQuestType.STATE_DINNER;
         if (CLAIM_ASSAY_ID.equals(spec.id)) return FleetQuestType.CLAIM_ASSAY;
+        if (MANDATE_ID.equals(spec.id)) return FleetQuestType.MANDATE;
 
         return null;
     }

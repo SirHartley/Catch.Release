@@ -118,6 +118,10 @@ public class FishRequirement {
         if (speciesId != null && !speciesId.equals(spec.id)) return false;
         if (speciesId == null && tag != null && !spec.tags.contains(tag)) return false;
         if (minRarity != null && spec.rarity.rank < minRarity.rank) return false;
+        if (origin == SectorRegion.ABYSSAL
+                && !spec.regions.contains(SectorRegion.ABYSSAL)) return false;
+        if (origin != null && origin != SectorRegion.ABYSSAL
+                && spec.regions.contains(SectorRegion.ABYSSAL)) return false;
         if (lowCoherence && spec.tags.contains("abyssal")) return false;
         if (minLength > 0f && spec.lengthMax < minLength) return false;
         if (minWeight > 0f && spec.weightMax < minWeight) return false;
