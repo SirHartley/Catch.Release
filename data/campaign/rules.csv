@@ -1084,8 +1084,8 @@ catchrelease_ringPickSel,DialogOptionSelected,$option == catchrelease_ringPick,C
 catchrelease_ringAssignmentReady,CatchReleaseRingWagerReady,"$missionId == catchrelease_ring
 $catchreleaseRingSelectionReady",CatchReleaseCMD highlightJobText $catchreleaseLeftFish $catchreleaseRightFish,"$catchreleaseRight takes the two container tags, turns them face-down and deals one to either side of the tank.
 
-$catchreleaseLeft — $catchreleaseLeftFish
-$catchreleaseRight — $catchreleaseRightFish
+$catchreleaseLeft - $catchreleaseLeftFish
+$catchreleaseRight - $catchreleaseRightFish
 
 He writes the line beneath them.
 
@@ -1840,10 +1840,11 @@ He studies you for a moment.
 10:catchrelease_fisherOkayMirror:Are you sure? Got a mirror?",
 catchrelease_fisherOkayThen,DialogOptionSelected,$option == catchrelease_fisherOkayThen,"$menuState = catchreleaseFisher 0
 FireAll CatchReleaseFisherOptions",,,
-catchrelease_fisherOkayMirror,DialogOptionSelected,$option == catchrelease_fisherOkayMirror,,"The Fisherman doesn't react.
+catchrelease_fisherOkayMirror,DialogOptionSelected,$option == catchrelease_fisherOkayMirror,FireBest CatchReleaseFisherDoubt,"The Fisherman doesn't react.
 
-""Fabric's playing tricks, don't mind it.""","0:catchrelease_fisherOkaySaySo:If you say so.
-10:catchrelease_fisherOkayKnot:This is another one of these knots, isn't it?",
+""Fabric's playing tricks, don't mind it.""",0:catchrelease_fisherOkaySaySo:If you say so.,
+catchrelease_fisherOkayPressedBefore,CatchReleaseFisherDoubt,$global.catchrelease_fisherPressedForFabricTruth,,,"10:catchrelease_fisherOkayKnot:This is another one of these knots, isn't it?",
+catchrelease_fisherOkayNeverPressed,CatchReleaseFisherDoubt,!$global.catchrelease_fisherPressedForFabricTruth,,,10:catchrelease_introPressLocation:That does not answer the question.,
 catchrelease_fisherOkaySaySo,DialogOptionSelected,$option == catchrelease_fisherOkaySaySo,"$menuState = catchreleaseFisher 0
 FireAll CatchReleaseFisherOptions",,,
 catchrelease_fisherOkayKnot,DialogOptionSelected,$option == catchrelease_fisherOkayKnot,,"""A terribly frayed one, especially here.""
@@ -3178,7 +3179,7 @@ He looks back toward the plot.
 
 ""Your fish is still here.""","0:catchrelease_introPressLocation:How?
 100:catchrelease_fisherBack:Let it go",
-catchrelease_introPressLocation,DialogOptionSelected,$option == catchrelease_introPressLocation,,"The Fisherman looks at you for a moment.
+catchrelease_introPressLocation,DialogOptionSelected,$option == catchrelease_introPressLocation,$global.catchrelease_fisherPressedForFabricTruth = true,"The Fisherman looks at you for a moment.
 
 ""Captain.""
 

@@ -20,9 +20,6 @@ General
 tUTORIAL
 - "If you say so" fisherman interaction - "knot" option should only show up if the "other" knot option has been asked before, otherwise, can be more inquisitive and get the original knot response
 
-Distress call
-- Quests that want fish from another system are not currently telling you that the fish isn't locally available - they should tell you which system to get it from if it's not the one you are in. System must be within 5ly
-
 Quests
 - "pathers on the rupture" did not correctly clear the "required" fish entry from memory after completion.
 
