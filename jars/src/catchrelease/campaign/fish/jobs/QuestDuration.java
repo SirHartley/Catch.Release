@@ -1,6 +1,8 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRanges;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
@@ -9,6 +11,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -56,47 +59,47 @@ public enum QuestDuration {
         return forDays(WORKING_DAYS + Math.max(0f, oneWayLY) * DAYS_PER_LY * 2f);
     }
 
-    /** A known single destination: the fleet in distress, the quest pond's system. */
-    public static QuestDuration forTarget(SectorEntityToken from, SectorEntityToken target) {
-        if (from == null || target == null) return STANDARD;
-
-        return forTravelLY(Misc.getDistanceLY(from.getLocationInHyperspace(),
-                target.getLocationInHyperspace()));
-    }
-
-    /** No single destination: the nearest system where every ask could be filled. */
-    public static QuestDuration forAsks(SectorEntityToken from, List<FishRequirement> asks) {
-        if (from == null || asks == null || asks.isEmpty()) return STANDARD;
-
+    /** The farthest of the per-ask nearest satisfiable systems, or -1 when some ask
+     *  cannot be filled within maxLY - such an offer should not be made. */
+    public static float worstNearestLY(SectorEntityToken from, List<FishRequirement> asks,
+                                       float maxLY) {
         float worst = 0f;
-        for (FishRequirement ask : asks) {
-            float nearest = nearestSatisfiableLY(from, ask);
-            if (nearest < 0f) return OPEN;
 
-            worst = Math.max(worst, nearest);
+        if (asks != null) {
+            for (FishRequirement ask : asks) {
+                float nearest = nearestSatisfiableLY(from, ask, maxLY);
+                if (nearest < 0f) return -1f;
+
+                worst = Math.max(worst, nearest);
+            }
         }
 
-        return forTravelLY(worst);
+        return worst;
     }
 
-    /** Whether every ask could be filled somewhere within the given reach of the giver.
-     *  Species ranges move monthly, so a demand rolled today can point at water that no
-     *  longer exists or sits across the sector; such an offer should not be made. */
-    public static boolean satisfiableWithin(SectorEntityToken from,
-                                            List<FishRequirement> asks, float maxLY) {
-        if (from == null || asks == null || asks.isEmpty()) return true;
+    /** Nearest system in whose water the ask could be filled, or -1 for none within
+     *  maxLY. Species ranges move monthly, so a demand rolled today can point at water
+     *  that no longer exists or sits across the sector. */
+    public static float nearestSatisfiableLY(SectorEntityToken from, FishRequirement ask,
+                                             float maxLY) {
+        if (from == null || ask == null || Global.getSector() == null) return -1f;
 
-        for (FishRequirement ask : asks) {
-            float nearest = nearestSatisfiableLY(from, ask);
-            if (nearest < 0f || nearest > maxLY) return false;
+        List<FishRequirement> branches = new ArrayList<>();
+        collectBranches(ask, branches);
+
+        // candidate species gathered once, so the system loop only tests ranges
+        List<FishSpec> specs = new ArrayList<>();
+        List<CatchImplement> implementFor = new ArrayList<>();
+        for (FishRequirement branch : branches) {
+            for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+                if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
+                if (!branch.couldBeSatisfiedBy(spec)) continue;
+
+                specs.add(spec);
+                implementFor.add(branch.implement);
+            }
         }
-
-        return true;
-    }
-
-    /** Nearest system in whose water the ask could be filled, or -1 for nowhere. */
-    protected static float nearestSatisfiableLY(SectorEntityToken from, FishRequirement ask) {
-        if (ask == null || Global.getSector() == null) return -1f;
+        if (specs.isEmpty()) return -1f;
 
         Vector2f at = from.getLocationInHyperspace();
         float best = -1f;
@@ -105,33 +108,28 @@ public enum QuestDuration {
             if (system == null) continue;
 
             float distance = Misc.getDistanceLY(at, system.getLocation());
+            if (distance > maxLY) continue;
             if (best >= 0f && distance >= best) continue;
 
-            if (!satisfiableIn(system, ask)) continue;
-
-            best = distance;
+            for (int i = 0; i < specs.size(); i++) {
+                if (FishRanges.matches(specs.get(i), system, implementFor.get(i))) {
+                    best = distance;
+                    break;
+                }
+            }
         }
 
         return best;
     }
 
-    protected static boolean satisfiableIn(StarSystemAPI system, FishRequirement ask) {
+    protected static void collectBranches(FishRequirement ask, List<FishRequirement> out) {
+        if (ask == null) return;
+
         if (!ask.anyOf.isEmpty()) {
-            for (FishRequirement alternative : ask.anyOf) {
-                if (alternative != null && satisfiableIn(system, alternative)) return true;
-            }
-
-            return false;
+            for (FishRequirement alternative : ask.anyOf) collectBranches(alternative, out);
+            return;
         }
 
-        for (catchrelease.campaign.fish.data.FishSpec spec
-                : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
-            if (!ask.couldBeSatisfiedBy(spec)) continue;
-
-            if (FishRanges.matches(spec, system, ask.implement)) return true;
-        }
-
-        return false;
+        out.add(ask);
     }
 }

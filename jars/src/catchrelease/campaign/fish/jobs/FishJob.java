@@ -143,11 +143,15 @@ public abstract class FishJob extends HubMissionWithBarEvent
      *  should not be made, so callers bail out of create(). */
     protected boolean setDurationForAsks(MarketAPI from) {
         SectorEntityToken at = from == null ? null : from.getPrimaryEntity();
-        if (!QuestDuration.satisfiableWithin(at, asks, QuestDuration.MAX_SENSIBLE_LY)) {
-            return false;
+        if (at == null || asks.isEmpty()) {
+            days = QuestDuration.STANDARD.days;
+            return true;
         }
 
-        days = QuestDuration.forAsks(at, asks).days;
+        float worst = QuestDuration.worstNearestLY(at, asks, QuestDuration.MAX_SENSIBLE_LY);
+        if (worst < 0f) return false;
+
+        days = QuestDuration.forTravelLY(worst).days;
 
         return true;
     }

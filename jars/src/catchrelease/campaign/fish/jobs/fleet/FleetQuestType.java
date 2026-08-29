@@ -1,12 +1,16 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
 import catchrelease.campaign.fish.data.FishGrade;
+import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
+import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import java.util.List;
@@ -98,6 +102,50 @@ public enum FleetQuestType {
         this.thanks = thanks;
     }
 
+    public static final float HOME_SPECIES_WEIGHT = 4f;
+
+    /** A species swimming where the giver already is, or failing that in the single
+     *  nearest neighbouring system - null when neither has anything eligible. */
+    protected static String pickNearbySpecies(Random random, StarSystemAPI home,
+                                              FishRarity maximum) {
+        if (home == null) return pickSpecies(random, null, maximum);
+
+        StarSystemAPI adjacent = nearestSystemTo(home);
+        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>(random);
+
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
+            if (maximum != null && spec.rarity.rank > maximum.rank) continue;
+
+            if (FishRanges.matches(spec, home, null)) {
+                picker.add(spec, HOME_SPECIES_WEIGHT);
+            } else if (adjacent != null && FishRanges.matches(spec, adjacent, null)) {
+                picker.add(spec, 1f);
+            }
+        }
+
+        FishSpec pick = picker.pick();
+
+        return pick == null ? null : pick.id;
+    }
+
+    protected static StarSystemAPI nearestSystemTo(StarSystemAPI home) {
+        StarSystemAPI best = null;
+        float bestLY = Float.MAX_VALUE;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (system == null || system == home) continue;
+
+            float ly = Misc.getDistanceLY(home.getLocation(), system.getLocation());
+            if (ly < bestLY) {
+                bestLY = ly;
+                best = system;
+            }
+        }
+
+        return best;
+    }
+
     protected static String pickSpecies(Random random, FishRarity minimum, FishRarity maximum) {
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>(random);
 
@@ -117,12 +165,20 @@ public enum FleetQuestType {
     /** The type keeps its demand shape - the pitch has to stay true - and the rolled
      *  ambition decides how far that shape is pushed. The reward is then priced off
      *  what actually came out, so a shape that cannot reach the target underpays
-     *  rather than overcharges. */
-    public FishRequirement rollAsk(Random random, float target) {
+     *  rather than overcharges. Returns null when the shape cannot be filled at all
+     *  from where the giver sits. */
+    public FishRequirement rollAsk(Random random, float target, StarSystemAPI home) {
         FishRequirement ask = new FishRequirement();
 
         switch (this) {
             case STRANDED:
+                // stranded means stranded: the pitch says the rupture is nearby, so the
+                // fish lives in this system or the one next door, never a detour
+                ask.count = target >= 24f ? 2 : 1;
+                ask.speciesId = pickNearbySpecies(random, home, FishRarity.UNCOMMON);
+                if (ask.speciesId == null) return null;
+                break;
+
             case SCAVENGER_ENGINE:
                 // stuck, not shopping: a bigger favour is a second specimen, never exotics
                 ask.count = target >= 24f ? 2 : 1;

@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -46,6 +47,9 @@ public class FleetQuest extends FishJob {
     public static final String THANKS_KEY = "$catchrelease_fleetQuestThanks";
 
     public static final float HOLD_DAYS = 100000f;
+
+    public static final int ASK_ATTEMPTS = 5;
+    public static final float ASK_BACKOFF = 0.7f;
 
     public static final String OFFER_SPRITE_CATEGORY = "systemMap";
     public static final String OFFER_SPRITE = "mission_indicator";
@@ -198,8 +202,6 @@ public class FleetQuest extends FishJob {
         addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
                 .budgetMult(1.15f).random(random())).rewards);
 
-        days = QuestDuration.forAsks(giver, asks).days;
-
         setUpSpine();
 
         if (!setEntityMissionRef(giver, REF_KEY)) return false;
@@ -210,15 +212,24 @@ public class FleetQuest extends FishJob {
     }
 
     // a rolled species can point at water that moved or vanished under the monthly
-    // reassessment; a few rerolls give the shape another chance before the encounter
-    // is dropped entirely
+    // reassessment; failed attempts retry with shrinking ambition, so a collector who
+    // cannot have an epic settles for a rare instead of the encounter being dropped.
+    // The reward is priced off the ask that came out, so settling also pays less.
+    // The one satisfiability scan also sizes the clock.
     protected FishRequirement rollFillableAsk(float target) {
-        for (int i = 0; i < 4; i++) {
-            FishRequirement ask = type.rollAsk(random(), target);
-            if (QuestDuration.satisfiableWithin(giver, List.of(ask),
-                    QuestDuration.MAX_SENSIBLE_LY)) {
-                return ask;
-            }
+        StarSystemAPI home = giver.getContainingLocation() instanceof StarSystemAPI
+                ? (StarSystemAPI) giver.getContainingLocation() : null;
+
+        for (int i = 0; i < ASK_ATTEMPTS; i++, target *= ASK_BACKOFF) {
+            FishRequirement ask = type.rollAsk(random(), target, home);
+            if (ask == null) continue;
+
+            float nearest = QuestDuration.nearestSatisfiableLY(giver, ask,
+                    QuestDuration.MAX_SENSIBLE_LY);
+            if (nearest < 0f) continue;
+
+            days = QuestDuration.forTravelLY(nearest).days;
+            return ask;
         }
 
         return null;

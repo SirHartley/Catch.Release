@@ -15,10 +15,12 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class FishRequirement {
 
@@ -207,14 +209,6 @@ public class FishRequirement {
         return spec.getDisplayName().length();
     }
 
-    protected static boolean containsHighlight(String text, List<RarityHighlight> highlights) {
-        if (text == null || highlights == null) return false;
-        for (RarityHighlight entry : highlights) {
-            if (entry != null && entry.text != null && text.contains(entry.text)) return true;
-        }
-        return false;
-    }
-
     public List<RarityHighlight> getRarityHighlights() {
         Map<String, FishRarity> found = new LinkedHashMap<>();
         collectRarityHighlights(found);
@@ -274,26 +268,24 @@ public class FishRequirement {
 
         List<String> strings = new ArrayList<>();
         List<Color> colors = new ArrayList<>();
+        Set<String> namesInline = new HashSet<>();
 
         if (normalHighlights != null) {
             for (String text : normalHighlights) {
-                if (text == null || text.isEmpty() || containsHighlight(text, fishNames)) continue;
-                strings.add(text);
-                colors.add(Misc.getHighlightColor());
+                if (text == null || text.isEmpty()) continue;
+                addSplit(text, fishNames, strings, colors, namesInline);
             }
         }
 
-        if (askRarity.isEmpty()) {
-            if (fallbackAsk != null && !fallbackAsk.isEmpty()
-                    && !containsHighlight(fallbackAsk, fishNames)) {
-                strings.add(fallbackAsk);
-                colors.add(Misc.getHighlightColor());
-            }
+        if (askRarity.isEmpty() && fallbackAsk != null && !fallbackAsk.isEmpty()) {
+            addSplit(fallbackAsk, fishNames, strings, colors, namesInline);
         }
 
         Map<String, FishRarity> rarity = new LinkedHashMap<>();
         for (RarityHighlight entry : askRarity) rarity.put(entry.text, entry.rarity);
-        for (RarityHighlight entry : fishNames) rarity.put(entry.text, entry.rarity);
+        for (RarityHighlight entry : fishNames) {
+            if (!namesInline.contains(entry.text)) rarity.put(entry.text, entry.rarity);
+        }
 
         for (Map.Entry<String, FishRarity> entry : rarity.entrySet()) {
             strings.add(entry.getKey());
@@ -303,6 +295,57 @@ public class FishRequirement {
         if (strings.isEmpty()) return;
         label.setHighlight(strings.toArray(new String[0]));
         label.setHighlightColors(colors.toArray(new Color[0]));
+    }
+
+    /** A slug that names a fish is split around the names, so the surrounding text
+     *  keeps the standard highlight while each name shows its rarity colour. The
+     *  pieces are added in textual order because label highlights match forward. */
+    protected static void addSplit(String text, List<RarityHighlight> fishNames,
+                                   List<String> strings, List<Color> colors,
+                                   Set<String> namesInline) {
+        int pos = 0;
+        while (pos < text.length()) {
+            RarityHighlight next = null;
+            int at = -1;
+
+            for (RarityHighlight name : fishNames) {
+                if (name == null || name.text == null || name.text.isEmpty()) continue;
+
+                int idx = text.indexOf(name.text, pos);
+                if (idx >= 0 && (at < 0 || idx < at)) {
+                    at = idx;
+                    next = name;
+                }
+            }
+
+            if (next == null) break;
+
+            addPlainSegment(text.substring(pos, at), strings, colors);
+            strings.add(next.text);
+            colors.add(next.rarity.color);
+            namesInline.add(next.text);
+            pos = at + next.text.length();
+        }
+
+        addPlainSegment(text.substring(pos), strings, colors);
+    }
+
+    protected static void addPlainSegment(String segment, List<String> strings,
+                                          List<Color> colors) {
+        String trimmed = segment.trim();
+        while (!trimmed.isEmpty() && ",.;:-".indexOf(trimmed.charAt(0)) >= 0) {
+            trimmed = trimmed.substring(1).trim();
+        }
+        if (trimmed.startsWith("and ")) trimmed = trimmed.substring(4).trim();
+        while (!trimmed.isEmpty()
+                && ",.;:-".indexOf(trimmed.charAt(trimmed.length() - 1)) >= 0) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1).trim();
+        }
+
+        if (trimmed.length() < 2) return;
+
+        strings.add(trimmed);
+        colors.add(Misc.getHighlightColor());
     }
 
     public static void highlightFishNames(LabelAPI label, String... texts) {
