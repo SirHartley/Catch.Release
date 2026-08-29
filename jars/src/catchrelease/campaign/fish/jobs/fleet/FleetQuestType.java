@@ -941,13 +941,47 @@ public enum FleetQuestType {
                     + " and out as the vessel tries to hold position."),
     SEEKER("Fleet on a Hunt",
             FleetTypes.SCAVENGER_SMALL,
-            "We have been out here eleven weeks looking for one specific thing and we are not"
-                    + " equipped for it. You clearly are. Land it for us and we will hand over what"
-                    + " we came out with instead.",
-            "They have been hunting one specimen for weeks with the wrong gear entirely.",
+            "The captain looks tired enough that eleven weeks sounds plausible before he says"
+                    + " it.\n\n"
+                    + "\"We've been hunting one fish for eleven weeks. Wrong equipment for the"
+                    + " job, but it's what we had.\"\n\n"
+                    + "\"I need {ask}. Nothing else will do.\"\n\n"
+                    + "He brings up the cargo transfer.\n\n"
+                    + "\"You bring it here, you take {reward}. That's the whole haul. This trip"
+                    + " was never supposed to make money.\"\n\n"
+                    + "\"I have {days} left.\"",
+            "A local captain has spent eleven weeks searching for {ask} and is offering his"
+                    + " entire haul in exchange. He needs the specimen within {days}.",
             "Searching",
-            "That's it. Eleven weeks with the wrong gear, and you brought it back in one trip."
-                    + " Thank you."),
+            "\"Eleven weeks with the wrong gear, and you brought it back in one trip.\"\n\n"
+                    + "He looks at the container again.\n\n\"That's all I needed.\"",
+            1.25f,
+            new Dialogue(
+                    "\"Captain here. If you've got a minute, I'd like to talk.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll send you the record for {ask}.\"\n\n"
+                            + "The file arrives over the comm link.\n\n"
+                            + "\"Bring it here when you have it.\"",
+                    "\"Fine. No promise.\"\n\nHe transmits the same record.\n\n"
+                            + "\"If you find {ask} before the window closes, hail me.\"",
+                    "Decline.",
+                    "\"Understood.\"\n\nThe captain closes the channel.",
+                    "\"Any luck with {ask}?\"\n\n\"I have {days} left.\"",
+                    "The captain takes the container and inspects the specimen longer than a"
+                            + " buyer would. No specification sheet comes out.\n\n"
+                            + "He turns it once, checks one side, then the other.\n\n"
+                            + "\"That's it.\"\n\n"
+                            + "A cargo order goes out. His crew begins transferring the haul to"
+                            + " your ship.",
+                    "Eleven weeks. What's it for?",
+                    "\"I was keeping a collection for my old captain.\"\n\n"
+                            + "\"I got into debt and sold one piece of it. My decision. Wasn't my"
+                            + " property.\"\n\n"
+                            + "\"He's retiring, and the collection gets inspected before it"
+                            + " changes hands.\"\n\n"
+                            + "\"Eleven weeks. That's the part you need.\"",
+                    "The captain's offer is recorded on the following terms.")),
     QUOTA("Short of Quota",
             FleetTypes.TRADE_SMALL,
             "Our quota is due, our nets came up light, and the difference between filed and short"
@@ -1544,12 +1578,14 @@ public enum FleetQuestType {
                 break;
             }
 
-            case SEEKER:
-                ask.count = 1;
-                ask.minRarity = target >= 45f ? FishRarity.EPIC
+            case SEEKER: {
+                FishRarity shelf = target >= 45f ? FishRarity.EPIC
                         : target >= 25f ? FishRarity.RARE : FishRarity.UNCOMMON;
+                ask.speciesId = pickSpecies(random, shelf, shelf);
+                if (ask.speciesId == null) return null;
                 if (target >= 60f) ask.minGrade = FishGrade.FINE;
                 break;
+            }
 
             case WAGER:
                 ask.count = 2;
