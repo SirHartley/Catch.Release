@@ -175,6 +175,71 @@ public enum FleetQuestType {
                     "\"It's in the will.\"\n\nThe master glances at the document.\n\n"
                             + "\"First catch goes with them, last catch closes the log.\"",
                     "The estate will accept delivery on the following terms.")),
+    CALIBRATION_PAIR("The Calibration Pair",
+            FleetTypes.SCAVENGER_SMALL,
+            "The researcher has a calibration record open when the link comes through.\n\n"
+                    + "\"We passed through worn fabric on the last leg. Since then, two of our"
+                    + " meters have been giving different results from the same standards.\"\n\n"
+                    + "\"Procedure calls for a matched local pair before we recalibrate either"
+                    + " instrument. We need {ask}.\"\n\n"
+                    + "\"The contract authorizes {reward}. Calibration window is {days}.\"",
+            "Under an Academy field contract, survey vessel {fleet} needs a matched local specimen"
+                    + " pair to calibrate instruments that began disagreeing after transit through"
+                    + " worn fabric.",
+            "Calibrating instruments",
+            "\"That's enough. I can file the calibration certificate.\"\n\n"
+                    + "The researcher signs the final sheet.\n\n"
+                    + "\"If the Academy wants a fourth column, they can issue a new contract."
+                    + " {fleet} out.\"",
+            1f,
+            new Dialogue(
+                    "\"Survey vessel {fleet}, operating under Academy field contract. Research"
+                            + " lead requesting a brief channel for calibration assistance.\"",
+                    "I'll take the job.",
+                    "No promises. Send me the details.",
+                    "\"Good. I'll transmit the calibration procedure and our current record.\""
+                            + "\n\nThe files arrive from {fleet}.",
+                    "\"Understood. No commitment recorded.\"\n\n"
+                            + "The researcher transmits the same procedure and calibration record."
+                            + "\n\n\"If you find what we need before the window closes, hail us.\"",
+                    "Decline.",
+                    "\"Understood. We'll continue with the calibration schedule.\"\n\n"
+                            + "The researcher closes the channel.",
+                    "\"The meters still disagree. I've started marking one 'probably correct,'"
+                            + " and I dislike writing 'probably' in a calibration record.\"\n\n"
+                            + "\"We still need {ask}.\"",
+                    "The researcher has both specimens transferred to the calibration bench. The"
+                            + " pair goes through the instrument set together, then through a second"
+                            + " time.\n\nBoth sets of readings are entered into the record.",
+                    "What do you mean, they disagree?",
+                    "\"The same certified mass produces one number on one meter and another on the"
+                            + " other.\"\n\nThe researcher brings up both entries.\n\n"
+                            + "\"We keep both results. That's why procedure calls for the reference"
+                            + " pair.\"",
+                    "The Academy field contract offers the following terms.",
+                    new Followup(
+                            "The researcher studies the completed table.\n\n"
+                                    + "\"One specimen returned a different number on the second"
+                                    + " pass.\"\n\nThey open the next line of the procedure.\n\n"
+                                    + "\"That calls for a tiebreaker. One more specimen of the same"
+                                    + " species.\"\n\n\"We need {ask}. The follow-up pays {reward}."
+                                    + " Window is {days}.\"",
+                            "I'll get the tiebreaker.",
+                            "\"Good. I'll transmit the amended calibration request.\"\n\n"
+                                    + "The new reference line is added to the existing record.",
+                            "Decline.",
+                            "\"Understood. The first pair remains accepted and paid.\"\n\n"
+                                    + "The researcher closes the additional request.\n\n"
+                                    + "\"We'll handle the remaining calibration from here.\"",
+                            "\"The calibration certificate is still sitting in drafts. We need"
+                                    + " {ask}.\"",
+                            "All three specimens go through the same instrument sequence.\n\n"
+                                    + "The researcher checks the readings and enters them in three"
+                                    + " columns on the calibration sheet.",
+                            "One reference specimen on {fleet} returned a different result on its"
+                                    + " second pass. Procedure requires a third specimen of the same"
+                                    + " species as a tiebreaker.",
+                            "The follow-up calibration request has the following terms."))),
     STRANDED("Stranded Fleet",
             FleetTypes.TRADE_SMALL,
             "Drive's on its last legs and we are limping. Worse, the ration printer wants organics"
@@ -237,6 +302,7 @@ public enum FleetQuestType {
             LAST_ENTRY,
             ESCROW,
             INTERMENT,
+            CALIBRATION_PAIR,
             SEEKER,
             QUOTA,
             STARVING,
@@ -297,6 +363,7 @@ public enum FleetQuestType {
         public final String haggleResponse;
         public final String sourOption;
         public final String sourResponse;
+        public final Followup followup;
 
         public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
                         String acceptNoPromise, String declineOption, String decline,
@@ -304,7 +371,16 @@ public enum FleetQuestType {
                         String questionResponse, String intelTerms) {
             this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
                     decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
-                    null, null, null, null);
+                    null, null, null, null, null);
+        }
+
+        public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
+                        String acceptNoPromise, String declineOption, String decline,
+                        String waiting, String turnIn, String questionOption,
+                        String questionResponse, String intelTerms, Followup followup) {
+            this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
+                    decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
+                    null, null, null, null, followup);
         }
 
         public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
@@ -312,6 +388,17 @@ public enum FleetQuestType {
                         String waiting, String turnIn, String questionOption,
                         String questionResponse, String intelTerms, String haggleOption,
                         String haggleResponse, String sourOption, String sourResponse) {
+            this(hail, acceptOption, noPromiseOption, accept, acceptNoPromise, declineOption,
+                    decline, waiting, turnIn, questionOption, questionResponse, intelTerms,
+                    haggleOption, haggleResponse, sourOption, sourResponse, null);
+        }
+
+        public Dialogue(String hail, String acceptOption, String noPromiseOption, String accept,
+                        String acceptNoPromise, String declineOption, String decline,
+                        String waiting, String turnIn, String questionOption,
+                        String questionResponse, String intelTerms, String haggleOption,
+                        String haggleResponse, String sourOption, String sourResponse,
+                        Followup followup) {
             this.hail = hail;
             this.acceptOption = acceptOption;
             this.noPromiseOption = noPromiseOption;
@@ -328,6 +415,34 @@ public enum FleetQuestType {
             this.haggleResponse = haggleResponse;
             this.sourOption = sourOption;
             this.sourResponse = sourResponse;
+            this.followup = followup;
+        }
+    }
+
+    public static class Followup {
+
+        public final String pitch;
+        public final String acceptOption;
+        public final String accept;
+        public final String declineOption;
+        public final String decline;
+        public final String waiting;
+        public final String turnIn;
+        public final String purpose;
+        public final String intelTerms;
+
+        public Followup(String pitch, String acceptOption, String accept, String declineOption,
+                        String decline, String waiting, String turnIn, String purpose,
+                        String intelTerms) {
+            this.pitch = pitch;
+            this.acceptOption = acceptOption;
+            this.accept = accept;
+            this.declineOption = declineOption;
+            this.decline = decline;
+            this.waiting = waiting;
+            this.turnIn = turnIn;
+            this.purpose = purpose;
+            this.intelTerms = intelTerms;
         }
     }
 
@@ -423,6 +538,12 @@ public enum FleetQuestType {
                 break;
             }
 
+            case CALIBRATION_PAIR:
+                ask.count = 2;
+                ask.sameSpecies = true;
+                if (target >= 30f) ask.lowCoherence = true;
+                break;
+
             case STRANDED:
             case SCAVENGER_ENGINE:
                 // Distress jobs add quantity instead of asking for distant or rarer fish.
@@ -473,31 +594,44 @@ public enum FleetQuestType {
         return ask;
     }
 
-    public List<FishReward> rollFixedRewards(Random random) {
-        if (this != LAST_ENTRY) return List.of();
+    public List<FishReward> rollFixedRewards(Random random, int round) {
+        if (this != LAST_ENTRY && !(this == CALIBRATION_PAIR && round == 0)) return List.of();
 
         return FishRewardRoller.rollLocationData(random, 1, FishRewardRoller.VALUE_PER_FISH);
     }
 
     public QuestRewards.Request createRewardRequest(List<FishRequirement> asks, Random random) {
+        return createRewardRequest(asks, random, 0);
+    }
+
+    public QuestRewards.Request createRewardRequest(List<FishRequirement> asks, Random random,
+                                                    int round) {
         QuestRewards.Request request = new QuestRewards.Request(asks)
-                .fixAll(rollFixedRewards(random))
+                .fixAll(rollFixedRewards(random, round))
                 .budgetMult(rewardBudgetMult)
                 .random(random);
 
         if (this == ESCROW) {
             request.exclude(QuestRewards.Kind.RANGE_DATA, QuestRewards.Kind.BACKDROP);
         }
+        if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
+        if (this == CALIBRATION_PAIR && round == 0 && !asks.isEmpty()
+                && asks.get(0).lowCoherence) {
+            request.tierFloor(DemandScore.Tier.HARD);
+        }
 
         return request;
     }
 
     public boolean requiresIndependentFleet() {
-        return this == LAST_ENTRY || this == ESCROW || this == INTERMENT;
+        return this == LAST_ENTRY || this == ESCROW || this == INTERMENT
+                || this == CALIBRATION_PAIR;
     }
 
     public float getMaximumTravelLY() {
-        return this == LAST_ENTRY ? LAST_ENTRY_MAX_LY : QuestDuration.MAX_SENSIBLE_LY;
+        return this == LAST_ENTRY ? LAST_ENTRY_MAX_LY
+                : this == CALIBRATION_PAIR ? Float.MAX_VALUE
+                : QuestDuration.MAX_SENSIBLE_LY;
     }
 
     public String getId() {

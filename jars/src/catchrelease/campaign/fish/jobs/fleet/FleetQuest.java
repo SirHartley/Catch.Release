@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishJob;
@@ -66,6 +67,14 @@ public class FleetQuest extends FishJob {
     public static final String SOUR_OPTION_KEY = "$catchrelease_fleetQuestSourOption";
     public static final String HAGGLED_FLAG = "$catchrelease_fqHaggled";
     public static final String SOURED_FLAG = "$catchrelease_fqSoured";
+    public static final String FOLLOWUP_PENDING_FLAG = "$catchrelease_fleetQuestFollowupPending";
+    public static final String FOLLOWUP_PITCH_KEY = "$catchrelease_fleetQuestFollowupPitch";
+    public static final String FOLLOWUP_ACCEPT_OPTION_KEY =
+            "$catchrelease_fleetQuestFollowupAcceptOption";
+    public static final String FOLLOWUP_ACCEPT_KEY = "$catchrelease_fleetQuestFollowupAccept";
+    public static final String FOLLOWUP_DECLINE_OPTION_KEY =
+            "$catchrelease_fleetQuestFollowupDeclineOption";
+    public static final String FOLLOWUP_DECLINE_KEY = "$catchrelease_fleetQuestFollowupDecline";
 
     public static final float HOLD_DAYS = 100000f;
 
@@ -94,6 +103,9 @@ public class FleetQuest extends FishJob {
     protected boolean haggled;
     protected boolean soured;
     protected List<FishReward> originalRewards = new ArrayList<>();
+    protected String followupSpeciesId;
+    protected boolean followupPending;
+    protected boolean declinedFollowup;
 
     public static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type) {
         return startOn(giver, type, false);
@@ -224,7 +236,7 @@ public class FleetQuest extends FishJob {
         if (captain == null) return false;
 
         PersonAPI contact = captain;
-        if (type == FleetQuestType.LAST_ENTRY) {
+        if (type == FleetQuestType.LAST_ENTRY || type == FleetQuestType.CALIBRATION_PAIR) {
             contact = giver.getFaction().createRandomPerson(random());
             if (contact == null) return false;
 
@@ -355,16 +367,19 @@ public class FleetQuest extends FishJob {
         memory.set(DECLINE_OPTION_KEY, dialogue.declineOption);
         memory.set(DECLINE_KEY, render(dialogue.decline));
 
-        String waiting = dialogue.waiting == null
+        FleetQuestType.Followup followup = round > 0 ? dialogue.followup : null;
+        String waiting = followup != null ? followup.waiting : dialogue.waiting;
+        waiting = waiting == null
                 ? "The fleet is still where you left it.\n\nThey still need {ask}."
-                : dialogue.waiting;
+                : waiting;
         memory.set(WAITING_KEY, render(waiting));
 
-        String turnIn = dialogue.turnIn == null
+        String turnIn = followup != null ? followup.turnIn : dialogue.turnIn;
+        turnIn = turnIn == null
                 ? "The cargo goes across.\n\nSomeone on the receiving ship checks the containers"
                 + " and calls something away from the microphone.\n\nSeveral voices answer.\n\n"
                 + "Payment follows."
-                : dialogue.turnIn;
+                : turnIn;
         memory.set(TURN_IN_KEY, render(turnIn));
 
         setOrUnset(memory, HAIL_KEY, render(dialogue.hail));
@@ -379,6 +394,19 @@ public class FleetQuest extends FishJob {
         if (soured) memory.set(SOURED_FLAG, true);
         else memory.unset(SOURED_FLAG);
         if (type == FleetQuestType.ESCROW) liabilityDay = elapsedDay();
+
+        setOrUnset(memory, FOLLOWUP_PITCH_KEY,
+                followup == null ? null : render(followup.pitch));
+        setOrUnset(memory, FOLLOWUP_ACCEPT_OPTION_KEY,
+                followup == null ? null : followup.acceptOption);
+        setOrUnset(memory, FOLLOWUP_ACCEPT_KEY,
+                followup == null ? null : render(followup.accept));
+        setOrUnset(memory, FOLLOWUP_DECLINE_OPTION_KEY,
+                followup == null ? null : followup.declineOption);
+        setOrUnset(memory, FOLLOWUP_DECLINE_KEY,
+                followup == null ? null : render(followup.decline));
+        if (followupPending) memory.set(FOLLOWUP_PENDING_FLAG, true);
+        else memory.unset(FOLLOWUP_PENDING_FLAG);
     }
 
     protected void setOrUnset(MemoryAPI memory, String key, String value) {
@@ -481,6 +509,16 @@ public class FleetQuest extends FishJob {
             return true;
         }
 
+        if ("acceptFollowup".equals(action)) {
+            acceptFollowup();
+            return true;
+        }
+
+        if ("declineFollowup".equals(action)) {
+            declineFollowup(dialog, memoryMap);
+            return true;
+        }
+
         return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
 
@@ -516,6 +554,51 @@ public class FleetQuest extends FishJob {
         }
     }
 
+    protected void acceptFollowup() {
+        if (!followupPending) return;
+
+        followupPending = false;
+        writeDialogueMemory();
+        FishIntelNotifications.update(this, null);
+    }
+
+    protected void declineFollowup(InteractionDialogAPI dialog,
+                                   Map<String, MemoryAPI> memoryMap) {
+        if (!followupPending) return;
+
+        followupPending = false;
+        declinedFollowup = true;
+        setCurrentStage(Stage.DONE, dialog, memoryMap);
+    }
+
+    @Override
+    protected void beforePayment(FishCatch offered, MemoryAPI mem) {
+        if (type == FleetQuestType.CALIBRATION_PAIR && round == 0 && offered != null) {
+            followupSpeciesId = offered.speciesId;
+        }
+    }
+
+    @Override
+    protected boolean onDelivered() {
+        if (type != FleetQuestType.CALIBRATION_PAIR || round != 1
+                || followupSpeciesId == null) return false;
+
+        asks.clear();
+        rewards.clear();
+
+        FishRequirement followup = new FishRequirement();
+        followup.speciesId = followupSpeciesId;
+        addAsk(followup);
+        addRewards(QuestRewards.roll(type.createRewardRequest(asks, random(), round)).rewards);
+
+        float nearest = QuestDuration.nearestSatisfiableLY(giver, followup,
+                type.getMaximumTravelLY());
+        days = nearest < 0f ? 0f : QuestDuration.forTravelLY(nearest).days;
+        followupPending = true;
+
+        return true;
+    }
+
     @Override
     protected String getDeliverFlag() {
         return DELIVER_FLAG;
@@ -530,6 +613,21 @@ public class FleetQuest extends FishJob {
 
         FireBest.fire(null, dialog, memoryMap, "DialogOptionSelected");
         showRewardReceipts(dialog);
+
+        if (followupPending && type.dialogue.followup != null) {
+            writeDialogueMemory();
+            if (dialog != null && dialog.getOptionPanel() != null) {
+                dialog.getOptionPanel().clearOptions();
+            }
+            if (dialog != null && dialog.getTextPanel() != null) {
+                LabelAPI pitch = dialog.getTextPanel().addPara(
+                        render(type.dialogue.followup.pitch));
+                FishRequirement.highlight(pitch, asks, describeAsks(), describeRewards());
+                showRewardDetails(dialog);
+            }
+            FireAll.fire(null, dialog, memoryMap, "CatchReleaseFleetQuestFollowupOptions");
+            return;
+        }
 
         setCurrentStage(Stage.DONE, dialog, memoryMap);
     }
@@ -579,6 +677,12 @@ public class FleetQuest extends FishJob {
         giver.getMemoryWithoutUpdate().unset(SOUR_OPTION_KEY);
         giver.getMemoryWithoutUpdate().unset(HAGGLED_FLAG);
         giver.getMemoryWithoutUpdate().unset(SOURED_FLAG);
+        giver.getMemoryWithoutUpdate().unset(FOLLOWUP_PENDING_FLAG);
+        giver.getMemoryWithoutUpdate().unset(FOLLOWUP_PITCH_KEY);
+        giver.getMemoryWithoutUpdate().unset(FOLLOWUP_ACCEPT_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(FOLLOWUP_ACCEPT_KEY);
+        giver.getMemoryWithoutUpdate().unset(FOLLOWUP_DECLINE_OPTION_KEY);
+        giver.getMemoryWithoutUpdate().unset(FOLLOWUP_DECLINE_KEY);
 
         Misc.setFlagWithReason(giver.getMemoryWithoutUpdate(),
                 MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, IMPORTANT_REASON, false, HOLD_DAYS);
@@ -603,6 +707,11 @@ public class FleetQuest extends FishJob {
         super.notifyEnding();
 
         if (!Stage.DONE.equals(currentStage) || giver == null) return;
+
+        if (declinedFollowup) {
+            release();
+            return;
+        }
 
         giver.getMemoryWithoutUpdate().set(THANKS_KEY, render(type.thanks));
         if (type.dialogue.hail != null) {
@@ -640,7 +749,12 @@ public class FleetQuest extends FishJob {
 
         String ask = describeAsks();
         String reward = describeRewards();
-        String specialTerms = type == null ? null : render(type.dialogue.intelTerms);
+        String specialTerms = null;
+        if (type != null) {
+            specialTerms = round > 0 && type.dialogue.followup != null
+                    ? render(type.dialogue.followup.intelTerms)
+                    : render(type.dialogue.intelTerms);
+        }
         if (specialTerms != null && !specialTerms.isEmpty()) info.addPara(specialTerms, pad);
 
         LabelAPI terms = info.addPara("They want %s, and are offering %s.", pad,
@@ -659,7 +773,11 @@ public class FleetQuest extends FishJob {
 
     @Override
     protected String getIntelPurpose() {
-        return type == null ? null : render(type.note);
+        if (type == null) return null;
+        if (round > 0 && type.dialogue.followup != null) {
+            return render(type.dialogue.followup.purpose);
+        }
+        return render(type.note);
     }
 
     @Override
