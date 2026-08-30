@@ -37,6 +37,7 @@ public class LonglinerDecoy implements EveryFrameScript {
     public static final String SOUND_FOUND = "catchrelease_longliner_found";
     public static final float CHECK_SECONDS = 0.5f;
     public static final float REVEAL_DRIFT_SECONDS = 1f;
+    public static final float REVEAL_ALERT_DELAY_SECONDS = 0.3f;
     public static final float REVEAL_DRIFT_SPEED = 35f;
     public static final float RUN_TARGET_RANGE = 7000f;
 
@@ -46,7 +47,8 @@ public class LonglinerDecoy implements EveryFrameScript {
 
         protected final SectorEntityToken mote;
         protected final Vector2f velocity;
-        protected float timeLeft = REVEAL_DRIFT_SECONDS;
+        protected float elapsed;
+        protected boolean alerted;
         protected boolean done;
 
         protected RevealDrift(SectorEntityToken mote, Vector2f velocity) {
@@ -72,18 +74,27 @@ public class LonglinerDecoy implements EveryFrameScript {
                 return;
             }
 
-            float step = Math.min(amount, timeLeft);
-            Vector2f at = mote.getLocation();
-            mote.setLocation(at.x + velocity.x * step, at.y + velocity.y * step);
+            float before = elapsed;
+            elapsed += amount;
 
-            timeLeft -= amount;
-            if (timeLeft > 0f) return;
+            float drift = Math.min(elapsed, REVEAL_DRIFT_SECONDS)
+                    - Math.min(before, REVEAL_DRIFT_SECONDS);
+            if (drift > 0f) {
+                Vector2f at = mote.getLocation();
+                mote.setLocation(at.x + velocity.x * drift, at.y + velocity.y * drift);
+            }
 
+            if (!alerted && elapsed >= REVEAL_DRIFT_SECONDS) alert();
+            done = elapsed >= REVEAL_DRIFT_SECONDS + REVEAL_ALERT_DELAY_SECONDS;
+        }
+
+        protected void alert() {
             if (mote.isInCurrentLocation()) {
                 Global.getSoundPlayer().playSound(
                         SOUND_FOUND, 1f, 1f, mote.getLocation(), Misc.ZERO);
+                mote.addFloatingText("!", Misc.getHighlightColor(), 1f);
             }
-            done = true;
+            alerted = true;
         }
     }
 
@@ -223,20 +234,19 @@ public class LonglinerDecoy implements EveryFrameScript {
         Vector2f loc = new Vector2f(boat.getLocation());
         Vector2f driftVelocity = getRevealDriftVelocity(boat);
 
-        retire(boat);
+        retireImmediately(boat, where);
 
         Vector2f runTo = MathUtils.getPointOnCircumference(loc, RUN_TARGET_RANGE,
                 MathUtils.getRandomNumberInRange(0f, 360f));
         FishEntityPlugin.Params params = new FishEntityPlugin.Params(
                 runTo, LegendaryShields.POP_SHIELD_SPECIES);
-        params.movementDelay = REVEAL_DRIFT_SECONDS;
+        params.movementDelay = REVEAL_DRIFT_SECONDS + REVEAL_ALERT_DELAY_SECONDS;
 
         SectorEntityToken mote = where.addCustomEntity(
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
                 params);
         mote.setLocation(loc.x, loc.y);
         mote.addScript(new RevealDrift(mote, driftVelocity));
-        mote.addFloatingText("!", Misc.getHighlightColor(), REVEAL_DRIFT_SECONDS);
 
         LegendaryChases.noteRevealed(LegendaryShields.POP_SHIELD_SPECIES);
     }
@@ -277,6 +287,17 @@ public class LonglinerDecoy implements EveryFrameScript {
         FishermanMapIcon.removeFor(boat);
         boat.setAI(null);
         boat.despawn();
+
+        Global.getSector().getMemoryWithoutUpdate().unset(BOAT_KEY);
+    }
+
+    protected void retireImmediately(CampaignFleetAPI boat, LocationAPI where) {
+        FishermanShelf.releaseFor(boat);
+        FishermanMapIcon.removeFor(boat);
+        boat.setAI(null);
+        boat.despawn();
+        where.removeEntity(boat);
+        boat.setExpired(true);
 
         Global.getSector().getMemoryWithoutUpdate().unset(BOAT_KEY);
     }
