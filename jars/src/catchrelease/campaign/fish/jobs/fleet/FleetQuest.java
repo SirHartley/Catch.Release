@@ -693,6 +693,7 @@ public class FleetQuest extends FishJob {
         String title = getRuleText(TITLE_TRIGGER);
         if (title != null && !title.isEmpty()) giver.setName(title);
 
+        FleetQuestMapIcon.findOrAdd(giver);
         keepStanding();
     }
 
@@ -925,6 +926,9 @@ public class FleetQuest extends FishJob {
                 writeDialogueMemory();
             }
             keepStanding();
+            if (takenUp && giver != null && !giver.isExpired()) {
+                FleetQuestMapIcon.findOrAdd(giver);
+            }
         }
     }
 
@@ -1281,6 +1285,7 @@ public class FleetQuest extends FishJob {
         if (giver == null) return;
 
         dropMarker();
+        FleetQuestMapIcon.removeFor(giver);
 
         MemoryAPI memory = giver.getMemoryWithoutUpdate();
         memory.unset(QUEST_FLAG);
