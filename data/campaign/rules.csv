@@ -937,7 +937,7 @@ The loud child studies his fish, then looks across the table at the other one.
 The quiet child pushes the prize toward you.",catchrelease_duelClose:Leave.,
 catchrelease_duel_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_duel
 $catchreleasePaid
-$catchreleaseBonus score:100","CatchReleaseCMD highlightJobText $catchreleaseReward $catchreleaseDuelBetterFish $catchreleaseDuelOtherFish
+$catchreleaseBonus score:100","CatchReleaseCMD highlightJobText $catchreleaseReward $catchreleaseDuelBetterFish $catchreleaseDuelOtherFish $catchreleaseDuelBetterFish
 SetShortcut catchrelease_duelClose ""ESCAPE""","You pass $catchreleaseDuelBetterFish to $catchreleaseKid and $catchreleaseDuelOtherFish to $catchreleaseOther.
 
 The quiet child checks the grade tag on $catchreleaseDuelBetterFish.
@@ -973,7 +973,7 @@ FireAll JobSpecificOptions","The Commissioner closes the notebook around one fin
 
 The barkeeper sets down a glass. ""House cut's posted with the rest.""",,
 catchrelease_ring_askReturning,DialogOptionSelected,"$option == catchrelease_ring_ask
-$catchreleaseFightNights > 0 score:110","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward $catchreleaseFightNights
+$catchreleaseFightNights > 0 score:110","CatchReleaseCMD highlightJobText $catchreleaseFightNights $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showContactVisual
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseRingOffer 0
@@ -1072,7 +1072,7 @@ catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"
 FireBest catchreleaseJobRemind
 FireAll JobSpecificOptions",,,
 catchrelease_ring_paid,catchreleaseJobPaid,"$missionId == catchrelease_ring
-$catchreleasePaid score:100",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseRight $catchreleaseWinner,"The divider lifts.
+$catchreleasePaid score:100",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseRight $catchreleaseLeft $catchreleaseWinner,"The divider lifts.
 
 The room goes quiet for an instant, long enough to hear water strike the glass. Then both shift crews start shouting.
 
@@ -1355,7 +1355,7 @@ catchrelease_cult_offerDeclineOption,JobSpecificOptions,$menuState == catchrelea
 catchrelease_cult_purpose,DialogOptionSelected,$option == catchrelease_cult_purpose,"$catchreleaseCultAskedPurpose = true 0
 $menuState = catchreleaseCultOffer 0
 FireAll JobSpecificOptions
-CatchReleaseCMD highlightJobText $catchreleaseSpecies","""$catchreleaseSpecies,"" says the first.
+CatchReleaseCMD highlightJobText $catchreleaseSpecies $catchreleaseSpecies $catchreleaseSpecies","""$catchreleaseSpecies,"" says the first.
 
 ""$catchreleaseSpecies,"" says the second.
 
@@ -5114,7 +5114,7 @@ $HeOrShe closes a fresh message from the claims office without reading it twice.
 ""Any movement on your end?""",,
 catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has two survey charts open beside a rejected claim form. The disputed boundary occupies a different place on each chart.,,
 catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask the fisher with the survey charts about the claim,
-catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
+catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampWhere $catchreleaseCampMany $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""A company survey moved the boundary.""
 
