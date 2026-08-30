@@ -37,27 +37,27 @@ public class FishRewardRoller {
     public static final float SPREAD = 0.35f;
 
     public static List<FishReward> roll(Random random, int worth, boolean allowCredits) {
-        return roll(random, worth, 1, allowCredits, null);
+        return roll(random, worth, allowCredits, null);
     }
 
     public static List<FishReward> roll(Random random, int worth,
                                         List<FishRequirement> asks, boolean allowCredits) {
-        return roll(random, worth, requestedFish(asks), allowCredits, null);
+        return roll(random, worth, allowCredits, null);
     }
 
     static List<FishReward> roll(Random random, int worth, boolean allowCredits,
                                  List<FishReward> reservedRewards) {
-        return roll(random, worth, 1, allowCredits, reservedRewards);
+        return rollWithReserved(random, worth, allowCredits, reservedRewards);
     }
 
     static List<FishReward> roll(Random random, int worth, List<FishRequirement> asks,
                                  boolean allowCredits, List<FishReward> reservedRewards) {
-        return roll(random, worth, requestedFish(asks), allowCredits, reservedRewards);
+        return rollWithReserved(random, worth, allowCredits, reservedRewards);
     }
 
-    protected static List<FishReward> roll(Random random, int worth, int requestedFish,
-                                           boolean allowCredits,
-                                           List<FishReward> reservedRewards) {
+    protected static List<FishReward> rollWithReserved(Random random, int worth,
+                                                       boolean allowCredits,
+                                                       List<FishReward> reservedRewards) {
         List<FishReward> rewards = new ArrayList<>();
         Set<String> reserved = getReservedSchematicKeys();
         Set<String> reservedLocationData = new LinkedHashSet<>();
@@ -71,7 +71,7 @@ public class FishRewardRoller {
         }
 
         int value = vary(random, worth);
-        float valueMultiplier = valueMultiplier(worth, requestedFish);
+        float valueMultiplier = valueMultiplier(random);
 
         FishReward main = rollOne(random, value, valueMultiplier, allowCredits, reserved,
                 reservedLocationData);
@@ -360,23 +360,19 @@ public class FishRewardRoller {
         return Math.round(amount / (float) step) * step;
     }
 
-    public static float valueMultiplier(int worth, int requestedFish) {
-        float perFish = Math.max(0, worth) / (float) Math.max(1, requestedFish);
-        float raw = perFish / VALUE_PER_FISH;
+    public static float valueMultiplier(Random random) {
+        WeightedRandomPicker<Float> picker = new WeightedRandomPicker<>(
+                random == null ? new Random() : random);
+        picker.add(3f, 55f);
+        picker.add(4f, 21f);
+        picker.add(5f, 11f);
+        picker.add(6f, 6f);
+        picker.add(7f, 3.5f);
+        picker.add(8f, 2f);
+        picker.add(9f, 1f);
+        picker.add(10f, 0.5f);
 
-        return Math.max(1f, Math.round(raw * 2f) * 0.5f);
-    }
-
-    protected static int requestedFish(List<FishRequirement> asks) {
-        int total = 0;
-
-        if (asks != null) {
-            for (FishRequirement ask : asks) {
-                if (ask != null) total += Math.max(1, ask.count);
-            }
-        }
-
-        return Math.max(1, total);
+        return picker.pick();
     }
 
     protected static int vary(Random random, int worth) {
