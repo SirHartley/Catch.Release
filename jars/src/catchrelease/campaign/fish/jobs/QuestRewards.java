@@ -39,8 +39,6 @@ public class QuestRewards {
 
     // Budget
     public static final float CREDITS_PER_POINT = 600f;
-    /** Used by the fish-value multiplier. */
-    public static final float WORTH_PER_POINT = 120f;
     public static final float ROLL_MIN = 0.75f;
     public static final float ROLL_MAX = 1.35f;
     public static final float SECOND_ITEM_CHANCE = 0.25f;
@@ -160,8 +158,7 @@ public class QuestRewards {
         }
         left = Math.max(0, left);
 
-        float multiplier = FishRewardRoller.valueMultiplier(
-                Math.round(score * WORTH_PER_POINT), requestedFish(request.asks));
+        float multiplier = FishRewardRoller.valueMultiplier(random);
 
         int itemRolls = random.nextFloat() < SECOND_ITEM_CHANCE ? 2 : 1;
         for (int i = 0; i < itemRolls && left > MIN_CREDIT_REMAINDER; i++) {
@@ -356,15 +353,4 @@ public class QuestRewards {
         return count;
     }
 
-    protected static int requestedFish(List<FishRequirement> asks) {
-        int total = 0;
-
-        if (asks != null) {
-            for (FishRequirement ask : asks) {
-                if (ask != null) total += Math.max(1, ask.count);
-            }
-        }
-
-        return Math.max(1, total);
-    }
 }

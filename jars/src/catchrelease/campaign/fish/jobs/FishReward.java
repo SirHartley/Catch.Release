@@ -50,15 +50,31 @@ public abstract class FishReward {
         public final String description;
         public final String highlight;
         public final Color highlightColor;
+        public final String note;
+        public final String noteHighlight;
+        public final Color noteHighlightColor;
 
         public Receipt(String description) {
             this(description, description, Misc.getHighlightColor());
         }
 
         public Receipt(String description, String highlight, Color highlightColor) {
+            this(description, highlight, highlightColor, null, null, null);
+        }
+
+        protected Receipt(String description, String highlight, Color highlightColor,
+                          String note, String noteHighlight, Color noteHighlightColor) {
             this.description = description;
             this.highlight = highlight;
             this.highlightColor = highlightColor;
+            this.note = note;
+            this.noteHighlight = noteHighlight;
+            this.noteHighlightColor = noteHighlightColor;
+        }
+
+        public Receipt withNote(String note, String highlight, Color highlightColor) {
+            return new Receipt(description, this.highlight, this.highlightColor,
+                    note, highlight, highlightColor);
         }
 
         public void addTo(TextPanelAPI text) {
@@ -72,6 +88,18 @@ public abstract class FishReward {
             text.addParagraph(verb + ": " + description, Misc.getPositiveHighlightColor());
             if (highlight != null && !highlight.isEmpty() && highlightColor != null) {
                 text.highlightInLastPara(highlightColor, highlight);
+            }
+            text.setFontInsignia();
+        }
+
+        public void addNoteTo(TextPanelAPI text) {
+            if (text == null || note == null || note.isEmpty()) return;
+
+            text.setFontSmallInsignia();
+            text.addParagraph(note, Misc.getTextColor());
+            if (noteHighlight != null && !noteHighlight.isEmpty()
+                    && noteHighlightColor != null) {
+                text.highlightInLastPara(noteHighlightColor, noteHighlight);
             }
             text.setFontInsignia();
         }
@@ -369,9 +397,18 @@ public abstract class FishReward {
 
         @Override
         public Receipt receipt() {
-            if (isRedundant()) return new Credits(getFallbackCredits()).receipt();
-
             FishSpec spec = FishSpecLoader.getFishSpec(speciesId);
+            if (isRedundant()) {
+                Receipt credits = new Credits(getFallbackCredits()).receipt();
+                if (spec == null) return credits;
+
+                String name = spec.getDisplayName();
+                String note = "Range data for " + name
+                        + " was already known, so that reward was converted to credits.";
+
+                return credits.withNote(note, name, spec.rarity.color);
+            }
+
             if (spec == null) return super.receipt();
 
             return new Receipt(describe(), spec.getDisplayName(), spec.rarity.color);
@@ -548,6 +585,9 @@ public abstract class FishReward {
         if (text == null || receipts == null) return;
         for (Receipt receipt : receipts) {
             if (receipt != null) receipt.addTo(text, verb);
+        }
+        for (Receipt receipt : receipts) {
+            if (receipt != null) receipt.addNoteTo(text);
         }
     }
 
