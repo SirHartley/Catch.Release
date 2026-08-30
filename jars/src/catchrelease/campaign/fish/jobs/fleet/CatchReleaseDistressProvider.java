@@ -7,7 +7,6 @@ import catchrelease.distress.DistressCallFramework;
 import catchrelease.distress.DistressCallInstance;
 import catchrelease.distress.DistressCallProvider;
 import catchrelease.distress.DistressCallSpec;
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -30,7 +29,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
     @Override
     public boolean isEligible(DistressCallSpec spec, StarSystemAPI system) {
         if (!FishingIntro.isComplete()) return false;
-        if (!Global.getSector().getIntelManager().getIntel(FleetQuest.class).isEmpty()) return false;
+        if (FleetQuestSpawner.countActive() > 0) return false;
 
         FleetQuestType type = typeFor(spec);
         if (type == null) return false;
@@ -39,7 +38,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
             return false;
         }
 
-        return FleetQuestEncounter.countLive() == 0;
+        return true;
     }
 
     @Override

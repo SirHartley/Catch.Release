@@ -1258,6 +1258,10 @@ public class FleetQuest extends FishJob {
         return giver;
     }
 
+    public boolean isActiveRequest() {
+        return Stage.WANTED.equals(currentStage) && !isEnding() && !isEnded();
+    }
+
     public SectorEntityToken getQuestPond() {
         return type == FleetQuestType.PARLEY_FISH ? questPond : null;
     }
