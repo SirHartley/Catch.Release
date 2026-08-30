@@ -1586,7 +1586,10 @@ catchrelease_fqTurnInPicker,DialogOptionSelected,"$option == catchrelease_fqTurn
 catchrelease_fqTurnInPickSel,DialogOptionSelected,"$option == catchrelease_fqTurnInPick
 !$catchreleaseFleetHandoffPaid",Call $entity.catchrelease_jobRef turnInPick,,,
 catchrelease_fqTurnInSel,DialogOptionSelected,"$option == catchrelease_fqTurnIn
-$catchreleaseFleetHandoffPaid","FireBest CatchReleaseFleetQuestTurnInText
+$catchreleaseFleetHandoffPaid",FireBest CatchReleaseFleetQuestTurnInText,,,
+catchrelease_fqThanksContinue,CatchReleaseFleetQuestThanksContinue,,,,,0:catchrelease_fqThanksContinue:Continue
+catchrelease_fqThanksContinueSel,DialogOptionSelected,$option == catchrelease_fqThanksContinue,"FireBest CatchReleaseFleetQuestThanksText
+Call $entity.catchrelease_jobRef finishHandoff
 FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,CatchReleaseCMD leaveEncounter,The link closes. They go back to waiting.,,
 catchrelease_fqFollowupContinue,CatchReleaseFleetQuestFollowupContinue,,,,,0:catchrelease_fqFollowupContinue:Continue

@@ -185,6 +185,7 @@ public class FleetQuest extends FishJob {
     protected boolean potCaptain;
     protected PersonAPI bosun;
     protected boolean mutinyResolved;
+    protected boolean thanksShown;
 
     protected static final String[] SHOW_NAMES = {
             "The Grand Catch Exhibition",
@@ -995,6 +996,11 @@ public class FleetQuest extends FishJob {
             return true;
         }
 
+        if ("finishHandoff".equals(action)) {
+            finishHandoff(dialog, memoryMap);
+            return true;
+        }
+
         return super.callAction(action, ruleId, dialog, params, memoryMap);
     }
 
@@ -1181,8 +1187,18 @@ public class FleetQuest extends FishJob {
             return;
         }
 
-        resolveMutinyPot();
+        if (dialog != null && dialog.getOptionPanel() != null) {
+            dialog.getOptionPanel().clearOptions();
+        }
+        FireAll.fire(null, dialog, memoryMap, "CatchReleaseFleetQuestThanksContinue");
+    }
 
+    protected void finishHandoff(InteractionDialogAPI dialog,
+                                 Map<String, MemoryAPI> memoryMap) {
+        if (thanksShown) return;
+
+        thanksShown = true;
+        resolveMutinyPot();
         setCurrentStage(Stage.DONE, dialog, memoryMap);
     }
 
@@ -1401,6 +1417,13 @@ public class FleetQuest extends FishJob {
 
         if (declinedFollowup) {
             release();
+            return;
+        }
+
+        if (thanksShown) {
+            release();
+            clearRuleTextMemory();
+            giver.getMemoryWithoutUpdate().unset(REF_KEY);
             return;
         }
 
