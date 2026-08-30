@@ -51,8 +51,14 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CatchReleaseCMD extends BaseCommandPlugin {
+
+    protected static final Pattern CREDIT_REWARD =
+            Pattern.compile("\\b(?:[\\d,.]+ credits(?: guaranteed, plus [\\d.]+x the value of "
+                    + "the fish handed in)?|[\\d.]+x the value of the fish handed in)\\b");
 
     public static final String DRIFT = "$catchreleaseDrift";
     public static final String STAGE = "$catchreleaseStage";
@@ -582,19 +588,26 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         Map<String, Color> highlights = new LinkedHashMap<>();
         for (String value : values) {
-            List<FishRequirement.RarityHighlight> inValue = new ArrayList<>();
+            Map<String, Color> inValue = new LinkedHashMap<>();
             for (FishRequirement.RarityHighlight entry : rarity) {
-                if (value.contains(entry.text)) inValue.add(entry);
+                if (value.contains(entry.text)) inValue.put(entry.text, entry.rarity.color);
             }
-            inValue.sort((left, right) -> Integer.compare(
-                    value.indexOf(left.text), value.indexOf(right.text)));
 
             if (inValue.isEmpty()) {
                 highlights.putIfAbsent(value, Misc.getHighlightColor());
                 continue;
             }
-            for (FishRequirement.RarityHighlight entry : inValue) {
-                highlights.putIfAbsent(entry.text, entry.rarity.color);
+
+            Matcher credits = CREDIT_REWARD.matcher(value);
+            while (credits.find()) {
+                inValue.putIfAbsent(credits.group(), Misc.getHighlightColor());
+            }
+
+            List<String> ordered = new ArrayList<>(inValue.keySet());
+            ordered.sort((left, right) -> Integer.compare(
+                    value.indexOf(left), value.indexOf(right)));
+            for (String text : ordered) {
+                highlights.putIfAbsent(text, inValue.get(text));
             }
         }
         if (highlights.isEmpty()) return true;
