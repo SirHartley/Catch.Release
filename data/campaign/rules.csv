@@ -1072,7 +1072,7 @@ catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"
 FireBest catchreleaseJobRemind
 FireAll JobSpecificOptions",,,
 catchrelease_ring_paid,catchreleaseJobPaid,"$missionId == catchrelease_ring
-$catchreleasePaid score:100",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseRight $catchreleaseLeft $catchreleaseWinner,"The divider lifts.
+$catchreleasePaid score:100",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseRight $catchreleaseLeft,"The divider lifts.
 
 The room goes quiet for an instant, long enough to hear water strike the glass. Then both shift crews start shouting.
 
@@ -1080,11 +1080,13 @@ The room goes quiet for an instant, long enough to hear water strike the glass. 
 
 Every turn in the tank starts another argument from the benches. A veteran regular begins explaining why $catchreleaseLeft has the better build for it, only for the other shift to shout him down.
 
-The benches push forward again. A moment later, the Commissioner raises a hand.
+A terrible noise emits from the tank, and the Commissioner raises a hand to announce the winner.",100:catchrelease_ringResult:Continue,
+catchrelease_ringResult,DialogOptionSelected,$option == catchrelease_ringResult,"CatchReleaseCMD highlightJobText $catchreleaseWinner
+FireBest CatchReleaseRingSettlement
+Call $catchrelease_jobRef showRewardReceipts
+FireAll JobSpecificOptions","""$catchreleaseWinner.""
 
-""$catchreleaseWinner. That's it.""
-
-The result goes onto the board.",,
+The result goes onto the board, and the noise becomes deafening.",,
 catchrelease_ring_settled,CatchReleaseRingSettlement,"$missionId == catchrelease_ring
 $catchreleasePaid
 !$catchreleaseHasWager score:100",CatchReleaseCMD highlightJobText $catchreleaseReward $catchreleaseWinner $catchreleaseLoser,"The barkeeper works through the surrounding bets while one shift crew pays the other across the bar. Someone near the tank calls, ""Took the safe money, captain?"" 
