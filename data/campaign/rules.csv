@@ -1533,34 +1533,42 @@ FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,"FireBest CatchReleaseFleetQuestDeclineText
 FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fleetQuestThanksRules,OpenCommLink,"$entity.catchrelease_fleetQuestThanks score:1330
+$entity.catchrelease_fleetQuestThanksPending
 Call $entity.catchrelease_jobRef hasRuleText
 !$entity.isHostile","Call $entity.catchrelease_jobRef showContactVisual
 FireBest CatchReleaseFleetQuestThanksText
 Call $entity.catchrelease_jobRef clearRuleText
 unset $entity.catchrelease_fleetQuestThanks
+unset $entity.catchrelease_fleetQuestThanksPending
 unset $entity.catchrelease_fleetQuestDetailedThanks
 unset $entity.catchrelease_jobRef
 FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fleetQuestThanksWithContact,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1320
+$entity.catchrelease_fleetQuestThanksPending
 $entity.catchrelease_fleetQuestDetailedThanks
 $entity.catchrelease_jobRef != false
 !$entity.isHostile
 $entity.catchrelease_fleetQuestType == false","Call $entity.catchrelease_jobRef showContactVisual
 unset $entity.catchrelease_fleetQuestThanks
+unset $entity.catchrelease_fleetQuestThanksPending
 unset $entity.catchrelease_fleetQuestDetailedThanks
 unset $entity.catchrelease_jobRef
 FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
 catchrelease_fleetQuestDetailedThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1310
+$entity.catchrelease_fleetQuestThanksPending
 $entity.catchrelease_fleetQuestDetailedThanks
 !$entity.isHostile
 $entity.catchrelease_fleetQuestType != false","FireBest CatchReleaseFleetQuestThanksText
 unset $entity.catchrelease_fleetQuestThanks
+unset $entity.catchrelease_fleetQuestThanksPending
 unset $entity.catchrelease_fleetQuestDetailedThanks
 unset $entity.catchrelease_fleetQuestType
 FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1300
+$entity.catchrelease_fleetQuestThanksPending
 !$entity.isHostile
 $entity.catchrelease_fleetQuestType == false","unset $entity.catchrelease_fleetQuestThanks
+unset $entity.catchrelease_fleetQuestThanksPending
 FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
 catchrelease_fleetQuestDeclined,CatchReleaseFleetQuestDeclinedText,,,"""We've put the word back out. Someone else will bring it in.""",,
 catchrelease_fleetQuestFollowup,OpenCommLink,"$entity.catchrelease_fleetQuest score:1250
