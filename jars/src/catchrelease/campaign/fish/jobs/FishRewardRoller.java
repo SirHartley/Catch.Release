@@ -360,6 +360,12 @@ public class FishRewardRoller {
         return Math.round(amount / (float) step) * step;
     }
 
+    public static int roundCreditRewardUp(int amount) {
+        int step = amount > 100_000 ? 10_000 : 1_000;
+
+        return (Math.max(0, amount) + step - 1) / step * step;
+    }
+
     public static float valueMultiplier(Random random) {
         WeightedRandomPicker<Float> picker = new WeightedRandomPicker<>(
                 random == null ? new Random() : random);

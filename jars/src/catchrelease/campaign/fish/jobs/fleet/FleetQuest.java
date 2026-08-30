@@ -1021,13 +1021,15 @@ public class FleetQuest extends FishJob {
         if (type != FleetQuestType.CALIBRATION_PAIR || round != 1
                 || followupSpeciesId == null) return false;
 
+        List<FishReward> previousRewards = new ArrayList<>(rewards);
         asks.clear();
         rewards.clear();
 
         FishRequirement followup = new FishRequirement();
         followup.speciesId = followupSpeciesId;
         addAsk(followup);
-        addRewards(QuestRewards.roll(type.createRewardRequest(asks, random(), round)).rewards);
+        addRewards(QuestRewards.rollLaterStage(
+                type.createRewardRequest(asks, random(), round), previousRewards).rewards);
 
         float nearest = QuestDuration.nearestSatisfiableLY(giver, followup,
                 type.getMaximumTravelLY());

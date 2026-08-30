@@ -422,7 +422,7 @@ public enum FleetQuestType {
             request.exclude(QuestRewards.Kind.RANGE_DATA, QuestRewards.Kind.BACKDROP);
         }
         if (this == MANDATE) request.tierFloor(DemandScore.Tier.MEDIUM);
-        if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(0.5f);
+        if (this == CALIBRATION_PAIR && round > 0) request.budgetMult(1.25f);
         if (this == CALIBRATION_PAIR && round == 0 && !asks.isEmpty()
                 && asks.get(0).lowCoherence) {
             request.tierFloor(DemandScore.Tier.HARD);
