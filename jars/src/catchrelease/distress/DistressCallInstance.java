@@ -54,8 +54,18 @@ public class DistressCallInstance implements CallableEvent {
         if (params.isEmpty() || !"open".equals(params.get(0).getString(memoryMap))) return false;
 
         DistressCallSpec spec = getSpec();
-        if (spec == null || dialog == null) return false;
+        if (spec == null || !owns(dialog)) return false;
 
         return FireAll.fire(ruleId, dialog, memoryMap, spec.dialogTrigger);
+    }
+
+    private boolean owns(InteractionDialogAPI dialog) {
+        if (resolved || fleet == null || dialog == null || dialog.getInteractionTarget() != fleet) {
+            return false;
+        }
+
+        MemoryAPI memory = fleet.getMemoryWithoutUpdate();
+        return memory.getBoolean(DistressCallSettings.ENTITY_FLAG)
+                && memory.get(DistressCallSettings.INSTANCE_REF) == this;
     }
 }

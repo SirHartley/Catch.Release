@@ -1524,16 +1524,15 @@ Call $entity.catchrelease_jobRef showRewardDetails
 FireAll CatchReleaseFleetQuestOfferOptions",,,
 catchrelease_fqAcceptSel,DialogOptionSelected,$option == catchrelease_fqAccept,"FireBest CatchReleaseFleetQuestAcceptText
 $entity.catchrelease_fleetQuestTaken = true
-Call $catchrelease_jobRef showIntelAdded
+Call $entity.catchrelease_jobRef showIntelAdded
 FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fqAcceptNoPromiseSel,DialogOptionSelected,$option == catchrelease_fqAcceptNoPromise,"FireBest CatchReleaseFleetQuestAcceptNoPromiseText
 $entity.catchrelease_fleetQuestTaken = true
-Call $catchrelease_jobRef showIntelAdded
+Call $entity.catchrelease_jobRef showIntelAdded
 FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fqDeclineSel,DialogOptionSelected,$option == catchrelease_fqDecline,"FireBest CatchReleaseFleetQuestDeclineText
 FireAll CatchReleaseFleetResolutionOptions",,,
-catchrelease_fleetQuestThanksRules,OpenCommLink,"$entity.catchrelease_fleetQuestThanks score:1330
-$entity.catchrelease_fleetQuestThanksPending
+catchrelease_fleetQuestThanksRules,OpenCommLink,"$entity.catchrelease_fleetQuestThanksPending score:1330
 Call $entity.catchrelease_jobRef hasRuleText
 !$entity.isHostile","Call $entity.catchrelease_jobRef showContactVisual
 FireBest CatchReleaseFleetQuestThanksText
@@ -1543,8 +1542,7 @@ unset $entity.catchrelease_fleetQuestThanksPending
 unset $entity.catchrelease_fleetQuestDetailedThanks
 unset $entity.catchrelease_jobRef
 FireAll CatchReleaseFleetResolutionOptions",,,
-catchrelease_fleetQuestThanksWithContact,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1320
-$entity.catchrelease_fleetQuestThanksPending
+catchrelease_fleetQuestThanksWithContact,OpenCommLink,"$entity.catchrelease_fleetQuestThanksPending score:1320
 $entity.catchrelease_fleetQuestDetailedThanks
 $entity.catchrelease_jobRef != false
 !$entity.isHostile
@@ -1554,8 +1552,7 @@ unset $entity.catchrelease_fleetQuestThanksPending
 unset $entity.catchrelease_fleetQuestDetailedThanks
 unset $entity.catchrelease_jobRef
 FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
-catchrelease_fleetQuestDetailedThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1310
-$entity.catchrelease_fleetQuestThanksPending
+catchrelease_fleetQuestDetailedThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanksPending score:1310
 $entity.catchrelease_fleetQuestDetailedThanks
 !$entity.isHostile
 $entity.catchrelease_fleetQuestType != false","FireBest CatchReleaseFleetQuestThanksText
@@ -1564,8 +1561,7 @@ unset $entity.catchrelease_fleetQuestThanksPending
 unset $entity.catchrelease_fleetQuestDetailedThanks
 unset $entity.catchrelease_fleetQuestType
 FireAll CatchReleaseFleetResolutionOptions",,,
-catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1300
-$entity.catchrelease_fleetQuestThanksPending
+catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanksPending score:1300
 !$entity.isHostile
 $entity.catchrelease_fleetQuestType == false","unset $entity.catchrelease_fleetQuestThanks
 unset $entity.catchrelease_fleetQuestThanksPending
@@ -5374,16 +5370,17 @@ catchrelease_campCloseDialogue,DialogOptionSelected,$option == catchrelease_camp
 CatchReleaseCMD leaveEncounter",,,
 ,,,,,,
 # distress call framework,,,,,,
-distress_framework_hail,BeginFleetEncounter,"!$isHostile
-$distressFramework score:1300
+distress_framework_hail,BeginFleetEncounter,"$distressFramework score:1300
+!$isHostile
 !$distressNoHail","AddText ""You're being hailed."" $faction.baseColor
 $hailing = true 0",,,
-distress_framework_open,OpenCommLink,"!$isHostile
-$entity.distressFramework score:1700",Call $entity.distressFrameworkRef open,,,
-catchrelease_distressFleetQuestPitch,CatchReleaseDistressFleetQuest,"$entity.catchrelease_fleetQuest
+distress_framework_open,OpenCommLink,"$entity.distressFramework score:1700
+!$isHostile",Call $entity.distressFrameworkRef open,,,
+catchrelease_distressFleetQuestPitch,CatchReleaseDistressFleetQuest,"$entity.distressFramework
+$entity.catchrelease_fleetQuest
 !$entity.catchrelease_fleetQuestTaken
-!$entity.isHostile score:1200","Call $catchrelease_jobRef showContactVisual
+!$entity.isHostile score:1200","Call $entity.catchrelease_jobRef showContactVisual
 FireBest CatchReleaseFleetQuestHailText
 FireBest CatchReleaseFleetQuestPitchText
-Call $catchrelease_jobRef showRewardDetails
+Call $entity.catchrelease_jobRef showRewardDetails
 FireAll CatchReleaseFleetQuestOfferOptions",,,
