@@ -46,10 +46,9 @@ public class SpawnDistressCall implements BaseCommandWithSuggestion {
         }
 
         if (system != null){
-
             SectorEntityToken jp = Misc.getDistressJumpPoint(system);
             Vector2f pointAroundJP = MathUtils.getPointOnCircumference(jp.getLocation(), 100f, MathUtils.getRandomNumberInRange(1, 359));
-            SectorEntityToken token = Global.getSector().getHyperspace().createToken(pointAroundJP);
+            SectorEntityToken token = system.createToken(pointAroundJP);
             final JumpPointAPI.JumpDestination dest = new JumpPointAPI.JumpDestination(token, null);
 
             Global.getSector().addScript(new DelayedActionScript(0.1f) {
