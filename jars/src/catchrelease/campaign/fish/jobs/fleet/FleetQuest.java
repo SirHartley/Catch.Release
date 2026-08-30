@@ -32,8 +32,10 @@ import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
+import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
@@ -100,6 +102,7 @@ public class FleetQuest extends FishJob {
     public static final String POT_CAPTAIN_FLAG = "$catchrelease_potCaptain";
     public static final String ROUND_KEY = "$catchreleaseFleetQuestRound";
     public static final String DAYS_TEXT_KEY = "$catchreleaseFleetDays";
+    public static final String BOSUN_RANK = "catchrelease_bosun";
 
     public static final String TITLE_TRIGGER = "CatchReleaseFleetQuestTitle";
     public static final String ACTION_TRIGGER = "CatchReleaseFleetQuestActionText";
@@ -180,6 +183,8 @@ public class FleetQuest extends FishJob {
     protected boolean declinedFollowup;
     protected List<FishReward> counterRewards = new ArrayList<>();
     protected boolean potCaptain;
+    protected PersonAPI bosun;
+    protected boolean mutinyResolved;
 
     protected static final String[] SHOW_NAMES = {
             "The Grand Catch Exhibition",
@@ -370,12 +375,13 @@ public class FleetQuest extends FishJob {
             contact.setPostId(Ranks.POST_CREW_BOSS);
             contact.setVoice(Voices.SPACER);
         } else if (type.usesBosunContact()) {
-            contact = giver.getFaction().createRandomPerson(random());
+            contact = createBosun(captain);
             if (contact == null) return false;
 
-            contact.setRankId(Ranks.CITIZEN);
+            contact.setRankId(BOSUN_RANK);
             contact.setPostId(Ranks.POST_CREW_BOSS);
             contact.setVoice(Voices.SPACER);
+            bosun = contact;
         } else if (type == FleetQuestType.TRIBUTE) {
             contact = giver.getFaction().createRandomPerson(random());
             if (contact == null) return false;
@@ -440,6 +446,32 @@ public class FleetQuest extends FishJob {
         offer();
 
         return true;
+    }
+
+    protected PersonAPI createBosun(PersonAPI captain) {
+        PersonAPI contact = giver.getFaction().createRandomPerson(random());
+        if (contact == null) return null;
+
+        String captainPortrait = captain.getPortraitSprite();
+        if (captainPortrait == null || !captainPortrait.equals(contact.getPortraitSprite())) {
+            return contact;
+        }
+
+        FullName.Gender[] genders = {FullName.Gender.MALE, FullName.Gender.FEMALE};
+        for (FullName.Gender gender : genders) {
+            List<String> portraits = new ArrayList<>(
+                    giver.getFaction().getPortraits(gender).getItems());
+            portraits.removeIf(captainPortrait::equals);
+            if (portraits.isEmpty()) continue;
+
+            contact = giver.getFaction().createRandomPerson(gender, random());
+            if (contact == null) continue;
+
+            contact.setPortraitSprite(portraits.get(random().nextInt(portraits.size())));
+            return contact;
+        }
+
+        return null;
     }
 
     // Retry at lower difficulty when a rolled ask has no reachable habitat.
@@ -1033,7 +1065,27 @@ public class FleetQuest extends FishJob {
         if (potCaptain) {
             showCounterparty(dialog);
         } else {
+            ensureBosunProfile();
             super.showContactVisual(dialog);
+        }
+    }
+
+    protected void ensureBosunProfile() {
+        if (type != FleetQuestType.MUTINY_POT || giver == null) return;
+
+        PersonAPI captain = giver.getCommander();
+        if (bosun == null && getPerson() != captain) bosun = getPerson();
+        if (bosun == null) return;
+
+        bosun.setRankId(BOSUN_RANK);
+        if (captain == null || captain.getPortraitSprite() == null
+                || !captain.getPortraitSprite().equals(bosun.getPortraitSprite())) return;
+
+        List<String> portraits = new ArrayList<>(
+                giver.getFaction().getPortraits(bosun.getGender()).getItems());
+        portraits.removeIf(captain.getPortraitSprite()::equals);
+        if (!portraits.isEmpty()) {
+            bosun.setPortraitSprite(portraits.get(random().nextInt(portraits.size())));
         }
     }
 
@@ -1126,7 +1178,83 @@ public class FleetQuest extends FishJob {
             return;
         }
 
+        resolveMutinyPot();
+
         setCurrentStage(Stage.DONE, dialog, memoryMap);
+    }
+
+    protected void resolveMutinyPot() {
+        if (type != FleetQuestType.MUTINY_POT || mutinyResolved || giver == null
+                || giver.isExpired()) return;
+
+        mutinyResolved = true;
+        if (potCaptain) {
+            spawnCaptainPayment();
+        } else {
+            launchBosunFlagship();
+        }
+    }
+
+    protected void spawnCaptainPayment() {
+        if (giver.getContainingLocation() == null) return;
+
+        SectorEntityToken pods = Misc.addCargoPods(
+                giver.getContainingLocation(), giver.getLocation());
+        pods.getCargo().addCommodity(Commodities.ORGANS, 10f);
+    }
+
+    protected void launchBosunFlagship() {
+        FleetMemberAPI flagship = giver.getFlagship();
+        PersonAPI newCaptain = bosun != null ? bosun : getPerson();
+        LocationAPI location = giver.getContainingLocation();
+        if (flagship == null || newCaptain == null || location == null) return;
+
+        giver.getFleetData().removeFleetMember(flagship);
+        giver.forceSync();
+
+        CampaignFleetAPI departing = Global.getFactory().createEmptyFleet(
+                giver.getFaction().getId(), type.fleetType, true);
+        departing.getFleetData().addFleetMember(flagship);
+        departing.getFleetData().setFlagship(flagship);
+        flagship.setCaptain(newCaptain);
+        departing.setCommander(newCaptain);
+        departing.setName(flagship.getShipName());
+        departing.setTransponderOn(giver.isTransponderOn());
+        departing.forceSync();
+
+        location.addEntity(departing);
+        departing.setLocation(giver.getLocation().x, giver.getLocation().y);
+        departing.setFacing(giver.getFacing());
+
+        MarketAPI destination = pickCoreDestination();
+        if (destination != null && destination.getPrimaryEntity() != null) {
+            SectorEntityToken target = destination.getPrimaryEntity();
+            departing.getMemoryWithoutUpdate().set(
+                    MemFlags.MEMORY_KEY_SOURCE_MARKET, destination.getId());
+            departing.addAssignment(FleetAssignment.GO_TO_LOCATION, target, 1000f);
+            departing.addAssignment(FleetAssignment.ORBIT_PASSIVE, target, 1f);
+            departing.addAssignment(FleetAssignment.GO_TO_LOCATION_AND_DESPAWN,
+                    target, 1000f);
+        } else {
+            Misc.giveStandardReturnToSourceAssignments(departing);
+        }
+
+        if (giver.isEmpty()) {
+            giver.despawn(CampaignEventListener.FleetDespawnReason.OTHER, null);
+            giver.setAI(null);
+            Misc.fadeAndExpire(giver);
+        }
+    }
+
+    protected MarketAPI pickCoreDestination() {
+        List<MarketAPI> markets = new ArrayList<>(
+                Global.getSector().getEconomy().getMarketsCopy());
+        markets.removeIf(market -> market == null || market.isHidden()
+                || market.getPrimaryEntity() == null
+                || market.getContainingLocation() == null
+                || !market.getContainingLocation().hasTag(Tags.THEME_CORE));
+
+        return markets.isEmpty() ? null : markets.get(random().nextInt(markets.size()));
     }
 
     @Override
