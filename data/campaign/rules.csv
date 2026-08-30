@@ -46,30 +46,26 @@ catchrelease_fleetResolutionLeaveSel,DialogOptionSelected,$option == catchreleas
 catchrelease_harpoonedComms,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1100
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""The channel opens on a busy damage-control compartment. Someone reads your transponder code. Someone else asks whether the object recovered from their hull belongs to you. Your comms officer confirms that it does. There is a short silence. \""Fishing gear.\"" The speaker looks off-screen. \""You fired fishing gear at our ship.\""""
-$menuState = fleetConvMain 0
-FireAll PopulateOptions",,,
+!$entity.isHostile","$menuState = fleetConvMain 0
+FireAll PopulateOptions","The channel opens on a busy damage-control compartment. Someone reads your transponder code. Someone else asks whether the object recovered from their hull belongs to you. Your comms officer confirms that it does. There is a short silence. ""Fishing gear."" The speaker looks off-screen. ""You fired fishing gear at our ship.""",,
 catchrelease_harpoonedCommsHeg,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == hegemony
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""Hegemony Navy.\"" $PersonRank $personName reads from the incident form. \""Hull damage. Unregistered heavy projectile. Recovery of an unidentified ROD assembly from the impact site.\"" A second slate is passed into frame. \""Naval Intelligence gets the hardware. You get the report.\""""
-$menuState = fleetConvMain 0
-FireAll PopulateOptions",,,
+!$entity.isHostile","$menuState = fleetConvMain 0
+FireAll PopulateOptions","""Hegemony Navy."" $PersonRank $personName reads from the incident form. ""Hull damage. Unregistered heavy projectile. Recovery of an unidentified ROD assembly from the impact site."" A second slate is passed into frame. ""Naval Intelligence gets the hardware. You get the report.""",,
 catchrelease_harpoonedCommsTT,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == tritachyon
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""Damage assessment is complete.\"" $PersonRank $personName is already looking at the invoice. \""Repair labor, lost operating time, forensic recovery and disposal of your projectile.\"" A brief glance up. \""We retained the projectile.\""""
-$menuState = fleetConvMain 0
-FireAll PopulateOptions",,,
+!$entity.isHostile","$menuState = fleetConvMain 0
+FireAll PopulateOptions","""Damage assessment is complete."" $PersonRank $personName is already looking at the invoice. ""Repair labor, lost operating time, forensic recovery and disposal of your projectile."" A brief glance up. ""We retained the projectile.""",,
 catchrelease_harpoonedCommsLC,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == luddic_church
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""$PersonRank $personName looks at the damage feed. Then at you. \""Whatever purpose that machine was built for, captain, this was not it.\""""
-$menuState = fleetConvMain 0
-FireAll PopulateOptions",,,
+!$entity.isHostile","$menuState = fleetConvMain 0
+FireAll PopulateOptions","$PersonRank $personName looks at the damage feed. Then at you. ""Whatever purpose that machine was built for, captain, this was not it.""",,
 catchrelease_harpoonedCommsLP,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == luddic_path
 $entity.catchrelease_harpooned score:1110
@@ -86,30 +82,26 @@ catchrelease_harpoonedCommsPirate,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == pirates
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""$personName turns the recovered projectile toward the camera. \""You hooked us.\"" A grin appears despite everything. \""Actually hooked us.\"" The grin goes away. \""Don't do it twice.\""""
-$menuState = fleetConvMain 0
-FireAll PopulateOptions",,,
+!$entity.isHostile","$menuState = fleetConvMain 0
+FireAll PopulateOptions","$personName turns the recovered projectile toward the camera. ""You hooked us."" A grin appears despite everything. ""Actually hooked us."" The grin goes away. ""Don't do it twice.""",,
 catchrelease_harpoonedCommsDiktat,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""You discharged an unregistered heavy device at a vessel of the Sindrian Diktat.\"" $PersonRank $personName checks the record. \""I am required to ask whether the act was deliberate.\"" The slate is set aside. \""I have spared us both the formality.\""""
-$menuState = fleetConvMain 0
-FireAll PopulateOptions",,,
+!$entity.isHostile","$menuState = fleetConvMain 0
+FireAll PopulateOptions","""You discharged an unregistered heavy device at a vessel of the Sindrian Diktat."" $PersonRank $personName checks the record. ""I am required to ask whether the act was deliberate."" The slate is set aside. ""I have spared us both the formality.""",,
 catchrelease_harpoonedCommsLeague,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == persean_league
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""$PersonRank $personName has several regulations open. \""I have weapon discharge, negligent recovery operations and collision damage.\"" Another document opens. \""I do not have 'industrial harpoon'.\"" They sigh. \""I will improvise.\""""
-$menuState = fleetConvMain 0
-FireAll PopulateOptions",,,
+!$entity.isHostile","$menuState = fleetConvMain 0
+FireAll PopulateOptions","$PersonRank $personName has several regulations open. ""I have weapon discharge, negligent recovery operations and collision damage."" Another document opens. ""I do not have 'industrial harpoon'."" They sigh. ""I will improvise.""",,
 catchrelease_harpoonedCommsIndie,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == independent
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
-!$entity.isHostile","AddText ""\""You put a hole in us with fishing gear.\"" $personName rubs the bridge of $hisOrHer nose. \""I have to explain that sentence to a yardmaster.\""""
-$menuState = fleetConvMain 0
-FireAll PopulateOptions",,,
+!$entity.isHostile","$menuState = fleetConvMain 0
+FireAll PopulateOptions","""You put a hole in us with fishing gear."" $personName rubs the bridge of $hisOrHer nose. ""I have to explain that sentence to a yardmaster.""",,
 catchrelease_harpoonedCommsOther,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1050","ShowDefaultVisual
 AddText ""The link is answered by somebody who already has your file open and a more pressing reason to dislike you already on it. The harpoon comes up once, near the end, in a list of things that will be dealt with later.""
