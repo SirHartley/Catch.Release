@@ -1555,7 +1555,7 @@ FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1300
 !$entity.isHostile
 $entity.catchrelease_fleetQuestType == false","unset $entity.catchrelease_fleetQuestThanks
-FireAll CatchReleaseFleetResolutionOptions","""$entity.catchrelease_fleetQuestThanks""",,
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
 catchrelease_fleetQuestFollowup,OpenCommLink,"$entity.catchrelease_fleetQuest score:1250
 $entity.catchrelease_fleetQuestTaken
 $entity.catchrelease_fleetQuestFollowupPending
