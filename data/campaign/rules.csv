@@ -1546,9 +1546,12 @@ unset $entity.catchrelease_jobRef
 FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
 catchrelease_fleetQuestDetailedThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1310
 $entity.catchrelease_fleetQuestDetailedThanks
-!$entity.isHostile","unset $entity.catchrelease_fleetQuestThanks
+!$entity.isHostile
+$entity.catchrelease_fleetQuestType != false","FireBest CatchReleaseFleetQuestThanksText
+unset $entity.catchrelease_fleetQuestThanks
 unset $entity.catchrelease_fleetQuestDetailedThanks
-FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
+unset $entity.catchrelease_fleetQuestType
+FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1300
 !$entity.isHostile
 $entity.catchrelease_fleetQuestType == false","unset $entity.catchrelease_fleetQuestThanks
