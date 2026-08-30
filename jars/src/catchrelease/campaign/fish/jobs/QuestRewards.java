@@ -46,6 +46,9 @@ public class QuestRewards {
     public static final float OVERSHOOT = 1.3f;
     public static final int MIN_CREDIT_REMAINDER = 1000;
     public static final int LONE_CHART_CREDITS = 2000;
+    public static final float LATER_STAGE_VALUE_MULT = 1.2f;
+    public static final float LATER_STAGE_CREDIT_MULT = 1.25f;
+    public static final int LATER_STAGE_MIN_INCREASE = 2000;
 
     // Reward values
     public static final int RANGE_DATA_COMMON = 5000;
@@ -204,6 +207,38 @@ public class QuestRewards {
         return new Result(score, tier, budget, rewards);
     }
 
+    public static Result rollLaterStage(Request request, List<FishReward> previousRewards) {
+        if (!request.allowCredits) {
+            throw new IllegalArgumentException("Later-stage rewards require credits");
+        }
+
+        Result result = roll(request);
+        if (previousRewards == null || previousRewards.isEmpty()) return result;
+
+        int previousValue = totalValue(previousRewards);
+        int previousCredits = guaranteedCredits(previousRewards);
+        int minimumValue = FishRewardRoller.roundCreditRewardUp(Math.max(
+                previousValue + LATER_STAGE_MIN_INCREASE,
+                (int) Math.ceil(previousValue * LATER_STAGE_VALUE_MULT)));
+        int minimumCredits = FishRewardRoller.roundCreditRewardUp(Math.max(
+                previousCredits + LATER_STAGE_MIN_INCREASE,
+                (int) Math.ceil(previousCredits * LATER_STAGE_CREDIT_MULT)));
+
+        List<FishReward> rewards = new ArrayList<>(result.rewards);
+        int currentCredits = guaranteedCredits(rewards);
+        int totalShortfall = Math.max(0, minimumValue - totalValue(rewards));
+        int targetCredits = FishRewardRoller.roundCreditRewardUp(Math.max(
+                minimumCredits, currentCredits + totalShortfall));
+        float valueMultiplier = Math.max(creditMultiplier(rewards),
+                creditMultiplier(previousRewards));
+
+        rewards.removeIf(reward -> reward instanceof FishReward.Credits);
+        rewards.add(FishReward.questCredits(targetCredits, valueMultiplier));
+
+        return new Result(result.score, result.tier,
+                Math.max(result.budgetCredits, totalValue(rewards)), rewards);
+    }
+
     protected static FishReward rollOne(Random random, Request request, DemandScore.Tier tier,
                                         int budgetLeft, Set<String> reservedSchematics,
                                         Set<String> reservedData) {
@@ -317,6 +352,42 @@ public class QuestRewards {
         }
 
         return SCHEMATIC_VALUE_FLOOR;
+    }
+
+    protected static int totalValue(List<FishReward> rewards) {
+        int total = 0;
+        if (rewards == null) return total;
+
+        for (FishReward reward : rewards) total += valueOf(reward);
+
+        return total;
+    }
+
+    protected static int guaranteedCredits(List<FishReward> rewards) {
+        int total = 0;
+        if (rewards == null) return total;
+
+        for (FishReward reward : rewards) {
+            if (reward instanceof FishReward.Credits) {
+                total += ((FishReward.Credits) reward).amount;
+            }
+        }
+
+        return total;
+    }
+
+    protected static float creditMultiplier(List<FishReward> rewards) {
+        float multiplier = 0f;
+        if (rewards == null) return multiplier;
+
+        for (FishReward reward : rewards) {
+            if (reward instanceof FishReward.Credits) {
+                multiplier = Math.max(multiplier,
+                        ((FishReward.Credits) reward).valueMultiplier);
+            }
+        }
+
+        return multiplier;
     }
 
     public static int rangeDataValue(FishSpec spec) {

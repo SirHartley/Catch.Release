@@ -7,6 +7,9 @@ import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TuberJob extends FishJob {
 
     @Override
@@ -40,6 +43,7 @@ public class TuberJob extends FishJob {
     protected boolean onDelivered() {
         if (getRound() > 1) return false;
 
+        List<FishReward> previousRewards = new ArrayList<>(rewards);
         asks.clear();
         rewards.clear();
 
@@ -48,9 +52,8 @@ public class TuberJob extends FishJob {
         grim.lowCoherence = true;
 
         addAsk(grim);
-        // The second shoot pays a 60% premium.
-        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
-                .budgetMult(1.6f).random(random())).rewards);
+        addRewards(QuestRewards.rollLaterStage(new QuestRewards.Request(asks)
+                .budgetMult(1.6f).random(random()), previousRewards).rewards);
 
         return true;
     }

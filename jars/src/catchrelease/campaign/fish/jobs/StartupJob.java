@@ -6,6 +6,9 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class StartupJob extends FishJob {
 
     public static final int ROUNDS = 3;
@@ -24,14 +27,14 @@ public class StartupJob extends FishJob {
 
         days = 0f;
 
-        setAsk(2 + genRandom.nextInt(2));
+        setAsk(2 + genRandom.nextInt(2), null);
 
         setUpSpine();
 
         return true;
     }
 
-    protected void setAsk(int count) {
+    protected void setAsk(int count, List<FishReward> previousRewards) {
         asks.clear();
         rewards.clear();
 
@@ -41,16 +44,20 @@ public class StartupJob extends FishJob {
 
         addAsk(ask);
 
-        // Each proof-of-scale delivery pays a 20% premium.
-        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
-                .budgetMult(1.2f).random(genRandom)).rewards);
+        QuestRewards.Request request = new QuestRewards.Request(asks)
+                .budgetMult(1.2f).random(genRandom);
+        QuestRewards.Result result = previousRewards == null
+                ? QuestRewards.roll(request)
+                : QuestRewards.rollLaterStage(request, previousRewards);
+        addRewards(result.rewards);
     }
 
     @Override
     protected boolean onDelivered() {
         if (getRound() >= ROUNDS) return false;
 
-        setAsk((int) (asks.get(0).count * GROWTH) + genRandom.nextInt(3));
+        List<FishReward> previousRewards = new ArrayList<>(rewards);
+        setAsk((int) (asks.get(0).count * GROWTH) + genRandom.nextInt(3), previousRewards);
 
         return true;
     }
