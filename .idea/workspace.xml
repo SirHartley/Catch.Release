@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="adjusted fisherman low coherence response">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="completely rewrote most quest dialogue...">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/ChefJob.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/ChefJob.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,7 +107,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="treasure chest icons" />
     <MESSAGE value="sfx" />
     <MESSAGE value="icons, rules work" />
     <MESSAGE value="fixed icon colouring in sidepanel" />
@@ -131,7 +131,8 @@
     <MESSAGE value="rules" />
     <MESSAGE value="wordings" />
     <MESSAGE value="adjusted fisherman low coherence response" />
-    <option name="LAST_COMMIT_MESSAGE" value="adjusted fisherman low coherence response" />
+    <MESSAGE value="completely rewrote most quest dialogue..." />
+    <option name="LAST_COMMIT_MESSAGE" value="completely rewrote most quest dialogue..." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

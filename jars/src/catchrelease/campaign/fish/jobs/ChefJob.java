@@ -14,7 +14,7 @@ public class ChefJob extends FishJob {
     public static final int VALUE_PER_TYPE = 2600;
     protected static final String[] DISHES = {
             "a terrine", "a cold course", "a broth", "a service of three",
-            "something the menu calls a study", "a dish with no name yet",
+            "something the called \"a study\"", "a dish with no name yet",
     };
 
     protected String dish;

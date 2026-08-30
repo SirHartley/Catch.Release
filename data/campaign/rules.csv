@@ -951,11 +951,11 @@ The loud child immediately reaches under the bucket.
 catchrelease_duelCloseSel,DialogOptionSelected,$option == catchrelease_duelClose,EndConversation NO_CONTINUE,,,
 ,,,,,,
 # bar job: Fight Night,,,,,,
-catchrelease_ring_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"The Commissioner answers with the book beside the comm display.
+catchrelease_ring_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"The Commissioner answers with the book open beside the comm display.
 
-""Captain. Main event's still open. $catchreleaseAskCap, both from your catch. $catchreleaseDaysLeft left.""",,
-catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,"A fight tank stands where the pool table used to be, with benches pulled around it and old splash marks on the bulkhead behind. A chalkboard records past Fight Night results in several hands. The next card is already written up, but the MAIN EVENT line is blank. Two shift crews are arguing over an older result while the barkeeper keeps serving. Beside the board, a $manOrWoman has a grease-stained notebook open to a page thick with corrections and initials.",,
-catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask about the blank MAIN EVENT line on the Fight Night chalkboard.,
+""Captain. Still looking for a pair. $catchreleaseAskCap, both from your catch. You've got $catchreleaseDaysLeft left.""",,
+catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,"A fight tank stands where the pool table used to be, benches dragged around it and old splash marks dried across the bulkhead behind. A holo-board records previous Fight Night results in several different hands. Two shift crews are arguing over an old result while the barkeeper serves through it. Beside the board, a $manOrWoman has a grease-stained notebook open to a page crowded with corrections and initials.",,
+catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask about the blank line on the Fight Night chalkboard.,
 catchrelease_ring_askFirst,DialogOptionSelected,"$option == catchrelease_ring_ask
 $catchreleaseFightNights == 0","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showContactVisual
@@ -963,68 +963,68 @@ Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseRingOffer 0
 FireAll JobSpecificOptions","The Commissioner closes the notebook around one finger.
 
-""Main event's short a pair. I need $catchreleaseAsk. Any species, but both from your catch.""
+""I'm short two fighters. I need $catchreleaseAsk. Species doesn't matter, but both have to come from the same catch.""
 
-""Card's in $catchreleaseDaysCap. Supplier's fee is $catchreleaseReward.""
+""Fight's in $catchreleaseDaysCap. Supplier's fee is $catchreleaseReward.""
 
-""At weigh-in, I measure both against the normal range for their species and put the odds on the chalkboard.""
+""We weigh them here, compare each one against the usual range for its species, then I put the odds up.""
 
-""You can take the fee or stake the whole fee on either one.""
+""You can take the fee, or bet the whole amount on either one. Double or nothing!""
 
-The barkeeper sets down a glass. ""House share goes on the board with everything else.""
-
-""And nobody hits the tank glass.""",,
+The barkeeper sets down a glass. ""House cut's posted with the rest.""",,
 catchrelease_ring_askReturning,DialogOptionSelected,"$option == catchrelease_ring_ask
 $catchreleaseFightNights > 0 score:110","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward $catchreleaseFightNights
 Call $catchrelease_jobRef showContactVisual
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseRingOffer 0
-FireAll JobSpecificOptions","$playerName appears on $catchreleaseFightNights earlier $catchreleaseFightNightWord on the chalkboard.
+FireAll JobSpecificOptions","$playerName appears on $catchreleaseFightNights earlier $catchreleaseFightNightWord on the board.
 
-The Commissioner taps the empty MAIN EVENT line. ""We're short another pair. $catchreleaseAskCap, both from your catch.""
+The Commissioner taps an empty space beneath the latest results.
 
-""Card's in $catchreleaseDaysCap. Supplier's fee is $catchreleaseReward.""
+""We're short another pair. $catchreleaseAskCap, both from your catch.""
 
-""Same choice at weigh-in. Take it, or stake the whole fee after I've posted the odds.""
+""Fight's in $catchreleaseDaysCap. Same fee: $catchreleaseReward.""
 
-The barkeeper fills a glass. ""House share goes up with the line. Glass rule still stands.""",,
+The Commissioner nods toward the board. ""Same arrangement as before. Take the money, or back one of them after I've set the odds.""
+
+The barkeeper fills a glass. ""House cut goes up with them.""",,
 catchrelease_ring_offerHowOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,10:catchrelease_ring_how:How does this work?,
 catchrelease_ring_offerHouseOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,20:catchrelease_ring_house:What's the house's end?,
-catchrelease_ring_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,"SetOptionColor catchrelease_jobAccept highlight",,30:catchrelease_jobAccept:I'll supply the pair.,
+catchrelease_ring_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,SetOptionColor catchrelease_jobAccept highlight,,30:catchrelease_jobAccept:I'll supply the pair.,
 catchrelease_ring_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,40:catchrelease_jobDecline:Not this card.,
 catchrelease_ring_how,DialogOptionSelected,$option == catchrelease_ring_how,"$menuState = catchreleaseRingOffer 0
 FireAll JobSpecificOptions","The Commissioner opens the notebook. Several rules have been crossed out; later amendments carry different initials.
 
-""Both entries come from one supplier. Same supplier, they fight true. Mixed pair fights ugly.""
+""Both fighters come from one supplier. We tried mixing catches. Didn't work.""
 
-""I measure each against the normal size range for its species. That's what sets the public line.""
+""I measure each against the normal size range for its species. That's what the odds are based on.""
 
-""If they're equal, they open at thirty-eight percent each. I call the result when it's done.""
+""If they come out even, they open at thirty-eight percent apiece. Once they're in the tank, I make the call.""
 
-""Stake your fee on the winner and the house rolls a larger purse for you. Lose and the fee's gone. No debt.""",,
+""Back the winner and the house pays out a larger purse. Lose, and you lose only the fee.""",,
 catchrelease_ring_house,DialogOptionSelected,$option == catchrelease_ring_house,"$menuState = catchreleaseRingOffer 0
 FireAll JobSpecificOptions","The barkeeper pours another drink.
 
-""Whatever the two fighters don't carry. It's written on the board.""
+""House gets whatever's left between the two. It's all written up there.""
 
-""Equal pair means thirty-eight each. Twenty-four to the house.""
+""Equal pair means thirty-eight each,"" the Commissioner says. ""Leaves twenty-four for the house.""
 
-The bottle goes back on the shelf. ""And don't hit the glass. We replaced the front pane once.""
+The bottle goes back on the shelf. ""And don't hit the glass. We already replaced it once.""
 
-From the benches: ""Your shift hasn't picked a winner in three cards.""
+From the benches: ""Your shift hasn't picked a winner in three fights.""
 
 ""Four,"" somebody answers.",,
 catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,CatchReleaseCMD highlightJobText $catchreleaseAsk,"The Commissioner writes your name into the supplier line.
 
-""Good. $catchreleaseAskCap, both from your catch. Bring them here before the card in $catchreleaseDaysCap.""
+""Good. $catchreleaseAskCap, both from your catch. Bring them in before the fight in $catchreleaseDaysCap.""
 
-""We'll weigh them in front of the room. Fee or wager comes after the line goes up.""",,
+""We'll weigh them in front of everyone, put the odds up, then you tell me whether you're taking the fee or backing one.""",,
 catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,"""Fair enough."" The Commissioner leaves the supplier line blank and reopens the notebook.
 
-The barkeeper calls down the bar, ""Main event's still open.""",,
+The barkeeper calls down the bar, ""Still need two for the fight!""",,
 catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"The Commissioner looks up from the book.
 
-""Still waiting on the pair. $catchreleaseAskCap, both from your catch. $catchreleaseDaysLeft left.""",,
+""Still waiting on that pair, captain. $catchreleaseAskCap. $catchreleaseDaysLeft left.""",,
 catchrelease_ringHandOver,JobSpecificOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish
@@ -1035,19 +1035,23 @@ Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_ringWait:Not ready yet.,
 catchrelease_ringPickSel,DialogOptionSelected,$option == catchrelease_ringPick,Call $catchrelease_jobRef chooseFighters,,,
 catchrelease_ringAssignmentReady,CatchReleaseRingWagerReady,"$missionId == catchrelease_ring
-$catchreleaseRingSelectionReady",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseLeftFish $catchreleaseLeftOdds $catchreleaseRight $catchreleaseRightFish $catchreleaseRightOdds $catchreleaseHouseOdds,"The Commissioner measures the first entry, checks the species range, then writes a name on the chalkboard.
+$catchreleaseRingSelectionReady",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseLeftFish $catchreleaseLeftOdds $catchreleaseRight $catchreleaseRightFish $catchreleaseRightOdds $catchreleaseHouseOdds,"The Commissioner measures the first entry, checks the species range, then writes a name on the board.
 
-""$catchreleaseLeft. $catchreleaseLeftFish. Line: $catchreleaseLeftOdds.""
+""$catchreleaseLeft. $catchreleaseLeftFish. $catchreleaseLeftOdds.""
 
 The second goes up beside it.
 
-""$catchreleaseRight. $catchreleaseRightFish. Line: $catchreleaseRightOdds.""
+""$catchreleaseRight. $catchreleaseRightFish. $catchreleaseRightOdds.""
 
-The Commissioner underlines both names. ""Fight names are mine. Book's made.""
+The Commissioner looks between the two figures and adds a line beneath them.
 
-A third figure goes underneath them. ""House: $catchreleaseHouseOdds.""
+""Those are your odds.""
 
-The room presses toward the board as bets begin changing hands.",,
+A third figure goes underneath.
+
+""House takes $catchreleaseHouseOdds.""
+
+That is enough to bring half the room toward the board. Money starts changing hands before the Commissioner has finished writing.",,
 catchrelease_ringAssignmentOptions,CatchReleaseRingWagerOptions,"$missionId == catchrelease_ring
 $catchreleaseRingSelectionReady","SetOptionColor catchrelease_ringFlat highlight
 SetOptionColor catchrelease_ringLeft highlight
@@ -1068,38 +1072,46 @@ catchrelease_ringWaitSel,DialogOptionSelected,$option == catchrelease_ringWait,"
 FireBest catchreleaseJobRemind
 FireAll JobSpecificOptions",,,
 catchrelease_ring_paid,catchreleaseJobPaid,"$missionId == catchrelease_ring
-$catchreleasePaid score:100",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseRight $catchreleaseWinner,"The divider lifts. The room drops for half a second, then both shift crews start shouting at once.
+$catchreleasePaid score:100",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseRight $catchreleaseWinner,"The divider lifts.
 
-The Commissioner calls, ""$catchreleaseLeft against $catchreleaseRight. Main event.""
+The room goes quiet for an instant, long enough to hear water strike the glass. Then both shift crews start shouting.
 
-The noise follows every turn in the tank. A veteran regular starts explaining why $catchreleaseLeft holds its shape under pressure until the other shift drowns the theory out.
+""$catchreleaseLeft against $catchreleaseRight,"" the Commissioner calls over them.
 
-The Commissioner keeps the calls short. ""Still live. Center. Keep it clean.""
+Every turn in the tank starts another argument from the benches. A veteran regular begins explaining why $catchreleaseLeft has the better build for it, only for the other shift to shout him down.
 
-The room surges toward the tank. The Commissioner raises a hand. ""$catchreleaseWinner. That's the result.""
+The benches push forward again. A moment later, the Commissioner raises a hand.
 
-The result goes onto the chalkboard.",,
+""$catchreleaseWinner. That's it.""
+
+The result goes onto the board.",,
 catchrelease_ring_settled,CatchReleaseRingSettlement,"$missionId == catchrelease_ring
 $catchreleasePaid
-!$catchreleaseHasWager score:100",CatchReleaseCMD highlightJobText $catchreleaseReward $catchreleaseWinner $catchreleaseLoser,"The barkeeper settles the surrounding bets while one shift crew pays the other across the bar. Someone near the tank calls, ""Safe money, captain?"" The veteran regular is already explaining why the result confirms the theory.
+!$catchreleaseHasWager score:100",CatchReleaseCMD highlightJobText $catchreleaseReward $catchreleaseWinner $catchreleaseLoser,"The barkeeper works through the surrounding bets while one shift crew pays the other across the bar. Someone near the tank calls, ""Took the safe money, captain?"" 
 
-""Supplier first,"" says the barkeeper. Your fixed fee clears, and service resumes.
+The veteran regular is already explaining why the outcome was obvious.
+
+""Supplier first,"" says the barkeeper.
+Your fixed fee clears, and service resumes.
 
 $catchreleaseFightDate: $catchreleaseWinner over $catchreleaseLoser. Supplier: $playerName.",,
 catchrelease_ring_settledWon,CatchReleaseRingSettlement,"$missionId == catchrelease_ring
 $catchreleasePaid
 $catchreleaseHasWager
-$catchreleaseWon score:110",CatchReleaseCMD highlightJobText $catchreleaseReward $catchreleaseWinner $catchreleaseLoser,"The winning side of the room makes enough noise to hold up service for a few seconds. The barkeeper waits it out, settles the other bets, then closes your line against the larger purse.
+$catchreleaseWon score:110",CatchReleaseCMD highlightJobText $catchreleaseReward $catchreleaseWinner $catchreleaseLoser,"The winning side makes enough noise to stop service for a few seconds. The barkeeper waits them out, settles the remaining bets, then closes your wager against the larger purse.
 
-The veteran regular points at the board. ""Exactly what I said."" Nobody nearby agrees on what was said.
+The veteran regular points at the board. ""Been saying it all night.""
+Nobody nearby remembers him saying quite that.
 
 $catchreleaseFightDate: $catchreleaseWinner over $catchreleaseLoser. Supplier: $playerName.",,
 catchrelease_ring_settledLost,CatchReleaseRingSettlement,"$missionId == catchrelease_ring
 $catchreleasePaid
 $catchreleaseHasWager
-!$catchreleaseWon score:110",CatchReleaseCMD highlightJobText $catchreleaseWinner $catchreleaseLoser,"The barkeeper settles the room and closes your line in the book. ""That's the wager. Nothing owed.""
+!$catchreleaseWon score:110",CatchReleaseCMD highlightJobText $catchreleaseWinner $catchreleaseLoser,"The barkeeper finishes settling the room and draws a line through your wager.
 
-Across the bar, the winning shift crew is collecting from the losing one. The veteran regular has already revised the theory.
+""That's yours gone. Nothing else owing.""
+
+Across the bar, the winning shift crew is collecting from the losing one. The veteran regular has already found a different reason the result was inevitable.
 
 $catchreleaseFightDate: $catchreleaseWinner over $catchreleaseLoser. Supplier: $playerName.",,
 ,,,,,,
@@ -1110,7 +1122,7 @@ catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchr
 
 The client's name is masked. $HeOrShe glances over it and brings up the specimen requirements instead.",,
 catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A $manOrWoman in understated eveningwear sits alone with a nearly finished drink. A private order is open on the table beside $himOrHer. The client's name is masked.,,
-catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask about the contract,
+catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask the liaison about the private contract,
 catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseClientOffer 0
@@ -1306,7 +1318,7 @@ $HeOrShe crops in until the specimen fills the display.
 
 $HeOrShe points at the frozen image.
 
-""That is the thumbnail. No cleanup. No explanation. Let everyone fight.""
+""A perfect thumbnail! Let everyone fight.""
 
 $HeOrShe authorizes the payment without taking $hisOrHer eyes off the viewer count.",,
 ,,,,,,
@@ -1351,9 +1363,7 @@ CatchReleaseCMD highlightJobText $catchreleaseSpecies","""$catchreleaseSpecies,"
 catchrelease_cult_accepted,catchreleaseJobAccepted,$missionId == catchrelease_cult,,"""Good,"" says the first.
 
 The other two remain still.",,
-catchrelease_cult_declined,catchreleaseJobDeclined,$missionId == catchrelease_cult,,"""Then it is agreed,"" says the second.
-
-They remain at the table.",,
+catchrelease_cult_declined,catchreleaseJobDeclined,$missionId == catchrelease_cult,,They remain at the table.,,
 catchrelease_cult_remind,catchreleaseJobRemind,$missionId == catchrelease_cult score:100,CatchReleaseCMD highlightJobText $catchreleaseSpecies,"""$catchreleaseSpecies.""",,
 catchrelease_cult_paid,catchreleaseJobPaid,"$missionId == catchrelease_cult
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"They do not open the container.
