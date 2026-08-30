@@ -210,6 +210,9 @@ public class FleetQuest extends FishJob {
         if (!FishingIntro.isComplete()) return null;
         if (giver == null || giver.isExpired() || type == null) return null;
         if (isQuestFleet(giver)) return null;
+        StarSystemAPI system = giver.getContainingLocation() instanceof StarSystemAPI
+                ? (StarSystemAPI) giver.getContainingLocation() : null;
+        if (!type.canSpawnIn(system)) return null;
 
         FleetQuest quest = new FleetQuest();
         quest.type = type;

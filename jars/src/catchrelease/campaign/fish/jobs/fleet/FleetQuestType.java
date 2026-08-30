@@ -1,9 +1,11 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishReward;
@@ -11,7 +13,6 @@ import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestDuration;
 import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -20,6 +21,7 @@ import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -455,6 +457,16 @@ public enum FleetQuestType {
         return this == CALIBRATION_PAIR;
     }
 
+    public boolean requiresLowCoherenceArea() {
+        return this == CALIBRATION_PAIR || this == QUIET_SHIP;
+    }
+
+    public boolean canSpawnIn(StarSystemAPI system) {
+        return !requiresLowCoherenceArea() || system != null
+                && Aberration.baseAt(system.getLocation(), system)
+                >= FishRequirement.LOW_COHERENCE;
+    }
+
     public boolean requiresIndependentFleet() {
         return this == LAST_ENTRY || this == ESCROW || this == INTERMENT
                 || this == CALIBRATION_PAIR || this == MUTINY_POT || this == TRIBUTE
@@ -494,5 +506,14 @@ public enum FleetQuestType {
 
     public static FleetQuestType rollAny(Random random) {
         return LOCAL_OFFERS[random.nextInt(LOCAL_OFFERS.length)];
+    }
+
+    public static FleetQuestType rollAny(Random random, StarSystemAPI system) {
+        List<FleetQuestType> eligible = new ArrayList<>();
+        for (FleetQuestType type : LOCAL_OFFERS) {
+            if (type.canSpawnIn(system)) eligible.add(type);
+        }
+
+        return eligible.isEmpty() ? null : eligible.get(random.nextInt(eligible.size()));
     }
 }
