@@ -152,7 +152,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
         float worst = QuestDuration.worstNearestLY(at, asks, QuestDuration.MAX_SENSIBLE_LY);
         if (worst < 0f) return false;
 
-        days = QuestDuration.forTravelLY(worst).days;
+        days = QuestDuration.daysForTravelLY(worst, asks);
 
         return true;
     }

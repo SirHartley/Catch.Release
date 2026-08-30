@@ -487,7 +487,7 @@ public class FleetQuest extends FishJob {
                     type.getMaximumTravelLY());
             if (nearest < 0f) continue;
 
-            days = QuestDuration.forTravelLY(nearest).days;
+            days = QuestDuration.daysForTravelLY(nearest, ask);
             if (type == FleetQuestType.HEADLINER) {
                 replacementPlan = i == 0 ? "So we hire a replacement."
                         : "Fine. We promote a strong supporting act to the headline and hire for"
@@ -1151,7 +1151,7 @@ public class FleetQuest extends FishJob {
 
         float nearest = QuestDuration.nearestSatisfiableLY(giver, followup,
                 type.getMaximumTravelLY());
-        days = nearest < 0f ? 0f : QuestDuration.forTravelLY(nearest).days;
+        days = nearest < 0f ? 0f : QuestDuration.daysForTravelLY(nearest, followup);
         followupPending = true;
 
         return true;

@@ -80,7 +80,8 @@ public abstract class CampedSpotJob extends FishJob {
 
         float ly = Misc.getDistanceLY(createdAt.getLocationInHyperspace(),
                 system.getLocation());
-        days = QuestDuration.forTravelLY(ly, QuestDuration.WORKING_DAYS * 2f).days;
+        days = QuestDuration.daysForTravelLY(
+                ly, QuestDuration.WORKING_DAYS * 2f, asks);
 
         setUpSpine();
 

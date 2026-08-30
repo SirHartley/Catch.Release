@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRanges;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -32,6 +33,7 @@ public enum QuestDuration {
     public static final float FALLBACK_DAYS_PER_LY = 1f;
     /** Maximum one-way distance for a valid offer. */
     public static final float MAX_SENSIBLE_LY = 30f;
+    public static final float RARE_CATCH_BONUS_DAYS = 30f;
 
     public final float days;
 
@@ -59,6 +61,54 @@ public enum QuestDuration {
         float travelDays = Math.max(0f, oneWayLY) * getPlayerDaysPerLY() * 2f;
 
         return forDays(Math.max(0f, workingDays) + travelDays);
+    }
+
+    public static float daysForTravelLY(float oneWayLY, List<FishRequirement> asks) {
+        return daysForTravelLY(oneWayLY, WORKING_DAYS, asks);
+    }
+
+    public static float daysForTravelLY(float oneWayLY, float workingDays,
+                                        List<FishRequirement> asks) {
+        float base = forTravelLY(oneWayLY, workingDays).days;
+        if (base <= 0f) return base;
+
+        return base + (requiresRareOrEpicCatch(asks) ? RARE_CATCH_BONUS_DAYS : 0f);
+    }
+
+    public static float daysForTravelLY(float oneWayLY, FishRequirement ask) {
+        return daysForTravelLY(oneWayLY, ask == null ? List.of() : List.of(ask));
+    }
+
+    protected static boolean requiresRareOrEpicCatch(List<FishRequirement> asks) {
+        if (asks == null) return false;
+
+        for (FishRequirement ask : asks) {
+            if (requiresRareOrEpicCatch(ask)) return true;
+        }
+
+        return false;
+    }
+
+    protected static boolean requiresRareOrEpicCatch(FishRequirement ask) {
+        if (ask == null) return false;
+
+        if (!ask.anyOf.isEmpty()) {
+            boolean found = false;
+            for (FishRequirement alternative : ask.anyOf) {
+                if (alternative == null) continue;
+                found = true;
+                if (!requiresRareOrEpicCatch(alternative)) return false;
+            }
+            return found;
+        }
+
+        FishRarity rarity = ask.minRarity;
+        if (ask.speciesId != null) {
+            FishSpec spec = FishSpecLoader.getFishSpec(ask.speciesId);
+            if (spec != null) rarity = spec.rarity;
+        }
+
+        return rarity == FishRarity.RARE || rarity == FishRarity.EPIC;
     }
 
     protected static float getPlayerDaysPerLY() {
