@@ -172,6 +172,8 @@ The console mod is optional at runtime but remains a compile dependency. Command
 
 The rules engine replaces text tokens before running the row's script. A row therefore cannot print a value that its own script creates. Roll or prepare the value on an earlier row, then render it.
 
+Harpooned-fleet comm greetings keep their primary prose in the `text` column. Their scripts only switch the fleet menu and populate its options.
+
 ### Job routing
 
 Each job follows this trigger family:
