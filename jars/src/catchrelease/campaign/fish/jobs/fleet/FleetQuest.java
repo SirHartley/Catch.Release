@@ -105,6 +105,7 @@ public class FleetQuest extends FishJob {
     public static final String TERMS_TRIGGER = "CatchReleaseFleetQuestIntelTerms";
     public static final String DISTRESS_INTEL_TRIGGER = "CatchReleaseFleetQuestDistressIntel";
     public static final String THANKS_TRIGGER = "CatchReleaseFleetQuestThanksText";
+    public static final String DECLINED_TRIGGER = "CatchReleaseFleetQuestDeclinedText";
 
     public static final float HOLD_DAYS = 100000f;
 
@@ -298,6 +299,14 @@ public class FleetQuest extends FishJob {
     }
 
     public void abandon() {
+        release();
+    }
+
+    public void decline() {
+        String followup = getRuleText(DECLINED_TRIGGER);
+        if (followup != null && !followup.isEmpty()) {
+            giver.getMemoryWithoutUpdate().set(THANKS_KEY, followup);
+        }
         release();
     }
 
