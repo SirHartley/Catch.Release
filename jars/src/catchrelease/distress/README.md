@@ -30,8 +30,10 @@ to the provider.
 
 The provider decides whether a row is eligible, attaches its own quest state to the supplied
 fleet, and may replace the default jump-point orbit anchor with another token in the same system.
-It owns all dialogue, rewards, acceptance and completion. Call
-`DistressCallFramework.resolve(fleet)` when the encounter has reached a final answer.
+It owns all dialogue, rewards, acceptance and completion. The generic comm entry requires the
+framework flag, and the saved instance verifies the exact fleet and instance reference before it
+fires the provider trigger. Call `DistressCallFramework.resolve(fleet)` when the encounter has
+reached a final answer.
 
 ## Vanilla integration
 
