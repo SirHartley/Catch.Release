@@ -1,4 +1,5 @@
 id,trigger,conditions,script,text,options,notes
+# harpoon revenge and patrol enforcement,,,,,,
 catchrelease_hitmanEncounter,BeginFleetEncounter,"$catchrelease_harpoonHitman score:1200
 !$catchrelease_harpoonHitmanHailed","FleetDesc
 HailPlayer",,,
@@ -451,6 +452,8 @@ ShowDefaultVisual
 EndConversation","""So was I, once."" The link closes.
 
 Your sensors officer has the formation opening out before the channel has finished dropping, and calls the gun ports as they come up, one ship at a time.",,
+,,,,,,
+# shared bar job dialogue,,,,,,
 catchrelease_jobAccept,DialogOptionSelected,$option == catchrelease_jobAccept,"HideMapMarker
 unset $menuState
 FireBest catchreleaseJobAccepted
@@ -487,6 +490,8 @@ unset $menuState
 Call $catchrelease_jobRef showContactVisual
 FireBest catchreleaseJobGreeting
 FireAll JobSpecificOptions",,,
+,,,,,,
+# bar job: standing order,,,,,,
 catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_standingOrder score:100,,"The provisioner looks up from a spread of manifests as your connection opens.
 
 ""Captain. Good timing.""
@@ -494,107 +499,6 @@ catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId ==
 A supplier line is pulled to the front of the slate, your comm ID already attached to it.
 
 ""Let's see where the order stands.""",,
-catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_chef score:100,,"The cook answers from somewhere just off the kitchen floor, wipes one hand on an apron and props a slate against a stack of ingredient cards.
-
-""Captain. You're back.""
-
-Three separate lines sit under the name of the dish.
-
-""All right. Let's see what we're working with.""",,
-catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with the current order already open. It appears as a solid line among several dotted forecasts.
-
-""Captain. Good. I've been updating the model from the committed volume.""
-
-$HeOrShe brings your order to the center of the display.
-
-""Where are we?""",,
-catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The $manOrWoman answers promptly. A household schedule remains open on $hisOrHer slate, though your supplier entry has already been brought to the front.
-
-""Captain. Good day.""
-
-$HeOrShe sets the slate down on $hisOrHer side of the desk.
-
-""You wished to discuss the commission.""",,
-catchrelease_curator_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_curator score:100,,"The curator accepts the connection from beside a row of open accession entries.
-
-""Captain. Good to hear from you.""
-
-$HeOrShe marks $hisOrHer place in the current record and brings your commission onto the main display.
-
-""Let's have a look at where things stand.""",,
-catchrelease_duel_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_duel score:100,,"The loud child appears first, leaning so close to the pickup that only half a face fits in frame.
-
-""Captain!""
-
-The quiet child pulls the comm unit back and puts the tournament bracket in front of it instead.
-
-""We kept your spot.""
-
-""I said we would.""
-
-""You also tried to write somebody else in it.""",,
-catchrelease_ring_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_ring score:100,,"$personFirstName takes the call from the same table. $catchreleaseRight has the book open beside the tank and does not stop writing.
-
-""Captain,"" $personFirstName says. ""You're still on the card.""
-
-$catchreleaseRight turns one page, finds your line and rests a finger beside it.
-
-""Go ahead.""",,
-catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection with the private purchase contract already open.
-
-""Captain.""
-
-The buyer field remains masked. $HeOrShe scrolls directly to your specification and the delivery line beneath it.
-
-""What do you need from me?""",,
-catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"The Academy researcher looks up from a pair of sensor plots when the connection opens.
-
-""Captain. Good.""
-
-$HeOrShe saves one comparison, then brings your retrieval commission onto the screen beside an empty record slot.
-
-""Tell me where things stand.""",,
-catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp.
-
-""Wait. Captain's on comms.""
-
-The lens swings toward the display before the sentence is finished.
-
-""Feed, update just came through. This is either excellent timing or excellent retention.""
-
-$HeOrShe checks the recording indicator.
-
-""All right. Talk to me.""",,
-catchrelease_cult_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_cult score:100,,"All three plain-coated buyers are present when the connection opens.
-
-The first looks at you.
-
-The second brings up the purchase entry.
-
-The third says, ""Captain.""
-
-They wait.",,
-catchrelease_campPirate_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPirate score:100,,"The fisher answers with an account sheet still open. The protection payment has its own column now.
-
-""Captain.""
-
-$HeOrShe pushes the figures aside and brings up the job marker.
-
-""Tell me you've got something worth changing next month's numbers for.""",,
-catchrelease_campMerc_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campMerc score:100,,"The fisher accepts the call with both survey charts open and the claim file between them.
-
-""Captain.""
-
-$HeOrShe closes a fresh message from the claims office without reading it twice.
-
-""Any movement on your end?""",,
-catchrelease_campPath_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPath score:100,,"The fisher answers after a short delay. The repaired rack component is on the table beside the comm unit; the door remains in view behind it.
-
-""Captain.""
-
-The fisher checks the doorway once, then brings up the camp marker.
-
-""What have you got?""",,
 catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has three delivery manifests open beside a supplier list. FRESH CATCH has more orders than names.,,
 catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Talk to the provisioner with the delivery manifests,
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -615,6 +519,15 @@ catchrelease_standingOrder_paid,catchreleaseJobPaid,"$missionId == catchrelease_
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The provisioner checks the containers against the manifest and closes the order.
 
 The agreed payment is transferred to your account.",,
+,,,,,,
+# bar job: chef,,,,,,
+catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_chef score:100,,"The cook answers from somewhere just off the kitchen floor, wipes one hand on an apron and props a slate against a stack of ingredient cards.
+
+""Captain. You're back.""
+
+Three separate lines sit under the name of the dish.
+
+""All right. Let's see what we're working with.""",,
 catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,A cook in stained whites has three ingredient cards laid beneath the name of one dish. Two supplier names have already been crossed out.,,
 catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Talk to the cook with the ingredient cards,
 catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -635,6 +548,15 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The coo
 ""Good. That's the plate.""
 
 The agreed transfer clears.",,
+,,,,,,
+# bar job: startup,,,,,,
+catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with the current order already open. It appears as a solid line among several dotted forecasts.
+
+""Captain. Good. I've been updating the model from the committed volume.""
+
+$HeOrShe brings your order to the center of the display.
+
+""Where are we?""",,
 catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,A young factor in an expensive jacket has a ten-page business case open on $hisOrHer slate. A half-finished drink sits at one corner of the table.,,
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch from the young factor in the expensive jacket,
 catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"$menuState = catchreleaseStartupOffer 0
@@ -749,6 +671,15 @@ The three receipts take up half a page in the business case. A distribution netw
 ""Three completed runs. That's the supply chain proven.""
 
 $HeOrShe is already revising the demand projections.",,
+,,,,,,
+# bar job: sub-butler,,,,,,
+catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The $manOrWoman answers promptly. A household schedule remains open on $hisOrHer slate, though your supplier entry has already been brought to the front.
+
+""Captain. Good day.""
+
+$HeOrShe sets the slate down on $hisOrHer side of the desk.
+
+""You wished to discuss the commission.""",,
 catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A $manOrWoman in a well-cut coat sits with an untouched drink. The chair opposite has been set a little farther from the table than the others.,,
 catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Talk to the $manOrWoman in the well-cut coat,
 catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"$menuState = catchreleaseButlerOffer 0
@@ -816,6 +747,15 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"A dock 
 The agreed payment changes hands.
 
 The $manOrWoman has already turned to $hisOrHer next entry.",,
+,,,,,,
+# bar job: curator,,,,,,
+catchrelease_curator_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_curator score:100,,"The curator accepts the connection from beside a row of open accession entries.
+
+""Captain. Good to hear from you.""
+
+$HeOrShe marks $hisOrHer place in the current record and brings your commission onto the main display.
+
+""Let's have a look at where things stand.""",,
 catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,A curator with an academic lanyard is updating accession records beside photographs of a public aquarium. Several entries are marked DISPLAY; others are marked RECORD.,,
 catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Talk to the curator with the aquarium photographs,
 catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -838,6 +778,19 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrSh
 ""Good. That's enough for the record.""
 
 The agreed transfer clears.",,
+,,,,,,
+# bar job: children's tournament,,,,,,
+catchrelease_duel_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_duel score:100,,"The loud child appears first, leaning so close to the pickup that only half a face fits in frame.
+
+""Captain!""
+
+The quiet child pulls the comm unit back and puts the tournament bracket in front of it instead.
+
+""We kept your spot.""
+
+""I said we would.""
+
+""You also tried to write somebody else in it.""",,
 catchrelease_duel_blurbBar,catchrelease_duel_blurbBar,,,Two children have taken over a corner table with an empty bucket and a hand-drawn tournament bracket. Several names have been crossed out and written back in.,,
 catchrelease_duel_optionBar,catchrelease_duel_optionBar,,,,catchrelease_duel_ask:Ask the children about the tournament bracket,
 catchrelease_duel_ask,DialogOptionSelected,$option == catchrelease_duel_ask,"Call $catchrelease_jobRef showBarBackdrop
@@ -988,6 +941,15 @@ The loud child immediately reaches under the bucket.
 ""I was getting it.""
 ""Too slow.""",catchrelease_duelClose:Leave.,
 catchrelease_duelCloseSel,DialogOptionSelected,$option == catchrelease_duelClose,EndConversation NO_CONTINUE,,,
+,,,,,,
+# bar job: fighting ring,,,,,,
+catchrelease_ring_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_ring score:100,,"$personFirstName takes the call from the same table. $catchreleaseRight has the book open beside the tank and does not stop writing.
+
+""Captain,"" $personFirstName says. ""You're still on the card.""
+
+$catchreleaseRight turns one page, finds your line and rests a finger beside it.
+
+""Go ahead.""",,
 catchrelease_ring_blurbBar,catchrelease_ring_blurbBar,,,Two men occupy the best table in the bar. Between them sits a transport tank with polished seals and a circulation unit worth more than the furniture. The surrounding chairs remain empty. A locked ampoule case rests beside the younger man's drink.,,
 catchrelease_ring_optionBar,catchrelease_ring_optionBar,,,,catchrelease_ring_ask:Ask the men with the transport tank about the bets,
 catchrelease_ring_ask,DialogOptionSelected,$option == catchrelease_ring_ask,"Call $catchrelease_jobRef showContactVisual
@@ -1142,6 +1104,15 @@ $catchreleaseRight breaks the seal on a numbered ampoule and empties it into the
 $personFirstName draws one line through the amount beside your name.
 
 No payment.",,
+,,,,,,
+# bar job: companion,,,,,,
+catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection with the private purchase contract already open.
+
+""Captain.""
+
+The buyer field remains masked. $HeOrShe scrolls directly to your specification and the delivery line beneath it.
+
+""What do you need from me?""",,
 catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A $manOrWoman in a conservative suit has a private purchase contract open beside a nearly finished drink. The buyer field is masked; the specification is not.,,
 catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask about the contract,
 catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -1185,6 +1156,15 @@ $HeOrShe checks the specimen's recorded size range against the premium schedule.
 The agreed payment changes hands.
 
 $HeOrShe doesn't shake your hand and turns to the next task on $HisOrHer list.",,
+,,,,,,
+# bar job: academy,,,,,,
+catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"The Academy researcher looks up from a pair of sensor plots when the connection opens.
+
+""Captain. Good.""
+
+$HeOrShe saves one comparison, then brings your retrieval commission onto the screen beside an empty record slot.
+
+""Tell me where things stand.""",,
 catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,,An Academy researcher is comparing retrieval logs against sensor plots. Every confirmed match goes into the smaller of two piles.,,
 catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask the Academy researcher what $heOrShe is studying,
 catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -1207,6 +1187,19 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrSh
 One measurement is taken twice. $HeOrShe enters the second result beside the first rather than replacing it.
 
 The agreed transfer clears.",,
+,,,,,,
+# bar job: tuber,,,,,,
+catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp.
+
+""Wait. Captain's on comms.""
+
+The lens swings toward the display before the sentence is finished.
+
+""Feed, update just came through. This is either excellent timing or excellent retention.""
+
+$HeOrShe checks the recording indicator.
+
+""All right. Talk to me.""",,
 catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A $manOrWoman has converted one end of the bar into a recording set: two lamps, a good lens, and a chair placed squarely in the main walkway. $HeOrShe is recording the same six-second introduction for the fourth time.",,
 catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask the $manOrWoman at the recording set what $heOrShe is filming,
 catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
@@ -1306,6 +1299,17 @@ $HeOrShe points at the frozen image.
 ""That is the thumbnail. No cleanup. No explanation. Let everyone fight.""
 
 $HeOrShe authorizes the payment without looking up.",,
+,,,,,,
+# bar job: cult,,,,,,
+catchrelease_cult_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_cult score:100,,"All three plain-coated buyers are present when the connection opens.
+
+The first looks at you.
+
+The second brings up the purchase entry.
+
+The third says, ""Captain.""
+
+They wait.",,
 catchrelease_cult_blurbBar,catchrelease_cult_blurbBar,,,Three people in matching plain coats share a table. One drink sits untouched between them.,,
 catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask:Ask the three people in matching coats what they are waiting for,
 catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,"CatchReleaseCMD highlightJobText $catchreleaseSpecies $catchreleaseReward
@@ -1345,6 +1349,8 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"They do
 One checks the seal. The agreed consideration is handed over in return.
 
 The third is already leaving.",,
+,,,,,,
+# shared fleet quest dialogue,,,,,,
 catchrelease_fleetQuestHail,BeginFleetEncounter,"$catchrelease_fleetQuest score:1200
 !$catchrelease_fleetQuestTaken
 !$catchrelease_fleetQuestHailed
@@ -1559,6 +1565,8 @@ FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fqFollowupDeclineSel,DialogOptionSelected,$option == catchrelease_fqFollowupDecline,"FireBest CatchReleaseFleetQuestFollowupDeclineText
 Call $entity.catchrelease_jobRef declineFollowup
 FireAll CatchReleaseFleetResolutionOptions",,,
+,,,,,,
+# fleet quest: last entry,,,,,,
 catchrelease_fq_last_entry_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == last_entry,,The Last Entry,,
 catchrelease_fq_last_entry_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == last_entry,,Holding for catalogue filing,,
 catchrelease_fq_last_entry_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == last_entry,,"Expedition $entity.catchreleaseFleetExpedition has completed its survey, but one specimen entry remains open. $entity.catchreleaseFleetName needs the requested specimen to close the entry and file the catalogue without voiding the expedition's survey classification.",,
@@ -1612,6 +1620,8 @@ The officer checks the submission receipt, then returns to the original sighting
 ""We'll retain the original entry with the expedition archive.""
 
 ""Good work, captain. $entity.catchreleaseFleetName out.""",,
+,,,,,,
+# fleet quest: escrow,,,,,,
 catchrelease_fq_escrow_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == escrow,,The Escrow,,
 catchrelease_fq_escrow_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == escrow,,Closing contract,,
 catchrelease_fq_escrow_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == escrow,,Recovery contractor $entity.catchreleaseFleetName is trying to close contract $entity.catchreleaseFleetContract after the original specimen and its carrier were lost. A qualifying substitute will satisfy the outstanding delivery and stop the liability from continuing to accrue.,,
@@ -1677,6 +1687,8 @@ catchrelease_fq_escrow_sour,CatchReleaseFleetQuestSourText,$entity.catchrelease_
 ""We're back to the written offer: $entity.catchrelease_fleetQuestReward. Anything higher goes through Tri-Tachyon Legal, and I'm not pretending that improves either of our day.""
 
 ""Those are the terms.""",,
+,,,,,,
+# fleet quest: interment,,,,,,
 catchrelease_fq_interment_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == interment,,The Interment,,
 catchrelease_fq_interment_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == interment,,Holding for interment,,
 catchrelease_fq_interment_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == interment,,Burial convoy $entity.catchreleaseFleetName needs the first species named in a guild elder's will before the appointed interment. The convoy has no fishing rig and cannot make a port stop without missing the window.,,
@@ -1718,6 +1730,8 @@ catchrelease_fq_interment_thanks,CatchReleaseFleetQuestThanksText,$entity.catchr
 The convoy master checks the departure order.
 
 ""We're getting underway. Safe passage, captain.""",,
+,,,,,,
+# fleet quest: calibration pair,,,,,,
 catchrelease_fq_calibration_pair_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == calibration_pair,,The Calibration Pair,,
 catchrelease_fq_calibration_pair_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == calibration_pair,,Calibrating instruments,,
 catchrelease_fq_calibration_pair_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == calibration_pair,,"Under an Academy field contract, survey vessel $entity.catchreleaseFleetName needs a matched local specimen pair to calibrate instruments that began disagreeing after transit through worn fabric.",,
@@ -1784,6 +1798,8 @@ catchrelease_fq_calibration_pair_followupPurpose,CatchReleaseFleetQuestIntelPurp
 $entity.catchreleaseFleetQuestRound > 0 score:20",,One reference specimen on $entity.catchreleaseFleetName returned a different result on its second pass. Procedure requires a third specimen of the same species as a tiebreaker.,,
 catchrelease_fq_calibration_pair_followupTerms,CatchReleaseFleetQuestIntelTerms,"$entity.catchrelease_fleetQuestType == calibration_pair
 $entity.catchreleaseFleetQuestRound > 0 score:20",,The follow-up calibration request has the following terms.,,
+,,,,,,
+# fleet quest: mutiny pot,,,,,,
 catchrelease_fq_mutiny_pot_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == mutiny_pot,,The Mutiny Pot,,
 catchrelease_fq_mutiny_pot_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == mutiny_pot,,Holding the buyout,,
 catchrelease_fq_mutiny_pot_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == mutiny_pot,,The crew of $entity.catchreleaseFleetName has pooled shares for three years to buy out its captain. They hired you privately to supply the specimen required by the sale agreement.,,
@@ -1868,6 +1884,8 @@ catchrelease_fq_mutiny_pot_counterPurpose,CatchReleaseFleetQuestIntelPurpose,"$e
 $entity.catchrelease_potCaptain score:30",,The captain of $entity.catchreleaseFleetName knows about the crew's buyout and has made a private counteroffer for the same specimen. They intend to present it as their own catch.,,
 catchrelease_fq_mutiny_pot_counterTerms,CatchReleaseFleetQuestIntelTerms,"$entity.catchrelease_fleetQuestType == mutiny_pot
 $entity.catchrelease_potCaptain score:30",,The captain's counteroffer has the following terms.,,
+,,,,,,
+# fleet quest: tribute,,,,,,
 catchrelease_fq_tribute_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == tribute,,The Tribute,,
 catchrelease_fq_tribute_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == tribute,,Holding for tribute,,
 catchrelease_fq_tribute_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == tribute,,Independent salvage crew $entity.catchreleaseFleetName owes a pirate ring its annual protection tribute and lost the courier sent to secure it. They need the requested display specimen before the deadline.,,
@@ -1909,6 +1927,8 @@ catchrelease_fq_tribute_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrel
 The quartermaster closes the protection ledger.
 
 ""Back to salvage. $entity.catchreleaseFleetName out.""",,
+,,,,,,
+# fleet quest: reference specimen,,,,,,
 catchrelease_fq_reference_specimen_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == reference_specimen,,The Reference Specimen,,
 catchrelease_fq_reference_specimen_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == reference_specimen,,Clearing the impound,,
 catchrelease_fq_reference_specimen_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == reference_specimen,,"Independent handling contractor $entity.catchreleaseFleetCompany is clearing an impounded hauler under League contract $entity.catchreleaseFleetContract. An origin-stamp discrepancy requires the requested reference specimen before the hauler can be released, and the filing window is limited.",,
@@ -1954,6 +1974,8 @@ The freed hauler is already moving away from the impound berth.
 The handler opens the next file on the slate.
 
 ""One less. $entity.catchreleaseFleetName out.""",,
+,,,,,,
+# fleet quest: quiet ship,,,,,,
 catchrelease_fq_quiet_ship_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == quiet_ship,,The Quiet Ship,,
 catchrelease_fq_quiet_ship_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == quiet_ship,,Maintaining the relay run,,
 catchrelease_fq_quiet_ship_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == quiet_ship,,Maintenance tender $entity.catchreleaseFleetName is working $entity.catchreleaseFleetRelayRun and wants to replace the catch its crews traditionally keep aboard. The current window closes in $entity.catchreleaseFleetDays.,,
@@ -2001,6 +2023,8 @@ catchrelease_fq_quiet_ship_thanks,CatchReleaseFleetQuestThanksText,$entity.catch
 They turn back to the board.
 
 ""I've got a relay to keep alive. $entity.catchreleaseFleetName out.""",,
+,,,,,,
+# fleet quest: exhibit,,,,,,
 catchrelease_fq_exhibit_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == exhibit,,The Exhibit,,
 catchrelease_fq_exhibit_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == exhibit,,Holding for evidence delivery,,
 catchrelease_fq_exhibit_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == exhibit,,"Bonded hauler $entity.catchreleaseFleetName, operated by $entity.catchreleaseFleetCompany, is carrying Hegemony exhibit $entity.catchreleaseFleetExhibit, which no longer matches its documented measurements. The operator needs a replacement before the delivery deadline to avoid forfeiting custody bond $entity.catchreleaseFleetBond.",,
@@ -2051,6 +2075,8 @@ catchrelease_fq_exhibit_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$e
 The operator taps the bond entry.
 
 ""That makes the failure ours to answer for. If the chain doesn't pass inspection, the contractual fault is ours. So is the criminal exposure.""",,
+,,,,,,
+# fleet quest: headliner,,,,,,
 catchrelease_fq_headliner_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == headliner,,The Headliner,,
 catchrelease_fq_headliner_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == headliner,,Holding for the show date,,
 catchrelease_fq_headliner_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == headliner,,Licensed exhibition boat $entity.catchreleaseFleetName has lost the headline specimen for $entity.catchreleaseFleetShow before its booked appearance at $entity.catchreleaseFleetBookedPort. The impresario needs a replacement within $entity.catchreleaseFleetDays.,,
@@ -2101,6 +2127,8 @@ catchrelease_fq_headliner_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,
 He gestures toward the tank.
 
 ""Critics. Never waste a usable sentence.""",,
+,,,,,,
+# fleet quest: follower,,,,,,
 catchrelease_fq_follower_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == follower,,The Follower,,
 catchrelease_fq_follower_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == follower,,Holding off-lane,,
 catchrelease_fq_follower_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == follower,,Hegemony logistics formation $entity.catchreleaseFleetName is holding off-lane with an unidentified sensor contact maintaining station nearby. The commander has requested $entity.catchrelease_fleetQuestAsk and will hold position for $entity.catchreleaseFleetDays.,,
@@ -2159,6 +2187,8 @@ They turn back to the convoy plot.
 
 ""We're resuming assigned course. $entity.catchreleaseFleetName out.""",,
 catchrelease_fq_follower_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == follower,,"A Hegemony logistics formation is holding off-lane, its escort facing an empty section of the sensor plot. An auxiliary-band request is asking passing civilian ships for trade services.",,
+,,,,,,
+# fleet quest: state dinner,,,,,,
 catchrelease_fq_state_dinner_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == state_dinner,,The State Dinner,,
 catchrelease_fq_state_dinner_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == state_dinner,,Holding for the official dinner,,
 catchrelease_fq_state_dinner_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == state_dinner,,Diktat protocol vessel $entity.catchreleaseFleetName needs $entity.catchrelease_fleetQuestAsk for an official dinner scheduled this evening. Delivery is required before the current $entity.catchreleaseFleetDays window expires.,,
@@ -2207,6 +2237,8 @@ The officer closes the channel.
 
 ""$entity.catchreleaseFleetName out.""",,
 catchrelease_fq_state_dinner_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == state_dinner,,A Sindrian Diktat protocol vessel is broadcasting an urgent procurement request under official seal. The request concerns an official function scheduled for this evening.,,
+,,,,,,
+# fleet quest: claim assay,,,,,,
 catchrelease_fq_claim_assay_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == claim_assay,,The Claim Assay,,
 catchrelease_fq_claim_assay_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == claim_assay,,Holding for claim renewal,,
 catchrelease_fq_claim_assay_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == claim_assay,,Tri-Tachyon prospecting fleet $entity.catchreleaseFleetName needs a live local specimen to preserve its survey rights under claim file $entity.catchreleaseFleetCharter. The specimen must be caught in $entity.catchreleaseFleetSystem after you accepted the subcontract and delivered within $entity.catchreleaseFleetDays.,,
@@ -2262,6 +2294,8 @@ The officer opens the traffic record.
 
 ""They can afford to wait.""",,
 catchrelease_fq_claim_assay_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == claim_assay,,A Tri-Tachyon survey formation is holding position in $entity.catchreleaseFleetSystem while an unaffiliated survey ship waits at the jump point. A priority commercial request is being broadcast on open channels.,,
+,,,,,,
+# fleet quest: mandate,,,,,,
 catchrelease_fq_mandate_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == mandate,,The Mandate,,
 catchrelease_fq_mandate_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == mandate,,Closing the expedition mandate,,
 catchrelease_fq_mandate_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == mandate,,Science expedition $entity.catchreleaseFleetName needs $entity.catchrelease_fleetQuestAsk to close the final deliverable under mandate $entity.catchreleaseFleetMandate. The convoy must depart within $entity.catchreleaseFleetDays when its escort fuel window closes.,,
@@ -2310,6 +2344,8 @@ The escort begins forming the return order.
 
 ""$entity.catchreleaseFleetName out.""",,
 catchrelease_fq_mandate_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == mandate,,A Persean League member-state science convoy is inbound from the deep fringe and holding at the edge of the system. $entity.catchreleaseFleetName is broadcasting an urgent research request.,,
+,,,,,,
+# fleet quest: parley fish,,,,,,
 catchrelease_fq_parley_fish_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == parley_fish,,The Parley Fish,,
 catchrelease_fq_parley_fish_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == parley_fish,,Holding for the parley,,
 catchrelease_fq_parley_fish_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == parley_fish,,Pirate fleet $entity.catchreleaseFleetName needs $entity.catchrelease_fleetQuestAsk from $entity.catchreleaseFleetRupture for an upcoming parley over protection rights. The specimen must be caught from that exact rupture after you accepted the job and delivered within $entity.catchreleaseFleetDays; an earlier catch does not qualify.,,
@@ -2373,6 +2409,8 @@ The captain gives you a thin grin.
 
 ""Still need the fish.""",,
 catchrelease_fq_parley_fish_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == parley_fish,,A pirate combat formation is holding near an in-system rupture. An open trade-band broadcast is requesting a fishing crew.,,
+,,,,,,
+# fleet quest: stranded fleet,,,,,,
 catchrelease_fq_stranded_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == stranded,,Stranded Fleet,,
 catchrelease_fq_stranded_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == stranded,,Stabilizing ship systems,,
 catchrelease_fq_stranded_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == stranded,,"A stranded ship has both drive and ration-printer failures and can only address one at a time. Its engineer needs $entity.catchrelease_fleetQuestAsk, sourced from this system or an adjacent one, to restore the printer within $entity.catchreleaseFleetDays.",,
@@ -2430,6 +2468,8 @@ The engineer checks the figures again.
 
 ""Cook it directly and we get one good meal and a worse morning. I checked both.""",,
 catchrelease_fq_stranded_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == stranded,,A stranded ship is broadcasting a standard distress call. Its drive plume cuts in and out as the vessel tries to hold position.,,
+,,,,,,
+# fleet quest: seeker,,,,,,
 catchrelease_fq_seeker_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == seeker,,Fleet on a Hunt,,
 catchrelease_fq_seeker_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == seeker,,Searching,,
 catchrelease_fq_seeker_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == seeker,,A local captain has spent eleven weeks searching for $entity.catchrelease_fleetQuestAsk and is offering his entire haul in exchange. He needs the specimen within $entity.catchreleaseFleetDays.,,
@@ -2481,6 +2521,8 @@ catchrelease_fq_seeker_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrele
 He looks at the container again.
 
 ""That's all I needed.""",,
+,,,,,,
+# fleet quest: quota,,,,,,
 catchrelease_fq_quota_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == quota,,Short of Quota,,
 catchrelease_fq_quota_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == quota,,Filling quota,,
 catchrelease_fq_quota_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == quota,,"Fishing fleet $entity.catchreleaseFleetName is short $entity.catchrelease_fleetQuestAsk on station provisioning contract $entity.catchreleaseFleetContract. The quota must be filled within $entity.catchreleaseFleetDays, before the $entity.catchreleaseFleetFilingDate filing.",,
@@ -2528,6 +2570,8 @@ catchrelease_fq_quota_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelea
 The purser closes the contract ledger.
 
 ""Good fish. I'd work alongside you again.""",,
+,,,,,,
+# fleet quest: starving,,,,,,
 catchrelease_fq_starving_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == starving,,Hungry Fleet,,
 catchrelease_fq_starving_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == starving,,Rationing,,
 catchrelease_fq_starving_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == starving,,"The crew of $entity.catchreleaseFleetName has spent $entity.catchreleaseFleetRationDays days on printed protein, and galley morale is failing. Their cook needs $entity.catchrelease_fleetQuestAsk within $entity.catchreleaseFleetDays to put fresh food back on the menu.",,
@@ -2587,6 +2631,8 @@ The chief reads from the crew's proposed menu.
 They fold the petition.
 
 ""That's your thank-you.""",,
+,,,,,,
+# fleet quest: scavenger with a dead engine,,,,,,
 catchrelease_fq_scavenger_engine_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == scavenger_engine,,Scavenger with a Dead Engine,,
 catchrelease_fq_scavenger_engine_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == scavenger_engine,,Repacking the drive coil,,
 catchrelease_fq_scavenger_engine_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == scavenger_engine,,The scavenger $entity.catchreleaseFleetName needs $entity.catchrelease_fleetQuestAsk to produce substitute packing gel for a failing drive coil. Catch from the current system or an adjacent one will qualify if delivered within $entity.catchreleaseFleetDays.,,
@@ -2637,6 +2683,8 @@ The technician glances at the open copy of $entity.catchreleaseFleetManualSectio
 
 ""Manual was right.""",,
 catchrelease_fq_scavenger_engine_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == scavenger_engine,,A scavenger vessel is holding position with its drive cold. A standard assistance request is running on the local trade band.,,
+,,,,,,
+# fleet quest: collector,,,,,,
 catchrelease_fq_collector_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == collector,,Collector's Commission,,
 catchrelease_fq_collector_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == collector,,Waiting,,
 catchrelease_fq_collector_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == collector,,A private collector aboard $entity.catchreleaseFleetName needs $entity.catchrelease_fleetQuestAsk after repeated brokered purchases were reassigned before transfer. They are commissioning a direct catch to bypass the market and require delivery within $entity.catchreleaseFleetDays.,,
@@ -2689,6 +2737,8 @@ catchrelease_fq_collector_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,
 ""Eighteen point five Celsius. Ten-hour display cycle.""
 
 They turn the pickup back.",,
+,,,,,,
+# fleet quest: wager,,,,,,
 catchrelease_fq_wager_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == wager,,Settling a Bet,,
 catchrelease_fq_wager_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == wager,,Arguing,,
 catchrelease_fq_wager_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == wager,,The crew of $entity.catchreleaseFleetName recorded conflicting watch logs for the same fishing ground and has asked for $entity.catchrelease_fleetQuestAsk to settle the wager. The captain needs the pair within $entity.catchreleaseFleetDays.,,
@@ -2745,6 +2795,8 @@ catchrelease_fq_wager_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$ent
 The captain taps the empty result line between the two watch logs.
 
 ""You're the instrument, and instruments do not bet.""",,
+,,,,,,
+# harpoon repair demands,,,,,,
 catchrelease_damagesStop,BeginFleetEncounter,"$catchrelease_harpoonDemand score:1100
 !$catchrelease_harpoonDemandDone
 !$isHostile","$catchrelease_harpoonDemandDone = true 1
@@ -2804,6 +2856,7 @@ $entity.catchrelease_harpoonFleeing","ShowDefaultVisual
 AddText ""The link opens on an empty chair, a channel already recording, and somebody off-screen reading your transponder code to somebody else. It closes before you have said anything.""
 CatchReleaseCMD leaveEncounter",,,
 ,,,,,,
+# tutorial wreck,,,,,,
 catchrelease_wreckOpen,OpenInteractionDialog,$catchrelease_tutorialWreck score:1000,"ShowDefaultVisual
 SetShortcut catchrelease_wreckLeave ""ESCAPE""","Your sensors officer picks a cold hull out of the debris field: an old auxiliary stripped farther than a salvage crew would ordinarily bother.
 
@@ -2844,6 +2897,7 @@ FireBest ShowSalvageEntityDetails
 FireBest SalvageCheckHostile",,,
 catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,DismissDialog,,,
 ,,,,,,
+# tutorial castaway,,,,,,
 catchrelease_castawayOpen,OpenInteractionDialog,"$market.isPlanetConditionMarketOnly
 !$catchrelease_castawaySeen
 CatchReleaseCMD castawayEligible score:1000","CatchReleaseCMD startCastaway
@@ -2897,6 +2951,7 @@ Your personnel officer finds a spare berth.","0:catchrelease_castawayToPlanet:Se
 catchrelease_castawayToPlanet,DialogOptionSelected,$option == catchrelease_castawayToPlanet,FireBest OpenInteractionDialog,,,
 catchrelease_castawayLeave,DialogOptionSelected,$option == catchrelease_castawayLeave,DismissDialog,,,
 ,,,,,,
+# fisherman encounter and services,,,,,,
 catchrelease_fisherEncounter,BeginFleetEncounter,"$catchrelease_fisherman score:1000
 !$isHostile","unset $ignorePlayerCommRequests
 OpenComms",,,
@@ -3225,6 +3280,8 @@ CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","""$catchrelease
 He checks the old mark.
 
 ""Take your time getting there. Don't take your time once you're on the rupture.""",100:catchrelease_fisherBack:Continue,
+,,,,,,
+# tutorial rating bar event,,,,,,
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
@@ -3272,6 +3329,8 @@ The rating gives you the relevant nav reference.
 
 ""If there's a boat in-system, your sensors will find it. If there isn't, go far enough out and there generally is.""",,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
+,,,,,,
+# crablobab,,,,,,
 catchrelease_crabBarAdd,AddBarEvents,CatchReleaseCMD crabBarAvailable,"AddBarEvent catchrelease_crabBar ""Ask the man with the crabs how business is going"" ""A cheerful man in a heavy coat is attempting to sell live crabs to people who came here to drink. The coat has a remarkable number of pockets. The crabs appear to be doing most of the negotiating.""",,,
 catchrelease_crabBar,DialogOptionSelected,"$option == catchrelease_crabBar
 !$global.catchrelease_metCrablobab","SaveCurrentVisual
@@ -3715,10 +3774,14 @@ Crablobab catches your hand in both of his and shakes it vigorously.
 You do not remember offering it.
 
 ""Come back if you need anything unreasonable.""",,
+,,,,,,
+# harpooned fleet greetings,,,,,,
 catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 0,,,,
 catchrelease_harpoonedGreet1,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 1,,,,
 catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 2,,,,
 catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 3,,,,
+,,,,,,
+# fisherman questions,,,,,,
 catchrelease_fisherOptAsk,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 CatchReleaseCMD tokens
 $catchreleaseStage >= 2",,,60:catchrelease_fisherAsk:Ask about something else,
@@ -3943,6 +4006,8 @@ CatchReleaseCMD tokens
 He taps the range entry.
 
 ""Chart's done the useful part. Put it in the planner and save yourself the fuel.""",100:catchrelease_fisherBack:Continue,
+,,,,,,
+# tutorial dialogue,,,,,,
 catchrelease_introHarpoon,DialogOptionSelected,"$option == catchrelease_fisherIntro score:100
 CatchReleaseCMD tokens
 $catchreleaseCarrying",CatchReleaseCMD dropFisherProperty,"The Fisherman studies the service code for perhaps a second.
@@ -4318,6 +4383,7 @@ catchrelease_introSurveyAsk_opt,CatchReleaseRangeDataBrief,!$global.catchrelease
 catchrelease_introPlannerAsk_opt,CatchReleaseRangeDataBrief,!$global.catchrelease_rangedata_what,,,0:catchrelease_introSurveyWhat:How do I use this?,
 catchrelease_introSurveyDone_opt,CatchReleaseRangeDataBrief,,,,10:catchrelease_introPlannerAsk:You want both of these?,
 ,,,,,,
+# tutorial habitat data stage,,,,,,
 catchrelease_introSurveyWhat,DialogOptionSelected,$option == catchrelease_introSurveyWhat,"$global.catchrelease_rangedata_what = true
 AddTextSmall ""The map has a filter option to show fishing information. Use the sidebar to filter for fish habitat. Use the route planner at the top to plot a quick route."" highlight
 FireAll CatchReleaseRangeDataBrief","""You use your map. Filter for fish the same way you'd check fuel range.""",,
@@ -4480,6 +4546,8 @@ His tone has not changed.
 He looks back to the local plot.
 
 ""Your fish is still here. Get it while the rupture's holding.""",catchrelease_fisherBack:Continue,
+,,,,,,
+# breach light enforcement,,,,,,
 catchrelease_lampStop,BeginFleetEncounter,"$catchrelease_sawLamps score:1050
 !$catchrelease_lampStopped
 !$isHostile","$catchrelease_lampStopped = true 30
@@ -4961,14 +5029,17 @@ ShowDefaultVisual
 CatchReleaseCMD leaveEncounter","You cut the link. The lamps keep burning.
 
 Weapons come up across the formation.",,
+,,,,,,
+# camped rupture job: pirates,,,,,,
+catchrelease_campPirate_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPirate score:100,,"The fisher answers with an account sheet still open. The protection payment has its own column now.
+
+""Captain.""
+
+$HeOrShe pushes the figures aside and brings up the job marker.
+
+""Tell me you've got something worth changing next month's numbers for.""",,
 catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,A fisher is moving repair charges between columns on an account sheet. One recurring payment is larger than the rest combined.,,
 catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask the fisher about the account sheet,
-catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has two survey charts open beside a rejected claim form. The disputed boundary occupies a different place on each chart.,,
-catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask the fisher with the survey charts about the claim,
-catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,A fisher sits with the door in view. A scorched drone-rack isolator rests on the table beside an untouched drink.,,
-catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A licensed fisher sits facing the door with a damaged power coupler beside the licence slate. Each time the door opens, the inspection of the coupler stops.",,
-catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A fisher is turning a burnt drone-rack relay over in both hands. The seat chosen gives a clear view of the door.,,
-catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask the fisher about the damaged equipment,
 catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pirates found our rupture. Now they collect protection on it.""
@@ -4982,34 +5053,6 @@ The slate marks $catchreleaseCampMany in the $catchreleaseCampWhere system.
 ""Get them off the rupture. Pay them, scare them, fight them, I don't care. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. Old cargo proves nothing.""
 
 ""$catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture and you get $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
-catchrelease_jobDecline:Decline.",
-catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails
-Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""A company survey moved the boundary.""
-
-The fisher overlays the charts.
-
-""Their security contractor says the rupture falls inside the lease. My filed chart says it doesn't. The clerk won't decide while hired ships are sitting on the point.""
-
-The disputed plot in the $catchreleaseCampWhere system shows $catchreleaseCampMany holding position.
-
-""Get them to leave. If they'll amend the contract and go quietly, better. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. Old cargo doesn't prove I can work the claim now.""
-
-""$catchreleaseDaysCap. $catchreleaseAsk as proof. $catchreleaseRewardCap when you bring it back.""","catchrelease_jobAccept:Agree to move them off.
-catchrelease_jobDecline:Decline.",
-catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails
-Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pathers. First they came to preach. Then they cut power to the drone rack.""
-
-The fisher puts the damaged component down.
-
-""Yesterday one stood on the launch gantry shouting that we were feeding Moloch through a wound in creation. Said if we worked the rupture again, the next sermon came with rifles.""
-
-The transponder record shows $catchreleaseCampMany in the $catchreleaseCampWhere system.
-
-""Get them away from the rupture. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. I need to know the spot can be worked again before I send crews out.""
-
-""$catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture. Payment is $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:Decline.",
 catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"The camp coordinates and pirate transponder codes are transferred.
 
@@ -5032,6 +5075,31 @@ catchrelease_campPirate_paid,catchreleaseJobPaid,"$missionId == catchrelease_cam
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe checks the retrieval record, then deletes the protection payment from next month's accounts.
 
 ""Good. Boats go back out next shift.""",,
+,,,,,,
+# camped rupture job: mercenaries,,,,,,
+catchrelease_campMerc_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campMerc score:100,,"The fisher accepts the call with both survey charts open and the claim file between them.
+
+""Captain.""
+
+$HeOrShe closes a fresh message from the claims office without reading it twice.
+
+""Any movement on your end?""",,
+catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has two survey charts open beside a rejected claim form. The disputed boundary occupies a different place on each chart.,,
+catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask the fisher with the survey charts about the claim,
+catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""A company survey moved the boundary.""
+
+The fisher overlays the charts.
+
+""Their security contractor says the rupture falls inside the lease. My filed chart says it doesn't. The clerk won't decide while hired ships are sitting on the point.""
+
+The disputed plot in the $catchreleaseCampWhere system shows $catchreleaseCampMany holding position.
+
+""Get them to leave. If they'll amend the contract and go quietly, better. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. Old cargo doesn't prove I can work the claim now.""
+
+""$catchreleaseDaysCap. $catchreleaseAsk as proof. $catchreleaseRewardCap when you bring it back.""","catchrelease_jobAccept:Agree to move them off.
+catchrelease_jobDecline:Decline.",
 catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""Try the contract line first. They're professionals.""
 
 $HeOrShe sends the fleet code and both boundary charts.
@@ -5055,6 +5123,33 @@ catchrelease_campMerc_paid,catchreleaseJobPaid,"$missionId == catchrelease_campM
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe attaches the retrieval record to the claim. The disputed boundary disappears from $hisOrHer working chart.
 
 ""That's evidence I can use.""",,
+,,,,,,
+# camped rupture job: pathers,,,,,,
+catchrelease_campPath_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPath score:100,,"The fisher answers after a short delay. The repaired rack component is on the table beside the comm unit; the door remains in view behind it.
+
+""Captain.""
+
+The fisher checks the doorway once, then brings up the camp marker.
+
+""What have you got?""",,
+catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,A fisher sits with the door in view. A scorched drone-rack isolator rests on the table beside an untouched drink.,,
+catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A licensed fisher sits facing the door with a damaged power coupler beside the licence slate. Each time the door opens, the inspection of the coupler stops.",,
+catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A fisher is turning a burnt drone-rack relay over in both hands. The seat chosen gives a clear view of the door.,,
+catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask the fisher about the damaged equipment,
+catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pathers. First they came to preach. Then they cut power to the drone rack.""
+
+The fisher puts the damaged component down.
+
+""Yesterday one stood on the launch gantry shouting that we were feeding Moloch through a wound in creation. Said if we worked the rupture again, the next sermon came with rifles.""
+
+The transponder record shows $catchreleaseCampMany in the $catchreleaseCampWhere system.
+
+""Get them away from the rupture. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. I need to know the spot can be worked again before I send crews out.""
+
+""$catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture. Payment is $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
+catchrelease_jobDecline:Decline.",
 catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"The fisher checks the door before sending the camp coordinates and transponder record.
 
 ""How you move them is your business. Just get them away from the boats.""",,
@@ -5078,6 +5173,8 @@ catchrelease_campPath_paid,catchreleaseJobPaid,"$missionId == catchrelease_campP
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The fisher checks the retrieval record and sends a launch order to the waiting boats.
 
 Someone at the yard is already signing off the repaired rack.",,
+,,,,,,
+# camped rupture encounters,,,,,,
 catchrelease_campEncounter,BeginFleetEncounter,"$catchrelease_campFleet score:1000
 !$catchrelease_campCleared","FleetDesc
 HailPlayer",,,
@@ -5179,6 +5276,8 @@ Eventually:
 The formation comes about.",,
 catchrelease_campCloseDialogue,DialogOptionSelected,$option == catchrelease_campCloseDialogue,"MakeOtherFleetGoAway true
 CatchReleaseCMD leaveEncounter",,,
+,,,,,,
+# distress call framework,,,,,,
 distress_framework_hail,BeginFleetEncounter,"!$isHostile
 $distressFramework score:1300
 !$distressNoHail","AddText ""You're being hailed."" $faction.baseColor
