@@ -120,6 +120,7 @@ public class FleetQuest extends FishJob {
     protected boolean takenUp = false;
     protected boolean distressOffer = false;
     protected String fleetName;
+    protected String flagshipName;
     protected String registry;
     protected String expedition;
     protected String entryDate;
@@ -458,6 +459,7 @@ public class FleetQuest extends FishJob {
 
     protected void prepareCaseDetails() {
         fleetName = giver.getName();
+        getFlagshipName();
         if (type == FleetQuestType.ESCROW) {
             contract = String.format(Locale.ROOT, "TT-RC-%04d-%03d",
                     Global.getSector().getClock().getCycle(), random().nextInt(1000));
@@ -661,6 +663,7 @@ public class FleetQuest extends FishJob {
         memory.set(DAYS_TEXT_KEY, describeDays());
 
         setOrUnset(memory, "$catchreleaseFleetName", fleetName);
+        setOrUnset(memory, "$catchreleaseFleetFlagshipName", getFlagshipName());
         setOrUnset(memory, "$catchreleaseFleetRegistry", registry);
         setOrUnset(memory, "$catchreleaseFleetExpedition", expedition);
         setOrUnset(memory, "$catchreleaseFleetEntryDate", entryDate);
@@ -723,6 +726,16 @@ public class FleetQuest extends FishJob {
     protected void setOrUnset(MemoryAPI memory, String key, String value) {
         if (value == null || value.isEmpty()) memory.unset(key);
         else memory.set(key, value);
+    }
+
+    protected String getFlagshipName() {
+        if (flagshipName != null && !flagshipName.isEmpty()) return flagshipName;
+
+        FleetMemberAPI flagship = giver == null ? null : giver.getFlagship();
+        flagshipName = flagship == null ? null : flagship.getShipName();
+        if (flagshipName == null || flagshipName.isEmpty()) flagshipName = fleetName;
+
+        return flagshipName;
     }
 
     public String getDistressIntel() {
@@ -1167,7 +1180,8 @@ public class FleetQuest extends FishJob {
         memory.unset(POT_CAPTAIN_FLAG);
 
         String[] details = {
-                "$catchreleaseFleetName", "$catchreleaseFleetRegistry",
+                "$catchreleaseFleetName", "$catchreleaseFleetFlagshipName",
+                "$catchreleaseFleetRegistry",
                 "$catchreleaseFleetExpedition", "$catchreleaseFleetEntryDate",
                 "$catchreleaseFleetCoordinates", "$catchreleaseFleetSignature",
                 "$catchreleaseFleetContract", "$catchreleaseFleetCompany",
