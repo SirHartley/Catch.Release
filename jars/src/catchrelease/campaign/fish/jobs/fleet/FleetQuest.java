@@ -60,6 +60,7 @@ public class FleetQuest extends FishJob {
     public static final String IMPORTANT_REASON = "catchreleaseFleetQuest";
     public static final String DELIVER_FLAG = "$catchrelease_fleetQuestDeliver";
     public static final String THANKS_KEY = "$catchrelease_fleetQuestThanks";
+    public static final String THANKS_PENDING_FLAG = "$catchrelease_fleetQuestThanksPending";
     public static final String DETAILED_THANKS_FLAG = "$catchrelease_fleetQuestDetailedThanks";
     public static final String HAIL_KEY = "$catchrelease_fleetQuestHail";
     public static final String ACCEPT_OPTION_KEY = "$catchrelease_fleetQuestAcceptOption";
@@ -308,11 +309,25 @@ public class FleetQuest extends FishJob {
     }
 
     public void decline() {
-        String followup = getRuleText(DECLINED_TRIGGER);
-        if (followup != null && !followup.isEmpty()) {
-            giver.getMemoryWithoutUpdate().set(THANKS_KEY, followup);
-        }
+        queueThanks(getRuleText(DECLINED_TRIGGER), false);
         release();
+    }
+
+    protected void queueThanks(String text, boolean detailed) {
+        if (giver == null) return;
+
+        MemoryAPI memory = giver.getMemoryWithoutUpdate();
+        if (text == null || text.isEmpty()) {
+            memory.unset(THANKS_KEY);
+            memory.unset(THANKS_PENDING_FLAG);
+            memory.unset(DETAILED_THANKS_FLAG);
+            return;
+        }
+
+        memory.set(THANKS_KEY, text);
+        memory.set(THANKS_PENDING_FLAG, true);
+        if (detailed) memory.set(DETAILED_THANKS_FLAG, true);
+        else memory.unset(DETAILED_THANKS_FLAG);
     }
 
     public void ensureMarked() {
@@ -1374,14 +1389,7 @@ public class FleetQuest extends FishJob {
         }
 
         writeDialogueMemory();
-        String thanks = getRuleText(THANKS_TRIGGER);
-        if (thanks != null && !thanks.isEmpty()) {
-            giver.getMemoryWithoutUpdate().set(THANKS_KEY, thanks);
-            giver.getMemoryWithoutUpdate().set(DETAILED_THANKS_FLAG, true);
-        } else {
-            giver.getMemoryWithoutUpdate().unset(THANKS_KEY);
-            giver.getMemoryWithoutUpdate().unset(DETAILED_THANKS_FLAG);
-        }
+        queueThanks(getRuleText(THANKS_TRIGGER), true);
         release();
     }
 
@@ -1390,7 +1398,7 @@ public class FleetQuest extends FishJob {
         super.notifyEnded();
 
         release();
-        if (giver != null && !giver.getMemoryWithoutUpdate().getBoolean(THANKS_KEY)) {
+        if (giver != null && !giver.getMemoryWithoutUpdate().getBoolean(THANKS_PENDING_FLAG)) {
             giver.getMemoryWithoutUpdate().unset(REF_KEY);
         }
     }
