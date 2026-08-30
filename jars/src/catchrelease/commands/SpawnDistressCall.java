@@ -4,9 +4,15 @@ import catchrelease.distress.DistressCallFramework;
 import catchrelease.distress.vanilla.VanillaDistressCallSpawner;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.JumpPointAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.util.DelayedActionScript;
+import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.console.BaseCommandWithSuggestion;
 import org.lazywizard.console.Console;
+import org.lazywizard.lazylib.MathUtils;
+import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +45,22 @@ public class SpawnDistressCall implements BaseCommandWithSuggestion {
             system = DistressCallFramework.spawnForTesting(eventId);
         }
 
+        if (system != null){
+
+            SectorEntityToken jp = Misc.getDistressJumpPoint(system);
+            Vector2f pointAroundJP = MathUtils.getPointOnCircumference(jp.getLocation(), 100f, MathUtils.getRandomNumberInRange(1, 359));
+            SectorEntityToken token = Global.getSector().getHyperspace().createToken(pointAroundJP);
+            final JumpPointAPI.JumpDestination dest = new JumpPointAPI.JumpDestination(token, null);
+
+            Global.getSector().addScript(new DelayedActionScript(0.1f) {
+                @Override
+                public void doAction() {
+                    CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+                    Global.getSector().doHyperspaceTransition(fleet, fleet, dest);
+                }
+            });
+        }
+
         if (system == null) {
             Console.showMessage("No naturally eligible, unreserved nearby system is available, "
                     + "or another distress call is already active.");
@@ -46,6 +68,7 @@ public class SpawnDistressCall implements BaseCommandWithSuggestion {
         }
 
         Console.showMessage("Spawned " + eventId + " in " + system.getNameWithLowercaseType() + ".");
+
         return CommandResult.SUCCESS;
     }
 

@@ -14,6 +14,16 @@ scrapped
 ---------------------
 qa_
 
+
+
+Manual
+escrow - "turn an open liability..." remove
+tribute - "what happens if it's late" needs a better answer
+quiet_ship - "long run" -> long excursion?
+headliner - language is barely decipherable, what's that even supposed to mean. Needs rewrite.
+collector - remove the "not in distrsss..." line
+wager - needs a rewrite to be more concise, is unfocused, no clue what's going on
+
 General
 - Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
 

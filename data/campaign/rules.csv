@@ -3393,7 +3393,7 @@ CatchReleaseCMD tokens
 CatchReleaseCMD crabExplosivePending","SaveCurrentVisual
 CatchReleaseCMD showCrabPortrait
 CatchReleaseCMD crabAcknowledgeExplosive
-CatchReleaseCMD highlightFishText $catchreleaseCrabExplosiveTarget","""Back!""
+CatchReleaseCMD highlightFishText $catchreleaseCrabExplosiveTarget","""You're back!""
 
 Crablobab points at you.
 
@@ -3411,7 +3411,7 @@ catchrelease_crabBarRepeat,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
 CatchReleaseCMD tokens
 CatchReleaseCMD crabExplosiveSettled","SaveCurrentVisual
-CatchReleaseCMD showCrabPortrait","""Back!""
+CatchReleaseCMD showCrabPortrait","""You're back!""
 
 Crablobab says it with obvious satisfaction.
 
