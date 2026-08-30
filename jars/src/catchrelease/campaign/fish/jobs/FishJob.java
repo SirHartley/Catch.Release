@@ -365,6 +365,12 @@ public abstract class FishJob extends HubMissionWithBarEvent
             return true;
         }
 
+        if ("showRewardReceipts".equals(action)) {
+            showRewardReceipts(dialog);
+
+            return true;
+        }
+
         if ("showRemoteMap".equals(action)) {
             SectorEntityToken location = getMapLocation(null);
             String systemId = location == null || location.getStarSystem() == null

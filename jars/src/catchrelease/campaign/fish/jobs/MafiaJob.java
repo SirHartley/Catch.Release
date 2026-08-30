@@ -256,9 +256,6 @@ public class MafiaJob extends FishJob {
     protected void afterPickerPaid(InteractionDialogAPI dialog,
                                    Map<String, MemoryAPI> memoryMap) {
         FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
-        FireBest.fire(null, dialog, memoryMap, "CatchReleaseRingSettlement");
-        showRewardReceipts(dialog);
-        FireAll.fire(null, dialog, memoryMap, OPTIONS_TRIGGER);
     }
 
     protected void clearFighters() {
