@@ -34,6 +34,7 @@ public enum QuestDuration {
     /** Maximum one-way distance for a valid offer. */
     public static final float MAX_SENSIBLE_LY = 30f;
     public static final float RARE_CATCH_BONUS_DAYS = 30f;
+    public static final float FRESH_CATCH_BONUS_DAYS = 30f;
 
     public final float days;
 
@@ -72,7 +73,10 @@ public enum QuestDuration {
         float base = forTravelLY(oneWayLY, workingDays).days;
         if (base <= 0f) return base;
 
-        return base + (requiresRareOrEpicCatch(asks) ? RARE_CATCH_BONUS_DAYS : 0f);
+        float bonus = requiresRareOrEpicCatch(asks) ? RARE_CATCH_BONUS_DAYS : 0f;
+        if (requiresFreshCatch(asks)) bonus += FRESH_CATCH_BONUS_DAYS;
+
+        return base + bonus;
     }
 
     public static float daysForTravelLY(float oneWayLY, FishRequirement ask) {
@@ -109,6 +113,31 @@ public enum QuestDuration {
         }
 
         return rarity == FishRarity.RARE || rarity == FishRarity.EPIC;
+    }
+
+    protected static boolean requiresFreshCatch(List<FishRequirement> asks) {
+        if (asks == null) return false;
+
+        for (FishRequirement ask : asks) {
+            if (requiresFreshCatch(ask)) return true;
+        }
+
+        return false;
+    }
+
+    protected static boolean requiresFreshCatch(FishRequirement ask) {
+        if (ask == null) return false;
+        if (ask.freshCatch || ask.minCaughtAt > 0L) return true;
+        if (ask.anyOf.isEmpty()) return false;
+
+        boolean found = false;
+        for (FishRequirement alternative : ask.anyOf) {
+            if (alternative == null) continue;
+            found = true;
+            if (!requiresFreshCatch(alternative)) return false;
+        }
+
+        return found;
     }
 
     protected static float getPlayerDaysPerLY() {

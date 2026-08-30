@@ -42,6 +42,7 @@ public class FishRequirement {
     public FishLogEntry.Method method = null;
     public CatchImplement implement = null;
     public String sourceId = null;
+    public boolean freshCatch = false;
     public long minCaughtAt = 0L;
     public String caughtSystemId = null;
     public String questTargetId = null;

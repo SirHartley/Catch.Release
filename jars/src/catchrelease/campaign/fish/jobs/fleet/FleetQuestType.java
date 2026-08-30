@@ -311,6 +311,7 @@ public enum FleetQuestType {
             case CLAIM_ASSAY:
                 if (home == null) return null;
                 ask.caughtSystemId = home.getId();
+                ask.freshCatch = true;
                 if (target >= 30f) ask.minRarity = FishRarity.UNCOMMON;
                 if (!canBeSatisfiedIn(ask, home)) return null;
                 break;
@@ -322,6 +323,7 @@ public enum FleetQuestType {
 
             case PARLEY_FISH:
                 if (home == null) return null;
+                ask.freshCatch = true;
                 if (target >= 26f) ask.minGrade = FishGrade.AVERAGE;
                 break;
 

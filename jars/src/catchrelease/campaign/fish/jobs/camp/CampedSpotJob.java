@@ -136,6 +136,7 @@ public abstract class CampedSpotJob extends FishJob {
             FishRequirement current = asks.get(0);
             if (current != null && current.speciesId == null && current.tag == null
                     && pond.getId().equals(current.sourceId)
+                    && current.freshCatch
                     && current.minCaughtAt == acceptedAt) {
                 return;
             }
@@ -144,6 +145,7 @@ public abstract class CampedSpotJob extends FishJob {
         FishRequirement receipt = new FishRequirement();
         receipt.count = 1;
         receipt.sourceId = pond.getId();
+        receipt.freshCatch = true;
         receipt.minCaughtAt = acceptedAt;
 
         asks.clear();
