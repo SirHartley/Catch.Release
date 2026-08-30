@@ -48,7 +48,6 @@ import com.fs.starfarer.api.util.Misc.Token;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -586,35 +585,63 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             if (!duplicate) rarity.add(entry);
         }
 
-        Map<String, Color> highlights = new LinkedHashMap<>();
+        List<String> highlights = new ArrayList<>();
+        List<Color> colors = new ArrayList<>();
         for (String value : values) {
-            Map<String, Color> inValue = new LinkedHashMap<>();
+            boolean containsRarity = false;
             for (FishRequirement.RarityHighlight entry : rarity) {
-                if (value.contains(entry.text)) inValue.put(entry.text, entry.rarity.color);
+                if (value.contains(entry.text)) {
+                    containsRarity = true;
+                    break;
+                }
             }
 
-            if (inValue.isEmpty()) {
-                highlights.putIfAbsent(value, Misc.getHighlightColor());
+            if (!containsRarity) {
+                highlights.add(value);
+                colors.add(Misc.getHighlightColor());
                 continue;
             }
 
-            Matcher credits = CREDIT_REWARD.matcher(value);
-            while (credits.find()) {
-                inValue.putIfAbsent(credits.group(), Misc.getHighlightColor());
-            }
-
-            List<String> ordered = new ArrayList<>(inValue.keySet());
-            ordered.sort((left, right) -> Integer.compare(
-                    value.indexOf(left), value.indexOf(right)));
-            for (String text : ordered) {
-                highlights.putIfAbsent(text, inValue.get(text));
-            }
+            addHighlightOccurrences(value, rarity, highlights, colors);
         }
         if (highlights.isEmpty()) return true;
 
-        panel.highlightInLastPara(highlights.keySet().toArray(new String[0]));
-        panel.setHighlightColorsInLastPara(highlights.values().toArray(new Color[0]));
+        panel.highlightInLastPara(highlights.toArray(new String[0]));
+        panel.setHighlightColorsInLastPara(colors.toArray(new Color[0]));
         return true;
+    }
+
+    protected void addHighlightOccurrences(String value,
+                                           List<FishRequirement.RarityHighlight> rarity,
+                                           List<String> highlights, List<Color> colors) {
+        int from = 0;
+        while (from < value.length()) {
+            FishRequirement.RarityHighlight nextRarity = null;
+            int nextRarityAt = -1;
+            for (FishRequirement.RarityHighlight entry : rarity) {
+                int at = value.indexOf(entry.text, from);
+                if (at >= 0 && (nextRarityAt < 0 || at < nextRarityAt
+                        || at == nextRarityAt
+                        && entry.text.length() > nextRarity.text.length())) {
+                    nextRarity = entry;
+                    nextRarityAt = at;
+                }
+            }
+
+            Matcher credits = CREDIT_REWARD.matcher(value);
+            int nextCreditAt = credits.find(from) ? credits.start() : -1;
+            if (nextRarityAt < 0 && nextCreditAt < 0) break;
+
+            if (nextCreditAt >= 0 && (nextRarityAt < 0 || nextCreditAt < nextRarityAt)) {
+                highlights.add(credits.group());
+                colors.add(Misc.getHighlightColor());
+                from = credits.end();
+            } else {
+                highlights.add(nextRarity.text);
+                colors.add(nextRarity.rarity.color);
+                from = nextRarityAt + nextRarity.text.length();
+            }
+        }
     }
 
     protected com.fs.starfarer.api.campaign.TextPanelAPI text(InteractionDialogAPI dialog) {
