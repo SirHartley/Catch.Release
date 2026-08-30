@@ -25,6 +25,7 @@ import java.util.Set;
 public class FishRequirement {
 
     public static final float LOW_COHERENCE = 0.55f;
+    public static final String FRESH_CATCH_DESCRIPTION = "caught after this job was accepted";
 
     public int count = 1;
     public boolean sameSpecies = false;
@@ -67,6 +68,7 @@ public class FishRequirement {
 
     public boolean matches(FishCatch entry) {
         if (entry == null) return false;
+        if (minCaughtAt > 0L && entry.caughtAt < minCaughtAt) return false;
 
         if (!anyOf.isEmpty()) {
             for (FishRequirement alternative : anyOf) {
@@ -93,7 +95,6 @@ public class FishRequirement {
         if (method != null && entry.method != method) return false;
         if (implement != null && entry.implement != implement) return false;
         if (sourceId != null && !sourceId.equals(entry.sourceId)) return false;
-        if (minCaughtAt > 0L && entry.caughtAt < minCaughtAt) return false;
         if (caughtSystemId != null && !caughtSystemId.equals(entry.caughtSystemId)) return false;
         if (questTargetId != null && !questTargetId.equals(entry.questTargetId)) return false;
 
@@ -389,6 +390,8 @@ public class FishRequirement {
                 text.append(anyOf.get(i).describeQualities());
             }
 
+            if (freshCatch) text.append(", ").append(FRESH_CATCH_DESCRIPTION);
+
             return text.toString();
         }
 
@@ -409,6 +412,7 @@ public class FishRequirement {
         if (lowCoherence) text.append(", coherence unstable or worse");
 
         append(text, describeCatch());
+        if (freshCatch) append(text, FRESH_CATCH_DESCRIPTION);
 
         return text.toString();
     }
@@ -472,6 +476,7 @@ public class FishRequirement {
         if (minWeight > 0f) text.append(", over ").append(trim(minWeight)).append(" kg");
 
         append(text, describeCatch());
+        if (freshCatch) append(text, FRESH_CATCH_DESCRIPTION);
 
         String out = text.toString();
 

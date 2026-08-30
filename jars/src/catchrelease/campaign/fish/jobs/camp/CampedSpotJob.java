@@ -149,7 +149,7 @@ public abstract class CampedSpotJob extends FishJob {
         receipt.minCaughtAt = acceptedAt;
 
         asks.clear();
-        asks.add(receipt);
+        addAsk(receipt);
         speciesId = null;
     }
 

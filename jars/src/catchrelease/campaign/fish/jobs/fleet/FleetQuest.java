@@ -233,7 +233,9 @@ public class FleetQuest extends FishJob {
         // the rows reach the job through the hull's own memory, and this is a different hull
         setEntityMissionRef(giver, REF_KEY);
 
-        stampAcceptedCatchConstraints();
+        if (type == FleetQuestType.CLAIM_ASSAY || type == FleetQuestType.PARLEY_FISH) {
+            requireFreshCatch();
+        }
         claimQuestPond();
         mark();
         hold();
@@ -296,14 +298,6 @@ public class FleetQuest extends FishJob {
         Misc.fadeAndExpire(original);
 
         return copy;
-    }
-
-    protected void stampAcceptedCatchConstraints() {
-        if ((type != FleetQuestType.CLAIM_ASSAY && type != FleetQuestType.PARLEY_FISH)
-                || Global.getSector() == null) return;
-
-        long acceptedAt = Global.getSector().getClock().getTimestamp();
-        for (FishRequirement ask : asks) ask.minCaughtAt = acceptedAt;
     }
 
     public void abandon() {
@@ -482,6 +476,8 @@ public class FleetQuest extends FishJob {
         for (int i = 0; i < ASK_ATTEMPTS; i++, target *= ASK_BACKOFF) {
             FishRequirement ask = type.rollAsk(random(), target, home, i);
             if (ask == null) continue;
+
+            prepareAsk(ask);
 
             float nearest = QuestDuration.nearestSatisfiableLY(giver, ask,
                     type.getMaximumTravelLY());
