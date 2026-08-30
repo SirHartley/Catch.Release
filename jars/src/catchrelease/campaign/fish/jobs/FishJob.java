@@ -63,6 +63,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
     public static final String DAYS_LEFT_KEY = "$catchreleaseDaysLeft";
     public static final String OPTIONS_TRIGGER = "JobSpecificOptions";
     public static final String CATCH_PROGRESS_UPDATE = "catchrelease_fish_job_progress";
+    public static final float FRESH_CATCH_CHANCE = 0.25f;
 
     protected List<FishRequirement> asks = new ArrayList<>();
     protected List<FishReward> rewards = new ArrayList<>();
@@ -71,12 +72,60 @@ public abstract class FishJob extends HubMissionWithBarEvent
     protected float days = 0f;
     protected float deadline = 0f;
     protected int round = 0;
+    protected boolean freshCatchModifierRolled;
+    protected boolean freshCatchRequired;
+    protected long jobAcceptedAt;
     protected List<Integer> displayedProgress = null;
     protected int displayedProgressRound = -1;
     protected transient IntervalUtil progressCheckInterval = null;
 
     protected void addAsk(FishRequirement ask) {
-        if (ask != null) asks.add(ask);
+        if (ask == null) return;
+
+        prepareAsk(ask);
+        asks.add(ask);
+    }
+
+    protected void prepareAsk(FishRequirement ask) {
+        if (ask == null) return;
+
+        if (!freshCatchModifierRolled && !asks.isEmpty()) {
+            freshCatchModifierRolled = true;
+            for (FishRequirement existing : asks) {
+                if (existing != null && existing.freshCatch) {
+                    freshCatchRequired = true;
+                    break;
+                }
+            }
+        }
+
+        if (ask.freshCatch) freshCatchRequired = true;
+        if (!freshCatchModifierRolled) {
+            freshCatchModifierRolled = true;
+            if (!freshCatchRequired && random().nextFloat() < FRESH_CATCH_CHANCE) {
+                freshCatchRequired = true;
+            }
+        }
+
+        if (freshCatchRequired) {
+            ask.freshCatch = true;
+            for (FishRequirement existing : asks) applyFreshCatch(existing);
+        }
+
+        applyFreshCatch(ask);
+    }
+
+    protected void applyFreshCatch(FishRequirement ask) {
+        if (ask == null || !freshCatchRequired) return;
+
+        ask.freshCatch = true;
+        if (jobAcceptedAt > 0L) ask.minCaughtAt = jobAcceptedAt;
+    }
+
+    protected void requireFreshCatch() {
+        freshCatchModifierRolled = true;
+        freshCatchRequired = true;
+        for (FishRequirement ask : asks) applyFreshCatch(ask);
     }
 
     protected void addReward(FishReward reward) {
@@ -152,7 +201,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
         float worst = QuestDuration.worstNearestLY(at, asks, QuestDuration.MAX_SENSIBLE_LY);
         if (worst < 0f) return false;
 
-        days = QuestDuration.forTravelLY(worst).days;
+        days = QuestDuration.daysForTravelLY(worst, asks);
 
         return true;
     }
@@ -219,6 +268,11 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
     @Override
     public void accept(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
+        if (jobAcceptedAt <= 0L && Global.getSector() != null) {
+            jobAcceptedAt = Global.getSector().getClock().getTimestamp();
+        }
+        for (FishRequirement ask : asks) applyFreshCatch(ask);
+
         super.accept(dialog, memoryMap);
         resetDisplayedProgress();
     }

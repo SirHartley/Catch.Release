@@ -90,6 +90,25 @@
 		"pluginClass":"catchrelease.campaign.fish.fisherman.FishermanMapIcon"
 	},
 
+	# Map-only marker for an accepted fleet job.
+	"catchrelease_FleetQuestMapIcon":{
+		"defaultName":"Quest Fleet",
+		"defaultRadius":10,
+		"showInCampaign":false,
+		"showIconOnMap":true,
+		"showNameOnMap":false,
+		"scaleNameWithZoom":false,
+		"scaleIconWithZoom":true,
+		"icon":"graphics/catchrelease/intel/intel_any.png",
+		"iconWidth":22,
+		"iconHeight":22,
+		"iconColor":[95,200,215,255],
+		"renderCircleIndicator":false,
+		"interactable":false,
+		"tags":["catchrelease_fleet_quest_icon"],
+		"pluginClass":"catchrelease.campaign.fish.jobs.fleet.FleetQuestMapIcon"
+	},
+
 	"catchrelease_FishingDrone":{
 		"defaultRadius":15,
 		"showInCampaign":true,

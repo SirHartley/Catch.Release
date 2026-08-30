@@ -34,7 +34,6 @@ import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
-import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
@@ -185,6 +184,7 @@ public class FleetQuest extends FishJob {
     protected boolean potCaptain;
     protected PersonAPI bosun;
     protected boolean mutinyResolved;
+    protected boolean thanksShown;
 
     protected static final String[] SHOW_NAMES = {
             "The Grand Catch Exhibition",
@@ -210,6 +210,9 @@ public class FleetQuest extends FishJob {
         if (!FishingIntro.isComplete()) return null;
         if (giver == null || giver.isExpired() || type == null) return null;
         if (isQuestFleet(giver)) return null;
+        StarSystemAPI system = giver.getContainingLocation() instanceof StarSystemAPI
+                ? (StarSystemAPI) giver.getContainingLocation() : null;
+        if (!type.canSpawnIn(system)) return null;
 
         FleetQuest quest = new FleetQuest();
         quest.type = type;
@@ -233,7 +236,9 @@ public class FleetQuest extends FishJob {
         // the rows reach the job through the hull's own memory, and this is a different hull
         setEntityMissionRef(giver, REF_KEY);
 
-        stampAcceptedCatchConstraints();
+        if (type == FleetQuestType.CLAIM_ASSAY || type == FleetQuestType.PARLEY_FISH) {
+            requireFreshCatch();
+        }
         claimQuestPond();
         mark();
         hold();
@@ -298,14 +303,6 @@ public class FleetQuest extends FishJob {
         return copy;
     }
 
-    protected void stampAcceptedCatchConstraints() {
-        if ((type != FleetQuestType.CLAIM_ASSAY && type != FleetQuestType.PARLEY_FISH)
-                || Global.getSector() == null) return;
-
-        long acceptedAt = Global.getSector().getClock().getTimestamp();
-        for (FishRequirement ask : asks) ask.minCaughtAt = acceptedAt;
-    }
-
     public void abandon() {
         release();
     }
@@ -343,80 +340,26 @@ public class FleetQuest extends FishJob {
         PersonAPI captain = giver.getCommander();
         if (captain == null) return false;
 
-        PersonAPI contact = captain;
-        if (type == FleetQuestType.LAST_ENTRY || type == FleetQuestType.CALIBRATION_PAIR
-                || type == FleetQuestType.MANDATE) {
-            contact = giver.getFaction().createRandomPerson(random());
-            if (contact == null) return false;
-
-            contact.setRankId(Ranks.CITIZEN);
-            contact.setPostId(Ranks.POST_SCIENTIST);
-            contact.setVoice(Voices.SCIENTIST);
-        } else if (type == FleetQuestType.STRANDED
-                || type == FleetQuestType.SCAVENGER_ENGINE) {
-            contact = giver.getFaction().createRandomPerson(random());
-            if (contact == null) return false;
-
-            contact.setRankId(Ranks.CITIZEN);
-            contact.setPostId(Ranks.POST_SPACER);
-            contact.setVoice(Voices.SPACER);
-        } else if (type == FleetQuestType.QUOTA) {
-            contact = giver.getFaction().createRandomPerson(random());
-            if (contact == null) return false;
-
-            contact.setRankId(Ranks.CITIZEN);
-            contact.setPostId(Ranks.POST_SUPPLY_MANAGER);
-            contact.setVoice(Voices.SPACER);
-        } else if (type == FleetQuestType.STARVING) {
-            contact = giver.getFaction().createRandomPerson(random());
-            if (contact == null) return false;
-
-            contact.setRankId(Ranks.CITIZEN);
-            contact.setPostId(Ranks.POST_CREW_BOSS);
-            contact.setVoice(Voices.SPACER);
-        } else if (type.usesBosunContact()) {
+        PersonAPI contact;
+        if (type.usesBosunContact()) {
             contact = createBosun(captain);
             if (contact == null) return false;
 
             contact.setRankId(BOSUN_RANK);
-            contact.setPostId(Ranks.POST_CREW_BOSS);
+            contact.setPostId(null);
             contact.setVoice(Voices.SPACER);
             bosun = contact;
-        } else if (type == FleetQuestType.TRIBUTE) {
-            contact = giver.getFaction().createRandomPerson(random());
+        } else if (type.getContactRankId() != null) {
+            contact = type.usesMaleContact()
+                    ? giver.getFaction().createRandomPerson(FullName.Gender.MALE, random())
+                    : giver.getFaction().createRandomPerson(random());
             if (contact == null) return false;
 
-            contact.setRankId(Ranks.CITIZEN);
-            contact.setPostId(Ranks.POST_SUPPLY_OFFICER);
-            contact.setVoice(Voices.SPACER);
-        } else if (type == FleetQuestType.REFERENCE_SPECIMEN) {
-            contact = giver.getFaction().createRandomPerson(random());
-            if (contact == null) return false;
-
-            contact.setRankId(Ranks.CITIZEN);
-            contact.setPostId(Ranks.POST_SUPPLY_MANAGER);
-            contact.setVoice(Voices.BUSINESS);
-        } else if (type == FleetQuestType.QUIET_SHIP) {
-            contact = giver.getFaction().createRandomPerson(random());
-            if (contact == null) return false;
-
-            contact.setRankId(Ranks.CITIZEN);
-            contact.setPostId(Ranks.POST_SUPPLY_OFFICER);
-            contact.setVoice(Voices.SPACER);
-        } else if (type == FleetQuestType.HEADLINER) {
-            contact = giver.getFaction().createRandomPerson(FullName.Gender.MALE, random());
-            if (contact == null) return false;
-
-            contact.setRankId(Ranks.CITIZEN);
-            contact.setPostId(Ranks.POST_INVESTOR);
-            contact.setVoice(Voices.BUSINESS);
-        } else if (type == FleetQuestType.COLLECTOR) {
-            contact = giver.getFaction().createRandomPerson(random());
-            if (contact == null) return false;
-
-            contact.setRankId(Ranks.CITIZEN);
-            contact.setPostId(Ranks.POST_INVESTOR);
-            contact.setVoice(Voices.BUSINESS);
+            contact.setRankId(type.getContactRankId());
+            contact.setPostId(null);
+            contact.setVoice(type.getContactVoice());
+        } else {
+            contact = captain;
         }
 
         setPersonOverride(contact);
@@ -483,11 +426,13 @@ public class FleetQuest extends FishJob {
             FishRequirement ask = type.rollAsk(random(), target, home, i);
             if (ask == null) continue;
 
+            prepareAsk(ask);
+
             float nearest = QuestDuration.nearestSatisfiableLY(giver, ask,
                     type.getMaximumTravelLY());
             if (nearest < 0f) continue;
 
-            days = QuestDuration.forTravelLY(nearest).days;
+            days = QuestDuration.daysForTravelLY(nearest, ask);
             if (type == FleetQuestType.HEADLINER) {
                 replacementPlan = i == 0 ? "So we hire a replacement."
                         : "Fine. We promote a strong supporting act to the headline and hire for"
@@ -693,6 +638,7 @@ public class FleetQuest extends FishJob {
         String title = getRuleText(TITLE_TRIGGER);
         if (title != null && !title.isEmpty()) giver.setName(title);
 
+        FleetQuestMapIcon.findOrAdd(giver);
         keepStanding();
     }
 
@@ -925,6 +871,9 @@ public class FleetQuest extends FishJob {
                 writeDialogueMemory();
             }
             keepStanding();
+            if (takenUp && giver != null && !giver.isExpired()) {
+                FleetQuestMapIcon.findOrAdd(giver);
+            }
         }
     }
 
@@ -989,6 +938,11 @@ public class FleetQuest extends FishJob {
 
         if ("selectCounteroffer".equals(action)) {
             selectCounteroffer();
+            return true;
+        }
+
+        if ("finishHandoff".equals(action)) {
+            finishHandoff(dialog, memoryMap);
             return true;
         }
 
@@ -1078,6 +1032,7 @@ public class FleetQuest extends FishJob {
         if (bosun == null) return;
 
         bosun.setRankId(BOSUN_RANK);
+        bosun.setPostId(null);
         if (captain == null || captain.getPortraitSprite() == null
                 || !captain.getPortraitSprite().equals(bosun.getPortraitSprite())) return;
 
@@ -1147,7 +1102,7 @@ public class FleetQuest extends FishJob {
 
         float nearest = QuestDuration.nearestSatisfiableLY(giver, followup,
                 type.getMaximumTravelLY());
-        days = nearest < 0f ? 0f : QuestDuration.forTravelLY(nearest).days;
+        days = nearest < 0f ? 0f : QuestDuration.daysForTravelLY(nearest, followup);
         followupPending = true;
 
         return true;
@@ -1178,8 +1133,18 @@ public class FleetQuest extends FishJob {
             return;
         }
 
-        resolveMutinyPot();
+        if (dialog != null && dialog.getOptionPanel() != null) {
+            dialog.getOptionPanel().clearOptions();
+        }
+        FireAll.fire(null, dialog, memoryMap, "CatchReleaseFleetQuestThanksContinue");
+    }
 
+    protected void finishHandoff(InteractionDialogAPI dialog,
+                                 Map<String, MemoryAPI> memoryMap) {
+        if (thanksShown) return;
+
+        thanksShown = true;
+        resolveMutinyPot();
         setCurrentStage(Stage.DONE, dialog, memoryMap);
     }
 
@@ -1281,6 +1246,7 @@ public class FleetQuest extends FishJob {
         if (giver == null) return;
 
         dropMarker();
+        FleetQuestMapIcon.removeFor(giver);
 
         MemoryAPI memory = giver.getMemoryWithoutUpdate();
         memory.unset(QUEST_FLAG);
@@ -1397,6 +1363,13 @@ public class FleetQuest extends FishJob {
 
         if (declinedFollowup) {
             release();
+            return;
+        }
+
+        if (thanksShown) {
+            release();
+            clearRuleTextMemory();
+            giver.getMemoryWithoutUpdate().unset(REF_KEY);
             return;
         }
 

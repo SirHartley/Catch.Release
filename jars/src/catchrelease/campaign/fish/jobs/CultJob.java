@@ -23,10 +23,10 @@ public class CultJob extends FishJob {
         FishRequirement ask = new FishRequirement();
         ask.speciesId = speciesId;
         ask.count = 1;
+        addAsk(ask);
 
         // Roll first so an empty prize pool does not block future offers.
-        List<FishReward> prizes = QuestRewards.roll(new QuestRewards.Request(
-                java.util.Collections.singletonList(ask))
+        List<FishReward> prizes = QuestRewards.roll(new QuestRewards.Request(asks)
                 .noCredits().tierFloor(DemandScore.Tier.MEDIUM)
                 .random(genRandom)).rewards;
         if (prizes.isEmpty()) return false;
@@ -40,7 +40,6 @@ public class CultJob extends FishJob {
 
         if (!setUpGiver(createdAt)) return false;
 
-        addAsk(ask);
         if (!setDurationForAsks(createdAt)) return false;
 
         addRewards(prizes);

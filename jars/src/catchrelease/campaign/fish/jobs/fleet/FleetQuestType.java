@@ -1,9 +1,11 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishReward;
@@ -11,15 +13,16 @@ import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestDuration;
 import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
+import com.fs.starfarer.api.impl.campaign.ids.Voices;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -311,6 +314,7 @@ public enum FleetQuestType {
             case CLAIM_ASSAY:
                 if (home == null) return null;
                 ask.caughtSystemId = home.getId();
+                ask.freshCatch = true;
                 if (target >= 30f) ask.minRarity = FishRarity.UNCOMMON;
                 if (!canBeSatisfiedIn(ask, home)) return null;
                 break;
@@ -322,6 +326,7 @@ public enum FleetQuestType {
 
             case PARLEY_FISH:
                 if (home == null) return null;
+                ask.freshCatch = true;
                 if (target >= 26f) ask.minGrade = FishGrade.AVERAGE;
                 break;
 
@@ -445,12 +450,68 @@ public enum FleetQuestType {
         return hasCounteroffer();
     }
 
+    public String getContactRankId() {
+        switch (this) {
+            case LAST_ENTRY: return "catchrelease_dataOfficer";
+            case INTERMENT: return "catchrelease_convoyMaster";
+            case CALIBRATION_PAIR: return "catchrelease_researcher";
+            case TRIBUTE: return "catchrelease_quartermaster";
+            case REFERENCE_SPECIMEN: return "catchrelease_handler";
+            case QUIET_SHIP: return "catchrelease_maintenanceChief";
+            case EXHIBIT: return "catchrelease_operator";
+            case HEADLINER: return "catchrelease_impresario";
+            case STATE_DINNER: return "catchrelease_protocolOfficer";
+            case CLAIM_ASSAY: return "catchrelease_contractOfficer";
+            case MANDATE: return "catchrelease_principalInvestigator";
+            case STRANDED: return "catchrelease_engineer";
+            case QUOTA: return "catchrelease_purser";
+            case STARVING: return "catchrelease_galleyChief";
+            case SCAVENGER_ENGINE: return "catchrelease_coilTechnician";
+            case COLLECTOR: return "catchrelease_collector";
+            default: return null;
+        }
+    }
+
+    public String getContactVoice() {
+        switch (this) {
+            case LAST_ENTRY:
+            case CALIBRATION_PAIR:
+            case MANDATE:
+                return Voices.SCIENTIST;
+            case INTERMENT:
+            case REFERENCE_SPECIMEN:
+            case EXHIBIT:
+            case HEADLINER:
+            case STATE_DINNER:
+            case CLAIM_ASSAY:
+            case QUOTA:
+            case COLLECTOR:
+                return Voices.BUSINESS;
+            default:
+                return Voices.SPACER;
+        }
+    }
+
+    public boolean usesMaleContact() {
+        return this == HEADLINER;
+    }
+
     public boolean hasCounteroffer() {
         return this == MUTINY_POT;
     }
 
     public boolean hasFollowup() {
         return this == CALIBRATION_PAIR;
+    }
+
+    public boolean requiresLowCoherenceArea() {
+        return this == CALIBRATION_PAIR || this == QUIET_SHIP;
+    }
+
+    public boolean canSpawnIn(StarSystemAPI system) {
+        return !requiresLowCoherenceArea() || system != null
+                && Aberration.baseAt(system.getLocation(), system)
+                >= FishRequirement.LOW_COHERENCE;
     }
 
     public boolean requiresIndependentFleet() {
@@ -492,5 +553,14 @@ public enum FleetQuestType {
 
     public static FleetQuestType rollAny(Random random) {
         return LOCAL_OFFERS[random.nextInt(LOCAL_OFFERS.length)];
+    }
+
+    public static FleetQuestType rollAny(Random random, StarSystemAPI system) {
+        List<FleetQuestType> eligible = new ArrayList<>();
+        for (FleetQuestType type : LOCAL_OFFERS) {
+            if (type.canSpawnIn(system)) eligible.add(type);
+        }
+
+        return eligible.isEmpty() ? null : eligible.get(random.nextInt(eligible.size()));
     }
 }

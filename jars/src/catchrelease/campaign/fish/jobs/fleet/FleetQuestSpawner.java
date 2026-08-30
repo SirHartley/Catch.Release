@@ -138,7 +138,9 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
         if (random.nextFloat() > CHANCE) return;
 
-        FleetQuestType type = FleetQuestType.rollAny(random);
+        StarSystemAPI system = (StarSystemAPI) Global.getSector().getPlayerFleet()
+                .getContainingLocation();
+        FleetQuestType type = FleetQuestType.rollAny(random, system);
         if (type == null) return;
 
         if (adopt(type)) markOffered(type);
@@ -178,6 +180,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (type == null || !FleetQuestType.getLocalOffers().contains(type) || countActive() > 0) {
             return null;
         }
+        if (!type.canSpawnIn(system)) return null;
 
         RuinsFleetRouteManager scavengers = new RuinsFleetRouteManager(system);
         MarketAPI source = scavengers.pickSourceMarket();

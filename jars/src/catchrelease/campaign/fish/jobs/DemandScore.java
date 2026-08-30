@@ -38,6 +38,7 @@ public final class DemandScore {
     public static final float WEIGHT_FLOOR_SPAN = 0.7f;
     public static final float LENGTH_FLOOR_MULT = 1.25f;
     public static final float SAME_SPECIES_MULT = 1.2f;
+    public static final float FRESH_CATCH_MULT = 1.25f;
 
     // Quantity
     public static final float EXTRA_SPECIMEN_FRACTION = 0.6f;
@@ -93,6 +94,7 @@ public final class DemandScore {
         if (ask.sameSpecies && ask.speciesId == null && count > 1) {
             countMult *= SAME_SPECIES_MULT;
         }
+        if (ask.freshCatch) countMult *= FRESH_CATCH_MULT;
 
         return perSpecimen * countMult;
     }

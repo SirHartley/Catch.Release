@@ -80,7 +80,8 @@ public abstract class CampedSpotJob extends FishJob {
 
         float ly = Misc.getDistanceLY(createdAt.getLocationInHyperspace(),
                 system.getLocation());
-        days = QuestDuration.forTravelLY(ly, QuestDuration.WORKING_DAYS * 2f).days;
+        days = QuestDuration.daysForTravelLY(
+                ly, QuestDuration.WORKING_DAYS * 2f, asks);
 
         setUpSpine();
 
@@ -135,6 +136,7 @@ public abstract class CampedSpotJob extends FishJob {
             FishRequirement current = asks.get(0);
             if (current != null && current.speciesId == null && current.tag == null
                     && pond.getId().equals(current.sourceId)
+                    && current.freshCatch
                     && current.minCaughtAt == acceptedAt) {
                 return;
             }
@@ -143,10 +145,11 @@ public abstract class CampedSpotJob extends FishJob {
         FishRequirement receipt = new FishRequirement();
         receipt.count = 1;
         receipt.sourceId = pond.getId();
+        receipt.freshCatch = true;
         receipt.minCaughtAt = acceptedAt;
 
         asks.clear();
-        asks.add(receipt);
+        addAsk(receipt);
         speciesId = null;
     }
 
