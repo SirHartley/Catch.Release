@@ -1121,9 +1121,8 @@ public class FleetQuest extends FishJob {
             if (dialog != null && dialog.getOptionPanel() != null) {
                 dialog.getOptionPanel().clearOptions();
             }
-            FireBest.fire(null, dialog, memoryMap, "CatchReleaseFleetQuestFollowupPitchText");
-            showRewardDetails(dialog);
-            FireAll.fire(null, dialog, memoryMap, "CatchReleaseFleetQuestFollowupOptions");
+            FireAll.fire(null, dialog, memoryMap,
+                    "CatchReleaseFleetQuestFollowupContinue");
             return;
         }
 

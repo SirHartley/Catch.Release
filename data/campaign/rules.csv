@@ -1589,6 +1589,10 @@ catchrelease_fqTurnInSel,DialogOptionSelected,"$option == catchrelease_fqTurnIn
 $catchreleaseFleetHandoffPaid","FireBest CatchReleaseFleetQuestTurnInText
 FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fqLeaveSel,DialogOptionSelected,$option == catchrelease_fqLeave,CatchReleaseCMD leaveEncounter,The link closes. They go back to waiting.,,
+catchrelease_fqFollowupContinue,CatchReleaseFleetQuestFollowupContinue,,,,,0:catchrelease_fqFollowupContinue:Continue
+catchrelease_fqFollowupContinueSel,DialogOptionSelected,$option == catchrelease_fqFollowupContinue,"FireBest CatchReleaseFleetQuestFollowupPitchText
+Call $entity.catchrelease_jobRef showRewardDetails
+FireAll CatchReleaseFleetQuestFollowupOptions",,,
 catchrelease_fqFollowupOptions,CatchReleaseFleetQuestFollowupOptions,$entity.catchrelease_fleetQuestType == calibration_pair,,,"0:catchrelease_fqFollowupAccept:I'll get the tiebreaker.
 10:catchrelease_fqFollowupDecline:Decline.",
 catchrelease_fqFollowupAcceptSel,DialogOptionSelected,$option == catchrelease_fqFollowupAccept,"FireBest CatchReleaseFleetQuestFollowupAcceptText
