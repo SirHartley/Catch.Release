@@ -18,6 +18,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
+import com.fs.starfarer.api.impl.campaign.ids.Voices;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
@@ -447,6 +448,52 @@ public enum FleetQuestType {
 
     public boolean usesBosunContact() {
         return hasCounteroffer();
+    }
+
+    public String getContactRankId() {
+        switch (this) {
+            case LAST_ENTRY: return "catchrelease_dataOfficer";
+            case INTERMENT: return "catchrelease_convoyMaster";
+            case CALIBRATION_PAIR: return "catchrelease_researcher";
+            case TRIBUTE: return "catchrelease_quartermaster";
+            case REFERENCE_SPECIMEN: return "catchrelease_handler";
+            case QUIET_SHIP: return "catchrelease_maintenanceChief";
+            case EXHIBIT: return "catchrelease_operator";
+            case HEADLINER: return "catchrelease_impresario";
+            case STATE_DINNER: return "catchrelease_protocolOfficer";
+            case CLAIM_ASSAY: return "catchrelease_contractOfficer";
+            case MANDATE: return "catchrelease_principalInvestigator";
+            case STRANDED: return "catchrelease_engineer";
+            case QUOTA: return "catchrelease_purser";
+            case STARVING: return "catchrelease_galleyChief";
+            case SCAVENGER_ENGINE: return "catchrelease_coilTechnician";
+            case COLLECTOR: return "catchrelease_collector";
+            default: return null;
+        }
+    }
+
+    public String getContactVoice() {
+        switch (this) {
+            case LAST_ENTRY:
+            case CALIBRATION_PAIR:
+            case MANDATE:
+                return Voices.SCIENTIST;
+            case INTERMENT:
+            case REFERENCE_SPECIMEN:
+            case EXHIBIT:
+            case HEADLINER:
+            case STATE_DINNER:
+            case CLAIM_ASSAY:
+            case QUOTA:
+            case COLLECTOR:
+                return Voices.BUSINESS;
+            default:
+                return Voices.SPACER;
+        }
+    }
+
+    public boolean usesMaleContact() {
+        return this == HEADLINER;
     }
 
     public boolean hasCounteroffer() {
