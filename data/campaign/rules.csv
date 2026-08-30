@@ -1489,6 +1489,8 @@ catchrelease_fqEscrowHaggleOpt,CatchReleaseFleetQuestOfferOptions,"$entity.catch
 catchrelease_fqEscrowSourOpt,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == escrow
 $entity.catchrelease_fqHaggled
 !$entity.catchrelease_fqSoured",,,6:catchrelease_fqSour:Still not enough.,
+catchrelease_fqEscrowReclaimOpt,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == escrow
+$entity.catchrelease_fqCanReclaim",SetStoryOption catchrelease_fqReclaim 1 avoidCargoScan ui_char_spent_story_point,,,6:catchrelease_fqReclaim:Restore the raised offer.
 catchrelease_fqQuestionSel,DialogOptionSelected,$option == catchrelease_fqQuestion,"FireBest CatchReleaseFleetQuestQuestionText
 FireAll CatchReleaseFleetQuestOfferOptions",,,
 catchrelease_fqExtraQuestionSel,DialogOptionSelected,$option == catchrelease_fqExtraQuestion,"FireBest CatchReleaseFleetQuestExtraQuestionText
@@ -1499,6 +1501,10 @@ Call $entity.catchrelease_jobRef showRewardDetails
 FireAll CatchReleaseFleetQuestOfferOptions",,,
 catchrelease_fqSourSel,DialogOptionSelected,$option == catchrelease_fqSour,"Call $entity.catchrelease_jobRef sour
 FireBest CatchReleaseFleetQuestSourText
+Call $entity.catchrelease_jobRef showRewardDetails
+FireAll CatchReleaseFleetQuestOfferOptions",,,
+catchrelease_fqReclaimSel,DialogOptionSelected,$option == catchrelease_fqReclaim,"Call $entity.catchrelease_jobRef reclaim
+FireBest CatchReleaseFleetQuestReclaimText
 Call $entity.catchrelease_jobRef showRewardDetails
 FireAll CatchReleaseFleetQuestOfferOptions",,,
 catchrelease_fqCounterSel,DialogOptionSelected,$option == catchrelease_fqCounter,"Call $entity.catchrelease_jobRef showCounterparty
@@ -1699,13 +1705,13 @@ catchrelease_fq_escrow_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrele
 The skipper clears the contract from the slate.
 
 ""Appreciate the delivery, captain. $entity.catchreleaseFleetFlagshipName out.""",,
-catchrelease_fq_escrow_haggle,CatchReleaseFleetQuestHaggleText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The skipper goes back through the contract, slower this time.
+catchrelease_fq_escrow_haggle,CatchReleaseFleetQuestHaggleText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestReward $entity.catchreleaseFleetDays,"The skipper goes back through the contract, slower this time.
 
 ""There's a discretionary settlement line. Knew I'd seen one.""
 
 They read it twice before looking back at you.
 
-""Fine. I can raise the offer to $entity.catchrelease_fleetQuestReward without asking anyone. That's the room I've got.""",,
+""Fine. I can add enough credits to bring the package to $entity.catchrelease_fleetQuestReward. You've still got $entity.catchreleaseFleetDays to bring it in.""",,
 catchrelease_fq_escrow_sour,CatchReleaseFleetQuestSourText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The skipper closes the slate.
 
 ""No. Discretionary authority has a ceiling.""
@@ -1713,6 +1719,7 @@ catchrelease_fq_escrow_sour,CatchReleaseFleetQuestSourText,$entity.catchrelease_
 ""We're back to the written offer: $entity.catchrelease_fleetQuestReward. Anything higher goes through Tri-Tachyon Legal, and I'm not pretending that improves either of our day.""
 
 ""Those are the terms.""",,
+catchrelease_fq_escrow_reclaim,CatchReleaseFleetQuestReclaimText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestReward $entity.catchreleaseFleetDays,"""All right. The raised offer stands: $entity.catchrelease_fleetQuestReward. Same deadline. You've got $entity.catchreleaseFleetDays.""",,
 ,,,,,,
 # fleet quest: interment,,,,,,
 catchrelease_fq_interment_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == interment,,The Interment,,

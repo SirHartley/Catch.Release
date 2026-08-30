@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.FishReward;
+import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestDuration;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.QuestRewards;
@@ -78,6 +79,7 @@ public class FleetQuest extends FishJob {
     public static final String SOUR_OPTION_KEY = "$catchrelease_fleetQuestSourOption";
     public static final String HAGGLED_FLAG = "$catchrelease_fqHaggled";
     public static final String SOURED_FLAG = "$catchrelease_fqSoured";
+    public static final String CAN_RECLAIM_FLAG = "$catchrelease_fqCanReclaim";
     public static final String FOLLOWUP_PENDING_FLAG = "$catchrelease_fleetQuestFollowupPending";
     public static final String FOLLOWUP_PITCH_KEY = "$catchrelease_fleetQuestFollowupPitch";
     public static final String FOLLOWUP_ACCEPT_OPTION_KEY =
@@ -172,6 +174,7 @@ public class FleetQuest extends FishJob {
     protected boolean haggled;
     protected boolean soured;
     protected List<FishReward> originalRewards = new ArrayList<>();
+    protected List<FishReward> negotiatedRewards = new ArrayList<>();
     protected String followupSpeciesId;
     protected boolean followupPending;
     protected boolean declinedFollowup;
@@ -721,6 +724,9 @@ public class FleetQuest extends FishJob {
         else memory.unset(HAGGLED_FLAG);
         if (soured) memory.set(SOURED_FLAG, true);
         else memory.unset(SOURED_FLAG);
+        if (soured && negotiatedRewards != null && !negotiatedRewards.isEmpty()) {
+            memory.set(CAN_RECLAIM_FLAG, true);
+        } else memory.unset(CAN_RECLAIM_FLAG);
         if (type == FleetQuestType.ESCROW) liabilityDay = elapsedDay();
         if (type == FleetQuestType.STARVING) rationDay = elapsedDay();
 
@@ -917,6 +923,11 @@ public class FleetQuest extends FishJob {
             return true;
         }
 
+        if ("reclaim".equals(action)) {
+            reclaim();
+            return true;
+        }
+
         if ("hasRuleText".equals(action)) return ensureRuleTextMemory();
 
         if ("clearRuleText".equals(action)) {
@@ -956,11 +967,29 @@ public class FleetQuest extends FishJob {
         if (type != FleetQuestType.ESCROW || haggled || soured) return;
 
         originalRewards = new ArrayList<>(rewards);
-        rewards.clear();
-        QuestRewards.Request request = type.createRewardRequest(asks, random()).budgetMult(1.45f);
-        rewards.addAll(QuestRewards.roll(request).rewards);
+        addNegotiatedCredits();
+        negotiatedRewards = new ArrayList<>(rewards);
         haggled = true;
         writeDialogueMemory();
+    }
+
+    protected void addNegotiatedCredits() {
+        float increase = 1.45f / type.rewardBudgetMult - 1f;
+        int added = FishRewardRoller.roundCreditRewardUp(
+                Math.max(FishRewardRoller.CREDIT_BASE,
+                        Math.round(rewardValue(rewards) * increase)));
+
+        for (int i = 0; i < rewards.size(); i++) {
+            FishReward reward = rewards.get(i);
+            if (!(reward instanceof FishReward.Credits)) continue;
+
+            FishReward.Credits credits = (FishReward.Credits) reward;
+            rewards.set(i, FishReward.questCredits(
+                    credits.amount + added, credits.valueMultiplier));
+            return;
+        }
+
+        rewards.add(FishReward.credits(added));
     }
 
     protected void sour() {
@@ -969,6 +998,16 @@ public class FleetQuest extends FishJob {
         rewards.clear();
         rewards.addAll(originalRewards);
         soured = true;
+        writeDialogueMemory();
+    }
+
+    protected void reclaim() {
+        if (type != FleetQuestType.ESCROW || !soured || negotiatedRewards == null
+                || negotiatedRewards.isEmpty()) return;
+
+        rewards.clear();
+        rewards.addAll(negotiatedRewards);
+        negotiatedRewards.clear();
         writeDialogueMemory();
     }
 
@@ -1190,6 +1229,7 @@ public class FleetQuest extends FishJob {
         memory.unset(DAYS_TEXT_KEY);
         memory.unset(HAGGLED_FLAG);
         memory.unset(SOURED_FLAG);
+        memory.unset(CAN_RECLAIM_FLAG);
         memory.unset(FOLLOWUP_PENDING_FLAG);
         memory.unset(COUNTER_REWARD_KEY);
         memory.unset(POT_CAPTAIN_FLAG);
