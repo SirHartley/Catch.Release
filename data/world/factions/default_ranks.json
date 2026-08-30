@@ -1,6 +1,8 @@
 {
     "ranks": {
         "catchrelease_crabMerchant": {"name": "Crab Merchant"},
-        "catchrelease_subButler": {"name": "Sub-Butler"}
+        "catchrelease_subButler": {"name": "Sub-Butler"},
+        "catchrelease_fightCommissioner": {"name": "Commissioner"},
+        "catchrelease_fightHouse": {"name": "House"}
     }
 }

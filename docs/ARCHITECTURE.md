@@ -130,7 +130,8 @@ The framework creates the distress entity, vanilla-style breadcrumb intel, and r
 
 ### Other registrations
 
-- `data/world/factions/default_ranks.json` registers the Sub-Butler and Crab Merchant display ranks.
+- `data/world/factions/default_ranks.json` registers the Sub-Butler, Crab Merchant, Fight Night
+  Commissioner and House display ranks.
 - Terrain CSVs register the pond and coherence terrain. `BaseTerrain` does not add the terrain ID as an entity tag.
 - `data/campaign/special_items.csv` registers fish cargo items.
 - `data/campaign/industries.csv` registers the Breach Conservatory.
@@ -277,7 +278,7 @@ All bar jobs share `FishJob` for requirements, rewards, hand-in, intel, routing,
 | `CultJob.java` | One named species for a non-credit reward. It does not create an offer when its prize roll comes up empty. |
 | `CuratorJob.java` | One to three Uncommon-or-better specimens that must be Fine or from low coherence. |
 | `KidsJob.java` | Two unrestricted fish for a tournament. Rewards and bonuses cannot be credits or charts; a tier floor keeps the prize pool open. Hand-in compares two selected specimens, then spends only after assignment. Bar entry restores the normal bar image; its comm anchor uses the generic portrait. |
-| `MafiaJob.java` | Two fish for Salvatore and Enzo. Maintains both people and portraits, displays odds from relative specimen size, and supports a safe payout or a wager. |
+| `MafiaJob.java` | Supplies the main event for a bar's Fight Night. It asks for exactly two unrestricted fish, maintains the local Commissioner and House, gives both entries size-based fight names, publishes relative-size odds and the house share, and runs the same public bout after either a fixed-fee or wager choice. Successful deliveries increment a sector-wide supplier record used by later offers. Older active jobs discard the retired rarity and catch-method clauses, while legacy Salvatore and Enzo contacts are recast into the new local roles. |
 | `StartupJob.java` | Three deliveries of increasing quantity. Each round resets its clock and uses a round token in dialogue. |
 | `TuberJob.java` | Fine Uncommon/Rare specimen followed by a low-coherence specimen. |
 

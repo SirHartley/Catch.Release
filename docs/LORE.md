@@ -1584,29 +1584,54 @@ captain to allocate two selected fish, that decision becomes binding playground 
 They know ordinary visible qualities such as size and grade. They do not know fabric theory,
 pattern ontology or anything the Fisherman alone should understand.
 
-## Betting-ring brokers
+## Fight Night
 
-Salvatore and Enzo run a protected private fish-fighting book. Salvatore is the older man: he finds
-suppliers, settles the house's obligations and remembers what people agreed to. Enzo handles the
-tank, assigns the delivered pair, writes the odds and keeps the numbered ampoules.
+Fight Night belongs to one bar. It is not a franchise, a syndicate or a secret circuit. The bar has
+a fight tank where a pool table used to be, a chalkboard of past results and a monthly card that draws
+the regulars. The player is hired to supply the main event and may either take the supplier's fee or
+bet it on one of the two fish.
 
-They should read unmistakably as organized criminals before either man names the organization.
-Show it through ownership and deference: the best table kept clear in a crowded bar, a bartender who
-arrives without being called, a room available because Salvatore knows its owner, and debts discussed
-as things that will simply be remembered. Salvatore speaks in favors, understandings and what is owed.
-Enzo speaks like a bookmaker who has already priced the evening.
+The Commissioner is a local worker who takes charge on Fight Night. They keep the book: a
+grease-stained notebook of rules, corrections and amendments written by different hands over many
+years. The regulars argue about those rules but accept the Commissioner's calls. The Commissioner
+cares about fair pairings, proper weigh-ins and a clean result. Treat the role as a competent adult
+whose work makes the night possible, not as comic relief.
 
-Do not turn them into broad mobsters, theatrical gangsters or a collection of real-world film quotes.
-They are calm because the room already accommodates them. A threat is stronger when nobody bothers
-to make it. Their Italian first names are enough; neither supplies a surname.
+The book should look used and inherited. It contains crossed-out rules, initialled amendments and
+one page nobody is allowed to read aloud because of an old bar joke that is never explained. None of
+this is anomalous. It differs from the children's tournament because the children invent serious
+procedures while the Commissioner follows an old procedure with a visible history.
 
-The player may take the sure payment or leave it in Enzo's book as a wager. Enzo prices each assigned
-specimen against the other using where its size falls inside its species range. Equal entrants still
-favour the house; he states the missing percentage as his share, not as an apology.
+The House is the barkeeper. They own the tank, take the cut and continue serving drinks during the
+event. They have one rule of their own, introduced after an incident involving the tank glass. They
+may interrupt the Commissioner but never leave the bar.
 
-They accept fish fighting as an ordinary commercial event. They may discuss grade, species, length,
-handling and observed results. They do not know why patterns hold or fail to hold shape and do not
-possess fabric theory.
+The Room is the rest of the crowd: shift crews with standing rivalries, a veteran regular who has a
+theory about every fighter and the surrounding noise. These people remain unnamed. Use their short
+lines and reactions throughout the job so the fight feels like a public event rather than a private
+transaction.
+
+The book requires both fish in a bout to come from one supplier. The regular explanation is that fish
+from one supplier "fight true", while mixed pairs "fight ugly". Everyone treats this as settled
+sporting knowledge. It happens to agree with same-water coherence, but nobody in the bar knows that.
+
+The Commissioner measures both fish and writes the odds on the public chalkboard. Each fish is priced
+according to its size within its species' recorded range. The house percentage appears openly as its
+own line item. The supplier may take the fixed fee or back one of the fish. A winning bet pays the
+larger purse; a losing bet pays nothing and creates no further debt.
+
+The Commissioner gives the fish fight names based on their species and size. The player does not name
+them. Describe the bout through the room's reactions and the Commissioner's calls rather than fish
+anatomy. Patterns do not die: announce the result without describing injury or what happens to the
+losing fish afterward.
+
+This job contains no anomaly. Its interest is social. Fight-night slang may use "holds its shape" for
+a fish that performs well under pressure. The patrons are using accurate words as sporting jargon
+without knowing it. Use the phrase no more than once on a screen and never explain it.
+
+The Commissioner knows the book. The House knows the bar. The regulars know form. They may discuss
+grade, species, length, handling and previous results. None of them understands fabric theory or why
+pairs from one supplier fight true.
 
 ## Ordinary buyers
 
