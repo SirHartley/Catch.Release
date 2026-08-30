@@ -100,7 +100,10 @@ public class FleetQuestEncounter extends BaseCampaignEventListenerAndScript impl
             return;
         }
 
-        turnedDown();
+        if (quest != null) quest.decline();
+        resolveDistress();
+
+        finish();
     }
 
     protected void turnedDown() {

@@ -7,6 +7,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
@@ -160,8 +161,13 @@ public class FleetQuestSpawner implements EveryFrameScript {
     }
 
     public static int countActive() {
-        return Global.getSector().getIntelManager().getIntel(FleetQuest.class).size()
-                + FleetQuestEncounter.countLive();
+        int count = FleetQuestEncounter.countLive();
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager()
+                .getIntel(FleetQuest.class)) {
+            FleetQuest quest = (FleetQuest) intel;
+            if (quest.isActiveRequest()) count++;
+        }
+        return count;
     }
 
     public static CampaignFleetAPI spawnForTesting(FleetQuestType type) {

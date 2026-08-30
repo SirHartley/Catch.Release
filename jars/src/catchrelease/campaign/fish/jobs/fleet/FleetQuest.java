@@ -104,6 +104,8 @@ public class FleetQuest extends FishJob {
     public static final String PURPOSE_TRIGGER = "CatchReleaseFleetQuestIntelPurpose";
     public static final String TERMS_TRIGGER = "CatchReleaseFleetQuestIntelTerms";
     public static final String DISTRESS_INTEL_TRIGGER = "CatchReleaseFleetQuestDistressIntel";
+    public static final String THANKS_TRIGGER = "CatchReleaseFleetQuestThanksText";
+    public static final String DECLINED_TRIGGER = "CatchReleaseFleetQuestDeclinedText";
 
     public static final float HOLD_DAYS = 100000f;
 
@@ -120,6 +122,7 @@ public class FleetQuest extends FishJob {
     protected boolean takenUp = false;
     protected boolean distressOffer = false;
     protected String fleetName;
+    protected String flagshipName;
     protected String registry;
     protected String expedition;
     protected String entryDate;
@@ -299,6 +302,14 @@ public class FleetQuest extends FishJob {
         release();
     }
 
+    public void decline() {
+        String followup = getRuleText(DECLINED_TRIGGER);
+        if (followup != null && !followup.isEmpty()) {
+            giver.getMemoryWithoutUpdate().set(THANKS_KEY, followup);
+        }
+        release();
+    }
+
     public void ensureMarked() {
         if (distressOffer || takenUp || giver == null || giver.isExpired()) return;
         if (marker != null && !marker.isExpired()) return;
@@ -458,6 +469,7 @@ public class FleetQuest extends FishJob {
 
     protected void prepareCaseDetails() {
         fleetName = giver.getName();
+        getFlagshipName();
         if (type == FleetQuestType.ESCROW) {
             contract = String.format(Locale.ROOT, "TT-RC-%04d-%03d",
                     Global.getSector().getClock().getCycle(), random().nextInt(1000));
@@ -661,6 +673,7 @@ public class FleetQuest extends FishJob {
         memory.set(DAYS_TEXT_KEY, describeDays());
 
         setOrUnset(memory, "$catchreleaseFleetName", fleetName);
+        setOrUnset(memory, "$catchreleaseFleetFlagshipName", getFlagshipName());
         setOrUnset(memory, "$catchreleaseFleetRegistry", registry);
         setOrUnset(memory, "$catchreleaseFleetExpedition", expedition);
         setOrUnset(memory, "$catchreleaseFleetEntryDate", entryDate);
@@ -723,6 +736,16 @@ public class FleetQuest extends FishJob {
     protected void setOrUnset(MemoryAPI memory, String key, String value) {
         if (value == null || value.isEmpty()) memory.unset(key);
         else memory.set(key, value);
+    }
+
+    protected String getFlagshipName() {
+        if (flagshipName != null && !flagshipName.isEmpty()) return flagshipName;
+
+        FleetMemberAPI flagship = giver == null ? null : giver.getFlagship();
+        flagshipName = flagship == null ? null : flagship.getShipName();
+        if (flagshipName == null || flagshipName.isEmpty()) flagshipName = fleetName;
+
+        return flagshipName;
     }
 
     public String getDistressIntel() {
@@ -1167,7 +1190,8 @@ public class FleetQuest extends FishJob {
         memory.unset(POT_CAPTAIN_FLAG);
 
         String[] details = {
-                "$catchreleaseFleetName", "$catchreleaseFleetRegistry",
+                "$catchreleaseFleetName", "$catchreleaseFleetFlagshipName",
+                "$catchreleaseFleetRegistry",
                 "$catchreleaseFleetExpedition", "$catchreleaseFleetEntryDate",
                 "$catchreleaseFleetCoordinates", "$catchreleaseFleetSignature",
                 "$catchreleaseFleetContract", "$catchreleaseFleetCompany",
@@ -1205,8 +1229,14 @@ public class FleetQuest extends FishJob {
         }
 
         writeDialogueMemory();
-        giver.getMemoryWithoutUpdate().set(THANKS_KEY, true);
-        giver.getMemoryWithoutUpdate().set(DETAILED_THANKS_FLAG, true);
+        String thanks = getRuleText(THANKS_TRIGGER);
+        if (thanks != null && !thanks.isEmpty()) {
+            giver.getMemoryWithoutUpdate().set(THANKS_KEY, thanks);
+            giver.getMemoryWithoutUpdate().set(DETAILED_THANKS_FLAG, true);
+        } else {
+            giver.getMemoryWithoutUpdate().unset(THANKS_KEY);
+            giver.getMemoryWithoutUpdate().unset(DETAILED_THANKS_FLAG);
+        }
         release();
     }
 
@@ -1226,6 +1256,10 @@ public class FleetQuest extends FishJob {
 
     public CampaignFleetAPI getGiver() {
         return giver;
+    }
+
+    public boolean isActiveRequest() {
+        return Stage.WANTED.equals(currentStage) && !isEnding() && !isEnded();
     }
 
     public SectorEntityToken getQuestPond() {

@@ -1546,13 +1546,17 @@ unset $entity.catchrelease_jobRef
 FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
 catchrelease_fleetQuestDetailedThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1310
 $entity.catchrelease_fleetQuestDetailedThanks
-!$entity.isHostile","unset $entity.catchrelease_fleetQuestThanks
+!$entity.isHostile
+$entity.catchrelease_fleetQuestType != false","FireBest CatchReleaseFleetQuestThanksText
+unset $entity.catchrelease_fleetQuestThanks
 unset $entity.catchrelease_fleetQuestDetailedThanks
-FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
+unset $entity.catchrelease_fleetQuestType
+FireAll CatchReleaseFleetResolutionOptions",,,
 catchrelease_fleetQuestThanks,OpenCommLink,"$entity.catchrelease_fleetQuestThanks != false score:1300
 !$entity.isHostile
 $entity.catchrelease_fleetQuestType == false","unset $entity.catchrelease_fleetQuestThanks
-FireAll CatchReleaseFleetResolutionOptions","""$entity.catchrelease_fleetQuestThanks""",,
+FireAll CatchReleaseFleetResolutionOptions",$entity.catchrelease_fleetQuestThanks,,
+catchrelease_fleetQuestDeclined,CatchReleaseFleetQuestDeclinedText,,,"""We've put the word back out. Someone else will bring it in.""",,
 catchrelease_fleetQuestFollowup,OpenCommLink,"$entity.catchrelease_fleetQuest score:1250
 $entity.catchrelease_fleetQuestTaken
 $entity.catchrelease_fleetQuestFollowupPending
@@ -1591,9 +1595,9 @@ FireAll CatchReleaseFleetResolutionOptions",,,
 # fleet quest: last entry,,,,,,
 catchrelease_fq_last_entry_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == last_entry,,The Last Entry,,
 catchrelease_fq_last_entry_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == last_entry,,Holding for catalogue filing,,
-catchrelease_fq_last_entry_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == last_entry,,"Expedition $entity.catchreleaseFleetExpedition has completed its survey, but one specimen entry remains open. $entity.catchreleaseFleetName needs the requested specimen to close the entry and file the catalogue without voiding the expedition's survey classification.",,
+catchrelease_fq_last_entry_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == last_entry,,"Expedition $entity.catchreleaseFleetExpedition has completed its survey, but one specimen entry remains open. $entity.catchreleaseFleetFlagshipName needs the requested specimen to close the entry and file the catalogue without voiding the expedition's survey classification.",,
 catchrelease_fq_last_entry_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == last_entry,,The expedition will accept delivery on the following terms.,,
-catchrelease_fq_last_entry_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == last_entry,,"""Survey vessel $entity.catchreleaseFleetName, registry $entity.catchreleaseFleetRegistry, expedition $entity.catchreleaseFleetExpedition. Requesting a channel regarding an outstanding catalogue entry.""",,
+catchrelease_fq_last_entry_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == last_entry,,"""Survey vessel $entity.catchreleaseFleetFlagshipName, registry $entity.catchreleaseFleetRegistry, expedition $entity.catchreleaseFleetExpedition. Requesting a channel regarding an outstanding catalogue entry.""",,
 catchrelease_fq_last_entry_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == last_entry,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The data officer appears with a slate already open beside the comm pickup.
 
 ""Expedition $entity.catchreleaseFleetExpedition has finished its survey. Telemetry is in. Every accession record but one is closed.""
@@ -1614,7 +1618,7 @@ They send the same catalogue entry and range references.
 catchrelease_fq_last_entry_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == last_entry,,"""Understood. We'll keep the entry open and continue looking.""
 
 The officer closes the channel.",,
-catchrelease_fq_last_entry_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == last_entry,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Survey vessel $entity.catchreleaseFleetName, registry $entity.catchreleaseFleetRegistry. Catalogue is still open. Berth and specimen-holding fees are still running.""
+catchrelease_fq_last_entry_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == last_entry,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Survey vessel $entity.catchreleaseFleetFlagshipName, registry $entity.catchreleaseFleetRegistry. Catalogue is still open. Berth and specimen-holding fees are still running.""
 
 ""We still need $entity.catchrelease_fleetQuestAsk.""",,
 catchrelease_fq_last_entry_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == last_entry,,"The expedition staff take custody of the specimen. It goes first to the scale, then beneath a fixed imaging rig while the data officer checks the accession number against the open catalogue entry.
@@ -1630,7 +1634,7 @@ catchrelease_fq_last_entry_question,CatchReleaseFleetQuestQuestionText,$entity.c
 
 They check the name against the personnel index.
 
-""No crew member by that name has ever served aboard $entity.catchreleaseFleetName.""
+""No crew member by that name has ever served aboard $entity.catchreleaseFleetFlagshipName.""
 
 They close the personnel index.
 
@@ -1641,7 +1645,7 @@ The officer checks the submission receipt, then returns to the original sighting
 
 ""We'll retain the original entry with the expedition archive.""
 
-""Good work, captain. $entity.catchreleaseFleetName out.""",,
+""Good work, captain. $entity.catchreleaseFleetFlagshipName out.""",,
 ,,,,,,
 # fleet quest: escrow,,,,,,
 catchrelease_fq_escrow_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == escrow,,The Escrow,,
