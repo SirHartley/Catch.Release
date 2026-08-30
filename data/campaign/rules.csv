@@ -1052,8 +1052,8 @@ catchrelease_ringAssignmentOptions,CatchReleaseRingWagerOptions,"$missionId == c
 $catchreleaseRingSelectionReady","SetOptionColor catchrelease_ringFlat highlight
 SetOptionColor catchrelease_ringLeft highlight
 SetOptionColor catchrelease_ringRight highlight",,"catchrelease_ringFlat:Take the $catchreleaseReward supplier fee.
-catchrelease_ringLeft:Back $catchreleaseLeft. Line: $catchreleaseLeftOdds.
-catchrelease_ringRight:Back $catchreleaseRight. Line: $catchreleaseRightOdds.
+catchrelease_ringLeft:Back $catchreleaseLeft at $catchreleaseLeftOdds.
+catchrelease_ringRight:Back $catchreleaseRight at $catchreleaseRightOdds.
 catchrelease_ringReselect:Choose another pair.
 catchrelease_ringAssignmentWait:Leave without handing in.",
 catchrelease_ringFlatSel,DialogOptionSelected,$option == catchrelease_ringFlat,Call $catchrelease_jobRef turnInFlat,,,
