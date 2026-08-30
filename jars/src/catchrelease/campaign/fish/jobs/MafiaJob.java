@@ -1,17 +1,14 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.campaign.fish.data.FishCatch;
-import catchrelease.campaign.fish.data.FishLogEntry;
-import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.shop.FishRequirement;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
-import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.characters.FullName.Gender;
 import com.fs.starfarer.api.characters.PersonAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
-import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
@@ -29,11 +26,16 @@ public class MafiaJob extends FishJob {
     public static final float QUALITY_SWING = 0.30f;
     public static final float WIN_MULT = 2f;
 
-    protected static final String LEFT_FIRST_NAME = "Salvatore";
-    protected static final String RIGHT_FIRST_NAME = "Enzo";
+    public static final String NIGHTS_SUPPLIED_KEY = "$catchrelease_fightNightsSupplied";
+    public static final String COMMISSIONER_RANK = "catchrelease_fightCommissioner";
+    public static final String HOUSE_RANK = "catchrelease_fightHouse";
+    public static final int CURRENT_VERSION = 1;
 
-    protected String left = LEFT_FIRST_NAME;
-    protected String right = RIGHT_FIRST_NAME;
+    protected static final String LEGACY_LEFT_NAME = "Salvatore";
+    protected static final String LEGACY_RIGHT_NAME = "Enzo";
+
+    protected String left = "left entry";
+    protected String right = "right entry";
     protected PersonAPI partner;
     protected transient FishHandoffPicker.Selection pendingSelection;
     protected transient FishCatch leftFighter;
@@ -42,6 +44,10 @@ public class MafiaJob extends FishJob {
     protected float rightOdds = BASE_ODDS;
     protected String wager = null;
     protected boolean won = false;
+    protected boolean leftWon = false;
+    protected boolean nightRecorded = false;
+    protected int fightNightVersion = 0;
+    protected transient boolean identitiesChecked = false;
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
@@ -49,19 +55,16 @@ public class MafiaJob extends FishJob {
             return false;
         }
 
-        setGiverRank(Ranks.CITIZEN);
-        setGiverVoice(Voices.VILLAIN);
+        setGiverRank(COMMISSIONER_RANK);
+        setGiverVoice(Voices.OFFICIAL);
 
         if (!setUpGiver(createdAt)) return false;
         setUpPeople(createdAt);
 
         FishRequirement ask = new FishRequirement();
         ask.count = 2;
-
-        if (genRandom.nextFloat() > 0.4f) ask.minRarity = FishRarity.UNCOMMON;
-        if (genRandom.nextFloat() > 0.5f) ask.method = FishLogEntry.Method.HARPOON;
-
         addAsk(ask);
+        fightNightVersion = CURRENT_VERSION;
 
         if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
@@ -110,35 +113,61 @@ public class MafiaJob extends FishJob {
     protected void setUpPeople(MarketAPI market) {
         PersonAPI giver = getPerson();
         if (giver != null) {
-            giver.setName(new FullName(LEFT_FIRST_NAME, "", Gender.MALE));
-            ensureMalePortrait(giver);
-            left = giver.getName().getFirst();
+            replaceLegacyIdentity(giver, LEGACY_LEFT_NAME);
+            giver.setRankId(COMMISSIONER_RANK);
+            giver.setPostId(null);
+            giver.setVoice(Voices.OFFICIAL);
         }
 
         if (partner == null && market != null && market.getFaction() != null) {
             for (int i = 0; i < 8; i++) {
-                partner = market.getFaction().createRandomPerson(Gender.MALE, random());
+                partner = market.getFaction().createRandomPerson(Gender.ANY, random());
                 if (giver == null || giver.getPortraitSprite() == null
                         || !giver.getPortraitSprite().equals(partner.getPortraitSprite())) break;
             }
         }
 
         if (partner != null) {
-            partner.setName(new FullName(RIGHT_FIRST_NAME, "", Gender.MALE));
-            ensureMalePortrait(partner);
-            partner.setRankId(Ranks.CITIZEN);
-            partner.setVoice(Voices.VILLAIN);
-            right = partner.getName().getFirst();
+            replaceLegacyIdentity(partner, LEGACY_RIGHT_NAME);
+            partner.setRankId(HOUSE_RANK);
+            partner.setPostId(null);
+            partner.setVoice(Voices.BUSINESS);
         }
     }
 
-    protected void ensureMalePortrait(PersonAPI person) {
-        if (person == null || person.getFaction() == null) return;
-        if (person.getFaction().getPortraits(Gender.MALE).getItems()
-                .contains(person.getPortraitSprite())) return;
+    protected void replaceLegacyIdentity(PersonAPI person, String legacyFirstName) {
+        if (person == null || person.getFaction() == null || person.getName() == null
+                || !legacyFirstName.equals(person.getName().getFirst())) return;
 
-        PersonAPI replacement = person.getFaction().createRandomPerson(Gender.MALE, random());
-        if (replacement != null) person.setPortraitSprite(replacement.getPortraitSprite());
+        PersonAPI replacement = person.getFaction().createRandomPerson(Gender.ANY, random());
+        if (replacement == null) return;
+
+        person.setName(replacement.getName());
+        person.setGender(replacement.getGender());
+        person.setPortraitSprite(replacement.getPortraitSprite());
+    }
+
+    @Override
+    protected void advanceImpl(float amount) {
+        migrateLegacyJob();
+
+        if (!identitiesChecked) {
+            setUpPeople(getGiverMarket());
+            identitiesChecked = true;
+        }
+
+        super.advanceImpl(amount);
+    }
+
+    protected void migrateLegacyJob() {
+        if (fightNightVersion >= CURRENT_VERSION) return;
+
+        asks.clear();
+        FishRequirement ask = new FishRequirement();
+        ask.count = 2;
+        asks.add(ask);
+        fightNightVersion = CURRENT_VERSION;
+        resetDisplayedProgress();
     }
 
     @Override
@@ -155,7 +184,8 @@ public class MafiaJob extends FishJob {
                                      final Map<String, MemoryAPI> memoryMap) {
         clearFighters();
 
-        boolean opened = FishHandoffPicker.show(dialog, "Select two fighters", "Enter", asks,
+        boolean opened = FishHandoffPicker.show(dialog,
+                "Choose exactly two fish for the main event.", "Use this pair.", asks,
                 new FishHandoffPicker.Listener() {
                     @Override
                     public void picked(FishHandoffPicker.Selection selection) {
@@ -189,6 +219,13 @@ public class MafiaJob extends FishJob {
         leftFighter = selection.getContents().get(leftIndex);
         rightFighter = selection.getContents().get(leftIndex == 0 ? 1 : 0);
 
+        left = fightName(leftFighter);
+        right = fightName(rightFighter);
+        if (left.equals(right)) {
+            left += " Red";
+            right += " Blue";
+        }
+
         leftOdds = odds(leftFighter, rightFighter);
         rightOdds = odds(rightFighter, leftFighter);
     }
@@ -215,6 +252,15 @@ public class MafiaJob extends FishJob {
         }
     }
 
+    @Override
+    protected void afterPickerPaid(InteractionDialogAPI dialog,
+                                   Map<String, MemoryAPI> memoryMap) {
+        FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid");
+        FireBest.fire(null, dialog, memoryMap, "CatchReleaseRingSettlement");
+        showRewardReceipts(dialog);
+        FireAll.fire(null, dialog, memoryMap, OPTIONS_TRIGGER);
+    }
+
     protected void clearFighters() {
         pendingSelection = null;
         leftFighter = null;
@@ -223,6 +269,7 @@ public class MafiaJob extends FishJob {
         rightOdds = BASE_ODDS;
         wager = null;
         won = false;
+        leftWon = false;
     }
 
     protected static float odds(FishCatch backed, FishCatch opponent) {
@@ -235,11 +282,16 @@ public class MafiaJob extends FishJob {
 
     @Override
     protected void beforePayment(FishCatch offered, MemoryAPI mem) {
-        if (wager == null) return;
+        if (wager == null) {
+            float decided = leftOdds + rightOdds;
+            leftWon = decided <= 0f || random().nextFloat() < leftOdds / decided;
+            return;
+        }
 
         float odds = wager.equals(left) ? leftOdds : rightOdds;
 
         won = random().nextFloat() < odds;
+        leftWon = won == wager.equals(left);
 
         rewards.clear();
 
@@ -251,24 +303,27 @@ public class MafiaJob extends FishJob {
 
     @Override
     protected String getIntelSpecialTerms() {
-        return "Salvatore will settle the agreed fee, or Enzo can assign the pair and quote odds "
-                + "from where each fish falls within its species' recorded size range. Back "
-                + "either entrant; a win pays more and a loss pays nothing.";
+        return "You may take the fixed supplier fee of " + describeRewards()
+                + " or stake the entire fee on either fish. A winning stake replaces the fee "
+                + "with a newly rolled, larger purse; a loss pays nothing and leaves no debt. "
+                + "The house keeps the share not assigned to either fighter.";
     }
 
     @Override
     protected String getIntelPurpose() {
-        return "Salvatore and Enzo are arranging a private fish fight using the submitted pair. "
-                + "Enzo runs the tank and the book.";
+        return "Supply any two fish from your own catch for the bar's next Fight Night main "
+                + "event. At hand-in, the Commissioner measures each fish against the normal "
+                + "size range for its species and posts both public lines along with the house "
+                + "share.";
     }
 
     @Override
     protected void setJobTokens(MemoryAPI mem) {
         if (mem == null) return;
 
+        migrateLegacyJob();
         setUpPeople(getGiverMarket());
 
-        token(mem, "$personFirstName", left);
         token(mem, "$catchreleaseLeft", left);
         token(mem, "$catchreleaseRight", right);
         token(mem, "$catchreleaseRingSelectionReady",
@@ -281,6 +336,7 @@ public class MafiaJob extends FishJob {
 
         token(mem, "$catchreleaseLeftOdds", percent(leftOdds));
         token(mem, "$catchreleaseRightOdds", percent(rightOdds));
+        token(mem, "$catchreleaseHouseOdds", percent(1f - leftOdds - rightOdds));
         token(mem, "$catchreleaseWon", won);
 
         // separate boolean since a rules-engine condition needs a true/false, not a name string
@@ -299,14 +355,62 @@ public class MafiaJob extends FishJob {
                 describeFighter(wagered, "the backed fighter"));
         token(mem, "$catchreleaseFoeFish",
                 describeFighter(opposing, "the opposing fighter"));
+
+        String winner = leftWon ? left : right;
+        String loser = leftWon ? right : left;
+        FishCatch winningFish = leftWon ? leftFighter : rightFighter;
+        FishCatch losingFish = leftWon ? rightFighter : leftFighter;
+
+        token(mem, "$catchreleaseWinner", winner);
+        token(mem, "$catchreleaseLoser", loser);
+        token(mem, "$catchreleaseWinnerFish",
+                describeFighter(winningFish, "the winning fighter"));
+        token(mem, "$catchreleaseLoserFish",
+                describeFighter(losingFish, "the other fighter"));
+
+        int nights = getNightsSupplied();
+        token(mem, "$catchreleaseFightNights", nights);
+        token(mem, "$catchreleaseFightNightWord", nights == 1 ? "entry" : "entries");
+        token(mem, "$catchreleaseFightDate", Global.getSector() == null
+                ? "Tonight" : Global.getSector().getClock().getDateString());
+    }
+
+    protected static String fightName(FishCatch fish) {
+        if (fish == null) return "Open Line";
+
+        String species = fish.getDisplayName();
+        float size = fish.getSizeFraction();
+        if (size < 0.2f) return species + " Nipper";
+        if (size < 0.4f) return species + " Scrapper";
+        if (size < 0.6f) return species + " Stayer";
+        if (size < 0.8f) return species + " Bruiser";
+        return species + " Crown";
+    }
+
+    protected int getNightsSupplied() {
+        if (Global.getSector() == null) return 0;
+        return Math.max(0, Global.getSector().getMemoryWithoutUpdate()
+                .getInt(NIGHTS_SUPPLIED_KEY));
+    }
+
+    @Override
+    protected boolean onDelivered() {
+        if (!nightRecorded && Global.getSector() != null) {
+            MemoryAPI memory = Global.getSector().getMemoryWithoutUpdate();
+            memory.set(NIGHTS_SUPPLIED_KEY, Math.max(0,
+                    memory.getInt(NIGHTS_SUPPLIED_KEY)) + 1);
+            nightRecorded = true;
+        }
+
+        return false;
     }
 
     protected static String describeFighter(FishCatch fish, String fallback) {
         if (fish == null) return fallback;
 
-        return "the " + fish.getGrade().name.toLowerCase()
+        return Misc.ucFirst(fish.getGrade().name.toLowerCase())
                 + " " + fish.getDisplayName()
-                + " (" + Misc.getRoundedValue(fish.length) + " m)";
+                + ", " + Misc.getRoundedValue(fish.length) + " m";
     }
 
     protected static String percent(float odds) {
@@ -316,6 +420,6 @@ public class MafiaJob extends FishJob {
 
     @Override
     public String getBaseName() {
-        return "The Tank";
+        return "Fight Night: Main Event";
     }
 }
