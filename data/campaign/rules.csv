@@ -1668,7 +1668,7 @@ catchrelease_fq_escrow_action,CatchReleaseFleetQuestActionText,$entity.catchrele
 catchrelease_fq_escrow_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == escrow,,"Recovery vessel $entity.catchreleaseFleetFlagshipName is trying to close contract $entity.catchreleaseFleetContract. The original specimen disappeared with its carrier, but the contract allows a replacement. The skipper needs $entity.catchrelease_fleetQuestAsk before the outstanding liability grows any further.",,
 catchrelease_fq_escrow_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == escrow,,The skipper offers the following terms for a replacement.,,
 catchrelease_fq_escrow_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == escrow,,"""Recovery vessel $entity.catchreleaseFleetFlagshipName. Skipper speaking. I've got a contract I need off my books.",,
-catchrelease_fq_escrow_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""$entity.catchreleaseFleetContract. Somebody sold a specimen two cycles ago. Carrier vanished before delivery, cargo and all. We got handed the recovery.""
+catchrelease_fq_escrow_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Somebody sold a specimen two cycles ago. Carrier vanished before delivery, cargo and all. We got handed the recovery.""
 
 They scroll through several pages of figures.
 

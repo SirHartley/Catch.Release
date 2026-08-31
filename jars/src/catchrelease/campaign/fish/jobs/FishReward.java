@@ -330,7 +330,7 @@ public abstract class FishReward {
 
             ShopEntry entry = ShopEntry.of(tackle);
             TooltipMakerAPI item = tooltip.beginImageWithText(entry.getIconName(), 48f);
-            item.addPara("Fishing Outfitter schematic", Misc.getHighlightColor(), 0f);
+            item.addPara("Fishing Outfitter schematic", Misc.getBasePlayerColor(), 0f);
             item.addPara(tackle.name, Misc.getTextColor(), 3f);
             item.addPara("Fits: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
                     describeFit(tackle.fit));
@@ -420,14 +420,13 @@ public abstract class FishReward {
             if (tooltip == null || spec == null || isRedundant()) return false;
 
             TooltipMakerAPI item = tooltip.beginImageWithText(
-                    "graphics/catchrelease/icon/blank.png", 48f);
-            item.addPara("Range data", Misc.getHighlightColor(), 0f);
-            item.addPara(spec.getDisplayName(), spec.rarity.color, 3f);
+                    "graphics/catchrelease/icon/blank.png", 42f);
+            item.addPara("Range data: %s", 0f, Misc.getHighlightColor(), spec.rarity.color, spec.getDisplayName());
             item.addPara("Range data unlocks the habitat of the pattern on your map, allowing you"
-                    + " to see its range and plot a course to catch it.", 6f);
+                    + " to see its range and plot a course to catch it.", Misc.getGrayColor(), 6f);
             UIPanelAPI card = tooltip.addImageWithText(pad);
 
-            CustomPanelAPI silhouette = Global.getSettings().createCustom(48f, 48f,
+            CustomPanelAPI silhouette = Global.getSettings().createCustom(42f, 42f,
                     new RangeDataSilhouetteOverlay(spec));
             card.addComponent(silhouette).inLMid(0f);
             card.bringComponentToTop(silhouette);
