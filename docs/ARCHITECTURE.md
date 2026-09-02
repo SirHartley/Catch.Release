@@ -238,6 +238,8 @@ Peaceful fleet resolutions use `CatchReleaseFleetResolutionOptions` and one Esca
 
 ### `campaign/fish` and `campaign/fish/data`
 
+Species names and descriptions come from `data/campaign/fish.csv`; renames retain the IDs used by catches, logs, and quest state. The `mackerel` ID displays as Moiré Mackerel. Its changing markings are descriptive flavour, not a new animation.
+
 | File | Responsibility |
 |---|---|
 | `FishingTaboo.java` | Central list of factions that reject fishing: the Church and the Path. Bar jobs, fleet jobs, and standing Fishermen use it. |
