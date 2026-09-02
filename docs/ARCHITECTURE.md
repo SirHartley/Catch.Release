@@ -238,7 +238,14 @@ Peaceful fleet resolutions use `CatchReleaseFleetResolutionOptions` and one Esca
 
 ### `campaign/fish` and `campaign/fish/data`
 
-Species names and descriptions come from `data/campaign/fish.csv`; renames retain the IDs used by catches, logs, and quest state. The `mackerel` ID displays as Moiré Mackerel. Its changing markings are descriptive flavour, not a new animation.
+Species display identities retain their original save IDs in `data/campaign/fish.csv`:
+
+| Save ID | Display identity | Category |
+|---|---|---|
+| `mackerel` | Moiré Mackerel, with changing bars | Fish |
+| `cutout` | Volley Dolphin, which plays with floating objects | Other |
+
+These descriptions do not add campaign behaviour or animations. Existing icons remain unchanged; unresolved replacement sprites retain the `placeholder art` comment.
 
 | File | Responsibility |
 |---|---|
