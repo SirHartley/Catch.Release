@@ -246,6 +246,7 @@ Species display identities retain their original save IDs in `data/campaign/fish
 | `cutout` | Volley Dolphin, which plays with floating objects | Other |
 | `hull_grazer` | Hull Grazer, a large pleco-like hull cleaner that leaves armour intact | Fish |
 | `longliner` | The Imposter, a whale disguised as the Fisherman's boat | Other, Special |
+| `miscount` | Relic Crab, a horseshoe-crab form matching a fossil cast | Crab |
 
 These descriptions do not add campaign behaviour or animations. Existing icons remain unchanged; unresolved replacement sprites retain the `placeholder art` comment.
 
