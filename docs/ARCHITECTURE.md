@@ -65,7 +65,7 @@ Keep compiler output outside `jars/`. Otherwise stale classes or an old jar can 
 13. Aberration cache updates on arrival and map opening.
 14. Monthly fish-range reassessment, including an immediate first-save assessment.
 15. Legendary haunt state and stale-haunt cleanup.
-16. Longliner decoy state and stale-decoy cleanup.
+16. The Imposter's decoy state and stale-decoy cleanup.
 17. Upgrade base-value refresh from the data sheet.
 18. The Catch.Release distress provider, followed by the generic distress framework on vanilla's nearby-event cadence.
 19. The skillshot framework.
@@ -145,7 +145,7 @@ When Console Commands is installed, the jar exposes:
 
 - `AllFish.java`
 - `AddFish.java`, using the shared species resolver
-- `SpawnFish.java <species>`, including legendary reset and Longliner safeguards
+- `SpawnFish.java <species>`, including legendary reset and Imposter safeguards
 - `HauntStatus.java`
 - `SpawnFisherman.java`
 - `SpawnFleetQuest.java`
@@ -245,8 +245,11 @@ Species display identities retain their original save IDs in `data/campaign/fish
 | `mackerel` | Moiré Mackerel, with changing bars | Fish |
 | `cutout` | Volley Dolphin, which plays with floating objects | Other |
 | `hull_grazer` | Hull Grazer, a large pleco-like hull cleaner that leaves armour intact | Fish |
+| `longliner` | The Imposter, a whale disguised as the Fisherman's boat | Other, Special |
 
 These descriptions do not add campaign behaviour or animations. Existing icons remain unchanged; unresolved replacement sprites retain the `placeholder art` comment.
+
+The Imposter retains the `LonglinerDecoy` class, `longliner` species ID, and existing Longliner-named memory, dialogue-option, and sound keys. Its reveal, shield, chase, and Fisherman question state remain save-compatible.
 
 | File | Responsibility |
 |---|---|
@@ -350,7 +353,7 @@ The same persistent Fisherman appears on every boat. Inhabited systems have a st
 
 | File | Responsibility |
 |---|---|
-| `FishermanSpawner.java` | Rolls and reconciles the temporary visitor. It allows one visitor sector-wide and one Fisherman per system, repairs old pointers and duplicates, excludes the Longliner decoy, and yields to tutorial postings. Its test entry bypasses only the natural roll. |
+| `FishermanSpawner.java` | Rolls and reconciles the temporary visitor. It allows one visitor sector-wide and one Fisherman per system, repairs old pointers and duplicates, excludes the Imposter decoy, and yields to tutorial postings. Its test entry bypasses only the natural roll. |
 | `CoreFisherSpawner.java` | Maintains one standing boat in each eligible inhabited system and re-creates missing boats weekly or when the player arrives. It reuses any canonical local Fisherman. |
 | `CoreFisherBehavior.java` | Permanent outer-reaches schedule for a standing boat. |
 | `OuterReaches.java` | Chooses destinations and straight-line legs that avoid inhabited inner orbits. Placement is clamped only in inhabited systems. |
@@ -416,7 +419,7 @@ The tutorial has six lessons, a returning-player skip, and a developer shortcut.
 | `GhostAsteroidEntityPlugin.java` | Non-interactive drifting haunt asteroid. |
 | `HauntMineEntityPlugin.java` | False Dawn mine. Red shoves, blue interdicts and drags, yellow pulls. Mines trigger by proximity or harpoon and clean themselves up after firing. |
 | `BuriedMoteEntityPlugin.java` | Invisible open-water fish. `unearth()` atomically replaces it with a normal mote. |
-| `PondFishSpawner.java` | Selects species by habitat, range, implement, weights, tackle, and rumor effects. Stranger rumors bypass only the range gate. The Longliner never spawns here. |
+| `PondFishSpawner.java` | Selects species by habitat, range, implement, weights, tackle, and rumor effects. Stranger rumors bypass only the range gate. The Imposter never spawns here. |
 | `BuriedMoteSpawner.java` | Maintains a buried-mote population around the player. |
 
 ### `campaign/fish/shop`
@@ -508,7 +511,7 @@ Legendary fish are unique, lamp-only targets with one host system and no purchas
 
 | File | Responsibility |
 |---|---|
-| `LegendaryChases.java` | Persistent host, sighting, provocation, Longliner reveal, completion, and defense state for each legendary. Uncaught fish relocate after 90 unseen days, never while the player is present. Longliner relocates after a revealed departure. Host selection prefers uninhabited systems and repairs null-host saves. |
+| `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. Uncaught fish relocate after 90 unseen days, never while the player is present. The Imposter relocates after a revealed departure. Host selection prefers uninhabited systems and repairs null-host saves. |
 | `LegendaryHaunt.java` | Transient coordinator. Starts only after a provoked legendary has been seen, eases modules in and out around visibility, and removes all haunt state on departure, completion, relocation, load cleanup, or test reset. |
 | `HauntModule.java` | Advance-and-cleanup contract for a haunt effect. |
 | `BaseHauntModule.java` | Tracks spawned props, chooses positions near the player, and removes fleets and entities immediately. |
@@ -522,9 +525,9 @@ Legendary fish are unique, lamp-only targets with one host system and no purchas
 | `CoherenceSurgeModule.java` | Holds the coherence overlay at full strength for the False Dawn. |
 | `SlipDashModule.java` | Gives the moray frequent curved escape dashes and builds a moving vanilla slipstream behind it. Segments fade rather than being removed so texture offsets remain valid. |
 | `QuorumShellGame.java` | Rebuildable three-body endgame after the escort is gone. One body is real; decoys use splinter catches and presented Quorum colours. Results reveal the body only after landing. |
-| `LonglinerDecoy.java` | Full Fisherman-like fleet used as the Longliner's disguise. It is excluded from Fisherman reconciliation and reveals only under the player's Breach Lights. Revelation reports and immediately removes the boat, then replaces it at the same position with a mote. The mote drifts for one second along the boat's last travel direction, shows the alert floaty with the positional discovery sting, waits another 0.3 seconds, and then begins its existing escape. |
+| `LonglinerDecoy.java` | Full Fisherman-like fleet used as the Imposter's disguise. It is excluded from Fisherman reconciliation and reveals only under the player's Breach Lights. Revelation reports and immediately removes the boat, then replaces it at the same position with a mote. The mote drifts for one second along the boat's last travel direction, shows the alert floaty with the positional discovery sting, waits another 0.3 seconds, and then begins its existing escape. |
 | `GhostAsteroidsModule.java` | Moving field of harmless ghost asteroids that reseeds near the chase. |
-| `LegendaryShields.java` | Shared shield radius, state, visuals, and per-species defense rules. Handles the Longliner explosive-only shield, Quorum escort and regeneration, Lantern Jack stored shells and prey lure, ordinary regrowing shells, first-hit provocation, flee/prowl exceptions, status text, and persistent defense state. |
+| `LegendaryShields.java` | Shared shield radius, state, visuals, and per-species defense rules. Handles the Imposter explosive-only shield, Quorum escort and regeneration, Lantern Jack stored shells and prey lure, ordinary regrowing shells, first-hit provocation, flee/prowl exceptions, status text, and persistent defense state. |
 | `MoteDashModule.java` | Moray countermeasure that throws nearby ordinary motes at the fleet. Contact interdicts; missing ammunition is replaced by temporary common props. Quest and shell-game motes are excluded. |
 
 The associated `entities/HauntMineEntityPlugin.java` implements mine behavior. `ChromaticAberrationModule` uses `rendering/plugins/ChromaticAberrationOverlay.java`; `CoherenceSurgeModule` uses the coherence overlay.
@@ -775,7 +778,7 @@ The shared UI language is used by the fishing map, outfitter, survey counter, an
 - When changing a rarity band, tune `difficulty`, `restlessness`, `motionSpeed`, `progressRateMult`, and `escapeRateMult` together and simulate the result. Difficulty alone stops carrying the late game once bar-size upgrades are large.
 - Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` may still roll either for one behavior interval.
 - `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Requirement rolling must combine that with method: drone catches are always pond catches, while Harpoon can use either implement.
-- A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and Longliner; the manta is Abyssal.
+- A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
 
 ### Coherence model

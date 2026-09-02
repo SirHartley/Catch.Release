@@ -60,7 +60,7 @@ public class HauntStatus implements BaseCommand {
 
             line.append(", provoked=").append(LegendaryChases.isProvoked(spec.id));
             if (LegendaryShields.isHauntSuppressed(spec)) {
-                line.append(", haunt suppressed (Longliner shield intact)");
+                line.append(", haunt suppressed (hull shield intact)");
             }
             if (LegendaryChases.isRevealed(spec.id)) line.append(", revealed");
 

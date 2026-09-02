@@ -3995,7 +3995,7 @@ catchrelease_fisherOptAsk_longliner,CatchReleaseFisherQuestionsNew,"CatchRelease
 !$global.catchrelease_fisherAsked_longliner","CatchReleaseCMD addFisherQuestion catchrelease_ask_longliner ""I just had you turn into a fish."" false",,,
 catchrelease_ask_longliner,DialogOptionSelected,$option == catchrelease_ask_longliner,$global.catchrelease_fisherAsked_longliner = true,"The Fisherman looks down, pats his coat pockets, then checks the nearest display.
 
-""No. You put the lamps on a Longliner and hauled in a fish.""
+""No. You put the lamps on a fishing boat and hauled in a whale.""
 
 He scrolls back through the return once.
 
