@@ -51,7 +51,7 @@ public final class FishIntelMapButton {
                             0f);
                 }
             }
-        }, TooltipMakerAPI.TooltipLocation.BELOW);
+        }, TooltipMakerAPI.TooltipLocation.BELOW, false);
     }
 
     public static void addPlotRoute(TooltipMakerAPI info, float width,
@@ -74,7 +74,7 @@ public final class FishIntelMapButton {
                                       Object tooltipParam) {
                 tooltip.addPara("Lays in a course to the system named by this request.", 0f);
             }
-        }, TooltipMakerAPI.TooltipLocation.BELOW);
+        }, TooltipMakerAPI.TooltipLocation.BELOW, false);
     }
 
     public static void addSetAutopilot(TooltipMakerAPI info, float width,
@@ -97,7 +97,7 @@ public final class FishIntelMapButton {
                                       Object tooltipParam) {
                 tooltip.addPara("Lays in a course to this intel's current destination.", 0f);
             }
-        }, TooltipMakerAPI.TooltipLocation.BELOW);
+        }, TooltipMakerAPI.TooltipLocation.BELOW, false);
     }
 
     public static List<FishRequirement> forSpecies(String speciesId) {

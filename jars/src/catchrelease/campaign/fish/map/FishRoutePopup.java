@@ -186,13 +186,13 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         controls.addCustom(titleRow, 0f);
         controls.addTooltipTo(createSimpleTooltip(220f,
                 "Close the planner and put the sidebar back."),
-                close, TooltipMakerAPI.TooltipLocation.BELOW);
+                close, TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         searchField = controls.addTextField(innerWidth, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 8f);
         searchField.setText(SEARCH_GHOST);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
                 "Type to filter the species by name. The list follows as you type."),
-                TooltipMakerAPI.TooltipLocation.BELOW);
+                TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         FishType[] types = FishType.values();
 
@@ -210,7 +210,8 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                             () -> filter.types.contains(type), () -> onChipToggled(type)));
 
             chipRow.addComponent(chip).inTL(i * (chipWidth + CHIP_GAP), 0f);
-            controls.addTooltipTo(createChipTooltip(type), chip, TooltipMakerAPI.TooltipLocation.BELOW);
+            controls.addTooltipTo(createChipTooltip(type), chip,
+                    TooltipMakerAPI.TooltipLocation.BELOW, false);
         }
 
         controls.addCustom(chipRow, 8f);
@@ -219,7 +220,8 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                 new PaneWidgets.ListHeader(() -> rows.isEmpty()
                         ? "SPECIES - NONE MATCH" : "SPECIES - " + rows.size()));
         controls.addCustom(header, 8f);
-        controls.addTooltipTo(createLegendTooltip(), header, TooltipMakerAPI.TooltipLocation.BELOW);
+        controls.addTooltipTo(createLegendTooltip(), header,
+                TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         panel.addUIElement(controls).inTL(PAD, PAD);
     }
@@ -239,7 +241,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         footer.addTooltipToPrevious(createSimpleTooltip(260f,
                 "Plot the shortest route through the picked species' ranges and draw it on"
                         + " the hyperspace map."),
-                TooltipMakerAPI.TooltipLocation.ABOVE);
+                TooltipMakerAPI.TooltipLocation.ABOVE, false);
 
         panel.addUIElement(footer).inTL(PAD, height - PAD - FOOTER_HEIGHT);
     }

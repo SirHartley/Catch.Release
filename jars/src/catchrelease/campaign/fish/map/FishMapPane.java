@@ -241,7 +241,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 "Paints how well the fabric is holding over the whole sector: clear where it"
                         + " holds, purple where it runs thin, hot where it is barely there."
                         + " Specimens taken where the fabric is thin come up aberrant."),
-                TooltipMakerAPI.TooltipLocation.ABOVE);
+                TooltipMakerAPI.TooltipLocation.ABOVE, false);
 
         panel.addUIElement(footer).inTL(PAD, height - PAD - COHERENCE_HEIGHT);
     }
@@ -295,14 +295,14 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
                 "Pick the fish you need - open jobs and upgrade asks are suggested - and plot"
                         + " the shortest route through their ranges."),
-                TooltipMakerAPI.TooltipLocation.BELOW);
+                TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         searchField = controls.addTextField(innerWidth, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 8f);
         searchField.setText(filter.search == null || filter.search.isEmpty()
                 ? SEARCH_GHOST : filter.search);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
                 "Type to filter the species by name. The list and the shading follow as you type."),
-                TooltipMakerAPI.TooltipLocation.BELOW);
+                TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         FishType[] types = FishType.values();
 
@@ -320,7 +320,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                             () -> filter.types.contains(type), () -> onChipToggled(type)));
 
             chipRow.addComponent(chip).inTL(i * (chipWidth + CHIP_GAP), 0f);
-            controls.addTooltipTo(createChipTooltip(type), chip, TooltipMakerAPI.TooltipLocation.BELOW);
+            controls.addTooltipTo(createChipTooltip(type), chip,
+                    TooltipMakerAPI.TooltipLocation.BELOW, false);
         }
 
         controls.addCustom(chipRow, 8f);
@@ -333,13 +334,14 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
         controls.addCustom(deselect, 8f);
         controls.addTooltipTo(createSimpleTooltip(260f,
                 "Clear the picked species and switch off every category filter."),
-                deselect, TooltipMakerAPI.TooltipLocation.BELOW);
+                deselect, TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         CustomPanelAPI header = panel.createCustomPanel(innerWidth, HEADER_HEIGHT,
                 new PaneWidgets.ListHeader(() -> shownCount == 0
                         ? "SPECIES - NONE MATCH" : "SPECIES - " + shownCount));
         controls.addCustom(header, 8f);
-        controls.addTooltipTo(createLegendTooltip(), header, TooltipMakerAPI.TooltipLocation.BELOW);
+        controls.addTooltipTo(createLegendTooltip(), header,
+                TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         panel.addUIElement(controls).inTL(PAD, PAD);
     }

@@ -531,7 +531,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             info.addCustom(head, 0f);
             info.addTooltipTo(createOutfitterHelpTooltip(), help,
-                    TooltipMakerAPI.TooltipLocation.BELOW);
+                    TooltipMakerAPI.TooltipLocation.BELOW, false);
 
             if (entry.isUpgrade()) {
                 LazyFont titleFont = ShopUi.getTitleFont();
