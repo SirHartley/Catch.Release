@@ -36,7 +36,7 @@ Independently check the result against the full current lore and the actual disp
 
 Read [LORE.md](LORE.md) for the setting's facts, absolute knowledge boundaries and character instructions. Its [Writing style](LORE.md#writing-style) section owns prose guidance, examples, dialogue cadence and player-option wording. Those requirements apply to every player-facing surface below.
 
-The lore reference is written for the author, not in the voice of the fiction. It must explicitly explain what a scene leaves implicit. Do not soften its facts, prohibitions or explanations to imitate the mod's understatement.
+For edits to the lore reference itself, follow [documentation upkeep](../CLAUDE.md#documentation-upkeep); do not apply fictional ambiguity to its instructions.
 
 ### Dialogue and options
 

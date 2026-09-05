@@ -1,13 +1,11 @@
 # Catch.Release lore and writing reference
 
-This is an out-of-universe reference for writers. It defines the setting's facts, the limits of each character's knowledge, and the instructions for writing them. **The document must be explicit. The fiction may leave the player uncertain; the writer must not be uncertain about the rules.**
-
-Do not apply the mod's understated narration to this document. Explain causes, distinctions, prohibitions and exceptions directly. An unexplained mystery in the fiction is not permission to leave its writing restrictions unexplained here.
+This is an out-of-universe reference for writers: setting facts, knowledge limits, style and character. **The fiction may leave the player uncertain; this document must state its rules explicitly.** Explain causes, prohibitions and exceptions here, including those a scene must leave unstated.
 
 - **Established facts** are true for the writer even when no character can state them.
 - **Knowledge limits** say who can understand those facts. A narrator or clever supporting character must not bypass those limits.
-- **Writing instructions** control what the player is told and how. “Must,” “never” and “do not” are requirements, not suggestions.
-- **Examples** demonstrate the instruction beside them. They are not mandatory dialogue, additional events or new mechanics.
+- **Writing instructions** control what the player is told and how. “Must,” “never” and “do not” are requirements. “Normally,” “prefer” and “rarely” express defaults or frequency, not absolute bans.
+- **Examples** demonstrate the instruction beside them, not a sentence pattern to copy. They are not mandatory dialogue, additional events or new mechanics. Source-labelled excerpts quote existing mod text; unlabelled examples are illustrative. An excerpt does not endorse every line in its source tree.
 - **Unanswered questions** are explicitly unavailable to the fiction. Writers must not invent answers to them.
 
 Read the foundations in order: [fabric and coherence](#fabric-and-coherence), [breaches and ruptures](#breaches-ruptures-and-ponds), [patterns](#patterns), then [what observers can notice](#what-observers-can-notice). The character sections build on those definitions. [Writing style](#writing-style) and [terminology](#terminology) apply across the cast.
@@ -81,7 +79,7 @@ It is a fault, not a jump point, gate, stable portal or navigable tunnel. Normal
 
 ### Trade terminology
 
-“Pond” is fishing slang, suitable in trade speech or deliberately informal fishing UI. Use “rupture” or “breach” in technical descriptions, surveys and neutral narration. Reserve “pond” for trade speech, a direct quotation of that speech, or deliberately informal fishing UI.
+“Pond” is fishing slang, suitable in trade speech or deliberately informal fishing UI. Technical descriptions, surveys and neutral narration should normally use “rupture” or “breach.” An occasional occupational term does not make the fabric literal water; the [no-water restrictions](#fabric-not-water) remain absolute.
 
 A location without an existing rupture is “open space.”
 
@@ -486,6 +484,20 @@ Its visible retrieval trace is not a steel cable.
 
 The projectile is large enough to damage a ship conventionally. The Fisherman may explain it as work equipment, but he does not pretend a multi-tonne launcher is harmless.
 
+**Existing dialogue — `catchrelease_introDeepResume_continue`, after the equipment transfer:**
+
+> He points at the second rig.
+>
+> "That's a harpoon. Name's apt, this time."
+>
+> "Quick and hard way to get a pattern. Lights thin the fabric enough to bring one within reach. Harpoon puts a ROD head on it before it slips away."
+>
+> He looks directly at you.
+>
+> "It's a heavy projectile. Treat it accordingly."
+
+He explains the job, then takes responsibility for the warning. The dry remark does not replace the operating instructions.
+
 ### Legality and Breach Lights
 
 ROD equipment is unlicensed and hazardous at best.
@@ -589,6 +601,30 @@ Show that through his priorities and omissions, not a confession, villainous smi
 
 **Keep both facts:** his immediate help and warmth are sincere; he does not share his whole calculation about the larger practice. Do not “resolve” this by making his kindness fake or by making him unaware of the consequences.
 
+**Existing dialogue — `catchrelease_introTurnIn2`, the first catch hand-in:**
+
+> The catch is transferred aboard the trawler.
+>
+> The Fisherman checks the ROD telemetry first.
+>
+> "Clean enough. Good."
+>
+> Only then does he look at what you brought back.
+>
+> "First trip's mostly about getting the rig home with you. You did."
+
+He checks the learner's safe return before the value of the catch. His approval is modest but genuine; no ominous qualification follows it.
+
+**Existing dialogue — `catchrelease_introTurnIn5_cont`, at graduation:**
+
+> "That's the lesson finished. You know enough now to make your own mistakes."
+>
+> He gives the range records another glance.
+>
+> "And if a return doesn't match what the chart promised, bring it here before you decide it's useless."
+
+He gives the player independence without withdrawing help. These short responses suit their moments; longer teaching exchanges still need room to finish the thought.
+
 #### Speech
 
 Give him enough room to speak naturally. He can pause, teach, observe, joke and finish a practical thought. When he stops, it should be a deliberate boundary rather than clipped prose.
@@ -603,6 +639,20 @@ For example:
 >
 > “Fish is fine if you're buying supper. Pattern's the careful word.”
 
+**Existing dialogue — `catchrelease_ask_deepWater`, answering a question about thin fabric:**
+
+> "Not water."
+>
+> There is no irritation in the correction.
+>
+> "Thinner fabric. Pattern gets less help holding one shape."
+>
+> He looks at you.
+>
+> "Same rule applies to the crew. Keep the trip short. Don't turn it into research."
+
+The correction leads to a useful explanation and concern for the crew. He is limiting their exposure, not mocking the question or hiding ordinary operating advice behind a riddle.
+
 #### Help and trust
 
 Dealing with him has no secret catch. He supplies equipment, work, range data and useful advice. Do not add a betrayal merely because he is strange.
@@ -616,6 +666,20 @@ His old registry name is Baha; he normally goes by Fisherman.
 Paperwork still identifies him as Baha. The name can degrade with local coherence. A particular location's missing letters must be consistent, not random dramatic corruption.
 
 Degradation belongs where the fabric is sufficiently thin. Do not corrupt his name on every appearance.
+
+**Existing dialogue — `catchrelease_ask_baha`, when asked about the registry name:**
+
+> "Registry says Baha."
+>
+> The Fisherman takes a drink.
+>
+> "Registry says my last physical was overdue before half the officers who signed it were born."
+>
+> He sets the mug down.
+>
+> "Fisherman will do."
+
+The old paperwork gives him something to joke about. He answers the name question without supplying an account of his transformation.
 
 #### The catch
 
@@ -637,7 +701,7 @@ The scientist who helped develop the ROD is aboard, merged into the crew and no 
 
 ### Boats
 
-His fleet appears where it should not and need not travel between appearances. Several game instances can exist, but fictionally they are not franchises, clones, siblings, holograms or a distributed organization. It is the Fisherman in more than one place.
+His fleet appears where it should not and need not travel between appearances. Several game instances may exist in inhabited systems and on the frontier. Fictionally they are not franchises, clones, siblings, holograms or a distributed organization. It is the Fisherman in more than one place.
 
 The player can ask about this. He knows how far to answer; he is not pretending to misunderstand. Do not add an explanation of the mechanism. Simultaneous presence is an established fact; its mechanism is unavailable to the prose.
 
@@ -649,7 +713,7 @@ Crablobab is a low-coherence being associated with the Fisherman's fleet. He ret
 
 ### Voice and behavior
 
-He is cheerful, colourful, expansive and physically comic. Low coherence has made his merchant-clown character physically true: space, stock, hands and pockets take the shape a transaction needs.
+He is cheerful, colourful, expansive and physically comic. Low coherence has made his merchant-clown character physically true: space, stock, hands, pockets and continuity take the shape a transaction needs.
 
 He neither worries about this nor needs a theory of it. Do not interpret his ease with the changes as proof that he shares the Fisherman's awareness.
 
@@ -695,7 +759,40 @@ Neither characters nor narration comment on the coat's spatial inconsistency.
 
 **Why:** the physical action supplies the anomaly; the product supplies his immediate concern. The first version tells the player to recognize spatial impossibility and makes the narrator acknowledge it.
 
-**How to continue:** let him sell the product, handle the payment or elaborate on its appeal. Do not have him explain the coat, whisper a warning or adopt the Fisherman's measured evasions.
+**How to continue:** let him sell the product, handle the payment or elaborate on its appeal. Do not have him explain the coat, whisper a warning or adopt the Fisherman's measured evasions. The two-line example above demonstrates the coat, not the length or rhythm of a whole sales pitch.
+
+**Existing dialogue — `catchrelease_crabWareChicken_profile`, the chicken display offer. Price tokens are unchanged:**
+
+> "Chicken!"
+>
+> Crablobab reaches into his coat, past a rack of boxed merchandise, and produces a little display tile. He plants it on the counter with a flourish.
+> A chicken marches across the screen, vanishes around one edge, and promptly returns from the other.
+>
+> "Fish not introduced yet? Chicken. Upright, punctual, excellent posture. Keeps the place occupied until something more fish-shaped turns up."
+>
+> Crablobab turns the tile toward you.
+>
+> "Very important: not a fish. If he were a fish, I'd have to charge you for the fish."
+>
+> He considers this, then brightens.
+>
+> "$catchreleaseCrabChicken_profilePrice credits, $catchreleaseCrabChicken_profileCrabs crabs. Permanent! Buy him once, chicken forever."
+>
+> The chicken completes another circuit. Crablobab gives it an approving nod.
+>
+> "Look at him go."
+
+He demonstrates the product, enjoys its performance and gets back to the sale. Longer sentences give the enthusiasm room; the price and permanent ownership remain clear. Do not reduce all his merchandise to a product-name exclamation and a pause.
+
+**Existing dialogue — `catchrelease_crabBuyExplosive_head`, completing a different sale:**
+
+> The head comes out of the coat wrapped, tagged, and already entered against your ship's inventory.
+>
+> Your ops chief checks the timestamp.
+>
+> The entry predates the sale by eleven minutes.
+
+Here the transaction changes continuity as well as moving stock. The ops chief checks a record; neither the chief nor the narration explains a reality rewrite. A brief receipt can follow an expansive pitch without making every part of the scene equally loud.
 
 ### Earmuffs
 
@@ -1059,6 +1156,16 @@ Think:
 - controlled irritation when reality does not fit the form.
 
 They are not universally stupid or fascist parody officers. Write a Hegemony officer whose institution expects the Sector to be legible.
+
+**Example retained from the original lore reference:**
+
+> "Hegemony Navy. Heave to."
+>
+> The officer brings up the damage image.
+>
+> "I am looking at a fishing harpoon in a registered hull. Start with your transponder code."
+
+The incongruous weapon irritates the officer; the next step is still identification and an incident report. No fabric theory is needed.
 
 ### Tri-Tachyon
 
