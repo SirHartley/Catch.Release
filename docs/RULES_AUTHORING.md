@@ -1,13 +1,17 @@
-# Commands, memory and text tokens
+# Rules implementation guide
 
-Practical rules authoring for Starsector **0.98a-RC8**. Start with the dictionaries before adding Java code or a new key:
+Practical command, memory and text-replacement integration for Starsector **0.98a-RC8**. Read the relevant sections when using, changing or debugging these mechanisms, including Java-only work on existing code. This is not limited to adding new plugins or keys.
+
+[RULES.md](RULES.md) owns rules syntax, execution, Catch.Release routing contracts and CSV validation. This guide owns the full command/key usage procedures and the source corrections below. Use both for rules implementation; neither governs prose. For player-facing text use [DIALOGUE.md](DIALOGUE.md), and for repository workflow use [CLAUDE.md](../CLAUDE.md#which-guide-to-read).
+
+Start with the relevant dictionary's scope notes, then look up the command or key and inspect its source/context. The dictionaries are lookup references, not required cover-to-cover reading:
 
 - [Vanilla commands](rules-reference/COMMANDS.md): common recipes and an index of the vanilla command classes, with actual CSV calls.
 - [Memory and text dictionary](rules-reference/MEMORY.md): pronouns, names, generated facts, state flags and their contexts.
 - [Vanilla key usage](rules-reference/KEY_USAGE.md): every literal key reference found in the active vanilla rules, including mission-specific keys. This is a lookup index, not permission to reuse mission state.
 - [Project rules guide](RULES.md): CSV editing, Catch.Release routes and fleet/bar teardown.
 
-These are project-owned references. The preserved documents under `docs/rules/` describe an external simulator and contain approximations and conflicts with this game build. Use the source corrections below for the listed cases. Do not change the vendored files to hide the differences.
+These are project-owned references. The preserved documents under `docs/rules/` describe an external simulator and contain approximations and conflicts with this game build. Use the source corrections below for the listed cases; this does not give the entire guide blanket precedence over unrelated technical contracts. For other discrepancies, follow [Technical references and conflicts](../CLAUDE.md#technical-references-and-conflicts). Do not change the vendored files to hide the differences.
 
 ## Choose an existing mechanism
 

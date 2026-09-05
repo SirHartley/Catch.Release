@@ -9,6 +9,11 @@ in this package; assets and registration entries are in the Catch.Release mod ro
 Shared drawing gotchas are in [UI.md](../../../../docs/UI.md#drawing-gotchas).
 Reticule hooks and targeting lifecycle stay here.
 
+Read this guide before implementing an ability or changing targeting hooks, registration
+or lifecycle. For Catch.Release's tooltip wording and other player-facing text, also use
+[DIALOGUE.md](../../../../docs/DIALOGUE.md); this guide owns the framework's technical
+integration, not a separate text standard.
+
 ## Requirements
 
 - Starsector 0.98a API

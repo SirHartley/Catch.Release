@@ -16,10 +16,31 @@ Reviews, explanations, audits, and proposals are read-only unless the user reque
    - `starfarer.api.zip` contains the official game API source.
    - `GraphicsLib.zip`, `Lazylib_lunalib.zip`, and `MagicLib.zip` contain dependency sources and jars.
    - For GraphicsLib, LazyLib, LunaLib, and MagicLib, `lib/` is the primary source because the Starsector skill covers vanilla only.
-4. For any player-facing text work, including `rules.csv` and Java strings, start with [`docs/DIALOGUE.md`](docs/DIALOGUE.md). It owns the Editor procedure, shared text-presentation guidelines and dialogue flow. These guidelines are content-agnostic and apply regardless of where the text is stored or displayed. `LORE.md` owns setting definitions, absolute knowledge limits, prose style, character instructions and explanatory examples; read it before drafting. Documentation editing and technical-only routing changes do not require an Editor prose pass.
-5. Read [`docs/RULES.md`](docs/RULES.md) before working on `rules.csv`. Use [`docs/RULES_AUTHORING.md`](docs/RULES_AUTHORING.md) and its vanilla command/key dictionaries before inventing a plugin or text replacement. Read the relevant parts of [`docs/rules/engine_workflow.md`](docs/rules/engine_workflow.md) and [`docs/rules/command_table.md`](docs/rules/command_table.md), applying the project guide's source-verified corrections to those simulator references.
-6. Use [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) to locate the relevant owner and connections before tracing code. Follow only the references needed for the task.
-7. For Java-bound custom UI work, read the relevant sections of [`docs/UI.md`](docs/UI.md) before editing. It owns custom panels, widgets, renderers, tooltip lifetime, layout and input contracts, not rules-dialogue guidance. Its text uses the same `DIALOGUE.md` guidelines as rules-authored text.
+4. Select the required guides using [Which guide to read](#which-guide-to-read). Apply every matching row, including for reviews and fixes to existing behavior. Follow required skill reading as well; this table does not waive full-reference reads required by a skill.
+
+### Which guide to read
+
+After reading this file, use the task to choose the next document. Read the relevant sections and their prerequisites; the lookup dictionaries do not need a cover-to-cover read. A task spanning prose, rules and Java UI needs all three routes.
+
+| Task | Required reading / order |
+|---|---|
+| Locate code or data, trace a feature, change an owner or lifecycle | [ARCHITECTURE.md](docs/ARCHITECTURE.md) before tracing code; follow its owner and framework links. |
+| Write or revise any player-facing text, including Java strings, CSV text, labels and console messages | [DIALOGUE.md](docs/DIALOGUE.md) for production, Editor review, shared presentation and dialogue flow; full current [LORE.md](docs/LORE.md) before drafting for facts, knowledge limits, prose style and characterization. These requirements do not depend on storage format or subject matter. |
+| Edit or debug rules rows, conditions, triggers, options or dialogue routing | [RULES.md](docs/RULES.md) for language, execution, project contracts and CSV validation; [RULES_AUTHORING.md](docs/RULES_AUTHORING.md) for the command, memory and replacement mechanisms involved. Add the text route above when wording changes. |
+| Use, change or debug commands, mission calls, memory or text replacements, even in Java without a CSV edit | [RULES_AUTHORING.md](docs/RULES_AUTHORING.md), its relevant dictionary entries and [RULES.md project routing](docs/RULES.md#project-routing). This applies to existing mechanisms, not only new plugins or keys. |
+| Find an existing vanilla command, fact, flag or text token | [COMMANDS.md](docs/rules-reference/COMMANDS.md) for command recipes/classes; [MEMORY.md](docs/rules-reference/MEMORY.md) for reusable facts and replacements; [KEY_USAGE.md](docs/rules-reference/KEY_USAGE.md) for literal-key call sites. Read each dictionary's scope notes, then search the relevant entry and inspect its source/context. |
+| Investigate rules-engine behavior | [RULES.md](docs/RULES.md) and the [source corrections](docs/RULES_AUTHORING.md#corrections-to-the-preserved-simulator-references), then relevant parts of the preserved [engine workflow](docs/rules/engine_workflow.md) and [simulator command table](docs/rules/command_table.md). Apply [Technical references and conflicts](#technical-references-and-conflicts); verify uncertain behavior against the exact game's source. |
+| Implement Java custom panels, widgets, renderers, tooltips, layout or input | [UI.md](docs/UI.md) and the owner in `ARCHITECTURE.md`. Add `DIALOGUE.md` for text work and the rules route for rules-hosted interaction changes. `UI.md` is not a second rules-dialogue standard. |
+| Integrate or change a reusable framework | The relevant [Distress README](jars/src/catchrelease/distress/README.md) or [Skillshot README](jars/src/catchrelease/skillshot/README.md) before changing its hooks, registration or lifecycle; also apply the rules, UI and text routes where involved. |
+| Edit a guide or add documentation | [Documentation upkeep](#documentation-upkeep), the owning guide and its inbound links. Documentation editing and technical-only routing changes without prose changes do not require an Editor pass. |
+
+### Technical references and conflicts
+
+`RULES.md` is the language and project-contract reference; `RULES_AUTHORING.md` is the implementation guide for commands, memory and replacements. Use them together. Short examples in `RULES.md` introduce the mechanisms; the full integration procedures belong in `RULES_AUTHORING.md`. Neither replaces the text, lore or UI guide in that guide's own subject area.
+
+The files under `docs/rules/` are preserved references for an external simulator. Their claims of being normative apply to that tool. For the listed discrepancies, follow the source-verified corrections in `RULES_AUTHORING.md` for the named game build. This does not certify unlisted claims. Resolve any other technical conflict against the exact source and record the evidence; do not pick a winner by filename, recency or an authority label.
+
+The dictionaries distinguish checked recipes from extracted names, expressions and call sites. A catalogue entry is not a complete behavioral audit of a plugin or proof that a key is available in every context. Preserve those limits when quoting or updating it.
 
 ### Make and record changes
 
@@ -59,12 +80,15 @@ Update documents automatically as part of each relevant change, not by a backgro
 | `docs/UI.md` | Java-bound custom UI: panels, widgets, renderers, sprites, tooltips, lifetime, layout and input | Update implementation contracts and source evidence. Link to `DIALOGUE.md` for shared text guidelines; do not put rules-dialogue guidance here. |
 | `docs/DIALOGUE.md` | All player-facing text, including rules and Java: Editor procedure, prose review, shared text presentation and dialogue usability | Keep shared guidelines content-agnostic and label subject-specific additions. Link to lore, Java UI implementation and technical rules instead of copying their explanations. |
 | `docs/LORE.md` | Setting definitions, absolute knowledge limits, prose style, character instructions, examples, terminology and information-release order | Update only for approved fiction/characterization changes or requested meaning-preserving edits. Define concepts before using them, or link to their definitions. Preserve the force of facts and prohibitions, their reasons, and useful correct/incorrect examples. Do not turn invented dialogue into canon. |
-| `docs/RULES.md` | Project rules-engine guidance | Update verified technical contracts and local links. Keep command syntax, examples and evidence accurate. |
-| `docs/RULES_AUTHORING.md`, `docs/rules-reference/*.md` | Command/key usage, memory lifetime, vanilla lookup dictionaries and source corrections | Check exact source and CSV usage when updating; retain version, provenance and scope limits. Reuse existing vanilla/project mechanisms before adding new ones. |
-| `docs/rules/*.md` | Vendored technical references | Preserve the upstream text and provenance. Record project-specific corrections in `docs/RULES.md`, with source evidence, rather than silently altering the reference. |
+| `docs/RULES.md` | Rules language, execution, project routing contracts and CSV validation | Update verified contracts and local links. Keep syntax and introductory examples accurate; link to the authoring guide for full command/key integration procedures. |
+| `docs/RULES_AUTHORING.md` | Command/key implementation, memory lifetime, replacement preparation, Java integration and source corrections | Check exact source and CSV usage when updating. Keep full procedures here and align related summaries in `RULES.md`; reuse existing mechanisms before adding new ones. |
+| `docs/rules-reference/*.md` | Vanilla lookup dictionaries: recipes, source expressions, classes and call sites | Retain game version, provenance and scope limits. Distinguish checked behavior from extracted inventory; link usage procedures to the authoring guide instead of maintaining a second manual. |
+| `docs/rules/*.md` | Preserved external simulator references | Preserve upstream text and provenance. Record source-verified corrections in `docs/RULES_AUTHORING.md`'s correction section and update affected `RULES.md` summaries/links, rather than silently altering the reference. |
 | Framework `README.md` files | Integration and extension instructions for that framework | Update when its API, registration, dependencies, paths or lifecycle changes. |
 
 Give each fact one home. Move useful detail to its proper owner and link to it; do not keep a second copy in architecture. After moving a section, repair inbound links and check that no requirement or technical constraint was lost. Keep architecture compact and readable; do not create a parallel human version to maintain.
+
+For a new or renamed guide, update the required-reading table, this ownership table and relevant architecture/guide links in the same commit. State when to read it and what it does not govern. Keep `AGENTS.md` as the entry pointer, not a duplicate index. During navigation or wording cleanup, preserve technical bodies and examples; any intended technical correction needs separate source evidence and an explicit review of the changed contract.
 
 Write documentation in ordinary English. Use direct verbs and concrete nouns; remove slogans, inflated claims, repeated contrasts, and commentary about how important the document is. Keep identifiers exact. Tables and short technical fragments are appropriate in architecture. Examples demonstrate a technique, not a sentence pattern to repeat everywhere. Preserve the distinction between absolute restrictions and defaults such as “normally” or “prefer.” For lore voice examples, quote useful existing mod exchanges where possible, identify their rule IDs and context, and explain what they demonstrate. Recheck those excerpts when their source changes; quoting a row does not approve its entire dialogue tree.
 
@@ -190,4 +214,4 @@ javac --release 17 -cp "<all jars above>" -d <empty-output> $(find jars/src -nam
 
 ## Repository navigation
 
-Start at [ARCHITECTURE.md](docs/ARCHITECTURE.md). It maps code and data owners, startup order, lifecycle constraints, and framework entry points. Start all player-facing text work at [DIALOGUE.md](docs/DIALOGUE.md); use [UI.md](docs/UI.md) for Java custom UI implementation.
+After the required read of this file, follow [Which guide to read](#which-guide-to-read). [ARCHITECTURE.md](docs/ARCHITECTURE.md) is the code/data map, not a substitute for the task-specific guides.

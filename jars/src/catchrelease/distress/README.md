@@ -7,6 +7,12 @@ For Catch.Release's player-facing text, follow [DIALOGUE.md](../../../../docs/DI
 Java intel controls and sidebar maps are covered by
 [UI.md](../../../../docs/UI.md#intel-and-sidebar-maps). Provider integration stays here.
 
+Read this guide before changing provider hooks, registration or the framework lifecycle.
+For the consuming mod's rules routes, also read [RULES.md](../../../../docs/RULES.md);
+command, memory and replacement integration is in
+[RULES_AUTHORING.md](../../../../docs/RULES_AUTHORING.md). Those guides do not move quest
+implementation into this framework.
+
 ## Install
 
 Keep the package under the mod's ordinary `jars/src` tree, merge its two generic rules into
