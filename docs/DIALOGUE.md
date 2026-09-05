@@ -2,13 +2,15 @@
 
 Start here for dialogue, options, intel, tooltips, UI labels, messages, species and item descriptions, mission copy, and console output.
 
+These guidelines apply whether text comes from `rules.csv`, Java or another data file. This is the shared guide for player-facing wording, text presentation and dialogue flow; it is not limited to spoken dialogue. Subject matter and storage format do not change the standard of review.
+
 - [LORE.md](LORE.md): setting definitions, absolute knowledge limits, prose style, character instructions, examples, terminology and information-release order.
-- [UI.md](UI.md): presentation requirements, colours, reward cards, intel navigation, portraits, tooltips and custom-panel behavior.
+- [UI.md](UI.md): Java-bound custom UI implementation, including panels, widgets, tooltips, sprites, layout and input. It uses this document's shared text guidelines.
 - [RULES.md](RULES.md): CSV format, rule execution, commands, memory, and technical validation. Read its linked references and the required rules skills for rules work.
 - [ARCHITECTURE.md](ARCHITECTURE.md): code and data owners, registrations, and lifecycle connections.
 - [CLAUDE.md](../CLAUDE.md#documentation-upkeep): task workflow and automatic documentation upkeep.
 
-This document governs text production and dialogue flow. It does not override lore or define rules-engine syntax. Preserve user-supplied dialogue verbatim unless the user asks for a rewrite.
+This document does not override lore or define rules-engine syntax. Preserve user-supplied dialogue verbatim unless the user asks for a rewrite.
 
 ## Starsector Editor
 
@@ -33,6 +35,19 @@ The Editor may revise only the requested prose. It may not change rule IDs, trig
 
 Independently check the result against the full current lore and the actual display context. Check the complete final exchange once. Reopen a passed review only when an integration change or a concrete issue affects it. Technical rules and UI checks remain the coding agent's responsibility.
 
+## Shared text presentation
+
+Apply these requirements to all player-facing text, including rules-authored dialogue and Java-built screens. Feature-specific notes below add requirements; they do not limit these to a particular character, item or quest.
+
+- Match vanilla's typography and spacing for the same kind of display. Body prose, compact gain/loss notices, labels and hover descriptions serve different purposes. Choose formatting by that purpose, not by the subject or the file containing the text.
+- Use colour consistently for meaning: ordinary text, emphasis, item identity, availability, gains and losses are distinct roles. Use the owning data or shared colour source, not a locally invented shade. Information serving the same role must not change meaning or colour between rules dialogue and Java UI.
+- Highlight arguments follow displayed occurrence order. Repeat the argument when the same name or value appears again. Check first, middle and last items, including token-expanded text. Formatting one item must not accidentally colour the next paragraph or the rest of a list.
+- Review the final displayed text after substitution and composition. Check names, quantities, units, punctuation, spacing, line breaks and highlights together. Do not leak unresolved tokens, internal IDs or raw state values in place of the intended wording.
+- Use established player-facing labels and saved values. Explain restrictions and consequences before a choice; distinguish an offer or preview from an actual result. Shared formatting must not conceal a condition or imply a grant that did not happen.
+- Fit text to its display without shrinking ordinary prose into receipt text or stripping out its character. Shorten repetition, split information at a useful point or adjust the layout as appropriate. Shared presentation does not mean a shared voice or a repeated sentence template.
+
+Rules command ordering and option styling are covered by [RULES.md](RULES.md#project-routing). Java custom-panel layout and rendering are covered by [UI.md](UI.md). Neither implementation path is exempt from the checks above.
+
 ## Writing
 
 Read [LORE.md](LORE.md) for the setting's facts, absolute knowledge boundaries and character instructions. Its [Writing style](LORE.md#writing-style) section owns prose guidance, examples, dialogue cadence and player-option wording. Those requirements apply to every player-facing surface below.
@@ -45,11 +60,21 @@ Use the [lore's dialogue and option instructions](LORE.md#dialogue-and-player-op
 
 ### Surface requirements
 
-Tooltip, schematic-card, intel and receipt requirements are in [UI.md](UI.md#text-cards-and-receipts). Use them alongside these writing requirements.
+Use these surface requirements alongside the shared guidance above, regardless of which implementation displays the text.
 
 | Surface | Required information |
 |---|---|
+| Tooltip | What it does first; flavor afterward. State restrictions and costs plainly. |
+| Navigation or request hover | Explain the destination or filter and retain all requirements; showing a location is not a substitute for the full conditions. |
+| Schematic reward card | Exact upgrade tier or compatible module, its effect, purchase-permission status, and later credit-and-fish price. A schematic is not the equipment itself. Resolve the same icon as the shop, including category fallback. |
 | Quest offer | Complete demand, destination, deadline, reward preview, and unusual conditions before acceptance. Do not repeat the whole reward section in both character speech and the shared pitch. |
+| Accepted intel | Purpose, special terms, exact requirements and live progress, deadline, rewards, and navigation. Match the shared bar-job layout. |
+| Receipt | Actual items, credits or knowledge granted, after the hand-in prose. Use the shared receipt path rather than a second invented payment sentence. |
+
+Subject-specific additions:
+
+| Subject | Required information |
+|---|---|
 | Fish description | Observable form, precise deviations, and a useful handling or culinary consequence. Do not invent evolutionary history or explain every pattern. |
 | Colony description | A functioning facility: visitors, staff, tanks, access and maintenance. Follow the lore's setting constraints. |
 
@@ -63,7 +88,7 @@ Apply the [common mistakes and corrections](LORE.md#common-mistakes-and-correcti
 
 ## Dialogue behavior and presentation checks
 
-Dialogue-flow criteria are below. Use [UI.md](UI.md) for presentation checks and `RULES.md` for technical implementation and validation.
+Use the [shared text presentation checks](#shared-text-presentation) alongside these dialogue-flow criteria. `RULES.md` owns rules implementation; `UI.md` owns Java custom UI implementation.
 
 ### Navigation
 
@@ -78,14 +103,23 @@ Custom-panel opening and return behavior is covered by [UI.md](UI.md#custom-dial
 
 ### Fisherman questions
 
-- Business and panel-return triggers are listed in [RULES.md](RULES.md#project-routing). Question sorting, colours and paging limits are in [UI.md](UI.md#colours-and-options).
+- Business and panel-return triggers are listed in [RULES.md](RULES.md#project-routing).
+- Unasked questions precede answered ones. Answered questions remain selectable at the end, coloured with vanilla `Misc.getGrayColor()`, not Common fish-rarity beige. Paging and navigation must fit within the nine-option limit.
 - Terminal answers return to questions through Something else; the question-menu exit returns to business.
 - “Baha” is introduced by its answer, not assumed in the preceding question label.
 - Bycatch becomes a question topic after the first relevant catch. Tutorial disclosure and special-topic precedence follow the saved progression and `LORE.md`.
 
 ### Colours, rewards and sidebars
 
-See [colours and options](UI.md#colours-and-options), [cards and receipts](UI.md#text-cards-and-receipts), [intel and maps](UI.md#intel-and-sidebar-maps), and [portraits](UI.md#portraits-and-sprites) in `UI.md`.
+These are Catch.Release-specific uses of the shared presentation guidelines, not exceptions to them.
+
+- Fish names use their rarity colours from `FishRarity.color`; Common uses the shared beige, not white or grey. Non-fish rewards, places and final hand-in choices use the established quest highlight. Do not substitute the positive-gain colour for the last fish in a list.
+- Use shared reward cards for initial offers, counteroffers and follow-ups. Receipts report actual grant results, including a learned-range reward converted to its saved credit fallback.
+- Standard `FishReward` receipts use Gained; fleet contracts use Received. Do not change an established receipt label as incidental prose cleanup.
+- Fish-request hovers retain size, grade, origin, time and method restrictions; a geographic range alone does not satisfy them.
+- Restore Crablobab's person card after merchandise options; do not leave the bar image active.
+
+Java map previews, intel controls and portrait rendering are covered by [UI.md](UI.md#intel-and-sidebar-maps).
 
 ### Camp proof
 
@@ -99,4 +133,4 @@ Trace each affected route through initial contact, questions, acceptance, return
 
 ## Maintenance
 
-Update the relevant section in the same commit when a text workflow or reusable dialogue convention changes. Keep presentation contracts in `UI.md`; setting facts, knowledge limits, prose style, characterization and their explanatory examples in `LORE.md`; engine semantics in `RULES.md`; and owner/connection information in `ARCHITECTURE.md`. Repair cross-links after moving a section. Do not append a task history or copy complete dialogue trees into this guide.
+Update the relevant section in the same commit when text workflow, shared text presentation or a reusable dialogue convention changes. Keep shared guidelines content-agnostic; label subject-specific additions separately. Keep Java custom UI contracts in `UI.md`; setting facts, knowledge limits, prose style, characterization and their explanatory examples in `LORE.md`; engine semantics in `RULES.md`; and owner/connection information in `ARCHITECTURE.md`. Repair cross-links after moving a section. Do not append a task history or copy complete dialogue trees into this guide.

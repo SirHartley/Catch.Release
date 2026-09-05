@@ -5,10 +5,10 @@ Technical routing for the current implementation. Java paths below are relative 
 | Reference | Scope |
 |---|---|
 | [CLAUDE.md](../CLAUDE.md) | Workflow, build gate and document upkeep |
-| [DIALOGUE.md](DIALOGUE.md) | Text workflow and dialogue flow; routes to LORE.md for prose and character constraints |
+| [DIALOGUE.md](DIALOGUE.md) | All player-facing text, rules or Java: workflow, shared text presentation and dialogue flow; prose constraints in LORE.md |
 | [LORE.md](LORE.md) | Setting facts, knowledge limits, character voices and source-labelled prose examples |
 | [RULES.md](RULES.md) | Rules syntax, execution and project routing contracts |
-| [UI.md](UI.md) | Shared presentation, colours, cards, intel navigation, portraits, sprites and custom-panel contracts |
+| [UI.md](UI.md) | Java custom panels, widgets, renderers, sprites, tooltips, layout and input; shared text guidelines in DIALOGUE.md |
 | [Distress README](../jars/src/catchrelease/distress/README.md) | Reusable distress integration |
 | [Skillshot README](../jars/src/catchrelease/skillshot/README.md) | Reusable targeting integration |
 
@@ -22,7 +22,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Camp, chart or tutorial proof | `CampedSpotJob/FishermanQuest/FishingIntro -> QuestPond/FishRequirement -> FishItems.stow` |
 | Fish shop and schematics | `FishShopDialog -> ShopEntry -> ShopPricing/ShopSchematics -> TackleManager/UpgradeManager` |
 | Fisherman fleet, identity, shelf | `CoreFisherSpawner/FishermanSpawner -> behavior -> FishermanIdentity/FishermanShelf` |
-| Rules menu, panel return, highlights | `rules.csv -> CatchReleaseCMD`; [project routing](RULES.md#project-routing), [presentation](UI.md#colours-and-options) and [panel returns](UI.md#custom-dialog-hosts) |
+| Rules menu, panel return, highlights | `rules.csv -> CatchReleaseCMD`; [project routing](RULES.md#project-routing), [shared text presentation](DIALOGUE.md#shared-text-presentation) and [Java panel returns](UI.md#custom-dialog-hosts) |
 | Harpoon, drones, Breach Lights | `abilities/*/ability -> entities/scripts -> renderers`; shared targeting in `skillshot/` |
 | Camera, pond opening | `PondInteractionAbilityPlugin -> RodMoteEntityPlugin -> MaskedFishingPondTerrainPlugin -> PondCameraFocusScript` |
 | Charge count / regeneration | `BaseChargedSkillshotAbility -> ChargeManager -> ability callback` |
@@ -30,7 +30,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Legendary reveal / cleanup | `LegendaryChases -> LegendaryHaunt/LonglinerDecoy -> HauntModule/LegendaryShields` |
 | Map/Codex/intel handoff | `FishIntelMapButton/FishCodex -> FishMapFilterScript -> FishMapPane/FishPresence` |
 | Stale campaign effect | Owner location/ability validity -> cleanup; shared renderer registration in `rendering/` |
-| Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; [UI conventions](UI.md). Minigame rendering is separate. |
+| Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; [Java UI contracts](UI.md). Minigame rendering is separate. |
 | Map / planner list rebuilds | `FishMapPane` and `FishRoutePopup` replace the list's owning custom panel; [lifetime contract](UI.md#rebuilding-lists) |
 | Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*`; black-hole pass in `rendering/spiral/` |
 | Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel`; [backdrop dimensions](UI.md#portraits-and-sprites) |
@@ -369,7 +369,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 
 ### Rendering, UI, reflection, and audio
 
-Shared presentation, sprite state, panel behavior, drawing gotchas and minigame UI timing are in [UI.md](UI.md). Campaign VFX and non-UI engine constraints remain here.
+Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing are in [UI.md](UI.md). Shared player-facing text guidelines are in [DIALOGUE.md](DIALOGUE.md#shared-text-presentation). Campaign VFX and non-UI engine constraints remain here.
 
 - Fan light and fan breach window share `STEPS_ACROSS`, `STEPS_ALONG`, and both alpha curves. Change their geometry together.
 - Glow, fan, and impression renderers share the same resting alpha formula. Module changes should affect light shape, not total intensity.
@@ -380,7 +380,8 @@ Shared presentation, sprite state, panel behavior, drawing gotchas and minigame 
 
 ### Fisherman and tutorial lifecycle
 
-- Shared-person portrait timing, asset registration and rank display: [UI.md](UI.md#portraits-and-sprites).
+- The Fisherman is one saved `PersonAPI` shared by every boat. Apply the hailed boat's portrait immediately before vanilla builds the person panel; background boats must not mutate it.
+- Fisherman portraits are registered `graphics.characters` sprite IDs in `settings.json`. Rank and post remain blank so vanilla shows the rankless person card once.
 - Standing boats plan one outer-reaches leg at a time and validate both the destination and the straight path. `PATROL_SYSTEM` is not suitable because it crosses inhabited inner orbits.
 - Fisherman visibility requires both a flat detected-range bonus and a per-frame sensor-fader override.
 - Visiting Fisherman time advances only while the player is elsewhere. Rendering and sound also stop when the player is outside the location.

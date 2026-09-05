@@ -3,7 +3,8 @@
 This framework schedules campaign distress calls alongside vanilla nearby events. The consuming
 mod supplies the quest, dialogue and rewards.
 
-For Catch.Release's quest presentation and navigation, follow
+For Catch.Release's player-facing text, follow [DIALOGUE.md](../../../../docs/DIALOGUE.md).
+Java intel controls and sidebar maps are covered by
 [UI.md](../../../../docs/UI.md#intel-and-sidebar-maps). Provider integration stays here.
 
 ## Install
