@@ -5,10 +5,10 @@ Technical routing for the current implementation. Java paths below are relative 
 | Reference | Scope |
 |---|---|
 | [CLAUDE.md](../CLAUDE.md) | Workflow, build gate and document upkeep |
-| [DIALOGUE.md](DIALOGUE.md) | Text workflow and presentation; routes to LORE.md for prose and character constraints |
+| [DIALOGUE.md](DIALOGUE.md) | Text workflow and dialogue flow; routes to LORE.md for prose and character constraints |
 | [LORE.md](LORE.md) | Setting facts, knowledge limits, character voices and source-labelled prose examples |
 | [RULES.md](RULES.md) | Rules syntax, execution and project routing contracts |
-| [UI.md](UI.md) | Custom-panel layout, tooltip lifetime and input |
+| [UI.md](UI.md) | Shared presentation, colours, cards, intel navigation, portraits, sprites and custom-panel contracts |
 | [Distress README](../jars/src/catchrelease/distress/README.md) | Reusable distress integration |
 | [Skillshot README](../jars/src/catchrelease/skillshot/README.md) | Reusable targeting integration |
 
@@ -22,7 +22,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Camp, chart or tutorial proof | `CampedSpotJob/FishermanQuest/FishingIntro -> QuestPond/FishRequirement -> FishItems.stow` |
 | Fish shop and schematics | `FishShopDialog -> ShopEntry -> ShopPricing/ShopSchematics -> TackleManager/UpgradeManager` |
 | Fisherman fleet, identity, shelf | `CoreFisherSpawner/FishermanSpawner -> behavior -> FishermanIdentity/FishermanShelf` |
-| Rules menu, panel return, highlights | `rules.csv -> CatchReleaseCMD`; [project contracts](RULES.md#project-routing) |
+| Rules menu, panel return, highlights | `rules.csv -> CatchReleaseCMD`; [project routing](RULES.md#project-routing), [presentation](UI.md#colours-and-options) and [panel returns](UI.md#custom-dialog-hosts) |
 | Harpoon, drones, Breach Lights | `abilities/*/ability -> entities/scripts -> renderers`; shared targeting in `skillshot/` |
 | Camera, pond opening | `PondInteractionAbilityPlugin -> RodMoteEntityPlugin -> MaskedFishingPondTerrainPlugin -> PondCameraFocusScript` |
 | Charge count / regeneration | `BaseChargedSkillshotAbility -> ChargeManager -> ability callback` |
@@ -30,10 +30,10 @@ Technical routing for the current implementation. Java paths below are relative 
 | Legendary reveal / cleanup | `LegendaryChases -> LegendaryHaunt/LonglinerDecoy -> HauntModule/LegendaryShields` |
 | Map/Codex/intel handoff | `FishIntelMapButton/FishCodex -> FishMapFilterScript -> FishMapPane/FishPresence` |
 | Stale campaign effect | Owner location/ability validity -> cleanup; shared renderer registration in `rendering/` |
-| Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; minigame rendering is separate |
+| Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; [UI conventions](UI.md). Minigame rendering is separate. |
 | Map / planner list rebuilds | `FishMapPane` and `FishRoutePopup` replace the list's owning custom panel; [lifetime contract](UI.md#rebuilding-lists) |
 | Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*`; black-hole pass in `rendering/spiral/` |
-| Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel` |
+| Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel`; [backdrop dimensions](UI.md#portraits-and-sprites) |
 
 ## Registration and lifecycle
 
@@ -319,7 +319,6 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Upgrade tiers and modules granted outside the shop still go through `ShopEntry.grant()` so a running ability is stopped and restarted with its new values.
 - A curio is a switch, not a purchase. Its shop price is null, it never becomes “done,” and the button toggles it.
 - Celebration Charges are purchased from Crablobab and switched in the outfitter. They are not a LunaLib setting.
-- A null module price can mean an empty slot or an already-owned module. UI text must distinguish them.
 - Abilities read tuning values when activated. Any code that changes their upgrade or module inputs must restart the affected running ability.
 - `StatIds.getAbilityId()` uses an explicit map. Do not infer the ability from a stat-name prefix.
 - ROD chase duration and rarity priority are progressive stats: every purchased tier must affect runtime behavior.
@@ -370,29 +369,23 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 
 ### Rendering, UI, reflection, and audio
 
-- `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short campaign lines. `SkillshotUtils` builds dash geometry explicitly.
+Shared presentation, sprite state, panel behavior, drawing gotchas and minigame UI timing are in [UI.md](UI.md). Campaign VFX and non-UI engine constraints remain here.
+
 - Fan light and fan breach window share `STEPS_ACROSS`, `STEPS_ALONG`, and both alpha curves. Change their geometry together.
 - Glow, fan, and impression renderers share the same resting alpha formula. Module changes should affect light shape, not total intensity.
-- Use transparent custom-panel hotspots to attach stock tooltips to hand-drawn controls. Vanilla then owns tooltip timing, placement, and clipping.
-- `showCustomDialog()` always includes a confirm button. Use `showCustomVisualDialog()` when the panel must have none.
-- `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use the depth-mask pair.
 - Camera-centered objects have no camera parallax term. Account for this in effects such as `PondDepthField`.
 - `ReflectionUtils` uses `MethodHandle` because the Starsector script classloader rejects direct references to `java.lang.reflect.Field` and `Method`.
 - Sound IDs are unchecked strings until playback. Validate them against merged sound data. Starsector JSON supports `#` comments and trailing commas, and sound entries may be arrays or objects.
-- `playUISound` expects stereo; positional `playSound` requires mono; loops should be mono. The minigame line sound uses one continuously refreshed UI loop with changing volume.
-- The loot result has a backdrop clock that starts when the panel is created and a list clock that starts after the catch tally. Coin rain uses the backdrop clock.
-- `SpriteLoader` and `FishIcons` use fresh sprite wrappers. Never retain mutable sprite state across screens.
+- `playUISound` expects stereo; positional `playSound` requires mono; loops should be mono.
 
 ### Fisherman and tutorial lifecycle
 
-- The Fisherman is one saved `PersonAPI` shared by every boat. Apply the hailed boat's portrait immediately before vanilla builds the person panel; background boats must not mutate it.
-- Fisherman portraits are registered `graphics.characters` sprite IDs. Rank and post remain blank so vanilla shows the rankless person card once.
+- Shared-person portrait timing, asset registration and rank display: [UI.md](UI.md#portraits-and-sprites).
 - Standing boats plan one outer-reaches leg at a time and validate both the destination and the straight path. `PATROL_SYSTEM` is not suitable because it crosses inhabited inner orbits.
 - Fisherman visibility requires both a flat detected-range bonus and a per-frame sensor-fader override.
 - Visiting Fisherman time advances only while the player is elsewhere. Rendering and sound also stop when the player is outside the location.
 - The Fisherman map marker exists only in the player's current location, has no sensor profile, and is map-only. Reconciliation removes old duplicates and marks from departed systems.
 - The visitor shelf restocks from each sale date, not a global monthly tick. Chart-request completion is the only way to increase shelf width.
-- `FishShopDialog` takes an optional close callback. Colony use may dismiss the interaction; Fisherman use must restore the conversation.
 - `FishingIntro.point()` is idempotent and can be reached from the wreck, castaway/rating, Fisherman interception, or a direct hail. Recovered property takes origin precedence, then rescued crew, then recorded market.
 - The returning-player skip is available only before the R.O.D. lesson begins. Manually disabling the new Luna setting stays disabled after the one-time legacy-file migration.
 - Tutorial single-target protection advances only when the requested species could naturally spawn at the current location with the required implement. The count carries between valid locations and pauses elsewhere.
@@ -419,7 +412,6 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - `QuestPond.sweep` repairs stale claims; no new camp fleet or claim before acceptance.
 - Tutorial skip is allowed only in UNSTARTED/POINTED. It shares dev-skip grants, but only normal completion enables and saves the setting. Mirror its saved object into LunaLib's cache without a global backend reload.
 - Crablobab backdrop offers persist per market until sold, then wait 60 days; exclude owned scenes and gate rotation on conservatory-plan ownership.
-- Backdrop source art: 388×170, visible 386×168; 2× visible assets: 772×336.
 
 ## Dead or dormant
 
