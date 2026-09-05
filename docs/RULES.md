@@ -1,15 +1,12 @@
-<!--
-Master document: the rules language as verified against decompiled engine source.
-Supplied by another modder for their own mod and adopted here as the more accurate of
-the two guides this repo had. Their project's specifics - id prefixes, command classes,
-tool paths - have been repointed at this one; the engine behaviour is theirs and
-unaltered. The two reference documents it cites are vendored verbatim under docs/rules/.
-The Catch.Release appendix at the end is carried over from the guide this replaced.
--->
+# Rules reference
+
+Use this document for technical rules work. Start at [DIALOGUE.md](DIALOGUE.md) for text production, Editor review and presentation checks; use [LORE.md](LORE.md) for fiction and voice.
+
+The engine guidance was adapted from another modder's reference. The detailed [engine workflow](rules/engine_workflow.md) and [command table](rules/command_table.md) are preserved upstream copies. Their simulator-specific instructions describe an external tool, not a requirement to build that tool in Catch.Release. Project constraints are listed below.
 
 ## Rules System (`data/campaign/rules.csv`)
 
-The **primary mechanism for in-game interactions** — dialog, flavor text, bar events, market screens, and more are all driven by rule rows. Vanilla file: `starsector-core/data/campaign/rules.csv` (~41k lines). Mod file: `data/campaign/rules.csv` (additive).
+Rule rows drive dialogue, bar events, market interactions and other campaign text. Vanilla file: `starsector-core/data/campaign/rules.csv` (~41k lines). Mod file: `data/campaign/rules.csv` (additive).
 
 For deep engine mechanics verified against decompiled source, see:
 [`rules/engine_workflow.md`](rules/engine_workflow.md).
@@ -70,7 +67,7 @@ Read from Java: `mem.getBoolean("$myFlag")`, `.getString(...)`, `.getInt(...)`, 
 
 Command plugins can also serve as conditions: if their `execute()` returns a boolean, that determines pass/fail. Examples: `hasMarket`, `hasPerson`, `hasFleet`, `isFactionHostile`, custom commands like `NullGateCMD CanBeAdded`.
 
-### Truthiness gate (critical)
+### Condition results
 
 A condition passes ONLY when its result is:
 - Boolean `true`, or
@@ -114,7 +111,7 @@ Register by **simple class name** in the script column: `MyRuleCMD argA "quoted 
 ### Integration patterns with Java code
 
 **Command-class registration (this mod's pattern):**
-Custom commands registered by simple name in the script column: `CatchReleaseCMD tokens`, `CatchReleaseCMD openShop`. The command class handles all logic; rules invoke it declaratively. Catch.Release deliberately has exactly one such class, so there is one bridge into Java rather than a scatter of them — see the rules.csv contract in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+Custom commands registered by simple name in the script column: `CatchReleaseCMD tokens`, `CatchReleaseCMD openShop`. The command class handles all logic; rules invoke it declaratively. Catch.Release uses one command bridge; see [Project routing](#project-routing).
 
 **Nexerelin style (memory references):**
 Java objects stored in global memory (`$global.nex_mission_ref`) and called directly from rules: `Call $global.nex_mission_ref updateStage`, or used as conditions: `Call $global.nex_mission_ref hasCores`. This enables complex state machines driven entirely by rules while keeping logic in code. Catch.Release uses this for the jobs: `$catchrelease_jobRef` is set by `setPersonMissionRef`/`setEntityMissionRef` and rows call it as `Call $catchrelease_jobRef <action>`. Objects reached this way must serialize across save/load.
@@ -150,130 +147,70 @@ Global.getSector().getRules().fireBest("CatchReleaseHarpoonedGreeting", dialog);
 - `MagicLib.MagicBountyIntel` / `MagicBountyCoordinator` — full bounty flow (intel, rule hooks, bar event) from JSON. Use before rolling custom bounty dialogs.
 - `LunaLib` Kotlin extensions (`lunalib.lunaExtensions.DialogExtensions`, `MemoryExtensions`) — concise `dialog.addText(...)`, typed memory get/set, `LunaMemory` property delegates.
 
-### Validation tool: Rules Visualizer
+## Project routing
 
-The Rules Visualizer is the other mod's tool and is **not** in this repo - only the two reference documents it was written against, which is why they are vendored under `docs/rules/`. It simulates rule chains offline without game state, traversing dialogs the same way they appear in-game and permutating memory at each step. Key capabilities:
+Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Presentation requirements belong in [DIALOGUE.md](DIALOGUE.md).
 
-- **Chain traversal**: Follows dialog flows from root rules through option selections, exactly as the engine would.
-- **Memory tracking**: Documents memory state snapshots at every step — what was set, changed, or cleared.
-- **Reachability analysis**: Identifies unreachable rules (no path from any root reaches them).
-- **Condition validation**: Catches incorrect logic early — conditions that never pass, self-skip issues, score conflicts.
+| Entry / state | Contract |
+|---|---|
+| `CatchReleaseCMD <verb> [arg]` | Sole custom rules command. Conditions prepare temporary tokens and return true; scripts perform actions. A handled mission `callAction()` returns true. |
+| `$catchrelease_jobRef` | Active FishJob; rows invoke its methods through Call. |
+| `$catchrelease_jobDeliver`, `$catchreleaseHasFish` | Valid delivery route; matching cargo available. |
+| `$catchreleaseAsk` / `…AskCap`, `$catchreleaseReward` / `…RewardCap` | Shared demand/reward descriptions. |
+| `$catchreleaseDays` / `…DaysCap`, `$catchreleaseDaysLeft` | Total deadline; remaining time. |
+| `$catchreleasePaid`, `$catchreleaseBonus`, `$catchreleaseMore` | Payout completed; bonus eligible; another round follows. |
+| `<missionId>_blurbBar`, `<missionId>_optionBar`, `<missionId>_ask` | Bar description, bar entry, and DialogOptionSelected offer handler. |
+| `JobSpecificOptions` | Private bar-job options; accepted contacts use the mission-owned greeting wrapper. |
+| `catchreleaseJobAccepted` / `…Declined` / `…Remind` / `…Paid` | Shared job lifecycle triggers. |
+| `$catchrelease_fleetQuest` | Fleet-owned Boolean required on external active-job routes. |
+| `$catchrelease_fleetQuestType` | Saved type selects the rules-authored dialogue, title, assignment, breadcrumb and intel rows. Non-dialogue consumers use the same rules lookup. |
+| `$catchrelease_fleetQuestThanksPending` | Separate gate for completed-job thanks; consumed with its saved text. |
+| `CatchReleaseFisherOptions` | Private Fisherman business menu; enter with `$menuState == catchreleaseFisher`. |
+| `CatchReleaseFisherResume` | Rebuild after picker/panel cancellation. |
+| `CatchReleaseFleetResolutionOptions` | Peaceful fleet result menu with Escape-bound Leave. |
 
-Recorded here because the two reference documents describe the engine it models, and because the workflow is worth knowing if the tool is ever brought over:
-1. Agent writes rules → 2. Reviewer runs visualizer on the relevant chain → 3. Share traversal output and memory states with agent → 4. Agent iterates based on findings.
+- Namespace IDs and options. Bar option IDs must begin with their mission ID; mission IDs must not prefix one another. `BarCMD` aborts a wrapper whose option prefix differs.
+- Private type-specific triggers and Java text lookups are reached only through gated routes. Shared distress entries require `$distressFramework`; the instance verifies the exact fleet and instance reference. The Catch.Release provider also requires its fleet-quest flag.
+- Conditions are evaluated before script actions. Prepare generated display tokens on an earlier row: a row cannot display a token its own script has not yet created.
+- Use Boolean flags for eligibility. Strings and numbers do not pass a bare-memory condition. Every memory key written through MemoryAPI begins with `$`.
+- A bare `score:` line is invalid. Put the score on a real condition. Scores sum; more conditions do not confer priority. Check overlap with unrelated rule families on the same fleet, not just alternatives within one family.
+- A harpoon offence may coexist with Fisherman flags. Preserve the Fisherman exclusion on generic harpooned-crew greetings.
+- Explicitly fire the intended menu trigger on entry and return; do not rely on the trigger's name to schedule it. Rows with no options may retain an old panel. Check actual rules and driver behavior for the path being edited.
+- `$hailing` and `$highlightComms` are consumed while vanilla builds fleet interaction. Do not treat them as lasting quest state.
+- Vanilla text-highlight calls consume matching occurrences in order. See [DIALOGUE.md](DIALOGUE.md#colours-rewards-and-sidebars) for the presentation check; retain the shared `highlightJobText` path.
+- `QuestDialogMap` owns only its temporary preview marker. It uses the mission's saved destination and rejects local or unresolved targets.
 
-This makes ambitious rule-driven features viable — you can debug a multi-step mission chain or branching dialog tree entirely offline before ever launching Starsector.
+## Fleet and bar exits
 
-### Practical tips for working on Catch.Release rules
+`EndConversation` returns a fleet comm conversation to its FleetInteractionDialogPluginImpl. It calls reinit, which can fire BeginFleetEncounter again. Use it only when rebuilding fleet/combat options is the intended result.
 
-1. **Read before writing**: Grep the existing rows in `data/campaign/rules.csv`, and the vanilla sheet through the `starsector-knowledge` skill. Match the established style.
-2. **Namespace everything**: Prefix ids and option keys with `catchrelease_`. This mod scores its own rows in bands - 1000s for comm greetings, 1200s+ for the harpoon and lamp responses - so a new row has to be placed in that ladder deliberately, not just given a big number.
-3. **Prefer extending over duplicating**: Use `FireAll`/`Call` to hook into existing rules rather than rewriting them.
-4. **Use libraries before reinventing**: Check LazyLib, MagicLib, LunaLib for utilities - their sources are in `lib/`, and they are the only thing the `starsector-knowledge` skill does not cover.
-5. **Validate with the visualizer first**, then verify in-game. The Rules Visualizer catches logic errors offline; in-game testing confirms runtime behavior and integration. Use `DumpMemory` command in rules to inspect state during live play.
-6. **When unsure about engine behavior**, consult [`rules/engine_workflow.md`](rules/engine_workflow.md) — it's verified against decompiled source with tracked corrections.
+`DismissDialog` alone does not clean up a fleet encounter's BattleAPI. Use `CatchReleaseCMD leaveEncounter`, which performs vanilla teardown before dismissal and checks the plugin type. It is also safe for non-fleet interactions.
 
----
+Bar-event wrappers close with `returnFromEvent`, not `close`. Check confirm, cancel and Escape paths after a custom panel.
 
-# APPENDIX — Catch.Release addendum
+`AddBarEvent <id> "<option>" "<blurb>" [<colour>]` accepts an optional fourth argument via Token.getColor. `highlight` resolves to the buttonShortcut colour; faction IDs resolve to faction colour. The rating event uses this argument.
 
-Not part of the master document above, and not from the modder who wrote it. Everything
-below was read out of the game sources for **0.98a-RC8** (the build the
-`starsector-knowledge` skill carries), and each item either refines something the master
-says or records a trap this repo has actually paid for. Verify against the sources before
-trusting any of it for another build.
+## Editing and validation
 
-**`EndConversation` does not end a fleet encounter.** The lifecycle section above lists
-it as a way to terminate, which holds for market and person dialogs. Inside a
-`FleetInteractionDialogPluginImpl` it sets `inConversation = false` and then calls
-`reinit()` on the plugin — and `reinit` re-fires `BeginFleetEncounter`, so a row that
-still matches puts a **Continue** button up that walks the player straight back into
-the conversation. To actually leave a fleet encounter from a row, use `DismissDialog`,
-which calls `dialog.dismiss()`. See `catchrelease_fisherLeave`.
+1. Read the relevant existing rows and the required Starsector rules references. Use vanilla source for uncertain engine behavior, and read-only `lib/` archives for third-party APIs.
+2. Prove a byte-identical CSV round-trip before changing parsed rows. Detect the current line endings; do not assume LF or CRLF from an old note.
+3. Preserve row IDs, seven columns, quoting, embedded newlines, tokens, commands and ordering except where the technical task explicitly changes them.
+4. Check every affected entry, question loop, accept/decline path, hand-in, cancellation and exit. Include overlapping flags, completed states and save/load. The route checklist is in `DIALOGUE.md`.
+5. Parse the edited file again, require seven fields per row, and inspect the diff. A small change must not rewrite unrelated rows.
+6. Report static checks separately from in-game QA. The external Rules Visualizer is not bundled with this repository; use it only if available. Its absence is not a new tooling project or a reason to claim a test was run. DumpMemory can help during live QA.
 
-The reinit is also the tool, not just the trap: a comm row that turns the fleet
-hostile and then calls `EndConversation` drops the player back into the fleet
-encounter, where the re-fired `BeginFleetEncounter` — blocked for this mod's own
-hail row by `$catchrelease_harpoonPatrolDone` and `$isHostile` — lands on vanilla's
-hostile greeting and the default hostile fleet actions, with the row's text still
-readable in the panel. The `catchrelease_fineDemandRepeat` family and the twice-harpooned crews'
-`catchrelease_harpoonedCommsHostile*` family work exactly this way; `DismissDialog`/`leaveEncounter` there would eject the player mid-sentence and
-make the hostility look like it only starts on the next contact.
-
-**`DismissDialog` is not enough to leave a fleet encounter.**
-`FleetInteractionDialogPluginImpl.init` builds a real `BattleAPI` between the player and the
-other fleet on *every* encounter, fight or no fight, and vanilla only takes it apart in its own
-`LEAVE` handler, which calls `cleanUpBattle()` *before* dismissing. Close the window without
-that and the battle stays attached to both hulls, so the next approach finds
-`otherFleet.getBattle() != null`, decides an engagement is already under way, and opens on the
-join-battle screen instead of a conversation. Any row that leaves a *fleet* dialog must call
-`CatchReleaseCMD leaveEncounter`, which runs vanilla's teardown and then dismisses. Rows that
-leave a market, person or custom-entity dialog are unaffected - there is no encounter and no
-battle - and the verb checks the plugin type, so it is safe everywhere.
-
-**`PopulateOptions` is not fired for you after `OpenCommLink`.** It is easy to read the
-trigger list above as implying the engine keeps the option loop turning by itself. It
-does fire after a `DialogOptionSelected` row, but *not* after `OpenCommLink` — a comm row that sets
-`$menuState` and stops produces a conversation with no options under it. Every row here
-that opens a menu from a comm link calls `FireAll PopulateOptions` itself.
-
-**`AddBarEvent` takes an undocumented fourth argument.** `AddBarEvent <id> "<option>"
-"<blurb>" [<colour>]`. It goes through `Token.getColor`, so `highlight` resolves to the
-settings colour `buttonShortcut` (255,210,0) and a faction id resolves to that
-faction's colour. The bar screen reads it back off `BarEventData.optionColor`. Used by
-`catchrelease_ratingBarAdd`.
-
-**Edit `rules.csv` through a CSV round-trip, and prove the round-trip first.** The
-file's line endings have changed once already and will change again the moment somebody
-opens it in the wrong editor. As of `00b0d1e` it is **pure LF throughout**; before that
-it was **CRLF at record boundaries with bare LF inside quoted fields**, and the appendix
-said so, which by then was wrong.
-
-So do not hard-code either shape. Read the file, round-trip it unmodified, and compare
-bytes:
+A round-trip probe for a file that uses LF record endings:
 
 ```python
-src  = open(path, newline='', encoding='utf-8').read()
+src = open(path, newline='', encoding='utf-8').read()
 rows = list(csv.reader(io.StringIO(src)))
-out  = io.StringIO()
+out = io.StringIO()
 csv.writer(out, lineterminator='\n', quoting=csv.QUOTE_MINIMAL).writerows(rows)
-assert out.getvalue() == src      # if this fails, try '\r\n' before touching anything
+assert out.getvalue() == src
 ```
 
-A round-trip that is byte-identical means editing the parsed rows and writing them back
-changes only what you changed - a one-line edit stays a one-line diff. A round-trip that
-is *not* identical means the file's shape is not what you assumed, and finding out why is
-the job before the edit, not after it.
+If it differs, inspect the source format before editing. A carriage return embedded in a script command can make its name unrecognisable. Commas in notes must remain inside a correctly quoted field.
 
-Two hazards that survive whatever the endings are:
+## Maintenance
 
-- A `\r` that ends up *inside* a quoted script cell makes the command on that line
-  unrecognisable (`ShowDefaultVisual\r`), silently.
-- The `notes` column takes prose, so a comma in it turns a 7-column row into 8. Let the
-  CSV writer do the quoting rather than hand-writing the commas.
-
-After any edit, check: `csv.reader` parses, every row has exactly 7 fields, and the diff
-is the size of the change you made.
-
-**Where the mod's own conventions live.** [`ARCHITECTURE.md`](ARCHITECTURE.md) has a
-"The rules.csv contract" section covering what this mod does on top of the language —
-how `CatchReleaseCMD` is the single bridge into Java, the per-job row shapes, and the
-tokens Java writes for rows to read.
-
-**One correction the master brings that is worth saying out loud.** Condition score
-defaults to **0**, not 1, and a rule's score is the sum of its conditions' explicit
-`score:N` tokens. The guide this replaced said every passing condition contributes a
-point, which would mean "more conditions wins" for free. It does not. Rows in this repo
-that rely on being outscored — the harpooned-comms ladder, the fisher greetings — carry
-explicit scores for exactly that reason, and a new row without one scores zero.
-
-The practical failure mode is not a tie inside one family - those are usually kept apart by
-opposed conditions (`$catchreleaseMore` against `!$catchreleaseMore`). It is two *different*
-families both matching the same hull. A fishing boat the player had harpooned carried
-`$catchrelease_harpooned`, so the harpooned-crew greetings applied to it; the Independent
-variant scores 1110 and the boat's own greetings top out at 1100, so one harpoon silently
-replaced the shop, the charts, the buyer and the whole introduction with a crew complaining
-about a hole, for the thirty days the flag lives. Nothing was wrong with either family on its
-own. When adding a family keyed on a flag any hull can carry, check what else can be true of
-that hull at the same time - the harpooned rows now all lead with
-`!$entity.catchrelease_fisherman`.
+Update verified project contracts here when their implementation changes. Preserve exact syntax and link to the relevant source evidence for technical corrections. Keep upstream reference files under `docs/rules/` unchanged unless intentionally updating the vendored version; simulator behavior described there is not a substitute for a live game check. Follow [CLAUDE.md](../CLAUDE.md#documentation-upkeep) for ownership and commit requirements.
