@@ -1,6 +1,6 @@
 # Rules reference
 
-Use this document for technical rules work. Start at [DIALOGUE.md](DIALOGUE.md) for text production and Editor review; use [UI.md](UI.md) for presentation checks and [LORE.md](LORE.md) for fiction and voice.
+Use this document for technical rules work. [DIALOGUE.md](DIALOGUE.md) governs all player-facing wording, text presentation and dialogue flow, including rules-authored text and options. Use [LORE.md](LORE.md) for fiction and voice. [UI.md](UI.md) covers Java-bound custom UI only; consult it when integrating a Java panel, not as a separate standard for rules dialogue.
 
 The engine guidance was adapted from another modder's reference. The detailed [engine workflow](rules/engine_workflow.md) and [command table](rules/command_table.md) are preserved upstream copies. Their simulator-specific instructions describe an external tool, not a requirement to build that tool in Catch.Release. Project constraints are listed below.
 
@@ -149,7 +149,7 @@ Global.getSector().getRules().fireBest("CatchReleaseHarpoonedGreeting", dialog);
 
 ## Project routing
 
-Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Presentation requirements belong in [UI.md](UI.md).
+Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Shared text-presentation requirements belong in [DIALOGUE.md](DIALOGUE.md#shared-text-presentation), regardless of the content or its source.
 
 | Entry / state | Contract |
 |---|---|
@@ -177,8 +177,9 @@ Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Presentation requi
 - A harpoon offence may coexist with Fisherman flags. Preserve the Fisherman exclusion on generic harpooned-crew greetings.
 - Explicitly fire the intended menu trigger on entry and return; do not rely on the trigger's name to schedule it. Rows with no options may retain an old panel. Check actual rules and driver behavior for the path being edited.
 - `$hailing` and `$highlightComms` are consumed while vanilla builds fleet interaction. Do not treat them as lasting quest state.
+- Colour an option after it has been added. Use the existing later, condition-matched colour row rather than relying on an earlier script. Retain the shared `highlightJobText` path for job dialogue.
 
-For highlight ordering and shared helpers, see [UI.md](UI.md#colours-and-options); for `QuestDialogMap` placement and cleanup, see [intel and sidebar maps](UI.md#intel-and-sidebar-maps).
+Check displayed highlight occurrences using [DIALOGUE.md](DIALOGUE.md#shared-text-presentation). Java `QuestDialogMap` placement and cleanup are covered by [UI.md](UI.md#intel-and-sidebar-maps).
 
 ## Fleet and bar exits
 
@@ -195,7 +196,7 @@ Bar-event wrappers close with `returnFromEvent`, not `close`. Check confirm, can
 1. Read the relevant existing rows and the required Starsector rules references. Use vanilla source for uncertain engine behavior, and read-only `lib/` archives for third-party APIs.
 2. Prove a byte-identical CSV round-trip before changing parsed rows. Detect the current line endings; do not assume LF or CRLF from an old note.
 3. Preserve row IDs, seven columns, quoting, embedded newlines, tokens, commands and ordering except where the technical task explicitly changes them.
-4. Check every affected entry, question loop, accept/decline path, hand-in, cancellation and exit. Include overlapping flags, completed states and save/load. Follow the [dialogue route checklist](DIALOGUE.md#technical-handoff) and [UI presentation checks](UI.md#review-the-affected-screen).
+4. Check every affected entry, question loop, accept/decline path, hand-in, cancellation and exit. Include overlapping flags, completed states and save/load. Follow the [dialogue route checklist](DIALOGUE.md#technical-handoff) and [shared text checks](DIALOGUE.md#shared-text-presentation). When a Java custom panel is affected, also use its [UI checks](UI.md#review-the-affected-screen).
 5. Parse the edited file again, require seven fields per row, and inspect the diff. A small change must not rewrite unrelated rows.
 6. Report static checks separately from in-game QA. The external Rules Visualizer is not bundled with this repository; use it only if available. Its absence is not a new tooling project or a reason to claim a test was run. DumpMemory can help during live QA.
 

@@ -10,7 +10,7 @@ This is an out-of-universe reference for writers: setting facts, knowledge limit
 
 Read the foundations in order: [fabric and coherence](#fabric-and-coherence), [breaches and ruptures](#breaches-ruptures-and-ponds), [patterns](#patterns), then [what observers can notice](#what-observers-can-notice). The character sections build on those definitions. [Writing style](#writing-style) and [terminology](#terminology) apply across the cast.
 
-For drafting and Editor review, start at [DIALOGUE.md](DIALOGUE.md). Use [UI.md](UI.md) for presentation checks and [RULES.md](RULES.md) for rules-engine behavior. Those documents own the workflow and implementation; this document owns lore, prose style and characterization.
+For drafting, Editor review and shared text-presentation checks, start at [DIALOGUE.md](DIALOGUE.md), whether the text comes from rules or Java. Use [RULES.md](RULES.md) for rules-engine behavior and [UI.md](UI.md) for Java custom UI implementation. Those documents own the workflow and implementation; this document owns lore, prose style and characterization.
 
 Current lore takes precedence over older mod prose. User-supplied lines remain verbatim unless the user requests a rewrite; if a supplied line conflicts with lore, point out the conflict rather than silently changing either. Documentation upkeep is defined in [CLAUDE.md](../CLAUDE.md#documentation-upkeep).
 
