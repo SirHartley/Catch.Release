@@ -20,6 +20,8 @@ Ordinary people accept that account because they are part of the reality produci
 
 The player may notice a contradiction across scenes. The fiction does not confirm it. The Fisherman alone can perceive the change itself because he is no longer entirely within the reality imposing it. He knows that forcing reality to account for a contradiction is dangerous.
 
+His awareness does not come from training, instruments or enhanced hyperspace senses, and does not make him resistant or immune to low coherence.
+
 ### Showing an anomaly
 
 Describe the action without announcing what it means. A crewman can reach through a closed locker for a wrench; the narrator does not explain that his body has been changed by hyperspace. Crablobab can retrieve stock from deep inside his coat without a comment about spatial impossibility.
