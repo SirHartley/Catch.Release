@@ -8,6 +8,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | [DIALOGUE.md](DIALOGUE.md) | All player-facing text, rules or Java: workflow, shared text presentation and dialogue flow; prose constraints in LORE.md |
 | [LORE.md](LORE.md) | Setting facts, knowledge limits, character voices and source-labelled prose examples |
 | [RULES.md](RULES.md) | Rules syntax, execution and project routing contracts |
+| [RULES_AUTHORING.md](RULES_AUTHORING.md) | Using and debugging commands, memory and text replacements, including Java integration; vanilla dictionaries and source corrections |
 | [UI.md](UI.md) | Java custom panels, widgets, renderers, sprites, tooltips, layout and input; shared text guidelines in DIALOGUE.md |
 | [Distress README](../jars/src/catchrelease/distress/README.md) | Reusable distress integration |
 | [Skillshot README](../jars/src/catchrelease/skillshot/README.md) | Reusable targeting integration |
@@ -23,6 +24,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Fish shop and schematics | `FishShopDialog -> ShopEntry -> ShopPricing/ShopSchematics -> TackleManager/UpgradeManager` |
 | Fisherman fleet, identity, shelf | `CoreFisherSpawner/FishermanSpawner -> behavior -> FishermanIdentity/FishermanShelf` |
 | Rules menu, panel return, highlights | `rules.csv -> CatchReleaseCMD`; [project routing](RULES.md#project-routing), [shared text presentation](DIALOGUE.md#shared-text-presentation) and [Java panel returns](UI.md#custom-dialog-hosts) |
+| Command arguments, mission calls, memory lifetime, missing text replacements | [Rules implementation guide](RULES_AUTHORING.md) and its dictionaries, including for Java-only fixes; [project routing](RULES.md#project-routing) for local contracts |
 | Harpoon, drones, Breach Lights | `abilities/*/ability -> entities/scripts -> renderers`; shared targeting in `skillshot/` |
 | Camera, pond opening | `PondInteractionAbilityPlugin -> RodMoteEntityPlugin -> MaskedFishingPondTerrainPlugin -> PondCameraFocusScript` |
 | Charge count / regeneration | `BaseChargedSkillshotAbility -> ChargeManager -> ability callback` |
@@ -144,6 +146,8 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishRumors.java` | Monthly rarity/treasure/non-legendary-stranger rumor state, expiry and intel; graduation grants a separate immediate lead. |
 
 ### `dialogue/rules`
+
+Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge or its memory/text bindings, not only when adding CSV rows.
 
 | File | Owner / connection |
 |---|---|

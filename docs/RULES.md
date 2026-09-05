@@ -1,17 +1,18 @@
-# Rules reference
+# Rules language and project contracts
 
-Use this document for technical rules work. [DIALOGUE.md](DIALOGUE.md) governs all player-facing wording, text presentation and dialogue flow, including rules-authored text and options. Use [LORE.md](LORE.md) for fiction and voice. [UI.md](UI.md) covers Java-bound custom UI only; consult it when integrating a Java panel, not as a separate standard for rules dialogue.
+Read this document for rules syntax, execution, Catch.Release routing contracts and CSV validation. [RULES_AUTHORING.md](RULES_AUTHORING.md) is the companion implementation guide for using and debugging commands, memory and text replacements, including their Java bindings. Both are technical guides: this one describes the language and project contracts; the companion owns the full command/key integration procedures. The short examples here do not replace that procedure.
+
+[DIALOGUE.md](DIALOGUE.md) governs all player-facing wording, text presentation and dialogue flow, including rules-authored text and options. Use [LORE.md](LORE.md) for fiction and voice. [UI.md](UI.md) covers Java-bound custom UI only; consult it when integrating a Java panel, not as a separate standard for rules dialogue. Repository workflow and required reading are in [CLAUDE.md](../CLAUDE.md#which-guide-to-read).
 
 The engine guidance was adapted from another modder's reference. The detailed [engine workflow](rules/engine_workflow.md) and [command table](rules/command_table.md) are preserved upstream copies. Their simulator-specific instructions describe an external tool, not a requirement to build that tool in Catch.Release. Project constraints are listed below.
 
-Before choosing a command or adding a memory/text key, read [Commands, memory and text tokens](RULES_AUTHORING.md). It links the [vanilla command dictionary](rules-reference/COMMANDS.md), [memory/text dictionary](rules-reference/MEMORY.md), and [complete literal-key usage index](rules-reference/KEY_USAGE.md). Look for a vanilla or existing project mechanism before writing a new plugin. Its [source corrections](RULES_AUTHORING.md#corrections-to-the-preserved-simulator-references) cover verified differences from the preserved simulator guides.
+Before using, changing or debugging commands or memory/text keys, read the relevant sections of the [Rules implementation guide](RULES_AUTHORING.md). It links the [vanilla command dictionary](rules-reference/COMMANDS.md), [memory/text dictionary](rules-reference/MEMORY.md), and [complete literal-key usage index](rules-reference/KEY_USAGE.md). Look for a vanilla or existing project mechanism before writing a new plugin. Its [source corrections](RULES_AUTHORING.md#corrections-to-the-preserved-simulator-references) govern the listed differences from the preserved simulator guides for the named build; they do not certify unlisted claims. Follow the [technical conflict procedure](../CLAUDE.md#technical-references-and-conflicts) for other discrepancies.
 
 ## Rules System (`data/campaign/rules.csv`)
 
 Rule rows drive dialogue, bar events, market interactions and other campaign text. Vanilla file: `starsector-core/data/campaign/rules.csv` (~41k lines). Mod file: `data/campaign/rules.csv` (additive).
 
-For deep engine mechanics verified against decompiled source, see:
-[`rules/engine_workflow.md`](rules/engine_workflow.md).
+For the preserved engine discussion, see [rules/engine_workflow.md](rules/engine_workflow.md), together with the [source corrections](RULES_AUTHORING.md#corrections-to-the-preserved-simulator-references). It is supporting reference material, not a replacement for the project contracts or the implementation guide.
 
 ### CSV columns
 `id,trigger,conditions,script,text,options,notes`
@@ -194,7 +195,7 @@ Bar-event wrappers close with `returnFromEvent`, not `close`. Check confirm, can
 
 ## Editing and validation
 
-1. Read the relevant existing rows and required Starsector rules references. Check [the authoring guide and dictionaries](RULES_AUTHORING.md) before adding a command or key. Use vanilla source for uncertain engine behavior, and read-only `lib/` archives for third-party APIs.
+1. Read the relevant existing rows and required Starsector rules references. Check [the authoring guide and dictionaries](RULES_AUTHORING.md) for the commands and keys being used, changed or debugged, not only new ones. Use vanilla source for uncertain engine behavior, and read-only `lib/` archives for third-party APIs.
 2. Prove a byte-identical CSV round-trip before changing parsed rows. Detect the current line endings; do not assume LF or CRLF from an old note.
 3. Preserve row IDs, seven columns, quoting, embedded newlines, tokens, commands and ordering except where the technical task explicitly changes them.
 4. Check every affected entry, question loop, accept/decline path, hand-in, cancellation and exit. Include overlapping flags, completed states and save/load. Follow the [dialogue route checklist](DIALOGUE.md#technical-handoff) and [shared text checks](DIALOGUE.md#shared-text-presentation). When a Java custom panel is affected, also use its [UI checks](UI.md#review-the-affected-screen).
@@ -215,4 +216,4 @@ If it differs, inspect the source format before editing. A carriage return embed
 
 ## Maintenance
 
-Update verified project contracts here when their implementation changes. Preserve exact syntax and link to the relevant source evidence for technical corrections. Keep upstream reference files under `docs/rules/` unchanged unless intentionally updating the vendored version; simulator behavior described there is not a substitute for a live game check. Follow [CLAUDE.md](../CLAUDE.md#documentation-upkeep) for ownership and commit requirements.
+Update verified language and project contracts here when their implementation changes. Preserve exact syntax and source evidence. Full command/key integration procedures belong in `RULES_AUTHORING.md`; link there rather than adding a competing procedure here. Record corrections to the preserved simulator references in its [source correction table](RULES_AUTHORING.md#corrections-to-the-preserved-simulator-references), then align affected summaries and links here. Keep upstream reference files under `docs/rules/` unchanged unless intentionally updating the vendored version; simulator behavior described there is not a substitute for a live game check. Follow [CLAUDE.md](../CLAUDE.md#documentation-upkeep) for ownership and commit requirements.
