@@ -243,9 +243,10 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             titleRow.addComponent(close).inTR(0f, 0f);
 
             header.addCustom(titleRow, 0f);
-            header.addTooltipTo(createLegendTooltip(), help, TooltipMakerAPI.TooltipLocation.BELOW);
+            header.addTooltipTo(createLegendTooltip(), help,
+                    TooltipMakerAPI.TooltipLocation.BELOW, false);
             header.addTooltipTo(createSimpleTooltip(220f, "Back to the boat."),
-                    close, TooltipMakerAPI.TooltipLocation.BELOW);
+                    close, TooltipMakerAPI.TooltipLocation.BELOW, false);
 
             panel.addUIElement(header).inTL(PAD, PAD);
         }
@@ -260,7 +261,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             footer.addTooltipToPrevious(createSimpleTooltip(260f,
                     "Takes back the last chart bought this visit - the fish paid for it return"
                             + " exactly as they were."),
-                    TooltipMakerAPI.TooltipLocation.ABOVE);
+                    TooltipMakerAPI.TooltipLocation.ABOVE, false);
 
             panel.addUIElement(footer).inTL(PAD, HEIGHT - PAD - UNDO_HEIGHT);
 

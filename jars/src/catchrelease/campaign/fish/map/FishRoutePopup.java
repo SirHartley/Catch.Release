@@ -15,7 +15,6 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TextFieldAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.input.Keyboard;
@@ -57,7 +56,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     protected PositionAPI pos;
     protected TextFieldAPI searchField;
     protected TooltipMakerAPI listElement;
-    protected UIComponentAPI listRemovable;
+    protected CustomPanelAPI listPanel;
     protected PositionAPI listViewport;
 
     protected String notice;
@@ -186,13 +185,13 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         controls.addCustom(titleRow, 0f);
         controls.addTooltipTo(createSimpleTooltip(220f,
                 "Close the planner and put the sidebar back."),
-                close, TooltipMakerAPI.TooltipLocation.BELOW);
+                close, TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         searchField = controls.addTextField(innerWidth, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 8f);
         searchField.setText(SEARCH_GHOST);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
                 "Type to filter the species by name. The list follows as you type."),
-                TooltipMakerAPI.TooltipLocation.BELOW);
+                TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         FishType[] types = FishType.values();
 
@@ -210,7 +209,8 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                             () -> filter.types.contains(type), () -> onChipToggled(type)));
 
             chipRow.addComponent(chip).inTL(i * (chipWidth + CHIP_GAP), 0f);
-            controls.addTooltipTo(createChipTooltip(type), chip, TooltipMakerAPI.TooltipLocation.BELOW);
+            controls.addTooltipTo(createChipTooltip(type), chip,
+                    TooltipMakerAPI.TooltipLocation.BELOW, false);
         }
 
         controls.addCustom(chipRow, 8f);
@@ -219,7 +219,8 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                 new PaneWidgets.ListHeader(() -> rows.isEmpty()
                         ? "SPECIES - NONE MATCH" : "SPECIES - " + rows.size()));
         controls.addCustom(header, 8f);
-        controls.addTooltipTo(createLegendTooltip(), header, TooltipMakerAPI.TooltipLocation.BELOW);
+        controls.addTooltipTo(createLegendTooltip(), header,
+                TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         panel.addUIElement(controls).inTL(PAD, PAD);
     }
@@ -239,22 +240,24 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
         footer.addTooltipToPrevious(createSimpleTooltip(260f,
                 "Plot the shortest route through the picked species' ranges and draw it on"
                         + " the hyperspace map."),
-                TooltipMakerAPI.TooltipLocation.ABOVE);
+                TooltipMakerAPI.TooltipLocation.ABOVE, false);
 
         panel.addUIElement(footer).inTL(PAD, height - PAD - FOOTER_HEIGHT);
     }
 
     protected void rebuildList() {
-        if (listRemovable != null) panel.removeComponent(listRemovable);
+        if (listPanel != null) panel.removeComponent(listPanel);
 
         rebuildRows();
 
         float listHeight = height - CONTROLS_HEIGHT - FOOTER_HEIGHT - PAD * 2f - 8f;
-        // same air on both sides - the list's slot is inset PAD left and right alike
-        listElement = panel.createUIElement(width - PAD * 2f, listHeight, true);
+        float listWidth = width - PAD * 2f;
+        // Vanilla retains created tooltips; replace their owner along with the list.
+        listPanel = panel.createCustomPanel(listWidth, listHeight, null);
+        listElement = listPanel.createUIElement(listWidth, listHeight, true);
 
         for (Row row : rows) {
-            CustomPanelAPI rowPanel = panel.createCustomPanel(width - PAD * 2f - 6f, ROW_HEIGHT,
+            CustomPanelAPI rowPanel = listPanel.createCustomPanel(listWidth - 6f, ROW_HEIGHT,
                     new RowPlugin(row));
 
             listElement.addCustom(rowPanel, 3f);
@@ -262,11 +265,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                     TooltipMakerAPI.TooltipLocation.LEFT);
         }
 
-        listViewport = panel.addUIElement(listElement);
-        listViewport.inTL(PAD, PAD + CONTROLS_HEIGHT);
-
-        listRemovable = listElement.getExternalScroller() != null
-                ? (UIComponentAPI) listElement.getExternalScroller() : listElement;
+        listViewport = listPanel.addUIElement(listElement);
+        listViewport.inTL(0f, 0f);
+        panel.addComponent(listPanel).inTL(PAD, PAD + CONTROLS_HEIGHT);
     }
 
     protected void rebuildRows() {

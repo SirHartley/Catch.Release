@@ -7,6 +7,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | [CLAUDE.md](../CLAUDE.md) | Workflow, build gate and document upkeep |
 | [DIALOGUE.md](DIALOGUE.md) | Text workflow and presentation; routes to LORE.md for prose and character constraints |
 | [RULES.md](RULES.md) | Rules syntax, execution and project routing contracts |
+| [UI.md](UI.md) | Custom-panel layout, tooltip lifetime and input |
 | [Distress README](../jars/src/catchrelease/distress/README.md) | Reusable distress integration |
 | [Skillshot README](../jars/src/catchrelease/skillshot/README.md) | Reusable targeting integration |
 
@@ -29,6 +30,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Map/Codex/intel handoff | `FishIntelMapButton/FishCodex -> FishMapFilterScript -> FishMapPane/FishPresence` |
 | Stale campaign effect | Owner location/ability validity -> cleanup; shared renderer registration in `rendering/` |
 | Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; minigame rendering is separate |
+| Map / planner list rebuilds | `FishMapPane` and `FishRoutePopup` replace the list's owning custom panel; [lifetime contract](UI.md#rebuilding-lists) |
 | Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*`; black-hole pass in `rendering/spiral/` |
 | Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel` |
 
