@@ -6,6 +6,9 @@ Clicking the ability instead starts aiming; the next map click fires.
 The framework was extracted from Industrial.Evolution's consumable missiles. Its Java source is
 in this package; assets and registration entries are in the Catch.Release mod root.
 
+Shared drawing gotchas are in [UI.md](../../../../docs/UI.md#drawing-gotchas).
+Reticule hooks and targeting lifecycle stay here.
+
 ## Requirements
 
 - Starsector 0.98a API

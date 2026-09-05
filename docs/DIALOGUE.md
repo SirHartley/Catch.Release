@@ -3,11 +3,12 @@
 Start here for dialogue, options, intel, tooltips, UI labels, messages, species and item descriptions, mission copy, and console output.
 
 - [LORE.md](LORE.md): setting definitions, absolute knowledge limits, prose style, character instructions, examples, terminology and information-release order.
+- [UI.md](UI.md): presentation requirements, colours, reward cards, intel navigation, portraits, tooltips and custom-panel behavior.
 - [RULES.md](RULES.md): CSV format, rule execution, commands, memory, and technical validation. Read its linked references and the required rules skills for rules work.
 - [ARCHITECTURE.md](ARCHITECTURE.md): code and data owners, registrations, and lifecycle connections.
 - [CLAUDE.md](../CLAUDE.md#documentation-upkeep): task workflow and automatic documentation upkeep.
 
-This document governs text production and presentation. It does not override lore or define rules-engine syntax. Preserve user-supplied dialogue verbatim unless the user asks for a rewrite.
+This document governs text production and dialogue flow. It does not override lore or define rules-engine syntax. Preserve user-supplied dialogue verbatim unless the user asks for a rewrite.
 
 ## Starsector Editor
 
@@ -44,15 +45,13 @@ Use the [lore's dialogue and option instructions](LORE.md#dialogue-and-player-op
 
 ### Surface requirements
 
+Tooltip, schematic-card, intel and receipt requirements are in [UI.md](UI.md#text-cards-and-receipts). Use them alongside these writing requirements.
+
 | Surface | Required information |
 |---|---|
-| Tooltip | What it does first; flavor afterward. State restrictions and costs plainly. |
-| Schematic reward card | Exact upgrade tier or compatible module, its effect, purchase-permission status, and later credit-and-fish price. A schematic is not the equipment itself. Resolve the same icon as the shop, including category fallback. |
 | Quest offer | Complete demand, destination, deadline, reward preview, and unusual conditions before acceptance. Do not repeat the whole reward section in both character speech and the shared pitch. |
-| Accepted intel | Purpose, special terms, exact requirements and live progress, deadline, rewards, and navigation. Match the shared bar-job layout. |
 | Fish description | Observable form, precise deviations, and a useful handling or culinary consequence. Do not invent evolutionary history or explain every pattern. |
 | Colony description | A functioning facility: visitors, staff, tanks, access and maintenance. Follow the lore's setting constraints. |
-| Receipt | Actual items, credits or knowledge granted, after the hand-in prose. Use the shared receipt path rather than a second invented payment sentence. |
 
 Use the terminology in [LORE.md](LORE.md#terminology) and the labels supplied by the owning UI/data definitions. Do not expose internal names such as `Tackle` or maintain a second vocabulary table here.
 
@@ -64,7 +63,7 @@ Apply the [common mistakes and corrections](LORE.md#common-mistakes-and-correcti
 
 ## Dialogue behavior and presentation checks
 
-These are project acceptance criteria. Use `RULES.md` for how to implement and validate them.
+Dialogue-flow criteria are below. Use [UI.md](UI.md) for presentation checks and `RULES.md` for technical implementation and validation.
 
 ### Navigation
 
@@ -74,28 +73,19 @@ These are project acceptance criteria. Use `RULES.md` for how to implement and v
 - Keep generated targets, prices, rewards and case details stable when leaving and reopening an unaccepted offer. Display saved values; prose must not reroll them.
 - Show hand-in prose and actual reward receipts before moving to a new offer or ending the interaction. Multi-stage hand-ins use a Continue handoff before the next stage's accept/decline choices.
 - Peaceful fleet resolutions leave a visible Leave option. Explicit flee and cut-link choices may exit directly. Technical teardown must use the proper fleet path in `RULES.md`.
-- Clear host options before custom panels and restore the prior menu once on close. Check both confirm and cancel paths.
+
+Custom-panel opening and return behavior is covered by [UI.md](UI.md#custom-dialog-hosts).
 
 ### Fisherman questions
 
-- Business uses the dedicated `CatchReleaseFisherOptions` trigger; custom-panel cancellations resume through `CatchReleaseFisherResume`.
-- Unasked questions precede answered ones. Answered questions remain selectable at the end, coloured with vanilla `Misc.getGrayColor()`, not Common fish-rarity beige.
-- Keep paging and navigation within the nine-option limit. Terminal answers return to questions through Something else; the question-menu exit returns to business.
+- Business and panel-return triggers are listed in [RULES.md](RULES.md#project-routing). Question sorting, colours and paging limits are in [UI.md](UI.md#colours-and-options).
+- Terminal answers return to questions through Something else; the question-menu exit returns to business.
 - “Baha” is introduced by its answer, not assumed in the preceding question label.
 - Bycatch becomes a question topic after the first relevant catch. Tutorial disclosure and special-topic precedence follow the saved progression and `LORE.md`.
 
 ### Colours, rewards and sidebars
 
-- Fish names use their rarity colours. Non-fish rewards, places and final hand-in choices use the established quest highlight. Do not substitute the positive-gain colour for the last fish in a list.
-- Highlight arguments follow displayed occurrence order. Repeat the argument when the same fish name appears again. Check first, middle and last items, including token-expanded names.
-- Colour a menu option after it has been added. Use the existing later, condition-matched colour row rather than relying on an earlier script.
-- Use shared reward cards for initial offers, counteroffers and follow-ups. Receipts report actual grant results, including a learned-range reward converted to its saved credit fallback.
-- Standard `FishReward` receipts use Gained; fleet contracts use Received. Do not change an established receipt label as incidental prose cleanup.
-- Remote offers and location reminders use `QuestDialogMap` below the portrait. Use the stored target; do not display a map for a local or unresolved destination. Remove only the temporary map/marker owned by that preview after acceptance, leaving, or switching surfaces.
-- Restore Crablobab's person card after merchandise options; do not leave the bar image active.
-- Every live fishing quest, task and rumor offers Open fishing map. The hover explains its destination/filter. Request hovers retain specimen restrictions: a geographic range alone does not satisfy size, grade, origin, time or method requirements.
-- Intel icons distinguish rupture-only, lamp-only and mixed requirements; POINT tutorial entries use the tutorial icon. Check the shared icon resolver instead of copying a portrait.
-- Unknown range data must remain visibly unknown in a forced map/planner handoff. Check the no-data state and reset path, not just a fully unlocked dev view.
+See [colours and options](UI.md#colours-and-options), [cards and receipts](UI.md#text-cards-and-receipts), [intel and maps](UI.md#intel-and-sidebar-maps), and [portraits](UI.md#portraits-and-sprites) in `UI.md`.
 
 ### Camp proof
 
@@ -109,4 +99,4 @@ Trace each affected route through initial contact, questions, acceptance, return
 
 ## Maintenance
 
-Update the relevant section in the same commit when a text workflow, presentation contract or reusable dialogue convention changes. Keep setting facts, knowledge limits, prose style, characterization and their explanatory examples in `LORE.md`; keep engine semantics in `RULES.md` and owner/connection information in `ARCHITECTURE.md`. Repair cross-links after moving a section. Do not append a task history or copy complete dialogue trees into this guide.
+Update the relevant section in the same commit when a text workflow or reusable dialogue convention changes. Keep presentation contracts in `UI.md`; setting facts, knowledge limits, prose style, characterization and their explanatory examples in `LORE.md`; engine semantics in `RULES.md`; and owner/connection information in `ARCHITECTURE.md`. Repair cross-links after moving a section. Do not append a task history or copy complete dialogue trees into this guide.
