@@ -19,6 +19,7 @@ Reviews, explanations, audits, and proposals are read-only unless the user reque
 4. For any player-facing text work, start with [`docs/DIALOGUE.md`](docs/DIALOGUE.md). It owns the Editor procedure, presentation checks, and links to lore and technical rules. `LORE.md` owns setting definitions, absolute knowledge limits, prose style, character instructions and explanatory examples; read it before drafting. Documentation editing and technical-only routing changes do not require an Editor prose pass.
 5. Read [`docs/RULES.md`](docs/RULES.md) before working on `rules.csv`. Read the relevant parts of [`docs/rules/engine_workflow.md`](docs/rules/engine_workflow.md) and [`docs/rules/command_table.md`](docs/rules/command_table.md) before writing a rule.
 6. Use [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) to locate the relevant owner and connections before tracing code. Follow only the references needed for the task.
+7. For custom UI work, read [`docs/UI.md`](docs/UI.md) for tooltip lifetime, layout and input contracts.
 
 ### Make and record changes
 
@@ -55,6 +56,7 @@ Update documents automatically as part of each relevant change, not by a backgro
 | `AGENTS.md` | Codex discovery | Keep it a short pointer to this file. Do not copy workflow policy into it. |
 | `CLAUDE.md` | Task scope, tools, commits, PRs, builds, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
 | `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No lore, writing advice, release history, or duplicate policy. |
+| `docs/UI.md` | Custom-panel lifetime, layout and input contracts | Update verified engine details and their sources when UI integration changes. Keep text presentation in `DIALOGUE.md`. |
 | `docs/DIALOGUE.md` | Master for text work: Editor procedure, prose review, UI/intel conventions, dialogue usability and presentation hazards | Update the relevant convention when a text feature or workflow changes. Link to lore and technical rules instead of copying their explanations. |
 | `docs/LORE.md` | Setting definitions, absolute knowledge limits, prose style, character instructions, examples, terminology and information-release order | Update only for approved fiction/characterization changes or requested meaning-preserving edits. Define concepts before using them, or link to their definitions. Preserve the force of facts and prohibitions, their reasons, and useful correct/incorrect examples. Do not turn invented dialogue into canon. |
 | `docs/RULES.md` | Project rules-engine guidance | Update verified technical contracts and local links. Keep command syntax, examples and evidence accurate. |
