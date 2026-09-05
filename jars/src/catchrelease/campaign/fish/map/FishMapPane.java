@@ -16,7 +16,6 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TextFieldAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.input.Keyboard;
@@ -63,7 +62,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     protected PositionAPI pos;
     protected TextFieldAPI searchField;
     protected TooltipMakerAPI listElement;
-    protected UIComponentAPI listRemovable;
+    protected CustomPanelAPI listPanel;
     protected PositionAPI listViewport;
 
     protected final Set<String> selectedIds = new LinkedHashSet<>();
@@ -347,7 +346,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     }
 
     protected void rebuildList() {
-        if (listRemovable != null) panel.removeComponent(listRemovable);
+        if (listPanel != null) panel.removeComponent(listPanel);
 
         List<FishSpec> shown = FishPresence.getShown(filter);
 
@@ -357,22 +356,23 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                 || filter.speciesRestricted && filter.allowedSpeciesIds.isEmpty();
         shownCount = noDataForEntry ? 0 : shown.size();
 
-        // same air on both sides - the list's slot is inset PAD left and right alike
-        listElement = panel.createUIElement(listWidth, listHeight, !noDataForEntry);
+        // Vanilla retains created tooltips; replace their owner along with the list.
+        listPanel = panel.createCustomPanel(listWidth, listHeight, null);
+        listElement = listPanel.createUIElement(listWidth, listHeight, !noDataForEntry);
 
         if (noDataForEntry) {
-            CustomPanelAPI emptyState = panel.createCustomPanel(listWidth, listHeight,
+            CustomPanelAPI emptyState = listPanel.createCustomPanel(listWidth, listHeight,
                     new BaseCustomUIPanelPlugin() {
                     });
 
             float blockHeight = NO_DATA_NOTE_HEIGHT + NO_DATA_GAP + NO_DATA_RESET_HEIGHT;
             float blockTop = Math.max(0f, (listHeight - blockHeight) * 0.5f);
 
-            CustomPanelAPI note = panel.createCustomPanel(listWidth, NO_DATA_NOTE_HEIGHT,
+            CustomPanelAPI note = listPanel.createCustomPanel(listWidth, NO_DATA_NOTE_HEIGHT,
                     new PaneWidgets.Note(NO_DATA_TEXT));
             emptyState.addComponent(note).inTL(0f, blockTop);
 
-            CustomPanelAPI reset = panel.createCustomPanel(
+            CustomPanelAPI reset = listPanel.createCustomPanel(
                     NO_DATA_RESET_WIDTH, NO_DATA_RESET_HEIGHT,
                     new PaneWidgets.TextButton(() -> "RESET", () -> true,
                             () -> resetRequested = true));
@@ -385,7 +385,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
 
         if (!noDataForEntry) {
             for (FishSpec spec : shown) {
-                CustomPanelAPI row = panel.createCustomPanel(listWidth - 6f, ROW_HEIGHT,
+                CustomPanelAPI row = listPanel.createCustomPanel(listWidth - 6f, ROW_HEIGHT,
                         new RowPlugin(spec));
 
                 listElement.addCustom(row, 3f);
@@ -394,11 +394,9 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             }
         }
 
-        listViewport = panel.addUIElement(listElement);
-        listViewport.inTL(PAD, PAD + CONTROLS_HEIGHT);
-
-        listRemovable = listElement.getExternalScroller() != null
-                ? (UIComponentAPI) listElement.getExternalScroller() : listElement;
+        listViewport = listPanel.addUIElement(listElement);
+        listViewport.inTL(0f, 0f);
+        panel.addComponent(listPanel).inTL(PAD, PAD + CONTROLS_HEIGHT);
     }
 
     protected void onChipToggled(FishType type) {

@@ -15,7 +15,6 @@ import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TextFieldAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.input.Keyboard;
@@ -57,7 +56,7 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     protected PositionAPI pos;
     protected TextFieldAPI searchField;
     protected TooltipMakerAPI listElement;
-    protected UIComponentAPI listRemovable;
+    protected CustomPanelAPI listPanel;
     protected PositionAPI listViewport;
 
     protected String notice;
@@ -247,16 +246,18 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
     }
 
     protected void rebuildList() {
-        if (listRemovable != null) panel.removeComponent(listRemovable);
+        if (listPanel != null) panel.removeComponent(listPanel);
 
         rebuildRows();
 
         float listHeight = height - CONTROLS_HEIGHT - FOOTER_HEIGHT - PAD * 2f - 8f;
-        // same air on both sides - the list's slot is inset PAD left and right alike
-        listElement = panel.createUIElement(width - PAD * 2f, listHeight, true);
+        float listWidth = width - PAD * 2f;
+        // Vanilla retains created tooltips; replace their owner along with the list.
+        listPanel = panel.createCustomPanel(listWidth, listHeight, null);
+        listElement = listPanel.createUIElement(listWidth, listHeight, true);
 
         for (Row row : rows) {
-            CustomPanelAPI rowPanel = panel.createCustomPanel(width - PAD * 2f - 6f, ROW_HEIGHT,
+            CustomPanelAPI rowPanel = listPanel.createCustomPanel(listWidth - 6f, ROW_HEIGHT,
                     new RowPlugin(row));
 
             listElement.addCustom(rowPanel, 3f);
@@ -264,11 +265,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
                     TooltipMakerAPI.TooltipLocation.LEFT);
         }
 
-        listViewport = panel.addUIElement(listElement);
-        listViewport.inTL(PAD, PAD + CONTROLS_HEIGHT);
-
-        listRemovable = listElement.getExternalScroller() != null
-                ? (UIComponentAPI) listElement.getExternalScroller() : listElement;
+        listViewport = listPanel.addUIElement(listElement);
+        listViewport.inTL(0f, 0f);
+        panel.addComponent(listPanel).inTL(PAD, PAD + CONTROLS_HEIGHT);
     }
 
     protected void rebuildRows() {
