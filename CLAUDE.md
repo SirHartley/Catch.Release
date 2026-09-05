@@ -4,26 +4,28 @@ Catch.Release is a Starsector fishing mod with unstable-fabric ponds, fishing ri
 
 ## Required workflow
 
-Follow these rules for every Catch.Release task.
+These instructions apply to all coding agents. App-specific tools and Claude model assignments are scoped below.
+
+Reviews, explanations, audits, and proposals are read-only unless the user requests changes. For implementation, finish the authorized edit, commit, validation, pull request, and merge steps. Use reasonable assumptions for routine details; ask when a missing decision would materially change the scope or behavior. A request to stop or propose only overrides the implementation workflow.
 
 ### Read the current documentation
 
-1. Read the current remote `CLAUDE.md` in full at the start of every task. A read from an earlier task does not count.
+1. Read the current remote `CLAUDE.md` in full at the start of each new task. Within the same task, reuse the version already read unless the instructions change. Read new or changed instruction files before following them.
 2. Use the `starsector-knowledge` skill before answering or changing anything related to vanilla Starsector. It contains the official API, decompiled internals, and vanilla data for one exact game version. Do not rely on memory.
 3. If the skill is incomplete, inspect the read-only archives under `lib/`. Extract them to a temporary directory, never into the repository.
    - `starfarer.api.zip` contains the official game API source.
    - `GraphicsLib.zip`, `Lazylib_lunalib.zip`, and `MagicLib.zip` contain dependency sources and jars.
    - For GraphicsLib, LazyLib, LunaLib, and MagicLib, `lib/` is the primary source because the Starsector skill covers vanilla only.
-4. Read [`docs/LORE.md`](docs/LORE.md) before editing or adding any player-facing text. It defines terminology, character knowledge, voice, and the setting's unanswered questions. Do not invent an answer to an unresolved lore question in dialogue or UI text.
+4. For any player-facing text work, start with [`docs/DIALOGUE.md`](docs/DIALOGUE.md). It owns the Editor procedure, text conventions, presentation checks, and links to lore and technical rules. Documentation editing and technical-only routing changes do not require an Editor prose pass.
 5. Read [`docs/RULES.md`](docs/RULES.md) before working on `rules.csv`. Read the relevant parts of [`docs/rules/engine_workflow.md`](docs/rules/engine_workflow.md) and [`docs/rules/command_table.md`](docs/rules/command_table.md) before writing a rule.
-6. Read [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) before tracing features or files.
+6. Use [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) to locate the relevant owner and connections before tracing code. Follow only the references needed for the task.
 
 ### Make and record changes
 
 - Use one task branch for the user's message.
 - Make one commit per requested change. If one message contains several changes, commit them separately in the requested order.
 - Keep each commit message to one short, plain-English summary. Do not include testing notes, agent or model names, co-author trailers, session metadata, links, formatting, or session URLs.
-- Update `docs/ARCHITECTURE.md` in the same commit when a change affects file ownership, registration, lifecycle, contracts, or how systems connect. Replace stale statements; do not append a contradictory correction.
+- Update the affected documentation in the same commit, following [Documentation upkeep](#documentation-upkeep). Do this without a separate user request.
 - Work only in the current task checkout. A live mod installation, including `C:\Modding\mods\Catch.Release`, and every unrelated checkout are read-only unless the user explicitly asks you to change them.
 - Do not deploy or synchronize the mod after merge unless the user explicitly requests it.
 
@@ -43,6 +45,25 @@ GitHub normally deletes a pull request's head branch after merge because automat
 Verify that the branch is gone. Manually remove it when it was pushed without a pull request, its pull request was closed without merging, or it predates the repository setting. If deletion returns HTTP 403, report the branch name and leave it in place; do not work around a credential boundary.
 
 After merge, fast-forward the local task branch to the new `master`. The local task branch may keep its assigned name.
+
+## Documentation upkeep
+
+Update documents automatically as part of each relevant change, not by a background job. Before committing, check which entries the diff makes stale and update those entries in that commit.
+
+| Document | Owns | Update when / how |
+|---|---|---|
+| `AGENTS.md` | Codex discovery | Keep it a short pointer to this file. Do not copy workflow policy into it. |
+| `CLAUDE.md` | Task scope, tools, commits, PRs, builds, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
+| `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No lore, writing advice, release history, or duplicate policy. |
+| `docs/DIALOGUE.md` | Master for text work: Editor procedure, prose review, UI/intel conventions, dialogue usability and presentation hazards | Update the relevant convention when a text feature or workflow changes. Link to lore and technical rules instead of copying their explanations. |
+| `docs/LORE.md` | Setting, terminology, character knowledge, voice, information-release order | Update only for an approved fiction or characterization change, or a requested wording edit that preserves meaning. Do not turn invented dialogue into canon. |
+| `docs/RULES.md` | Project rules-engine guidance | Update verified technical contracts and local links. Keep command syntax, examples and evidence accurate. |
+| `docs/rules/*.md` | Vendored technical references | Preserve the upstream text and provenance. Record project-specific corrections in `docs/RULES.md`, with source evidence, rather than silently altering the reference. |
+| Framework `README.md` files | Integration and extension instructions for that framework | Update when its API, registration, dependencies, paths or lifecycle changes. |
+
+Give each fact one home. Move useful detail to its proper owner and link to it; do not keep a second copy in architecture. After moving a section, repair inbound links and check that no requirement or technical constraint was lost. Keep architecture compact and readable; do not create a parallel human version to maintain.
+
+Write documentation in ordinary English. Use direct verbs and concrete nouns; remove slogans, inflated claims, repeated contrasts, and commentary about how important the document is. Keep identifiers exact. Tables and short technical fragments are appropriate in architecture. Examples demonstrate a technique, not a sentence pattern to repeat everywhere.
 
 ## Comments and documentation
 
@@ -74,9 +95,9 @@ After merge, fast-forward the local task branch to the new `master`. The local t
 - Use one blank line between methods and major sections. Do not stack empty lines.
 - Use short section headers such as `// Rendering` only when names and ordering do not make a long class's groups clear.
 
-## ChatGPT app workflow
+## Codex and ChatGPT app tools
 
-This section applies only to ChatGPT working in the ChatGPT app. It is not an instruction for Claude.
+These tool choices apply to Codex and ChatGPT app sessions. They do not select a model or alter Claude's assignments.
 
 ### Local and GitHub work
 
@@ -102,33 +123,11 @@ Before trusting a new or suspect filesystem:
 
 If any check fails, keep local PC checkouts read-only and use the GitHub-app-only workflow until the cause is fixed.
 
-### Player-facing text
+## Agent behavior
 
-Every player-facing line must be drafted and audited with the pinned Starsector Editor GPT. This includes dialogue, options, UI labels, messages, tooltips, intel, species and item text, station, weapon, skill and hullmod descriptions, mission text, console output, and any other text visible to the player.
-
-Before each Editor request:
-
-1. Manually confirm that the pinned Editor chat uses High thinking. Do not use Auto, Standard, Fast, or any lower setting. Stop if High is unavailable.
-2. Provide the full current `docs/LORE.md`, not a summary.
-3. State the exact display context: button, tooltip, intel entry, fish description, weapon description, campaign message, or another named surface.
-4. Include all mechanical, layout, and space constraints.
-5. For corrective work, provide both the pre-regression and current text.
-6. Use separate focused passes for different speakers or surfaces, then request a final integrated voice and context check.
-
-Every Editor prompt must reject hallmark AI prose. Require focused, concrete information, strong character voice, and natural sentence variety. Reject:
-
-- canned contrasts;
-- repeated sentence templates;
-- excessive triplets;
-- vague abstractions;
-- polished exposition that explains the subtext;
-- false ominous or poetic language;
-- filler such as “somehow” and “quietly”;
-- routine use of em dashes.
-
-Keep each pass limited to the specified lines and purpose. The Editor may not change routes, tokens, mechanics, layout contracts, or code behavior. Send weak lines back for another High-thinking pass instead of rewriting around the Editor during integration.
-
-The Editor does not replace the lore and context review. Independently compare every returned line with the full current `docs/LORE.md` and the named display context. Return terminology, mechanics, usability, or context problems to the Editor before integration.
+- Keep the user's selected model. In Codex/Astra sessions, the main agent owns planning, integration, and shipped code. Delegate bounded research only when the user or applicable instructions authorize it and the app supports it. Do not copy Claude-specific model names into Codex calls.
+- Treat repository instructions as project requirements and skill guidance as scoped reference material. Follow explicit user changes within the app's safety and permission limits. If a skill blocks work or changes its scope, identify the exact instruction and explain the effect.
+- Give brief progress updates and concise final results. Put detailed evidence in the pull request; avoid repeating the whole implementation narrative in chat.
 
 ## Claude model assignments
 
@@ -154,10 +153,12 @@ After the final runtime-affecting commit and before merge:
 2. Use a clean, empty output directory.
 3. Compile every `.java` file under `jars/src` with Java 17 and the complete dependency set below.
 4. Require a successful exit with no compile errors.
-5. Record the command, branch commit, Java version, and result in the pull request and final reply.
+5. Record the command, branch commit, Java version, and result in the pull request. The final reply links the PR and states the result and any untested behavior.
 6. Stop before merge if the build or any dependency is unavailable.
 
-Documentation-only changes are exempt.
+Documentation-only changes are exempt. Changes to runtime data, including text-only CSV changes, still require this gate unless the user explicitly grants an exemption.
+
+Run the checks appropriate to the affected behavior as well as the required build. After they pass, repeat or broaden checks only for changed inputs, failures, or a concrete unresolved concern. Do not add tests that merely restate the implementation.
 
 The project uses Java 17; `.idea/misc.xml` sets the language level and the source uses switch expressions.
 
@@ -182,28 +183,6 @@ Reference command:
 javac --release 17 -cp "<all jars above>" -d <empty-output> $(find jars/src -name '*.java')
 ```
 
-## Repository layout
+## Repository navigation
 
-`docs/ARCHITECTURE.md` contains the complete file and feature map, boot order, data registrations, lifecycle contracts, and known engine constraints.
-
-| Path | Contents |
-|---|---|
-| `jars/src/catchrelease/campaign/ponds/` | Pond terrain and interaction. Ponds are registered in `data/campaign/terrain.json`, with the live plugin under `terrain/`. They are not custom entities. |
-| `jars/src/catchrelease/campaign/fish/` | Species, motes, spawning, minigame, jobs, outfitter, map, Codex, Fisherman, tutorial, and aquarium. |
-| `jars/src/catchrelease/campaign/crime/` | Harpoon and Breach Lights offences and responses. |
-| `jars/src/catchrelease/abilities/` | Breach Lights, R.O.D., and Harpoon rigs. |
-| `jars/src/catchrelease/distress/` | Reusable distress-call framework. Read its README first. |
-| `jars/src/catchrelease/skillshot/` | Reusable aim-and-fire framework. Read its README first. |
-| `jars/src/catchrelease/rendering/` | Campaign shaders, sprite renderers, stencils, and warp grids. |
-| `jars/src/catchrelease/memory/` | Persistent upgrades and charges plus session caches. |
-| `data/config/custom_entities.json` | Motes, drones, harpoons, legendary props, and the Fisherman map icon. Ponds are not registered here. |
-
-## Core engine constraints
-
-- Church and Path factions do not provide fishers, buyers, or fishing jobs. They provide enforcement and rupture camps. `campaign/fish/FishingTaboo.java` is the only faction list; do not hardcode those IDs elsewhere.
-- A custom entity plugin's `init()` must call `super.init()`. `BaseCustomEntityPlugin` stores the inherited `entity` reference used by `getRenderRange()`. Do not shadow it.
-- Terrain uses `getPlugin()`, not `getCustomPlugin()`. Set radius through `CampaignTerrainAPI`. Override `getActiveLayers()` and `getRenderRange()`. `BaseTerrain.advance()` affects local fleets unless the plugin opts out.
-- `GL_LINE_STIPPLE` restarts for every `GL_LINES` segment, so short segments render solid. `SkillshotUtils` creates dash geometry instead.
-- Campaign distortion uses GraphicsLib's `.vert` and `.frag` shaders with campaign-specific plumbing. `DistortionShader` normally stores its list in `Global.getCombatEngine().getCustomData()`, which is unavailable outside combat. `CampaignDistortionRenderer` replaces that storage, calls `ShaderLib.copyScreen` itself, and supplies campaign versions of `unitsToUV` and `isOnScreen` because the originals read the combat viewport.
-- A camera-centered object has no camera-distance parallax. Effects that must show depth while centered need independent motion; see `PondDepthField` and `computeDriftUvOffsetPx`.
-- `showCustomDialog()` always creates a confirm button and binds Enter and Space to it. Use `showCustomVisualDialog()` with `CustomVisualDialogDelegate` when a panel must have no buttons. Vanilla's `DuelDialogDelegate` uses this pattern.
+Start at [ARCHITECTURE.md](docs/ARCHITECTURE.md). It maps code and data owners, startup order, lifecycle constraints, and framework entry points. Start text work at [DIALOGUE.md](docs/DIALOGUE.md).

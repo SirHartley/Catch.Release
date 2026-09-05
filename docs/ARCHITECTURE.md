@@ -4,6 +4,7 @@ This document maps features to files and records the contracts that are easy to 
 
 - `CLAUDE.md` defines repository workflow, documentation style, and source-layout policy.
 - `LORE.md` defines the setting, character voices, and when the player may learn information.
+- `DIALOGUE.md` is the master for text work, Editor review, and presentation checks; `AGENTS.md` routes Codex to `CLAUDE.md`.
 - `lib/` contains read-only game and dependency archives.
 - Only the active task checkout is writable unless the user explicitly says otherwise. Use the connected GitHub app for pull requests and merges.
 
