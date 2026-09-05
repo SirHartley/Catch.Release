@@ -6,7 +6,7 @@ These guidelines apply whether text comes from `rules.csv`, Java or another data
 
 - [LORE.md](LORE.md): setting definitions, absolute knowledge limits, prose style, character instructions, examples, terminology and information-release order.
 - [UI.md](UI.md): Java-bound custom UI implementation, including panels, widgets, tooltips, sprites, layout and input. It uses this document's shared text guidelines.
-- [RULES.md](RULES.md): CSV format, rule execution, commands, memory, and technical validation. Read its linked references and the required rules skills for rules work.
+- [RULES.md](RULES.md): CSV format, rule execution and technical validation. [RULES_AUTHORING.md](RULES_AUTHORING.md) supplies command/key dictionaries, pronoun context and memory lifetime. Read the linked references and required rules skills for rules work.
 - [ARCHITECTURE.md](ARCHITECTURE.md): code and data owners, registrations, and lifecycle connections.
 - [CLAUDE.md](../CLAUDE.md#documentation-upkeep): task workflow and automatic documentation upkeep.
 

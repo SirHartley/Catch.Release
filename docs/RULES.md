@@ -4,6 +4,8 @@ Use this document for technical rules work. [DIALOGUE.md](DIALOGUE.md) governs a
 
 The engine guidance was adapted from another modder's reference. The detailed [engine workflow](rules/engine_workflow.md) and [command table](rules/command_table.md) are preserved upstream copies. Their simulator-specific instructions describe an external tool, not a requirement to build that tool in Catch.Release. Project constraints are listed below.
 
+Before choosing a command or adding a memory/text key, read [Commands, memory and text tokens](RULES_AUTHORING.md). It links the [vanilla command dictionary](rules-reference/COMMANDS.md), [memory/text dictionary](rules-reference/MEMORY.md), and [complete literal-key usage index](rules-reference/KEY_USAGE.md). Look for a vanilla or existing project mechanism before writing a new plugin. Its [source corrections](RULES_AUTHORING.md#corrections-to-the-preserved-simulator-references) cover verified differences from the preserved simulator guides.
+
 ## Rules System (`data/campaign/rules.csv`)
 
 Rule rows drive dialogue, bar events, market interactions and other campaign text. Vanilla file: `starsector-core/data/campaign/rules.csv` (~41k lines). Mod file: `data/campaign/rules.csv` (additive).
@@ -24,7 +26,7 @@ For deep engine mechanics verified against decompiled source, see:
 - **conditions** — newline-separated predicate expressions. ALL must pass for the rule to match. Empty = always matches. See Operators section below. Append `score:N` to a condition line for priority in `getBestMatching`.
 - **script** — newline-separated command invocations executed sequentially when the rule fires. Token before first space is a `CommandPlugin` name (resolved across all mods + `api/impl/campaign/rulecmd/*`). Quoted arguments preserve spaces; `""` escapes quotes inside CSV. Bare assignment lines (`$var = value`) are valid and common (~33% of real script lines).
 - **text** — shortcut for dialog display text shown when the rule fires. Supports `$var` substitution at display time. For multiple paragraphs or highlights, prefer `script` with `AddText`/`Highlight`.
-- **options** — newline-separated option definitions: `order:id:text` or `id:text`. Lower order = displayed higher. Selecting an option fires `DialogOptionSelected` with `$option == optionId`. Options are batched after script execution, sorted by order, then added to the panel.
+- **options** — newline-separated option definitions: `order:id:text` or `id:text`. Lower order = displayed higher. Selecting an option fires `DialogOptionSelected` with `$option == optionId`. FireBest/FireAll collect and add options before ordinary Script execution; prepare option text beforehand. See [display ordering](RULES_AUTHORING.md#create-a-custom-text-token).
 - **notes** — free-form comments; ignored by engine.
 
 ### Memory scopes
@@ -33,20 +35,17 @@ Conditions and commands reference memory through dotted scopes:
 | Scope | Meaning | Persistence |
 |---|---|---|
 | `$global.*` | Sector-wide state (`Global.getSector().getMemoryWithoutUpdate()`) | Campaign-long |
-| `$player.*` | Player fleet/character memory | Campaign-long |
+| `$player.*` | Player character-data memory in the standard rules dialog | Owner persists; individual keys may expire |
 | `$market.*` | Current market being interacted with | Per-market |
 | `$faction.*` | Faction of the interaction target | Derived at runtime |
-| `$entity.*` | Sector entity being interacted with (fleet, planet, derelict) | Derived at runtime |
-| `$local.*` | Per-dialog scratch memory | Cleared when dialog closes |
+| `$entity.*` | Underlying target when an active person occupies local; optional scope | Owner persists; individual keys may expire |
+| `$local.*` | Current interaction's selected entity/person memory | Not automatically cleared on dialogue close |
 
-Unqualified `$var` resolves to **local** memory by default.
+Unqualified `$var` in an expression resolves to **local** memory by default. Text substitution also has generated-token and memory-replacement passes; see [ownership and replacement](RULES_AUTHORING.md#text-replacements-are-not-all-memory-keys). A scope's owner and a key's expiry are separate decisions.
 
-Special variables:
-- `$option` — set by dialog driver when player clicks an option (stored in local). Cleared before each rule's script runs, so the rule cannot see which option led to it firing.
-- `$last` — previous option ID (also cleared per-rule).
-- `$opt0`, `$opt1`, … — option text labels for display substitution.
+Special interaction key: `$option` is written by the dialog driver into local with zero expiry when an option is selected. In this build, rule `runScript` does not clear it before executing commands. Do not treat it as persistent quest state. The simulator's `$last` and `$optN` claims are not established vanilla APIs; do not use them without an actual producer. See the [source corrections](RULES_AUTHORING.md#corrections-to-the-preserved-simulator-references).
 
-Set from Java: `entity.getMemoryWithoutUpdate().set("$myFlag", true, expireDays)`; `expireDays = 0` means never expires.
+Lifetime: no duration is persistent, including after dialogue closure on a persistent owner. `0` expires on the next advancing memory update, normally when the dialogue closes and the campaign unpauses. Positive durations are campaign-day timers. `set(key, value)` overwrites the value and cancels its previous expiry. Use the [rules/Java lifetime table](RULES_AUTHORING.md#memory-lifetime); never treat zero as permanent or assume local means disposable.
 Read from Java: `mem.getBoolean("$myFlag")`, `.getString(...)`, `.getInt(...)`, `.contains(...)`.
 
 ### Operators (verified against decompiled source)
@@ -65,7 +64,7 @@ Read from Java: `mem.getBoolean("$myFlag")`, `.getString(...)`, `.getInt(...)`, 
 | Key absent | `does_not_have` / `has_not` | Memory key does not exist (right operand ignored) |
 | Assignment | `=` `+=` `-=` `*=` `/=` | Writes to memory, returns the written value |
 
-Command plugins can also serve as conditions: if their `execute()` returns a boolean, that determines pass/fail. Examples: `hasMarket`, `hasPerson`, `hasFleet`, `isFactionHostile`, custom commands like `NullGateCMD CanBeAdded`.
+Command plugins can also serve as conditions: their Boolean return determines pass/fail. Examples include `PlayerHasCargo supplies 10` and `CheckSetting <booleanSettingId>`. Use the command dictionary for exact class names; `$hasMarket` and `$isPerson` are facts, not plugins named hasMarket or hasPerson. Conditions must not perform acceptance/payment mutations.
 
 ### Condition results
 
@@ -86,10 +85,10 @@ The rule that just fired is excluded from the next matching round (`currentRuleI
 
 ### Dialog lifecycle (for writing chains)
 
-1. **Initialization**: Fresh local memory created → `DialogStart` trigger fires → first matching rule applied → its text/options displayed.
-2. **Option selection**: Player clicks option → `$option` set in local → `DialogOptionSelected` fires with self-skip active → first/best matching rule applied (conditions filter by `$option == ...`) → new options displayed.
-3. **Failsafe**: If no rules match, engine tries `TerminateInteraction`, then `FireAll fire("leave")`, then dismisses dialog.
-4. **Termination**: Script calls `EndConversation` or `DismissDialog`, no rules match (failsafe), or player uses escape option.
+1. **Initialization**: The dialog builds its memory map from the target/person and starts its configured trigger. The standard RuleBasedInteractionDialogPluginImpl defaults to `OpenInteractionDialog`; wrappers can use other entry paths. Local is not inherently fresh memory.
+2. **Option selection**: The standard driver writes `$option` into local with zero expiry and uses FireBest for `DialogOptionSelected`. The selected rule's text/options and script follow the display ordering above.
+3. **Failsafe**: The standard driver adds an error and an explicit exit option when a selection has no matching rule (except its confirmation path). Do not depend on a missing rule to close a conversation safely.
+4. **Termination**: Use the explicit exit appropriate to the wrapper. EndConversation, DismissDialog, bar return and fleet teardown are different operations; see [fleet and bar exits](#fleet-and-bar-exits).
 
 ### Writing a custom rule command
 Extend `BaseCommandPlugin`:
@@ -106,7 +105,7 @@ public class MyRuleCMD extends BaseCommandPlugin {
 }
 ```
 
-Register by **simple class name** in the script column: `MyRuleCMD argA "quoted arg"`. Engine looks up the class on the classpath at startup. This mod ships exactly one: `dialogue/rules/CatchReleaseCMD.java`, a multi-command dispatcher whose first argument selects the branch (`CatchReleaseCMD tokens`, `CatchReleaseCMD giveRod`).
+Register the class's package in `ruleCommandPackages`, then invoke its exact simple class name in Script: `MyRuleCMD argA "quoted arg"`. The resolver tries registered packages and caches successful class lookups. Catch.Release uses `dialogue/rules/CatchReleaseCMD.java`, a multi-command dispatcher. Read [custom command integration](RULES_AUTHORING.md#create-a-command-only-when-needed) before adding another class; ordinary mod actions should extend the existing bridge.
 
 ### Integration patterns with Java code
 
@@ -114,7 +113,7 @@ Register by **simple class name** in the script column: `MyRuleCMD argA "quoted 
 Custom commands registered by simple name in the script column: `CatchReleaseCMD tokens`, `CatchReleaseCMD openShop`. The command class handles all logic; rules invoke it declaratively. Catch.Release uses one command bridge; see [Project routing](#project-routing).
 
 **Nexerelin style (memory references):**
-Java objects stored in global memory (`$global.nex_mission_ref`) and called directly from rules: `Call $global.nex_mission_ref updateStage`, or used as conditions: `Call $global.nex_mission_ref hasCores`. This enables complex state machines driven entirely by rules while keeping logic in code. Catch.Release uses this for the jobs: `$catchrelease_jobRef` is set by `setPersonMissionRef`/`setEntityMissionRef` and rows call it as `Call $catchrelease_jobRef <action>`. Objects reached this way must serialize across save/load.
+`Call $reference <action>` requires an object implementing `CallEvent.CallableEvent`; it delivers action tokens to `callEvent`, not to an arbitrary reflected Java method. Catch.Release uses the BaseHubMission dispatch through `$catchrelease_jobRef`, set by `setPersonMissionRef`/`setEntityMissionRef`. Persistent referenced objects must remain save-compatible. See [Call integration](RULES_AUTHORING.md#reuse-a-mission-object-through-call).
 
 **Rule-driven mission chains:**
 For multi-step missions without timers/map markers:
@@ -125,7 +124,7 @@ For multi-step missions without timers/map markers:
 ### Useful built-in commands (subset)
 `AddText`, `AddTextSmall`, `Highlight`, `SetTextHighlights`, `SetTextHighlightColors`, `FireAll` / `FireBest`, `Call`, `BeginConversation`, `EndConversation`, `DismissDialog`, `AdjustRep`, `AddCredits`, `AddCommodity`, `SetShortcut`, `ShowDefaultVisual` / `ShowImageVisual`, `DumpMemory` (debug), `MakeOptionOpenCore`, `RemoveOption`.
 
-Full list: ~200 commands under `api/impl/campaign/rulecmd/`. For comprehensive reference, see [`rules/command_table.md`](rules/command_table.md).
+Use the [vanilla command dictionary](rules-reference/COMMANDS.md) for recipes, exact classes and real call sites. The preserved `rules/command_table.md` is a simulator vocabulary with recorded no-ops, not a comprehensive game command manual. In particular, `Highlight` aliases `SetTextHighlights`; it does not emit a separate paragraph.
 
 ### Text features
 - `$var` substitution happens at **display time**, not rule definition time.
@@ -138,10 +137,12 @@ Full list: ~200 commands under `api/impl/campaign/rulecmd/`. For comprehensive r
 
 ### Firing rules from Java
 ```java
-Global.getSector().getRules().fireAll("CatchReleaseFisherResume", dialog);
+FireAll.fire(null, dialog, memoryMap, "CatchReleaseFisherResume");
 // or single best match:
-Global.getSector().getRules().fireBest("CatchReleaseHarpoonedGreeting", dialog);
+FireBest.fire(null, dialog, memoryMap, "CatchReleaseHarpoonedGreeting");
 ```
+
+Import FireAll/FireBest from `com.fs.starfarer.api.impl.campaign.rulecmd`; pass the active interaction's memory map. RulesAPI supplies matching/replacement, not these fireAll/fireBest methods.
 
 ### Library shortcuts
 - `MagicLib.MagicBountyIntel` / `MagicBountyCoordinator` — full bounty flow (intel, rule hooks, bar event) from JSON. Use before rolling custom bounty dialogs.
@@ -193,7 +194,7 @@ Bar-event wrappers close with `returnFromEvent`, not `close`. Check confirm, can
 
 ## Editing and validation
 
-1. Read the relevant existing rows and the required Starsector rules references. Use vanilla source for uncertain engine behavior, and read-only `lib/` archives for third-party APIs.
+1. Read the relevant existing rows and required Starsector rules references. Check [the authoring guide and dictionaries](RULES_AUTHORING.md) before adding a command or key. Use vanilla source for uncertain engine behavior, and read-only `lib/` archives for third-party APIs.
 2. Prove a byte-identical CSV round-trip before changing parsed rows. Detect the current line endings; do not assume LF or CRLF from an old note.
 3. Preserve row IDs, seven columns, quoting, embedded newlines, tokens, commands and ordering except where the technical task explicitly changes them.
 4. Check every affected entry, question loop, accept/decline path, hand-in, cancellation and exit. Include overlapping flags, completed states and save/load. Follow the [dialogue route checklist](DIALOGUE.md#technical-handoff) and [shared text checks](DIALOGUE.md#shared-text-presentation). When a Java custom panel is affected, also use its [UI checks](UI.md#review-the-affected-screen).
