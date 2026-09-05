@@ -16,7 +16,7 @@ Reviews, explanations, audits, and proposals are read-only unless the user reque
    - `starfarer.api.zip` contains the official game API source.
    - `GraphicsLib.zip`, `Lazylib_lunalib.zip`, and `MagicLib.zip` contain dependency sources and jars.
    - For GraphicsLib, LazyLib, LunaLib, and MagicLib, `lib/` is the primary source because the Starsector skill covers vanilla only.
-4. For any player-facing text work, start with [`docs/DIALOGUE.md`](docs/DIALOGUE.md). It owns the Editor procedure, text conventions, presentation checks, and links to lore and technical rules. Documentation editing and technical-only routing changes do not require an Editor prose pass.
+4. For any player-facing text work, start with [`docs/DIALOGUE.md`](docs/DIALOGUE.md). It owns the Editor procedure, presentation checks, and links to lore and technical rules. `LORE.md` owns setting definitions, absolute knowledge limits, prose style, character instructions and explanatory examples; read it before drafting. Documentation editing and technical-only routing changes do not require an Editor prose pass.
 5. Read [`docs/RULES.md`](docs/RULES.md) before working on `rules.csv`. Read the relevant parts of [`docs/rules/engine_workflow.md`](docs/rules/engine_workflow.md) and [`docs/rules/command_table.md`](docs/rules/command_table.md) before writing a rule.
 6. Use [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) to locate the relevant owner and connections before tracing code. Follow only the references needed for the task.
 
@@ -56,7 +56,7 @@ Update documents automatically as part of each relevant change, not by a backgro
 | `CLAUDE.md` | Task scope, tools, commits, PRs, builds, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
 | `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No lore, writing advice, release history, or duplicate policy. |
 | `docs/DIALOGUE.md` | Master for text work: Editor procedure, prose review, UI/intel conventions, dialogue usability and presentation hazards | Update the relevant convention when a text feature or workflow changes. Link to lore and technical rules instead of copying their explanations. |
-| `docs/LORE.md` | Setting, terminology, character knowledge, voice, information-release order | Update only for an approved fiction or characterization change, or a requested wording edit that preserves meaning. Do not turn invented dialogue into canon. |
+| `docs/LORE.md` | Setting definitions, absolute knowledge limits, prose style, character instructions, examples, terminology and information-release order | Update only for approved fiction/characterization changes or requested meaning-preserving edits. Define concepts before using them, or link to their definitions. Preserve the force of facts and prohibitions, their reasons, and useful correct/incorrect examples. Do not turn invented dialogue into canon. |
 | `docs/RULES.md` | Project rules-engine guidance | Update verified technical contracts and local links. Keep command syntax, examples and evidence accurate. |
 | `docs/rules/*.md` | Vendored technical references | Preserve the upstream text and provenance. Record project-specific corrections in `docs/RULES.md`, with source evidence, rather than silently altering the reference. |
 | Framework `README.md` files | Integration and extension instructions for that framework | Update when its API, registration, dependencies, paths or lifecycle changes. |
@@ -64,6 +64,8 @@ Update documents automatically as part of each relevant change, not by a backgro
 Give each fact one home. Move useful detail to its proper owner and link to it; do not keep a second copy in architecture. After moving a section, repair inbound links and check that no requirement or technical constraint was lost. Keep architecture compact and readable; do not create a parallel human version to maintain.
 
 Write documentation in ordinary English. Use direct verbs and concrete nouns; remove slogans, inflated claims, repeated contrasts, and commentary about how important the document is. Keep identifiers exact. Tables and short technical fragments are appropriate in architecture. Examples demonstrate a technique, not a sentence pattern to repeat everywhere.
+
+`LORE.md` is an explicit author reference, not player-facing fiction. Never apply the mod's ambiguity, understatement or omission of explanations to the document itself. Distinguish established facts, character knowledge, narration restrictions and deliberately unanswered questions. State absolutes directly; do not replace “cannot” or “never” with a preference to “avoid.” Explain what to write, what not to write, why the distinction exists and how to apply it. Shortening must not remove those instructions or examples. After reorganizing lore, compare the old and new versions for facts, prohibition strength, exceptions, examples and definition order; word retention alone is not a sufficient check. Keep text-production workflow in `DIALOGUE.md` and link to lore for prose and characterization rules.
 
 ## Comments and documentation
 

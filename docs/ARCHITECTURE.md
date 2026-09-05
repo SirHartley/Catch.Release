@@ -5,7 +5,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Reference | Scope |
 |---|---|
 | [CLAUDE.md](../CLAUDE.md) | Workflow, build gate and document upkeep |
-| [DIALOGUE.md](DIALOGUE.md) | All text work and presentation checks |
+| [DIALOGUE.md](DIALOGUE.md) | Text workflow and presentation; routes to LORE.md for prose and character constraints |
 | [RULES.md](RULES.md) | Rules syntax, execution and project routing contracts |
 | [Distress README](../jars/src/catchrelease/distress/README.md) | Reusable distress integration |
 | [Skillshot README](../jars/src/catchrelease/skillshot/README.md) | Reusable targeting integration |
