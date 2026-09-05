@@ -2,7 +2,7 @@
 
 Start here for dialogue, options, intel, tooltips, UI labels, messages, species and item descriptions, mission copy, and console output.
 
-- [LORE.md](LORE.md): setting, terminology, character voices, knowledge limits, and information-release order.
+- [LORE.md](LORE.md): setting definitions, absolute knowledge limits, prose style, character instructions, examples, terminology and information-release order.
 - [RULES.md](RULES.md): CSV format, rule execution, commands, memory, and technical validation. Read its linked references and the required rules skills for rules work.
 - [ARCHITECTURE.md](ARCHITECTURE.md): code and data owners, registrations, and lifecycle connections.
 - [CLAUDE.md](../CLAUDE.md#documentation-upkeep): task workflow and automatic documentation upkeep.
@@ -34,23 +34,13 @@ Independently check the result against the full current lore and the actual disp
 
 ## Writing
 
-Write people doing their jobs. An officer thinks about orders and liability; a cook thinks about prep and service. Their vocabulary and choices should fit that work. Supporting characters are usually competent.
+Read [LORE.md](LORE.md) for the setting's facts, absolute knowledge boundaries and character instructions. Its [Writing style](LORE.md#writing-style) section owns prose guidance, examples, dialogue cadence and player-option wording. Those requirements apply to every player-facing surface below.
 
-Describe observable actions before interpreting them. “Your ops chief checks the mass figure twice” gives the player more room than an explanation of how disturbed the chief feels. Use specific objects when they matter; avoid lists of invented technical nouns.
-
-Characters need different rhythms. Mix sentence lengths without repeating a fixed paragraph pattern. Let dialogue sound spoken, with enough room to finish a thought. Character-specific voice in `LORE.md` and information the player needs take precedence over general advice to shorten a passage. Crablobab should remain expansive; the Fisherman should have warmth and patience.
-
-Choose a useful detail for each beat. One is often enough; this is not a numerical limit on descriptions or conversations. Do not explain the detail's emotional meaning afterward. Use dashes for real interruptions, not every aside.
+The lore reference is written for the author, not in the voice of the fiction. It must explicitly explain what a scene leaves implicit. Do not soften its facts, prohibitions or explanations to imitate the mod's understatement.
 
 ### Dialogue and options
 
-- Break teaching into related questions or short exchanges rather than a long lecture.
-- Let choices express the player's intent. Avoid paraphrasing the preceding paragraph or forcing a theatrical personality onto the captain.
-- Write option labels as unquoted actions, following the existing menu's convention.
-- Offer different plausible responses where they matter. Use Continue when there is no meaningful decision.
-- Repetition can belong to a character: a product name, a regulation, or the plain-coated buyers' exact requested species. Do not have every speaker repeat the player's question.
-- Humor should come from the situation and the people. Avoid explaining a joke after it lands.
-- Keep the narrator's voice consistent when something strange happens. The lore defines what observers can notice; do not announce horror or tell the player how to feel.
+Use the [lore's dialogue and option instructions](LORE.md#dialogue-and-player-options) for voice and wording, then the [navigation requirements](#navigation) below for availability, transitions and exits.
 
 ### Surface requirements
 
@@ -70,9 +60,7 @@ Use the terminology in [LORE.md](LORE.md#terminology) and the labels supplied by
 
 Does the line fit the speaker's job and knowledge? Does it tell the player what they need to do? Does its voice still belong in Starsector without the anomaly? Does narration explain a joke, prescribe an emotion, or reveal a mystery the lore leaves unresolved?
 
-Remove needless emphasis, vague adjectives and repetitive comparisons such as “with the expression of someone who…”. Watch for theatrical reactions, constant ellipses, ominous smiles, and a clever closing line on every exchange. Cut a sentence only if it adds no information, character, pacing, or useful context.
-
-Examples illustrate one technique. Do not turn them into templates for every speaker or screen.
+Apply the [common mistakes and corrections](LORE.md#common-mistakes-and-corrections) to the complete exchange. Check the speaker's knowledge separately from the player's possible interpretation; a stylistically restrained line can still reveal a forbidden fact.
 
 ## Dialogue behavior and presentation checks
 
@@ -121,4 +109,4 @@ Trace each affected route through initial contact, questions, acceptance, return
 
 ## Maintenance
 
-Update the relevant section in the same commit when a text workflow, presentation contract or reusable dialogue convention changes. Keep lore facts in `LORE.md`, engine semantics in `RULES.md`, and owner/connection information in `ARCHITECTURE.md`. Repair cross-links after moving a section. Do not append a task history or copy complete dialogue trees into this guide.
+Update the relevant section in the same commit when a text workflow, presentation contract or reusable dialogue convention changes. Keep setting facts, knowledge limits, prose style, characterization and their explanatory examples in `LORE.md`; keep engine semantics in `RULES.md` and owner/connection information in `ARCHITECTURE.md`. Repair cross-links after moving a section. Do not append a task history or copy complete dialogue trees into this guide.

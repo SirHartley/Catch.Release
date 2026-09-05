@@ -1,8 +1,294 @@
-# Catch.Release lore
+# Catch.Release lore and writing reference
 
-This document defines the setting, terminology, character voices and information the player may learn. For drafting, Editor review and presentation checks, start at [DIALOGUE.md](DIALOGUE.md). For rules-engine behavior, use [RULES.md](RULES.md).
+This is an out-of-universe reference for writers. It defines the setting's facts, the limits of each character's knowledge, and the instructions for writing them. **The document must be explicit. The fiction may leave the player uncertain; the writer must not be uncertain about the rules.**
+
+Do not apply the mod's understated narration to this document. Explain causes, distinctions, prohibitions and exceptions directly. An unexplained mystery in the fiction is not permission to leave its writing restrictions unexplained here.
+
+- **Established facts** are true for the writer even when no character can state them.
+- **Knowledge limits** say who can understand those facts. A narrator or clever supporting character must not bypass those limits.
+- **Writing instructions** control what the player is told and how. “Must,” “never” and “do not” are requirements, not suggestions.
+- **Examples** demonstrate the instruction beside them. They are not mandatory dialogue, additional events or new mechanics.
+- **Unanswered questions** are explicitly unavailable to the fiction. Writers must not invent answers to them.
+
+Read the foundations in order: [fabric and coherence](#fabric-and-coherence), [breaches and ruptures](#breaches-ruptures-and-ponds), [patterns](#patterns), then [what observers can notice](#what-observers-can-notice). The character sections build on those definitions. [Writing style](#writing-style) and [terminology](#terminology) apply across the cast.
+
+For drafting, Editor review and presentation checks, start at [DIALOGUE.md](DIALOGUE.md). For rules-engine behavior, use [RULES.md](RULES.md). Those documents own the workflow and implementation; this document owns lore, prose style and characterization.
 
 Current lore takes precedence over older mod prose. User-supplied lines remain verbatim unless the user requests a rewrite; if a supplied line conflicts with lore, point out the conflict rather than silently changing either. Documentation upkeep is defined in [CLAUDE.md](../CLAUDE.md#documentation-upkeep).
+
+## Fabric and coherence
+
+### Fabric
+
+Reality has a fabric. Everything in realspace exists as part of it. Hyperspace is on the other side.
+
+“Thick,” “thin,” “worn,” “strained,” “holding,” “going” and “torn” describe the fabric. “Through,” “under” and “beyond” can describe its relationship to hyperspace. These are useful terms, not an established literal geometry. There is no canonical human direction for that relationship.
+
+A [breach](#breaches-ruptures-and-ponds) is not literally a hole in a physical sheet. Do not turn the cloth metaphor into an explanation of the universe's construction.
+
+### Fabric, not water
+
+There is no hyperspace ocean. The fabric is not water. Hyperspace is not wet, submerged or underwater, and nothing is literally swimming beneath an ocean surface. Fishing language is occupational slang applied to something that is not a sea.
+
+- Lay speakers may occasionally say “the water.” A dockhand, cook, buyer, independent fisher or [rating](#entry) is using the vocabulary of the trade, not describing its physics. Use this rarely.
+- Never use “the water” as technical terminology for hyperspace.
+- Never use it for hyperspace in neutral narration or instrumental/survey intel.
+- Never use it from [the Fisherman](#the-fisherman) when he is being precise. He says “fabric.”
+- Actual tanks, conservatories and cooking water contain ordinary water. These are not exceptions to the hyperspace rule.
+
+### Coherence
+
+**Coherence is how reliably reality holds a place and its contents in a consistent form.** It also describes how reliably something retrieved through the fabric retains its form.
+
+Higher coherence means reality holds more reliably. At low coherence, reality is less obliged to preserve a previous state. The changes and their consequences are defined below; “low coherence” is not a vague synonym for strangeness.
+
+Coherence is a condition. It is not morality, corruption, taint or evil energy. Use “coherence,” never “cohesion,” for this setting term.
+
+### Permanence
+
+Physical, settled things contribute permanence: planets, stations, hulls, people, cities and long-established objects. Permanence helps reality hold. A large population provides a great deal of it.
+
+The Fisherman's practical explanation may be:
+
+> “Fabric's thick where people are. All that living holds it down.”
+
+That line states a useful relationship; it is not a complete physical theory.
+
+Phenomena and machinery that interact strongly with hyperspace can disturb or thin the fabric. Do not invent a universal physics textbook to enumerate every cause. The abyss need not be a machine or a source: little remains there to hold reality in place.
+
+### Changes in people and objects
+
+**Low coherence edits things; it is not ordinary damage.** Something may be added, changed or absent. The person's continuity, surrounding records and ordinary observers' account can change with it.
+
+The change need not involve pain, blood, shock, a wound or a remembered accident.
+
+- A missing hand may have always been missing.
+- A new arm may already have a matching sleeve.
+- A changed face may match an existing identification image.
+- A changed name may already agree with the manifest.
+
+The lower the coherence, the less reliable the previous state becomes. This self-correction is what allows an impossible state to be accepted as ordinary. It is not a conspiracy, a shared lie or a character deciding to overlook the evidence. The exact [inside/outside knowledge boundary](#what-observers-can-notice) follows after the remaining definitions.
+
+These are possible manifestations, not a requirement to alter a body in every scene. Prefer varied continuity changes to repeated missing limbs.
+
+Changes to retrieved fish are covered under [patterns](#patterns), which defines what those fish are.
+
+## Breaches, ruptures and ponds
+
+A breach or rupture is fabric thin enough to expose hyperspace. Both terms are valid.
+
+It is a fault, not a jump point, gate, stable portal or navigable tunnel. Normal living crews cannot safely cross it.
+
+### Trade terminology
+
+“Pond” is fishing slang, suitable in trade speech or deliberately informal fishing UI. Use “rupture” or “breach” in technical descriptions, surveys and neutral narration. Reserve “pond” for trade speech, a direct quotation of that speech, or deliberately informal fishing UI.
+
+A location without an existing rupture is “open space.”
+
+## Patterns
+
+A pattern is a hyperspace ghost taking a temporary realspace form during retrieval through a [breach](#breaches-ruptures-and-ponds). “Pattern” is the careful term; “fish” is the ordinary one.
+
+The form is often fish-shaped, sometimes a crab, mollusc or something harder to classify. **Why patterns so often become fish is unanswered. Do not supply an explanation.**
+
+### Form and biology
+
+A pattern is not an ordinary animal. Do not write it as possessing an established:
+
+- ecology;
+- reproductive cycle;
+- evolutionary history;
+- conventional biological habitat;
+- biological ancestry.
+
+Mapped ranges describe where patterns are encountered. They do not establish an evolved ecosystem. “Species” remains a usable game-data classification, as defined in [terminology](#terminology).
+
+Descriptions may use animal comparisons because that is how people describe an animal-shaped object. The form is not obliged to make anatomical sense. It may resemble an animal assembled from incomplete reference material.
+
+This does not require every fish to be grotesque. Keep most fish plausible at first glance. Give a strange feature a specific purpose in the description rather than adding one automatically.
+
+### Changes in patterns
+
+Patterns have little [permanence](#permanence). A low-coherence specimen may:
+
+- change markings;
+- lose or gain structure;
+- drift without an obvious force;
+- have inconsistent mass;
+- produce sounds;
+- have features that do not stay fixed;
+- appear different in separate records;
+- continue behaving after parts of its form cease to hold.
+
+These are manifestations of unstable form, not proof of ordinary injury or animal biology.
+
+### Specimen coherence
+
+A specimen's coherence primarily reflects **where it came through**. It is not a moral or genetic property of the fish.
+
+Two catches from the same local fabric broadly reflect the same environmental coherence. Transport equipment may preserve the recovered state. It cannot make the original crossing better than it was.
+
+### Loss of shape and awareness
+
+A pattern can stop holding its shape. Do not narrate this as an ordinary creature dying or use the losing fish's injuries to describe a bout.
+
+**Do not write:**
+
+> The creature dies.
+
+**Write:**
+
+> The pattern loses its shape.
+
+Or describe what remains. **Why:** failure to maintain a form does not establish ordinary biological death.
+
+A pattern looking at a person does not necessarily see them as an animal would. The Fisherman knows this distinction matters; he does not explain what consciousness a pattern possesses.
+
+Examples of how little he may say:
+
+> “They look.”
+
+Or:
+
+> “Don't mistake that for seeing you.”
+
+Do not add an explanation of the pattern's consciousness after either line.
+
+### Rarity
+
+Rarity means frequency of encounter. It does not inherently establish:
+
+- age;
+- size;
+- power;
+- danger;
+- depth;
+- intelligence.
+
+Any such property must belong to that particular pattern, not follow from its rarity.
+
+### Buried patterns
+
+Some patterns are harder to reach because they lie further into the fabric. “Buried,” “deep” and “hiding” are trade descriptions, not a literal water column.
+
+[Breach Lights](#what-breach-lights-do) can expose patterns that ordinary retrieval cannot reach.
+
+## What observers can notice
+
+This section depends on [coherence and self-correction](#changes-in-people-and-objects). It defines an absolute knowledge boundary, not a tendency in how observant different characters are.
+
+### Ordinary observers: inside reality
+
+**Ordinary people are inside the reality that supplies their observations, records and continuity. They cannot perceive its self-correction from outside that system.**
+
+A contradiction is not presented to them as an impossible fact they choose to ignore. Reality supplies a consistent account. The clam has three hinges. The crewman has always had that face. The crew roster agrees. The observer accepts that account because they are part of the mechanism producing it.
+
+This is not stupidity, inattention, denial, politeness or concealment. Intelligence, professional expertise and exposure do not let an ordinary character escape the boundary.
+
+It applies to:
+
+- the player's officers and crew;
+- bar patrons and buyers;
+- researchers and Academy staff;
+- independent fishers;
+- patrol crews and faction officials;
+- [the Fisherman's crew, including the scientist](#crew-and-scientist);
+- Crablobab's customers;
+- neutral narration's account of what is happening.
+
+A person can detect a bad measurement, record contradictory readings, be frightened by dangerous equipment or act on an alarming sensor return. **They cannot correctly conclude that reality has rewritten itself, recognize the trade's impossible continuity, or acquire the Fisherman's understanding.** Measurement is not the same as perceiving the mechanism behind it.
+
+Do not create a second Fisherman by making a researcher exceptionally clever, a fisher unusually experienced or a Pather unusually angry.
+
+### The Fisherman's awareness: partly outside reality
+
+**The Fisherman is the only character who perceives the contradictions as contradictions. He is no longer human and is partly outside the mechanism that makes reality self-consistent for everyone else.**
+
+He is not simply an ordinary person who notices more. His changed relationship to reality is the reason he can see what the others cannot. “Outside” here describes that relationship, not a location a ship can reach by travelling into hyperspace.
+
+He knows:
+
+- when his crew have changed;
+- when the same boat is somewhere else;
+- when a person has been edited and supplied with a matching history;
+- that the [fishing trade's continuity and logistics](#the-fishing-trade) do not add up;
+- what a rupture is doing;
+- more about patterns than he says;
+- that forcing reality to account for a contradiction is dangerous.
+
+His awareness does **not** come from training, special instruments, enhanced hyperspace senses or psychic ability. It does **not** make him resistant or immune to low coherence.
+
+His origin and the reason he limits his explanations are defined under [The Fisherman](#the-fisherman). His precise nature is stated there for the writer; it is not an explanation to put into another character's mouth.
+
+### The player and neutral narration
+
+The player can compare events across scenes and systems. The fiction must never confirm the player's interpretation for them.
+
+Player questions may point out an apparent contradiction: “I just left you in another system.” Such a question does not establish that the captain is immune, outside reality or possesses the Fisherman's understanding. The Fisherman may respond without explaining the mechanism.
+
+Neutral narration can report the actions and records that make the contradiction available to the player. It must not diagnose the cause, announce impossibility, explain the horror or tell the player what conclusion to draw. This is a restriction on narration, not uncertainty about the facts in this reference.
+
+### Crablobab's knowledge is undefined
+
+Crablobab's degree of conscious understanding remains undefined. Do not fill that gap by giving him the Fisherman's knowledge or declaring him outside reality.
+
+He can conduct a transaction amid physical inconsistency without explaining it. His complete [character instructions](#crablobab) distinguish his cheerful, expansive performance from the Fisherman's deliberate restraint.
+
+### Showing an anomaly
+
+Keep the established fact, the observer's knowledge and the narrated action separate. The examples below demonstrate the boundary; they do not require these exact lines in a scene.
+
+#### Changed crew
+
+**Do not write:**
+
+> One of the Fisherman's horribly mutated crewmen reaches impossibly through a locker door.
+
+**Write:**
+
+> A crewman reaches through the closed locker and removes a wrench.
+
+**Why:** the first line diagnoses the crewman's condition and instructs the reader to recognize impossibility. The second reports the action. The crewman regards it as ordinary; the Fisherman can see the contradiction.
+
+**How to continue:** carry on with the conversation. Do not add a reaction explaining what the player should find disturbing.
+
+#### Research measurements
+
+**A researcher may say:**
+
+> “The mass return is inconsistent.”
+
+**A researcher must not say:**
+
+> “Reality is rewriting the specimen.”
+
+**Why:** the first is a measurement available to someone inside reality. The second correctly identifies a mechanism they cannot perceive. More expertise does not make the second line permissible.
+
+**How to continue:** preserve both measurements, recalibrate, record retrieval conditions or request another specimen. Do not turn the disagreement into a successful theory of reality.
+
+#### Records and continuity
+
+[LYNE drones](#lyne-and-line) are the trade's retrieval craft.
+
+**An appropriate example:**
+
+> The manifest lists both LYNE drones before the first one crosses.
+>
+> Your ops chief signs it.
+
+**Why:** the record and the ordinary work are both presented without interpretation. Do not add “Somehow the manifest already knows” or have the chief explain that history has changed.
+
+#### Subtraction, not gore
+
+Prefer absence, inconsistency and continuity failure to bodily spectacle. A worker may continue working with part of their torso absent. There need not be torn organs, pain or panic. A duplicated crew name or a missing crate can serve the same purpose without another changed body.
+
+Do not write an ordinary character having a breakdown because they have correctly recognized reality's self-correction. A practical reaction to danger remains permissible; a correct metaphysical diagnosis does not.
+
+### No narrator winks
+
+Do not use “somehow,” “impossibly,” “inexplicably,” “against all reason,” “you try not to think about it,” “which is somehow worse,” “something is very wrong,” “you decide not to ask,” “best not to dwell on it,” “whatever it is,” “eldritch,” “cosmic” or “unnatural” to flag an anomaly.
+
+These words are not banned from every possible ordinary sentence. **Their use as a signal that the player should find an event impossible or disturbing is prohibited.** State the event and continue.
 
 ## Premise
 
@@ -12,40 +298,123 @@ Across those ordinary encounters, other details become apparent. The trade has n
 
 The Fisherman notices. Other people accept what is in front of them. The game never labels these scenes as horror or confirms the player's interpretation. The cheerful trade and its disturbing implications must both remain possible readings.
 
-## What observers can notice
+The two readings describe the player's experience. They do not make the facts in this reference optional or uncertain. The [inside/outside boundary](#what-observers-can-notice) and the trade's missing logistics are established facts for the writer, whether or not the player recognizes them.
 
-### Ordinary observers
+## Writing style
 
-Low coherence can change an object, a person and the records of their history together. The observer is given a consistent account: the clam has three hinges, the crewman has always had that face, and the manifest agrees.
+These instructions govern player-facing prose. They do **not** govern how this reference explains its own rules: documentation must state the causes and prohibitions that a scene must leave unstated.
 
-Ordinary people accept that account because they are part of the reality producing it.
+Catch.Release must sound at home in Starsector before the anomaly is added. Follow the [knowledge boundary](#what-observers-can-notice) in every voice, including narration. Character-specific instructions below take precedence over generic advice to shorten a passage.
 
-This includes the player's officers, researchers, independent fishers, officials, patrol crews, the Fisherman's crew, Crablobab's customers and neutral narration. They can measure discrepancies or act on a dangerous reading without understanding that reality has changed.
+### People doing their jobs
 
-Accepting reality's account is not a failure of intelligence or attention. Rejecting it would require perceiving the inconsistency from outside the system that supplies the answer.
+Write people who already had a working day before the player contacted them.
 
-The player may notice a contradiction across scenes. The fiction does not confirm it.
+- An ops chief thinks about manifests, mass, deck space, cranes, repairs, crew assignments and invoices.
+- A science officer thinks about telemetry, sensor returns, measurements and calibration.
+- A patrol officer thinks about jurisdiction, orders, incident categories and liability.
+- A cook thinks about prep, the plate and service.
+- A trader thinks about the product, customer and price.
 
-### The Fisherman's awareness
+Supporting characters are normally competent. Do not make them helpless so the player can appear impressive. When handling unfamiliar equipment, they check the manifest, read telemetry, identify the mass and determine what can be disconnected. Their competence concerns the job; it does not grant forbidden knowledge.
 
-The Fisherman alone can perceive the change itself because he is no longer entirely within the reality imposing it. He knows that forcing reality to account for a contradiction is dangerous.
+**Appropriate:**
 
-His awareness:
+> The transfer manifest arrives before the cargo boom has finished extending. Your ops chief checks the mass, assigns a section of heavy deck and sends two crews down to clear it.
 
-- does not come from training, instruments or enhanced hyperspace senses;
-- does not make him resistant or immune to low coherence.
+**Why:** the crew's work establishes an inhabited ship and capable people. The scene does not need an explanation of what this competence symbolizes.
 
-### Showing an anomaly
+### Observation, vocabulary and subtext
 
-Describe the action without announcing what it means.
+Describe observable actions before interpreting them. Let conduct establish character.
 
-A crewman can reach through a closed locker for a wrench; the narrator does not explain that his body has been changed by hyperspace. Crablobab can retrieve stock from deep inside his coat without a comment about spatial impossibility.
+**Do not write:**
 
-Prefer inconsistencies in presence, records and continuity to gore. A worker with part of their torso absent may continue working. There need not be torn organs, pain or a scene of panic.
+> Your ops chief is visibly disturbed by the impossible mass.
 
-Use bodily changes sparingly; a changed name on a manifest can be sufficient.
+**Write:**
 
-Words such as “somehow,” “impossibly,” “eldritch,” “unnatural,” and “you decide not to ask” often tell the player how to interpret the scene. They are not forbidden in every context, but do not use them to point out an anomaly.
+> Your ops chief checks the mass figure twice.
+
+**Why:** the second reports a professional response. The first supplies an emotional interpretation and labels the mass impossible.
+
+Use a specific noun when it matters: slate, bulkhead, cargo boom, docking frame, transponder return, tank lid, maintenance tag or sensor plot. Do not replace description with “eerie,” “uncanny,” “ominous,” “sinister” or “bizarre.”
+
+Technical language must identify something useful in the scene. A relevant handling frame or telemetry reading is sufficient; do not stack invented technical nouns to simulate expertise.
+
+A corporate officer with an invoice prepared does not need narration explaining corporate ruthlessness. A Hegemony officer sending recovered hardware to Naval Intelligence does not need an explanation of institutional suspicion. The action supplies the characterization.
+
+### Rhythm and length
+
+Mix sentence lengths and paragraph shapes. Dialogue must sound spoken, but it does not need every hesitation and filler word. A short sentence can provide a pause without announcing a dramatic moment.
+
+**Example using the [LYNE/ROD installation](#rod-lyne-and-harpoon):**
+
+> The first LYNE drone crosses on external clamps. It is roughly the size of a light fighter, with the ROD assembly buried inside a blunt maneuvering frame.
+>
+> A second follows.
+>
+> “That's the line,” the Fisherman says.
+>
+> Your ops crew are already arguing about where to bolt down the launch rack.
+
+**Why:** this varies the pace while communicating scale, equipment and ordinary work. It is an example, not a paragraph template to repeat.
+
+- Break a sentence when it accumulates several independent descriptive clauses.
+- Use dashes for a genuine interruption, not every aside.
+- Choose a useful detail for a beat. One is often enough, but this is not a numerical limit.
+- Do not remove explanation, character, pacing or necessary context merely to make a line shorter.
+- The Fisherman's restraint must not become clipped delivery. Crablobab must remain expansive.
+- Do not give every exchange a clever final line.
+
+### Dialogue and player options
+
+Break teaching into related questions or short exchanges instead of delivering a lecture because every fact is relevant. Give the player the practical answer, then room to ask about the next subject. Follow the [tutorial information order](#tutorial-information-order); a writing exercise cannot reveal equipment or knowledge early.
+
+Choices must express the player's intent, not paraphrase the preceding paragraph. Do not force the captain into a theatrical personality just to advance the text.
+
+Useful option examples include:
+
+- What exactly is a rating?
+- You give this equipment to every stranger?
+- I just left you in another system.
+- This is a weapon.
+- Where does the range data come from?
+- Decline.
+- Pay the fine.
+- Cut the comm link.
+
+Write option labels as unquoted actions, following the existing menu's convention. Offer different plausible responses when they matter. Use Continue when no meaningful decision exists. Do not offer cosmetically different choices unless the roleplay distinction itself matters. Menu routing, availability and return behavior are specified in [DIALOGUE.md](DIALOGUE.md#navigation).
+
+Repetition must belong to a speaker. Crablobab may enthusiastically repeat a product name; an anxious bureaucrat may repeat a regulation. The plain-coated buyers repeat the exact requested species, not a paraphrase, when asked its purpose. Do not make every speaker repeat the player's question before answering.
+
+### Humor and horror
+
+Play the situation straight. Appropriate humor includes officers having to put “harpoon” on a naval incident form, children treating a tournament as binding diplomacy, or a competent merchant conducting normal business through inconsistent pockets.
+
+**Example:**
+
+> The blueprint is entered under COLONY INFRASTRUCTURE.
+>
+> The category was already present.
+
+**Why:** the existing category is the detail. Do not add an explanation of why the bureaucracy's readiness is funny or unsettling.
+
+A normal manifest and an anomalous manifest must use the same narrative voice. Never switch into horror diction to signal that the player should now be frightened. Do not add a punchline, ominous silence or sinister smile after every incident.
+
+Crablobab's humor is more expansive and physical than the Fisherman's. Following the general preference for dry humor must not make their voices interchangeable.
+
+### Common mistakes and corrections
+
+- **Decorative horror:** “The impossible ichor of another reality shimmers beneath the tortured veil of existence.” Wrong vocabulary and explicit interpretation. Describe the relevant object or action instead.
+- **Theatrical reaction:** gasps, freezing in shock, repeated ellipses or loudly announced emotions used as a default. Give the character a response appropriate to their job and actual knowledge.
+- **Constant interpretation:** “a joyless smile,” “almost pleased,” or comparisons to someone “cataloguing a sin” used to colour every line. Keep them only when that specific interpretation matters and does not violate the knowledge boundary.
+- **Repeated similes:** “with the expression of someone who…” or “in the voice of somebody who…” repeated across speakers. Describe the conduct itself.
+- **Manufactured suspense:** an unexplained silence followed by the Fisherman's smile around ordinary information. Supply a concrete reason for the pause or remove it.
+- **Explained jokes:** a League officer finds no suitable form, followed by narration explaining the defeat of bureaucracy. Stop at the specific problem.
+- **Accidental omniscience:** a skilled NPC explains reality's self-correction. Replace the diagnosis with measurement, practical response, doctrine, rumor or ignorance, as appropriate to that character.
+
+These are correction instructions, not bans on every smile, surprise, pause or comparison. The prohibited uses are specified above. Do not weaken an absolute knowledge limit into a stylistic preference.
 
 ## The fishing trade
 
@@ -59,7 +428,7 @@ There is one Fisherman, present in inhabited systems at once, whose boats could 
 
 Reality gives the trade a plausible history in the same way that it gives a three-hinged clam a plausible shape.
 
-Do not write a merchant or independent fisher who uncovers the missing logistics. They are not pretending to believe in the profession.
+**No ordinary merchant or independent fisher may uncover the missing logistics.** They are not pretending to believe in the profession. The industry is accepted through the same [self-correction](#ordinary-observers-inside-reality) that supplies a consistent account of an altered person. Commercial experience does not make anyone an exception.
 
 ### Independent fishers and camps
 
@@ -71,117 +440,15 @@ Independent fishers own or work a rupture.
 
 The post-clearance catch is proof that the rupture can be worked again. Exact quest terms and intel transitions are defined in [DIALOGUE.md](DIALOGUE.md#camp-proof); neither an old fish nor a fish from elsewhere proves that work.
 
-## Fabric and coherence
-
-Everything in realspace is part of reality's fabric. Hyperspace is on the other side.
-
-“Through,” “under,” and “beyond” can be useful descriptions, but no literal geometry is established. A breach is not a hole in a physical sheet.
-
-### Fabric, not water
-
-There is no hyperspace ocean. Fishing language is trade slang; hyperspace is not wet, submerged or underwater.
-
-Lay speakers may occasionally call it “the water,” but precise Fisherman speech uses “fabric.” Neutral narration, technical descriptions and survey intel should not call it water.
-
-Actual tanks, conservatories and cooking water remain ordinary water.
-
-### Coherence
-
-Coherence describes how reliably a place, or a retrieved specimen, holds its form.
-
-Use “coherence,” not “cohesion.” It is not morality, corruption, taint or evil energy.
-
-### Permanence
-
-Settled physical things help reality hold: planets, stations, hulls, people, cities and long-established objects. Population provides a great deal of permanence. The Fisherman's practical explanation may be:
-
-> “Fabric's thick where people are. All that living holds it down.”
-
-Phenomena and machinery that interact strongly with hyperspace can wear the fabric down. Do not turn this into a complete physics textbook. The abyss need not be a machine or a source; little remains there to hold reality in place.
-
-### Changes in people and objects
-
-Low coherence can alter a person without an injury or remembered accident.
-
-The change need not involve pain, blood, shock or a wound.
-
-- A missing hand may have always been missing.
-- A new arm may already have a matching sleeve.
-- A changed face can match an existing identification image.
-
-Lower coherence makes the previous state less reliable.
-
-### Changes in patterns
-
-Patterns have little permanence. Their markings, structure, mass, sound or appearance in records may change. A pattern can continue behaving after parts of its form cease to hold. This is not necessarily death.
-
-A low-coherence specimen may also drift without an obvious force.
-
-### Specimen coherence
-
-A specimen's coherence primarily reflects where it crossed.
-
-It is not a moral or genetic property of the fish. Two catches from the same local fabric should broadly reflect the same conditions.
-
-Transport equipment may preserve the recovered state; it cannot improve the original crossing.
-
-## Breaches, ruptures and ponds
-
-A breach or rupture is fabric thin enough to expose hyperspace. Both terms are valid.
-
-It is a fault, not a jump point, gate, stable portal or navigable tunnel. Normal living crews cannot safely cross it.
-
-### Trade terminology
-
-“Pond” is fishing slang, suitable in trade speech or deliberately informal fishing UI. Technical descriptions, surveys and neutral narration normally use “rupture” or “breach.”
-
-A location without an existing rupture is “open space.”
-
-## Patterns
-
-A pattern is a hyperspace ghost taking a temporary realspace form during retrieval.
-
-“Pattern” is the careful term; “fish” is the ordinary one. The form is often fish-shaped, sometimes a crab, mollusc or something harder to classify. Why this happens remains unexplained.
-
-### Form and biology
-
-No ordinary ecology, reproduction, evolutionary history or biological ancestry is established.
-
-Nor is a conventional biological habitat established; mapped ranges describe where patterns are encountered.
-
-Descriptions can use animal comparisons because that is how people describe what they see.
-
-The shape need not be anatomically consistent, but most fish should appear plausible at first glance. Not every specimen needs a grotesque feature.
-
-### Loss of shape and awareness
-
-A pattern may stop holding its shape. Describe that change or what remains rather than declaring that a creature dies.
-
-A pattern looking at someone does not necessarily see them as an animal would. The Fisherman understands the distinction but does not explain its consciousness.
-
-An example of how little he may say:
-
-> “They look.”
->
-> “Don't mistake that for seeing you.”
-
-### Rarity
-
-Rarity means frequency of encounter. It does not, by itself, establish age, size, power, danger, depth or intelligence.
-
-### Buried patterns
-
-Some patterns are harder to reach within the fabric. “Buried,” “deep,” or “hiding” can be trade descriptions; they do not establish a water column. Breach-light equipment can expose patterns ordinary retrieval cannot reach.
-
 ## Eating catch
 
-Much of the catch is edible, which supports the trade.
+Eating catch is mostly safe. Much of the catch is actually edible, which supports the trade.
 
 The population is not unknowingly consuming universally lethal parasites. Specific culinary or physiological effects belong to individual patterns.
 
 ### Low-coherence catch
 
-Eating a badly coherent specimen can transfer some instability to the consumer. Ordinary cooks and researchers do not understand that mechanism, and the market does not automatically treat low-coherence catch as hazardous biological material.
+Eating a badly coherent specimen can transfer some instability to the consumer. The consumer's own coherence may begin to drop. Ordinary cooks and researchers do not understand that mechanism, and the market does not automatically treat low-coherence catch as hazardous biological material.
 
 ## ROD, LYNE and Harpoon
 
@@ -199,11 +466,11 @@ The D stands for Device; R and O remain unresolved. People still say “ROD devi
 
 LYNE drones carry the ROD retrieval equipment.
 
-LYNE has no defined expansion. If later design requires one, it should sound like an ordinary engineering or procurement acronym.
+LYNE has no defined expansion. If later design requires one, use an ordinary engineering or procurement acronym.
 
 #### Size and handling
 
-The drones are fighter-sized. The ROD/LINE installation needs cargo cranes, handling frames, launch racks, external clamps, service assemblies and deck crews. The first equipment grant should resemble the transfer of auxiliary craft, not a suitcase.
+The drones are fighter-sized. The ROD/LINE installation needs cargo cranes, handling frames, launch racks, external clamps, service assemblies and deck crews. The first equipment grant must resemble the transfer of auxiliary craft, not a suitcase.
 
 #### The retrieval line
 
@@ -257,9 +524,9 @@ Nobody in the trade has scrutinized how those charts can be correct.
 
 The Fisherman was a human mercenary captain. After the Gate Collapse, he and a scientist developed the technology that became the ROD while exploring ways to restore lost movement.
 
-Long exposure to ruptures and low coherence made him something other than human: a conscious expression of the rupture's wrongness.
+**The Fisherman is no longer human. He is a conscious expression of the rupture's wrongness, produced by prolonged exposure to ruptures and low coherence.** This is a categorical change in what the original captain is, not merely a damaged or unusually mutated human body.
 
-His memories, habits, competence and occupation remain.
+His memories, habits, competence, personality and occupation remain. He is partly outside reality's self-correction; that is why he can perceive contradictions. The full [inside/outside boundary](#the-fishermans-awareness-partly-outside-reality) is a prerequisite for writing him.
 
 Do not explain him as:
 
@@ -270,13 +537,15 @@ Do not explain him as:
 - an alien;
 - an avatar of a named god.
 
-There is no need to place another entity behind him. The rupture is enough.
+There is no separate entity to invent behind him. The changed captain himself is the conscious anomaly; do not turn the description into possession, an external patron or a named supernatural being.
 
 ### What he knows and why he stops
 
 He sees his crew change, his boat elsewhere, and people acquire revised histories. He understands the fabric and the trade's false continuity.
 
-He also knows that explanation forces definition, and definition makes reality account for a contradiction. That can be dangerous.
+**Explanation forces definition. Definition makes reality account for the thing being defined.** The Fisherman knows that making a contradiction too precise can provoke a dangerous response.
+
+This is the reason for his restraint. It is an established cause for the writer, not a hint that writers should replace with their own explanation. Do not invent a named physical law or a detailed mechanism for the response.
 
 His restraint is practical.
 
@@ -286,11 +555,25 @@ He gives the useful part of an answer and stops before precision makes trouble. 
 
 He can redirect the conversation or use fishing language where exact language would press too far. This is a practical safety decision, not a riddle for the player to solve.
 
+**Appropriate example:**
+
+> “I just left you in another system.”
+>
+> “You left a boat there.”
+>
+> “This one's here.”
+
+**Why:** he recognizes the contradiction and deliberately declines to define it. He is not confused or pretending to misunderstand. Continue with useful work or another question, not an explanation of how his simultaneous presence functions.
+
+**Do not write him** claiming special sensors let him see the truth, saying the player's mind cannot bear the answer, or inviting the player to solve his riddle. Each supplies a false reason for his awareness or restraint.
+
 ### Voice and purpose
 
-Write an experienced spacer and fisher: grizzled, competent, unhurried, dryly funny and comfortable in command. His former education and technical work should remain apparent.
+Write an experienced spacer and fisher: grizzled, competent, unhurried, dryly funny and comfortable in command. His former education and technical work must remain apparent.
 
-Avoid a pirate accent, cowboy manner, folksy oracle, wizard or emotionless lecturer. Do not fill his speech with “aye,” “lad,” nautical metaphors and warnings.
+He is practical, helpful, patient when patience is useful and difficult to surprise. Do not write him flat or constantly ominous.
+
+Avoid a pirate accent, cowboy manner, folksy oracle, wizard, cryptic mentor or emotionless lecturer. Do not fill his speech with “aye,” “lad,” nautical metaphors and warnings. An occasional occupational phrase is permissible; making every answer a cryptic fishing proverb is not.
 
 #### Acceptance
 
@@ -303,6 +586,8 @@ His warmth is sincere. He remembers whether the crew have eaten, teaches without
 His judgment is less comforting. He considers what will hold, what can be moved and what should remain undefined. He helps the player bring patterns onto the stable side while knowing that the larger practice increases instability.
 
 Show that through his priorities and omissions, not a confession, villainous smile or exposed agenda.
+
+**Keep both facts:** his immediate help and warmth are sincere; he does not share his whole calculation about the larger practice. Do not “resolve” this by making his kindness fake or by making him unaware of the consequences.
 
 #### Speech
 
@@ -328,7 +613,7 @@ Dealing with him has no secret catch. He supplies equipment, work, range data an
 
 His old registry name is Baha; he normally goes by Fisherman.
 
-Paperwork still identifies him as Baha. The name can degrade with local coherence. A particular location's missing letters should be consistent, not random dramatic corruption.
+Paperwork still identifies him as Baha. The name can degrade with local coherence. A particular location's missing letters must be consistent, not random dramatic corruption.
 
 Degradation belongs where the fabric is sufficiently thin. Do not corrupt his name on every appearance.
 
@@ -354,27 +639,36 @@ The scientist who helped develop the ROD is aboard, merged into the crew and no 
 
 His fleet appears where it should not and need not travel between appearances. Several game instances can exist, but fictionally they are not franchises, clones, siblings, holograms or a distributed organization. It is the Fisherman in more than one place.
 
-The player can ask about this. He knows how far to answer; he is not pretending to misunderstand. Do not add an explanation of the mechanism.
+The player can ask about this. He knows how far to answer; he is not pretending to misunderstand. Do not add an explanation of the mechanism. Simultaneous presence is an established fact; its mechanism is unavailable to the prose.
 
 ## Crablobab
 
 ### Nature
 
-Crablobab is a low-coherence being associated with the Fisherman's fleet. He retains a man's general shape and social habits and enjoys running his stall. His coat accommodates the business less conventionally.
+Crablobab is a low-coherence being associated with the Fisherman's fleet. He retains a man's general shape and social habits and enjoys running his stall. His coat, stock and movements exhibit the changes permitted by [low coherence](#changes-in-people-and-objects).
 
 ### Voice and behavior
 
 He is cheerful, colourful, expansive and physically comic. Low coherence has made his merchant-clown character physically true: space, stock, hands and pockets take the shape a transaction needs.
 
-He neither worries about this nor needs a theory of it.
+He neither worries about this nor needs a theory of it. Do not interpret his ease with the changes as proof that he shares the Fisherman's awareness.
 
 Never flatten him into the Fisherman's measured pauses or clipped understatement.
 
-His scenes should be funny first. Their implications can trouble a player later. He does not lurk, threaten, whisper forbidden knowledge or become a sinister shopkeeper.
+His scenes must be funny first. Their implications can trouble a player later. He does not lurk, threaten, whisper forbidden knowledge or become a sinister shopkeeper.
 
 ### Commercial knowledge
 
-His peculiar associations must still make sense in a transaction. He understands products, customers, prices, trades, crabs and whether he has been paid. Do not replace that competence with word salad.
+His peculiar associations must still make sense in a transaction. He understands:
+
+- products and their uses;
+- customers;
+- prices;
+- trades;
+- crabs;
+- whether he has been paid.
+
+He can complete a transaction. Do not replace that competence with word salad. The business functions correctly even when the physical facts do not.
 
 ### The coat
 
@@ -389,13 +683,27 @@ Show what the coat does.
 
 Neither characters nor narration comment on the coat's spatial inconsistency.
 
+**Do not write:**
+
+> You decide not to ask how the coat contains so much space.
+
+**Write:**
+
+> Crablobab reaches past a shelf several metres inside the coat and retrieves the box.
+>
+> “Celebration charges!”
+
+**Why:** the physical action supplies the anomaly; the product supplies his immediate concern. The first version tells the player to recognize spatial impossibility and makes the narrator acknowledge it.
+
+**How to continue:** let him sell the product, handle the payment or elaborate on its appeal. Do not have him explain the coat, whisper a warning or adopt the Fisherman's measured evasions.
+
 ### Earmuffs
 
 The earmuffs prevent the wearer from hearing the whispering associated with thin fabric.
 
-The whispering continues: another person or a recorder may still hear it.
+**The whispering itself does not stop.** Another person or a recorder may still hear it.
 
-Crablobab does not explain this distinction and is not deceiving the customer. The noise no longer bothers the wearer.
+Crablobab does not explain this distinction and is not deceiving the customer. The noise no longer bothers the wearer, so the product meets the customer's request. Do not turn the sale into a fraudulent cure or claim that the source of the whispering has been removed.
 
 ## Uses of catch and conservatories
 
@@ -407,7 +715,7 @@ Catch also supplies research, collections, entertainment, gambling and prestige 
 
 A Breach Conservatory is a colony's public display and fishing trade/outfitter facility. Staff maintain tanks and families visit.
 
-The stock does not die conventionally, but nobody treats that as a philosophical emergency. Keep it part of ordinary civic life unless particular content requires otherwise.
+The stock does not die conventionally, but nobody treats that as a philosophical emergency. Keep it part of ordinary civic life. Do not turn the building into a haunted-house attraction without an explicit content requirement.
 
 ## Tutorial information order
 
@@ -453,7 +761,7 @@ The tutorial gates player equipment and knowledge, not the existence of the fish
 
 ## Other characters
 
-Characters know what their work and experience allow them to know.
+The [inside/outside knowledge boundary](#what-observers-can-notice) applies to every profile below. Work and experience permit practical knowledge, measurements and opinions within that boundary. They never grant an ordinary character correct knowledge of reality's self-correction.
 
 ### Children and tournament jobs
 
@@ -492,7 +800,7 @@ years. The regulars argue about those rules but accept the Commissioner's calls.
 cares about fair pairings, proper weigh-ins and a clean result. Treat the role as a competent adult
 whose work makes the night possible, not as comic relief.
 
-The book should look used and inherited. It contains crossed-out rules, initialled amendments and
+The book must look used and inherited. It contains crossed-out rules, initialled amendments and
 one page nobody is allowed to read aloud because of an old bar joke that is never explained. None of
 this is anomalous. It differs from the children's tournament because the children invent serious
 procedures while the Commissioner follows an old procedure with a visible history.
@@ -614,7 +922,7 @@ He wants the first frame to make a promise, the next to contradict it and the co
 
 #### Vocabulary
 
-Keep his vocabulary within the setting. He may say `feed`, `clip`, `post`, `comments`, `retention`, `thumbnail`, `sponsor` and `follow`; he should not mention YouTube, TikTok, Gen Z or contemporary real-world memes. His speech is aggressively compressed and promotional, not random slang.
+Keep his vocabulary within the setting. He may say `feed`, `clip`, `post`, `comments`, `retention`, `thumbnail`, `sponsor` and `follow`; he must not mention YouTube, TikTok, Gen Z or contemporary real-world memes. His speech is aggressively compressed and promotional, not random slang.
 
 #### Knowledge
 
@@ -648,15 +956,7 @@ May know measurable facts:
 - retrieval telemetry;
 - structural instability.
 
-They can say:
-
-> "The mass return is inconsistent."
-
-They should not say:
-
-> "Reality is rewriting the specimen."
-
-That conclusion belongs to the Fisherman.
+Use the [research measurement example](#research-measurements): a researcher may report inconsistent mass, but must never correctly diagnose reality rewriting a specimen. That understanding belongs to the Fisherman.
 
 Academy field researchers care about provenance as much as the result. They compare original
 retrieval records, coherence readings, mass return and structural variance; a specimen relabelled
@@ -712,11 +1012,11 @@ May hate the equipment more violently. Their anger does not give them technical 
 
 ### Crablobab
 
-His degree of conscious understanding is not a question the mod needs to answer. He demonstrates. He does not lecture.
+His degree of conscious understanding is undefined. This does not authorize Fisherman-level explanations. Follow [Crablobab's character instructions](#crablobab): demonstrate the action, conduct the transaction, and never lecture about the mechanism.
 
 ### The Fisherman
 
-Knows. Stops talking before knowledge becomes definition.
+The sole exception to ordinary observers' knowledge limits. He perceives contradictions because he is partly outside reality, and limits explanations because definition can be dangerous. Follow [his nature and restraint](#the-fisherman), not a generic mysterious-mentor voice.
 
 ## Terminology
 
@@ -724,7 +1024,7 @@ The Outfitter tabs are Upgrades, Equipment and Extras. Upgrade levels are tiers.
 are Harpoon Tips, Drone Cores and Lens Arrays; use “rig module” when discussing several categories.
 `Tackle` is an internal and saved identifier, not a player-facing category name.
 
-| Thing | Careful / technical | Slang / ordinary speech | Avoid |
+| Thing | Careful / technical | Slang / ordinary speech | Do not use for this meaning |
 |---|---|---|---|
 | Reality's substrate | fabric | water, very rarely and only from lay speakers | veil, aether |
 | Worn-through fabric | breach, rupture | pond, spot | portal, jump point, gate |
@@ -736,13 +1036,13 @@ are Harpoon Tips, Drone Cores and Lens Arrays; use “rig module” when discuss
 | No natural breach | open space | — | open water |
 | Pattern distribution | range | where they turn up | waters, biome |
 
-"Species" may still be used as a **game-data/table classification** because the player needs a usable category. Avoid making the fiction claim that patterns belong to conventional biological species in a scientific sense.
+"Species" may still be used as a **game-data/table classification** because the player needs a usable category. Do not make the fiction claim that patterns belong to conventional biological species in a scientific sense.
 
 ## Faction voices
 
-Faction dialogue should be recognizable through priorities and institutional habits, not caricatured accents.
+Make faction dialogue recognizable through priorities and institutional habits, not caricatured accents.
 
-Recognizable does not mean flat. Patrol dialogue should retain colour, irritation, humour, menace
+Recognizable does not mean flat. Patrol dialogue must retain colour, irritation, humour, menace
 and the sense that a particular officer is speaking. Institutional vocabulary is a foundation for
 voice, not a substitute for it.
 
@@ -758,7 +1058,7 @@ Think:
 - Naval Intelligence;
 - controlled irritation when reality does not fit the form.
 
-They are not universally stupid or fascist parody officers. A Hegemony officer should sound like someone whose institution expects the Sector to be legible.
+They are not universally stupid or fascist parody officers. Write a Hegemony officer whose institution expects the Sector to be legible.
 
 ### Tri-Tachyon
 
@@ -803,7 +1103,7 @@ Think:
 Do not make every Pather rant. A calm Pather can be more convincing.
 
 The breach-lamp and hostile fishing-camp encounters are the deliberate exception. Here the player
-is repeatedly using a machine beside a wound in creation for appetite and profit. Pathers should be
+is repeatedly using a machine beside a wound in creation for appetite and profit. Write these Pathers as
 furious, unreasonable and ready to scream about Moloch's tools, defilement and violence against
 God's work. They may be emotionally close to the truth without possessing Fisherman-level physics;
 their response is accusation and holy violence, not calm administration.
