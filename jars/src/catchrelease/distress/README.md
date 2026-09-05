@@ -1,7 +1,7 @@
 # Distress Call Framework
 
-Campaign distress calls that share vanilla's nearby-event cadence and presentation while leaving
-the actual quest or encounter in the consuming mod.
+This framework schedules campaign distress calls alongside vanilla nearby events. The consuming
+mod supplies the quest, dialogue and rewards.
 
 ## Install
 
@@ -33,7 +33,7 @@ fleet, and may replace the default jump-point orbit anchor with another token in
 It owns all dialogue, rewards, acceptance and completion. The generic comm entry requires the
 framework flag, and the saved instance verifies the exact fleet and instance reference before it
 fires the provider trigger. Call `DistressCallFramework.resolve(fleet)` when the encounter has
-reached a final answer.
+finished.
 
 ## Vanilla integration
 
@@ -46,3 +46,9 @@ call; they expire naturally when the framework stops refreshing them.
 The bridge does not replace `nearby_events`, call its event picker, or claim a vanilla-created
 entity. If the expected vanilla fields are unavailable, the framework fails closed and spawns
 nothing.
+
+## Maintenance
+
+Update this README when provider hooks, registration, CSV fields or reservation behavior change.
+Keep quest-specific rules and copy in the consuming mod. See
+[CLAUDE.md](../../../../CLAUDE.md#documentation-upkeep) for repository maintenance.

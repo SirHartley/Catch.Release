@@ -28,6 +28,8 @@ Technical routing for the current implementation. Java paths below are relative 
 | Legendary reveal / cleanup | `LegendaryChases -> LegendaryHaunt/LonglinerDecoy -> HauntModule/LegendaryShields` |
 | Map/Codex/intel handoff | `FishIntelMapButton/FishCodex -> FishMapFilterScript -> FishMapPane/FishPresence` |
 | Stale campaign effect | Owner location/ability validity -> cleanup; shared renderer registration in `rendering/` |
+| Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; minigame rendering is separate |
+| Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*`; black-hole pass in `rendering/spiral/` |
 | Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel` |
 
 ## Registration and lifecycle
@@ -38,7 +40,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `ModPlugin.onGameLoad()` | Idempotent script/listener registration and save repair; order below |
 | `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting |
 | `data/campaign/fish.csv` | Species; `FishSpecLoader` |
-| `data/characters/abilities/abilities.csv` | searchlights, rod, harpoon, skillshot_example IDs |
+| `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon, skillshot_example |
 | `data/config/settings.json` | `catchrelease.dialogue.rules` command package, sprites, black-hole warp range |
 | `data/config/sounds.json` | Sound registry; callers in abilities and `FishConstants` |
 | `data/config/LunaSettings.csv` | Charge-ready sound policy, camera snap, returning-player tutorial skip |
@@ -46,12 +48,12 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/distress_calls.csv` | Merged, namespaced specs; # IDs disabled; `CatchReleaseDistressProvider` |
 | `data/campaign/rules.csv` | Dialogue and type-selected fleet quest/intel text; Java supplies mechanics/state |
 | `data/world/factions/default_ranks.json` | Contact roles |
-| `data/campaign/terrain.json` and terrain CSVs | Pond/coherence terrain; ponds are not custom entities |
+| `data/campaign/terrain.json` | Pond/coherence terrain; ponds are not custom entities |
 | `data/config/custom_entities.json` | Motes, drones, harpoons, legendary props and map proxies |
 | `data/campaign/special_items.csv` | Fish cargo |
 | `data/campaign/industries.csv` | Breach Conservatory |
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
-| `memory/upgrades` + upgrade data | Stat IDs, loader aliases, saved levels and runtime values |
+| `data/config/UpgradeData.csv` -> `memory/upgrades/` | Stat IDs, loader aliases, saved levels and runtime values |
 
 Load order in `ModPlugin`: pond-on-jump -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/rating/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> black-hole warp -> stale pond claims/range relock -> dev shortcut.
 

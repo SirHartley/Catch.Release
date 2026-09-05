@@ -46,6 +46,7 @@ Choose a useful detail for each beat. One is often enough; this is not a numeric
 
 - Break teaching into related questions or short exchanges rather than a long lecture.
 - Let choices express the player's intent. Avoid paraphrasing the preceding paragraph or forcing a theatrical personality onto the captain.
+- Write option labels as unquoted actions, following the existing menu's convention.
 - Offer different plausible responses where they matter. Use Continue when there is no meaningful decision.
 - Repetition can belong to a character: a product name, a regulation, or the plain-coated buyers' exact requested species. Do not have every speaker repeat the player's question.
 - Humor should come from the situation and the people. Avoid explaining a joke after it lands.
@@ -63,7 +64,7 @@ Choose a useful detail for each beat. One is often enough; this is not a numeric
 | Colony description | A functioning facility: visitors, staff, tanks, access and maintenance. Follow the lore's setting constraints. |
 | Receipt | Actual items, credits or knowledge granted, after the hand-in prose. Use the shared receipt path rather than a second invented payment sentence. |
 
-The Outfitter tabs are Upgrades, Equipment, and Extras. Upgrade levels are tiers. Module categories are Harpoon Tips, Drone Cores, and Lens Arrays; use “rig module” across categories. `Tackle` remains an internal/save identifier. Canonical terminology belongs in `LORE.md`; obtain labels from the owning UI/data definitions rather than maintaining another vocabulary table here.
+Use the terminology in [LORE.md](LORE.md#terminology) and the labels supplied by the owning UI/data definitions. Do not expose internal names such as `Tackle` or maintain a second vocabulary table here.
 
 ### Review questions
 

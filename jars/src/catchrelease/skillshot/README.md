@@ -1,11 +1,10 @@
 # Skillshot Framework
 
-Campaign-layer aimed abilities for Starsector. Hold an ability's hotkey (or click it), a reticule
-appears around your fleet pointing at the cursor, release/click and the ability fires at that spot.
+Aimed campaign abilities for Starsector. Hold an ability hotkey to aim and release it to fire.
+Clicking the ability instead starts aiming; the next map click fires.
 
-Extracted from Industrial.Evolution's consumable missiles, with the IndEvo-specific parts stripped
-out. Everything the framework needs is in this folder — source, sprites, sound, and the data entries
-that register them.
+The framework was extracted from Industrial.Evolution's consumable missiles. Its Java source is
+in this package; assets and registration entries are in the Catch.Release mod root.
 
 ## Requirements
 
@@ -15,20 +14,20 @@ that register them.
 
 ## Install
 
-1. Copy the contents of this folder into your mod root, so you end up with:
+1. Copy the Java package and its referenced assets into your mod, preserving the package name or
+   updating Java imports and plugin registrations together. In this repository they are located at:
 
    ```
-   yourmod/
-     data/campaign/abilities.csv
-     data/config/settings.json
-     data/config/sounds.json
-     graphics/fx/skillshot_*.png
-     skillshot/sounds/skillshot_denied.ogg
-     jars/src/skillshot/...          <- move src/skillshot here, or wherever your sources live
+   jars/src/catchrelease/skillshot/
+   data/campaign/abilities.csv
+   data/config/settings.json
+   data/config/sounds.json
+   graphics/catchrelease/fx/skillshot_*.png
+   sounds/catchrelease/skillshot/skillshot_denied.ogg
    ```
 
-   If your mod already has `settings.json`, `sounds.json` or `abilities.csv`, merge the entries
-   rather than overwriting — the files here contain nothing but the framework's own additions.
+   Merge only the framework's ability, sprite and sound entries into your mod's registries.
+   Do not copy the whole Catch.Release registries over another mod's files.
 
 2. Add LunaLib to `mod_info.json` dependencies if it isn't there already.
 
@@ -85,12 +84,12 @@ Useful hooks on `BaseSkillshotAbility`:
 | Method | Purpose |
 | --- | --- |
 | `createReticule()` | New reticule per targeting session |
-| `onSkillshotFired(target, angle)` | The payload |
+| `onSkillshotFired(target, angle)` | Action after a targeted shot |
 | `onConsume()` | Runs once per successful shot — remove the item, spend a charge |
 | `isTargetingBlocked()` | Why aiming can't start right now; override to add your own conditions |
 | `addTooltip(tooltip)` | Ability tooltip body; the framework appends its own blocked-reason lines |
 | `showReticuleOnActivation()` | Whether this press should be aimed at all; default true |
-| `onActivatedWithoutReticule()` | The payload for an unaimed press, i.e. when the above is false |
+| `onActivatedWithoutReticule()` | Action for an unaimed press |
 
 ## Abilities that are only sometimes aimed
 
@@ -159,10 +158,9 @@ rather than at every call site:
 | `GUIDE_LINE_DASH_PX` / `GUIDE_LINE_DASH_GAP_PX` | `24f` / `24f` | `DASHED` — stroke and gap length |
 | `GUIDE_LINE_DOT_PX` / `GUIDE_LINE_DOT_GAP_PX` | `4f` / `28f` | `DOTTED` — same two lengths |
 
-All lengths are in **screen pixels**, not world units, so dashes keep their spacing however far the
-map is zoomed out. They are snapped to the nearest pattern GL can stipple — the stroke keeps its
-share of the stroke-plus-gap period, and the period rounds to a multiple of 16 pixels — so read them
-as the look you're after rather than an exact measurement.
+Lengths are in screen pixels. `SkillshotUtils.cutDashes()` converts them through the current
+viewport and constructs dash geometry; it does not use GL stippling. Connected segments preserve
+phase, and a break in the path resets it.
 
 A `PositionValidator` is one method — `boolean isValid(Vector2f worldPos)`. `MarketProximityValidator`
 ships with the framework and rejects aim points near inhabited worlds:
@@ -208,15 +206,12 @@ across abilities.
 Either path cancels cleanly on an opened dialog, on ctrl (the vanilla slot-reassign modifier), or on
 any stray keypress. Firing at a position the reticule rejects plays `skillshot_denied` instead.
 
-## Differences from the IndEvo original
+## Extension boundaries
 
-- Reticule comes from `SkillshotAbility.createReticule()` instead of being picked from `aoe` /
-  `artillery` tags inside the listeners. Attachment is still by tag; only the sprite choice moved.
-- The artillery no-fire-near-markets rule became `PositionValidator` / `MarketProximityValidator`.
-- `isValidPosition()` now sees the current frame's cursor position. In the original the aim point was
-  written after validation ran, so validation lagged a frame.
-- The hotkey path resolves the slotted ability the same way on key-down and key-up; the original used
-  the hyperspace-aware id on the way down and the normal one on the way up, which could fire the
-  wrong ability in hyperspace.
-- Consumable-item plumbing (cargo counts, item removal, fleet inventory) is gone, replaced by the
-  `onConsume()` hook.
+The framework chooses reticules through `SkillshotAbility.createReticule()` and target restrictions
+through `PositionValidator`. Validation uses the current frame's cursor position. Both hotkey edges
+resolve the same slotted ability, including in hyperspace. Consumers implement cargo or charge
+spending through `onConsume()`; the framework does not own inventory.
+
+Update this README with changes to those hooks, registration, assets or lifecycle. Follow
+[CLAUDE.md](../../../../CLAUDE.md#documentation-upkeep) for repository maintenance.
