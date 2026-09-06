@@ -19,8 +19,11 @@ import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
+import catchrelease.campaign.fish.shop.ShopSchematics;
+import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -538,6 +541,7 @@ public class FishingIntro {
     public static void skip(TextPanelAPI text) {
         grant(TutorialConstants.ROD, text);
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
+        giveOutfitterSchematic(text);
 
         giveCharts(TutorialConstants.FREE_COMMONS, null, text);
         for (int rung = 0; rung < TutorialConstants.GRADUATION_CHARTS.length; rung++) {
@@ -611,6 +615,14 @@ public class FishingIntro {
 
     public static void giveOutfitter(TextPanelAPI text) {
         Global.getSector().getMemoryWithoutUpdate().set(TutorialConstants.DEEP_HANDOFF_KEY, true);
+        giveOutfitterSchematic(text);
+    }
+
+    protected static void giveOutfitterSchematic(TextPanelAPI text) {
+        if (ShopSchematics.has(Tackle.SPOOL_GOVERNOR)) return;
+
+        FishReward reward = FishReward.tackleSchematic(Tackle.SPOOL_GOVERNOR);
+        FishReward.showReceipts(text, List.of(reward.grantWithReceipt()));
     }
 
     public static boolean isDeepHandoffPending() {

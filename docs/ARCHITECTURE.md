@@ -399,6 +399,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - The Fisherman map marker exists only in the player's current location, has no sensor profile, and is map-only. Reconciliation removes old duplicates and marks from departed systems.
 - The visitor shelf restocks from each sale date, not a global monthly tick. Chart-request completion is the only way to increase shelf width.
 - `FishingIntro.point()` is idempotent and can be reached from the wreck, castaway/rating, Fisherman interception, or a direct hail. Recovered property takes origin precedence, then rescued crew, then recorded market.
+- `FishingIntro.giveOutfitter()` grants the Spool Governor schematic with the second tutorial hand-in. `giveOutfitterSchematic()` also supplies the skip path, reuses `FishReward` receipts, and skips known/owned equipment. The schematic exposes the Equipment tab's drone-core shelf; purchasing and fitting remain separate.
 - The returning-player skip is available only before the R.O.D. lesson begins. Manually disabling the new Luna setting stays disabled after the one-time legacy-file migration.
 - Tutorial single-target protection advances only when the requested species could naturally spawn at the current location with the required implement. The count carries between valid locations and pauses elsewhere.
 - No bar, local fleet, or distress fleet job may appear before `FishingIntro.isOpenForWork()` or tutorial completion as appropriate. Equipment requirements are limited to gear the player owns.
