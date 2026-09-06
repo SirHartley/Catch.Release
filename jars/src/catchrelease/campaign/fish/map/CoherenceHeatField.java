@@ -85,7 +85,9 @@ public class CoherenceHeatField {
 
         GL11.glEnd();
 
-        renderRumor(FishRumors.getActive(), factor, centerX, centerY, alphaMult);
+        for (FishRumors.Saved rumor : FishRumors.getActiveRumors()) {
+            renderRumor(rumor, factor, centerX, centerY, alphaMult);
+        }
     }
 
     protected void renderRumor(FishRumors.Saved rumor, float factor, float centerX,

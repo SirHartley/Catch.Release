@@ -154,6 +154,8 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 
 Each `FishRumors.Kind` has one matching `CatchReleaseRumorText` row. Combined leads use their own passages, not appended single-effect text. Intel expands the same saved system/fish values with ordered highlights, including repeated fish names; the dialogue route and its no-lead fallback retain Continue to business.
 
+Rumors last 60 days from their saved `started` timestamp; new leads remain available every 30 days. `ACTIVE_KEY` stores overlapping leads in separate systems, migrating the old single `STATE_KEY` once. `getActive()` selects the newest lead for dialogue; effect getters search all live leads. `RumorIntel` uses the same expiry test and discards old 30-day ending timers without reviving ended entries. Queued intel remains live until its actual deadline.
+
 ### `dialogue/rules`
 
 Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge or its memory/text bindings, not only when adding CSV rows.

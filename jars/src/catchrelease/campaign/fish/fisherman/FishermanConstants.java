@@ -75,7 +75,7 @@ public class FishermanConstants {
     public static final float STRANGER_MAX_ABERRATION = 0.15f;
 
     public static final float RUMOR_COOLDOWN_DAYS = 30f;
-    public static final float RUMOR_DURATION_DAYS = 30f;
+    public static final float RUMOR_DURATION_DAYS = 60f;
     public static final float RUMOR_RARITY_BIAS = 1.5f;
     public static final float RUMOR_LOOT_MULT = 2.5f;
     public static final float RUMOR_STRANGER_WEIGHT = 8f;

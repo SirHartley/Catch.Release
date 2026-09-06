@@ -68,6 +68,7 @@ public class FishRumors {
     }
 
     public static final String STATE_KEY = "$catchrelease_rumor";
+    public static final String ACTIVE_KEY = "$catchrelease_rumors_active";
     public static final String LAST_ASKED_KEY = "$catchrelease_rumor_last";
     public static final String TUTORIAL_LEAD_KEY = "$catchrelease_tutorial_rumor";
 
@@ -104,7 +105,23 @@ public class FishRumors {
         }
 
         protected boolean matches(Saved other) {
-            return other != null && rumor.started == other.started;
+            return other != null && rumor.started == other.started
+                    && java.util.Objects.equals(rumor.systemId, other.systemId);
+        }
+
+        @Override
+        public void advance(float amount) {
+            if (isEnded()) return;
+
+            // Older saves carry a separate 30-day BaseIntelPlugin timer.
+            ending = false;
+            endingTimeRemaining = null;
+            if (isExpired(rumor)) endImmediately();
+        }
+
+        @Override
+        public boolean shouldRemoveIntel() {
+            return isEnded();
         }
 
         @Override
@@ -248,20 +265,35 @@ public class FishRumors {
     }
 
     public static Saved getActive() {
-        if (Global.getSector() == null) return null;
+        List<Saved> active = getActiveRumors();
+        return active.isEmpty() ? null : active.get(active.size() - 1);
+    }
 
-        Object stored = Global.getSector().getPersistentData().get(STATE_KEY);
-        if (!(stored instanceof Saved)) return null;
+    @SuppressWarnings("unchecked")
+    public static List<Saved> getActiveRumors() {
+        if (Global.getSector() == null) return List.of();
 
-        Saved rumor = (Saved) stored;
-
-        if (Global.getSector().getClock().getElapsedDaysSince(rumor.started)
-                > FishermanConstants.RUMOR_DURATION_DAYS) {
-            Global.getSector().getPersistentData().remove(STATE_KEY);
-            return null;
+        java.util.Map<String, Object> data = Global.getSector().getPersistentData();
+        Object stored = data.get(ACTIVE_KEY);
+        List<Saved> active;
+        if (stored instanceof List<?>) {
+            active = (List<Saved>) stored;
+        } else {
+            active = new ArrayList<>();
+            if (data.get(STATE_KEY) instanceof Saved old) active.add(old);
+            data.put(ACTIVE_KEY, active);
         }
 
-        return rumor;
+        active.removeIf(FishRumors::isExpired);
+        if (active.isEmpty()) data.remove(STATE_KEY);
+        else data.put(STATE_KEY, active.get(active.size() - 1));
+
+        return List.copyOf(active);
+    }
+
+    protected static boolean isExpired(Saved rumor) {
+        return Global.getSector().getClock().getElapsedDaysSince(rumor.started)
+                >= FishermanConstants.RUMOR_DURATION_DAYS;
     }
 
     public static boolean showCurrentIntel(TextPanelAPI text) {
@@ -286,10 +318,17 @@ public class FishRumors {
     }
 
     protected static boolean appliesTo(LocationAPI location, int type) {
-        Saved rumor = getActive();
+        return findEffect(location, type) != null;
+    }
 
-        return hasEffect(rumor, type) && location instanceof StarSystemAPI
-                && rumor.systemId != null && rumor.systemId.equals(((StarSystemAPI) location).getId());
+    protected static Saved findEffect(LocationAPI location, int type) {
+        if (!(location instanceof StarSystemAPI system)) return null;
+
+        for (Saved rumor : getActiveRumors()) {
+            if (hasEffect(rumor, type) && system.getId().equals(rumor.systemId)) return rumor;
+        }
+
+        return null;
     }
 
     public static Kind getKind(Saved rumor) {
@@ -356,11 +395,8 @@ public class FishRumors {
     }
 
     public static String getStrangerId(LocationAPI location) {
-        Saved rumor = getActive();
-        if (!hasEffect(rumor, TYPE_STRANGER)) return null;
-        if (!appliesTo(location, TYPE_STRANGER)) return null;
-
-        return rumor.strangerId;
+        Saved rumor = findEffect(location, TYPE_STRANGER);
+        return rumor == null ? null : rumor.strangerId;
     }
 
     public static boolean isAvailable() {
@@ -397,12 +433,14 @@ public class FishRumors {
         rumor.type = kind.primaryType;
         rumor.kindId = kind.id;
 
+        List<Saved> active = new ArrayList<>(getActiveRumors());
+        active.add(rumor);
+        Global.getSector().getPersistentData().put(ACTIVE_KEY, active);
         Global.getSector().getPersistentData().put(STATE_KEY, rumor);
         Global.getSector().getPersistentData().put(LAST_ASKED_KEY, rumor.started);
 
         RumorIntel intel = new RumorIntel(rumor);
         FishIntelNotifications.queue(intel);
-        intel.endAfterDelay(FishermanConstants.RUMOR_DURATION_DAYS);
 
         return rumor;
     }
@@ -427,6 +465,8 @@ public class FishRumors {
 
     protected static StarSystemAPI pickSystem(Kind kind) {
         List<StarSystemAPI> candidates = new ArrayList<>();
+        Set<String> occupied = new java.util.HashSet<>();
+        for (Saved rumor : getActiveRumors()) occupied.add(rumor.systemId);
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             if (!system.isProcgen()) continue;
@@ -434,6 +474,7 @@ public class FishRumors {
             if (system.hasTag(Tags.SYSTEM_ABYSSAL)) continue;
             if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) continue;
             if (system.getLocation() == null) continue;
+            if (occupied.contains(system.getId())) continue;
             if (!canHost(kind, system)) continue;
 
             candidates.add(system);
