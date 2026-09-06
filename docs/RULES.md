@@ -188,7 +188,7 @@ Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Shared text-presen
 | `$catchrelease_fleetQuestThanksPending` | Separate gate for completed-job thanks; consumed with its saved text. |
 | `CatchReleaseFisherOptions` | Private Fisherman business menu; enter with `$menuState == catchreleaseFisher`. |
 | `CatchReleaseFisherResume` | Rebuild after picker/panel cancellation. |
-| `CatchReleaseRumorText` | Private Fisherman lead display. `CatchReleaseCMD tokens` prepares `$catchreleaseRumorKind` from the saved rumor before selecting its Text row; rendering never rolls a new lead. |
+| `CatchReleaseRumorText` | Private Fisherman lead display. `CatchReleaseCMD tokens` prepares `$catchreleaseRumorKind` from the saved rumor before selecting one complete Text row, including combined effects or `none`. Rendering never rolls a new lead; the caller supplies Continue. |
 | `CatchReleaseFleetResolutionOptions` | Peaceful fleet result menu with Escape-bound Leave. |
 
 - Namespace IDs and options. Bar option IDs must begin with their mission ID; mission IDs must not prefix one another. `BarCMD` aborts a wrapper whose option prefix differs.

@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class FishRumors {
 
@@ -39,7 +40,11 @@ public class FishRumors {
         STRANGER("stranger", TYPE_STRANGER),
         SIZE("size", TYPE_SIZE),
         CALM("calm", TYPE_CALM),
-        VALUABLE_LOOT("valuable_loot", TYPE_VALUABLE_LOOT);
+        VALUABLE_LOOT("valuable_loot", TYPE_VALUABLE_LOOT),
+        RARITY_LOOT("rarity_loot", TYPE_RARITY, TYPE_LOOT),
+        SIZE_CALM("size_calm", TYPE_SIZE, TYPE_CALM),
+        STRANGER_CALM("stranger_calm", TYPE_STRANGER, TYPE_CALM),
+        LOOT_VALUABLE("loot_valuable", TYPE_LOOT, TYPE_VALUABLE_LOOT);
 
         public final String id;
         public final int primaryType;
@@ -68,6 +73,8 @@ public class FishRumors {
     public static final int TYPE_SIZE = 3;
     public static final int TYPE_CALM = 4;
     public static final int TYPE_VALUABLE_LOOT = 5;
+
+    protected static final Pattern DESCRIPTION_TOKEN = Pattern.compile("\\$catchreleaseRumor(System|Stranger)");
 
     public static class Saved implements Serializable {
 
@@ -158,7 +165,10 @@ public class FishRumors {
         public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
             String description = describe(rumor);
             LabelAPI paragraph = info.addPara(description, 10f);
-            FishRequirement.highlightFishNames(paragraph, description);
+            String[] highlights = DESCRIPTION_TOKEN.matcher(descriptionTemplate(getKind(rumor)))
+                    .results().map(match -> "System".equals(match.group(1))
+                            ? rumor.systemName : getStrangerDisplayName(rumor)).toArray(String[]::new);
+            FishRequirement.highlight(paragraph, List.of(), null, highlights);
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
             if (getMapAsks() == null) {
@@ -444,26 +454,29 @@ public class FishRumors {
     public static String describe(Saved rumor) {
         if (rumor == null) return "";
 
-        switch (rumor.type) {
-            case TYPE_SIZE:
-                return "Catches in " + rumor.systemName + " are tending toward larger and heavier specimens.";
-            case TYPE_CALM:
-                return "Fish in " + rumor.systemName
-                        + " are moving more slowly during retrieval, making them easier to pursue.";
-            case TYPE_VALUABLE_LOOT:
-                return "Bycatch recovered in " + rumor.systemName + " has been skewing toward more valuable finds.";
-            case TYPE_LOOT:
-                return "Retrievals in " + rumor.systemName
-                        + " are returning with more wreckage and lost cargo than usual.";
-            case TYPE_STRANGER:
-                FishSpec stranger = FishSpecLoader.getFishSpec(rumor.strangerId);
-                String name = stranger == null ? "something that has no business there"
-                        : stranger.getDisplayName();
-                return "Reports place " + name + " in " + rumor.systemName
-                        + ", outside its recorded range.";
-            default:
-                return "Ruptures in " + rumor.systemName
-                        + " are producing rarer patterns while the local fabric remains thin.";
-        }
+        return descriptionTemplate(getKind(rumor)).replace("$catchreleaseRumorSystem", rumor.systemName)
+                .replace("$catchreleaseRumorStranger", getStrangerDisplayName(rumor));
+    }
+
+    protected static String descriptionTemplate(Kind kind) {
+        return switch (kind) {
+            case RARITY -> "Rarer species are turning up more often in $catchreleaseRumorSystem.";
+            case LOOT -> "Retrievals in $catchreleaseRumorSystem are producing bycatch opportunities more often than usual.";
+            case STRANGER -> "$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem, outside its charted range. "
+                    + "Recent catches have generally been good specimens.";
+            case SIZE -> "Catches in $catchreleaseRumorSystem are tending toward larger and heavier specimens.";
+            case CALM -> "Fish in $catchreleaseRumorSystem are moving more slowly during retrieval, making them easier to "
+                    + "pursue.";
+            case VALUABLE_LOOT -> "Bycatch recovered in $catchreleaseRumorSystem has been skewing toward more valuable finds.";
+            case RARITY_LOOT -> "Rarer species are turning up more often in $catchreleaseRumorSystem, and retrievals there are "
+                    + "producing bycatch opportunities more frequently.";
+            case SIZE_CALM -> "Catches in $catchreleaseRumorSystem are tending larger and heavier, while fish there are moving more "
+                    + "slowly during retrieval.";
+            case STRANGER_CALM -> "$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem outside its charted range, "
+                    + "and fish there are moving more slowly during retrieval. Recent $catchreleaseRumorStranger catches "
+                    + "have generally been good specimens.";
+            case LOOT_VALUABLE -> "Retrievals in $catchreleaseRumorSystem are producing bycatch opportunities more often, with a "
+                    + "greater share of valuable finds among them.";
+        };
     }
 }
