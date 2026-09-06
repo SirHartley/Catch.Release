@@ -19,6 +19,10 @@
         {
             "id": "MagicLib",
             "name": "MagicLib",
+        },
+        {
+            "id": "shaderLib",
+            "name": "GraphicsLib",
         }
     ]
 }
