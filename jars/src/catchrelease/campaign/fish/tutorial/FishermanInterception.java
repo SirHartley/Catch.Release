@@ -11,6 +11,7 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.ai.FleetAIFlags;
 import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
@@ -76,16 +77,17 @@ public class FishermanInterception implements EveryFrameScript {
     }
 
     protected void cutOff(CampaignFleetAPI boat, CampaignFleetAPI player) {
-        boat.getMemoryWithoutUpdate().set(INTERCEPTED_KEY, true);
+        if (boat.getBattle() != null) return;
+        if (!(player.getContainingLocation() instanceof StarSystemAPI system)) return;
 
         Vector2f at = MathUtils.getPointOnCircumference(player.getLocation(),
                 TutorialConstants.INTERCEPT_SPAWN_DISTANCE,
                 MathUtils.getRandomNumberInRange(0f, 360f));
 
-        if (player.getContainingLocation() instanceof StarSystemAPI system) {
-            at = OuterReaches.place(system, at);
-        }
+        at = OuterReaches.place(system, at);
+        if (!OuterReaches.isLegClear(system, at, player.getLocation())) return;
 
+        boat.getMemoryWithoutUpdate().set(INTERCEPTED_KEY, true);
         boat.setLocation(at.x, at.y);
 
         boat.clearAssignments();
@@ -108,6 +110,19 @@ public class FishermanInterception implements EveryFrameScript {
 
     public static boolean isClosing(CampaignFleetAPI fleet) {
         return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(CHASING_KEY);
+    }
+
+    public static void cancelApproach(CampaignFleetAPI fleet) {
+        MemoryAPI memory = fleet.getMemoryWithoutUpdate();
+        memory.unset(CHASING_KEY);
+        memory.unset(FleetAIFlags.PLACE_TO_LOOK_FOR_TARGET);
+        memory.unset(MemFlags.MEMORY_KEY_PURSUE_PLAYER);
+        memory.unset(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED);
+        memory.unset(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER);
+        memory.unset(MemFlags.MEMORY_KEY_ALLOW_LONG_PURSUIT);
+        fleet.setInteractionTarget(null);
+
+        if (!FishingIntro.isAtLeast(FishingIntro.RODDED)) memory.unset(INTERCEPTED_KEY);
     }
 
     public static boolean hasIntercepted(CampaignFleetAPI fleet) {
