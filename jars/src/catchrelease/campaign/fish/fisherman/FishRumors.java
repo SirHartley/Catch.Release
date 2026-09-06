@@ -110,17 +110,13 @@ public class FishRumors {
         }
 
         @Override
-        public void advance(float amount) {
-            if (isEnded()) return;
+        public boolean shouldRemoveIntel() {
+            if (isEnded()) return true;
 
-            // Older saves carry a separate 30-day BaseIntelPlugin timer.
+            // IntelManager calls this for queued and visible entries; no separate script is needed.
             ending = false;
             endingTimeRemaining = null;
             if (isExpired(rumor)) endImmediately();
-        }
-
-        @Override
-        public boolean shouldRemoveIntel() {
             return isEnded();
         }
 

@@ -154,7 +154,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 
 Each `FishRumors.Kind` has one matching `CatchReleaseRumorText` row. Combined leads use their own passages, not appended single-effect text. Intel expands the same saved system/fish values with ordered highlights, including repeated fish names; the dialogue route and its no-lead fallback retain Continue to business.
 
-Rumors last 60 days from their saved `started` timestamp; new leads remain available every 30 days. `ACTIVE_KEY` stores overlapping leads in separate systems, migrating the old single `STATE_KEY` once. `getActive()` selects the newest lead for dialogue; effect getters search all live leads. `RumorIntel` uses the same expiry test and discards old 30-day ending timers without reviving ended entries. Queued intel remains live until its actual deadline.
+Rumors last 60 days from their saved `started` timestamp; new leads remain available every 30 days. `ACTIVE_KEY` stores overlapping leads in separate systems, migrating the old single `STATE_KEY` once. `getActive()` selects the newest lead for dialogue; effect getters search all live leads. `RumorIntel.shouldRemoveIntel()` uses the same expiry test and discards old 30-day ending timers without reviving ended entries. Vanilla `IntelManager.removeAllThatShouldBeRemoved()` calls it for queued and visible entries while unpaused; no additional timer script or sector scan is needed.
 
 ### `dialogue/rules`
 
