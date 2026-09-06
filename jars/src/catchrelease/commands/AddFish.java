@@ -25,12 +25,14 @@ public class AddFish implements BaseCommandWithSuggestion {
 
     private static final class ParsedArguments {
 
-        private final String query;
-        private final int amount;
+        private final String fishId;
+        private final Float quality;
+        private final Float coherence;
 
-        private ParsedArguments(String query, int amount) {
-            this.query = query;
-            this.amount = amount;
+        private ParsedArguments(String fishId, Float quality, Float coherence) {
+            this.fishId = fishId;
+            this.quality = quality;
+            this.coherence = coherence;
         }
     }
 
@@ -78,46 +80,39 @@ public class AddFish implements BaseCommandWithSuggestion {
         ParsedArguments parsed = parseArguments(args);
         if (parsed == null) return CommandResult.BAD_SYNTAX;
 
-        Match match = findMatch(parsed.query);
-        if (match.spec == null) {
-            if (!match.suggestions.isEmpty()) {
-                Console.showMessage("Multiple fish match \"" + parsed.query + "\". Try one of:");
-                for (FishSpec suggestion : match.suggestions) {
-                    Console.showMessage("  " + suggestion.getDisplayName() + " [" + suggestion.id + "]");
-                }
-            } else {
-                Console.showMessage("No fish id or name matches \"" + parsed.query + "\".");
-            }
+        FishSpec spec = FishSpecLoader.getFishSpec(parsed.fishId);
+        if (spec == null) {
+            Console.showMessage("No fish ID matches \"" + parsed.fishId + "\".");
             return CommandResult.ERROR;
         }
 
-        List<FishCatch> crate = new ArrayList<>(parsed.amount);
-        float aberration = (match.spec.minAberration + match.spec.maxAberration) * 0.5f;
-        for (int i = 0; i < parsed.amount; i++) {
-            FishCatch specimen = FishCatch.roll(match.spec, aberration);
-            if (specimen != null) crate.add(specimen);
-        }
-
-        if (crate.isEmpty()) {
-            Console.showMessage("Could not create any specimens for " + match.spec.getDisplayName() + ".");
+        float aberration = parsed.coherence == null
+                ? (spec.minAberration + spec.maxAberration) * 0.5f : 1f - parsed.coherence;
+        FishCatch specimen = FishCatch.roll(spec, aberration);
+        if (specimen == null) {
+            Console.showMessage("Could not create any specimens for " + spec.getDisplayName() + ".");
             return CommandResult.ERROR;
+        }
+        if (parsed.quality != null) {
+            specimen.length = spec.lengthMin + (spec.lengthMax - spec.lengthMin) * parsed.quality;
+            specimen.weight = spec.weightMin + (spec.weightMax - spec.weightMin) * parsed.quality;
         }
 
         CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
-        cargo.addSpecial(FishItems.toBundle(crate), 1);
+        cargo.addSpecial(FishItems.toBundle(Collections.singletonList(specimen)), 1);
 
-        if (match.fuzzy) {
-            Console.showMessage("Matched \"" + parsed.query + "\" to "
-                    + match.spec.getDisplayName() + " [" + match.spec.id + "].");
-        }
-        Console.showMessage("Added " + crate.size() + " x " + match.spec.getDisplayName()
-                + " [" + match.spec.id + "] to the player fleet's cargo.");
+        Console.showMessage("Added 1 x " + spec.getDisplayName()
+                + " [" + spec.id + "] to the player fleet's cargo.");
         return CommandResult.SUCCESS;
     }
 
     @Override
     public List<String> getSuggestions(int parameter, List<String> previous, CommandContext context) {
-        return getFishSuggestions(parameter, previous, context);
+        if (!context.isInCampaign() || parameter != 0) return Collections.emptyList();
+
+        List<String> ids = new ArrayList<>();
+        for (FishSpec spec : validSpecs()) ids.add(spec.id);
+        return ids;
     }
 
     static List<String> getFishSuggestions(int parameter, List<String> previous,
@@ -156,21 +151,25 @@ public class AddFish implements BaseCommandWithSuggestion {
     }
 
     private static ParsedArguments parseArguments(String args) {
-        if (args == null) return null;
-        String trimmed = args.trim();
-        int separator = trimmed.lastIndexOf(' ');
-        if (separator <= 0 || separator >= trimmed.length() - 1) return null;
-
-        String query = trimmed.substring(0, separator).trim();
-        String amountText = trimmed.substring(separator + 1).trim();
-        if (query.isEmpty()) return null;
+        if (args == null || args.isBlank()) return null;
+        String[] parts = args.trim().split("\\s+");
+        if (parts.length > 3) return null;
 
         try {
-            int amount = Integer.parseInt(amountText);
-            return amount > 0 ? new ParsedArguments(query, amount) : null;
+            Float quality = parts.length > 1 ? parseUnitValue(parts[1]) : null;
+            Float coherence = parts.length > 2 ? parseUnitValue(parts[2]) : null;
+            return new ParsedArguments(parts[0], quality, coherence);
         } catch (NumberFormatException ex) {
             return null;
         }
+    }
+
+    private static float parseUnitValue(String text) {
+        double value = Double.parseDouble(text);
+        if (!Double.isFinite(value) || value < 0d || value > 1d) {
+            throw new NumberFormatException();
+        }
+        return (float) value;
     }
 
     static Match findMatch(String query) {
