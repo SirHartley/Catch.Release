@@ -3394,19 +3394,8 @@ A pause.
 
 ""Ask for the Fisherman.""",,
 catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:Where do I find the trawler?,
-catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,10:catchrelease_ratingBarWhatRating:What exactly is a rating?,
 catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,20:catchrelease_ratingBarFishing:Fishing. In space.,
 catchrelease_ratingQuestionBack,CatchReleaseRatingQuestions,,,,100:catchrelease_ratingBarBack:Go back to the bar,
-catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,"$catchrelease_ratingAskedWhat = true 0
-FireAll CatchReleaseRatingQuestions","""Ship's crew.""
-
-The rating lifts one shoulder.
-
-""Not an officer. Deck, drives, guns, flight line, loading detail - whatever berth owns you that watch. Navy likes a proper word for everything.""
-
-They take a drink.
-
-""Rating.""",,
 catchrelease_ratingBarFishing,DialogOptionSelected,$option == catchrelease_ratingBarFishing,"$catchrelease_ratingAskedFishing = true 0
 FireAll CatchReleaseRatingQuestions","""That's what they call it.""
 

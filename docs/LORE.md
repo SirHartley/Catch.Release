@@ -391,7 +391,6 @@ Choices must express the player's intent, not paraphrase the preceding paragraph
 
 Useful option examples include:
 
-- What exactly is a rating?
 - You give this equipment to every stranger?
 - I just left you in another system.
 - This is a weapon.
