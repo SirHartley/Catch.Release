@@ -167,6 +167,10 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 Campaign VFX, reflection restrictions and sound formats remain in
 [ARCHITECTURE.md](ARCHITECTURE.md#rendering-ui-reflection-and-audio).
 
+The coherence map keeps temporary system conditions separate from hyperspace heat.
+`CoherenceHeatField` draws their rings with `Disc` and the shared coherence colour;
+`Aberration.temporaryAt` supplies the live value, including colony precedence and expiry.
+
 ### Minigame timing
 
 - The line sound uses one continuously refreshed UI loop with changing volume.

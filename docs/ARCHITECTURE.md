@@ -94,7 +94,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishLocationSummary.java` | Shared habitat prose for range-data and caught-fish hovers (`FishTooltips`) and Codex range panels. Always names the catch sources, including both breach lights and ruptures for blank or mixed `reachedBy`. |
 | `FishCatch.java` | One specimen: size, weight, aberration, region, source rupture, timestamp, method, and optional chart-request provenance. |
 | `FishLog.java` | Persistent per-species discovery and record data. |
-| `Aberration.java` | Computes and caches aberration from the strongest destabilizer minus the strongest colony field. |
+| `Aberration.java` | Caches ordinary aberration from the strongest destabilizer minus the strongest colony field, then applies temporary system rumors. `naturalAt` bypasses rumors for target selection. |
 | `FishRanges.java` | Authoritative current range test. |
 
 ### `campaign/fish/jobs`
@@ -148,11 +148,13 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
 | `FishermanQuest.java` | Saved chart offer and exact identified catch. Selects species/system/source together; repairs legacy lamp-only pond targets without changing specimen identity. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
 | `FishermanIdentity.java` | Stores the shared `PersonAPI` and selects one of five coherence portraits immediately before a hail. |
-| `FishRumors.java` | Monthly leads with six effects and four authored pairs: rarity/bycatch, size/calm, stranger/calm, bycatch/value. Saved `kindId` selects the effect set and complete dialogue/intel passage; old `type` saves retain their single effect. Graduation grants a separate immediate lead. |
+| `FishRumors.java` | Monthly leads with eight effects and four authored pairs: rarity/bycatch, size/calm, stranger/calm, bycatch/value. Saved `kindId` selects the effect set and complete dialogue/intel passage; old `type` saves retain their single effect. Graduation grants a separate immediate lead. |
 
 `FishingMinigameDialogPlugin` takes rumor effects from the catch anchor. Size bias joins the specimen roll; `FishingMinigame` snapshots movement, bycatch chance and bycatch rarity for that retrieval. Size and movement boosts exclude legendaries, and their fixed treasure rarity is unchanged. Tuning stays in `FishermanConstants`.
 
 Each `FishRumors.Kind` has one matching `CatchReleaseRumorText` row. Combined leads use their own passages, not appended single-effect text. Intel expands the same saved system/fish values with ordered highlights, including repeated fish names; the dialogue route and its no-lead fallback retain Continue to business.
+
+Rumors last 60 days from their saved `started` timestamp; new leads remain available every 30 days. `ACTIVE_KEY` stores overlapping leads in separate systems, migrating the old single `STATE_KEY` once. `getActive()` selects the newest lead for dialogue; effect getters search all live leads. `RumorIntel.shouldRemoveIntel()` uses the same expiry test and discards old 30-day ending timers without reviving ended entries. Vanilla `IntelManager.removeAllThatShouldBeRemoved()` calls it for queued and visible entries while unpaused; no additional timer script or sector scan is needed.
 
 ### `dialogue/rules`
 
@@ -371,6 +373,8 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - The Abyss uses uncapped `Misc.getAbyssalDepth()` divided by `ABERRATION_ABYSS_SPAN`. A span of one restores the old hard cliff.
 - `openSpaceReading` must include all indexed sources, not only Abyss and slipstreams, because the heat map samples bare hyperspace points.
 - Each inhabited market creates a five-light-year quadratic stabilizing field. Overlapping fields do not stack; the strongest stabilizer is subtracted from the strongest destabilizer. The colony's own system is exactly zero aberration.
+- Extreme-coherence rumors set one system to zero or one aberration without changing its cached ordinary reading or neighboring hyperspace. Targets must be outside the corresponding coherence band; instability excludes colonies, and a new colony overrides an ongoing event. Catch rolls, known route readings and habitat snapshots use the effective value; expiry restores the ordinary reading. Quest pins still take precedence over habitat changes.
+- `CoherenceHeatField` draws temporary system rings in the shared coherence colour over the ordinary hyperspace heat field. It reads live overrides so expired rings disappear without rebuilding the map.
 - Slipstreams are indexed as sampled ribbons through `SlipstreamTerrainPlugin2.getSegments()`. The old `SlipstreamTerrainPlugin` is inert in 0.98a. Foreign implementations fall back to their anchor.
 - Marks verify that their source still exists so short-lived sources do not remain active until the next daily rebuild.
 - In-system reach is `ABERRATION_LOCAL_BASE + ABERRATION_LOCAL_PER_LY × reachLY`. Do not add a second hand-maintained reach table.
@@ -389,7 +393,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - A chart request plants or replants its identified target only while the player is in the target system. Only the active specimen ID/species/system suppresses replanting; a stale quest flag does not. Open-space targets spawn away from their destinations, and chart intel routes to their saved in-system search coordinates.
 - `FishermanQuest.markCatch()` assigns both aberration 1.0 and chart provenance after checking specimen ID/species/system. This happens after normal catch rolls and equipment bonuses. Ordinary catches keep their own readings and cannot satisfy the identified request; loose/container cargo, progress and hand-in use the same requirement.
 - Chart offers select a valid species/system/implement together through `FishRanges.matches()`. Lamp-only species cannot use ponds; pond-only species require a free pond. Zero-weight, legendary and low-coherence-ineligible species are excluded. Occupied camp ruptures may inform species choice but are never quest destinations.
-- `FishermanQuest.hasActiveRumor()` excludes the system named by `FishRumors.getActive()` from chart generation, regardless of rumor kind. A saved, unaccepted offer there is withheld without replacement until that rumor expires or moves; accepted targets remain unchanged. Expired intel cards do not gate generation.
+- `FishermanQuest.hasActiveRumor()` excludes every system in `FishRumors.getActiveRumors()` from chart generation, regardless of rumor kind. A saved, unaccepted offer there is withheld without replacement until its rumor expires; accepted targets remain unchanged. Expired intel cards do not gate generation.
 - Harpoon aim assist and collision both call `HarpoonEntityPlugin.canTake()`. Buried motes use `catchrelease_buried_mote` and require full light, or mere detection with Fathom Head.
 
 ### Rendering, UI, reflection, and audio
