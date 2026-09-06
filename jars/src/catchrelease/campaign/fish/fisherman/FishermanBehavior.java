@@ -232,6 +232,15 @@ public class FishermanBehavior implements EveryFrameScript {
     }
 
     protected void keepMarker(boolean watched) {
+        if (CoreFisherSpawner.isStanding(fleet)) {
+            if (!markerReconciled || marker == null
+                    || marker.getContainingLocation() != fleet.getContainingLocation()) {
+                marker = FishermanMapIcon.findOrAdd(fleet);
+                markerReconciled = true;
+            }
+            return;
+        }
+
         if (!watched || fleet.isVisibleToPlayerFleet()) {
             dropMarker();
             return;
@@ -399,13 +408,24 @@ public class FishermanBehavior implements EveryFrameScript {
             return;
         }
 
-        FishermanMapIcon.removeFor(fleet);
+        if (marker.getCustomPlugin() instanceof FishermanMapIcon icon && icon.standing) {
+            icon.detach();
+        } else {
+            FishermanMapIcon.removeFor(fleet);
+        }
         marker = null;
         markerReconciled = false;
     }
 
     protected void dropShelf() {
         FishermanShelf.releaseFor(fleet);
+    }
+
+    public void unload() {
+        expireLamps(0f);
+        marker = null;
+        markerReconciled = false;
+        done = true;
     }
 
     protected void seedMote() {

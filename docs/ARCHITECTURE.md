@@ -141,7 +141,8 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | File | Owner / connection |
 |---|---|
 | `FishermanSpawner.java` | One temporary visitor sector-wide, one Fisherman per system; repairs duplicate pointers, excludes decoy, yields to tutorial posting; test path bypasses only the natural roll. |
-| `CoreFisherSpawner.java` | Maintains standing boats in eligible inhabited systems; reconciles weekly/on arrival and reuses the canonical local Fisherman. |
+| `CoreFisherSpawner.java` | Keeps permanent map postings in eligible inhabited systems; creates core markers on load and other inhabited-system markers on discovery. Spawns the local boat at its marker, unloads off-screen boats, and reconciles weekly/on arrival. Tutorial reservations and active battles delay unloading. |
+| `FishermanMapIcon.java` | Standing postings survive without a fleet and keep its last position. Temporary visitors and decoys retain fleet-owned markers. Local autopilot selections redirect to the attached boat once per second. |
 | `OuterReaches.java` | Chooses destinations and straight-line legs that avoid inhabited inner orbits. |
 | `FishermanBehavior.java` | Controls lamps, staged motes, pacing, visibility, visit duration, and departure. |
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
@@ -369,7 +370,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Hyperspace has no entity-local reading; its relevant sources are the Abyss depth field and slipstream terrain.
 - Gates are individual marks because active and dormant gates have different reach and strength. Use `GateEntityPlugin.isActive()` only for vanilla gates; foreign tags fall back to sector-wide gate state.
 - Foreign equivalents are identified by optional tags. Missing tags return empty results and create no dependency.
-- Hidden sources use one survey test in `Mark.isFound`. Stars and slipstreams are the only always-visible exceptions. Fisherman icons follow fleet visibility; motes use Breach Lights instead.
+- Hidden sources use one survey test in `Mark.isFound`. Stars and slipstreams are the only always-visible exceptions. Fisherman map postings follow the lifecycle below; motes use Breach Lights instead.
 
 ### Fish entities and catch provenance
 
@@ -400,7 +401,9 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - Standing boats plan one outer-reaches leg at a time and validate both the destination and the straight path. `PATROL_SYSTEM` is not suitable because it crosses inhabited inner orbits.
 - Fisherman visibility requires both a flat detected-range bonus and a per-frame sensor-fader override.
 - Visiting Fisherman time advances only while the player is elsewhere. Rendering and sound also stop when the player is outside the location.
-- The Fisherman map marker exists only in the player's current location, has no sensor profile, and is map-only. Reconciliation removes old duplicates and marks from departed systems.
+- Standing Fisherman markers are map-only and have no sensor profile. Eligible core-system postings are known from the start; other inhabited-system postings remain known after discovery. The fleet exists while the player is in-system, except for tutorial reservations or battles, and returns at the saved marker position. Shared identity, stock, restock timers and chart requests live outside the unloaded fleet.
+- Visiting/procgen and Imposter markers remain temporary: departure removes the marker, and the existing fleet departure/expiry rules still apply. Reconciliation preserves standing markers and removes duplicate markers.
+- Tutorial and chart-request return navigation can target a standing marker when its boat is unloaded; local marker autopilot redirects to the fleet after spawning.
 - The visitor shelf restocks from each sale date, not a global monthly tick. Chart-request completion is the only way to increase shelf width.
 - `FishingIntro.point()` is idempotent and can be reached from the wreck, stranded crewman, bar referral, Fisherman interception, or a direct hail. Recovered property takes origin precedence, then rescued crew, then recorded market.
 - `CatchReleaseRatingQuestions` offers trawler directions, a fishing question and a return to the bar. Both answers rebuild the menu; the return option is always available.
