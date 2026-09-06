@@ -14,6 +14,8 @@ For drafting, Editor review and shared text-presentation checks, start at [DIALO
 
 Current lore takes precedence over older mod prose. User-supplied lines remain verbatim unless the user requests a rewrite; if a supplied line conflicts with lore, point out the conflict rather than silently changing either. Documentation upkeep is defined in [CLAUDE.md](../CLAUDE.md#documentation-upkeep).
 
+The [deferred quest concept](NEEDLE_QUEST_CONCEPT.md) preserves brainstorming for the Fisherman / Scientist story, to revisit once the three fishing ships are finished. It does not amend this reference or authorize implementation.
+
 ## Fabric and coherence
 
 ### Fabric
