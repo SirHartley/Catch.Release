@@ -390,6 +390,7 @@ public class FishermanQuest {
         Object stored = Global.getSector().getPersistentData().get(OFFER_KEY);
 
         if (!(stored instanceof Saved quest)) return null;
+        if (hasActiveRumor(quest.systemId)) return null;
         repairSource(quest);
         return quest;
     }
@@ -450,10 +451,12 @@ public class FishermanQuest {
     }
 
     public static Saved getOrRollOffer() {
-        Saved offer = getOffer();
-        if (offer != null) return offer;
+        // Withhold a rumor-blocked offer without replacing the saved target.
+        if (Global.getSector().getPersistentData().get(OFFER_KEY) instanceof Saved) {
+            return getOffer();
+        }
 
-        offer = roll();
+        Saved offer = roll();
         if (offer != null) Global.getSector().getPersistentData().put(OFFER_KEY, offer);
 
         return offer;
@@ -529,11 +532,17 @@ public class FishermanQuest {
 
     protected static boolean isEligibleSystem(StarSystemAPI system, Vector2f from, float minLY) {
         if (system == null) return false;
+        if (hasActiveRumor(system.getId())) return false;
         if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) return false;
         if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) return false;
         if (system.getCenter() == null) return false;
 
         return Misc.getDistanceLY(from, system.getLocation()) >= minLY;
+    }
+
+    protected static boolean hasActiveRumor(String systemId) {
+        FishRumors.Saved rumor = FishRumors.getActive();
+        return rumor != null && systemId != null && systemId.equals(rumor.systemId);
     }
 
     protected static boolean isChartRequest(FishSpec spec, StarSystemAPI system) {
