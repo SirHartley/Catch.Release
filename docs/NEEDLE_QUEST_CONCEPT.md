@@ -1,4 +1,4 @@
-# Catch.Release: the player’s needle
+# Catch.Release: The Needle Theorem
 
 ## Concept reference — 6 September 2026
 
