@@ -189,6 +189,7 @@ Import these from `com.fs.starfarer.api.impl.campaign.rulecmd`. `RulesAPI` expos
 
 | Topic | Use for this game build | Source |
 |---|---|---|
+| CSV rows and multiline cells | Separate rows do not continue a rule. The loader skips empty ids and rejects duplicate ids within one CSV file. Multiple commands belong in one quoted Script cell with embedded newlines. | `Rules` CSV loading in `sources-obf/campaign.rules.java`, bundle lines 558–563; `LoadingUtils.super(List, String, boolean, boolean)` and `com.fs.starfarer.loading.G.o00000(String)` bytecode in the 0.98a-RC8 game jar |
 | Assignment and comparison in CSV | The loader rejects plain `=` in Conditions and `==` in Script. Condition-result rules apply only after the CSV has loaded; they do not make assignment conditions valid. | `sources-obf/campaign.rules.java`: `Rules` CSV loading at bundle lines 580–585 and 641–652; expression `isTrueFor` at bundle lines 897–903 |
 | No expiry / zero expiry | No duration is persistent; `0` expires on subsequent unpaused memory advancement. | `Memory.set/expire/advance` |
 | Local/player scopes | Local can be entity/person memory; player is character-data memory. Dialogue closure does not clear all persistent local keys. | `RuleBasedInteractionDialogPluginImpl.updateMemory/updatePersonMemory` |
@@ -201,7 +202,7 @@ Import these from `com.fs.starfarer.api.impl.campaign.rulecmd`. `RulesAPI` expos
 | Command existence | The corpus uses `AddOption`; do not assume `MakeOption`, `ShowDialogButton`, `hasPerson`, `hasMarket`, `setMemory` or `goto` exist without a supplied mod implementation. | Class inventory and package resolution; `$isPerson`/`$hasMarket` are facts |
 | `SetLater` units | Its comment says days, but its implementation accumulates raw `EveryFrameScript` amount without converting to days. Do not use it as a campaign-day expiry recipe. | `SetLater.java` |
 
-This is a comparison for commands, keys and presentation timing, not a claim to have revalidated every scoring or lifecycle statement in the external simulator guide.
+This table covers the listed discrepancies. Other claims in the external simulator guide still need source verification before relying on them.
 
 ## Check before shipping
 

@@ -17,7 +17,7 @@ For the preserved engine discussion, see [rules/engine_workflow.md](rules/engine
 ### CSV columns
 `id,trigger,conditions,script,text,options,notes`
 
-- **id** — unique rule id. Prefix with something mod-specific - `catchrelease_` here - to avoid collisions. Multiple rows with the same id form one logical rule: first row defines id/trigger/condition; subsequent rows (empty id column) append commands to the script.
+- **id** — unique rule id. Prefix with `catchrelease_` to avoid collisions with other mods. The loader skips rows with an empty id and rejects duplicate ids within the same CSV file. Separate rows do not continue the previous rule.
 - **trigger** — a bucket that groups rules, not "fires when." The engine fetches all rules for a trigger and filters via conditions. Common triggers:
   - Dialog flow: `DialogStart`, `OpenInteractionDialog`, `PopulateOptions`, `DialogOptionSelected`
   - Fleet encounters: `BeginFleetEncounter`, `FleetEncounterResolved`, `OpenCommLink`
@@ -25,7 +25,7 @@ For the preserved engine discussion, see [rules/engine_workflow.md](rules/engine
   - Salvage/raids: `BeginSalvage`, custom triggers like `BeatDefendersContinue`
   - Custom mod-defined triggers via `FireAll CatchReleaseFisherResume` from code/script.
 - **conditions** — newline-separated predicate expressions. ALL must pass for the rule to match. Empty = always matches. See Operators section below. Append `score:N` to a condition line for priority in `getBestMatching`.
-- **script** — newline-separated command invocations executed sequentially when the rule fires. Token before first space is a `CommandPlugin` name (resolved across all mods + `api/impl/campaign/rulecmd/*`). Quoted arguments preserve spaces; `""` escapes quotes inside CSV. Bare assignment lines (`$var = value`) are valid and common (~33% of real script lines).
+- **script** — newline-separated command invocations in one cell, executed sequentially when the rule fires. Quote the whole CSV cell when it contains multiple lines. Token before first space is a `CommandPlugin` name (resolved across all mods + `api/impl/campaign/rulecmd/*`). Quoted arguments preserve spaces; `""` escapes quotes inside CSV. Bare assignment lines (`$var = value`) are valid and common (~33% of real script lines).
 - **text** — shortcut for dialog display text shown when the rule fires. Supports `$var` substitution at display time. For multiple paragraphs or highlights, prefer `script` with `AddText`/`Highlight`.
 - **options** — newline-separated option definitions: `order:id:text` or `id:text`. Lower order = displayed higher. Selecting an option fires `DialogOptionSelected` with `$option == optionId`. FireBest/FireAll collect and add options before ordinary Script execution; prepare option text beforehand. See [display ordering](RULES_AUTHORING.md#create-a-custom-text-token).
 - **notes** — free-form comments; ignored by engine.

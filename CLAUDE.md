@@ -75,7 +75,7 @@ Update documents automatically as part of each relevant change, not by a backgro
 | Document | Owns | Update when / how |
 |---|---|---|
 | `AGENTS.md` | Codex discovery | Keep it a short pointer to this file. Do not copy workflow policy into it. |
-| `CLAUDE.md` | Task scope, tools, commits, PRs, builds, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
+| `CLAUDE.md` | Task scope, subagent instructions, tools, commits, PRs, builds, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
 | `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No lore, writing advice, release history, or duplicate policy. |
 | `docs/UI.md` | Java-bound custom UI: panels, widgets, renderers, sprites, tooltips, lifetime, layout and input | Update implementation contracts and source evidence. Link to `DIALOGUE.md` for shared text guidelines; do not put rules-dialogue guidance here. |
 | `docs/DIALOGUE.md` | All player-facing text, including rules and Java: Editor procedure, prose review, shared text presentation and dialogue usability | Keep shared guidelines content-agnostic and label subject-specific additions. Link to lore, Java UI implementation and technical rules instead of copying their explanations. |
@@ -157,6 +157,49 @@ If any check fails, keep local PC checkouts read-only and use the GitHub-app-onl
 - Keep the user's selected model. In Codex/Astra sessions, the main agent owns planning, integration, and shipped code. Delegate bounded research only when the user or applicable instructions authorize it and the app supports it. Do not copy Claude-specific model names into Codex calls.
 - Treat repository instructions as project requirements and skill guidance as scoped reference material. Follow explicit user changes within the app's safety and permission limits. If a skill blocks work or changes its scope, identify the exact instruction and explain the effect.
 - Give brief progress updates and concise final results. Put detailed evidence in the pull request; avoid repeating the whole implementation narrative in chat.
+
+### Subagent dispatch template
+
+Use this template for authorized subagent work, including programming support, crawling, audits, questions and research. It applies across models. The main agent fills in the brief and sets the selected model and reasoning effort in the dispatch call. Include relevant user clarifications explicitly; do not assume the subagent received the conversation. Keep the permitted work within the ownership and model assignments above and below.
+
+```text
+Task: <specific question or result, and what counts as complete>
+Checkout: <absolute path and revision; note relevant uncommitted changes>
+Context: <user clarifications, constraints and work already completed>
+Access: <allowed sources; permitted writes and paths, if any>
+Starting points: <relevant guides, files or symbols, if known>
+Return: <desired detail, format and output path, if needed>
+
+1. Read AGENTS.md and CLAUDE.md, then follow the required-reading routes for
+   this task. Starting points are navigation help, not the full reading list.
+   Follow required skills and linked prerequisites. Read full documents where
+   required; otherwise read the relevant sections and their context.
+2. Use searches to locate material. Open the surrounding section before using
+   a match as evidence. Read definitions, scope notes, exceptions and warnings;
+   do not answer from filenames, headings or search snippets alone.
+3. Preserve what each passage applies to: game version, vanilla or mod code,
+   current implementation, example, deprecated code or external tool. An account
+   of an old mistake is not a current instruction to repeat it. Keep qualifiers
+   such as "normally", "only", "never" and "not" when summarizing.
+4. Use lookup tables to find relevant entries and follow their source links.
+   An entry's presence does not prove it is usable in every context. Do not read
+   or count an entire lookup table unless the task requires that coverage.
+5. For implementation work or behavioral claims, follow the documentation to
+   the relevant code, callers, registration and data within the allowed sources.
+   Check the actual version and applicable source corrections. Do not invent
+   APIs, names or behavior to fill gaps. If access is documentation-only, say
+   what the guide describes and leave implementation verification to the parent.
+6. Distinguish documented facts, source-verified behavior and your inferences.
+   Before claiming a contradiction, cite what both passages actually say and
+   check whether they concern the same version and situation. If evidence is
+   missing or still conflicts, identify the uncertainty instead of guessing.
+7. Return the requested result with file/line references or source URLs for
+   material claims, plus checks performed and remaining questions. For searches
+   or crawls, state the scope searched; "not found there" does not prove absence
+   everywhere. Do not invent findings or expand the task to fill the report.
+```
+
+The main agent checks the cited evidence before using a conclusion to change code or documentation. A subagent's report does not replace the parent's integration review or the required validation.
 
 ## Claude model assignments
 
