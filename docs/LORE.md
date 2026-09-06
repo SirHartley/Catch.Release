@@ -18,15 +18,21 @@ Current lore takes precedence over older mod prose. User-supplied lines remain v
 
 ### Fabric
 
-Reality has a fabric. Everything in realspace exists as part of it. Hyperspace is on the other side.
+**The fabric is reality itself.** It is not a barrier between reality and hyperspace. Everything in realspace is part of the fabric; a tear exposes the hyperspace beyond it.
 
-“Thick,” “thin,” “worn,” “strained,” “holding,” “going” and “torn” describe the fabric. “Through,” “under” and “beyond” can describe its relationship to hyperspace. These are useful terms, not an established literal geometry. There is no canonical human direction for that relationship.
+To picture this, imagine reality painted on a sheet of cloth. The people and objects in the painting are two-dimensional. The space beyond the cloth is three-dimensional, so the painted people cannot understand its full shape.
 
-A [breach](#breaches-ruptures-and-ponds) is not literally a hole in a physical sheet. Do not turn the cloth metaphor into an explanation of the universe's construction.
+This metaphor lowers everything by one dimension to make it easier to imagine: the two-dimensional painting stands for three-dimensional realspace, and the three-dimensional space beyond it stands for four-dimensional hyperspace. The cloth, painting and directions such as “behind” are teaching aids, not literal materials or compass directions in the setting.
+
+The beyond is not a consciousness. It has no malice or human purpose; it simply is. Calling the Fisherman or Crablobab an expression of it does not introduce a thinking god or patron directing them.
+
+“Thick,” “thin,” “worn,” “strained,” “holding,” “going” and “torn” describe the fabric. “Through,” “under” and “beyond” can describe its relationship to hyperspace. These terms carry the cloth metaphor without making reality a physical textile.
 
 ### Fabric, not water
 
 There is no hyperspace ocean. The fabric is not water. Hyperspace is not wet, submerged or underwater, and nothing is literally swimming beneath an ocean surface. Fishing language is occupational slang applied to something that is not a sea.
+
+The game shows unstable fabric as water-like ripples. That visual marks a weak patch of reality; it does not make the fabric water.
 
 - Lay speakers may occasionally say “the water.” A dockhand, cook, buyer, independent fisher or [rating](#entry) is using the vocabulary of the trade, not describing its physics. Use this rarely.
 - Never use “the water” as technical terminology for hyperspace.
@@ -38,7 +44,9 @@ There is no hyperspace ocean. The fabric is not water. Hyperspace is not wet, su
 
 **Coherence is how reliably reality holds a place and its contents in a consistent form.** It also describes how reliably something retrieved through the fabric retains its form.
 
-Higher coherence means reality holds more reliably. At low coherence, reality is less obliged to preserve a previous state. The changes and their consequences are defined below; “low coherence” is not a vague synonym for strangeness.
+Higher coherence means reality holds more reliably. Low coherence is like frayed, thin cloth: easily warped, easily torn, and never quite the same after being stitched together.
+
+When the fabric tears, information about its previous shape is altered. Reality mends itself, but it cannot reconstruct exactly what was there before. That imperfect repair causes the changes described below. “Low coherence” is not a vague synonym for strangeness.
 
 Coherence is a condition. It is not morality, corruption, taint or evil energy. Use “coherence,” never “cohesion,” for this setting term.
 
@@ -73,15 +81,23 @@ Changes to retrieved fish are covered under [patterns](#patterns), which defines
 
 ## Breaches, ruptures and ponds
 
-A breach or rupture is fabric thin enough to expose hyperspace. Both terms are valid.
+**Unstable fabric is a weak patch that has not yet been opened. A breach or rupture is an opening in that fabric, exposing hyperspace.** “Breach” and “rupture” mean the same thing.
 
-It is a fault, not a jump point, gate, stable portal or navigable tunnel. Normal living crews cannot safely cross it.
+At a natural patch, the sequence is:
+
+1. The player finds the water-like ripples that mark unstable fabric.
+2. The first stage of the ROD opens that patch into a rupture.
+3. Retrieval equipment pulls patterns through the opened breach.
+
+Fish cannot be pulled from unopened unstable fabric. The opening must come first. [Breach Lights](#what-breach-lights-do) can also create an opening where there was no unstable patch.
+
+A breach is a fault, not a jump point, gate, stable portal or navigable tunnel. Normal living crews cannot safely cross it.
 
 ### Trade terminology
 
 “Pond” is fishing slang, suitable in trade speech or deliberately informal fishing UI. Technical descriptions, surveys and neutral narration should normally use “rupture” or “breach.” An occasional occupational term does not make the fabric literal water; the [no-water restrictions](#fabric-not-water) remain absolute.
 
-A location without an existing rupture is “open space.”
+In fishing dialogue, “open space” means a location away from a natural patch of unstable fabric. Breach Lights make fishing possible there by opening a breach.
 
 ## Patterns
 
@@ -198,11 +214,11 @@ A person can detect a bad measurement, record contradictory readings, be frighte
 
 Do not create a second Fisherman by making a researcher exceptionally clever, a fisher unusually experienced or a Pather unusually angry.
 
-### The Fisherman's awareness: partly outside reality
+### The Fisherman's awareness
 
-**The Fisherman is the only character who perceives the contradictions as contradictions. He is no longer human and is partly outside the mechanism that makes reality self-consistent for everyone else.**
+**The Fisherman is the only character who perceives the contradictions as contradictions. He is entirely beyond human, an instrument of the beyond interacting with reality.** His human appearance does not put him halfway between the two.
 
-He is not simply an ordinary person who notices more. His changed relationship to reality is the reason he can see what the others cannot. “Outside” here describes that relationship, not a location a ship can reach by travelling into hyperspace.
+His nature is the reason he can see what ordinary observers cannot. Travelling into hyperspace in a ship does not give a human that nature or awareness. The [needle metaphor](#origin-and-nature) explains his relationship to reality.
 
 He knows:
 
@@ -228,7 +244,7 @@ Neutral narration can report the actions and records that make the contradiction
 
 ### Crablobab's knowledge is undefined
 
-Crablobab's degree of conscious understanding remains undefined. Do not fill that gap by giving him the Fisherman's knowledge or declaring him outside reality.
+Crablobab is also a manifestation of the beyond, and he was never human. His degree of conscious understanding remains undefined. His origin does not establish that he shares the Fisherman's knowledge; do not give him explanations of the fabric or its self-correction.
 
 He can conduct a transaction amid physical inconsistency without explaining it. His complete [character instructions](#crablobab) distinguish his cheerful, expansive performance from the Fisherman's deliberate restraint.
 
@@ -450,15 +466,19 @@ Eating a badly coherent specimen can transfer some instability to the consumer. 
 
 ## ROD, LYNE and Harpoon
 
-The ROD allows equipment to pass through a breach into hyperspace and return.
+ROD technology can hold its shape in hyperspace, grasp the shapes or concepts there, and bring them back into realspace.
+
+In the [dimensional metaphor](#fabric), it is two-dimensional equipment that can act a little like a three-dimensional object. It can hold onto a three-dimensional shape and pull it into the two-dimensional world. Finding the way back is part of the achievement: a sensor made for a flat world would normally struggle to navigate the space beyond it.
+
+Entering hyperspace alone is ordinary hyperdrive work. What makes the ROD special is its ability to hold onto something there and retrieve it.
 
 The D stands for Device; R and O remain unresolved. People still say “ROD device.”
 
 ### Operating limits
 
-- It needs a rupture or suitably weakened fabric. Away from that context, it is hardware.
+- Its first stage opens an existing patch of unstable fabric. Retrieval then needs an opened breach, whether made this way or by Breach Lights. Away from either setting, it is hardware.
 - A ROD-equipped harpoon striking a ship does not automatically open the hull into hyperspace.
-- ROD equipment is not safe human transport or an alternative jump drive. Living material exposed to the process does not return in a usable condition. The Fisherman knows more than he explains.
+- ROD retrieval is not safe human transport or an alternative jump drive. Living material exposed to that retrieval process does not return in a usable condition. This restriction does not apply to ordinary ship travel through hyperspace. The Fisherman knows more than he explains.
 
 ### LYNE and LINE
 
@@ -506,9 +526,9 @@ Church and Path objections are religious; other patrols can regulate dangerous o
 
 #### What Breach Lights do
 
-Breach Lights weaken the fabric where directed rather than meaningfully illuminating a target. This permits ROD interaction without an existing natural rupture.
+Breach Lights tear open a local breach even where the fabric was not already unstable. They are named for the opening they create. Their useful effect is opening reality to retrieval, not illuminating a target.
 
-Near inhabited traffic, the effect can alter whole crews regardless of the operator's intent.
+Making that opening requires extreme warping of reality. It causes low-coherence effects around the breach regardless of where the lights are pointed. Aiming away from people does not confine those effects to a harmless direction. Near inhabited traffic, whole crews can be altered; this is why the equipment is such a problem around people.
 
 #### What patrols know
 
@@ -536,9 +556,13 @@ Nobody in the trade has scrutinized how those charts can be correct.
 
 The Fisherman was a human mercenary captain. After the Gate Collapse, he and a scientist developed the technology that became the ROD while exploring ways to restore lost movement.
 
-**The Fisherman is no longer human. He is a conscious expression of the rupture's wrongness, produced by prolonged exposure to ruptures and low coherence.** This is a categorical change in what the original captain is, not merely a damaged or unusually mutated human body.
+**The Fisherman is entirely beyond human.** He fell through a rupture and was made anew when the fabric mended, but it mended him in the wrong direction. In the [dimensional metaphor](#fabric), a two-dimensional person became three-dimensional. He became a manifestation and instrument of the beyond, not a human made stranger by prolonged exposure.
 
-His memories, habits, competence, personality and occupation remain. He is partly outside reality's self-correction; that is why he can perceive contradictions. The full [inside/outside boundary](#the-fishermans-awareness-partly-outside-reality) is a prerequisite for writing him.
+Picture a needle pushed through the cloth from behind. The painting only contains the needle's cross-section. Viewed directly above the cloth, that cross-section looks like a dot; its appearance conceals the shape extending beyond the painted world. The Fisherman interacts with reality in this way.
+
+His needle is painted in the right human colours inside. His memories, habits, competence, personality and occupation remain because he was once human. That is why he retains more humanity than Crablobab. It does not make his nature partly human: the shape is still wrong for the painted world, and his behaviour gives it away.
+
+The full [inside/outside knowledge boundary](#the-fishermans-awareness) is a prerequisite for writing him. These explanations are for the writer; do not put the dimensional metaphor into dialogue or narration as a revelation of what he is.
 
 Do not explain him as:
 
@@ -549,7 +573,7 @@ Do not explain him as:
 - an alien;
 - an avatar of a named god.
 
-There is no separate entity to invent behind him. The changed captain himself is the conscious anomaly; do not turn the description into possession, an external patron or a named supernatural being.
+The beyond is present in what he has become, but it is not a separate consciousness possessing him or giving him orders. Do not invent an external patron, a named supernatural being or a malicious plan behind his work.
 
 ### What he knows and why he stops
 
@@ -709,11 +733,15 @@ The player can ask about this. He knows how far to answer; he is not pretending 
 
 ### Nature
 
-Crablobab is a low-coherence being associated with the Fisherman's fleet. He retains a man's general shape and social habits and enjoys running his stall. His coat, stock and movements exhibit the changes permitted by [low coherence](#changes-in-people-and-objects).
+**Crablobab was never human.** He is the beyond's attempt to play human: a facsimile of human behaviour, driven to act without having been a person first. He is associated with the Fisherman's fleet and takes a man's general shape, social habits and pleasure in running a stall.
+
+Like the Fisherman, he is a three-dimensional object interacting with the two-dimensional painting in the [needle metaphor](#origin-and-nature). Unlike the Fisherman, he has no former humanity to preserve. His human act works until a movement demands something impossible by the painting's rules. The needle pulls the threads to accommodate the thing he is trying to do.
+
+That is why his coat, stock, hands and surroundings can take the shape a transaction needs. His apparent humanity fails at the fringes of the performance; he is not a former merchant gradually mutated by low coherence. What he understands about his own nature remains [undefined](#crablobabs-knowledge-is-undefined).
 
 ### Voice and behavior
 
-He is cheerful, colourful, expansive and physically comic. Low coherence has made his merchant-clown character physically true: space, stock, hands, pockets and continuity take the shape a transaction needs.
+He is cheerful, colourful, expansive and physically comic. Show his merchant-clown performance through what he says and does, including the impossible movements described above. Do not narrate the needle or explain how he pulls at reality.
 
 He neither worries about this nor needs a theory of it. Do not interpret his ease with the changes as proof that he shares the Fisherman's awareness.
 
@@ -828,7 +856,7 @@ Recovered Fisherman property is heavy, crane-handled LYNE hardware or a transpon
 
 ### First meeting
 
-Show the ROD/LINE installation's scale, give the equipment and send the player to a nearby natural rupture. Explain only what is needed to operate it.
+Show the ROD/LINE installation's scale, give the equipment and send the player to a nearby patch of unstable fabric. Teach them to open it into a rupture before retrieving a catch. Explain only what is needed to operate the equipment.
 
 ### First return
 
@@ -1113,7 +1141,7 @@ His degree of conscious understanding is undefined. This does not authorize Fish
 
 ### The Fisherman
 
-The sole exception to ordinary observers' knowledge limits. He perceives contradictions because he is partly outside reality, and limits explanations because definition can be dangerous. Follow [his nature and restraint](#the-fisherman), not a generic mysterious-mentor voice.
+The sole exception to ordinary observers' knowledge limits. His nature is entirely beyond human, and he limits explanations because definition can be dangerous. Follow [his nature and restraint](#the-fisherman), not a generic mysterious-mentor voice.
 
 ## Terminology
 
@@ -1123,14 +1151,15 @@ are Harpoon Tips, Drone Cores and Lens Arrays; use “rig module” when discuss
 
 | Thing | Careful / technical | Slang / ordinary speech | Do not use for this meaning |
 |---|---|---|---|
-| Reality's substrate | fabric | water, very rarely and only from lay speakers | veil, aether |
-| Worn-through fabric | breach, rupture | pond, spot | portal, jump point, gate |
+| Reality itself | fabric | water, very rarely and only from lay speakers | veil, aether |
+| Weak patch before opening | unstable fabric, patch of unstable fabric | patch, spot | breach, rupture |
+| Opened fabric | breach, rupture | pond, spot | portal, jump point, gate |
 | Hyperspace ghost | pattern | fish | creature, animal |
 | Retrieval craft | LYNE drones | drones, line | robots, little probes |
 | Retrieval connection | — | line, rope | cable, winch line |
-| Fabric-weakeners | breach lights | lights, lamps, searchlights | floodlights |
+| Devices that open a breach | breach lights | lights, lamps, searchlights | floodlights |
 | Local reality condition | coherence | thin, worn, holding, going | corruption, taint |
-| No natural breach | open space | — | open water |
+| Away from a natural unstable patch | open space | — | open water |
 | Pattern distribution | range | where they turn up | waters, biome |
 
 "Species" may still be used as a **game-data/table classification** because the player needs a usable category. Do not make the fiction claim that patterns belong to conventional biological species in a scientific sense.
