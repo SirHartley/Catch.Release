@@ -19,11 +19,12 @@ public class FishLocationSummary {
         String where = describeRegions(spec.regions);
         clauses.add(where);
 
-        // each omitted entirely when unconstrained, rather than saying "under any star"
+        // Omit unconstrained habitat filters.
         addIfAny(clauses, describeStars(spec.starColours));
         addIfAny(clauses, describeAges(spec.constellationAges));
         addIfAny(clauses, describeCoherence(spec.minAberration, spec.maxAberration));
         addIfAny(clauses, describeTags(spec.systemTags));
+
         addIfAny(clauses, describeReach(spec.reachedBy));
 
         return join(clauses, ", ") + ".";
@@ -128,7 +129,10 @@ public class FishLocationSummary {
     }
 
     protected static String describeReach(Set<CatchImplement> reachedBy) {
-        if (reachedBy == null || reachedBy.isEmpty() || reachedBy.size() > 1) return null;
+        if (reachedBy == null || reachedBy.isEmpty()
+                || (reachedBy.contains(CatchImplement.POND) && reachedBy.contains(CatchImplement.BREACH_LAMP))) {
+            return "and accessible under breach lights or from a rupture";
+        }
 
         CatchImplement only = reachedBy.iterator().next();
 

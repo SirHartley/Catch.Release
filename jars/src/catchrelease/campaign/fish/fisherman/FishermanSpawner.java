@@ -6,7 +6,6 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
-import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
@@ -291,11 +290,9 @@ public class FishermanSpawner implements EveryFrameScript {
         system.addEntity(fleet);
         fleet.setLocation(at.x, at.y);
 
-        // the wander is vanilla's patrol; the two weeks and the leaving belong to the behaviour
-        fleet.addAssignment(FleetAssignment.PATROL_SYSTEM, system.getCenter(),
-                FishermanConstants.STAY_DAYS + 2f, "fishing the deep");
-
-        fleet.addScript(new FishermanBehavior(fleet));
+        FishermanBehavior behavior = new FishermanBehavior(fleet);
+        behavior.keepWorking();
+        fleet.addScript(behavior);
 
         Global.getSector().getMemoryWithoutUpdate().set(FishermanConstants.ACTIVE_KEY, fleet);
 

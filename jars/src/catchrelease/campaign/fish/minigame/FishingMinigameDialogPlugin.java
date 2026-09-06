@@ -8,6 +8,8 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
@@ -20,6 +22,7 @@ import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
@@ -273,18 +276,18 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         this.dialog = dialog;
         // tackle sizes the window and rolls treasure; read once before anything is rolled
         Tackle tackle = TackleManager.get(method);
-        this.minigame = new FishingMinigame(fish, tackle);
+        LocationAPI location = anchor == null ? null : anchor.getContainingLocation();
+        this.minigame = new FishingMinigame(fish, tackle, location);
         this.minigame.setPresentedColor(catchrelease.campaign.fish.legendary
                 .LegendaryShields.getPresentedColor(fish, catchTarget));
 
-        boolean stranger = fish != null && anchor != null && fish.id.equals(
-                catchrelease.campaign.fish.fisherman.FishRumors.getStrangerId(
-                        anchor.getContainingLocation()));
+        boolean stranger = fish != null && fish.id.equals(FishRumors.getStrangerId(location));
 
         float quality = stranger
                 ? Math.max(tackle.qualityBias,
                         catchrelease.campaign.fish.fisherman.FishermanConstants.STRANGER_QUALITY_FLOOR)
                 : tackle.qualityBias;
+        if (fish.rarity != FishRarity.LEGENDARY) quality += FishRumors.getQualityBias(location);
         float aberration = stranger
                 ? Math.min(Aberration.of(anchor),
                         catchrelease.campaign.fish.fisherman.FishermanConstants.STRANGER_MAX_ABERRATION)
@@ -293,10 +296,6 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         // tackle that holds a specimen to its shape on the way up, applied to whatever the water and the stranger cap between them decided
         if (tackle.coherenceBonus > 0f) {
             aberration = Math.max(0f, aberration - tackle.coherenceBonus);
-        }
-
-        if (catchrelease.campaign.fish.fisherman.FishermanQuest.isQuestFish(catchTarget)) {
-            aberration = 1f;
         }
 
         this.specimen = FishCatch.roll(fish, aberration, quality,

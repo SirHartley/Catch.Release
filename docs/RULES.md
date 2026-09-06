@@ -188,6 +188,7 @@ Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Shared text-presen
 | `$catchrelease_fleetQuestThanksPending` | Separate gate for completed-job thanks; consumed with its saved text. |
 | `CatchReleaseFisherOptions` | Private Fisherman business menu; enter with `$menuState == catchreleaseFisher`. |
 | `CatchReleaseFisherResume` | Rebuild after picker/panel cancellation. |
+| `CatchReleaseRumorText` | Private Fisherman lead display. `CatchReleaseCMD tokens` prepares `$catchreleaseRumorKind` from the saved rumor before selecting one complete Text row, including combined effects or `none`. Rendering never rolls a new lead; the caller supplies Continue. |
 | `CatchReleaseFleetResolutionOptions` | Peaceful fleet result menu with Escape-bound Leave. |
 
 - Namespace IDs and options. Bar option IDs must begin with their mission ID; mission IDs must not prefix one another. `BarCMD` aborts a wrapper whose option prefix differs.
@@ -210,7 +211,7 @@ Check displayed highlight occurrences using [DIALOGUE.md](DIALOGUE.md#shared-tex
 
 Bar-event wrappers close with `returnFromEvent`, not `close`. Check confirm, cancel and Escape paths after a custom panel.
 
-`AddBarEvent <id> "<option>" "<blurb>" [<colour>]` accepts an optional fourth argument via Token.getColor. `highlight` resolves to the buttonShortcut colour; faction IDs resolve to faction colour. The rating event uses this argument.
+`AddBarEvent <id> "<option>" "<blurb>" [<colour>]` accepts an optional fourth argument via Token.getColor. `highlight` resolves to the buttonShortcut colour; faction IDs resolve to faction colour. The tutorial spacer's bar event uses this argument.
 
 ## Editing and validation
 

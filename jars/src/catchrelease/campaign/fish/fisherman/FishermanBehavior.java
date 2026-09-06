@@ -7,6 +7,8 @@ import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
+import catchrelease.campaign.fish.tutorial.FishermanInterception;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.cache.TimedValue;
 import catchrelease.helper.math.CircularArc;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -17,6 +19,7 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
+import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
@@ -46,6 +49,7 @@ public class FishermanBehavior implements EveryFrameScript {
 
     protected transient boolean litSoundPlayed = false;
     protected transient TimedValue<String> named;
+    protected transient float routeCheckLeft;
 
     protected static class Lamp {
 
@@ -166,7 +170,11 @@ public class FishermanBehavior implements EveryFrameScript {
             daysOut += Global.getSector().getClock().convertToDays(amount);
         }
 
-        keepWorking();
+        routeCheckLeft -= amount;
+        if (routeCheckLeft <= 0f) {
+            routeCheckLeft = OuterReaches.RECHECK_SECONDS;
+            keepWorking();
+        }
 
         if (windingDown) {
             advanceWindDown(amount);
@@ -244,6 +252,15 @@ public class FishermanBehavior implements EveryFrameScript {
     }
 
     protected void keepMarker(boolean watched) {
+        if (CoreFisherSpawner.isStanding(fleet)) {
+            if (!markerReconciled || marker == null
+                    || marker.getContainingLocation() != fleet.getContainingLocation()) {
+                marker = FishermanMapIcon.findOrAdd(fleet);
+                markerReconciled = true;
+            }
+            return;
+        }
+
         if (!watched || fleet.isVisibleToPlayerFleet()) {
             dropMarker();
             return;
@@ -345,12 +362,56 @@ public class FishermanBehavior implements EveryFrameScript {
     }
 
     protected void keepWorking() {
-        if (fleet.getCurrentAssignment() != null) return;
-        if (!(fleet.getContainingLocation() instanceof StarSystemAPI)) return;
+        if (fleet.getBattle() != null) return;
+        if (!(fleet.getContainingLocation() instanceof StarSystemAPI system)) return;
 
-        fleet.addAssignment(FleetAssignment.PATROL_SYSTEM,
-                ((StarSystemAPI) fleet.getContainingLocation()).getCenter(),
-                FishermanConstants.STAY_DAYS, "fishing the deep");
+        if (fleet.getAI() instanceof ModularFleetAIAPI ai) {
+            for (SectorEntityToken market : OuterReaches.getPopulated(system)) {
+                float clearance = OuterReaches.AVOID_RADIUS + market.getRadius() + fleet.getRadius();
+                ai.getNavModule().avoidEntity(market, clearance,
+                        clearance + OuterReaches.ROUTE_PAD, 1f);
+            }
+        }
+
+        FleetAssignmentDataAPI assignment = fleet.getCurrentAssignment();
+        if ((assignment == null || assignment.getAssignment() != FleetAssignment.INTERCEPT)
+                && FishermanInterception.hasIntercepted(fleet)
+                && fleet.getMemoryWithoutUpdate().getBoolean(MemFlags.MEMORY_KEY_PURSUE_PLAYER)) {
+            FishermanInterception.cancelApproach(fleet);
+        }
+        SectorEntityToken target = assignment == null ? null : assignment.getTarget();
+        if (target != null && !target.isExpired() && target.getContainingLocation() == system
+                && OuterReaches.canTravel(system, fleet.getLocation(), fleet.getMoveDestination())) {
+            if (assignment.getAssignment() == FleetAssignment.INTERCEPT
+                    && !FishingIntro.isAtLeast(FishingIntro.RODDED)
+                    && target == Global.getSector().getPlayerFleet()
+                    && OuterReaches.isLegClear(system, fleet.getLocation(), target.getLocation())) return;
+            if (assignment.getAssignment() == FleetAssignment.GO_TO_LOCATION
+                    && OuterReaches.canTravel(system, fleet.getLocation(), target.getLocation())) return;
+        }
+
+        if ((assignment != null && assignment.getAssignment() == FleetAssignment.INTERCEPT)
+                || FishermanInterception.isClosing(fleet)) {
+            FishermanInterception.cancelApproach(fleet);
+        }
+        fleet.clearAssignments();
+        Vector2f at = OuterReaches.pick(system, new Vector2f(fleet.getLocation()));
+        if (fleet.getAI() instanceof ModularFleetAIAPI ai) {
+            ai.getTacticalModule().setTarget(null);
+            ai.getTacticalModule().setTravelDestination(at == null ? fleet.getLocation() : at, 0.5f);
+        }
+        if (at == null) {
+            fleet.addAssignment(FleetAssignment.HOLD, fleet, 0.1f, getWorkDescription());
+            return;
+        }
+
+        SectorEntityToken waypoint = system.createToken(at.x, at.y);
+        fleet.addAssignment(FleetAssignment.GO_TO_LOCATION, waypoint,
+                OuterReaches.LEG_DAYS, getWorkDescription());
+    }
+
+    protected String getWorkDescription() {
+        return "fishing the deep";
     }
 
     protected void advanceWindDown(float amount) {
@@ -411,13 +472,24 @@ public class FishermanBehavior implements EveryFrameScript {
             return;
         }
 
-        FishermanMapIcon.removeFor(fleet);
+        if (marker.getCustomPlugin() instanceof FishermanMapIcon icon && icon.standing) {
+            icon.detach();
+        } else {
+            FishermanMapIcon.removeFor(fleet);
+        }
         marker = null;
         markerReconciled = false;
     }
 
     protected void dropShelf() {
         FishermanShelf.releaseFor(fleet);
+    }
+
+    public void unload() {
+        expireLamps(0f);
+        marker = null;
+        markerReconciled = false;
+        done = true;
     }
 
     protected void seedMote() {

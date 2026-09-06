@@ -2214,7 +2214,7 @@ The commander closes the maneuver record.
 
 ""Standing orders don't permit me to fire on an unclassified contact. I am also not taking this logistics train toward inhabited space with it in trail.""
 
-""One of my ratings used to fish. He says fishing crews deal with persistent contacts by releasing a specimen they're known to follow. I do not enjoy having that sentence in the incident log, but it is the only course with precedent.""
+""One of my crewmen used to fish. He says fishing crews deal with persistent contacts by releasing a specimen they're known to follow. I do not enjoy having that sentence in the incident log, but it is the only course with precedent.""
 
 ""On his recommendation, we need $entity.catchrelease_fleetQuestAsk. Navy service voucher is $entity.catchrelease_fleetQuestReward. We can hold here for $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_follower_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrelease_fleetQuestType == follower,,"""Accepted. I'll transmit the request and service voucher authorization.""
@@ -2233,7 +2233,7 @@ catchrelease_fq_follower_decline,CatchReleaseFleetQuestDeclineText,$entity.catch
 catchrelease_fq_follower_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == follower,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""The contact remains at station. It has a permanent line on the watch log now.""
 
 ""We have $entity.catchreleaseFleetDays. We still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_follower_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == follower,,"The rating comes up from the working deck to handle the release. He checks the specimen against the request, then has the container moved clear of the formation.
+catchrelease_fq_follower_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == follower,,"The crewman comes up from the working deck to handle the release. He checks the specimen against the request, then has the container moved clear of the formation.
 
 On the sensor plot, $entity.catchreleaseFleetContactDesignation breaks station and takes the release bearing. The return weakens until it drops below tracking threshold.
 
@@ -2251,7 +2251,7 @@ catchrelease_fq_follower_thanks,CatchReleaseFleetQuestThanksText,$entity.catchre
 
 The commander looks across the compartment.
 
-""Good call, rating.""
+""Good call, crewman.""
 
 They turn back to the convoy plot.
 
@@ -3295,47 +3295,142 @@ $catchreleaseRumor","CatchReleaseCMD rumor
 CatchReleaseCMD tokens
 FireBest CatchReleaseRumorText",,100:catchrelease_fisherBack:Continue,
 catchrelease_rumorRarity,CatchReleaseRumorText,"CatchReleaseCMD tokens
-$catchreleaseRumorRarity score:10",CatchReleaseCMD showRumorIntel,"The Fisherman pulls a grease-marked chart from beneath the control unit.
+$catchreleaseRumorKind == rarity score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""If you're choosing where to fish next, look at $catchreleaseRumorSystem.""
 
-""Rarer patterns are turning up in $catchreleaseRumorSystem.""
+The Fisherman leans back from the comm pickup.
 
-He checks the date in one corner.
+""Rarer patterns have been turning up there more often lately. Enough that I'd believe the report.""
 
-""Fabric's running thin in $catchreleaseRumorSystem. May be stale by the time you arrive.""",,
+He gives the system name another glance.
+
+""Might not stay worth the trip forever.""",,
 catchrelease_rumorLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
-$catchreleaseRumorLoot score:10",CatchReleaseCMD showRumorIntel,"The Fisherman calls up a retrieval manifest. Three cargo lines have been circled.
+$catchreleaseRumorKind == loot score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","The Fisherman has a retrieval manifest open beside him when the channel settles.
 
-""Crews in $catchreleaseRumorSystem are bringing up more bycatch than usual. Wreckage. Lost cargo.""
+""More bycatch is coming up with the fish in $catchreleaseRumorSystem. Not better, necessarily. Just more chances to grab something before it gets away.""
 
-He closes the manifest.
+He looks down the page once more.
 
-""Leave room in the hold.""",,
+""If you're headed there anyway, keep some hold space free.""",,
 catchrelease_rumorOutsider,CatchReleaseRumorText,"CatchReleaseCMD tokens
-$catchreleaseRumorOutsider score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
-CatchReleaseCMD showRumorIntel","The Fisherman turns a range chart until one system sits under his thumb.
+$catchreleaseRumorKind == stranger score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""$catchreleaseRumorStranger.""
 
-""$catchreleaseRumorStranger. $catchreleaseRumorSystem.""
+The Fisherman names $catchreleaseRumorSystem next.
 
-He puts a finger against the recorded range.
+""Those two aren't supposed to share a chart. They do, for the moment.""
 
-""Wrong range. Still there last I heard.""",,
+He leaves it there for a second, then adds:
+
+""If you're after one, that's where I'd look. The ones brought in so far have been decent specimens.""",,
+catchrelease_rumorSize,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == size score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","The Fisherman holds up a catch sheet where the measurements are easy to see over the comm feed.
+
+""$catchreleaseRumorSystem has been producing heavier fish than usual. Not freaks. Just a lot of catches toward the big end of what you'd expect.""
+
+He lowers the sheet.
+
+""Useful if you're filling an order by weight.""",,
+catchrelease_rumorCalm,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == calm score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""One more for your planner. $catchreleaseRumorSystem.""
+
+The Fisherman scratches at his jaw.
+
+""Fish there haven't been running as hard during retrieval. Easier to follow, easier to stay on.""
+
+He shrugs once.
+
+""They can still slip you. I'd just rather work an easy fish than a difficult one.""",,
+catchrelease_rumorValuableLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == valuable_loot score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","A bycatch tally is visible on the Fisherman's side of the link, several entries marked for value.
+
+""$catchreleaseRumorSystem has been turning up better bycatch than usual. More of the recoveries are worth keeping instead of writing off as scrap.""
+
+He closes the tally.
+
+""Still have to catch what comes through.""",,
+catchrelease_rumorRarityLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == rarity_loot score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""$catchreleaseRumorSystem is busy in a useful way right now.""
+
+The Fisherman counts the points off on two fingers.
+
+""Rarer fish are showing more often, and crews working them are seeing more bycatch along the way.""
+
+He drops his hand.
+
+""If you've got the hold space and the time, it's a good place to spend both.""",,
+catchrelease_rumorSizeCalm,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == size_calm score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","The Fisherman looks mildly pleased when he mentions $catchreleaseRumorSystem.
+
+""Good catches there lately. Bigger specimens, and they aren't making you work quite as hard once the retrieval starts.""
+
+He nods toward the range display.
+
+""That's a comfortable combination. Doesn't happen often enough.""",,
+catchrelease_rumorStrangerCalm,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == stranger_calm score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""I've got a strange one for you. $catchreleaseRumorStranger is showing in $catchreleaseRumorSystem, outside the charted range.""
+
+The Fisherman watches the system marker blink on his display.
+
+""Fish there have also been easier to stay with during retrieval.""
+
+He looks back at you.
+
+""If you mean to chase the stranger, I'd do it while both reports are still worth trusting.""",,
+catchrelease_rumorLootValuable,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == loot_valuable score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""If you like bycatch, $catchreleaseRumorSystem is worth your attention.""
+
+The Fisherman turns a cargo tally toward his own light and reads another line.
+
+""More opportunities are showing up during retrieval, and a better share of what gets recovered is worth keeping.""
+
+He sets the tally aside.
+
+""Still plenty of ordinary scrap in the mix.""",,
+catchrelease_rumorExtremeStability,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == extreme_stability score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""Here's one worth putting on the planner: $catchreleaseRumorSystem. Fabric there is holding about as firm as you'll ever see it.""
+
+The Fisherman gives the system name a small nod.
+
+""It usually runs rougher. If coherence was the reason you passed it by before, take another look.""",,
+catchrelease_rumorExtremeInstability,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == extreme_instability score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""If $catchreleaseRumorSystem is on your route, update the coherence note. Fabric's barely holding there now. Much thinner than that system usually runs.""
+
+The Fisherman folds his arms.
+
+""Fish it if you mean to. Keep the work short and mind your crew.""",,
+catchrelease_rumorUnavailable,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == none",,"""Nothing worth sending you after.""",,
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
 !$catchreleaseRumor",,"""Nothing worth sending you after.""",100:catchrelease_fisherBack:Continue,
+catchrelease_workPondInstructions,CatchReleaseWorkPondInstructions,,,"At the marked rupture, look for the bright cyan mote that identifies the requested specimen. Retrieve that specimen with the ROD/LYNE rig. Ordinary catches of the same pattern do not qualify.",,
+catchrelease_workLampInstructions,CatchReleaseWorkLampInstructions,,,"At the marked open-space point, use Breach Lights first. Once the breach is open, look for the bright cyan mote that identifies the requested specimen and retrieve it with the Harpoon. Ordinary catches of the same pattern do not qualify.",,
 catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork score:20
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork
 FireBest CatchReleaseWorkOffer",,,
-catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,"CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay """"another chart on the shelf""""
-CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","""I've got one.""
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,"CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere ""Unstable or worse"" ""bright cyan mote"" $catchreleaseWorkPay ""another chart on the shelf""
+CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","The Fisherman calls up a range entry.
 
-He sends over a range entry.
+""I've got one. $catchreleaseWorkFish, in $catchreleaseWorkWhere.""
 
-""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
+He opens the coherence trace beside it.
 
-The coherence trace attached to the record is poor. He leaves it open between you.
+""There's one specimen in that search I want. Its own coherence needs to read Unstable or worse. The system reading may be cleaner; that's still the one I'm after.""
 
-""I want the reading as much as the catch. Preserve what comes through; don't chase a prettier number afterward.""
+$catchreleaseWorkInstructions
 
 He names the payment: $catchreleaseWorkPay.
 
@@ -3366,14 +3461,16 @@ $catchreleaseWorkHandoffPaid",,"The container is taken aft while the Fisherman s
 catchrelease_workWaiting,DialogOptionSelected,"$option == catchrelease_fisherWork score:25
 CatchReleaseCMD tokens
 $catchreleaseWork
-!$catchreleaseWorkMet","CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere
-CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
+!$catchreleaseWorkMet","CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere ""Unstable or worse"" ""bright cyan mote""
+CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","""Still after $catchreleaseWorkFish in $catchreleaseWorkWhere.""
 
-He checks the old mark.
+The Fisherman checks the saved trace.
 
-""Take your time getting there. Don't take your time once you're on the rupture.""",100:catchrelease_fisherBack:Continue,
+""You're looking for the particular specimen I marked, with its own coherence reading of Unstable or worse. A cleaner system reading doesn't cancel the job.""
+
+$catchreleaseWorkInstructions",100:catchrelease_fisherBack:Continue,
 ,,,,,,
-# tutorial rating bar event,,,,,,
+# tutorial spacer bar event,,,,,,
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
@@ -3382,7 +3479,7 @@ catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBa
 CatchReleaseCMD rememberRatingPlanet
 CatchReleaseCMD point
 CatchReleaseCMD showIntroIntel
-FireAll CatchReleaseRatingQuestions","The rating hears you out, then turns the glass between both hands.
+FireAll CatchReleaseRatingQuestions","The spacer hears you out, then turns the glass between both hands.
 
 ""You're going beyond the picket?""
 
@@ -3394,30 +3491,19 @@ A pause.
 
 ""Ask for the Fisherman.""",,
 catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:Where do I find the trawler?,
-catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,10:catchrelease_ratingBarWhatRating:What exactly is a rating?,
 catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,20:catchrelease_ratingBarFishing:Fishing. In space.,
 catchrelease_ratingQuestionBack,CatchReleaseRatingQuestions,,,,100:catchrelease_ratingBarBack:Go back to the bar,
-catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,"$catchrelease_ratingAskedWhat = true 0
-FireAll CatchReleaseRatingQuestions","""Ship's crew.""
-
-The rating lifts one shoulder.
-
-""Not an officer. Deck, drives, guns, flight line, loading detail - whatever berth owns you that watch. Navy likes a proper word for everything.""
-
-They take a drink.
-
-""Rating.""",,
 catchrelease_ratingBarFishing,DialogOptionSelected,$option == catchrelease_ratingBarFishing,"$catchrelease_ratingAskedFishing = true 0
 FireAll CatchReleaseRatingQuestions","""That's what they call it.""
 
-The rating considers the objection.
+The spacer considers the objection.
 
 ""There's catch. There's buyers. There's gear. Sounds like fishing from my end of the loading bay.""",,
 catchrelease_ratingBarWhere,DialogOptionSelected,$option == catchrelease_ratingBarWhere,"CatchReleaseCMD point
 $catchrelease_ratingAskedWhere = true 0
 FireAll CatchReleaseRatingQuestions","""Past the last settled orbit. They don't berth much.""
 
-The rating gives you the relevant nav reference.
+The spacer gives you the relevant nav reference.
 
 ""If there's a boat in-system, your sensors will find it. If there isn't, go far enough out and there generally is.""",,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
@@ -4166,7 +4252,7 @@ $global.catchrelease_metRating",,"The Fisherman glances over your transponder re
 
 ""All right, captain. You were sent for, and you came. What next?","0:catchrelease_introWantWork:I'm looking for work.
 10:catchrelease_introCurious:I want to know what you're doing out here.
-20:catchrelease_introRodQuestion:The rating said something about a ROD.
+20:catchrelease_introRodQuestion:The spacer said something about a ROD.
 100:catchrelease_fisherBack:Not today.",
 catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
 CatchReleaseCMD tokens
@@ -4182,7 +4268,7 @@ $global.catchrelease_metRating",,"The Fisherman glances over your transponder re
 
 ""All right, captain. You've come out to a fishing boat. What are you after?""","0:catchrelease_introWantWork:I'm looking for work.
 10:catchrelease_introCurious:I want to know what you're doing out here.
-20:catchrelease_introRodQuestion:The rating said something about a ROD.
+20:catchrelease_introRodQuestion:The spacer said something about a ROD.
 100:catchrelease_fisherBack:Not today.",
 catchrelease_introHelloFromProperty,DialogOptionSelected,"$option == catchrelease_introHello
 !$global.catchrelease_metRating",,"The Fisherman glances over your transponder return, then sets the manifest aside.

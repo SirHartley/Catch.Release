@@ -27,6 +27,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Command arguments, mission calls, memory lifetime, missing text replacements | [Rules implementation guide](RULES_AUTHORING.md) and its dictionaries, including for Java-only fixes; [project routing](RULES.md#project-routing) for local contracts |
 | Harpoon, drones, Breach Lights | `abilities/*/ability -> entities/scripts -> renderers`; shared targeting in `skillshot/` |
 | Camera, pond opening | `PondInteractionAbilityPlugin -> RodMoteEntityPlugin -> MaskedFishingPondTerrainPlugin -> PondCameraFocusScript` |
+| Ponds missing from a charted system | `OnJumpPondSpawner -> PondCreator`; fills charted systems on load and before Map/Intel draws via `CoreUITabListener`. `CurrentLocationChangedListener` also fills the entered system, including non-jump travel. No periodic scan. Uses vanilla `isEnteredByPlayer()`, which includes acquired maps and known core systems; ponds remain ordinary map-visible terrain. |
 | Charge count / regeneration | `BaseChargedSkillshotAbility -> ChargeManager -> ability callback` |
 | Fleet offence / pursuit | `LampOffence/HarpoonOffence -> patrol response -> CatchReleaseCampaignPlugin/HarpoonedFleetFID` |
 | Legendary reveal / cleanup | `LegendaryChases -> LegendaryHaunt/LonglinerDecoy -> HauntModule/LegendaryShields` |
@@ -49,7 +50,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/config/settings.json` | `catchrelease.dialogue.rules` command package and sprites; black-hole warp settings belong to the deprecated test below |
 | `data/config/sounds.json` | Sound registry; callers in abilities and `FishConstants` |
 | `data/config/LunaSettings.csv` | Charge-ready sound policy, camera snap, returning-player tutorial skip |
-| `data/campaign/bar_events.csv` | 11 ordinary FishJob subclasses + 3 camp jobs; Crablobab/rating use AddBarEvents rules |
+| `data/campaign/bar_events.csv` | 11 ordinary FishJob subclasses + 3 camp jobs; Crablobab and the tutorial spacer use AddBarEvents rules |
 | `data/campaign/distress_calls.csv` | Merged, namespaced specs; # IDs disabled; `CatchReleaseDistressProvider` |
 | `data/campaign/rules.csv` | Dialogue and type-selected fleet quest/intel text; Java supplies mechanics/state |
 | `data/world/factions/default_ranks.json` | Contact roles |
@@ -60,7 +61,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
 | `data/config/UpgradeData.csv` -> `memory/upgrades/` | Stat IDs, loader aliases, saved levels and runtime values |
 
-Load order in `ModPlugin`: pond-on-jump -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/rating/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims/range relock -> dev shortcut.
+Load order in `ModPlugin`: pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims/range relock -> dev shortcut.
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
 
@@ -78,6 +79,8 @@ Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `Haun
 
 Display renames do not migrate IDs. `LonglinerDecoy` and Longliner-named memory, sound and option keys remain compatible with older saves. Asset status is recorded beside each species row (`placeholder art`); descriptions do not imply new campaign mechanics.
 
+`RatingBarEvent` and rating-named rule IDs, commands and memory keys still identify the tutorial crew referrals. Player-facing job descriptions do not rename these bindings or saved keys.
+
 ## Source owners
 
 Folders contain related renderers, constants, widgets and helpers; use `rg --files jars/src/catchrelease/<folder>` for their complete inventory. The entries below identify state and integration owners, not every class.
@@ -88,9 +91,10 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 |---|---|
 | `FishingTaboo.java` | Central list of factions that reject fishing: the Church and the Path. |
 | `FishSpec.java` | Species row, stable save ID and display fields, minigame tuning, value/size, habitat and implements; display renames do not rename saved IDs. |
+| `FishLocationSummary.java` | Shared habitat prose for range-data and caught-fish hovers (`FishTooltips`) and Codex range panels. Always names the catch sources, including both breach lights and ruptures for blank or mixed `reachedBy`. |
 | `FishCatch.java` | One specimen: size, weight, aberration, region, source rupture, timestamp, method, and optional chart-request provenance. |
 | `FishLog.java` | Persistent per-species discovery and record data. |
-| `Aberration.java` | Computes and caches aberration from the strongest destabilizer minus the strongest colony field. |
+| `Aberration.java` | Caches ordinary aberration from the strongest destabilizer minus the strongest colony field, then applies temporary system rumors. `naturalAt` bypasses rumors for target selection. |
 | `FishRanges.java` | Authoritative current range test. |
 
 ### `campaign/fish/jobs`
@@ -137,13 +141,20 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | File | Owner / connection |
 |---|---|
 | `FishermanSpawner.java` | One temporary visitor sector-wide, one Fisherman per system; repairs duplicate pointers, excludes decoy, yields to tutorial posting; test path bypasses only the natural roll. |
-| `CoreFisherSpawner.java` | Maintains standing boats in eligible inhabited systems; reconciles weekly/on arrival and reuses the canonical local Fisherman. |
-| `OuterReaches.java` | Chooses destinations and straight-line legs that avoid inhabited inner orbits. |
-| `FishermanBehavior.java` | Controls lamps, staged motes, pacing, visibility, visit duration, and departure. |
+| `CoreFisherSpawner.java` | Keeps permanent map postings in eligible inhabited systems; creates core markers on load and other inhabited-system markers on discovery. Spawns the local boat at its marker, unloads boats only outside the player's system, and reconciles weekly/on arrival. Tutorial reservations and active battles delay unloading. |
+| `FishermanMapIcon.java` | Standing postings survive without a fleet and keep its last position. Temporary visitors and decoys retain fleet-owned markers. Local autopilot selections redirect to the attached boat once per second. |
+| `OuterReaches.java` | Collects real market entities, including connected/hidden/non-economy entities; chooses cleared spawn points and travel legs. Conditions-only planet markets are not settlements. |
+| `FishermanBehavior.java` | Shared visitor/standing route checks and market navigation avoidance; also lamps, staged motes, pacing, visibility, visit duration, and departure. `CoreFisherBehavior` selects standing lifetime and assignment text. |
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
-| `FishermanQuest.java` | Saved chart offer and exact identified catch. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
+| `FishermanQuest.java` | Saved chart offer and exact identified catch. Selects species/system/source together; repairs legacy lamp-only pond targets without changing specimen identity. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
 | `FishermanIdentity.java` | Stores the shared `PersonAPI` and selects one of five coherence portraits immediately before a hail. |
-| `FishRumors.java` | Monthly rarity/treasure/non-legendary-stranger rumor state, expiry and intel; graduation grants a separate immediate lead. |
+| `FishRumors.java` | Monthly leads with eight effects and four authored pairs: rarity/bycatch, size/calm, stranger/calm, bycatch/value. Saved `kindId` selects the effect set and complete dialogue/intel passage; old `type` saves retain their single effect. Graduation grants a separate immediate lead. |
+
+`FishingMinigameDialogPlugin` takes rumor effects from the catch anchor. Size bias joins the specimen roll; `FishingMinigame` snapshots movement, bycatch chance and bycatch rarity for that retrieval. Size and movement boosts exclude legendaries, and their fixed treasure rarity is unchanged. Tuning stays in `FishermanConstants`.
+
+Each `FishRumors.Kind` has one matching `CatchReleaseRumorText` row. Combined leads use their own passages, not appended single-effect text. Intel expands the same saved system/fish values with ordered highlights, including repeated fish names; the dialogue route and its no-lead fallback retain Continue to business.
+
+Rumors last 60 days from their saved `started` timestamp; new leads remain available every 30 days. `ACTIVE_KEY` stores overlapping leads in separate systems, migrating the old single `STATE_KEY` once. `getActive()` selects the newest lead for dialogue; effect getters search all live leads. `RumorIntel.shouldRemoveIntel()` uses the same expiry test and discards old 30-day ending timers without reviving ended entries. Vanilla `IntelManager.removeAllThatShouldBeRemoved()` calls it for queued and visible entries while unpaused; no additional timer script or sector scan is needed.
 
 ### `dialogue/rules`
 
@@ -155,13 +166,15 @@ Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge 
 | `QuestDialogMap.java` | Shared temporary sidebar map for remote dialogue targets, matching vanilla mission icons, tags, and colours. |
 | `FishBuyer.java` | Immutable bulk-sale preview, revalidated before sale; protects active FishAsker and marked-gear specimens, preserves cargo cells and unboxes temporary crates on exit. |
 
+Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchreleaseWorkInstructions` reads a Text-only `CatchReleaseWorkPondInstructions` or `CatchReleaseWorkLampInstructions` row from `rules.csv`, chosen by the saved source before outer Text replacement; these private lookups do not execute scripts or add options.
+
 ### `campaign/fish/tutorial`
 
 | File | Owner / connection |
 |---|---|
 | `FishingIntro.java` | Six-stage tutorial, grants, target selection, save repair and IntroIntel. Shared requirement/currency path; fifth valid same-rarity miss substitutes the single lesson target; invalid locations pause the count. Final multi-species lesson is excluded. |
 | `TutorialWreck.java` | Creates a vanilla derelict cruiser beside the first suitable rupture. |
-| `Castaway.java` | Stores planet eligibility and rescue state for the rating encounter. |
+| `Castaway.java` | Stores planet eligibility and rescue state for the stranded crewman encounter. |
 
 ### `campaign/fish/minigame`
 
@@ -246,7 +259,8 @@ Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge 
 
 | File | Owner / connection |
 |---|---|
-| `listener/PondCreator.java` | Populates entered systems from planet count, capped at two ponds, and finds clear positions away from planets, ponds, nebulae, and rings. |
+| `listener/OnJumpPondSpawner.java` | Transient Map/Intel-opening and current-location listeners, registered on load. Vanilla 0.98a-RC8 `StarSystem.setEnteredByPlayer` has no event; newly charted systems are prepared at the next Map/Intel opening, not at the data grant itself. `CoreUITabListener` is dispatched before display, and the map reads current terrain entities when drawing. |
+| `listener/PondCreator.java` | Populates charted or entered systems from planet count, capped at two ponds, and finds clear positions away from planets, ponds, nebulae, and rings. |
 | `scripts/PondCameraFocusScript.java` | Smoothly acquires and releases camera control around an open pond. |
 
 ### `campaign/crime`
@@ -359,13 +373,15 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - The Abyss uses uncapped `Misc.getAbyssalDepth()` divided by `ABERRATION_ABYSS_SPAN`. A span of one restores the old hard cliff.
 - `openSpaceReading` must include all indexed sources, not only Abyss and slipstreams, because the heat map samples bare hyperspace points.
 - Each inhabited market creates a five-light-year quadratic stabilizing field. Overlapping fields do not stack; the strongest stabilizer is subtracted from the strongest destabilizer. The colony's own system is exactly zero aberration.
+- Extreme-coherence rumors set one system to zero or one aberration without changing its cached ordinary reading or neighboring hyperspace. Targets must be outside the corresponding coherence band; instability excludes colonies, and a new colony overrides an ongoing event. Catch rolls, known route readings and habitat snapshots use the effective value; expiry restores the ordinary reading. Quest pins still take precedence over habitat changes.
+- `CoherenceHeatField` draws temporary system rings in the shared coherence colour over the ordinary hyperspace heat field. It reads live overrides so expired rings disappear without rebuilding the map.
 - Slipstreams are indexed as sampled ribbons through `SlipstreamTerrainPlugin2.getSegments()`. The old `SlipstreamTerrainPlugin` is inert in 0.98a. Foreign implementations fall back to their anchor.
 - Marks verify that their source still exists so short-lived sources do not remain active until the next daily rebuild.
 - In-system reach is `ABERRATION_LOCAL_BASE + ABERRATION_LOCAL_PER_LY × reachLY`. Do not add a second hand-maintained reach table.
 - Hyperspace has no entity-local reading; its relevant sources are the Abyss depth field and slipstream terrain.
 - Gates are individual marks because active and dormant gates have different reach and strength. Use `GateEntityPlugin.isActive()` only for vanilla gates; foreign tags fall back to sector-wide gate state.
 - Foreign equivalents are identified by optional tags. Missing tags return empty results and create no dependency.
-- Hidden sources use one survey test in `Mark.isFound`. Stars and slipstreams are the only always-visible exceptions. Fisherman icons follow fleet visibility; motes use Breach Lights instead.
+- Hidden sources use one survey test in `Mark.isFound`. Stars and slipstreams are the only always-visible exceptions. Fisherman map postings follow the lifecycle below; motes use Breach Lights instead.
 
 ### Fish entities and catch provenance
 
@@ -374,8 +390,10 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - The method says which rig caught a fish; the implement says what exposed it. Both values must follow the mote's actual provenance.
 - Pond and harpoon catches must carry the exact source rupture where applicable. Chart requests also carry target ID, target system, and earliest valid timestamp through loose fish and containers.
 - Chart and tutorial completion use the same `FishRequirement`/`FishCurrency` read and spend path as other quests. Do not add a separate cargo-completion check.
-- A chart request plants or replants its identified target only while the player is in the target system. Open-water targets spawn away from their destinations and always use the required low-coherence roll.
-- Chart offers select a valid fish-and-system pair, not a species pasted onto a destination. Occupied camp ruptures may inform the species choice but are never selected as the quest destination.
+- A chart request plants or replants its identified target only while the player is in the target system. Only the active specimen ID/species/system suppresses replanting; a stale quest flag does not. Open-space targets spawn away from their destinations, and chart intel routes to their saved in-system search coordinates.
+- `FishermanQuest.markCatch()` assigns both aberration 1.0 and chart provenance after checking specimen ID/species/system. This happens after normal catch rolls and equipment bonuses. Ordinary catches keep their own readings and cannot satisfy the identified request; loose/container cargo, progress and hand-in use the same requirement.
+- Chart offers select a valid species/system/implement together through `FishRanges.matches()`. Lamp-only species cannot use ponds; pond-only species require a free pond. Zero-weight, legendary and low-coherence-ineligible species are excluded. Occupied camp ruptures may inform species choice but are never quest destinations.
+- `FishermanQuest.hasActiveRumor()` excludes every system in `FishRumors.getActiveRumors()` from chart generation, regardless of rumor kind. A saved, unaccepted offer there is withheld without replacement until its rumor expires; accepted targets remain unchanged. Expired intel cards do not gate generation.
 - Harpoon aim assist and collision both call `HarpoonEntityPlugin.canTake()`. Buried motes use `catchrelease_buried_mote` and require full light, or mere detection with Fathom Head.
 
 ### Rendering, UI, reflection, and audio
@@ -393,12 +411,18 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 
 - The Fisherman is one saved `PersonAPI` shared by every boat. Apply the hailed boat's portrait immediately before vanilla builds the person panel; background boats must not mutate it.
 - Fisherman portraits are registered `graphics.characters` sprite IDs in `settings.json`. Rank and post remain blank so vanilla shows the rankless person card once.
-- Standing boats plan one outer-reaches leg at a time and validate both the destination and the straight path. `PATROL_SYSTEM` is not suitable because it crosses inhabited inner orbits.
+- All Fishermen use one checked `GO_TO_LOCATION` leg at a time, not `PATROL_SYSTEM`. `OuterReaches` excludes 5,000 units beyond each market entity's radius plus a 1,000-unit route buffer. Deterministic fallback legs are checked too; no valid leg means hold and retry. A boat already inside an exclusion may only take a leg that increases its distance from every enclosing market throughout the escape.
+- `FishermanBehavior.keepWorking()` rechecks destinations, current movement and moving markets every 0.25 campaign seconds, refreshes vanilla navigation avoidance and replaces unsafe/legacy assignments. Battles are not interrupted; the transient check timer starts immediately after loading.
+- `FishermanInterception.cutOff()` requires a clear approach before relocating or consuming the encounter flag. Unsafe ongoing approaches clear tutorial pursuit state and return to checked travel; a pre-tutorial player can trigger another approach later.
 - Fisherman visibility requires both a flat detected-range bonus and a per-frame sensor-fader override.
 - Visiting Fisherman time advances only while the player is elsewhere. Rendering and sound also stop when the player is outside the location.
-- The Fisherman map marker exists only in the player's current location, has no sensor profile, and is map-only. Reconciliation removes old duplicates and marks from departed systems.
+- Standing Fisherman markers are map-only and have no sensor profile. Eligible core-system postings are known from the start; other inhabited-system postings remain known after discovery. The fleet stays loaded throughout the player's stay in-system, regardless of viewport or sensor visibility. It unloads only after the player leaves; tutorial reservations and battles delay that unloading. It returns at the saved marker position. Shared identity, stock, restock timers and chart requests live outside the unloaded fleet.
+- Visiting/procgen and Imposter markers remain temporary: departure removes the marker, and the existing fleet departure/expiry rules still apply. Reconciliation preserves standing markers and removes duplicate markers.
+- Tutorial and chart-request return navigation can target a standing marker when its boat is unloaded; local marker autopilot redirects to the fleet after spawning.
 - The visitor shelf restocks from each sale date, not a global monthly tick. Chart-request completion is the only way to increase shelf width.
-- `FishingIntro.point()` is idempotent and can be reached from the wreck, castaway/rating, Fisherman interception, or a direct hail. Recovered property takes origin precedence, then rescued crew, then recorded market.
+- `FishingIntro.point()` is idempotent and can be reached from the wreck, stranded crewman, bar referral, Fisherman interception, or a direct hail. Recovered property takes origin precedence, then rescued crew, then recorded market.
+- `CatchReleaseRatingQuestions` offers trawler directions, a fishing question and a return to the bar. Both answers rebuild the menu; the return option is always available.
+- `FishingIntro.giveOutfitter()` grants the Spool Governor schematic with the second tutorial hand-in. `giveOutfitterSchematic()` also supplies the skip path, reuses `FishReward` receipts, and skips known/owned equipment. The schematic exposes the Equipment tab's drone-core shelf; purchasing and fitting remain separate.
 - The returning-player skip is available only before the R.O.D. lesson begins. Manually disabling the new Luna setting stays disabled after the one-time legacy-file migration.
 - Tutorial single-target protection advances only when the requested species could naturally spawn at the current location with the required implement. The count carries between valid locations and pauses elsewhere.
 - No bar, local fleet, or distress fleet job may appear before `FishingIntro.isOpenForWork()` or tutorial completion as appropriate. Equipment requirements are limited to gear the player owns.

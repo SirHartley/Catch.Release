@@ -38,6 +38,7 @@ import com.fs.starfarer.api.campaign.OptionPanelAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.campaign.rules.RuleAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
 import com.fs.starfarer.api.impl.campaign.rulecmd.BaseCommandPlugin;
@@ -87,6 +88,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String WORK_WHERE = "$catchreleaseWorkWhere";
     public static final String WORK_PAY = "$catchreleaseWorkPay";
     public static final String WORK_POND = "$catchreleaseWorkPond";
+    public static final String WORK_INSTRUCTIONS = "$catchreleaseWorkInstructions";
     public static final String WORK_ROLLED = "$catchreleaseWorkRolled";
 
     public static final String SHELF = "$catchreleaseShelf";
@@ -98,6 +100,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String SELL_EPIC = "$catchreleaseSellEpic";
 
     public static final String RUMOR = "$catchreleaseRumor";
+    public static final String RUMOR_KIND = "$catchreleaseRumorKind";
     public static final String RUMOR_SYSTEM = "$catchreleaseRumorSystem";
     public static final String RUMOR_STRANGER = "$catchreleaseRumorStranger";
     public static final String RUMOR_RARITY = "$catchreleaseRumorRarity";
@@ -799,11 +802,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 && FishRumors.isAvailable(), 0);
 
         FishRumors.Saved rumor = FishRumors.getActive();
+        local.set(RUMOR_KIND, FishRumors.getKindId(rumor), 0);
         local.set(RUMOR_SYSTEM, rumor == null ? "" : rumor.systemName, 0);
         local.set(RUMOR_STRANGER, FishRumors.getStrangerDisplayName(rumor), 0);
-        local.set(RUMOR_RARITY, rumor != null && rumor.type == FishRumors.TYPE_RARITY, 0);
-        local.set(RUMOR_LOOT, rumor != null && rumor.type == FishRumors.TYPE_LOOT, 0);
-        local.set(RUMOR_OUTSIDER, rumor != null && rumor.type == FishRumors.TYPE_STRANGER, 0);
+        local.set(RUMOR_RARITY, FishRumors.hasEffect(rumor, FishRumors.TYPE_RARITY), 0);
+        local.set(RUMOR_LOOT, FishRumors.hasEffect(rumor, FishRumors.TYPE_LOOT), 0);
+        local.set(RUMOR_OUTSIDER, FishRumors.hasEffect(rumor, FishRumors.TYPE_STRANGER), 0);
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
@@ -841,10 +845,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(WORK_MET, work != null && FishermanQuest.isSatisfied(), 0);
 
         if (work != null) {
-            local.set(WORK_FISH, FishermanQuest.describe(work), 0);
-            local.set(WORK_WHERE, work.systemName, 0);
-            local.set(WORK_PAY, Misc.getDGSCredits(work.credits), 0);
-            local.set(WORK_POND, work.atPond, 0);
+            setWorkTokens(work, local, memoryMap);
         }
     }
 
@@ -954,13 +955,23 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         if (local == null) return true;
 
-        local.set(WORK_FISH, FishermanQuest.describe(offer), 0);
-        local.set(WORK_WHERE, offer.systemName, 0);
-        local.set(WORK_PAY, Misc.getDGSCredits(offer.credits), 0);
-        local.set(WORK_POND, offer.atPond, 0);
+        setWorkTokens(offer, local, memoryMap);
         local.set(WORK_ROLLED, true, 0);
 
         return true;
+    }
+
+    protected void setWorkTokens(FishermanQuest.Saved work, MemoryAPI local,
+                                 Map<String, MemoryAPI> memoryMap) {
+        local.set(WORK_FISH, FishermanQuest.describe(work), 0);
+        local.set(WORK_WHERE, work.systemName, 0);
+        local.set(WORK_PAY, Misc.getDGSCredits(work.credits), 0);
+        local.set(WORK_POND, work.atPond, 0);
+
+        RuleAPI instructions = Global.getSector().getRules().getBestMatching(null,
+                work.atPond ? "CatchReleaseWorkPondInstructions"
+                        : "CatchReleaseWorkLampInstructions", null, memoryMap);
+        local.set(WORK_INSTRUCTIONS, instructions == null ? "" : instructions.pickText(), 0);
     }
 
     protected boolean takeWork(InteractionDialogAPI dialog) {
