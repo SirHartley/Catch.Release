@@ -1279,15 +1279,19 @@ public class FishingIntro {
                 .unset(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY);
     }
 
-    public static CampaignFleetAPI getNearestBoat() {
+    public static SectorEntityToken getNearestBoat() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return null;
 
-        CampaignFleetAPI best = null;
+        SectorEntityToken best = null;
         float bestDistance = Float.MAX_VALUE;
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            CampaignFleetAPI boat = CoreFisherSpawner.getBoat(system);
+            SectorEntityToken boat = CoreFisherSpawner.getBoat(system);
+            if (boat == null) {
+                boat = catchrelease.campaign.fish.fisherman.FishermanMapIcon.findStanding(system);
+                if (boat != null && boat.isDiscoverable()) continue;
+            }
             if (boat == null) continue;
 
             float distance = Misc.getDistanceLY(player.getLocationInHyperspace(),

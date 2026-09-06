@@ -5,9 +5,11 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CustomCampaignEntityAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
 
@@ -19,6 +21,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
             "Fishing. Trades in range data, buys a catch, and carries an outfitter.";
 
     protected CampaignFleetAPI fleet;
+    protected boolean standing;
     protected float autopilotCheckElapsed = 0f;
 
     public static SectorEntityToken findOrAdd(CampaignFleetAPI fleet) {
@@ -26,6 +29,10 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
         LocationAPI where = fleet.getContainingLocation();
         if (where == null) return null;
+
+        if (CoreFisherSpawner.isStanding(fleet)) {
+            return findOrAddStanding((StarSystemAPI) where, fleet);
+        }
 
         SectorEntityToken found = null;
         for (CustomCampaignEntityAPI candidate : new ArrayList<>(where.getCustomEntities())) {
@@ -53,6 +60,64 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         return icon;
     }
 
+    public static SectorEntityToken findStanding(StarSystemAPI system) {
+        if (system == null) return null;
+
+        for (CustomCampaignEntityAPI candidate : system.getCustomEntities()) {
+            if (candidate.getCustomPlugin() instanceof FishermanMapIcon icon && icon.standing) {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    public static SectorEntityToken findOrAddStanding(StarSystemAPI system, CampaignFleetAPI fleet) {
+        SectorEntityToken found = findStanding(system);
+        for (CustomCampaignEntityAPI candidate : new ArrayList<>(system.getCustomEntities())) {
+            if (!(candidate.getCustomPlugin() instanceof FishermanMapIcon icon)) continue;
+            if (!icon.standing && (fleet == null || !icon.isFor(fleet))) continue;
+
+            if (found == null) found = candidate;
+            else if (found != candidate) system.removeEntity(candidate);
+        }
+
+        if (found == null) {
+            found = system.addCustomEntity(Misc.genUID(), null, ENTITY_ID,
+                    FishermanConstants.FACTION);
+            Vector2f at = CoreFisherSpawner.pickLocation(system);
+            found.setLocation(at.x, at.y);
+        }
+
+        FishermanMapIcon icon = (FishermanMapIcon) found.getCustomPlugin();
+        icon.standing = true;
+        if (fleet != null) icon.attach(fleet);
+        found.setDiscoverable(false);
+        found.setSensorProfile(null);
+
+        return found;
+    }
+
+    public void attach(CampaignFleetAPI fleet) {
+        this.fleet = fleet;
+        entity.setLocation(fleet.getLocation().x, fleet.getLocation().y);
+    }
+
+    public void detach() {
+        if (fleet != null) entity.setLocation(fleet.getLocation().x, fleet.getLocation().y);
+        fleet = null;
+        autopilotCheckElapsed = 0f;
+    }
+
+    public static void detachStanding(CampaignFleetAPI fleet) {
+        if (fleet == null || !(fleet.getContainingLocation() instanceof StarSystemAPI system)) return;
+
+        SectorEntityToken marker = findStanding(system);
+        if (marker != null && ((FishermanMapIcon) marker.getCustomPlugin()).isFor(fleet)) {
+            ((FishermanMapIcon) marker.getCustomPlugin()).detach();
+        }
+    }
+
     public static void removeFor(CampaignFleetAPI fleet) {
         if (fleet == null) return;
 
@@ -60,8 +125,10 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
             for (CustomCampaignEntityAPI candidate : new ArrayList<>(location.getCustomEntities())) {
                 if (!ENTITY_ID.equals(candidate.getCustomEntityType())) continue;
                 if (!(candidate.getCustomPlugin() instanceof FishermanMapIcon)) continue;
-                if (((FishermanMapIcon) candidate.getCustomPlugin()).isFor(fleet)) {
-                    location.removeEntity(candidate);
+                FishermanMapIcon icon = (FishermanMapIcon) candidate.getCustomPlugin();
+                if (icon.isFor(fleet)) {
+                    if (icon.standing) icon.detach();
+                    else location.removeEntity(candidate);
                 }
             }
         }
@@ -73,7 +140,8 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
             for (CustomCampaignEntityAPI candidate : new ArrayList<>(location.getCustomEntities())) {
                 if (ENTITY_ID.equals(candidate.getCustomEntityType())
-                        && candidate.getCustomPlugin() instanceof FishermanMapIcon) {
+                        && candidate.getCustomPlugin() instanceof FishermanMapIcon icon
+                        && !icon.standing) {
                     location.removeEntity(candidate);
                 }
             }
@@ -95,9 +163,16 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
     public void advance(float amount) {
         if (entity == null) return;
 
+        if (standing && fleet == null && entity.isInCurrentLocation()
+                && entity.getContainingLocation() instanceof StarSystemAPI system) {
+            CampaignFleetAPI local = CoreFisherSpawner.getAnyBoat(system);
+            if (local != null && local != fleet) attach(local);
+        }
+
         if (fleet == null || fleet.isExpired() || !fleet.isAlive()
                 || fleet.getContainingLocation() != entity.getContainingLocation()) {
-            remove();
+            if (standing) fleet = null;
+            else remove();
             return;
         }
 
@@ -130,7 +205,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
     @Override
     public boolean hasCustomMapTooltip() {
-        return fleet != null;
+        return standing || fleet != null;
     }
 
     @Override
@@ -140,10 +215,12 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
     @Override
     public void createMapTooltip(TooltipMakerAPI tooltip, boolean expanded) {
-        if (fleet == null) return;
+        if (!hasCustomMapTooltip()) return;
 
-        tooltip.addTitle(Misc.ucFirst(fleet.getName()));
-        int band = FishermanIdentity.getDialogueBand(FishermanIdentity.getDrift(fleet));
+        float drift = FishermanIdentity.getDrift(entity.getContainingLocation());
+        tooltip.addTitle(Misc.ucFirst(fleet != null ? fleet.getName()
+                : FishermanIdentity.getDisplayName(drift)));
+        int band = FishermanIdentity.getDialogueBand(drift);
         tooltip.addPara(FishermanIdentity.corrupt(SERVICE_LINE, band), Misc.getGrayColor(), 10f);
     }
 }

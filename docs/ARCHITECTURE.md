@@ -27,6 +27,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Command arguments, mission calls, memory lifetime, missing text replacements | [Rules implementation guide](RULES_AUTHORING.md) and its dictionaries, including for Java-only fixes; [project routing](RULES.md#project-routing) for local contracts |
 | Harpoon, drones, Breach Lights | `abilities/*/ability -> entities/scripts -> renderers`; shared targeting in `skillshot/` |
 | Camera, pond opening | `PondInteractionAbilityPlugin -> RodMoteEntityPlugin -> MaskedFishingPondTerrainPlugin -> PondCameraFocusScript` |
+| Ponds missing from a charted system | `OnJumpPondSpawner -> PondCreator`; fills charted systems on load, checks newly unlocked maps once per second even while paused, and retains the arrival fallback. Uses vanilla `isEnteredByPlayer()`, which includes acquired maps and known core systems; ponds remain ordinary map-visible terrain. |
 | Charge count / regeneration | `BaseChargedSkillshotAbility -> ChargeManager -> ability callback` |
 | Fleet offence / pursuit | `LampOffence/HarpoonOffence -> patrol response -> CatchReleaseCampaignPlugin/HarpoonedFleetFID` |
 | Legendary reveal / cleanup | `LegendaryChases -> LegendaryHaunt/LonglinerDecoy -> HauntModule/LegendaryShields` |
@@ -140,7 +141,8 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | File | Owner / connection |
 |---|---|
 | `FishermanSpawner.java` | One temporary visitor sector-wide, one Fisherman per system; repairs duplicate pointers, excludes decoy, yields to tutorial posting; test path bypasses only the natural roll. |
-| `CoreFisherSpawner.java` | Maintains standing boats in eligible inhabited systems; reconciles weekly/on arrival and reuses the canonical local Fisherman. |
+| `CoreFisherSpawner.java` | Keeps permanent map postings in eligible inhabited systems; creates core markers on load and other inhabited-system markers on discovery. Spawns the local boat at its marker, unloads off-screen boats, and reconciles weekly/on arrival. Tutorial reservations and active battles delay unloading. |
+| `FishermanMapIcon.java` | Standing postings survive without a fleet and keep its last position. Temporary visitors and decoys retain fleet-owned markers. Local autopilot selections redirect to the attached boat once per second. |
 | `OuterReaches.java` | Collects real market entities, including connected/hidden/non-economy entities; chooses cleared spawn points and travel legs. Conditions-only planet markets are not settlements. |
 | `FishermanBehavior.java` | Shared visitor/standing route checks and market navigation avoidance; also lamps, staged motes, pacing, visibility, visit duration, and departure. `CoreFisherBehavior` selects standing lifetime and assignment text. |
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
@@ -372,7 +374,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Hyperspace has no entity-local reading; its relevant sources are the Abyss depth field and slipstream terrain.
 - Gates are individual marks because active and dormant gates have different reach and strength. Use `GateEntityPlugin.isActive()` only for vanilla gates; foreign tags fall back to sector-wide gate state.
 - Foreign equivalents are identified by optional tags. Missing tags return empty results and create no dependency.
-- Hidden sources use one survey test in `Mark.isFound`. Stars and slipstreams are the only always-visible exceptions. Fisherman icons follow fleet visibility; motes use Breach Lights instead.
+- Hidden sources use one survey test in `Mark.isFound`. Stars and slipstreams are the only always-visible exceptions. Fisherman map postings follow the lifecycle below; motes use Breach Lights instead.
 
 ### Fish entities and catch provenance
 
@@ -405,7 +407,9 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - `FishermanInterception.cutOff()` requires a clear approach before relocating or consuming the encounter flag. Unsafe ongoing approaches clear tutorial pursuit state and return to checked travel; a pre-tutorial player can trigger another approach later.
 - Fisherman visibility requires both a flat detected-range bonus and a per-frame sensor-fader override.
 - Visiting Fisherman time advances only while the player is elsewhere. Rendering and sound also stop when the player is outside the location.
-- The Fisherman map marker exists only in the player's current location, has no sensor profile, and is map-only. Reconciliation removes old duplicates and marks from departed systems.
+- Standing Fisherman markers are map-only and have no sensor profile. Eligible core-system postings are known from the start; other inhabited-system postings remain known after discovery. The fleet exists while the player is in-system, except for tutorial reservations or battles, and returns at the saved marker position. Shared identity, stock, restock timers and chart requests live outside the unloaded fleet.
+- Visiting/procgen and Imposter markers remain temporary: departure removes the marker, and the existing fleet departure/expiry rules still apply. Reconciliation preserves standing markers and removes duplicate markers.
+- Tutorial and chart-request return navigation can target a standing marker when its boat is unloaded; local marker autopilot redirects to the fleet after spawning.
 - The visitor shelf restocks from each sale date, not a global monthly tick. Chart-request completion is the only way to increase shelf width.
 - `FishingIntro.point()` is idempotent and can be reached from the wreck, stranded crewman, bar referral, Fisherman interception, or a direct hail. Recovered property takes origin precedence, then rescued crew, then recorded market.
 - `CatchReleaseRatingQuestions` offers trawler directions, a fishing question and a return to the bar. Both answers rebuild the menu; the return option is always available.
