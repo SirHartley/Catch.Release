@@ -27,7 +27,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Command arguments, mission calls, memory lifetime, missing text replacements | [Rules implementation guide](RULES_AUTHORING.md) and its dictionaries, including for Java-only fixes; [project routing](RULES.md#project-routing) for local contracts |
 | Harpoon, drones, Breach Lights | `abilities/*/ability -> entities/scripts -> renderers`; shared targeting in `skillshot/` |
 | Camera, pond opening | `PondInteractionAbilityPlugin -> RodMoteEntityPlugin -> MaskedFishingPondTerrainPlugin -> PondCameraFocusScript` |
-| Ponds missing from a charted system | `OnJumpPondSpawner -> PondCreator`; fills charted systems on load, checks newly unlocked maps once per second even while paused, and retains the arrival fallback. Uses vanilla `isEnteredByPlayer()`, which includes acquired maps and known core systems; ponds remain ordinary map-visible terrain. |
+| Ponds missing from a charted system | `OnJumpPondSpawner -> PondCreator`; fills charted systems on load and before Map/Intel draws via `CoreUITabListener`. `CurrentLocationChangedListener` also fills the entered system, including non-jump travel. No periodic scan. Uses vanilla `isEnteredByPlayer()`, which includes acquired maps and known core systems; ponds remain ordinary map-visible terrain. |
 | Charge count / regeneration | `BaseChargedSkillshotAbility -> ChargeManager -> ability callback` |
 | Fleet offence / pursuit | `LampOffence/HarpoonOffence -> patrol response -> CatchReleaseCampaignPlugin/HarpoonedFleetFID` |
 | Legendary reveal / cleanup | `LegendaryChases -> LegendaryHaunt/LonglinerDecoy -> HauntModule/LegendaryShields` |
@@ -61,7 +61,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
 | `data/config/UpgradeData.csv` -> `memory/upgrades/` | Stat IDs, loader aliases, saved levels and runtime values |
 
-Load order in `ModPlugin`: pond-on-jump -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims/range relock -> dev shortcut.
+Load order in `ModPlugin`: pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims/range relock -> dev shortcut.
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
 
@@ -141,7 +141,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | File | Owner / connection |
 |---|---|
 | `FishermanSpawner.java` | One temporary visitor sector-wide, one Fisherman per system; repairs duplicate pointers, excludes decoy, yields to tutorial posting; test path bypasses only the natural roll. |
-| `CoreFisherSpawner.java` | Keeps permanent map postings in eligible inhabited systems; creates core markers on load and other inhabited-system markers on discovery. Spawns the local boat at its marker, unloads off-screen boats, and reconciles weekly/on arrival. Tutorial reservations and active battles delay unloading. |
+| `CoreFisherSpawner.java` | Keeps permanent map postings in eligible inhabited systems; creates core markers on load and other inhabited-system markers on discovery. Spawns the local boat at its marker, unloads boats only outside the player's system, and reconciles weekly/on arrival. Tutorial reservations and active battles delay unloading. |
 | `FishermanMapIcon.java` | Standing postings survive without a fleet and keep its last position. Temporary visitors and decoys retain fleet-owned markers. Local autopilot selections redirect to the attached boat once per second. |
 | `OuterReaches.java` | Collects real market entities, including connected/hidden/non-economy entities; chooses cleared spawn points and travel legs. Conditions-only planet markets are not settlements. |
 | `FishermanBehavior.java` | Shared visitor/standing route checks and market navigation avoidance; also lamps, staged motes, pacing, visibility, visit duration, and departure. `CoreFisherBehavior` selects standing lifetime and assignment text. |
@@ -255,7 +255,8 @@ Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge 
 
 | File | Owner / connection |
 |---|---|
-| `listener/PondCreator.java` | Populates entered systems from planet count, capped at two ponds, and finds clear positions away from planets, ponds, nebulae, and rings. |
+| `listener/OnJumpPondSpawner.java` | Transient Map/Intel-opening and current-location listeners, registered on load. Vanilla 0.98a-RC8 `StarSystem.setEnteredByPlayer` has no event; newly charted systems are prepared at the next Map/Intel opening, not at the data grant itself. `CoreUITabListener` is dispatched before display, and the map reads current terrain entities when drawing. |
+| `listener/PondCreator.java` | Populates charted or entered systems from planet count, capped at two ponds, and finds clear positions away from planets, ponds, nebulae, and rings. |
 | `scripts/PondCameraFocusScript.java` | Smoothly acquires and releases camera control around an open pond. |
 
 ### `campaign/crime`
@@ -407,7 +408,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - `FishermanInterception.cutOff()` requires a clear approach before relocating or consuming the encounter flag. Unsafe ongoing approaches clear tutorial pursuit state and return to checked travel; a pre-tutorial player can trigger another approach later.
 - Fisherman visibility requires both a flat detected-range bonus and a per-frame sensor-fader override.
 - Visiting Fisherman time advances only while the player is elsewhere. Rendering and sound also stop when the player is outside the location.
-- Standing Fisherman markers are map-only and have no sensor profile. Eligible core-system postings are known from the start; other inhabited-system postings remain known after discovery. The fleet exists while the player is in-system, except for tutorial reservations or battles, and returns at the saved marker position. Shared identity, stock, restock timers and chart requests live outside the unloaded fleet.
+- Standing Fisherman markers are map-only and have no sensor profile. Eligible core-system postings are known from the start; other inhabited-system postings remain known after discovery. The fleet stays loaded throughout the player's stay in-system, regardless of viewport or sensor visibility. It unloads only after the player leaves; tutorial reservations and battles delay that unloading. It returns at the saved marker position. Shared identity, stock, restock timers and chart requests live outside the unloaded fleet.
 - Visiting/procgen and Imposter markers remain temporary: departure removes the marker, and the existing fleet departure/expiry rules still apply. Reconciliation preserves standing markers and removes duplicate markers.
 - Tutorial and chart-request return navigation can target a standing marker when its boat is unloaded; local marker autopilot redirects to the fleet after spawning.
 - The visitor shelf restocks from each sale date, not a global monthly tick. Chart-request completion is the only way to increase shelf width.
