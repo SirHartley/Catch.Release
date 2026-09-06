@@ -155,7 +155,7 @@ Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Shared text-presen
 
 | Entry / state | Contract |
 |---|---|
-| `CatchReleaseCMD <verb> [arg]` | Sole custom rules command. Conditions prepare temporary tokens and return true; scripts perform actions. A handled mission `callAction()` returns true. |
+| `CatchReleaseCMD <verb> [arg]` | Sole custom rules command. Queries return whether their requirement is met. The `tokens` verb prepares temporary display values and returns true. Put actions in Script. A handled mission `callAction()` returns true. |
 | `$catchrelease_jobRef` | Active FishJob; rows invoke its methods through Call. |
 | `$catchrelease_jobDeliver`, `$catchreleaseHasFish` | Valid delivery route; matching cargo available. |
 | `$catchreleaseAsk` / `…AskCap`, `$catchreleaseReward` / `…RewardCap` | Shared demand/reward descriptions. |
