@@ -3415,20 +3415,22 @@ $catchreleaseRumorKind == none",,"""Nothing worth sending you after.""",,
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
 !$catchreleaseRumor",,"""Nothing worth sending you after.""",100:catchrelease_fisherBack:Continue,
+catchrelease_workPondInstructions,CatchReleaseWorkPondInstructions,,,"At the marked rupture, look for the bright cyan mote that identifies the requested specimen. Retrieve that specimen with the ROD/LYNE rig. Ordinary catches of the same pattern do not qualify.",,
+catchrelease_workLampInstructions,CatchReleaseWorkLampInstructions,,,"At the marked open-space point, use Breach Lights first. Once the breach is open, look for the bright cyan mote that identifies the requested specimen and retrieve it with the Harpoon. Ordinary catches of the same pattern do not qualify.",,
 catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork score:20
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork
 FireBest CatchReleaseWorkOffer",,,
-catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,"CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere $catchreleaseWorkPay """"another chart on the shelf""""
-CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","""I've got one.""
+catchrelease_workOfferText,CatchReleaseWorkOffer,$catchreleaseWorkRolled,"CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere ""Unstable or worse"" ""bright cyan mote"" $catchreleaseWorkPay ""another chart on the shelf""
+CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","The Fisherman calls up a range entry.
 
-He sends over a range entry.
+""I've got one. $catchreleaseWorkFish, in $catchreleaseWorkWhere.""
 
-""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
+He opens the coherence trace beside it.
 
-The coherence trace attached to the record is poor. He leaves it open between you.
+""There's one specimen in that search I want. Its own coherence needs to read Unstable or worse. The system reading may be cleaner; that's still the one I'm after.""
 
-""I want the reading as much as the catch. Preserve what comes through; don't chase a prettier number afterward.""
+$catchreleaseWorkInstructions
 
 He names the payment: $catchreleaseWorkPay.
 
@@ -3459,12 +3461,14 @@ $catchreleaseWorkHandoffPaid",,"The container is taken aft while the Fisherman s
 catchrelease_workWaiting,DialogOptionSelected,"$option == catchrelease_fisherWork score:25
 CatchReleaseCMD tokens
 $catchreleaseWork
-!$catchreleaseWorkMet","CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere
-CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","""$catchreleaseWorkFish. $catchreleaseWorkWhere.""
+!$catchreleaseWorkMet","CatchReleaseCMD highlightWorkText $catchreleaseWorkFish $catchreleaseWorkWhere ""Unstable or worse"" ""bright cyan mote""
+CatchReleaseCMD showWorkMap ""Target: $catchreleaseWorkWhere""","""Still after $catchreleaseWorkFish in $catchreleaseWorkWhere.""
 
-He checks the old mark.
+The Fisherman checks the saved trace.
 
-""Take your time getting there. Don't take your time once you're on the rupture.""",100:catchrelease_fisherBack:Continue,
+""You're looking for the particular specimen I marked, with its own coherence reading of Unstable or worse. A cleaner system reading doesn't cancel the job.""
+
+$catchreleaseWorkInstructions",100:catchrelease_fisherBack:Continue,
 ,,,,,,
 # tutorial spacer bar event,,,,,,
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2

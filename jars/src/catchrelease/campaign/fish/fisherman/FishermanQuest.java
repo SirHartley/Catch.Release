@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.fisherman;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
@@ -12,7 +13,6 @@ import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
-import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -90,10 +90,12 @@ public class FishermanQuest {
 
         public final FishSpec spec;
         public final StarSystemAPI system;
+        public final SectorEntityToken pond;
 
-        public Target(FishSpec spec, StarSystemAPI system) {
+        public Target(FishSpec spec, StarSystemAPI system, SectorEntityToken pond) {
             this.spec = spec;
             this.system = system;
+            this.pond = pond;
         }
     }
 
@@ -134,7 +136,7 @@ public class FishermanQuest {
             StarSystemAPI system = (StarSystemAPI) player.getContainingLocation();
 
             if (!system.getId().equals(quest.systemId)) return;
-            if (isPlanted(system)) return;
+            if (isPlanted(quest, system)) return;
 
             plant(quest, system);
         }
@@ -144,6 +146,7 @@ public class FishermanQuest {
             implements catchrelease.campaign.fish.shop.FishAsker {
 
         protected final Saved quest;
+        protected transient SectorEntityToken searchPoint;
 
         public QuestIntel(Saved quest) {
             this.quest = quest;
@@ -266,9 +269,12 @@ public class FishermanQuest {
                     faction.getBaseUIColor(),
                     faction.getDisplayNameWithArticleWithoutArticle());
 
-            info.addPara("The Fisherman wants the coherence reading as much as the specimen, with "
-                    + "whatever comes through preserved as recovered. Completing the request "
-                    + "increases the number of range-data listings he keeps in stock.", opad);
+            info.addPara("This request is for one identified anomalous specimen, not an ordinary "
+                    + "representative of the pattern or a search for an unstable system. Its own "
+                    + "coherence reading is unusually poor, and the target is identified at the "
+                    + "saved search point by a bright cyan mote. Only that specimen qualifies. "
+                    + "Completing the request also increases the range-data listings the "
+                    + "Fisherman keeps available for purchase.", opad);
 
             info.addPara("What is wanted:", opad);
             bullet(info);
@@ -360,7 +366,12 @@ public class FishermanQuest {
                     if (pond != null) return pond;
                 }
 
-                return system.getHyperspaceAnchor();
+                if (searchPoint == null || searchPoint.getContainingLocation() != system
+                        || searchPoint.getLocation().x != current.x
+                        || searchPoint.getLocation().y != current.y) {
+                    searchPoint = system.createToken(current.x, current.y);
+                }
+                return searchPoint;
             }
 
             return null;
@@ -370,13 +381,17 @@ public class FishermanQuest {
     public static Saved getActive() {
         Object stored = Global.getSector().getPersistentData().get(STATE_KEY);
 
-        return stored instanceof Saved ? (Saved) stored : null;
+        if (!(stored instanceof Saved quest)) return null;
+        repairSource(quest);
+        return quest;
     }
 
     public static Saved getOffer() {
         Object stored = Global.getSector().getPersistentData().get(OFFER_KEY);
 
-        return stored instanceof Saved ? (Saved) stored : null;
+        if (!(stored instanceof Saved quest)) return null;
+        repairSource(quest);
+        return quest;
     }
 
     public static String describe(Saved quest) {
@@ -417,17 +432,14 @@ public class FishermanQuest {
         quest.round = round;
         quest.credits = CREDITS_BASE + CREDITS_PER_ROUND * round;
 
-        SectorEntityToken pond = QuestPond.findFreePond(system);
+        SectorEntityToken pond = target.pond;
 
         if (pond != null) {
             quest.atPond = true;
             quest.x = pond.getLocation().x;
             quest.y = pond.getLocation().y;
         } else {
-            Vector2f at = MathUtils.getPointOnCircumference(OuterReaches.center(system),
-                    MathUtils.getRandomNumberInRange(OuterReaches.getInnerLimit(system),
-                            OuterReaches.getOuterLimit(system)),
-                    MathUtils.getRandomNumberInRange(0f, 360f));
+            Vector2f at = openSearchPoint(system);
 
             quest.atPond = false;
             quest.x = at.x;
@@ -455,23 +467,64 @@ public class FishermanQuest {
         Vector2f from = player == null ? new Vector2f() : player.getLocationInHyperspace();
 
         WeightedRandomPicker<Target> picker = new WeightedRandomPicker<>();
+        FishRequirement requirement = new FishRequirement();
+        requirement.lowCoherence = true;
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null || !spec.hasHabitat()) continue;
+            if (spec.spawnWeight <= 0f || spec.rarity == FishRarity.LEGENDARY
+                    || !requirement.couldBeSatisfiedBy(spec)) continue;
 
             int rung = spec.rarity.rank;
             float rarityWeight = rung == want ? 3f : rung == want - 1 ? 1f : 0.25f;
 
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {
                 if (!isEligibleSystem(system, from, minLY)) continue;
-                if (!FishPresence.livesIn(spec, system)) continue;
                 if (!isChartRequest(spec, system)) continue;
 
-                picker.add(new Target(spec, system), rarityWeight);
+                Target target = targetIn(spec, system);
+                if (target != null) picker.add(target, rarityWeight);
             }
         }
 
         return picker.pick();
+    }
+
+    protected static Target targetIn(FishSpec spec, StarSystemAPI system) {
+        SectorEntityToken pond = FishRanges.matches(spec, system, CatchImplement.POND)
+                ? QuestPond.findFreePond(system) : null;
+        if (pond != null) return new Target(spec, system, pond);
+        return FishRanges.matches(spec, system, CatchImplement.BREACH_LAMP)
+                ? new Target(spec, system, null) : null;
+    }
+
+    protected static void repairSource(Saved quest) {
+        FishSpec spec = FishSpecLoader.getFishSpec(quest.speciesId);
+        if (spec == null || !quest.atPond || spec.canBeReachedBy(CatchImplement.POND)
+                || !spec.canBeReachedBy(CatchImplement.BREACH_LAMP)) return;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!system.getId().equals(quest.systemId)) continue;
+
+            // Keep the accepted specimen identity; only the incompatible search site moves.
+            letGo(quest);
+            Vector2f at = openSearchPoint(system);
+            quest.atPond = false;
+            quest.x = at.x;
+            quest.y = at.y;
+            return;
+        }
+    }
+
+    protected static Vector2f openSearchPoint(StarSystemAPI system) {
+        Vector2f center = OuterReaches.center(system);
+        float radius = OuterReaches.getOuterLimit(system);
+        for (SectorEntityToken pond : QuestPond.getPonds(system)) {
+            radius = Math.max(radius, Misc.getDistance(center, pond.getLocation())
+                    + pond.getRadius() + SPOT_SPREAD * 2f);
+        }
+        return MathUtils.getPointOnCircumference(center, radius,
+                MathUtils.getRandomNumberInRange(0f, 360f));
     }
 
     protected static boolean isEligibleSystem(StarSystemAPI system, Vector2f from, float minLY) {
@@ -655,16 +708,17 @@ public class FishermanQuest {
     }
 
     public static void markCatch(FishCatch fish, SectorEntityToken mote) {
-        if (fish == null || !isQuestFish(mote)) return;
+        if (fish == null || mote == null) return;
 
         Saved quest = getActive();
         if (quest == null) return;
         ensureIdentity(quest);
 
-        String targetId = mote.getMemoryWithoutUpdate().getString(QUEST_TARGET_ID_KEY);
-        if (!quest.targetFishId.equals(targetId)) return;
+        if (!matchesTarget(quest, mote) || !quest.speciesId.equals(fish.speciesId)) return;
 
-        fish.questTargetId = targetId;
+        // Coherence and provenance must describe the same identified specimen.
+        fish.aberration = 1f;
+        fish.questTargetId = quest.targetFishId;
         fish.caughtAt = Global.getSector().getClock().getTimestamp();
         fish.caughtSystemId = mote.getContainingLocation() == null
                 ? null : mote.getContainingLocation().getId();
@@ -721,9 +775,19 @@ public class FishermanQuest {
         QuestPond.markPlanted(mote, STATE_KEY);
     }
 
-    protected static boolean isPlanted(StarSystemAPI system) {
+    protected static boolean matchesTarget(Saved quest, SectorEntityToken mote) {
+        if (mote == null || mote.isExpired() || mote.getContainingLocation() == null) return false;
+        if (!quest.systemId.equals(mote.getContainingLocation().getId())) return false;
+        if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)
+                || !quest.speciesId.equals(fish.getFishId())) return false;
+        return quest.targetFishId != null && quest.targetFishId.equals(
+                mote.getMemoryWithoutUpdate().getString(QUEST_TARGET_ID_KEY));
+    }
+
+    protected static boolean isPlanted(Saved quest, StarSystemAPI system) {
+        ensureIdentity(quest);
         for (SectorEntityToken mote : system.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (isQuestFish(mote) && !mote.isExpired()) return true;
+            if (matchesTarget(quest, mote)) return true;
         }
 
         return false;
