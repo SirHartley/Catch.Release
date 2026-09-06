@@ -541,8 +541,12 @@ public class FishermanQuest {
     }
 
     protected static boolean hasActiveRumor(String systemId) {
-        FishRumors.Saved rumor = FishRumors.getActive();
-        return rumor != null && systemId != null && systemId.equals(rumor.systemId);
+        if (systemId == null) return false;
+        for (FishRumors.Saved rumor : FishRumors.getActiveRumors()) {
+            if (systemId.equals(rumor.systemId)) return true;
+        }
+
+        return false;
     }
 
     protected static boolean isChartRequest(FishSpec spec, StarSystemAPI system) {
