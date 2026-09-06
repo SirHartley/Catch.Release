@@ -341,9 +341,16 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - The Abyss uses its own high-difficulty ladder. Rarity controls frequency and value there, but even Abyssal Common rows use at least main-sheet Rare difficulty.
 - When changing a rarity band, tune `difficulty`, `restlessness`, `motionSpeed`, `progressRateMult`, and `escapeRateMult` together and simulate the result. Difficulty alone stops carrying the late game once bar-size upgrades are large.
 - Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` may still roll either for one behavior interval.
-- `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Requirement rolling must combine that with method: drone catches are always pond catches, while Harpoon can use either implement.
+- `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
 - A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
+
+| Catch | Method | Implement |
+|---|---|---|
+| Drones at a natural rupture | `DRONE` | `POND` |
+| Harpoon catch of a fish from a pond | `HARPOON` | `POND` |
+| Harpoon catch at a Breach Lamp | `HARPOON` | `BREACH_LAMP` |
+| Drones at a Breach Lamp with the Breach Coupler | `DRONE` | `BREACH_LAMP` |
 
 ### Coherence model
 
