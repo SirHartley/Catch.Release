@@ -34,7 +34,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Stale campaign effect | Owner location/ability validity -> cleanup; shared renderer registration in `rendering/` |
 | Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; [Java UI contracts](UI.md). Minigame rendering is separate. |
 | Map / planner list rebuilds | `FishMapPane` and `FishRoutePopup` replace the list's owning custom panel; [lifetime contract](UI.md#rebuilding-lists) |
-| Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*`; black-hole pass in `rendering/spiral/` |
+| Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*` |
 | Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel`; [backdrop dimensions](UI.md#portraits-and-sprites) |
 
 ## Registration and lifecycle
@@ -46,7 +46,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting |
 | `data/campaign/fish.csv` | Species; `FishSpecLoader` |
 | `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon, skillshot_example |
-| `data/config/settings.json` | `catchrelease.dialogue.rules` command package, sprites, black-hole warp range |
+| `data/config/settings.json` | `catchrelease.dialogue.rules` command package and sprites; black-hole warp settings belong to the deprecated test below |
 | `data/config/sounds.json` | Sound registry; callers in abilities and `FishConstants` |
 | `data/config/LunaSettings.csv` | Charge-ready sound policy, camera snap, returning-player tutorial skip |
 | `data/campaign/bar_events.csv` | 11 ordinary FishJob subclasses + 3 camp jobs; Crablobab/rating use AddBarEvents rules |
@@ -60,7 +60,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
 | `data/config/UpgradeData.csv` -> `memory/upgrades/` | Stat IDs, loader aliases, saved levels and runtime values |
 
-Load order in `ModPlugin`: pond-on-jump -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/rating/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> black-hole warp -> stale pond claims/range relock -> dev shortcut.
+Load order in `ModPlugin`: pond-on-jump -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/rating/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims/range relock -> dev shortcut.
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
 
@@ -434,4 +434,5 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 | `campaign/fish/shop/ShopStorage` | Migration only. Returns fish left in the removed storage UI. |
 | `testing/DevShortcut` | Registered, but active only in dev mode. |
 | `testing/TestStencilRenderer` | Not registered. |
+| `rendering/spiral/BlackHoleSpiralWarp` | Deprecated test effect. Not installed by `ModPlugin`; its settings do not enable it. |
 | `campaign/ponds/renderer/PondHoleRenderer` | Dormant while `PondConstants.POND_HOLE_LOOK` selects the shader version. |
