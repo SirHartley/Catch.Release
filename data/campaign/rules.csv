@@ -2214,7 +2214,7 @@ The commander closes the maneuver record.
 
 ""Standing orders don't permit me to fire on an unclassified contact. I am also not taking this logistics train toward inhabited space with it in trail.""
 
-""One of my ratings used to fish. He says fishing crews deal with persistent contacts by releasing a specimen they're known to follow. I do not enjoy having that sentence in the incident log, but it is the only course with precedent.""
+""One of my crewmen used to fish. He says fishing crews deal with persistent contacts by releasing a specimen they're known to follow. I do not enjoy having that sentence in the incident log, but it is the only course with precedent.""
 
 ""On his recommendation, we need $entity.catchrelease_fleetQuestAsk. Navy service voucher is $entity.catchrelease_fleetQuestReward. We can hold here for $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_follower_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrelease_fleetQuestType == follower,,"""Accepted. I'll transmit the request and service voucher authorization.""
@@ -2233,7 +2233,7 @@ catchrelease_fq_follower_decline,CatchReleaseFleetQuestDeclineText,$entity.catch
 catchrelease_fq_follower_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == follower,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""The contact remains at station. It has a permanent line on the watch log now.""
 
 ""We have $entity.catchreleaseFleetDays. We still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_follower_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == follower,,"The rating comes up from the working deck to handle the release. He checks the specimen against the request, then has the container moved clear of the formation.
+catchrelease_fq_follower_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == follower,,"The crewman comes up from the working deck to handle the release. He checks the specimen against the request, then has the container moved clear of the formation.
 
 On the sensor plot, $entity.catchreleaseFleetContactDesignation breaks station and takes the release bearing. The return weakens until it drops below tracking threshold.
 
@@ -2251,7 +2251,7 @@ catchrelease_fq_follower_thanks,CatchReleaseFleetQuestThanksText,$entity.catchre
 
 The commander looks across the compartment.
 
-""Good call, rating.""
+""Good call, crewman.""
 
 They turn back to the convoy plot.
 
@@ -3373,7 +3373,7 @@ He checks the old mark.
 
 ""Take your time getting there. Don't take your time once you're on the rupture.""",100:catchrelease_fisherBack:Continue,
 ,,,,,,
-# tutorial rating bar event,,,,,,
+# tutorial spacer bar event,,,,,,
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
@@ -3382,7 +3382,7 @@ catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBa
 CatchReleaseCMD rememberRatingPlanet
 CatchReleaseCMD point
 CatchReleaseCMD showIntroIntel
-FireAll CatchReleaseRatingQuestions","The rating hears you out, then turns the glass between both hands.
+FireAll CatchReleaseRatingQuestions","The spacer hears you out, then turns the glass between both hands.
 
 ""You're going beyond the picket?""
 
@@ -3394,30 +3394,19 @@ A pause.
 
 ""Ask for the Fisherman.""",,
 catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:Where do I find the trawler?,
-catchrelease_ratingQuestionWhat,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhat,,,10:catchrelease_ratingBarWhatRating:What exactly is a rating?,
 catchrelease_ratingQuestionFishing,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedFishing,,,20:catchrelease_ratingBarFishing:Fishing. In space.,
 catchrelease_ratingQuestionBack,CatchReleaseRatingQuestions,,,,100:catchrelease_ratingBarBack:Go back to the bar,
-catchrelease_ratingBarWhatRating,DialogOptionSelected,$option == catchrelease_ratingBarWhatRating,"$catchrelease_ratingAskedWhat = true 0
-FireAll CatchReleaseRatingQuestions","""Ship's crew.""
-
-The rating lifts one shoulder.
-
-""Not an officer. Deck, drives, guns, flight line, loading detail - whatever berth owns you that watch. Navy likes a proper word for everything.""
-
-They take a drink.
-
-""Rating.""",,
 catchrelease_ratingBarFishing,DialogOptionSelected,$option == catchrelease_ratingBarFishing,"$catchrelease_ratingAskedFishing = true 0
 FireAll CatchReleaseRatingQuestions","""That's what they call it.""
 
-The rating considers the objection.
+The spacer considers the objection.
 
 ""There's catch. There's buyers. There's gear. Sounds like fishing from my end of the loading bay.""",,
 catchrelease_ratingBarWhere,DialogOptionSelected,$option == catchrelease_ratingBarWhere,"CatchReleaseCMD point
 $catchrelease_ratingAskedWhere = true 0
 FireAll CatchReleaseRatingQuestions","""Past the last settled orbit. They don't berth much.""
 
-The rating gives you the relevant nav reference.
+The spacer gives you the relevant nav reference.
 
 ""If there's a boat in-system, your sensors will find it. If there isn't, go far enough out and there generally is.""",,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
@@ -4166,7 +4155,7 @@ $global.catchrelease_metRating",,"The Fisherman glances over your transponder re
 
 ""All right, captain. You were sent for, and you came. What next?","0:catchrelease_introWantWork:I'm looking for work.
 10:catchrelease_introCurious:I want to know what you're doing out here.
-20:catchrelease_introRodQuestion:The rating said something about a ROD.
+20:catchrelease_introRodQuestion:The spacer said something about a ROD.
 100:catchrelease_fisherBack:Not today.",
 catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
 CatchReleaseCMD tokens
@@ -4182,7 +4171,7 @@ $global.catchrelease_metRating",,"The Fisherman glances over your transponder re
 
 ""All right, captain. You've come out to a fishing boat. What are you after?""","0:catchrelease_introWantWork:I'm looking for work.
 10:catchrelease_introCurious:I want to know what you're doing out here.
-20:catchrelease_introRodQuestion:The rating said something about a ROD.
+20:catchrelease_introRodQuestion:The spacer said something about a ROD.
 100:catchrelease_fisherBack:Not today.",
 catchrelease_introHelloFromProperty,DialogOptionSelected,"$option == catchrelease_introHello
 !$global.catchrelease_metRating",,"The Fisherman glances over your transponder return, then sets the manifest aside.
