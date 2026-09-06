@@ -79,6 +79,9 @@ public class FishermanConstants {
     public static final float RUMOR_RARITY_BIAS = 1.5f;
     public static final float RUMOR_LOOT_MULT = 2.5f;
     public static final float RUMOR_STRANGER_WEIGHT = 8f;
+    public static final float RUMOR_QUALITY_BIAS = 0.25f;
+    public static final float RUMOR_MOTION_MULT = 0.75f;
+    public static final float RUMOR_LOOT_RARITY_BIAS = 2f;
 
     public static final float DIALOG_DIM = 0.9f;
     public static final String VISIBILITY_ID = "catchrelease_fisherman";

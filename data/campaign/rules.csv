@@ -3295,30 +3295,109 @@ $catchreleaseRumor","CatchReleaseCMD rumor
 CatchReleaseCMD tokens
 FireBest CatchReleaseRumorText",,100:catchrelease_fisherBack:Continue,
 catchrelease_rumorRarity,CatchReleaseRumorText,"CatchReleaseCMD tokens
-$catchreleaseRumorRarity score:10",CatchReleaseCMD showRumorIntel,"The Fisherman pulls a grease-marked chart from beneath the control unit.
+$catchreleaseRumorKind == rarity score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""If you're choosing where to fish next, look at $catchreleaseRumorSystem.""
 
-""Rarer patterns are turning up in $catchreleaseRumorSystem.""
+The Fisherman leans back from the comm pickup.
 
-He checks the date in one corner.
+""Rarer patterns have been turning up there more often lately. Enough that I'd believe the report.""
 
-""Fabric's running thin in $catchreleaseRumorSystem. May be stale by the time you arrive.""",,
+He gives the system name another glance.
+
+""Might not stay worth the trip forever.""",,
 catchrelease_rumorLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
-$catchreleaseRumorLoot score:10",CatchReleaseCMD showRumorIntel,"The Fisherman calls up a retrieval manifest. Three cargo lines have been circled.
+$catchreleaseRumorKind == loot score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","The Fisherman has a retrieval manifest open beside him when the channel settles.
 
-""Crews in $catchreleaseRumorSystem are bringing up more bycatch than usual. Wreckage. Lost cargo.""
+""More bycatch is coming up with the fish in $catchreleaseRumorSystem. Not better, necessarily. Just more chances to grab something before it gets away.""
 
-He closes the manifest.
+He looks down the page once more.
 
-""Leave room in the hold.""",,
+""If you're headed there anyway, keep some hold space free.""",,
 catchrelease_rumorOutsider,CatchReleaseRumorText,"CatchReleaseCMD tokens
-$catchreleaseRumorOutsider score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
-CatchReleaseCMD showRumorIntel","The Fisherman turns a range chart until one system sits under his thumb.
+$catchreleaseRumorKind == stranger score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""$catchreleaseRumorStranger.""
 
-""$catchreleaseRumorStranger. $catchreleaseRumorSystem.""
+The Fisherman names $catchreleaseRumorSystem next.
 
-He puts a finger against the recorded range.
+""Those two aren't supposed to share a chart. They do, for the moment.""
 
-""Wrong range. Still there last I heard.""",,
+He leaves it there for a second, then adds:
+
+""If you're after one, that's where I'd look. The ones brought in so far have been decent specimens.""",,
+catchrelease_rumorSize,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == size score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","The Fisherman holds up a catch sheet where the measurements are easy to see over the comm feed.
+
+""$catchreleaseRumorSystem has been producing heavier fish than usual. Not freaks. Just a lot of catches toward the big end of what you'd expect.""
+
+He lowers the sheet.
+
+""Useful if you're filling an order by weight.""",,
+catchrelease_rumorCalm,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == calm score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""One more for your planner. $catchreleaseRumorSystem.""
+
+The Fisherman scratches at his jaw.
+
+""Fish there haven't been running as hard during retrieval. Easier to follow, easier to stay on.""
+
+He shrugs once.
+
+""They can still slip you. I'd just rather work an easy fish than a difficult one.""",,
+catchrelease_rumorValuableLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == valuable_loot score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","A bycatch tally is visible on the Fisherman's side of the link, several entries marked for value.
+
+""$catchreleaseRumorSystem has been turning up better bycatch than usual. More of the recoveries are worth keeping instead of writing off as scrap.""
+
+He closes the tally.
+
+""Still have to catch what comes through.""",,
+catchrelease_rumorRarityLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == rarity_loot score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""$catchreleaseRumorSystem is busy in a useful way right now.""
+
+The Fisherman counts the points off on two fingers.
+
+""Rarer fish are showing more often, and crews working them are seeing more bycatch along the way.""
+
+He drops his hand.
+
+""If you've got the hold space and the time, it's a good place to spend both.""",,
+catchrelease_rumorSizeCalm,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == size_calm score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","The Fisherman looks mildly pleased when he mentions $catchreleaseRumorSystem.
+
+""Good catches there lately. Bigger specimens, and they aren't making you work quite as hard once the retrieval starts.""
+
+He nods toward the range display.
+
+""That's a comfortable combination. Doesn't happen often enough.""",,
+catchrelease_rumorStrangerCalm,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == stranger_calm score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""I've got a strange one for you. $catchreleaseRumorStranger is showing in $catchreleaseRumorSystem, outside the charted range.""
+
+The Fisherman watches the system marker blink on his display.
+
+""Fish there have also been easier to stay with during retrieval.""
+
+He looks back at you.
+
+""If you mean to chase the stranger, I'd do it while both reports are still worth trusting.""",,
+catchrelease_rumorLootValuable,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == loot_valuable score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""If you like bycatch, $catchreleaseRumorSystem is worth your attention.""
+
+The Fisherman turns a cargo tally toward his own light and reads another line.
+
+""More opportunities are showing up during retrieval, and a better share of what gets recovered is worth keeping.""
+
+He sets the tally aside.
+
+""Still plenty of ordinary scrap in the mix.""",,
+catchrelease_rumorUnavailable,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == none",,"""Nothing worth sending you after.""",,
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
 !$catchreleaseRumor",,"""Nothing worth sending you after.""",100:catchrelease_fisherBack:Continue,
