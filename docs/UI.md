@@ -75,6 +75,29 @@ Fisherman identity and vanilla person-panel setup are covered by
 Use the [project routing](RULES.md#project-routing) for Fisherman panel returns and
 the [fleet and bar exit paths](RULES.md#fleet-and-bar-exits) for teardown.
 
+## Cargo pickers
+
+The description panel passed to `CargoPickerListener.recreateTextPanel` is a
+tooltip, not an interactive UI element. Its outer `setForceProcessInput(true)`
+must be called through `ReflectionUtils` before nested buttons can receive input.
+The nested custom panel's normal `buttonPressed` callback then works. Set its
+button to quick mode: vanilla rebuilds this tooltip every frame, so a button
+waiting for mouse-up can be replaced between press and release.
+
+`FishBuyer` queues packing for the button panel's `advance`, outside input
+dispatch. It finds only the ancestor picker holding its exact offer cargo, then
+that picker's cargo panel by `updateCargoViews`; no obfuscated names or global
+UI search. Packing waits until no stack is held by the cursor and clears the
+transfer handler's ledger with `resetTransaction` before replacing either grid.
+Otherwise, cancel would replay transfers using obsolete loose-fish identities.
+Copy the packed player cargo into the offer instead of packing both independently:
+crate contents must have identical ordering for item removal on sale.
+
+Sources (0.98a-RC8): cargo picker and custom-panel implementations in
+`sources-obf/ui.newui.java`; `StandardTooltipV2.processInputImpl` in
+`sources-obf/ui.impl.java`; cargo panel `updateCargoViews` and transfer handler
+`resetTransaction/cancelTransaction` in `sources-obf/campaign.ui.java`.
+
 ## Hover tooltips
 
 Use transparent custom-panel hotspots to attach stock tooltips to hand-drawn
