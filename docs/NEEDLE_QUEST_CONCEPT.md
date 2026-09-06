@@ -1,11 +1,4 @@
 # Catch.Release: The Needle Theorem
-
-## Overview
-
-- **Theme:** Quiet existential horror about the player’s freedom to reshape a world whose people have to live with the results.
-- **Philosophy:** The Fisherman chooses to live within the world’s limits; the Scientist pursues knowledge without regard for its inhabitants. The player must decide what those lives are worth.
-- **Content:** Fish measurements, legendary hunts and concealed experiments on the captain lead to a choice: take extraordinary power, or protect familiar people and places without an equivalent reward.
-
 ## Concept reference - 6 September 2026
 
 **Status: deferred narrative brainstorming. Revisit quest design once the three fishing ships are finished.** This concept note preserves the author’s decisions and open options for that discussion. [LORE.md](LORE.md) remains the current lore authority; this note does not amend it or authorize quest implementation. Sections marked as directions or established concepts reflect the conversation’s decisions; suggested scenes, reward details and ending mechanics remain open where indicated.
