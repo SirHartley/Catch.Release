@@ -146,7 +146,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `OuterReaches.java` | Collects real market entities, including connected/hidden/non-economy entities; chooses cleared spawn points and travel legs. Conditions-only planet markets are not settlements. |
 | `FishermanBehavior.java` | Shared visitor/standing route checks and market navigation avoidance; also lamps, staged motes, pacing, visibility, visit duration, and departure. `CoreFisherBehavior` selects standing lifetime and assignment text. |
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
-| `FishermanQuest.java` | Saved chart offer and exact identified catch. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
+| `FishermanQuest.java` | Saved chart offer and exact identified catch. Selects species/system/source together; repairs legacy lamp-only pond targets without changing specimen identity. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
 | `FishermanIdentity.java` | Stores the shared `PersonAPI` and selects one of five coherence portraits immediately before a hail. |
 | `FishRumors.java` | Monthly leads with six effects and four authored pairs: rarity/bycatch, size/calm, stranger/calm, bycatch/value. Saved `kindId` selects the effect set and complete dialogue/intel passage; old `type` saves retain their single effect. Graduation grants a separate immediate lead. |
 
@@ -163,6 +163,8 @@ Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge 
 | `CatchReleaseCMD.java` | Single rules bridge: temporary tokens, conditions, actions, custom panels, highlights, question paging and fleet teardown. Restores prior rules plugin and options once after panels. |
 | `QuestDialogMap.java` | Shared temporary sidebar map for remote dialogue targets, matching vanilla mission icons, tags, and colours. |
 | `FishBuyer.java` | Immutable bulk-sale preview, revalidated before sale; protects active FishAsker and marked-gear specimens, preserves cargo cells and unboxes temporary crates on exit. |
+
+Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchreleaseWorkInstructions` reads a Text-only `CatchReleaseWorkPondInstructions` or `CatchReleaseWorkLampInstructions` row from `rules.csv`, chosen by the saved source before outer Text replacement; these private lookups do not execute scripts or add options.
 
 ### `campaign/fish/tutorial`
 
@@ -384,8 +386,9 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - The method says which rig caught a fish; the implement says what exposed it. Both values must follow the mote's actual provenance.
 - Pond and harpoon catches must carry the exact source rupture where applicable. Chart requests also carry target ID, target system, and earliest valid timestamp through loose fish and containers.
 - Chart and tutorial completion use the same `FishRequirement`/`FishCurrency` read and spend path as other quests. Do not add a separate cargo-completion check.
-- A chart request plants or replants its identified target only while the player is in the target system. Open-water targets spawn away from their destinations and always use the required low-coherence roll.
-- Chart offers select a valid fish-and-system pair, not a species pasted onto a destination. Occupied camp ruptures may inform the species choice but are never selected as the quest destination.
+- A chart request plants or replants its identified target only while the player is in the target system. Only the active specimen ID/species/system suppresses replanting; a stale quest flag does not. Open-space targets spawn away from their destinations, and chart intel routes to their saved in-system search coordinates.
+- `FishermanQuest.markCatch()` assigns both aberration 1.0 and chart provenance after checking specimen ID/species/system. This happens after normal catch rolls and equipment bonuses. Ordinary catches keep their own readings and cannot satisfy the identified request; loose/container cargo, progress and hand-in use the same requirement.
+- Chart offers select a valid species/system/implement together through `FishRanges.matches()`. Lamp-only species cannot use ponds; pond-only species require a free pond. Zero-weight, legendary and low-coherence-ineligible species are excluded. Occupied camp ruptures may inform species choice but are never quest destinations.
 - Harpoon aim assist and collision both call `HarpoonEntityPlugin.canTake()`. Buried motes use `catchrelease_buried_mote` and require full light, or mere detection with Fathom Head.
 
 ### Rendering, UI, reflection, and audio
