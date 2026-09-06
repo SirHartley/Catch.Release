@@ -104,9 +104,10 @@ custom panel. Remove the old child panel, not just its tooltip or scroller. Keep
 the list's `createUIElement` and `addUIElement` calls on that disposable owner.
 Do not keep old owners in another cache.
 
-`FishMapPane` and `FishRoutePopup` use this pattern. Their `listViewport` is the
-position returned by the owner's `addUIElement`, so row clipping and hit tests
-still use the visible viewport, not the full scrollable content.
+`FishMapPane` and `FishRoutePopup` use this pattern. After creating each replacement
+panel, set `listViewport` to the position returned by that panel's `addUIElement`
+call. Use this position for drawing and mouse checks. The old panel's position is
+no longer valid, and the full scrollable content is larger than the visible viewport.
 
 Source: the `CustomPanelAPI` implementation's `createUIElement/addUIElement` in
 `sources-obf/ui.newui.java`, and `UIPanel` removal in `sources-obf/ui.java`.
