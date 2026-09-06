@@ -105,14 +105,17 @@ public class FishBuyer {
 
         protected final CargoAPI offer;
         protected boolean packed;
+        protected boolean packRequested;
 
         PickerPackingSession(CargoAPI offer) {
             this.offer = offer;
         }
 
-        void addButton(TooltipMakerAPI panel, CargoAPI selected) {
+        void addButton(TooltipMakerAPI panel, CargoAPI selected, CargoStackAPI pickedUp) {
             if (packed || panel == null) return;
 
+            // The picker's outer tooltip blocks input to its children by default.
+            ReflectionUtils.invoke(panel, "setForceProcessInput", true);
             PackButton plugin = new PackButton(this, selected);
             CustomPanelAPI custom = Global.getSettings().createCustom(
                     BUTTON_WIDTH, BUTTON_HEIGHT + 10f, plugin);
@@ -121,23 +124,23 @@ public class FishBuyer {
                     BUTTON_WIDTH, BUTTON_HEIGHT + 10f, false);
             plugin.button = element.addButton("Pack into crates", plugin.buttonId,
                     BUTTON_WIDTH, BUTTON_HEIGHT, 10f);
+            // Vanilla rebuilds this tooltip every frame, before a later mouse-up.
+            plugin.button.setQuickMode(true);
+            plugin.button.setEnabled(pickedUp == null && !packRequested);
             custom.addUIElement(element).inTL(0f, 0f);
             panel.addCustom(custom, 0f);
         }
 
-        boolean pack(CargoAPI selected) {
+        boolean pack(CargoAPI selected, CargoAPI playerCargo) {
             if (packed) return false;
-            packed = true;
 
-            // Selection lives in a second cargo object. Put it back before rebuilding the source so nothing remains stranded under the old loose-item identity.
-            if (selected != null && !selected.isEmpty()) {
-                offer.addAll(selected);
-                selected.clear();
-            }
-
-            FishItems.packIntoCrates(offer);
-            FishItems.packIntoCrates(Global.getSector().getPlayerFleet().getCargo());
+            // Copy the packed hold so crate contents have identical ordering for sale removal.
+            FishItems.packIntoCrates(playerCargo);
+            selected.clear();
+            offer.clear();
+            offer.addAll(FishItems.copyFishStacks(playerCargo));
             offer.sort();
+            packed = true;
             return true;
         }
     }
@@ -158,52 +161,66 @@ public class FishBuyer {
 
         @Override
         public void buttonPressed(Object buttonId) {
-            if (buttonId != this.buttonId || !session.pack(selected)) return;
+            if (buttonId != this.buttonId || session.packed || !button.isEnabled()) return;
 
-            if (button != null) button.setEnabled(false);
-            PickerCargoRefresh.refreshFrom(panel);
+            session.packRequested = true;
+            button.setEnabled(false);
+        }
+
+        @Override
+        public void advance(float amount) {
+            if (!session.packRequested || session.packed) return;
+            session.packRequested = false;
+
+            try {
+                Object tradePanel = PickerCargoAccess.findTradePanel(panel, session.offer);
+                Object transfers = ReflectionUtils.invoke(tradePanel, "getTransferHandler");
+                if (ReflectionUtils.invoke(transfers, "getPickedUpStack") != null) return;
+
+                // Forget loose-item transfers before replacing the picker cargo with crates.
+                ReflectionUtils.invoke(transfers, "resetTransaction");
+                session.pack(selected, Global.getSector().getPlayerFleet().getCargo());
+                ReflectionUtils.invoke(tradePanel, "updateCargoViews");
+            } catch (RuntimeException ex) {
+                Global.getLogger(FishBuyer.class).warn("Could not pack fish in cargo picker", ex);
+            }
         }
     }
 
-    protected static final class PickerCargoRefresh {
+    protected static final class PickerCargoAccess {
 
         protected static final int MAX_PARENT_DEPTH = 16;
 
-        static void refreshFrom(CustomPanelAPI panel) {
+        static Object findTradePanel(Object panel, CargoAPI offer) {
             Object current = panel;
 
             for (int depth = 0; current != null && depth < MAX_PARENT_DEPTH; depth++) {
-                if (invokeRefresh(current)) return;
-
-                for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
-                        current, null, null, null, null, false)) {
-                    try {
-                        Object value = field.get(current);
-                        if (value != null && invokeRefresh(value)) return;
-                    } catch (Throwable ignored) {
-                        // One inaccessible or invalid field does not invalidate the capability crawl.
+                if (ownsOffer(current, offer)) {
+                    Object tradePanel = null;
+                    for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
+                            current, null, null, null, null, false)) {
+                        if (ReflectionUtils.getMethodsMatching(field.type,
+                                "updateCargoViews", null, 0, null).size() != 1) continue;
+                        if (tradePanel != null) throw new IllegalStateException("Ambiguous cargo panel");
+                        tradePanel = field.get(current);
                     }
+                    if (tradePanel != null) return tradePanel;
+                    break;
                 }
 
-                try {
-                    current = ReflectionUtils.invokeIfExists(current, "getParent");
-                } catch (Throwable ignored) {
-                    return;
-                }
+                current = ReflectionUtils.invokeIfExists(current, "getParent");
             }
+            throw new IllegalStateException("Fish cargo picker not found");
         }
 
-        protected static boolean invokeRefresh(Object candidate) {
-            try {
-                List<ReflectionUtils.ReflectedMethod> methods = ReflectionUtils.getMethodsMatching(
-                        candidate, "updateCargoViews", null, 0, null);
-                if (methods.size() != 1) return false;
+        protected static boolean ownsOffer(Object candidate, CargoAPI offer) {
+            if (!ReflectionUtils.hasFieldOfType(candidate, CargoPickerListener.class)) return false;
 
-                methods.get(0).invoke(candidate);
-                return true;
-            } catch (Throwable ignored) {
-                return false;
+            for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
+                    candidate, null, null, CargoAPI.class, null, false)) {
+                if (field.get(candidate) == offer) return true;
             }
+            return false;
         }
     }
 
@@ -352,7 +369,7 @@ public class FishBuyer {
                         panel.addPara("Total: %s", 10f, Misc.getHighlightColor(),
                                 Misc.getDGSCredits(valueOf(combined)));
 
-                        packing.addButton(panel, cargo);
+                        packing.addButton(panel, cargo, pickedUp);
                     }
                 });
 
