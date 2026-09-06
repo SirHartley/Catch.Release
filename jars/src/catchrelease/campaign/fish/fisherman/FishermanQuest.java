@@ -269,9 +269,12 @@ public class FishermanQuest {
                     faction.getBaseUIColor(),
                     faction.getDisplayNameWithArticleWithoutArticle());
 
-            info.addPara("The Fisherman wants the coherence reading as much as the specimen, with "
-                    + "whatever comes through preserved as recovered. Completing the request "
-                    + "increases the number of range-data listings he keeps in stock.", opad);
+            info.addPara("This request is for one identified anomalous specimen, not an ordinary "
+                    + "representative of the pattern or a search for an unstable system. Its own "
+                    + "coherence reading is unusually poor, and the target is identified at the "
+                    + "saved search point by a bright cyan mote. Only that specimen qualifies. "
+                    + "Completing the request also increases the range-data listings the "
+                    + "Fisherman keeps available for purchase.", opad);
 
             info.addPara("What is wanted:", opad);
             bullet(info);
