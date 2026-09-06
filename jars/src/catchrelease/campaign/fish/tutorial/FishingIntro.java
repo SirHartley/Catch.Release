@@ -1069,7 +1069,26 @@ public class FishingIntro {
                 ask.questTargetId = TutorialConstants.TARGET_KEY;
             }
 
-            asks.add(ask);
+            FishRequirement ponds = new FishRequirement();
+            ponds.addAlternative(ask);
+            for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+                if (!system.getId().equals(target.systemId)) continue;
+
+                // Ordinary catches record their pond ID, but older catches lack a system ID.
+                for (SectorEntityToken pond : QuestPond.getPonds(system)) {
+                    if (pond.getId() == null || pond.getId().equals(sourceId)) continue;
+
+                    FishRequirement alternative = new FishRequirement();
+                    alternative.method = FishLogEntry.Method.DRONE;
+                    alternative.implement = CatchImplement.POND;
+                    alternative.sourceId = pond.getId();
+                    alternative.minCaughtAt = target.assignedAt;
+                    ponds.addAlternative(alternative);
+                }
+                break;
+            }
+
+            asks.add(ponds.anyOf.size() > 1 ? ponds : ask);
             return asks;
         }
 
