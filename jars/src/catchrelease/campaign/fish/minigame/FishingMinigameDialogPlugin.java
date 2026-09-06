@@ -298,10 +298,6 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
             aberration = Math.max(0f, aberration - tackle.coherenceBonus);
         }
 
-        if (catchrelease.campaign.fish.fisherman.FishermanQuest.isQuestFish(catchTarget)) {
-            aberration = 1f;
-        }
-
         this.specimen = FishCatch.roll(fish, aberration, quality,
                 anchor == null ? null : SectorRegion.of(anchor.getContainingLocation()));
 
