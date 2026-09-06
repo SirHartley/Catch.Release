@@ -98,6 +98,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String SELL_EPIC = "$catchreleaseSellEpic";
 
     public static final String RUMOR = "$catchreleaseRumor";
+    public static final String RUMOR_KIND = "$catchreleaseRumorKind";
     public static final String RUMOR_SYSTEM = "$catchreleaseRumorSystem";
     public static final String RUMOR_STRANGER = "$catchreleaseRumorStranger";
     public static final String RUMOR_RARITY = "$catchreleaseRumorRarity";
@@ -799,11 +800,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 && FishRumors.isAvailable(), 0);
 
         FishRumors.Saved rumor = FishRumors.getActive();
+        local.set(RUMOR_KIND, FishRumors.getKindId(rumor), 0);
         local.set(RUMOR_SYSTEM, rumor == null ? "" : rumor.systemName, 0);
         local.set(RUMOR_STRANGER, FishRumors.getStrangerDisplayName(rumor), 0);
-        local.set(RUMOR_RARITY, rumor != null && rumor.type == FishRumors.TYPE_RARITY, 0);
-        local.set(RUMOR_LOOT, rumor != null && rumor.type == FishRumors.TYPE_LOOT, 0);
-        local.set(RUMOR_OUTSIDER, rumor != null && rumor.type == FishRumors.TYPE_STRANGER, 0);
+        local.set(RUMOR_RARITY, FishRumors.hasEffect(rumor, FishRumors.TYPE_RARITY), 0);
+        local.set(RUMOR_LOOT, FishRumors.hasEffect(rumor, FishRumors.TYPE_LOOT), 0);
+        local.set(RUMOR_OUTSIDER, FishRumors.hasEffect(rumor, FishRumors.TYPE_STRANGER), 0);
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));

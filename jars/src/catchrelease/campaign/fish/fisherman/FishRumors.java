@@ -32,6 +32,32 @@ import java.util.Set;
 
 public class FishRumors {
 
+    public enum Kind {
+
+        RARITY("rarity", TYPE_RARITY),
+        LOOT("loot", TYPE_LOOT),
+        STRANGER("stranger", TYPE_STRANGER),
+        SIZE("size", TYPE_SIZE),
+        CALM("calm", TYPE_CALM),
+        VALUABLE_LOOT("valuable_loot", TYPE_VALUABLE_LOOT);
+
+        public final String id;
+        public final int primaryType;
+        private final int effects;
+
+        Kind(String id, int... types) {
+            this.id = id;
+            this.primaryType = types[0];
+            int mask = 0;
+            for (int type : types) mask |= 1 << type;
+            this.effects = mask;
+        }
+
+        public boolean has(int type) {
+            return (effects & (1 << type)) != 0;
+        }
+    }
+
     public static final String STATE_KEY = "$catchrelease_rumor";
     public static final String LAST_ASKED_KEY = "$catchrelease_rumor_last";
     public static final String TUTORIAL_LEAD_KEY = "$catchrelease_tutorial_rumor";
@@ -39,6 +65,9 @@ public class FishRumors {
     public static final int TYPE_RARITY = 0;
     public static final int TYPE_LOOT = 1;
     public static final int TYPE_STRANGER = 2;
+    public static final int TYPE_SIZE = 3;
+    public static final int TYPE_CALM = 4;
+    public static final int TYPE_VALUABLE_LOOT = 5;
 
     public static class Saved implements Serializable {
 
@@ -46,6 +75,7 @@ public class FishRumors {
         public String systemName;
 
         public int type;
+        public String kindId;
         public String strangerId;
         public long started;
     }
@@ -139,7 +169,7 @@ public class FishRumors {
         }
 
         protected List<catchrelease.campaign.fish.shop.FishRequirement> getMapAsks() {
-            if (rumor.type != TYPE_STRANGER) return null;
+            if (!hasEffect(rumor, TYPE_STRANGER)) return null;
             return FishIntelMapButton.forSpecies(rumor.strangerId);
         }
 
@@ -242,8 +272,36 @@ public class FishRumors {
     protected static boolean appliesTo(LocationAPI location, int type) {
         Saved rumor = getActive();
 
-        return rumor != null && rumor.type == type && location instanceof StarSystemAPI
+        return hasEffect(rumor, type) && location instanceof StarSystemAPI
                 && rumor.systemId != null && rumor.systemId.equals(((StarSystemAPI) location).getId());
+    }
+
+    public static Kind getKind(Saved rumor) {
+        if (rumor == null) return null;
+
+        for (Kind kind : Kind.values()) {
+            if (kind.id.equals(rumor.kindId)) return kind;
+        }
+
+        // Older saves stored only one effect.
+        return switch (rumor.type) {
+            case TYPE_LOOT -> Kind.LOOT;
+            case TYPE_STRANGER -> Kind.STRANGER;
+            case TYPE_SIZE -> Kind.SIZE;
+            case TYPE_CALM -> Kind.CALM;
+            case TYPE_VALUABLE_LOOT -> Kind.VALUABLE_LOOT;
+            default -> Kind.RARITY;
+        };
+    }
+
+    public static boolean hasEffect(Saved rumor, int type) {
+        Kind kind = getKind(rumor);
+        return kind != null && kind.has(type);
+    }
+
+    public static String getKindId(Saved rumor) {
+        Kind kind = getKind(rumor);
+        return kind == null ? "none" : kind.id;
     }
 
     public static float getRarityBias(LocationAPI location) {
@@ -253,13 +311,28 @@ public class FishRumors {
     public static float getLootMultForPlayer() {
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return 1f;
 
-        return appliesTo(Global.getSector().getPlayerFleet().getContainingLocation(), TYPE_LOOT)
-                ? FishermanConstants.RUMOR_LOOT_MULT : 1f;
+        return getLootMult(Global.getSector().getPlayerFleet().getContainingLocation());
+    }
+
+    public static float getLootMult(LocationAPI location) {
+        return appliesTo(location, TYPE_LOOT) ? FishermanConstants.RUMOR_LOOT_MULT : 1f;
+    }
+
+    public static float getQualityBias(LocationAPI location) {
+        return appliesTo(location, TYPE_SIZE) ? FishermanConstants.RUMOR_QUALITY_BIAS : 0f;
+    }
+
+    public static float getMotionMult(LocationAPI location) {
+        return appliesTo(location, TYPE_CALM) ? FishermanConstants.RUMOR_MOTION_MULT : 1f;
+    }
+
+    public static float getLootRarityBias(LocationAPI location) {
+        return appliesTo(location, TYPE_VALUABLE_LOOT) ? FishermanConstants.RUMOR_LOOT_RARITY_BIAS : 1f;
     }
 
     public static String getStrangerId(LocationAPI location) {
         Saved rumor = getActive();
-        if (rumor == null || rumor.type != TYPE_STRANGER) return null;
+        if (!hasEffect(rumor, TYPE_STRANGER)) return null;
         if (!appliesTo(location, TYPE_STRANGER)) return null;
 
         return rumor.strangerId;
@@ -282,14 +355,18 @@ public class FishRumors {
         Saved rumor = new Saved();
         rumor.systemId = system.getId();
         rumor.systemName = system.getNameWithNoType();
-        rumor.type = (int) MathUtils.getRandomNumberInRange(0f, 2.99f);
+        Kind[] kinds = Kind.values();
+        Kind kind = kinds[(int) MathUtils.getRandomNumberInRange(0f, kinds.length - 0.01f)];
         rumor.started = Global.getSector().getClock().getTimestamp();
 
-        if (rumor.type == TYPE_STRANGER) {
+        if (kind.has(TYPE_STRANGER)) {
             rumor.strangerId = pickStranger(system);
 
-            if (rumor.strangerId == null) rumor.type = TYPE_RARITY;
+            if (rumor.strangerId == null) kind = Kind.RARITY;
         }
+
+        rumor.type = kind.primaryType;
+        rumor.kindId = kind.id;
 
         Global.getSector().getPersistentData().put(STATE_KEY, rumor);
         Global.getSector().getPersistentData().put(LAST_ASKED_KEY, rumor.started);
@@ -358,7 +435,7 @@ public class FishRumors {
     }
 
     public static String getStrangerDisplayName(Saved rumor) {
-        if (rumor == null || rumor.type != TYPE_STRANGER) return "";
+        if (!hasEffect(rumor, TYPE_STRANGER)) return "";
 
         FishSpec stranger = FishSpecLoader.getFishSpec(rumor.strangerId);
         return stranger == null ? "pattern" : stranger.getDisplayName();
@@ -368,6 +445,13 @@ public class FishRumors {
         if (rumor == null) return "";
 
         switch (rumor.type) {
+            case TYPE_SIZE:
+                return "Catches in " + rumor.systemName + " are tending toward larger and heavier specimens.";
+            case TYPE_CALM:
+                return "Fish in " + rumor.systemName
+                        + " are moving more slowly during retrieval, making them easier to pursue.";
+            case TYPE_VALUABLE_LOOT:
+                return "Bycatch recovered in " + rumor.systemName + " has been skewing toward more valuable finds.";
             case TYPE_LOOT:
                 return "Retrievals in " + rumor.systemName
                         + " are returning with more wreckage and lost cargo than usual.";

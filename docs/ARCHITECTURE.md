@@ -146,7 +146,9 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
 | `FishermanQuest.java` | Saved chart offer and exact identified catch. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
 | `FishermanIdentity.java` | Stores the shared `PersonAPI` and selects one of five coherence portraits immediately before a hail. |
-| `FishRumors.java` | Monthly rarity/treasure/non-legendary-stranger rumor state, expiry and intel; graduation grants a separate immediate lead. |
+| `FishRumors.java` | Monthly rarity, bycatch, non-legendary stranger, larger-catch, slower-retrieval and valuable-bycatch leads. Saved `kindId` selects effects and dialogue; old `type` saves retain their single effect. Graduation grants a separate immediate lead. |
+
+`FishingMinigameDialogPlugin` takes rumor effects from the catch anchor. Size bias joins the specimen roll; `FishingMinigame` snapshots movement, bycatch chance and bycatch rarity for that retrieval. Size and movement boosts exclude legendaries, and their fixed treasure rarity is unchanged. Tuning stays in `FishermanConstants`.
 
 ### `dialogue/rules`
 

@@ -12,6 +12,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import org.lazywizard.lazylib.MathUtils;
 
 public class FishingMinigame {
@@ -51,22 +52,33 @@ public class FishingMinigame {
     protected boolean cannotLose = false;
     protected java.awt.Color presentedColor;
 
+    protected final float rumorLootMult;
+    protected final float rumorLootRarityBias;
+
     protected float timeHeld = 0f;
     protected float timeTotal = 0f;
 
     public FishingMinigame(FishSpec fish, Tackle tackle) {
+        this(fish, tackle, Global.getSector().getPlayerFleet().getContainingLocation());
+    }
+
+    public FishingMinigame(FishSpec fish, Tackle tackle, LocationAPI location) {
         this.fish = fish;
         this.tackle = tackle == null ? Tackle.NONE : tackle;
 
+        boolean legendary = fish.rarity == FishRarity.LEGENDARY;
+        this.rumorLootMult = FishRumors.getLootMult(location);
+        this.rumorLootRarityBias = legendary ? 1f : FishRumors.getLootRarityBias(location);
+
         this.difficulty = fish.difficulty;
-        this.motionSpeed = fish.motionSpeed;
+        this.motionSpeed = fish.motionSpeed * (legendary ? 1f : FishRumors.getMotionMult(location));
         this.restlessness = fish.restlessness;
         this.progressRateMult = fish.progressRateMult;
         this.escapeRateMult = fish.escapeRateMult;
         this.motion = fish.motion;
 
         // clamped after the tackle has had its say, so a wide window is still a window
-        this.barHeight = MathUtils.clamp(getBarHeight() * tackle.barSizeMult,
+        this.barHeight = MathUtils.clamp(getBarHeight() * this.tackle.barSizeMult,
                 FishConstants.MINIGAME_BAR_MIN_FRACTION, FishConstants.MINIGAME_BAR_MAX_FRACTION);
         this.fishTarget = pickFishTarget();
         this.cannotLose = Global.getSettings().isDevMode();
@@ -78,7 +90,7 @@ public class FishingMinigame {
         takenTreasures.clear();
         treasureClock = 0f;
         treasuresLeft = TreasureRoller.rollCount(
-                tackle.treasureChanceMult * FishRumors.getLootMultForPlayer());
+                tackle.treasureChanceMult * rumorLootMult);
 
         // a legendary always carries a full hold of the best there is
         if (fish.rarity == FishRarity.LEGENDARY) {
@@ -96,7 +108,7 @@ public class FishingMinigame {
             return new MinigameTreasure(TreasureRarity.EPIC);
         }
 
-        return new MinigameTreasure(TreasureRoller.rollRarity());
+        return new MinigameTreasure(TreasureRoller.rollRarity(rumorLootRarityBias));
     }
 
     public void restart() {
@@ -438,7 +450,7 @@ public class FishingMinigame {
     }
 
     public void devTakeTreasure() {
-        takenTreasures.add(new MinigameTreasure(TreasureRoller.rollRarity()));
+        takenTreasures.add(new MinigameTreasure(TreasureRoller.rollRarity(rumorLootRarityBias)));
     }
 
     public void devSpawnTreasure() {
