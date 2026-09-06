@@ -73,7 +73,26 @@ A condition passes ONLY when its result is:
 - Boolean `true`, or
 - A String that equals `"true"` after `.toLowerCase().trim()` — so `"True"`, `"TRUE "`, `" true "` all pass.
 
-`null`, numbers, and every other type **FAIL**. This means assignment conditions like `$local.x = 5` perform the write but the condition fails (returns 5, which is not Boolean/String). Only `$x = true` both writes and passes.
+`null`, numbers, and every other type **FAIL**.
+
+The CSV loader rejects plain assignment (`=`) in Conditions before a rule can run.
+This includes `$local.x = 5` and `$x = true`. Put assignments in Script and comparisons
+in Conditions. The loader also rejects equality comparisons (`==`) in Script.
+
+For example, test a value in Conditions:
+
+```text
+$local.x == 5
+```
+
+Set a value in Script:
+
+```text
+$local.x = 5
+```
+
+See the [source corrections](RULES_AUTHORING.md#corrections-to-the-preserved-simulator-references)
+for the loader and condition evaluator.
 
 ### Score mechanics
 - Lives on CONDITIONS: `score:N` token parsed per condition line. Default is **0** (not 1).
