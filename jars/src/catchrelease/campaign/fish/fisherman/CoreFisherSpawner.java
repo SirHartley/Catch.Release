@@ -176,7 +176,9 @@ public class CoreFisherSpawner implements EveryFrameScript {
         fleet.setLocation(at.x, at.y);
         if (isStanding(fleet)) FishermanMapIcon.findOrAddStanding(system, fleet);
 
-        fleet.addScript(new CoreFisherBehavior(fleet));
+        CoreFisherBehavior behavior = new CoreFisherBehavior(fleet);
+        behavior.keepWorking();
+        fleet.addScript(behavior);
 
         return fleet;
     }

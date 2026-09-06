@@ -143,8 +143,8 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishermanSpawner.java` | One temporary visitor sector-wide, one Fisherman per system; repairs duplicate pointers, excludes decoy, yields to tutorial posting; test path bypasses only the natural roll. |
 | `CoreFisherSpawner.java` | Keeps permanent map postings in eligible inhabited systems; creates core markers on load and other inhabited-system markers on discovery. Spawns the local boat at its marker, unloads off-screen boats, and reconciles weekly/on arrival. Tutorial reservations and active battles delay unloading. |
 | `FishermanMapIcon.java` | Standing postings survive without a fleet and keep its last position. Temporary visitors and decoys retain fleet-owned markers. Local autopilot selections redirect to the attached boat once per second. |
-| `OuterReaches.java` | Chooses destinations and straight-line legs that avoid inhabited inner orbits. |
-| `FishermanBehavior.java` | Controls lamps, staged motes, pacing, visibility, visit duration, and departure. |
+| `OuterReaches.java` | Collects real market entities, including connected/hidden/non-economy entities; chooses cleared spawn points and travel legs. Conditions-only planet markets are not settlements. |
+| `FishermanBehavior.java` | Shared visitor/standing route checks and market navigation avoidance; also lamps, staged motes, pacing, visibility, visit duration, and departure. `CoreFisherBehavior` selects standing lifetime and assignment text. |
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
 | `FishermanQuest.java` | Saved chart offer and exact identified catch. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
 | `FishermanIdentity.java` | Stores the shared `PersonAPI` and selects one of five coherence portraits immediately before a hail. |
@@ -398,7 +398,9 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 
 - The Fisherman is one saved `PersonAPI` shared by every boat. Apply the hailed boat's portrait immediately before vanilla builds the person panel; background boats must not mutate it.
 - Fisherman portraits are registered `graphics.characters` sprite IDs in `settings.json`. Rank and post remain blank so vanilla shows the rankless person card once.
-- Standing boats plan one outer-reaches leg at a time and validate both the destination and the straight path. `PATROL_SYSTEM` is not suitable because it crosses inhabited inner orbits.
+- All Fishermen use one checked `GO_TO_LOCATION` leg at a time, not `PATROL_SYSTEM`. `OuterReaches` excludes 5,000 units beyond each market entity's radius plus a 1,000-unit route buffer. Deterministic fallback legs are checked too; no valid leg means hold and retry. A boat already inside an exclusion may only take a leg that increases its distance from every enclosing market throughout the escape.
+- `FishermanBehavior.keepWorking()` rechecks destinations, current movement and moving markets every 0.25 campaign seconds, refreshes vanilla navigation avoidance and replaces unsafe/legacy assignments. Battles are not interrupted; the transient check timer starts immediately after loading.
+- `FishermanInterception.cutOff()` requires a clear approach before relocating or consuming the encounter flag. Unsafe ongoing approaches clear tutorial pursuit state and return to checked travel; a pre-tutorial player can trigger another approach later.
 - Fisherman visibility requires both a flat detected-range bonus and a per-frame sensor-fader override.
 - Visiting Fisherman time advances only while the player is elsewhere. Rendering and sound also stop when the player is outside the location.
 - Standing Fisherman markers are map-only and have no sensor profile. Eligible core-system postings are known from the start; other inhabited-system postings remain known after discovery. The fleet exists while the player is in-system, except for tutorial reservations or battles, and returns at the saved marker position. Shared identity, stock, restock timers and chart requests live outside the unloaded fleet.
