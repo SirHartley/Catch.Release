@@ -1,6 +1,10 @@
 package catchrelease.campaign.fish.map;
 
 import catchrelease.campaign.fish.data.Aberration;
+import catchrelease.campaign.fish.fisherman.FishRumors;
+import catchrelease.campaign.fish.items.FishItemPlugin;
+import catchrelease.rendering.helper.Disc;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.Global;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.opengl.GL11;
@@ -48,7 +52,6 @@ public class CoherenceHeatField {
 
     public void render(float factor, float centerX, float centerY, float alphaMult) {
         int fullRows = filled / cols;
-        if (fullRows < 2) return;
 
         GL11.glBegin(GL11.GL_QUADS);
 
@@ -81,6 +84,23 @@ public class CoherenceHeatField {
         }
 
         GL11.glEnd();
+
+        renderRumor(FishRumors.getActive(), factor, centerX, centerY, alphaMult);
+    }
+
+    protected void renderRumor(FishRumors.Saved rumor, float factor, float centerX,
+                               float centerY, float alphaMult) {
+        if (rumor == null) return;
+        StarSystemAPI system = FishRoute.getSystemById(rumor.systemId);
+        if (system == null || system.getLocation() == null) return;
+        Float level = Aberration.temporaryAt(system);
+        if (level == null) return;
+
+        float x = system.getLocation().x * factor + centerX;
+        float y = system.getLocation().y * factor + centerY;
+        Color color = FishItemPlugin.getAberrationColor(level);
+        Disc.draw(x, y, 18f, Color.BLACK, 0.65f * alphaMult, 0f, false);
+        Disc.drawOutline(x, y, 12f, color, 0.8f * alphaMult, 2f);
     }
 
     protected void corner(float value, float alphaMult) {

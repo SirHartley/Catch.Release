@@ -94,7 +94,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishLocationSummary.java` | Shared habitat prose for range-data and caught-fish hovers (`FishTooltips`) and Codex range panels. Always names the catch sources, including both breach lights and ruptures for blank or mixed `reachedBy`. |
 | `FishCatch.java` | One specimen: size, weight, aberration, region, source rupture, timestamp, method, and optional chart-request provenance. |
 | `FishLog.java` | Persistent per-species discovery and record data. |
-| `Aberration.java` | Computes and caches aberration from the strongest destabilizer minus the strongest colony field. |
+| `Aberration.java` | Caches ordinary aberration from the strongest destabilizer minus the strongest colony field, then applies temporary system rumors. `naturalAt` bypasses rumors for target selection. |
 | `FishRanges.java` | Authoritative current range test. |
 
 ### `campaign/fish/jobs`
@@ -148,7 +148,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
 | `FishermanQuest.java` | Saved chart offer and exact identified catch. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
 | `FishermanIdentity.java` | Stores the shared `PersonAPI` and selects one of five coherence portraits immediately before a hail. |
-| `FishRumors.java` | Monthly leads with six effects and four authored pairs: rarity/bycatch, size/calm, stranger/calm, bycatch/value. Saved `kindId` selects the effect set and complete dialogue/intel passage; old `type` saves retain their single effect. Graduation grants a separate immediate lead. |
+| `FishRumors.java` | Monthly leads with eight effects and four authored pairs: rarity/bycatch, size/calm, stranger/calm, bycatch/value. Saved `kindId` selects the effect set and complete dialogue/intel passage; old `type` saves retain their single effect. Graduation grants a separate immediate lead. |
 
 `FishingMinigameDialogPlugin` takes rumor effects from the catch anchor. Size bias joins the specimen roll; `FishingMinigame` snapshots movement, bycatch chance and bycatch rarity for that retrieval. Size and movement boosts exclude legendaries, and their fixed treasure rarity is unchanged. Tuning stays in `FishermanConstants`.
 
@@ -368,6 +368,8 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - The Abyss uses uncapped `Misc.getAbyssalDepth()` divided by `ABERRATION_ABYSS_SPAN`. A span of one restores the old hard cliff.
 - `openSpaceReading` must include all indexed sources, not only Abyss and slipstreams, because the heat map samples bare hyperspace points.
 - Each inhabited market creates a five-light-year quadratic stabilizing field. Overlapping fields do not stack; the strongest stabilizer is subtracted from the strongest destabilizer. The colony's own system is exactly zero aberration.
+- Extreme-coherence rumors set one system to zero or one aberration without changing its cached ordinary reading or neighboring hyperspace. Targets must be outside the corresponding coherence band; instability excludes colonies, and a new colony overrides an ongoing event. Catch rolls, known route readings and habitat snapshots use the effective value; expiry restores the ordinary reading. Quest pins still take precedence over habitat changes.
+- `CoherenceHeatField` draws temporary system rings in the shared coherence colour over the ordinary hyperspace heat field. It reads live overrides so expired rings disappear without rebuilding the map.
 - Slipstreams are indexed as sampled ribbons through `SlipstreamTerrainPlugin2.getSegments()`. The old `SlipstreamTerrainPlugin` is inert in 0.98a. Foreign implementations fall back to their anchor.
 - Marks verify that their source still exists so short-lived sources do not remain active until the next daily rebuild.
 - In-system reach is `ABERRATION_LOCAL_BASE + ABERRATION_LOCAL_PER_LY × reachLY`. Do not add a second hand-maintained reach table.

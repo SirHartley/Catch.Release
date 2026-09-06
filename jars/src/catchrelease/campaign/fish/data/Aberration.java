@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.data;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.fisherman.FishRumors;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -181,6 +182,8 @@ public class Aberration {
 
     public static float at(Vector2f locInHyper, LocationAPI location) {
         if (isColonySystem(location)) return 0f;
+        Float temporary = temporaryAt(location);
+        if (temporary != null) return temporary;
 
         // two specimens out of the same rupture should not read identically
         return MathUtils.clamp(baseAt(locInHyper, location)
@@ -189,10 +192,24 @@ public class Aberration {
     }
 
     public static float baseAt(Vector2f locInHyper, LocationAPI location) {
+        Float temporary = temporaryAt(location);
+        return temporary == null ? naturalAt(locInHyper, location) : temporary;
+    }
+
+    public static Float temporaryAt(LocationAPI location) {
+        Float temporary = FishRumors.getAberrationOverride(location);
+        if (temporary == null) return null;
+
+        return isColonySystem(location) ? 0f : temporary;
+    }
+
+    // Rumor selection must read the ordinary system, not its current override.
+    public static float naturalAt(Vector2f locInHyper, LocationAPI location) {
         return readingAt(locInHyper, location, false).level;
     }
 
     public static String dominantSourceAt(Vector2f locInHyper, LocationAPI location) {
+        if (temporaryAt(location) != null) return null;
         Reading reading = readingAt(locInHyper, location, false);
 
         if (reading.source == null) return null;
@@ -203,6 +220,8 @@ public class Aberration {
 
     public static float knownInstability(StarSystemAPI system) {
         if (system == null || system.getLocation() == null) return 0f;
+        Float temporary = temporaryAt(system);
+        if (temporary != null) return temporary;
 
         return readingAt(system.getLocation(), system, true).level;
     }
@@ -369,7 +388,7 @@ public class Aberration {
                 && market.getLocationInHyperspace() != null;
     }
 
-    protected static boolean isColonySystem(LocationAPI location) {
+    public static boolean isColonySystem(LocationAPI location) {
         if (!(location instanceof StarSystemAPI system)) return false;
 
         for (MarketAPI market : Global.getSector().getEconomy().getMarkets(system)) {

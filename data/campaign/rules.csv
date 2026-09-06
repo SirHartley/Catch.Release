@@ -3396,6 +3396,20 @@ The Fisherman turns a cargo tally toward his own light and reads another line.
 He sets the tally aside.
 
 ""Still plenty of ordinary scrap in the mix.""",,
+catchrelease_rumorExtremeStability,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == extreme_stability score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""Here's one worth putting on the planner: $catchreleaseRumorSystem. Fabric there is holding about as firm as you'll ever see it.""
+
+The Fisherman gives the system name a small nod.
+
+""It usually runs rougher. If coherence was the reason you passed it by before, take another look.""",,
+catchrelease_rumorExtremeInstability,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == extreme_instability score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""If $catchreleaseRumorSystem is on your route, update the coherence note. Fabric's barely holding there now. Much thinner than that system usually runs.""
+
+The Fisherman folds his arms.
+
+""Fish it if you mean to. Keep the work short and mind your crew.""",,
 catchrelease_rumorUnavailable,CatchReleaseRumorText,"CatchReleaseCMD tokens
 $catchreleaseRumorKind == none",,"""Nothing worth sending you after.""",,
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5

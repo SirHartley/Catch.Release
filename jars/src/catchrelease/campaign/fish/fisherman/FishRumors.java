@@ -5,6 +5,8 @@ import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.Aberration;
+import catchrelease.campaign.fish.items.FishItemPlugin;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -41,6 +43,8 @@ public class FishRumors {
         SIZE("size", TYPE_SIZE),
         CALM("calm", TYPE_CALM),
         VALUABLE_LOOT("valuable_loot", TYPE_VALUABLE_LOOT),
+        EXTREME_STABILITY("extreme_stability", TYPE_EXTREME_STABILITY),
+        EXTREME_INSTABILITY("extreme_instability", TYPE_EXTREME_INSTABILITY),
         RARITY_LOOT("rarity_loot", TYPE_RARITY, TYPE_LOOT),
         SIZE_CALM("size_calm", TYPE_SIZE, TYPE_CALM),
         STRANGER_CALM("stranger_calm", TYPE_STRANGER, TYPE_CALM),
@@ -73,6 +77,8 @@ public class FishRumors {
     public static final int TYPE_SIZE = 3;
     public static final int TYPE_CALM = 4;
     public static final int TYPE_VALUABLE_LOOT = 5;
+    public static final int TYPE_EXTREME_STABILITY = 6;
+    public static final int TYPE_EXTREME_INSTABILITY = 7;
 
     protected static final Pattern DESCRIPTION_TOKEN = Pattern.compile("\\$catchreleaseRumor(System|Stranger)");
 
@@ -300,6 +306,8 @@ public class FishRumors {
             case TYPE_SIZE -> Kind.SIZE;
             case TYPE_CALM -> Kind.CALM;
             case TYPE_VALUABLE_LOOT -> Kind.VALUABLE_LOOT;
+            case TYPE_EXTREME_STABILITY -> Kind.EXTREME_STABILITY;
+            case TYPE_EXTREME_INSTABILITY -> Kind.EXTREME_INSTABILITY;
             default -> Kind.RARITY;
         };
     }
@@ -322,6 +330,13 @@ public class FishRumors {
         if (Global.getSector() == null || Global.getSector().getPlayerFleet() == null) return 1f;
 
         return getLootMult(Global.getSector().getPlayerFleet().getContainingLocation());
+    }
+
+    public static Float getAberrationOverride(LocationAPI location) {
+        if (appliesTo(location, TYPE_EXTREME_STABILITY)) return 0f;
+        if (appliesTo(location, TYPE_EXTREME_INSTABILITY)) return 1f;
+
+        return null;
     }
 
     public static float getLootMult(LocationAPI location) {
@@ -359,14 +374,18 @@ public class FishRumors {
     }
 
     public static Saved create() {
-        StarSystemAPI system = pickSystem();
+        Kind[] kinds = Kind.values();
+        Kind kind = kinds[(int) MathUtils.getRandomNumberInRange(0f, kinds.length - 0.01f)];
+        StarSystemAPI system = pickSystem(kind);
+        if (system == null && (kind == Kind.EXTREME_STABILITY || kind == Kind.EXTREME_INSTABILITY)) {
+            kind = Kind.RARITY;
+            system = pickSystem(kind);
+        }
         if (system == null) return null;
 
         Saved rumor = new Saved();
         rumor.systemId = system.getId();
         rumor.systemName = system.getNameWithNoType();
-        Kind[] kinds = Kind.values();
-        Kind kind = kinds[(int) MathUtils.getRandomNumberInRange(0f, kinds.length - 0.01f)];
         rumor.started = Global.getSector().getClock().getTimestamp();
 
         if (kind.has(TYPE_STRANGER)) {
@@ -406,7 +425,7 @@ public class FishRumors {
         return rumor;
     }
 
-    protected static StarSystemAPI pickSystem() {
+    protected static StarSystemAPI pickSystem(Kind kind) {
         List<StarSystemAPI> candidates = new ArrayList<>();
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
@@ -415,6 +434,7 @@ public class FishRumors {
             if (system.hasTag(Tags.SYSTEM_ABYSSAL)) continue;
             if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) continue;
             if (system.getLocation() == null) continue;
+            if (!canHost(kind, system)) continue;
 
             candidates.add(system);
         }
@@ -422,6 +442,15 @@ public class FishRumors {
         if (candidates.isEmpty()) return null;
 
         return candidates.get((int) MathUtils.getRandomNumberInRange(0f, candidates.size() - 0.01f));
+    }
+
+    protected static boolean canHost(Kind kind, StarSystemAPI system) {
+        if (kind != Kind.EXTREME_STABILITY && kind != Kind.EXTREME_INSTABILITY) return true;
+
+        int band = FishItemPlugin.getAberrationBand(Aberration.naturalAt(system.getLocation(), system));
+        if (kind == Kind.EXTREME_STABILITY) return band > 0;
+
+        return band < 4 && !Aberration.isColonySystem(system);
     }
 
     protected static String pickStranger(StarSystemAPI system) {
@@ -468,6 +497,10 @@ public class FishRumors {
             case CALM -> "Fish in $catchreleaseRumorSystem are moving more slowly during retrieval, making them easier to "
                     + "pursue.";
             case VALUABLE_LOOT -> "Bycatch recovered in $catchreleaseRumorSystem has been skewing toward more valuable finds.";
+            case EXTREME_STABILITY -> "Local fabric in $catchreleaseRumorSystem is currently stable, a marked improvement "
+                    + "over the system's usual coherence.";
+            case EXTREME_INSTABILITY -> "Local fabric in $catchreleaseRumorSystem is currently barely holding, a sharp "
+                    + "decline from the system's usual coherence.";
             case RARITY_LOOT -> "Rarer species are turning up more often in $catchreleaseRumorSystem, and retrievals there are "
                     + "producing bycatch opportunities more frequently.";
             case SIZE_CALM -> "Catches in $catchreleaseRumorSystem are tending larger and heavier, while fish there are moving more "

@@ -49,7 +49,7 @@ public class FishHabitat {
         }
 
         FishHabitat known = cache.get(location.getId());
-        if (known != null) return known;
+        if (known != null && known.aberration == Aberration.baseAt(location.getLocation(), location)) return known;
 
         FishHabitat built = read(location);
         cache.put(location.getId(), built);
