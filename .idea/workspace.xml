@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="changed module dep to coretto 17">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="dialogue &amp; formatting">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/FishReward.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/FishReward.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fx/skillshot_target.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fx/skillshot_target.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/FishermanBehavior.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/FishermanBehavior.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LonglinerDecoy.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LonglinerDecoy.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +109,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="dialogue" />
     <MESSAGE value="fish rarity&#10;indicator name" />
     <MESSAGE value="rules work" />
     <MESSAGE value="Fisherman intro castaway" />
@@ -133,7 +133,8 @@
     <MESSAGE value="more dialogue work&#10;immediate fleet jump to distress call loc upon forced spawn" />
     <MESSAGE value="fixed a massive amount of rules" />
     <MESSAGE value="changed module dep to coretto 17" />
-    <option name="LAST_COMMIT_MESSAGE" value="changed module dep to coretto 17" />
+    <MESSAGE value="dialogue &amp; formatting" />
+    <option name="LAST_COMMIT_MESSAGE" value="dialogue &amp; formatting" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

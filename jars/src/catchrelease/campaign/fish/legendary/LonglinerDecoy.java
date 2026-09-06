@@ -3,12 +3,7 @@ package catchrelease.campaign.fish.legendary;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
-import catchrelease.campaign.fish.fisherman.CoreFisherBehavior;
-import catchrelease.campaign.fish.fisherman.FishermanConstants;
-import catchrelease.campaign.fish.fisherman.FishermanIdentity;
-import catchrelease.campaign.fish.fisherman.FishermanMapIcon;
-import catchrelease.campaign.fish.fisherman.FishermanShelf;
-import catchrelease.campaign.fish.fisherman.OuterReaches;
+import catchrelease.campaign.fish.fisherman.*;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -36,7 +31,7 @@ public class LonglinerDecoy implements EveryFrameScript {
     public static final String BOAT_KEY = "$catchrelease_longliner_boat";
     public static final String SOUND_FOUND = "catchrelease_longliner_found";
     public static final float CHECK_SECONDS = 0.5f;
-    public static final float REVEAL_DRIFT_SECONDS = 1f;
+    public static final float REVEAL_DRIFT_SECONDS = 3f;
     public static final float REVEAL_ALERT_DELAY_SECONDS = 0.3f;
     public static final float REVEAL_DRIFT_SPEED = 35f;
     public static final float RUN_TARGET_RANGE = 7000f;
@@ -285,6 +280,9 @@ public class LonglinerDecoy implements EveryFrameScript {
     protected void retire(CampaignFleetAPI boat) {
         FishermanShelf.releaseFor(boat);
         FishermanMapIcon.removeFor(boat);
+
+        for (EveryFrameScript script : boat.getScripts()) if (script instanceof FishermanBehavior) ((FishermanBehavior) script).beginWindDown(0f);
+
         boat.setAI(null);
         boat.despawn();
 
@@ -294,6 +292,9 @@ public class LonglinerDecoy implements EveryFrameScript {
     protected void retireImmediately(CampaignFleetAPI boat, LocationAPI where) {
         FishermanShelf.releaseFor(boat);
         FishermanMapIcon.removeFor(boat);
+
+        for (EveryFrameScript script : boat.getScripts()) if (script instanceof FishermanBehavior) ((FishermanBehavior) script).beginWindDown(0.2f);
+
         boat.setAI(null);
         boat.despawn();
         where.removeEntity(boat);

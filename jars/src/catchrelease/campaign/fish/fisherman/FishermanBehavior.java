@@ -198,6 +198,18 @@ public class FishermanBehavior implements EveryFrameScript {
                 instanceof String;
     }
 
+    public void beginWindDown(float dur) {
+        windingDown = true;
+        windDownLeft = dur;
+
+        expireLamps(dur);
+
+        if (isPlayerHere()) {
+            Global.getSoundPlayer().playSound(FishermanConstants.SOUND_TOGGLE, 0.9f, 1f,
+                    fleet.getLocation(), new Vector2f());
+        }
+    }
+
     protected void beginWindDown() {
         windingDown = true;
         windDownLeft = FishermanConstants.WIND_DOWN_SECONDS;

@@ -1,6 +1,6 @@
 # Catch.Release: The Needle Theorem
 
-## Concept reference — 6 September 2026
+## Concept reference - 6 September 2026
 
 **Status: deferred narrative brainstorming. Revisit quest design once the three fishing ships are finished.** This concept note preserves the author’s decisions and open options for that discussion. [LORE.md](LORE.md) remains the current lore authority; this note does not amend it or authorize quest implementation. Sections marked as directions or established concepts reflect the conversation’s decisions; suggested scenes, reward details and ending mechanics remain open where indicated.
 
@@ -30,7 +30,7 @@ The author’s central formulation:
 
 > “The fisherman is the in-universe mirror to the player, but he has decided to play by the games rules”
 
-The player acts from beyond the larger space in which the Fisherman and Scientist exist. To the player, that larger space—including hyperspace—is itself part of the played fabric.
+The player acts from beyond the larger space in which the Fisherman and Scientist exist. To the player, that larger space-including hyperspace-is itself part of the played fabric.
 
 | Level in the metaphor | What belongs to it | Relationship to what enters |
 |---|---|---|
@@ -149,7 +149,7 @@ Recognizing that reality changed during an uninterrupted manifestation does not 
 
 ### The assistant: deliberate deception becomes sincere denial
 
-The Scientist has a research assistant. A task changes reality so that everyone else says he never had one. While the same manifestation persists, the Scientist remembers the assistant and makes an obvious excuse about their temporary absence—for example, that they went to fetch lunch. He is knowingly misleading the player.
+The Scientist has a research assistant. A task changes reality so that everyone else says he never had one. While the same manifestation persists, the Scientist remembers the assistant and makes an obvious excuse about their temporary absence-for example, that they went to fetch lunch. He is knowingly misleading the player.
 
 After he changes host or re-manifests, he genuinely does not remember having an assistant. The new reality is his starting truth. The same denial has a different basis, which the player can recognize through the sequence of encounters.
 
@@ -203,7 +203,7 @@ Procedural catch requests can provide money, equipment and resources that make t
 
 Three unimplemented fishing ships are available as rewards. Their allocation is unresolved. Earlier suggestions placed them after hunts two, four and six, but those milestones remain optional. The ships can support progression without being equivalent to the final reality-bending power offer.
 
-## 7. Six legendary subjects — a provisional use
+## 7. Six legendary subjects - a provisional use
 
 The six fish provide distinct phenomena that the Scientist can study while secretly studying the captain. The order and applications below are suggestions, not final chapters or metaphysical ingredients required by the universe.
 
