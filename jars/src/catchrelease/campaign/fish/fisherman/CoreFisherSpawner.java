@@ -130,7 +130,9 @@ public class CoreFisherSpawner implements EveryFrameScript {
 
         fleet.setLocation(at.x, at.y);
 
-        fleet.addScript(new CoreFisherBehavior(fleet));
+        CoreFisherBehavior behavior = new CoreFisherBehavior(fleet);
+        behavior.keepWorking();
+        fleet.addScript(behavior);
 
         return fleet;
     }

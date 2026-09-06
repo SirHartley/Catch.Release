@@ -9,10 +9,14 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class OuterReaches {
 
-    public static final float AVOID_RADIUS = 2500f;
+    public static final float AVOID_RADIUS = 5000f;
+    public static final float ROUTE_PAD = 1000f;
+    public static final float RECHECK_SECONDS = 0.25f;
     public static final float INNER_PAD = 1500f;
     public static final float OUTER_PAD = 2500f;
     public static final float MIN_BAND = 3000f;
@@ -27,17 +31,27 @@ public class OuterReaches {
     }
 
     public static List<SectorEntityToken> getPopulated(StarSystemAPI system) {
-        List<SectorEntityToken> out = new ArrayList<>();
-        if (system == null) return out;
+        Set<SectorEntityToken> out = new LinkedHashSet<>();
+        if (system == null) return new ArrayList<>();
 
         for (MarketAPI market : Misc.getMarketsInLocation(system)) {
             if (market.isPlanetConditionMarketOnly()) continue;
-            if (market.getPrimaryEntity() == null) continue;
-
             out.add(market.getPrimaryEntity());
+            out.addAll(market.getConnectedEntities());
         }
 
-        return out;
+        // Hidden or non-economy markets may exist only on their entities.
+        for (SectorEntityToken entity : system.getAllEntities()) {
+            MarketAPI market = entity.getMarket();
+            if (market == null || market.isPlanetConditionMarketOnly()) continue;
+            out.add(entity);
+            out.add(market.getPrimaryEntity());
+            out.addAll(market.getConnectedEntities());
+        }
+
+        out.removeIf(entity -> entity == null || entity.isExpired()
+                || entity.getContainingLocation() != system);
+        return new ArrayList<>(out);
     }
 
     public static boolean isPopulated(StarSystemAPI system) {
@@ -49,10 +63,11 @@ public class OuterReaches {
 
         for (SectorEntityToken populated : getPopulated(system)) {
             furthest = Math.max(furthest,
-                    Misc.getDistance(center(system), populated.getLocation()));
+                    Misc.getDistance(center(system), populated.getLocation())
+                            + Math.max(0f, populated.getRadius()));
         }
 
-        return furthest + AVOID_RADIUS + INNER_PAD;
+        return furthest + AVOID_RADIUS + ROUTE_PAD + INNER_PAD;
     }
 
     public static float getOuterLimit(StarSystemAPI system) {
@@ -104,16 +119,44 @@ public class OuterReaches {
                     MathUtils.getRandomNumberInRange(inner, outer),
                     MathUtils.getRandomNumberInRange(0f, 360f));
 
-            if (isLegClear(system, from, at)) return at;
+            if (canTravel(system, from, at)) return at;
         }
 
-        return MathUtils.getPointOnCircumference(center, outer,
-                MathUtils.getRandomNumberInRange(0f, 360f));
+        float bearing = from == null ? 0f : Misc.getAngleInDegrees(center, from);
+        for (int i = 0; i < 72; i++) {
+            Vector2f at = MathUtils.getPointOnCircumference(center, outer, bearing + i * 5f);
+            if (canTravel(system, from, at)) return at;
+        }
+
+        return null;
     }
 
     public static boolean isLegClear(StarSystemAPI system, Vector2f from, Vector2f to) {
+        return isLegClear(system, from, to, false);
+    }
+
+    public static boolean canTravel(StarSystemAPI system, Vector2f from, Vector2f to) {
+        return isLegClear(system, from, to, true);
+    }
+
+    protected static boolean isLegClear(StarSystemAPI system, Vector2f from, Vector2f to,
+                                        boolean allowEscape) {
+        if (to == null) return false;
+
         for (SectorEntityToken populated : getPopulated(system)) {
-            if (distanceToSegment(populated.getLocation(), from, to) < AVOID_RADIUS) return false;
+            Vector2f market = populated.getLocation();
+            float clearance = AVOID_RADIUS + ROUTE_PAD + Math.max(0f, populated.getRadius());
+            if (Misc.getDistance(market, to) < clearance) return false;
+
+            if (allowEscape && from != null && Misc.getDistance(market, from) < clearance) {
+                // Old saves and moving markets can start a boat inside the exclusion.
+                // An escape must move outward throughout, never cut through the market.
+                float outward = (from.x - market.x) * (to.x - from.x)
+                        + (from.y - market.y) * (to.y - from.y);
+                if (outward < 0f) return false;
+            } else if (distanceToSegment(market, from, to) < clearance) {
+                return false;
+            }
         }
 
         return true;
