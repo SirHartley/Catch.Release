@@ -90,6 +90,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 |---|---|
 | `FishingTaboo.java` | Central list of factions that reject fishing: the Church and the Path. |
 | `FishSpec.java` | Species row, stable save ID and display fields, minigame tuning, value/size, habitat and implements; display renames do not rename saved IDs. |
+| `FishLocationSummary.java` | Shared habitat prose for range-data and caught-fish hovers (`FishTooltips`) and Codex range panels. Always names the catch sources, including both breach lights and ruptures for blank or mixed `reachedBy`. |
 | `FishCatch.java` | One specimen: size, weight, aberration, region, source rupture, timestamp, method, and optional chart-request provenance. |
 | `FishLog.java` | Persistent per-species discovery and record data. |
 | `Aberration.java` | Computes and caches aberration from the strongest destabilizer minus the strongest colony field. |
