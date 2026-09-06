@@ -172,6 +172,12 @@ Opus 5 in the main session owns planning and shipped code. Clear names and struc
 
 Subagents perform research and scoping, not shipped code. The UI assignment takes precedence whenever the player can see the result.
 
+## Version names
+
+`1.0.1` is the development/alpha version used in `mod_info.json`. `1.0.a` is the public
+release version used in the release metadata and changelog. They are different version
+names on purpose; do not change one merely to make it match the other.
+
 ## Building
 
 ### Required compile gate

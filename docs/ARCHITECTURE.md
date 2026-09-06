@@ -34,7 +34,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Stale campaign effect | Owner location/ability validity -> cleanup; shared renderer registration in `rendering/` |
 | Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; [Java UI contracts](UI.md). Minigame rendering is separate. |
 | Map / planner list rebuilds | `FishMapPane` and `FishRoutePopup` replace the list's owning custom panel; [lifetime contract](UI.md#rebuilding-lists) |
-| Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*`; black-hole pass in `rendering/spiral/` |
+| Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*` |
 | Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel`; [backdrop dimensions](UI.md#portraits-and-sprites) |
 
 ## Registration and lifecycle
@@ -45,8 +45,8 @@ Technical routing for the current implementation. Java paths below are relative 
 | `ModPlugin.onGameLoad()` | Idempotent script/listener registration and save repair; order below |
 | `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting |
 | `data/campaign/fish.csv` | Species; `FishSpecLoader` |
-| `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon, skillshot_example |
-| `data/config/settings.json` | `catchrelease.dialogue.rules` command package, sprites, black-hole warp range |
+| `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon |
+| `data/config/settings.json` | `catchrelease.dialogue.rules` command package and sprites; black-hole warp settings belong to the deprecated test below |
 | `data/config/sounds.json` | Sound registry; callers in abilities and `FishConstants` |
 | `data/config/LunaSettings.csv` | Charge-ready sound policy, camera snap, returning-player tutorial skip |
 | `data/campaign/bar_events.csv` | 11 ordinary FishJob subclasses + 3 camp jobs; Crablobab/rating use AddBarEvents rules |
@@ -60,7 +60,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
 | `data/config/UpgradeData.csv` -> `memory/upgrades/` | Stat IDs, loader aliases, saved levels and runtime values |
 
-Load order in `ModPlugin`: pond-on-jump -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/rating/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> black-hole warp -> stale pond claims/range relock -> dev shortcut.
+Load order in `ModPlugin`: pond-on-jump -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/rating/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims/range relock -> dev shortcut.
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
 
@@ -306,7 +306,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Repair bills and fines return their outcomes through memory. The global pending marker prevents repeated sector-wide searches when the original fleet is no longer nearby.
 - Camp completion is polled because destruction, bribery, dialogue, and departure do not share a callback.
 - `despawn()` reports fleet removal to managers and starts the fleet's own fade. `FleetQuest` replacements additionally clear AI, move the original away, and call `Misc.fadeAndExpire()` so the replacement can occupy the same position immediately. Other retiring fleets must not move their still-rendering token during that fade.
-- A local fleet-job offer adds state and a cyan drawn marker to an existing scavenger; it does not create or rename a fleet. Acceptance creates fresh members in a mission-owned replacement and reports the original despawn.
+- A local fleet-job offer adds state and a cyan drawn marker to an existing eligible fleet; see `FleetQuestSpawner` above for fleet types and exceptions. It does not create or rename a fleet. Acceptance creates fresh members in a mission-owned replacement and reports the original despawn.
 - `$missionImportant` is not used for fleet-job offer markers because it changes both colour and story behavior. `FleetQuestMarker` copies vanilla placement and changes only tint.
 
 ### Save data, cargo, and shop state
@@ -341,9 +341,16 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - The Abyss uses its own high-difficulty ladder. Rarity controls frequency and value there, but even Abyssal Common rows use at least main-sheet Rare difficulty.
 - When changing a rarity band, tune `difficulty`, `restlessness`, `motionSpeed`, `progressRateMult`, and `escapeRateMult` together and simulate the result. Difficulty alone stops carrying the late game once bar-size upgrades are large.
 - Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` may still roll either for one behavior interval.
-- `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Requirement rolling must combine that with method: drone catches are always pond catches, while Harpoon can use either implement.
+- `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
 - A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
+
+| Catch | Method | Implement |
+|---|---|---|
+| Drones at a natural rupture | `DRONE` | `POND` |
+| Harpoon catch of a fish from a pond | `HARPOON` | `POND` |
+| Harpoon catch at a Breach Lamp | `HARPOON` | `BREACH_LAMP` |
+| Drones at a Breach Lamp with the Breach Coupler | `DRONE` | `BREACH_LAMP` |
 
 ### Coherence model
 
@@ -394,7 +401,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - `FishingIntro.point()` is idempotent and can be reached from the wreck, castaway/rating, Fisherman interception, or a direct hail. Recovered property takes origin precedence, then rescued crew, then recorded market.
 - The returning-player skip is available only before the R.O.D. lesson begins. Manually disabling the new Luna setting stays disabled after the one-time legacy-file migration.
 - Tutorial single-target protection advances only when the requested species could naturally spawn at the current location with the required implement. The count carries between valid locations and pauses elsewhere.
-- No bar, local scavenger, or distress fleet job may appear before `FishingIntro.isOpenForWork()` or tutorial completion as appropriate. Equipment requirements are limited to gear the player owns.
+- No bar, local fleet, or distress fleet job may appear before `FishingIntro.isOpenForWork()` or tutorial completion as appropriate. Equipment requirements are limited to gear the player owns.
 
 ### Distress and reusable framework boundaries
 
@@ -427,4 +434,5 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 | `campaign/fish/shop/ShopStorage` | Migration only. Returns fish left in the removed storage UI. |
 | `testing/DevShortcut` | Registered, but active only in dev mode. |
 | `testing/TestStencilRenderer` | Not registered. |
+| `rendering/spiral/BlackHoleSpiralWarp` | Deprecated test effect. Not installed by `ModPlugin`; its settings do not enable it. |
 | `campaign/ponds/renderer/PondHoleRenderer` | Dormant while `PondConstants.POND_HOLE_LOOK` selects the shader version. |

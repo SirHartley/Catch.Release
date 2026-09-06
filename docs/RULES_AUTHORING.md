@@ -189,6 +189,7 @@ Import these from `com.fs.starfarer.api.impl.campaign.rulecmd`. `RulesAPI` expos
 
 | Topic | Use for this game build | Source |
 |---|---|---|
+| Assignment and comparison in CSV | The loader rejects plain `=` in Conditions and `==` in Script. Condition-result rules apply only after the CSV has loaded; they do not make assignment conditions valid. | `sources-obf/campaign.rules.java`: `Rules` CSV loading at bundle lines 580–585 and 641–652; expression `isTrueFor` at bundle lines 897–903 |
 | No expiry / zero expiry | No duration is persistent; `0` expires on subsequent unpaused memory advancement. | `Memory.set/expire/advance` |
 | Local/player scopes | Local can be entity/person memory; player is character-data memory. Dialogue closure does not clear all persistent local keys. | `RuleBasedInteractionDialogPluginImpl.updateMemory/updatePersonMemory` |
 | `$option`, `$last`, `$optN` | The driver sets `$option` with zero expiry; this build's rule runScript does not clear it. No general `$last`/`$optN` producer was found in the standard driver, token resolver or vanilla CSV. | `RuleBasedInteractionDialogPluginImpl.optionSelected`, rule `runScript`, `Misc.Token` |

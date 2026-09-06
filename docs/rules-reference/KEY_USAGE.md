@@ -4,10 +4,9 @@ Starsector **0.98a-RC8**. This is a searchable corpus index, not a list of globa
 
 ## Coverage
 
-- 9749 active, named vanilla CSV records were parsed; blank IDs and IDs starting with `#` were excluded.
-- 2775 distinct literal key spellings were found in Conditions, Script, Text and Options. Scoped spellings remain separate. Colon-bearing families such as `$market.ind:heavyindustry` are preserved.
-- 194 command names in Conditions/Script resolved to vanilla classes. Bare assignments are not plugin invocations.
-- Catch.Release's 986 active rows were also crawled: 306 key spellings. This index retains vanilla ownership; the project-specific public tokens remain in [RULES.md](../RULES.md#project-routing).
+This table contains literal keys from vanilla rules only. It covers Conditions, Script, Text and Options in named records, excluding blank IDs and IDs starting with `#`. Scoped spellings remain separate, including colon-bearing families such as `$market.ind:heavyindustry`.
+
+Catch.Release keys are not included. For the mod's public tokens and dialogue routing, see [RULES.md](../RULES.md#project-routing).
 
 The lexical key pattern is `\$[A-Za-z_][A-Za-z0-9_]*(?:[.:][A-Za-z_][A-Za-z0-9_]*)*`. It finds literal references, not arbitrary dynamically assembled Java keys. Dynamic fact families and the separately extracted generator/fact/MemFlags dictionaries are in MEMORY.md. A token found in Text need not be stored memory. A token found only in Conditions is not automatically useful prose.
 
