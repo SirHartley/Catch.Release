@@ -84,9 +84,6 @@ Then add a row to `abilities.csv` with **`skillshot` in the tags column** and yo
 plugin column. The tag is how the hotkey listener recognises the ability in the ability bar; without
 it only the click path works.
 
-`catchrelease.skillshot.example.ExampleSkillshotAbility` and the `skillshot_example` row in `abilities.csv` are a
-complete working ability you can grant yourself and try immediately.
-
 Useful hooks on `BaseSkillshotAbility`:
 
 | Method | Purpose |

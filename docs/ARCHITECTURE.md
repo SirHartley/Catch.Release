@@ -45,7 +45,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `ModPlugin.onGameLoad()` | Idempotent script/listener registration and save repair; order below |
 | `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting |
 | `data/campaign/fish.csv` | Species; `FishSpecLoader` |
-| `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon, skillshot_example |
+| `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon |
 | `data/config/settings.json` | `catchrelease.dialogue.rules` command package and sprites; black-hole warp settings belong to the deprecated test below |
 | `data/config/sounds.json` | Sound registry; callers in abilities and `FishConstants` |
 | `data/config/LunaSettings.csv` | Charge-ready sound policy, camera snap, returning-player tutorial skip |
