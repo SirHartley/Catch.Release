@@ -210,7 +210,7 @@ Check displayed highlight occurrences using [DIALOGUE.md](DIALOGUE.md#shared-tex
 
 Bar-event wrappers close with `returnFromEvent`, not `close`. Check confirm, cancel and Escape paths after a custom panel.
 
-`AddBarEvent <id> "<option>" "<blurb>" [<colour>]` accepts an optional fourth argument via Token.getColor. `highlight` resolves to the buttonShortcut colour; faction IDs resolve to faction colour. The rating event uses this argument.
+`AddBarEvent <id> "<option>" "<blurb>" [<colour>]` accepts an optional fourth argument via Token.getColor. `highlight` resolves to the buttonShortcut colour; faction IDs resolve to faction colour. The tutorial spacer's bar event uses this argument.
 
 ## Editing and validation
 

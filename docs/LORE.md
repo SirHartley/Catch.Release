@@ -36,7 +36,7 @@ There is no hyperspace ocean. The fabric is not water. Hyperspace is not wet, su
 
 The game shows unstable fabric as water-like ripples. That visual marks a weak patch of reality; it does not make the fabric water.
 
-- Lay speakers may occasionally say “the water.” A dockhand, cook, buyer, independent fisher or [rating](#entry) is using the vocabulary of the trade, not describing its physics. Use this rarely.
+- Lay speakers may occasionally say “the water.” A dockhand, cook, buyer, independent fisher or [spacer](#entry) is using the vocabulary of the trade, not describing its physics. Use this rarely.
 - Never use “the water” as technical terminology for hyperspace.
 - Never use it for hyperspace in neutral narration or instrumental/survey intel.
 - Never use it from [the Fisherman](#the-fisherman) when he is being precise. He says “fabric.”
@@ -850,7 +850,7 @@ Do not introduce information early merely because a text box has room.
 
 ### Entry
 
-A rating or ordinary source directs the player to the Fisherman. If asked, a rating means non-officer ship's crew: deck, drives, weapons, flight or loading work.
+A spacer in a bar or another ordinary source directs the player to the Fisherman.
 
 A player who discovers unstable fabric before meeting him may instead recover one of his possessions. Its purpose is to point them toward his fleet.
 
@@ -1146,6 +1146,8 @@ His degree of conscious understanding is undefined. This does not authorize Fish
 The sole exception to ordinary observers' knowledge limits. His nature is entirely beyond human, and he limits explanations because definition can be dangerous. Follow [his nature and restraint](#the-fisherman), not a generic mysterious-mentor voice.
 
 ## Terminology
+
+Use a job description that fits the scene: crewman, deckhand, dockworker, technician or spacer. Do not use “rating” as a crew title.
 
 The Outfitter tabs are Upgrades, Equipment and Extras. Upgrade levels are tiers. Module categories
 are Harpoon Tips, Drone Cores and Lens Arrays; use “rig module” when discussing several categories.
