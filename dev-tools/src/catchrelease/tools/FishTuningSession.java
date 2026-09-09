@@ -1,9 +1,5 @@
 package catchrelease.tools;
 
-import catchrelease.campaign.fish.constants.FishConstants;
-import catchrelease.campaign.fish.minigame.FishingSimulation;
-import catchrelease.campaign.fish.tackle.Tackle;
-
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -88,8 +84,8 @@ final class FishTuningSession {
         }
         held = skill == SimulatedAngler.Skill.MANUAL ? manualHeld : angler.input(game.getTimeTotal(),
                 visibleFish(), game.getBarPosition(), game.getBarHeightFraction(),
-                FishConstants.MINIGAME_BAR_LIFT * tackle.barLiftMult,
-                FishConstants.MINIGAME_BAR_GRAVITY * tackle.barGravityMult);
+                SimulationConstants.MINIGAME_BAR_LIFT * tackle.barLiftMult,
+                SimulationConstants.MINIGAME_BAR_GRAVITY * tackle.barGravityMult);
         game.advance(amount, held);
         if (game.isRunning()) return;
         boolean success = game.isCaught();
@@ -112,7 +108,7 @@ final class FishTuningSession {
 
     float visibleFish() {
         return game.getFishPosition() + FishingSimulation.jitter(game.getTimeTotal(), 1.7f,
-                game.getFishVelocity(), fish.value(JITTER)) / FishConstants.MINIGAME_TRACK_HEIGHT;
+                game.getFishVelocity(), fish.value(JITTER)) / SimulationConstants.MINIGAME_TRACK_HEIGHT;
     }
 
     private float speed() {
