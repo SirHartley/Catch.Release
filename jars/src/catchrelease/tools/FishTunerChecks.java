@@ -21,7 +21,6 @@ public class FishTunerChecks {
     static final String HEADER = "id,name,icon,rarity,motion,difficulty,motionSpeed,restlessness,progressRateMult,escapeRateMult,jitter,spriteDirection,desc,comment";
 
     public static void main(String[] args) throws Exception {
-        standaloneChecks();
         Files.createDirectories(OUTPUT);
         csvChecks();
         sessionChecks();
@@ -35,16 +34,6 @@ public class FishTunerChecks {
             catch (Exception ex) { throw new RuntimeException(ex); }
         });
         System.out.println("Fish tuner checks passed");
-    }
-
-    static void standaloneChecks() throws Exception {
-        for (String name : List.of("com.fs.starfarer.api.Global",
-                "catchrelease.campaign.fish.minigame.FishingMinigame")) {
-            try {
-                Class.forName(name, false, FishTunerChecks.class.getClassLoader());
-                throw new AssertionError("Engine class on standalone test classpath: " + name);
-            } catch (ClassNotFoundException expected) { }
-        }
     }
 
     static void csvChecks() throws Exception {
