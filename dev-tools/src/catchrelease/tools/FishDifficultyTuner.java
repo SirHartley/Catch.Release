@@ -45,6 +45,7 @@ public final class FishDifficultyTuner extends JPanel {
     private final javax.swing.Timer timer = new javax.swing.Timer(16, event -> tick());
 
     private FishTuningSession session;
+    private JComponent helpTarget;
     private BufferedImage image;
     private boolean loading;
     private boolean manualHeld;
@@ -190,7 +191,7 @@ public final class FishDifficultyTuner extends JPanel {
                     loading = true;
                     spinner.setValue(spinner.getClientProperty("lastValid"));
                     loading = false;
-                    hints.setText("Enter a finite value within the control's range.");
+                    showNotice("Enter a finite value within the control's range.");
                     return;
                 }
                 spinner.putClientProperty("lastValid", spinner.getValue());
@@ -243,7 +244,7 @@ public final class FishDifficultyTuner extends JPanel {
         if (loading || selected().values[field.ordinal()] == value) return;
         if (!Double.isFinite(value) || value < field.min || value > Math.max(field.max, selected().saved[field.ordinal()])) {
             loadValues();
-            hints.setText("Enter a finite value within the range shown in the control's tooltip.");
+            showNotice("Enter a finite value within the control's range. Hover or focus it for help below.");
             return;
         }
         remember();
@@ -319,6 +320,7 @@ public final class FishDifficultyTuner extends JPanel {
                 + " | " + session.lastResult);
         save.setEnabled(!sheet.changes().isEmpty());
         undoButton.setEnabled(!undo.isEmpty());
+        refreshHelp();
         track.repaint();
     }
 
@@ -398,13 +400,13 @@ public final class FishDifficultyTuner extends JPanel {
         component.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent event) {
-                hints.setText((String) component.getClientProperty("fishHelp"));
+                showHelp(component);
             }
         });
         component.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent event) {
-                hints.setText((String) component.getClientProperty("fishHelp"));
+                showHelp(component);
             }
         });
         for (Component child : component.getComponents()) {
@@ -413,12 +415,29 @@ public final class FishDifficultyTuner extends JPanel {
     }
 
     private void setHelp(JComponent component, String text) {
-        component.setToolTipText("<html><body style='width:300px'>" + text + "</body></html>");
+        component.setToolTipText(null);
         component.putClientProperty("fishHelp", text);
         component.getAccessibleContext().setAccessibleDescription(text);
         for (Component child : component.getComponents()) {
             if (child instanceof JComponent swing) setHelp(swing, text);
         }
+    }
+
+    private void showHelp(JComponent component) {
+        helpTarget = component;
+        refreshHelp();
+    }
+
+    private void refreshHelp() {
+        if (helpTarget == null) return;
+        String text = (String) helpTarget.getClientProperty("fishHelp");
+        if (helpTarget == track && session != null) text += "\n" + track.describeState();
+        if (!hints.getText().equals(text)) hints.setText(text);
+    }
+
+    private void showNotice(String text) {
+        helpTarget = null;
+        hints.setText(text);
     }
 
     private static String motionHelp() {
@@ -470,9 +489,7 @@ public final class FishDifficultyTuner extends JPanel {
             });
         }
 
-        @Override
-        public String getToolTipText(MouseEvent event) {
-            if (session == null || session.skill == SimulatedAngler.Skill.MANUAL) return null;
+        String describeState() {
             FishingSimulation game = session.game;
             return String.format(Locale.ROOT, "Fish %.3f; window %.3f–%.3f; progress %.1f%%; covered %.1fs of %.1fs",
                     game.getFishPosition(), game.getBarPosition(), game.getBarPosition() + game.getBarHeightFraction(),
@@ -566,7 +583,6 @@ public final class FishDifficultyTuner extends JPanel {
         frame.setMinimumSize(new Dimension(950, 720));
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-        ToolTipManager.sharedInstance().registerComponent(track);
         resetClock();
         timer.start();
     }
