@@ -6,10 +6,10 @@ $output = Join-Path $repoRoot ('out/fish-tool-tests-' + [guid]::NewGuid().ToStri
 Push-Location -LiteralPath $repoRoot
 try {
     New-Item -ItemType Directory -Path $output | Out-Null
-    & "$JavaHome/bin/javac.exe" --release 17 -encoding UTF-8 -cp $output -sourcepath dev-tools/src -d $output `
-        dev-tools/src/catchrelease/tools/FishDifficultyTuner.java `
-        dev-tools/src/catchrelease/tools/FishFacingPicker.java `
-        dev-tools/test/catchrelease/tools/FishTunerChecks.java
+    & "$JavaHome/bin/javac.exe" --release 17 -encoding UTF-8 -cp $output -sourcepath jars/src -d $output `
+        jars/src/catchrelease/tools/FishDifficultyTuner.java `
+        jars/src/catchrelease/tools/FishFacingPicker.java `
+        tests/catchrelease/tools/FishTunerChecks.java
     if ($LASTEXITCODE -ne 0) { throw 'Fish tool compilation failed.' }
     & "$JavaHome/bin/java.exe" '-Djava.awt.headless=true' -cp $output catchrelease.tools.FishTunerChecks
     if ($LASTEXITCODE -ne 0) { throw 'Fish tool checks failed.' }

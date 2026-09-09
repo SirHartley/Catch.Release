@@ -8,7 +8,7 @@ try {
     New-Item -ItemType Directory -Path $output | Out-Null
     # Compile actual runtime physics, but no campaign engine or treasure RNG.
     & "$JavaHome/bin/javac.exe" --release 17 -encoding UTF-8 -cp $output `
-        -sourcepath 'tests/fishing-parity/stubs;dev-tools/src' -d $output `
+        -sourcepath 'tests/fishing-parity/stubs;jars/src' -d $output `
         jars/src/catchrelease/campaign/fish/minigame/FishingMinigame.java `
         jars/src/catchrelease/campaign/fish/constants/FishConstants.java `
         jars/src/catchrelease/campaign/fish/data/FishMotion.java `

@@ -68,17 +68,16 @@ IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.ja
 
 Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `HauntStatus`, `SpawnFisherman`, `SpawnFleetQuest`, `SpawnDistressCall`. `lw_Console.jar` is needed for compilation even when the runtime mod is absent.
 
-Standalone authoring tools live in `dev-tools/src/catchrelease/tools/`, outside
-the mod's source root. The separate `fish-tools` IntelliJ module uses only Java 17;
-neither module depends on the other, and the mod jar includes only `catchrelease`.
+Authoring tools live in `jars/src/catchrelease/tools/`, in the normal `catchrelease`
+module. They run as standalone Java 17 programs, without starting Starsector.
 Use the `Fish Difficulty Tuner` or `Fish Facing Picker` run configuration, or run
-either `main` with the `fish-tools` classpath and mod root as working directory
+either `main` with the `catchrelease` classpath and mod root as working directory
 (or first argument). Optional second argument: starting fish ID.
 
 | Entry point | Use / owners |
 |---|---|
-| `dev-tools/src/catchrelease/tools/FishFacingPicker.java` | Click a head to save `spriteDirection` and advance; Back revisits, Skip leaves the row unchanged. Image centre is the origin; right/up/left/down are 0/90/180/270 degrees. |
-| `dev-tools/src/catchrelease/tools/FishDifficultyTuner.java` | Live fish tuning, three simulated angler levels or manual hold/release. `FishTuningSheet` holds unsaved values; `FishTuningSession` owns attempts; `SimulatedAngler` consumes screen observations. `help`/`refreshHelp` route control help and preview readouts to the bottom bar. [Tool contract](UI.md#fish-difficulty-tuner). |
+| `tools/FishFacingPicker.java` | Click a head to save `spriteDirection` and advance; Back revisits, Skip leaves the row unchanged. Image centre is the origin; right/up/left/down are 0/90/180/270 degrees. |
+| `tools/FishDifficultyTuner.java` | Live fish tuning, three simulated angler levels or manual hold/release. `FishTuningSheet` holds unsaved values; `FishTuningSession` owns attempts; `SimulatedAngler` consumes screen observations. `help`/`refreshHelp` route control help and preview readouts to the bottom bar. [Tool contract](UI.md#fish-difficulty-tuner). |
 
 The tools' `FishCsv` is their shared cell-preserving CSV reader/writer. It leaves other
 text and line endings intact, checks for external edits, and replaces the file
@@ -86,13 +85,16 @@ through a temporary file. The first changed save creates `fish.csv.facing-*.bak`
 or `fish.csv.tuning-*.bak` beside the CSV. External edits require reopening the
 tool. The tuner writes only on explicit Save; the facing picker saves each click.
 
-The tools' `FishingSimulation`, `SimulationConstants`, `FishMotion` and `Tackle`
-are separate copies of the catch model and its inputs. Runtime code must not
-import them. When game physics changes, compare and update the tool copy using
-`tests/test-fish-parity.ps1`; never change runtime physics to support a tool-only
-experiment. The check compiles the current game physics with test-only campaign
-stubs and compares deterministic traces, constants, tackle modifiers and jitter.
-It does not simulate treasure or run the game engine.
+`tools/FishingSimulation` owns the simulator's catch model. It reads the existing
+`FishConstants`, `FishMotion` and `Tackle` directly; do not duplicate those defaults
+or modify them from the tool. Keep tools in the normal source tree. Do not edit
+or refactor the classes running the in-game minigame to support a tool, and do
+not make runtime code depend on `tools/`. The simulator owns its state and loop.
+When game physics changes, compare and update the tool model using
+`tests/test-fish-parity.ps1`. The check compiles current game physics with
+test-only campaign stubs and compares deterministic traces and jitter. It does
+not simulate treasure or run the game engine. Tool checks live under `tests/`;
+their campaign stubs must stay outside the production source root.
 
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 

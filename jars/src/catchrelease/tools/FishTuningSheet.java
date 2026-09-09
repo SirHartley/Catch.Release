@@ -1,5 +1,7 @@
 package catchrelease.tools;
 
+import catchrelease.campaign.fish.data.FishMotion;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
