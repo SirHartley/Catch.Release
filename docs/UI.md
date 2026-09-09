@@ -59,6 +59,12 @@ and `FishRumors`. Quest-specific destinations come from their saved state.
   sprite state across screens. `FishIcons.draw` owns the fish/silhouette rendering;
   `drawBacklit` adds the rarity backlight. Both use the shared Codex unlock state.
 - Aquarium backdrop source art: 388×170, visible 386×168; 2× visible assets: 772×336.
+- Aquarium fish use `spriteDirection` in degrees counter-clockwise from image
+  right, measured from the full image centre. `FishSpritePose` aligns the mesh
+  to that exact bearing, with no quarter-turn snapping. It preserves the image
+  proportions and the old mirroring convention for left-painted fish. Tail sway
+  follows the aligned body axis; UVs stay within the sprite's texture region.
+  The IDE-facing picker is described under [registration and lifecycle](ARCHITECTURE.md#registration-and-lifecycle).
 
 Fisherman identity and vanilla person-panel setup are covered by
 [ARCHITECTURE.md](ARCHITECTURE.md#fisherman-and-tutorial-lifecycle).

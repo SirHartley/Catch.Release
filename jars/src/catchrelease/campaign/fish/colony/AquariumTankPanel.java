@@ -80,6 +80,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         protected final Build build;
         protected final float lengthPx;
         protected final float aspect;
+        protected final FishSpritePose pose;
         protected final Vector2f loc = new Vector2f();
         protected final Vector2f vel = new Vector2f();
         protected final Vector2f target = new Vector2f();
@@ -109,8 +110,9 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
             SpriteAPI art = SpriteLoader.loadSprite(spec.icon);
             sprite = art;
-            aspect = art != null && art.getWidth() > 0f
-                    ? art.getHeight() / art.getWidth() : 0.5f;
+            pose = new FishSpritePose(art == null ? 2f : art.getWidth(),
+                    art == null ? 1f : art.getHeight(), spec.spriteDirection);
+            aspect = pose.aspect;
 
             mode = nextMode();
             wavePhase = MathUtils.getRandomNumberInRange(0f, 6.28f);
@@ -343,39 +345,31 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
             float waveAmp = breadth * 0.09f * Math.max(0.5f, spec.jitter);
             float waveSpeed = 5f + 3f * spec.motionSpeed;
 
-            GL11.glBegin(GL11.GL_QUAD_STRIP);
-            for (int i = 0; i <= WARP_SEGMENTS; i++) {
-                float along = i / (float) WARP_SEGMENTS;
-
-                float tailness = 1f - along;
-                float sway = (float) Math.sin(wavePhase + time * waveSpeed + tailness * 3.4f)
-                        * waveAmp * (0.15f + 0.85f * tailness);
-
-                float x = -length * 0.5f + along * length;
-
-                uv(along, 1f);
-                GL11.glVertex2f(x, breadth * 0.5f + sway);
-                uv(along, 0f);
-                GL11.glVertex2f(x, -breadth * 0.5f + sway);
+            // Rotate the mesh, not the UVs: diagonal corners stay inside the source image.
+            for (int row = 0; row < WARP_SEGMENTS; row++) {
+                float bottom = row / (float) WARP_SEGMENTS;
+                float top = (row + 1f) / WARP_SEGMENTS;
+                GL11.glBegin(GL11.GL_QUAD_STRIP);
+                for (int i = 0; i <= WARP_SEGMENTS; i++) {
+                    float u = i / (float) WARP_SEGMENTS;
+                    vertex(u, top, length, waveAmp, waveSpeed, time);
+                    vertex(u, bottom, length, waveAmp, waveSpeed, time);
+                }
+                GL11.glEnd();
             }
-            GL11.glEnd();
 
             GL11.glPopMatrix();
         }
 
-        protected void uv(float along, float across) {
-            float facing = Misc.normalizeAngle(spec.spriteDirection);
+        protected void vertex(float u, float v, float length, float waveAmp, float waveSpeed, float time) {
+            float x = pose.x(u, v);
+            float tailness = Math.max(0f, Math.min(1f, 0.5f - x));
+            float sway = (float) Math.sin(wavePhase + time * waveSpeed + tailness * 3.4f)
+                    * waveAmp * (0.15f + 0.85f * tailness);
 
-            if (facing >= 45f && facing < 135f) {
-                GL11.glTexCoord2f(1f - across, along);
-            } else if (facing >= 135f && facing < 225f) {
-                GL11.glTexCoord2f(1f - along, across);
-            } else if (facing >= 225f && facing < 315f) {
-                GL11.glTexCoord2f(across, 1f - along);
-            } else {
-                // painted facing right: the art already agrees with the local frame
-                GL11.glTexCoord2f(along, across);
-            }
+            GL11.glTexCoord2f(sprite.getTexX() + u * sprite.getTexWidth(),
+                    sprite.getTexY() + v * sprite.getTexHeight());
+            GL11.glVertex2f(x * length, pose.y(u, v) * length + sway);
         }
     }
 
