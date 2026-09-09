@@ -68,14 +68,20 @@ IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.ja
 
 Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `HauntStatus`, `SpawnFisherman`, `SpawnFleetQuest`, `SpawnDistressCall`. `lw_Console.jar` is needed for compilation even when the runtime mod is absent.
 
-Standalone authoring tool: run `tools/FishFacingPicker.java`'s `main` from the IDE
-with the mod root as the working directory (or first argument). Optional second
-argument: starting fish ID. No game or mod libraries required. Click a head to
-save its angle in `fish.csv`'s `spriteDirection` and advance; Back revisits, Skip
-leaves a row unchanged. The image centre is the origin; right/up/left/down are
-0/90/180/270 degrees. Only the selected cell is replaced, preserving other CSV
-text and line endings. The first changed click creates a `fish.csv.facing-*.bak`
-beside the CSV; edits from another program block saving until the tool is reopened.
+Standalone authoring tools: run either `main` from the IDE with the mod root as
+the working directory (or first argument). Optional second argument: starting
+fish ID. Both use Java 17 with project sources and no game or mod libraries.
+
+| Entry point | Use / owners |
+|---|---|
+| `tools/FishFacingPicker.java` | Click a head to save `spriteDirection` and advance; Back revisits, Skip leaves the row unchanged. Image centre is the origin; right/up/left/down are 0/90/180/270 degrees. |
+| `tools/FishDifficultyTuner.java` | Live fish tuning, three simulated angler levels or manual hold/release. `FishTuningSheet` holds unsaved values; `FishTuningSession` owns attempts; `SimulatedAngler` consumes screen observations. [Tool contract](UI.md#fish-difficulty-tuner). |
+
+`tools/FishCsv` is the shared cell-preserving CSV reader/writer. It leaves other
+text and line endings intact, checks for external edits, and replaces the file
+through a temporary file. The first changed save creates `fish.csv.facing-*.bak`
+or `fish.csv.tuning-*.bak` beside the CSV. External edits require reopening the
+tool. The tuner writes only on explicit Save; the facing picker saves each click.
 
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 
@@ -193,7 +199,8 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 
 | File | Owner / connection |
 |---|---|
-| `FishingMinigame.java` | Catch physics, progress, escape and treasure. Square-root difficulty and compressRate preserve the sheet ordering with flat player power; hooked legendaries receive at least three Epic rewards. |
+| `FishingMinigame.java` | Game wrapper: resolves campaign/tackle inputs, retains the public state API, and advances movement -> treasure -> progress. Hooked legendaries receive at least three Epic rewards. |
+| `FishingSimulation.java` | Game-independent catch physics shared with the tuning tool: bar movement, fish movement, progress/escape, practice floor and visual jitter. Uses `FishConstants` and injected random ranges; the game wrapper retains live player-rate lookups and its existing frame timestep. |
 | `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure; handles input; records bycatch, catch intel, route progress, and legendary completion. |
 | `FishingMinigameDialogPlugin.java` | Hosts the custom visual, preserves source rupture and quest identity for drone and harpoon catches, applies tutorial catch protection, preserves campaign music, and exposes dev reopens that bypass substitution. |
 

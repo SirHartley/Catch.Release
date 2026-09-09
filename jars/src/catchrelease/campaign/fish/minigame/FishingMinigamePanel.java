@@ -536,15 +536,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     protected float getJitter(float offset) {
-        float time = (jitterTime + offset) * FishConstants.MINIGAME_FISH_JITTER_SPEED;
-
-        float wobble = (float) (Math.sin(time) * 0.5f
-                + Math.sin(time * 1.73f) * 0.3f
-                + Math.sin(time * 2.61f) * 0.2f);
-
-        float effort = 1f + Math.abs(minigame.getFishVelocity()) * FishConstants.MINIGAME_FISH_JITTER_EFFORT;
-
-        return wobble * FishConstants.MINIGAME_FISH_JITTER * minigame.getFish().jitter * effort;
+        return FishingSimulation.jitter(jitterTime, offset,
+                minigame.getFishVelocity(), minigame.getFish().jitter);
     }
 
     protected SpriteAPI getMoteSprite() {

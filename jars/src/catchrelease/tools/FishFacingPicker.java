@@ -1,5 +1,7 @@
 package catchrelease.tools;
 
+import catchrelease.tools.FishCsv.Cell;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -18,8 +20,6 @@ import java.util.function.Consumer;
 
 public final class FishFacingPicker {
 
-    private static final String CSV_PATH = "data/campaign/fish.csv";
-
     private final Sheet sheet;
     private final JFrame frame = new JFrame("Fish facing");
     private final JLabel title = new JLabel();
@@ -31,56 +31,23 @@ public final class FishFacingPicker {
     private BufferedImage image;
     private double direction;
 
-    record Cell(int start, int end, String value) {
-
-    }
-
     record Fish(String id, String name, String icon, Cell direction) {
 
     }
 
-    static final class Sheet {
+    static final class Sheet extends FishCsv {
 
-        final Path path;
-        final Path root;
-        String source;
         List<Fish> fish;
-        Path backup;
 
         Sheet(Path path) throws IOException {
-            this.path = path.toRealPath();
-            root = this.path.getParent().getParent().getParent();
-            source = Files.readString(this.path);
+            super(path);
             fish = readFish(source);
         }
 
         void save(int index, double angle) throws IOException {
-            if (!Files.readString(path).equals(source)) {
-                throw new IOException("fish.csv changed outside this tool. Reopen it before continuing.");
-            }
-            Cell cell = fish.get(index).direction;
             String value = String.format(Locale.ROOT, "%.2f", Math.round(angle * 100) % 36000 / 100d);
-            String updated = source.substring(0, cell.start) + value + source.substring(cell.end);
-            if (updated.equals(source)) return;
-            List<Fish> parsed = readFish(updated);
-            if (backup == null) {
-                backup = Files.createTempFile(path.getParent(), "fish.csv.facing-", ".bak");
-                Files.writeString(backup, source);
-                System.out.println("Backup: " + backup);
-            }
-            Path temp = Files.createTempFile(path.getParent(), "fish-facing-", ".tmp");
-            try {
-                Files.writeString(temp, updated);
-                try {
-                    Files.move(temp, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-                } catch (AtomicMoveNotSupportedException ex) {
-                    Files.move(temp, path, StandardCopyOption.REPLACE_EXISTING);
-                }
-            } finally {
-                Files.deleteIfExists(temp);
-            }
-            source = updated;
-            fish = parsed;
+            save(List.of(new Edit(fish.get(index).direction, value)), "facing");
+            fish = readFish(source);
         }
     }
 
@@ -188,7 +155,7 @@ public final class FishFacingPicker {
         } else {
             Fish fish = sheet.fish.get(index);
             try {
-                direction = Double.parseDouble(fish.direction.value);
+                direction = Double.parseDouble(fish.direction.value());
                 if (!Double.isFinite(direction)) direction = 180d;
             } catch (NumberFormatException ex) {
                 direction = 180d;
@@ -256,59 +223,24 @@ public final class FishFacingPicker {
         Set<String> ids = new HashSet<>();
         int required = Math.max(Math.max(id, name), Math.max(icon, direction));
         for (List<Cell> row : rows.subList(1, rows.size())) {
-            if (row.stream().allMatch(cell -> cell.value.isBlank()) || row.get(0).value.startsWith("#")) continue;
-            if (row.size() <= id || row.get(id).value.isBlank() || row.get(id).value.startsWith("#")) continue;
-            if (row.size() <= required) throw new IOException("Missing fields for " + row.get(id).value);
-            if (!ids.add(row.get(id).value)) throw new IOException("Duplicate fish ID: " + row.get(id).value);
-            fish.add(new Fish(row.get(id).value, row.get(name).value, row.get(icon).value, row.get(direction)));
+            if (row.stream().allMatch(cell -> cell.value().isBlank()) || row.get(0).value().startsWith("#")) continue;
+            if (row.size() <= id || row.get(id).value().isBlank() || row.get(id).value().startsWith("#")) continue;
+            if (row.size() <= required) throw new IOException("Missing fields for " + row.get(id).value());
+            if (!ids.add(row.get(id).value())) throw new IOException("Duplicate fish ID: " + row.get(id).value());
+            fish.add(new Fish(row.get(id).value(), row.get(name).value(), row.get(icon).value(), row.get(direction)));
         }
         if (fish.isEmpty()) throw new IOException("No fish rows found");
         return fish;
     }
 
     static List<List<Cell>> parseCsv(String source) throws IOException {
-        List<List<Cell>> rows = new ArrayList<>();
-        List<Cell> row = new ArrayList<>();
-        int start = source.startsWith("\uFEFF") ? 1 : 0;
-        boolean quoted = false;
-        for (int i = start; i <= source.length(); i++) {
-            char c = i == source.length() ? '\0' : source.charAt(i);
-            if (c == '"') {
-                if (quoted && i + 1 < source.length() && source.charAt(i + 1) == '"') i++;
-                else if (i == start) quoted = true;
-                else if (quoted) {
-                    quoted = false;
-                    if (i + 1 < source.length() && ",\r\n".indexOf(source.charAt(i + 1)) < 0) {
-                        throw new IOException("Text after CSV quote at " + i);
-                    }
-                } else throw new IOException("Unexpected CSV quote at " + i);
-            } else if (!quoted && (c == ',' || c == '\r' || c == '\n' || i == source.length())) {
-                if (i == source.length() && start == i && row.isEmpty()) break;
-                String raw = source.substring(start, i);
-                String value = raw.startsWith("\"") ? raw.substring(1, raw.length() - 1).replace("\"\"", "\"") : raw;
-                row.add(new Cell(start, i, value));
-                if (c != ',') {
-                    rows.add(row);
-                    row = new ArrayList<>();
-                    if (c == '\r' && i + 1 < source.length() && source.charAt(i + 1) == '\n') i++;
-                }
-                start = i + 1;
-            }
-        }
-        if (quoted) throw new IOException("Unclosed CSV quote");
-        return rows;
+        return FishCsv.parse(source);
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                Path path = args.length > 0 ? Path.of(args[0]) : Path.of("").toAbsolutePath();
-                if (Files.isDirectory(path)) {
-                    while (path != null && !Files.isRegularFile(path.resolve(CSV_PATH))) path = path.getParent();
-                    if (path == null) throw new IOException("Set the working directory or first argument to the mod folder.");
-                    path = path.resolve(CSV_PATH);
-                }
-                new FishFacingPicker(new Sheet(path), args.length > 1 ? args[1] : null);
+                new FishFacingPicker(new Sheet(FishCsv.locate(args)), args.length > 1 ? args[1] : null);
             } catch (IOException | IllegalArgumentException ex) {
                 System.err.println(ex.getMessage());
                 JOptionPane.showMessageDialog(null, ex.getMessage(), "Fish facing", JOptionPane.ERROR_MESSAGE);

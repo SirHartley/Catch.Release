@@ -206,6 +206,34 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 - The loot result has a backdrop clock that starts when the panel is created and
   a list clock that starts after the catch tally. Coin rain uses the backdrop clock.
 
+### Fish difficulty tuner
+
+`tools/FishDifficultyTuner.main` opens a plain Swing authoring window outside the
+game. It uses `FishingSimulation`, including the same visual jitter formula as
+`FishingMinigamePanel`. Gear/player/rumor controls are test conditions, not fish
+CSV fields. Treasure pursuit is not simulated. Saving and launch arguments are
+under [authoring tools](ARCHITECTURE.md#registration-and-lifecycle).
+
+Beginner, Regular and Skilled use delayed screen observations with different
+decision intervals, tracking error and anticipation. They do not read future
+fish targets. These are repeatable test profiles, not calibrated human skill.
+Manual mode takes left-mouse or Space only in the focused preview. Losing focus
+releases input and pauses manual play; window focus loss pauses all modes.
+
+The tool advances at fixed 1/60-second steps. Both Caught and Lost are logged,
+held on screen for 0.8 seconds, then followed by a new simulation and seed with
+settings retained. The last result stays visible. Disable losing is off by
+default and independent of game devmode; it uses the existing practice floor.
+An attempt remains unscored if protection was enabled or tuning changed during
+it. Tuning changes clear the current statistics; switching input/gear starts a
+fresh session. Tooltip help is also displayed in a persistent text area when a
+control receives focus or hover, so it can be read while paused.
+
+Standalone checks: `tests/test-fish-tools.ps1 -JavaHome <Java 17 JDK>`. They compile
+without game jars, check CSV saves, resets, determinism, profiles and input, and
+render the panel off-screen at two sizes. This does not replace the full mod build
+or live in-game QA.
+
 ## Keep optimizations local
 
 Reuse existing widgets and text where practical. `TooltipMakerAPI` is a supported
