@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/catchrelease.iml" filepath="$PROJECT_DIR$/catchrelease.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dev-tools/fish-tools.iml" filepath="$PROJECT_DIR$/dev-tools/fish-tools.iml" />
     </modules>
   </component>
 </project>

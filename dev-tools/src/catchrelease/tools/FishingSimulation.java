@@ -1,10 +1,6 @@
-package catchrelease.campaign.fish.minigame;
+package catchrelease.tools;
 
-import catchrelease.campaign.fish.constants.FishConstants;
-import catchrelease.campaign.fish.data.FishMotion;
-import catchrelease.campaign.fish.tackle.Tackle;
-
-public class FishingSimulation {
+final class FishingSimulation {
 
     public enum State {
 
@@ -28,7 +24,7 @@ public class FishingSimulation {
     protected float fishThinkTimer = 0f;
     protected float fishVelocity = 0f;
 
-    protected float progress = FishConstants.MINIGAME_PROGRESS_START;
+    protected float progress = SimulationConstants.MINIGAME_PROGRESS_START;
     protected State state = State.RUNNING;
     protected boolean cannotLose;
     protected float timeHeld;
@@ -61,10 +57,10 @@ public class FishingSimulation {
     }
 
     public static float barHeight(float pixels, float tackleSize) {
-        float base = clamp(pixels / FishConstants.MINIGAME_TRACK_HEIGHT,
-                FishConstants.MINIGAME_BAR_MIN_FRACTION, FishConstants.MINIGAME_BAR_MAX_FRACTION);
+        float base = clamp(pixels / SimulationConstants.MINIGAME_TRACK_HEIGHT,
+                SimulationConstants.MINIGAME_BAR_MIN_FRACTION, SimulationConstants.MINIGAME_BAR_MAX_FRACTION);
         return clamp(base * tackleSize,
-                FishConstants.MINIGAME_BAR_MIN_FRACTION, FishConstants.MINIGAME_BAR_MAX_FRACTION);
+                SimulationConstants.MINIGAME_BAR_MIN_FRACTION, SimulationConstants.MINIGAME_BAR_MAX_FRACTION);
     }
 
     public void restart() {
@@ -74,7 +70,7 @@ public class FishingSimulation {
         fishVelocity = 0f;
         fishThinkTimer = 0f;
         fishTarget = pickFishTarget();
-        progress = FishConstants.MINIGAME_PROGRESS_START;
+        progress = SimulationConstants.MINIGAME_PROGRESS_START;
 
         state = State.RUNNING;
         timeHeld = 0f;
@@ -95,9 +91,9 @@ public class FishingSimulation {
 
     protected void advanceBar(float amount, boolean reeling) {
         barVelocity += (reeling
-                ? FishConstants.MINIGAME_BAR_LIFT * tackle.barLiftMult
-                : -FishConstants.MINIGAME_BAR_GRAVITY * tackle.barGravityMult) * amount;
-        barVelocity = clamp(barVelocity, -FishConstants.MINIGAME_BAR_MAX_SPEED, FishConstants.MINIGAME_BAR_MAX_SPEED);
+                ? SimulationConstants.MINIGAME_BAR_LIFT * tackle.barLiftMult
+                : -SimulationConstants.MINIGAME_BAR_GRAVITY * tackle.barGravityMult) * amount;
+        barVelocity = clamp(barVelocity, -SimulationConstants.MINIGAME_BAR_MAX_SPEED, SimulationConstants.MINIGAME_BAR_MAX_SPEED);
 
         barPosition += barVelocity * amount;
 
@@ -107,15 +103,15 @@ public class FishingSimulation {
     protected void bounce(float lowest, float highest) {
         if (barPosition < lowest) {
             barPosition = lowest;
-            barVelocity = -barVelocity * FishConstants.MINIGAME_BAR_RESTITUTION;
+            barVelocity = -barVelocity * SimulationConstants.MINIGAME_BAR_RESTITUTION;
         } else if (barPosition > highest) {
             barPosition = highest;
-            barVelocity = -barVelocity * FishConstants.MINIGAME_BAR_RESTITUTION;
+            barVelocity = -barVelocity * SimulationConstants.MINIGAME_BAR_RESTITUTION;
         } else {
             return;
         }
 
-        if (Math.abs(barVelocity) < FishConstants.MINIGAME_BAR_REST_SPEED) barVelocity = 0f;
+        if (Math.abs(barVelocity) < SimulationConstants.MINIGAME_BAR_REST_SPEED) barVelocity = 0f;
     }
 
     protected void advanceFish(float amount) {
@@ -126,25 +122,25 @@ public class FishingSimulation {
             fishThinkTimer = pickThinkTime();
         }
 
-        float maxSpeed = FishConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult();
+        float maxSpeed = SimulationConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult();
 
         if (activeMotion == FishMotion.LUNGER) {
-            maxSpeed *= Math.abs(fishTarget - fishPosition) > FishConstants.MINIGAME_LUNGER_NEAR
-                    ? FishConstants.MINIGAME_LUNGER_DASH_MULT
-                    : FishConstants.MINIGAME_LUNGER_CREEP_MULT;
+            maxSpeed *= Math.abs(fishTarget - fishPosition) > SimulationConstants.MINIGAME_LUNGER_NEAR
+                    ? SimulationConstants.MINIGAME_LUNGER_DASH_MULT
+                    : SimulationConstants.MINIGAME_LUNGER_CREEP_MULT;
         }
 
-        float desired = clamp((fishTarget - fishPosition) * FishConstants.MINIGAME_FISH_STIFFNESS,
+        float desired = clamp((fishTarget - fishPosition) * SimulationConstants.MINIGAME_FISH_STIFFNESS,
                 -maxSpeed, maxSpeed);
 
-        float response = 1f - (float) Math.exp(-amount / FishConstants.MINIGAME_FISH_RESPONSE);
+        float response = 1f - (float) Math.exp(-amount / SimulationConstants.MINIGAME_FISH_RESPONSE);
         fishVelocity += (desired - fishVelocity) * response;
 
         fishPosition += fishVelocity * amount;
 
-        float markerSize = Math.max(FishConstants.MINIGAME_FISH_ICON_SIZE,
-                FishConstants.MINIGAME_MOTE_HALO_SIZE);
-        float margin = markerSize * 0.5f / FishConstants.MINIGAME_TRACK_HEIGHT;
+        float markerSize = Math.max(SimulationConstants.MINIGAME_FISH_ICON_SIZE,
+                SimulationConstants.MINIGAME_MOTE_HALO_SIZE);
+        float margin = markerSize * 0.5f / SimulationConstants.MINIGAME_TRACK_HEIGHT;
 
         if (fishPosition < margin || fishPosition > 1f - margin) fishVelocity = 0f;
         fishPosition = clamp(fishPosition, margin, 1f - margin);
@@ -153,12 +149,12 @@ public class FishingSimulation {
     void advanceProgress(float amount, float playerMult) {
         if (isFishInBar()) {
             timeHeld += amount;
-            progress += FishConstants.MINIGAME_CATCH_RATE * compressRate(progressRateMult)
+            progress += SimulationConstants.MINIGAME_CATCH_RATE * compressRate(progressRateMult)
                     * amount
                     * playerMult
                     * tackle.progressMult;
         } else {
-            progress -= FishConstants.MINIGAME_ESCAPE_RATE * compressRate(escapeRateMult)
+            progress -= SimulationConstants.MINIGAME_ESCAPE_RATE * compressRate(escapeRateMult)
                     * amount
                     * playerMult
                     * tackle.escapeMult;
@@ -172,7 +168,7 @@ public class FishingSimulation {
 
         // Practice protection applies before the escape check.
         if (cannotLose) {
-            progress = Math.max(progress, FishConstants.MINIGAME_DEV_PROGRESS_FLOOR);
+            progress = Math.max(progress, SimulationConstants.MINIGAME_DEV_PROGRESS_FLOOR);
             return;
         }
 
@@ -183,7 +179,7 @@ public class FishingSimulation {
     }
 
     protected float compressRate(float mult) {
-        return 1f + (mult - 1f) * FishConstants.MINIGAME_RATE_COMPRESSION;
+        return 1f + (mult - 1f) * SimulationConstants.MINIGAME_RATE_COMPRESSION;
     }
 
     public boolean isFishInBar() {
@@ -212,17 +208,17 @@ public class FishingSimulation {
 
             case WEAVER:
                 // Only reverse after arrival; timer-only reversals collapse into centre jitter.
-                return Math.abs(fishPosition - fishTarget) >= FishConstants.MINIGAME_WEAVER_ARRIVE
+                return Math.abs(fishPosition - fishTarget) >= SimulationConstants.MINIGAME_WEAVER_ARRIVE
                         ? fishTarget
                         : fishPosition > 0.5f
-                                ? FishConstants.MINIGAME_WEAVER_LOW
-                                : FishConstants.MINIGAME_WEAVER_HIGH;
+                                ? SimulationConstants.MINIGAME_WEAVER_LOW
+                                : SimulationConstants.MINIGAME_WEAVER_HIGH;
 
             case TWITCHER: {
                 float hop = random.between(0f, 1f)
-                        < FishConstants.MINIGAME_TWITCHER_LEAP_CHANCE
-                        ? FishConstants.MINIGAME_TWITCHER_LEAP
-                        : FishConstants.MINIGAME_TWITCHER_HOP;
+                        < SimulationConstants.MINIGAME_TWITCHER_LEAP_CHANCE
+                        ? SimulationConstants.MINIGAME_TWITCHER_LEAP
+                        : SimulationConstants.MINIGAME_TWITCHER_HOP;
 
                 return clamp(fishPosition
                         + random.between(-hop, hop), 0.05f, 0.95f);
@@ -245,26 +241,26 @@ public class FishingSimulation {
 
     protected float pickThinkTime() {
         float base = random.between(
-                FishConstants.MINIGAME_THINK_TIME_MIN, FishConstants.MINIGAME_THINK_TIME_MAX);
+                SimulationConstants.MINIGAME_THINK_TIME_MIN, SimulationConstants.MINIGAME_THINK_TIME_MAX);
 
         float divisor = Math.max(0.1f, restlessness * getDifficultyMult());
 
         // MIXED uses the cadence of its current movement type.
         switch (activeMotion == null ? FishMotion.SMOOTH : activeMotion) {
             case DARTER:
-                base *= FishConstants.MINIGAME_DARTER_PATIENCE;
+                base *= SimulationConstants.MINIGAME_DARTER_PATIENCE;
                 break;
 
             case TWITCHER:
-                base *= FishConstants.MINIGAME_TWITCHER_CADENCE;
+                base *= SimulationConstants.MINIGAME_TWITCHER_CADENCE;
                 break;
 
             case LUNGER:
-                base *= FishConstants.MINIGAME_LUNGER_PATIENCE;
+                base *= SimulationConstants.MINIGAME_LUNGER_PATIENCE;
                 break;
 
             case WEAVER:
-                base = FishConstants.MINIGAME_THINK_TIME_MAX;
+                base = SimulationConstants.MINIGAME_THINK_TIME_MAX;
                 break;
 
             default:
@@ -275,18 +271,18 @@ public class FishingSimulation {
 
         // Preserve a tracking window at the end of a Weaver sweep.
         if (activeMotion == FishMotion.WEAVER) {
-            think = Math.max(FishConstants.MINIGAME_WEAVER_DWELL_FLOOR, think);
+            think = Math.max(SimulationConstants.MINIGAME_WEAVER_DWELL_FLOOR, think);
         }
 
         return think;
     }
 
     protected float getDifficultyMult() {
-        float scaled = FishConstants.MINIGAME_DIFFICULTY_FLOOR
-                + FishConstants.MINIGAME_DIFFICULTY_SCALE
-                * (float) Math.sqrt(difficulty / FishConstants.MINIGAME_DIFFICULTY_BASELINE);
+        float scaled = SimulationConstants.MINIGAME_DIFFICULTY_FLOOR
+                + SimulationConstants.MINIGAME_DIFFICULTY_SCALE
+                * (float) Math.sqrt(difficulty / SimulationConstants.MINIGAME_DIFFICULTY_BASELINE);
 
-        return Math.max(0.2f, scaled * FishConstants.MINIGAME_GLOBAL_DIFFICULTY);
+        return Math.max(0.2f, scaled * SimulationConstants.MINIGAME_GLOBAL_DIFFICULTY);
     }
 
     public float getDifficulty() {
@@ -294,7 +290,7 @@ public class FishingSimulation {
     }
 
     public void setDifficulty(float value) {
-        difficulty = clamp(value, FishConstants.MINIGAME_DIFFICULTY_MIN, FishConstants.MINIGAME_DIFFICULTY_MAX);
+        difficulty = clamp(value, SimulationConstants.MINIGAME_DIFFICULTY_MIN, SimulationConstants.MINIGAME_DIFFICULTY_MAX);
     }
 
     public float getMotionSpeed() {
@@ -302,7 +298,7 @@ public class FishingSimulation {
     }
 
     public void setMotionSpeed(float value) {
-        motionSpeed = clamp(value, FishConstants.MINIGAME_SPEED_MIN, FishConstants.MINIGAME_SPEED_MAX);
+        motionSpeed = clamp(value, SimulationConstants.MINIGAME_SPEED_MIN, SimulationConstants.MINIGAME_SPEED_MAX);
     }
 
     public boolean isCannotLose() {
@@ -387,11 +383,11 @@ public class FishingSimulation {
     }
 
     public float getGainPerSecond() {
-        return FishConstants.MINIGAME_CATCH_RATE * compressRate(progressRateMult) * playerProgress * tackle.progressMult;
+        return SimulationConstants.MINIGAME_CATCH_RATE * compressRate(progressRateMult) * playerProgress * tackle.progressMult;
     }
 
     public float getLossPerSecond() {
-        return FishConstants.MINIGAME_ESCAPE_RATE * compressRate(escapeRateMult) * playerEscape * tackle.escapeMult;
+        return SimulationConstants.MINIGAME_ESCAPE_RATE * compressRate(escapeRateMult) * playerEscape * tackle.escapeMult;
     }
 
     public float getBarVelocity() {
@@ -403,11 +399,11 @@ public class FishingSimulation {
     }
 
     public static float jitter(float time, float offset, float velocity, float jitter) {
-        time = (time + offset) * FishConstants.MINIGAME_FISH_JITTER_SPEED;
+        time = (time + offset) * SimulationConstants.MINIGAME_FISH_JITTER_SPEED;
         float wobble = (float) (Math.sin(time) * 0.5f
                 + Math.sin(time * 1.73f) * 0.3f + Math.sin(time * 2.61f) * 0.2f);
-        float effort = 1f + Math.abs(velocity) * FishConstants.MINIGAME_FISH_JITTER_EFFORT;
-        return wobble * FishConstants.MINIGAME_FISH_JITTER * jitter * effort;
+        float effort = 1f + Math.abs(velocity) * SimulationConstants.MINIGAME_FISH_JITTER_EFFORT;
+        return wobble * SimulationConstants.MINIGAME_FISH_JITTER * jitter * effort;
     }
 
     private static float clamp(float value, float min, float max) {
