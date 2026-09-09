@@ -68,6 +68,15 @@ IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.ja
 
 Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `HauntStatus`, `SpawnFisherman`, `SpawnFleetQuest`, `SpawnDistressCall`. `lw_Console.jar` is needed for compilation even when the runtime mod is absent.
 
+Standalone authoring tool: run `tools/FishFacingPicker.java`'s `main` from the IDE
+with the mod root as the working directory (or first argument). Optional second
+argument: starting fish ID. No game or mod libraries required. Click a head to
+save its angle in `fish.csv`'s `spriteDirection` and advance; Back revisits, Skip
+leaves a row unchanged. The image centre is the origin; right/up/left/down are
+0/90/180/270 degrees. Only the selected cell is replaced, preserving other CSV
+text and line endings. The first changed click creates a `fish.csv.facing-*.bak`
+beside the CSV; edits from another program block saving until the tool is reopened.
+
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 
 ## Save identity
