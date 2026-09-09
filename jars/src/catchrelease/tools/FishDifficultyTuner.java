@@ -1,5 +1,9 @@
 package catchrelease.tools;
 
+import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.data.FishMotion;
+import catchrelease.campaign.fish.tackle.Tackle;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +29,7 @@ public final class FishDifficultyTuner extends JPanel {
     private final JCheckBox paused = new JCheckBox("Pause");
     private final JCheckBox logicalPosition = new JCheckBox("Show true catch position");
     private final JSpinner barPixels = new JSpinner(new SpinnerNumberModel(
-            (double) SimulationConstants.MINIGAME_BAR_SIZE_FALLBACK, 28.8d, 360d, 1d));
+            (double) FishConstants.MINIGAME_BAR_SIZE_FALLBACK, 28.8d, 360d, 1d));
     private final JSpinner playerGain = new JSpinner(new SpinnerNumberModel(1d, 0.1d, 5d, 0.05d));
     private final JSpinner playerLoss = new JSpinner(new SpinnerNumberModel(1d, 0.1d, 5d, 0.05d));
     private final JSpinner rumorSpeed = new JSpinner(new SpinnerNumberModel(1d, 0.1d, 4d, 0.05d));

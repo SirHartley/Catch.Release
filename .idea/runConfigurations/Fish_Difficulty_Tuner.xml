@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Fish Difficulty Tuner" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="catchrelease.tools.FishDifficultyTuner" />
-    <module name="fish-tools" />
+    <module name="catchrelease" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <method v="2">
       <option name="Make" enabled="true" />

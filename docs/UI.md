@@ -208,10 +208,11 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 
 ### Fish difficulty tuner
 
-`catchrelease.tools.FishDifficultyTuner.main` in the separate `fish-tools` module
+`catchrelease.tools.FishDifficultyTuner.main` in the normal `catchrelease` module
 opens a plain Swing authoring window outside the game. Its tool-only
-`FishingSimulation` copies the catch model and `FishingMinigamePanel` jitter;
-the game does not call it. Gear/player/rumor controls are test conditions, not fish
+`FishingSimulation` copies the catch model and `FishingMinigamePanel` jitter,
+using the existing game constants and types read-only. The game does not call
+the simulator. Gear/player/rumor controls are test conditions, not fish
 CSV fields. Treasure pursuit is not simulated. Saving and launch arguments are
 under [authoring tools](ARCHITECTURE.md#registration-and-lifecycle).
 
@@ -233,7 +234,7 @@ and progress there. The last selected help stays visible, including while paused
 validation notices stay until the next hover or focus event.
 
 Standalone checks: `tests/test-fish-tools.ps1 -JavaHome <Java 17 JDK>`. They compile
-only developer-tool sources, without game sources or jars, check CSV saves,
+the tools and their shared constants/types without game libraries, check CSV saves,
 resets, determinism, profiles and input, and render the panel off-screen at two
 sizes. Game/model comparison is separate: `tests/test-fish-parity.ps1` with the
 same JDK argument; see [model ownership](ARCHITECTURE.md#registration-and-lifecycle).

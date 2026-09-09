@@ -1,5 +1,9 @@
 package catchrelease.tools;
 
+import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.data.FishMotion;
+import catchrelease.campaign.fish.tackle.Tackle;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +21,7 @@ public class FishTunerChecks {
     static final String HEADER = "id,name,icon,rarity,motion,difficulty,motionSpeed,restlessness,progressRateMult,escapeRateMult,jitter,spriteDirection,desc,comment";
 
     public static void main(String[] args) throws Exception {
-        isolationChecks();
+        standaloneChecks();
         Files.createDirectories(OUTPUT);
         csvChecks();
         sessionChecks();
@@ -33,13 +37,12 @@ public class FishTunerChecks {
         System.out.println("Fish tuner checks passed");
     }
 
-    static void isolationChecks() throws Exception {
+    static void standaloneChecks() throws Exception {
         for (String name : List.of("com.fs.starfarer.api.Global",
-                "catchrelease.campaign.fish.minigame.FishingMinigame",
-                "catchrelease.campaign.fish.constants.FishConstants")) {
+                "catchrelease.campaign.fish.minigame.FishingMinigame")) {
             try {
                 Class.forName(name, false, FishTunerChecks.class.getClassLoader());
-                throw new AssertionError("Game class on tool classpath: " + name);
+                throw new AssertionError("Engine class on standalone test classpath: " + name);
             } catch (ClassNotFoundException expected) { }
         }
     }
@@ -104,13 +107,13 @@ public class FishTunerChecks {
         game.disableLosing(true);
         for (int i = 0; i < 3600; i++) game.advance(FishTuningSession.STEP, false);
         check(game.game.isRunning() && game.attempt == 2, "no-loss mode stays alive");
-        check(game.game.getProgress() >= SimulationConstants.MINIGAME_DEV_PROGRESS_FLOOR, "practice floor");
+        check(game.game.getProgress() >= FishConstants.MINIGAME_DEV_PROGRESS_FLOOR, "practice floor");
         game.disableLosing(false);
         for (int i = 0; game.game.isRunning() && i < 3600; i++) game.advance(FishTuningSession.STEP, false);
         check(game.lost == 1 && game.lastResult.contains("not scored"), "protected attempt remains unscored");
         game.restart(true);
         check(game.game.getTimeTotal() == 0 && game.game.getBarVelocity() == 0 && game.game.getFishVelocity() == 0, "reset physics");
-        check(game.game.getProgress() == SimulationConstants.MINIGAME_PROGRESS_START, "fresh progress");
+        check(game.game.getProgress() == FishConstants.MINIGAME_PROGRESS_START, "fresh progress");
         game.tune();
         check(game.unscored && game.caught == 0 && game.lost == 0, "edits invalidate measurements");
     }

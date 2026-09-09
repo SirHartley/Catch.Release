@@ -1,17 +1,17 @@
 package catchrelease.tools;
 
-import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.minigame.FishingMinigame;
+import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.Global;
 import org.lazywizard.lazylib.MathUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Random;
 
 public class FishingParityChecks {
@@ -22,47 +22,24 @@ public class FishingParityChecks {
     static int lost;
 
     public static void main(String[] args) throws Exception {
-        constantsAndTackle();
         jitterFormula();
         for (FishMotion motion : FishMotion.values()) {
-            for (var tackle : catchrelease.campaign.fish.tackle.Tackle.values()) {
+            for (Tackle tackle : Tackle.values()) {
                 for (int fps : new int[]{30, 60, 144}) {
                     for (int seed = 0; seed < 8; seed++) trace(motion, tackle, fps, seed);
                 }
             }
         }
-        trace(null, catchrelease.campaign.fish.tackle.Tackle.NONE, 60, 9);
+        trace(null, Tackle.NONE, 60, 9);
         require(caught > 0 && lost > 0, "traces must reach both terminal states");
         System.out.printf("Physics parity passed: %,d frames, %,d catches, %,d losses; all movements/tackle, "
                 + "30/60/144Hz, restarts, live modifiers, protection and jitter formula.%n", frames, caught, lost);
     }
 
-    static Tackle toolTackle(catchrelease.campaign.fish.tackle.Tackle game) {
-        try { return Tackle.valueOf(game.name()); }
-        catch (IllegalArgumentException ignored) { return Tackle.NONE; }
-    }
-
-    static void constantsAndTackle() throws Exception {
-        for (var field : SimulationConstants.class.getDeclaredFields()) {
-            context = field.getName();
-            equal(field.getFloat(null), FishConstants.class.getField(field.getName()).getFloat(null));
-        }
-        require(Arrays.equals(Arrays.stream(FishMotion.values()).map(Enum::name).toArray(),
-                Arrays.stream(catchrelease.campaign.fish.data.FishMotion.values()).map(Enum::name).toArray()), "movement roster");
-        for (var game : catchrelease.campaign.fish.tackle.Tackle.values()) {
-            Tackle tool = toolTackle(game);
-            for (String name : new String[]{"barSizeMult", "barLiftMult", "barGravityMult", "progressMult", "escapeMult"}) {
-                context = game.name() + "." + name;
-                equal(Tackle.class.getDeclaredField(name).getFloat(tool), game.getClass().getField(name).getFloat(game));
-            }
-        }
-        for (Tackle tool : Tackle.values()) catchrelease.campaign.fish.tackle.Tackle.valueOf(tool.name());
-    }
-
-    static void trace(FishMotion motion, catchrelease.campaign.fish.tackle.Tackle tackle, int fps, int seed) {
+    static void trace(FishMotion motion, Tackle tackle, int fps, int seed) {
         context = motion + "/" + tackle + "/" + fps + "/" + seed;
         FishSpec fish = new FishSpec();
-        fish.motion = motion == null ? null : catchrelease.campaign.fish.data.FishMotion.valueOf(motion.name());
+        fish.motion = motion;
         fish.difficulty = 5 + seed * 27;
         fish.motionSpeed = 0.5f + seed * 0.2f;
         fish.restlessness = 0.2f + seed * 0.3f;
@@ -80,7 +57,7 @@ public class FishingParityChecks {
         FishingSimulation tool = new FishingSimulation(fish.difficulty,
                 fish.motionSpeed * (fish.rarity == FishRarity.LEGENDARY ? 1f : FishRumors.speed),
                 fish.restlessness, fish.progressRateMult, fish.escapeRateMult, motion,
-                toolTackle(tackle), UpgradeManager.bar,
+                tackle, UpgradeManager.bar,
                 (min, max) -> min + toolRandom.nextFloat() * (max - min));
         tool.setPlayerRates(UpgradeManager.gain, UpgradeManager.loss);
         tool.setCannotLose(Global.dev);
@@ -117,7 +94,7 @@ public class FishingParityChecks {
                 tool.setCannotLose(!Global.dev);
             }
             if (frame == fps * 12) {
-                game.setMotion(catchrelease.campaign.fish.data.FishMotion.WEAVER);
+                game.setMotion(FishMotion.WEAVER);
                 tool.setMotion(FishMotion.WEAVER);
                 game.setDifficulty(80f);
                 tool.setDifficulty(80f);
@@ -149,9 +126,8 @@ public class FishingParityChecks {
         String game = methodBody(Path.of("jars/src/catchrelease/campaign/fish/minigame/FishingMinigamePanel.java"),
                 "protected float getJitter(float offset)")
                 .replace("float time =", "time =").replace("jitterTime", "time")
-                .replace("minigame.getFishVelocity()", "velocity").replace("minigame.getFish().jitter", "jitter")
-                .replace("FishConstants", "SimulationConstants");
-        String tool = methodBody(Path.of("dev-tools/src/catchrelease/tools/FishingSimulation.java"), "public static float jitter(");
+                .replace("minigame.getFishVelocity()", "velocity").replace("minigame.getFish().jitter", "jitter");
+        String tool = methodBody(Path.of("jars/src/catchrelease/tools/FishingSimulation.java"), "public static float jitter(");
         require(game.replaceAll("\\s+", "").equals(tool.replaceAll("\\s+", "")),
                 "jitter formula changed; compare the game panel with the tool");
     }
