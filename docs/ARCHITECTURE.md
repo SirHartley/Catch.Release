@@ -146,6 +146,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `BreachConservatory.java` | Industry definition and aquarium state: stock, enabled state, and selected backdrop. |
 | `AquariumTransfers.java` | Vanilla cargo pickers for transfers. |
 | `AquariumTankScript.java` | Mounts the tank below the colony image whenever no covering visual is open, and removes it when another visual takes over. |
+| `FishSpritePose.java` | Converts native image coordinates into a head-right mesh using precise `spriteDirection`; `AquariumTankPanel` bends that mesh and applies swimming turns. |
 | `Backdrops.java` | Separates campaign-wide backdrop ownership from the scene selected by each conservatory. |
 
 ### `campaign/fish/fisherman`
