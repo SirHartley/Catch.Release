@@ -51,6 +51,7 @@ The dictionaries distinguish checked recipes from extracted names, expressions a
 - Update the affected documentation in the same commit, following [Documentation upkeep](#documentation-upkeep). Do this without a separate user request.
 - Work only in the current task checkout. A live mod installation, including `C:\Modding\mods\Catch.Release`, and every unrelated checkout are read-only unless the user explicitly asks you to change them.
 - Do not deploy or synchronize the mod after merge unless the user explicitly requests it.
+- Keep all Java tools and automated checks under `jars/src`, in the normal module. Do not add separate test source trees or duplicate game classes. Tools may read existing game constants and types; do not change the in-game minigame classes to support them.
 - Prefer listeners and existing callbacks over `EveryFrameScript` polling. Before adding or retaining a polling solution for the task, verify against the exact game source that no existing callback covers the requirement. Document the missing coverage and keep the scan scope and frequency to what the behavior needs. Run while paused only when that behavior requires it.
 
 ### Validate and merge

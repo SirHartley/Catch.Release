@@ -91,10 +91,14 @@ or modify them from the tool. Keep tools in the normal source tree. Do not edit
 or refactor the classes running the in-game minigame to support a tool, and do
 not make runtime code depend on `tools/`. The simulator owns its state and loop.
 When game physics changes, compare and update the tool model using
-`tests/test-fish-parity.ps1`. The check compiles current game physics with
-test-only campaign stubs and compares deterministic traces and jitter. It does
-not simulate treasure or run the game engine. Tool checks live under `tests/`;
-their campaign stubs must stay outside the production source root.
+`tools/FishingParityChecks`. Both it and `tools/FishTunerChecks` have IDE run
+configurations in the normal module; run them from the mod root in a separate
+JVM. Parity checks use the real minigame, fish, rumors, upgrades and LazyLib RNG.
+The check's nested `Environment` supplies API proxies and private campaign data;
+it refuses to run with existing game globals and clears its globals on exit.
+`CatchOnlyMinigame` overrides only treasure generation, leaving catch physics
+unchanged. No duplicate game classes, source rewriting or separate test tree.
+This covers deterministic catch traces and jitter, not treasure or the engine.
 
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 

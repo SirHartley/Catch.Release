@@ -233,11 +233,11 @@ do not register floating Swing tooltips. The preview adds its live coordinates
 and progress there. The last selected help stays visible, including while paused;
 validation notices stay until the next hover or focus event.
 
-Standalone checks: `tests/test-fish-tools.ps1 -JavaHome <Java 17 JDK>`. They compile
-the tools and their shared constants/types without game libraries, check CSV saves,
-resets, determinism, profiles and input, and render the panel off-screen at two
-sizes. Game/model comparison is separate: `tests/test-fish-parity.ps1` with the
-same JDK argument; see [model ownership](ARCHITECTURE.md#registration-and-lifecycle).
+Run `Fish Tuner Checks` from IntelliJ for CSV saves, resets, determinism, profiles,
+input and off-screen panel rendering at two sizes. Run `Fishing Parity Checks`
+for game/model comparison. Both check classes live beside the tools under
+`jars/src/catchrelease/tools` and run headless with Java 17 and the normal module
+classpath; see [model ownership](ARCHITECTURE.md#registration-and-lifecycle).
 Neither check replaces the full mod build or live in-game QA.
 
 ## Keep optimizations local
