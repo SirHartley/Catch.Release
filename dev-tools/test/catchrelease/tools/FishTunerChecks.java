@@ -188,10 +188,33 @@ public class FishTunerChecks {
         noLoss.doClick();
         check(((FishTuningSession) get(panel, "session")).game.isCannotLose(), "checkbox changes core");
         check(((JLabel) get(panel, "status")).getText().contains("LOSS DISABLED"), "practice label immediately visible");
-        for (JSpinner spinner : numbers.values()) check(spinner.getToolTipText() != null, "number tooltip");
+        JTextArea hints = (JTextArea) get(panel, "hints");
         for (String name : List.of("fish", "motion", "skill", "tackle", "noLoss", "save", "undoButton", "rates", "statistics")) {
-            check(((JComponent) get(panel, name)).getToolTipText() != null, name + " help");
+            check(((JComponent) get(panel, name)).getClientProperty("fishHelp") != null, name + " help");
         }
+        for (JSpinner spinner : numbers.values()) check(spinner.getClientProperty("fishHelp") != null, "number help");
+        for (SimulatedAngler.Skill mode : SimulatedAngler.Skill.values()) {
+            skill.setSelectedItem(mode);
+            bottomHelpChecks(panel, hints);
+            hover(track);
+            check(hints.getText().contains("Fish 0.500; window"), "preview readout in bottom bar for " + mode);
+            ((FishTuningSession) get(panel, "session")).game.advance(0.1f, false);
+            refreshReadouts(panel);
+            check(hints.getText().contains("of 0.1s"), "preview help refreshes without mouse movement");
+        }
+        JSpinner speedInput = numbers.get(FishTuningSheet.Field.SPEED);
+        hover(speedInput);
+        speedInput.setValue(2.25);
+        check(hints.getText().contains("Current: 2.25"), "active help follows live tuning");
+        ((JButton) get(panel, "undoButton")).doClick();
+        check(hints.getText().contains("Current: " + first.values[FishTuningSheet.Field.SPEED.ordinal()]), "active help follows undo");
+        speedInput.setValue(Double.NaN);
+        String notice = hints.getText();
+        refreshReadouts(panel);
+        check(hints.getText().equals(notice) && notice.startsWith("Enter a finite value"), "validation notice persists");
+        hover(speedInput);
+        check(hints.getText().equals(speedInput.getClientProperty("fishHelp")), "hover replaces notice with help");
+        check(ToolTipManager.sharedInstance().isEnabled(), "other Swing windows keep their tooltip settings");
         for (Dimension size : List.of(new Dimension(1020, 820), new Dimension(950, 720))) {
             panel.setSize(size);
             layout(panel);
@@ -200,8 +223,53 @@ public class FishTunerChecks {
             Graphics2D g = image.createGraphics();
             panel.paint(g);
             g.dispose();
+            bottomHelpChecks(panel, hints);
+            hover(track);
+            checkHelpFits(hints);
+            g = image.createGraphics();
+            panel.paint(g);
+            g.dispose();
             ImageIO.write(image, "png", OUTPUT.resolve("tuner-" + size.width + ".png").toFile());
         }
+    }
+
+    static void bottomHelpChecks(JComponent component, JTextArea hints) throws Exception {
+        MouseEvent event = new MouseEvent(component, MouseEvent.MOUSE_ENTERED, 0, 0, 1, 1, 0, false);
+        check(component.getToolTipText() == null && component.getToolTipText(event) == null, "no floating tooltip");
+        String help = (String) component.getClientProperty("fishHelp");
+        if (help != null) {
+            hover(component);
+            check(hints.getText().startsWith(help), "hover help in bottom bar");
+            hints.setText("");
+            for (FocusListener listener : component.getFocusListeners()) {
+                listener.focusGained(new FocusEvent(component, FocusEvent.FOCUS_GAINED));
+            }
+            check(hints.getText().startsWith(help), "keyboard focus help in bottom bar");
+            for (FocusListener listener : component.getFocusListeners()) {
+                listener.focusLost(new FocusEvent(component, FocusEvent.FOCUS_LOST));
+            }
+            check(help.equals(component.getAccessibleContext().getAccessibleDescription()), "accessible help retained");
+            if (hints.getWidth() > 0) checkHelpFits(hints);
+        }
+        for (Component child : component.getComponents()) {
+            if (child instanceof JComponent swing) bottomHelpChecks(swing, hints);
+        }
+    }
+
+    static void hover(JComponent component) {
+        MouseEvent event = new MouseEvent(component, MouseEvent.MOUSE_ENTERED, 0, 0, 1, 1, 0, false);
+        for (MouseListener listener : component.getMouseListeners()) listener.mouseEntered(event);
+    }
+
+    static void refreshReadouts(FishDifficultyTuner panel) throws Exception {
+        var method = FishDifficultyTuner.class.getDeclaredMethod("updateReadouts");
+        method.setAccessible(true);
+        method.invoke(panel);
+    }
+
+    static void checkHelpFits(JTextArea hints) throws Exception {
+        var end = hints.modelToView2D(hints.getDocument().getLength());
+        check(end != null && end.getMaxY() <= hints.getHeight(), "bottom help is fully readable");
     }
 
     static void check(boolean value, String message) {

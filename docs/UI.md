@@ -227,8 +227,10 @@ settings retained. The last result stays visible. Disable losing is off by
 default and independent of game devmode; it uses the existing practice floor.
 An attempt remains unscored if protection was enabled or tuning changed during
 it. Tuning changes clear the current statistics; switching input/gear starts a
-fresh session. Tooltip help is also displayed in a persistent text area when a
-control receives focus or hover, so it can be read while paused.
+fresh session. Help appears only in the bottom bar on hover or keyboard focus;
+do not register floating Swing tooltips. The preview adds its live coordinates
+and progress there. The last selected help stays visible, including while paused;
+validation notices stay until the next hover or focus event.
 
 Standalone checks: `tests/test-fish-tools.ps1 -JavaHome <Java 17 JDK>`. They compile
 only developer-tool sources, without game sources or jars, check CSV saves,

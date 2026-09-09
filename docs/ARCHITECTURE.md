@@ -78,7 +78,7 @@ either `main` with the `fish-tools` classpath and mod root as working directory
 | Entry point | Use / owners |
 |---|---|
 | `dev-tools/src/catchrelease/tools/FishFacingPicker.java` | Click a head to save `spriteDirection` and advance; Back revisits, Skip leaves the row unchanged. Image centre is the origin; right/up/left/down are 0/90/180/270 degrees. |
-| `dev-tools/src/catchrelease/tools/FishDifficultyTuner.java` | Live fish tuning, three simulated angler levels or manual hold/release. `FishTuningSheet` holds unsaved values; `FishTuningSession` owns attempts; `SimulatedAngler` consumes screen observations. [Tool contract](UI.md#fish-difficulty-tuner). |
+| `dev-tools/src/catchrelease/tools/FishDifficultyTuner.java` | Live fish tuning, three simulated angler levels or manual hold/release. `FishTuningSheet` holds unsaved values; `FishTuningSession` owns attempts; `SimulatedAngler` consumes screen observations. `help`/`refreshHelp` route control help and preview readouts to the bottom bar. [Tool contract](UI.md#fish-difficulty-tuner). |
 
 The tools' `FishCsv` is their shared cell-preserving CSV reader/writer. It leaves other
 text and line endings intact, checks for external edits, and replaces the file
