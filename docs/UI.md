@@ -258,6 +258,11 @@ The panel retains both snapshots, reports percentage-point changes and counts
 seeds that became or ceased being catches. Each side's time statistics use its
 own successful attempts. Catch-rate intervals are not a significance test of
 the difference. Selection or input changes mark the retained comparison stale.
+Selected results explain the metrics in plain language and suggest one-field
+experiments. Required coverage and drain times use the tested fish and setup,
+not the current controls. Advice labels uncertainty and possible causes; it
+does not treat bot catch rates as human success rates or promise a particular
+fix. Every movement type has a description, including its main tuning tradeoff.
 
 ## Keep optimizations local
 

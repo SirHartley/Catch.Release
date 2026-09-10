@@ -43,6 +43,11 @@ public class FishBalanceChecks {
         check(stats.time(0.9) == 2 && Double.isNaN(stats.deviation()), "catch-only quantiles and missing deviation");
         check(stats.earlyLosses() == 1 && stats.nearLosses() == 1, "failure flags");
         check(stats.confidence(false) < stats.catchRate() && stats.confidence(true) > stats.catchRate(), "uncertainty interval");
+        String advice = FishBalanceAdvice.describe(simulate(requests.get(0)), Skill.REGULAR);
+        check(advice.contains("THINGS TO TEST") && advice.contains("not an automatic diagnosis"), "guidance distinguishes observations from suggestions");
+        for (catchrelease.campaign.fish.data.FishMotion movement : catchrelease.campaign.fish.data.FishMotion.values()) {
+            check(!FishBalanceAdvice.movement(movement).isBlank(), "every movement has an explanation");
+        }
         Thread.currentThread().interrupt();
         try { simulate(requests.get(0)); throw new AssertionError("cancellation ignored"); }
         catch (InterruptedException expected) { Thread.interrupted(); }

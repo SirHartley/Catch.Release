@@ -336,7 +336,8 @@ final class FishBalancePanel extends JPanel {
                 + "\nSuccessful catch times: min " + number(stats.time(0)) + "s; P10 " + number(stats.time(0.1)) + "s; median "
                 + number(stats.time(0.5)) + "s; P90 " + number(stats.time(0.9)) + "s; max " + number(stats.time(1)) + "s; standard deviation " + number(stats.deviation()) + "s."
                 + "\nFlags: " + (stats.flags().isEmpty() ? "none" : stats.flags())
-                + ". Percentiles use successful catches only; a small number of successes makes them unreliable.");
+                + ". Percentiles use successful catches only; a small number of successes makes them unreliable."
+                + FishBalanceAdvice.describe(result, profile()));
         details.setCaretPosition(0);
     }
 
@@ -352,6 +353,7 @@ final class FishBalancePanel extends JPanel {
             text.append(String.format(Locale.ROOT, "%-9s %3d fish | %s | mean catch %5.1f%% | fish range %5.1f–%5.1f%% | median %s s | P90 %s s | timeouts %d\n",
                     type, group.size(), profile(), Arrays.stream(rates).average().orElse(0), Arrays.stream(rates).min().orElse(0),
                     Arrays.stream(rates).max().orElse(0), number(pooled.time(0.5)), number(pooled.time(0.9)), pooled.count(Outcome.TIMEOUT)));
+            text.append("  ").append(FishBalanceAdvice.movement(type)).append("\n\n");
         }
         behaviors.setText(text.toString());
     }

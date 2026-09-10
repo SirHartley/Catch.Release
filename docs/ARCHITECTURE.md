@@ -108,6 +108,8 @@ read mutable sheet rows or game globals. `FishBalanceChecks` checks batch/previe
 agreement and deterministic parallel results.
 `FishBalanceComparison` keeps saved/checkpoint and edited requests separate,
 and compares complete results on matching seeds without modifying the sheet.
+`FishBalanceAdvice` explains measured coverage, miss duration, early/near-catch
+losses and movement-specific tuning options. It never changes fish values.
 
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 
