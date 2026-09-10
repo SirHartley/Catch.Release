@@ -70,6 +70,14 @@ public class FishBalanceChecks {
                 panel.refresh();
                 panel.runRows(sheet.fish.subList(0, 6));
                 check(panel.worker == null, "identical runs use cache");
+                panel.comparison.compare();
+                check(panel.comparison.before.equals(panel.comparison.after), "unchanged comparison reuses identical result");
+                check(panel.comparison.model.getRowCount() == 3, "comparison reports all anglers");
+                check(panel.comparison.model.getValueAt(1, 3).equals("0.0"), "unchanged catch delta is zero");
+                row.values[Field.SPEED.ordinal()] += 0.1;
+                panel.comparison.refresh();
+                check(panel.comparison.notes.getText().contains("STALE"), "comparison keeps old snapshot and marks edits");
+                row.values[Field.SPEED.ordinal()] = original;
                 panel.setSize(950, 490);
                 FishTunerChecks.layout(panel);
                 BufferedImage image = new BufferedImage(950, 490, BufferedImage.TYPE_INT_RGB);

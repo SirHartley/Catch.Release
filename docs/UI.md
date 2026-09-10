@@ -252,6 +252,12 @@ weight for mean catch rates. Filtering and sorting also control the charts.
 Edits debounce a retest of only previously tested fish; an active batch finishes
 before queued edits run. Cancelling keeps completed fish, discards incomplete
 ones and stops queued retests. Closing the tuner cancels all background work.
+Before / after compares saved CSV values or a named in-session checkpoint with
+current edits. Both use the same setup, sample count, first seed and time limit.
+The panel retains both snapshots, reports percentage-point changes and counts
+seeds that became or ceased being catches. Each side's time statistics use its
+own successful attempts. Catch-rate intervals are not a significance test of
+the difference. Selection or input changes mark the retained comparison stale.
 
 ## Keep optimizations local
 

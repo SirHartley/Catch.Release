@@ -49,6 +49,7 @@ final class FishBalancePanel extends JPanel {
     final JTabbedPane views = new JTabbedPane();
     final FishBalanceChart chart = new FishBalanceChart();
     final JTextArea behaviors = new JTextArea();
+    final FishBalanceComparison comparison;
     final javax.swing.Timer editDelay = new javax.swing.Timer(600, event -> retestPending());
     SwingWorker<Void, Result> worker;
     boolean closed;
@@ -62,6 +63,7 @@ final class FishBalancePanel extends JPanel {
         this.openFish = openFish;
         this.help = help;
         this.bottomHelp = bottomHelp;
+        comparison = new FishBalanceComparison(this);
         table = new JTable(model);
         sorter = new TableRowSorter<>(model);
         samples.setPreferredSize(new Dimension(65, 25));
@@ -139,6 +141,7 @@ final class FishBalancePanel extends JPanel {
         behaviors.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
         help.accept(behaviors, "Movement groups use only fresh visible fish. Catch rate is the mean per-fish rate; min/max exposes differences hidden by an average. This is not a controlled comparison of movement alone.");
         views.addTab("Movement groups", new JScrollPane(behaviors));
+        views.addTab("Before / after", comparison);
         details.setEditable(false);
         details.setLineWrap(true);
         details.setWrapStyleWord(true);
@@ -317,6 +320,7 @@ final class FishBalancePanel extends JPanel {
         }
         showDetails();
         updateCharts();
+        comparison.refresh();
     }
 
     void showDetails() {
