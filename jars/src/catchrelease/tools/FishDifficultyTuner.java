@@ -73,7 +73,8 @@ public final class FishDifficultyTuner extends JPanel {
         buildControls();
         installEvents();
         selectFish();
-        balance = new FishBalancePanel(sheet, this::balanceSetup, this::selected, this::openBalanceFish, this::help, this::showNotice);
+        balance = new FishBalancePanel(sheet, this::balanceSetup, this::selected, this::openBalanceFish, this::help, this::showNotice,
+                (spec, field) -> { openBalanceFish(spec.id()); changeNumber(field, spec.values().get(field.ordinal())); });
         Component preview = ((BorderLayout) getLayout()).getLayoutComponent(BorderLayout.CENTER);
         remove(preview);
         tabs.addTab("Live tuning", preview);

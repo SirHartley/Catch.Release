@@ -43,6 +43,9 @@ public class FishBalanceChecks {
         check(stats.time(0.9) == 2 && Double.isNaN(stats.deviation()), "catch-only quantiles and missing deviation");
         check(stats.earlyLosses() == 1 && stats.nearLosses() == 1, "failure flags");
         check(stats.confidence(false) < stats.catchRate() && stats.confidence(true) > stats.catchRate(), "uncertainty interval");
+        List<Request> sweep = FishBalanceExperiments.candidates(snapshot, setup, requests.get(0).plan(), Field.SPEED, 0.5, 1.5, 5, 4);
+        check(sweep.size() == 5 && sweep.get(0).fish().value(Field.SPEED) == 0.5f && sweep.get(4).fish().value(Field.SPEED) == 1.5f, "sweep endpoints");
+        check(sweep.stream().allMatch(r -> r.fish().value(Field.GAIN) == snapshot.value(Field.GAIN) && r.plan().equals(requests.get(0).plan())), "one field varies on matched seeds");
         String advice = FishBalanceAdvice.describe(simulate(requests.get(0)), Skill.REGULAR);
         check(advice.contains("THINGS TO TEST") && advice.contains("not an automatic diagnosis"), "guidance distinguishes observations from suggestions");
         for (catchrelease.campaign.fish.data.FishMotion movement : catchrelease.campaign.fish.data.FishMotion.values()) {
@@ -53,7 +56,7 @@ public class FishBalanceChecks {
         catch (InterruptedException expected) { Thread.interrupted(); }
         SwingUtilities.invokeAndWait(() -> {
             try {
-                FishBalancePanel panel = new FishBalancePanel(sheet, () -> setup, () -> row, ignored -> {}, (component, text) -> {}, ignored -> {});
+                FishBalancePanel panel = new FishBalancePanel(sheet, () -> setup, () -> row, ignored -> {}, (component, text) -> {}, ignored -> {}, (spec, field) -> {});
                 for (Result result : parallel.values()) {
                     panel.results.put(result.request().fish().id(), result);
                     panel.cache.put(result.request(), result);

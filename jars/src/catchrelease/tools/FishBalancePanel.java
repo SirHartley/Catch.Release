@@ -24,6 +24,7 @@ final class FishBalancePanel extends JPanel {
     final Consumer<String> openFish;
     final BiConsumer<JComponent, String> help;
     final Consumer<String> bottomHelp;
+    final BiConsumer<Spec, FishTuningSheet.Field> apply;
     final Map<String, Result> results = new HashMap<>();
     final Map<Request, Result> cache = new LinkedHashMap<>();
     final Set<String> pendingEdits = new LinkedHashSet<>();
@@ -50,12 +51,14 @@ final class FishBalancePanel extends JPanel {
     final FishBalanceChart chart = new FishBalanceChart();
     final JTextArea behaviors = new JTextArea();
     final FishBalanceComparison comparison;
+    final FishBalanceExperiments experiments;
     final javax.swing.Timer editDelay = new javax.swing.Timer(600, event -> retestPending());
     SwingWorker<Void, Result> worker;
     boolean closed;
 
     FishBalancePanel(FishTuningSheet sheet, Supplier<Setup> setup, Supplier<FishTuningSheet.Row> current,
-                     Consumer<String> openFish, BiConsumer<JComponent, String> help, Consumer<String> bottomHelp) {
+                     Consumer<String> openFish, BiConsumer<JComponent, String> help, Consumer<String> bottomHelp,
+                     BiConsumer<Spec, FishTuningSheet.Field> apply) {
         super(new BorderLayout(4, 4));
         this.sheet = sheet;
         this.setup = setup;
@@ -63,9 +66,11 @@ final class FishBalancePanel extends JPanel {
         this.openFish = openFish;
         this.help = help;
         this.bottomHelp = bottomHelp;
-        comparison = new FishBalanceComparison(this);
+        this.apply = apply;
         table = new JTable(model);
         sorter = new TableRowSorter<>(model);
+        comparison = new FishBalanceComparison(this);
+        experiments = new FishBalanceExperiments(this);
         samples.setPreferredSize(new Dimension(65, 25));
         seed.setPreferredSize(new Dimension(90, 25));
         limit.setPreferredSize(new Dimension(65, 25));
@@ -142,6 +147,7 @@ final class FishBalancePanel extends JPanel {
         help.accept(behaviors, "Movement groups use only fresh visible fish. Catch rate is the mean per-fish rate; min/max exposes differences hidden by an average. This is not a controlled comparison of movement alone.");
         views.addTab("Movement groups", new JScrollPane(behaviors));
         views.addTab("Before / after", comparison);
+        views.addTab("Experiments", experiments);
         details.setEditable(false);
         details.setLineWrap(true);
         details.setWrapStyleWord(true);
@@ -321,6 +327,7 @@ final class FishBalancePanel extends JPanel {
         showDetails();
         updateCharts();
         comparison.refresh();
+        experiments.refresh();
     }
 
     void showDetails() {

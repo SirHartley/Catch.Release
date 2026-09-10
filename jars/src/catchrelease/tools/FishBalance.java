@@ -226,4 +226,8 @@ final class FishBalance {
     static String number(double value) {
         return Double.isFinite(value) ? String.format(Locale.ROOT, "%.1f", value) : "—";
     }
+
+    static String value(double value) {
+        return java.math.BigDecimal.valueOf(value).setScale(4, java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
+    }
 }

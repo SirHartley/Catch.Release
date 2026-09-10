@@ -88,8 +88,8 @@ final class FishBalanceComparison extends JPanel {
                 + afterRequest.plan().seed() + ", limit " + afterRequest.plan().seconds() + "s.\n");
         text.append("Movement: ").append(beforeRequest.fish().motion()).append(" → ").append(afterRequest.fish().motion()).append("\n");
         for (FishTuningSheet.Field field : FishTuningSheet.Field.values()) {
-            text.append(field.label).append(": ").append(number(beforeRequest.fish().value(field))).append(" → ")
-                    .append(number(afterRequest.fish().value(field))).append("   ");
+            text.append(field.label).append(": ").append(value(beforeRequest.fish().values().get(field.ordinal()))).append(" → ")
+                    .append(value(afterRequest.fish().values().get(field.ordinal()))).append("   ");
         }
         text.append("\n\n");
         if (before == null || after == null) text.append("Waiting for both completed snapshots. Cancelled or failed runs do not count as a comparison.");

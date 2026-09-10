@@ -110,6 +110,9 @@ agreement and deterministic parallel results.
 and compares complete results on matching seeds without modifying the sheet.
 `FishBalanceAdvice` explains measured coverage, miss duration, early/near-catch
 losses and movement-specific tuning options. It never changes fish values.
+`FishBalanceExperiments` builds one-field candidate requests and keeps their
+results outside the normal per-fish result map. Apply uses the tuner's existing
+edit/Undo path and refuses a changed source fish.
 
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 

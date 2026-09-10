@@ -263,6 +263,11 @@ experiments. Required coverage and drain times use the tested fish and setup,
 not the current controls. Advice labels uncertainty and possible causes; it
 does not treat bot catch rates as human success rates or promise a particular
 fix. Every movement type has a description, including its main tuning tradeoff.
+Experiments run an inclusive, evenly spaced range for one field with identical
+seeds and setup. Candidate tables and charts retain completed snapshots.
+Applying a completed candidate changes only its tested field and adds a normal
+Undo entry; it does not save the CSV. A changed source fish blocks applying old
+candidates. No replay or frame-recording system is included.
 
 ## Keep optimizations local
 
