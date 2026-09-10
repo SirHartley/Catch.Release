@@ -240,6 +240,19 @@ for game/model comparison. Both check classes live beside the tools under
 classpath; see [model ownership](ARCHITECTURE.md#registration-and-lifecycle).
 Neither check replaces the full mod build or live in-game QA.
 
+Balance results runs all three anglers with normal losing at fixed 60 Hz, without
+drawing or real-time waits. Up to four workers run fish snapshots independently.
+The default is 30 attempts per angler and a 120-second limit. Timeouts stay
+separate from losses and remain in catch-rate denominators. Catch-time
+percentiles and sample deviation use successes only; the 95% catch-rate interval
+uses Wilson's method. Flags are screening heuristics, not balance verdicts.
+Tables retain stale results visibly; charts and movement groups exclude them.
+Movement groups use declared modes (MIXED is separate), with equal per-fish
+weight for mean catch rates. Filtering and sorting also control the charts.
+Edits debounce a retest of only previously tested fish; an active batch finishes
+before queued edits run. Cancelling keeps completed fish, discards incomplete
+ones and stops queued retests. Closing the tuner cancels all background work.
+
 ## Keep optimizations local
 
 Reuse existing widgets and text where practical. `TooltipMakerAPI` is a supported

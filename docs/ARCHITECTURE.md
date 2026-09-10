@@ -100,6 +100,13 @@ it refuses to run with existing game globals and clears its globals on exit.
 unchanged. No duplicate game classes, source rewriting or separate test tree.
 This covers deterministic catch traces and jitter, not treasure or the engine.
 
+The tuner's Balance results tab uses `tools/FishBalance` for immutable run
+snapshots, per-attempt telemetry and bounded parallel batches. `FishBalancePanel`
+owns session results, exact-input cache, filters and stale-result checks;
+`FishBalanceChart` draws catch-rate and successful-time plots. Workers never
+read mutable sheet rows or game globals. `FishBalanceChecks` checks batch/preview
+agreement and deterministic parallel results.
+
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 
 ## Save identity
