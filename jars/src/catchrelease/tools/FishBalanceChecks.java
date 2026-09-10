@@ -3,6 +3,9 @@ package catchrelease.tools;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.*;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -54,9 +57,20 @@ public class FishBalanceChecks {
         Thread.currentThread().interrupt();
         try { simulate(requests.get(0)); throw new AssertionError("cancellation ignored"); }
         catch (InterruptedException expected) { Thread.interrupted(); }
+        Path notebookFile = Files.createTempDirectory("fish-balance-notebook-").resolve("notes.properties");
+        FishBalanceNotebook notebook = new FishBalanceNotebook(notebookFile);
+        notebook.references.put("Slow / careful | fish", new FishBalanceNotebook.Reference(snapshot, "Easy to read\nGood pause; no rush."));
+        notebook.presets.put("Basic equipment", setup);
+        notebook.save();
+        FishBalanceNotebook loaded = new FishBalanceNotebook(notebookFile);
+        check(loaded.references.equals(notebook.references) && loaded.presets.equals(notebook.presets), "notebook round-trip");
+        Files.writeString(notebookFile, "external edit");
+        try { notebook.save(); throw new AssertionError("external edit overwritten"); }
+        catch (java.io.IOException expected) { }
+        check(new FishBalanceNotebook(notebookFile).error != null, "bad notebook is reported without overwriting");
         SwingUtilities.invokeAndWait(() -> {
             try {
-                FishBalancePanel panel = new FishBalancePanel(sheet, () -> setup, () -> row, ignored -> {}, (component, text) -> {}, ignored -> {}, (spec, field) -> {});
+                FishBalancePanel panel = new FishBalancePanel(sheet, () -> setup, () -> row, ignored -> {}, (component, text) -> {}, ignored -> {}, (spec, field) -> {}, ignored -> {});
                 for (Result result : parallel.values()) {
                     panel.results.put(result.request().fish().id(), result);
                     panel.cache.put(result.request(), result);
@@ -86,17 +100,38 @@ public class FishBalanceChecks {
                 panel.comparison.refresh();
                 check(panel.comparison.notes.getText().contains("STALE"), "comparison keeps old snapshot and marks edits");
                 row.values[Field.SPEED.ordinal()] = original;
+                panel.refresh();
+                int other = panel.table.convertRowIndexToView(1);
+                panel.table.setRowSelectionInterval(other, other);
+                check(panel.comparison.notes.getText().contains("STALE"), "selection immediately updates comparison");
+                panel.table.clearSelection();
+                check(!panel.comparison.notes.getText().contains("STALE"), "returning to compared fish clears warning");
+                panel.experiments.original = snapshot;
+                panel.experiments.testedField = Field.SPEED;
+                panel.experiments.requests = sweep;
+                for (Request candidate : sweep) panel.experiments.results.put(candidate, simulate(candidate));
+                panel.experiments.refresh();
+                panel.seed.setValue(18L);
+                check(!panel.experiments.contextUnchanged(), "experiment remembers its tested settings");
+                panel.seed.setValue(17L);
+                panel.references.notebook.references.put("Readable movement", new FishBalanceNotebook.Reference(snapshot, "Good reference for pauses."));
+                panel.references.reload();
+                panel.references.tree.setSelectionRow(2);
                 panel.setSize(950, 490);
-                FishTunerChecks.layout(panel);
-                BufferedImage image = new BufferedImage(950, 490, BufferedImage.TYPE_INT_RGB);
-                Graphics2D graphics = image.createGraphics();
-                panel.paint(graphics);
-                graphics.dispose();
                 Files.createDirectories(Path.of("out/fish-tuner-checks"));
-                ImageIO.write(image, "png", Path.of("out/fish-tuner-checks/balance-table.png").toFile());
+                for (int i = 0; i < panel.views.getTabCount(); i++) {
+                    panel.views.setSelectedIndex(i);
+                    FishTunerChecks.layout(panel);
+                    if (i == 0) check(panel.split.getBottomComponent().getHeight() >= 125, "results explanation has room at minimum size");
+                    BufferedImage image = new BufferedImage(950, 490, BufferedImage.TYPE_INT_RGB);
+                    Graphics2D graphics = image.createGraphics();
+                    panel.paint(graphics);
+                    graphics.dispose();
+                    ImageIO.write(image, "png", Path.of("out/fish-tuner-checks/balance-tab-" + i + ".png").toFile());
+                }
                 panel.chart.setSize(900, 390);
-                image = new BufferedImage(900, 390, BufferedImage.TYPE_INT_RGB);
-                graphics = image.createGraphics();
+                BufferedImage image = new BufferedImage(900, 390, BufferedImage.TYPE_INT_RGB);
+                Graphics2D graphics = image.createGraphics();
                 panel.chart.paint(graphics);
                 graphics.dispose();
                 ImageIO.write(image, "png", Path.of("out/fish-tuner-checks/balance-chart.png").toFile());
@@ -105,7 +140,68 @@ public class FishBalanceChecks {
                 throw new RuntimeException(ex);
             }
         });
-        System.out.println("Balance checks passed: deterministic parallel runs, preview parity, snapshots, statistics and cancellation.");
+        lifecycleChecks(sheet, setup, parallel);
+        System.out.println("Balance checks passed: parallel/preview parity, snapshots, statistics, presets, UI, queued retesting and cancellation.");
+    }
+
+    static void lifecycleChecks(FishTuningSheet sheet, Setup setup, Map<Request, Result> previous) throws Exception {
+        AtomicReference<FishBalancePanel> reference = new AtomicReference<>();
+        FishTuningSheet.Row row = sheet.fish.get(0);
+        double original = row.values[Field.SPEED.ordinal()];
+        SwingUtilities.invokeAndWait(() -> {
+            FishBalancePanel panel = new FishBalancePanel(sheet, () -> setup, () -> row, ignored -> {}, (component, text) -> {},
+                    ignored -> {}, (spec, field) -> {}, ignored -> {});
+            reference.set(panel);
+            previous.values().forEach(result -> panel.results.put(result.request().fish().id(), result));
+            panel.samples.setValue(5);
+            panel.seed.setValue(18L);
+            panel.limit.setValue(30);
+            panel.runRows(sheet.fish.subList(0, 2));
+            row.values[Field.SPEED.ordinal()] += 0.1;
+            panel.edited(row.id);
+        });
+        FishBalancePanel panel = reference.get();
+        try {
+            awaitIdle(panel);
+            AtomicReference<Result> untouched = new AtomicReference<>();
+            SwingUtilities.invokeAndWait(() -> {
+                check(panel.fresh(row, panel.results.get(row.id)), "edit during batch retested after completion");
+                check(panel.fresh(sheet.fish.get(1), panel.results.get(sheet.fish.get(1).id)), "other completed fish stays fresh");
+                untouched.set(panel.results.get(sheet.fish.get(1).id));
+                row.values[Field.SPEED.ordinal()] += 0.1;
+                panel.edited(row.id);
+            });
+            awaitIdle(panel);
+            SwingUtilities.invokeAndWait(() -> {
+                check(panel.fresh(row, panel.results.get(row.id)), "single edited fish retested");
+                check(panel.results.get(sheet.fish.get(1).id) == untouched.get(), "single retest preserves other result");
+                panel.samples.setValue(2000);
+                panel.limit.setValue(600);
+                panel.runRows(sheet.fish);
+                panel.cancel();
+            });
+            awaitIdle(panel);
+            SwingUtilities.invokeAndWait(() -> {
+                check(panel.results.values().stream().noneMatch(result -> result.request().plan().attempts() == 2000),
+                        "cancelled incomplete snapshots are not published");
+                check(panel.results.get(sheet.fish.get(1).id) == untouched.get(), "cancellation keeps completed results");
+            });
+        } finally {
+            SwingUtilities.invokeAndWait(() -> {
+                panel.close();
+                row.values[Field.SPEED.ordinal()] = original;
+            });
+        }
+    }
+
+    static void awaitIdle(FishBalancePanel panel) throws Exception {
+        CountDownLatch idle = new CountDownLatch(1);
+        javax.swing.Timer timer = new javax.swing.Timer(20, event -> {
+            if (panel.worker == null && panel.pendingEdits.isEmpty() && !panel.editDelay.isRunning()) idle.countDown();
+        });
+        SwingUtilities.invokeAndWait(timer::start);
+        try { check(idle.await(30, TimeUnit.SECONDS), "background UI run finishes"); }
+        finally { SwingUtilities.invokeAndWait(timer::stop); }
     }
 
     static void check(boolean condition, String message) {

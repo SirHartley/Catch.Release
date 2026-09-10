@@ -175,6 +175,16 @@ public class FishTunerChecks {
         JSpinner playerGain = (JSpinner) get(panel, "playerGain");
         playerGain.setValue(Double.POSITIVE_INFINITY);
         check(((Number) playerGain.getValue()).doubleValue() == 1d, "invalid test modifier rejected");
+        FishBalancePanel balance = (FishBalancePanel) get(panel, "balance");
+        balance.references.applySetup.accept(new FishBalance.Setup(Tackle.NONE, 120, 2, 1, 1));
+        playerGain.setValue(Double.NaN);
+        check(((Number) playerGain.getValue()).doubleValue() == 2d, "preset updates last valid value");
+        try {
+            balance.references.applySetup.accept(new FishBalance.Setup(Tackle.NONE, 120, 9, 1, 1));
+            throw new AssertionError("out-of-range preset accepted");
+        } catch (IllegalArgumentException expected) { }
+        check(((Number) playerGain.getValue()).doubleValue() == 2d, "invalid preset leaves controls unchanged");
+        balance.references.applySetup.accept(new FishBalance.Setup(Tackle.NONE, 120, 1, 1, 1));
         JCheckBox noLoss = (JCheckBox) get(panel, "noLoss");
         check(!noLoss.isSelected(), "loss default");
         noLoss.doClick();

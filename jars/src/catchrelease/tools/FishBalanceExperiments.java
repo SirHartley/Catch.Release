@@ -25,7 +25,7 @@ final class FishBalanceExperiments extends JPanel {
     };
     final JTable table = new JTable(model);
     final FishBalanceChart chart = new FishBalanceChart();
-    final JLabel status = new JLabel("Choose a field and range; experiments never apply themselves.");
+    final JTextArea status = new JTextArea("Choose a field and range; experiments never apply themselves.", 3, 60);
     final Map<Request, Result> results = new LinkedHashMap<>();
     List<Request> requests = List.of();
     Spec original;
@@ -50,10 +50,13 @@ final class FishBalanceExperiments extends JPanel {
         owner.control(controls, "Steps", points, "Every candidate is tested with all three anglers and the same seeds.");
         owner.button(controls, "Run sweep", "Run a one-field experiment for the selected fish. Does not edit fish.csv or the live values.", this::run);
         owner.button(controls, "Apply selected", "Apply just this candidate field through the tuner's normal Undo history. Save fish.csv is still separate.", this::apply);
-        JPanel top = new JPanel(new GridLayout(0, 1));
-        top.add(controls);
-        top.add(status);
-        owner.help.accept(status, "Old experiment results stay visible, but applying is blocked if the source fish has since changed. Rerun to test its new values.");
+        status.setEditable(false);
+        status.setLineWrap(true);
+        status.setWrapStyleWord(true);
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(controls, BorderLayout.NORTH);
+        top.add(new JScrollPane(status));
+        owner.help.accept(status, "Old experiment results stay visible. Applying is blocked if the source fish or test setup has since changed. Rerun to test the new values.");
         add(top, BorderLayout.NORTH);
         table.setAutoCreateRowSorter(true);
         table.setRowHeight(25);
@@ -98,10 +101,13 @@ final class FishBalanceExperiments extends JPanel {
     void run() {
         if (owner.worker != null) throw new IllegalStateException("Wait for the active run or cancel it first.");
         FishTuningSheet.Row row = owner.selected();
-        original = Spec.of(row, false);
-        testedField = (Field) field.getSelectedItem();
-        requests = candidates(original, owner.setup.get(), owner.plan(), testedField, ((Number) low.getValue()).doubleValue(),
-                ((Number) high.getValue()).doubleValue(), ((Number) points.getValue()).intValue(), Math.max(testedField.max, row.saved[testedField.ordinal()]));
+        Spec source = Spec.of(row, false);
+        Field selected = (Field) field.getSelectedItem();
+        List<Request> candidates = candidates(source, owner.setup.get(), owner.plan(), selected, ((Number) low.getValue()).doubleValue(),
+                ((Number) high.getValue()).doubleValue(), ((Number) points.getValue()).intValue(), Math.max(selected.max, row.saved[selected.ordinal()]));
+        original = source;
+        testedField = selected;
+        requests = candidates;
         results.clear();
         owner.start(requests, result -> { results.put(result.request(), result); refresh(); });
         refresh();
@@ -112,11 +118,16 @@ final class FishBalanceExperiments extends JPanel {
         int selected = table.getSelectedRow();
         if (selected < 0) throw new IllegalArgumentException("Select a completed candidate first.");
         if (!sourceUnchanged()) throw new IllegalArgumentException("The source fish changed. Run the experiment again before applying.");
+        if (!contextUnchanged()) throw new IllegalArgumentException("The test settings changed. Run the experiment again before applying.");
         owner.apply.accept(completed().get(table.convertRowIndexToModel(selected)).request().fish(), testedField);
     }
 
     boolean sourceUnchanged() {
         return original != null && owner.sheet.fish.stream().anyMatch(row -> row.id.equals(original.id()) && Spec.of(row, false).equals(original));
+    }
+
+    boolean contextUnchanged() {
+        return !requests.isEmpty() && requests.get(0).setup().equals(owner.setup.get()) && requests.get(0).plan().equals(owner.plan());
     }
 
     List<Result> completed() {
@@ -140,6 +151,9 @@ final class FishBalanceExperiments extends JPanel {
         }
         chart.setResults(chartRows, owner.profile(), false);
         status.setText(original.name() + " | " + testedField.label + " | " + completed.size() + "/" + requests.size()
-                + " candidates | " + owner.profile() + (sourceUnchanged() ? "" : " | STALE: source fish changed"));
+                + " candidates | " + owner.profile() + (sourceUnchanged() ? "" : " | STALE: source fish changed")
+                + (contextUnchanged() ? "" : " | STALE: test settings changed")
+                + "\n" + requests.get(0).setup() + " | " + requests.get(0).plan());
+        status.setCaretPosition(0);
     }
 }

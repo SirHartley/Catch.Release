@@ -65,6 +65,12 @@ final class FishBalanceComparison extends JPanel {
         FishTuningSheet.Row row = owner.selected();
         Spec spec = baseline.getSelectedIndex() == 0 ? Spec.of(row, true) : checkpoints.get(baseline.getSelectedItem());
         if (spec == null || !spec.id().equals(row.id)) throw new IllegalArgumentException("That checkpoint belongs to a different fish.");
+        compareAgainst(spec);
+    }
+
+    void compareAgainst(Spec spec) {
+        if (owner.worker != null) throw new IllegalStateException("Wait for the active run or cancel it first.");
+        FishTuningSheet.Row row = owner.selected();
         beforeRequest = new Request(spec, owner.setup.get(), owner.plan());
         afterRequest = owner.request(row);
         before = after = null;
@@ -86,6 +92,7 @@ final class FishBalanceComparison extends JPanel {
         StringBuilder text = new StringBuilder(afterRequest.fish().name() + (stale ? " — STALE: current selection or settings differ" : "")
                 + "\n" + afterRequest.setup() + "\n" + afterRequest.plan().attempts() + " attempts per angler, first seed "
                 + afterRequest.plan().seed() + ", limit " + afterRequest.plan().seconds() + "s.\n");
+        text.append("Before: ").append(beforeRequest.fish().name()).append(" | After: ").append(afterRequest.fish().name()).append("\n");
         text.append("Movement: ").append(beforeRequest.fish().motion()).append(" → ").append(afterRequest.fish().motion()).append("\n");
         for (FishTuningSheet.Field field : FishTuningSheet.Field.values()) {
             text.append(field.label).append(": ").append(value(beforeRequest.fish().values().get(field.ordinal()))).append(" → ")

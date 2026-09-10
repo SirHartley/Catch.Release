@@ -52,13 +52,17 @@ final class FishBalancePanel extends JPanel {
     final JTextArea behaviors = new JTextArea();
     final FishBalanceComparison comparison;
     final FishBalanceExperiments experiments;
+    final FishBalanceReferences references;
+    JSplitPane split;
+    boolean dividerReady;
     final javax.swing.Timer editDelay = new javax.swing.Timer(600, event -> retestPending());
     SwingWorker<Void, Result> worker;
     boolean closed;
+    boolean refreshing;
 
     FishBalancePanel(FishTuningSheet sheet, Supplier<Setup> setup, Supplier<FishTuningSheet.Row> current,
                      Consumer<String> openFish, BiConsumer<JComponent, String> help, Consumer<String> bottomHelp,
-                     BiConsumer<Spec, FishTuningSheet.Field> apply) {
+                     BiConsumer<Spec, FishTuningSheet.Field> apply, Consumer<Setup> applySetup) {
         super(new BorderLayout(4, 4));
         this.sheet = sheet;
         this.setup = setup;
@@ -71,6 +75,7 @@ final class FishBalancePanel extends JPanel {
         sorter = new TableRowSorter<>(model);
         comparison = new FishBalanceComparison(this);
         experiments = new FishBalanceExperiments(this);
+        references = new FishBalanceReferences(this, applySetup);
         samples.setPreferredSize(new Dimension(65, 25));
         seed.setPreferredSize(new Dimension(90, 25));
         limit.setPreferredSize(new Dimension(65, 25));
@@ -123,7 +128,13 @@ final class FishBalancePanel extends JPanel {
         table.setDefaultRenderer(Integer.class, new Cells());
         for (int i = 0; i < model.getColumnCount(); i++) table.getColumnModel().getColumn(i).setPreferredWidth(i == 0 ? 170 : i == 14 ? 240 : 108);
         sorter.setSortKeys(List.of(new RowSorter.SortKey(15, SortOrder.ASCENDING), new RowSorter.SortKey(4, SortOrder.ASCENDING)));
-        table.getSelectionModel().addListSelectionListener(event -> { if (!event.getValueIsAdjusting()) showDetails(); });
+        table.getSelectionModel().addListSelectionListener(event -> {
+            if (!refreshing && !event.getValueIsAdjusting()) {
+                showDetails();
+                comparison.refresh();
+                experiments.refresh();
+            }
+        });
         help.accept(table, "Click column headings to sort numerically. Catch percentages include timeouts in their denominator. Select a fish for sample counts and interpretation below. Orange rows need a new run.");
         help.accept(table.getTableHeader(), "Catch %: higher is easier. Catch times and spread use successful attempts only. Coverage is actual time in the indicator. Gap is the longest uninterrupted miss.");
         table.getTableHeader().addMouseMotionListener(new MouseMotionAdapter() {
@@ -148,6 +159,7 @@ final class FishBalancePanel extends JPanel {
         views.addTab("Movement groups", new JScrollPane(behaviors));
         views.addTab("Before / after", comparison);
         views.addTab("Experiments", experiments);
+        views.addTab("References / setups", references);
         details.setEditable(false);
         details.setLineWrap(true);
         details.setWrapStyleWord(true);
@@ -155,9 +167,15 @@ final class FishBalancePanel extends JPanel {
         JScrollPane detailScroll = new JScrollPane(details);
         detailScroll.setMinimumSize(new Dimension(200, 125));
         views.setMinimumSize(new Dimension(200, 120));
-        JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, views, detailScroll);
+        split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, views, detailScroll);
         split.setResizeWeight(0.7);
-        split.setDividerLocation(300);
+        views.addChangeListener(event -> {
+            boolean show = views.getSelectedIndex() == 0;
+            detailScroll.setVisible(show);
+            split.setDividerSize(show ? 6 : 0);
+            if (show) split.setDividerLocation(0.62);
+            split.revalidate();
+        });
         add(split);
         DocumentListener filterChanges = new DocumentListener() {
             public void insertUpdate(DocumentEvent event) { refresh(); }
@@ -170,6 +188,15 @@ final class FishBalancePanel extends JPanel {
         flaggedOnly.addActionListener(event -> refresh());
         for (JSpinner spinner : List.of(samples, seed, limit)) spinner.addChangeListener(event -> refresh());
         sorter.addRowSorterListener(event -> updateCharts());
+    }
+
+    @Override
+    public void doLayout() {
+        super.doLayout();
+        if (!dividerReady && split != null && split.getHeight() > 0) {
+            split.setDividerLocation(0.58);
+            dividerReady = true;
+        }
     }
 
     void control(JPanel panel, String label, JComponent component, String description) {
@@ -305,6 +332,19 @@ final class FishBalancePanel extends JPanel {
 
     void refresh() {
         String selectedId = table.getSelectedRow() < 0 ? null : selected().id;
+        refreshing = true;
+        try {
+            refreshRows(selectedId);
+        } finally {
+            refreshing = false;
+        }
+        showDetails();
+        updateCharts();
+        comparison.refresh();
+        experiments.refresh();
+    }
+
+    private void refreshRows(String selectedId) {
         model.fireTableDataChanged();
         sorter.setRowFilter(new RowFilter<>() {
             public boolean include(Entry<? extends ResultTable, ? extends Integer> entry) {
@@ -324,10 +364,6 @@ final class FishBalancePanel extends JPanel {
                 if (visible >= 0) table.setRowSelectionInterval(visible, visible);
             }
         }
-        showDetails();
-        updateCharts();
-        comparison.refresh();
-        experiments.refresh();
     }
 
     void showDetails() {

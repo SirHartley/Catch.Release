@@ -74,7 +74,7 @@ public final class FishDifficultyTuner extends JPanel {
         installEvents();
         selectFish();
         balance = new FishBalancePanel(sheet, this::balanceSetup, this::selected, this::openBalanceFish, this::help, this::showNotice,
-                (spec, field) -> { openBalanceFish(spec.id()); changeNumber(field, spec.values().get(field.ordinal())); });
+                (spec, field) -> { openBalanceFish(spec.id()); changeNumber(field, spec.values().get(field.ordinal())); }, this::applyBalanceSetup);
         Component preview = ((BorderLayout) getLayout()).getLayoutComponent(BorderLayout.CENTER);
         remove(preview);
         tabs.addTab("Live tuning", preview);
@@ -309,6 +309,32 @@ public final class FishDifficultyTuner extends JPanel {
     private FishBalance.Setup balanceSetup() {
         return new FishBalance.Setup((Tackle) tackle.getSelectedItem(), number(barPixels),
                 number(playerGain), number(playerLoss), number(rumorSpeed));
+    }
+
+    private void applyBalanceSetup(FishBalance.Setup setup) {
+        JSpinner[] controls = {barPixels, playerGain, playerLoss, rumorSpeed};
+        float[] values = {setup.bar(), setup.gain(), setup.loss(), setup.rumor()};
+        for (int i = 0; i < controls.length; i++) {
+            SpinnerNumberModel model = (SpinnerNumberModel) controls[i].getModel();
+            if (values[i] < ((Number) model.getMinimum()).floatValue()
+                    || values[i] > ((Number) model.getMaximum()).floatValue()) {
+                throw new IllegalArgumentException("Preset values exceed the tuner's allowed range.");
+            }
+        }
+        boolean supported = false;
+        for (int i = 0; i < tackle.getItemCount(); i++) supported |= tackle.getItemAt(i) == setup.tackle();
+        if (!supported) throw new IllegalArgumentException("This tackle is not available in the tuner.");
+        loading = true;
+        try {
+            tackle.setSelectedItem(setup.tackle());
+            for (int i = 0; i < controls.length; i++) {
+                controls[i].setValue((double) values[i]);
+                controls[i].putClientProperty("lastValid", controls[i].getValue());
+            }
+        } finally {
+            loading = false;
+        }
+        newSession();
     }
 
     private void openBalanceFish(String id) {

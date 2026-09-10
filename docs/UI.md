@@ -266,8 +266,18 @@ fix. Every movement type has a description, including its main tuning tradeoff.
 Experiments run an inclusive, evenly spaced range for one field with identical
 seeds and setup. Candidate tables and charts retain completed snapshots.
 Applying a completed candidate changes only its tested field and adds a normal
-Undo entry; it does not save the CSV. A changed source fish blocks applying old
-candidates. No replay or frame-recording system is included.
+Undo entry; it does not save the CSV. A changed source fish or test setup blocks
+applying old candidates. Results keep their tested settings visible. No replay
+or frame-recording system is included.
+Reference fish are fixed snapshots grouped by their recorded movement, with
+editable notes. Comparing a reference may cross species; it never copies
+reference stats onto the selected fish. Named setups store tackle, bar size,
+player gain/loss and rumor speed, not fish values. Loading a setup marks
+incompatible results stale; out-of-range presets leave the controls unchanged.
+References and setups persist in the notebook
+described in architecture; checkpoints and cached run results last only for
+the current tuner session. New panels use bottom-bar hover/focus help, with no
+floating tooltips.
 
 ## Keep optimizations local
 

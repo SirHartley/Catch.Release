@@ -112,7 +112,13 @@ and compares complete results on matching seeds without modifying the sheet.
 losses and movement-specific tuning options. It never changes fish values.
 `FishBalanceExperiments` builds one-field candidate requests and keeps their
 results outside the normal per-fish result map. Apply uses the tuner's existing
-edit/Undo path and refuses a changed source fish.
+edit/Undo path and refuses a changed source fish or test setup.
+`FishBalanceReferences` groups fixed reference snapshots by movement and loads
+named test setups into the tuner. `FishBalanceNotebook` stores references,
+notes and equipment presets in the ignored mod-root `.fish-balancing.properties`.
+It validates input, checks external edits, backs up an existing notebook before
+its first replacement, and writes through a temporary file. It never writes the
+fish CSV. Run `Fish Balance Checks` from IntelliJ for the workbench checks.
 
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 
