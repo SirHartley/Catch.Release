@@ -100,6 +100,26 @@ it refuses to run with existing game globals and clears its globals on exit.
 unchanged. No duplicate game classes, source rewriting or separate test tree.
 This covers deterministic catch traces and jitter, not treasure or the engine.
 
+The tuner's Balance results tab uses `tools/FishBalance` for immutable run
+snapshots, per-attempt telemetry and bounded parallel batches. `FishBalancePanel`
+owns session results, exact-input cache, filters and stale-result checks;
+`FishBalanceChart` draws catch-rate and successful-time plots. Workers never
+read mutable sheet rows or game globals. `FishBalanceChecks` checks batch/preview
+agreement and deterministic parallel results.
+`FishBalanceComparison` keeps saved/checkpoint and edited requests separate,
+and compares complete results on matching seeds without modifying the sheet.
+`FishBalanceAdvice` explains measured coverage, miss duration, early/near-catch
+losses and movement-specific tuning options. It never changes fish values.
+`FishBalanceExperiments` builds one-field candidate requests and keeps their
+results outside the normal per-fish result map. Apply uses the tuner's existing
+edit/Undo path and refuses a changed source fish or test setup.
+`FishBalanceReferences` groups fixed reference snapshots by movement and loads
+named test setups into the tuner. `FishBalanceNotebook` stores references,
+notes and equipment presets in the ignored mod-root `.fish-balancing.properties`.
+It validates input, checks external edits, backs up an existing notebook before
+its first replacement, and writes through a temporary file. It never writes the
+fish CSV. Run `Fish Balance Checks` from IntelliJ for the workbench checks.
+
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 
 ## Save identity

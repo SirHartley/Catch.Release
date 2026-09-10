@@ -240,6 +240,45 @@ for game/model comparison. Both check classes live beside the tools under
 classpath; see [model ownership](ARCHITECTURE.md#registration-and-lifecycle).
 Neither check replaces the full mod build or live in-game QA.
 
+Balance results runs all three anglers with normal losing at fixed 60 Hz, without
+drawing or real-time waits. Up to four workers run fish snapshots independently.
+The default is 30 attempts per angler and a 120-second limit. Timeouts stay
+separate from losses and remain in catch-rate denominators. Catch-time
+percentiles and sample deviation use successes only; the 95% catch-rate interval
+uses Wilson's method. Flags are screening heuristics, not balance verdicts.
+Tables retain stale results visibly; charts and movement groups exclude them.
+Movement groups use declared modes (MIXED is separate), with equal per-fish
+weight for mean catch rates. Filtering and sorting also control the charts.
+Edits debounce a retest of only previously tested fish; an active batch finishes
+before queued edits run. Cancelling keeps completed fish, discards incomplete
+ones and stops queued retests. Closing the tuner cancels all background work.
+Before / after compares saved CSV values or a named in-session checkpoint with
+current edits. Both use the same setup, sample count, first seed and time limit.
+The panel retains both snapshots, reports percentage-point changes and counts
+seeds that became or ceased being catches. Each side's time statistics use its
+own successful attempts. Catch-rate intervals are not a significance test of
+the difference. Selection or input changes mark the retained comparison stale.
+Selected results explain the metrics in plain language and suggest one-field
+experiments. Required coverage and drain times use the tested fish and setup,
+not the current controls. Advice labels uncertainty and possible causes; it
+does not treat bot catch rates as human success rates or promise a particular
+fix. Every movement type has a description, including its main tuning tradeoff.
+Experiments run an inclusive, evenly spaced range for one field with identical
+seeds and setup. Candidate tables and charts retain completed snapshots.
+Applying a completed candidate changes only its tested field and adds a normal
+Undo entry; it does not save the CSV. A changed source fish or test setup blocks
+applying old candidates. Results keep their tested settings visible. No replay
+or frame-recording system is included.
+Reference fish are fixed snapshots grouped by their recorded movement, with
+editable notes. Comparing a reference may cross species; it never copies
+reference stats onto the selected fish. Named setups store tackle, bar size,
+player gain/loss and rumor speed, not fish values. Loading a setup marks
+incompatible results stale; out-of-range presets leave the controls unchanged.
+References and setups persist in the notebook
+described in architecture; checkpoints and cached run results last only for
+the current tuner session. New panels use bottom-bar hover/focus help, with no
+floating tooltips.
+
 ## Keep optimizations local
 
 Reuse existing widgets and text where practical. `TooltipMakerAPI` is a supported

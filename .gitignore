@@ -5,3 +5,5 @@
 /.idea/shelf/
 /data/campaign/fish.csv.facing-*.bak
 /data/campaign/fish.csv.tuning-*.bak
+/.fish-balancing.properties
+/.fish-balancing.properties.bak

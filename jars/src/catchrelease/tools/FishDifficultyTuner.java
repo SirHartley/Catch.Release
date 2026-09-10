@@ -48,6 +48,9 @@ public final class FishDifficultyTuner extends JPanel {
     private final JButton undoButton = new JButton("Undo edit");
     private final javax.swing.Timer timer = new javax.swing.Timer(16, event -> tick());
 
+    private FishBalancePanel balance;
+    private final JTabbedPane tabs = new JTabbedPane();
+
     private FishTuningSession session;
     private JComponent helpTarget;
     private BufferedImage image;
@@ -70,6 +73,20 @@ public final class FishDifficultyTuner extends JPanel {
         buildControls();
         installEvents();
         selectFish();
+        balance = new FishBalancePanel(sheet, this::balanceSetup, this::selected, this::openBalanceFish, this::help, this::showNotice,
+                (spec, field) -> { openBalanceFish(spec.id()); changeNumber(field, spec.values().get(field.ordinal())); }, this::applyBalanceSetup);
+        Component preview = ((BorderLayout) getLayout()).getLayoutComponent(BorderLayout.CENTER);
+        remove(preview);
+        tabs.addTab("Live tuning", preview);
+        tabs.addTab("Balance results", balance);
+        tabs.addChangeListener(event -> {
+            JScrollPane logScroll = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, log);
+            logScroll.setVisible(tabs.getSelectedIndex() == 0);
+            status.setVisible(tabs.getSelectedIndex() == 0);
+            manualHeld = false;
+            revalidate();
+        });
+        add(tabs, BorderLayout.CENTER);
     }
 
     private void buildControls() {
@@ -261,6 +278,7 @@ public final class FishDifficultyTuner extends JPanel {
         session.tune();
         fish.repaint();
         updateReadouts();
+        if (balance != null) balance.edited(selected().id);
     }
 
     private void remember() {
@@ -285,6 +303,43 @@ public final class FishDifficultyTuner extends JPanel {
                 number(playerLoss), number(rumorSpeed), noLoss.isSelected(), System.nanoTime(), this::appendLog);
         resetClock();
         updateReadouts();
+        if (balance != null) balance.refresh();
+    }
+
+    private FishBalance.Setup balanceSetup() {
+        return new FishBalance.Setup((Tackle) tackle.getSelectedItem(), number(barPixels),
+                number(playerGain), number(playerLoss), number(rumorSpeed));
+    }
+
+    private void applyBalanceSetup(FishBalance.Setup setup) {
+        JSpinner[] controls = {barPixels, playerGain, playerLoss, rumorSpeed};
+        float[] values = {setup.bar(), setup.gain(), setup.loss(), setup.rumor()};
+        for (int i = 0; i < controls.length; i++) {
+            SpinnerNumberModel model = (SpinnerNumberModel) controls[i].getModel();
+            if (values[i] < ((Number) model.getMinimum()).floatValue()
+                    || values[i] > ((Number) model.getMaximum()).floatValue()) {
+                throw new IllegalArgumentException("Preset values exceed the tuner's allowed range.");
+            }
+        }
+        boolean supported = false;
+        for (int i = 0; i < tackle.getItemCount(); i++) supported |= tackle.getItemAt(i) == setup.tackle();
+        if (!supported) throw new IllegalArgumentException("This tackle is not available in the tuner.");
+        loading = true;
+        try {
+            tackle.setSelectedItem(setup.tackle());
+            for (int i = 0; i < controls.length; i++) {
+                controls[i].setValue((double) values[i]);
+                controls[i].putClientProperty("lastValid", controls[i].getValue());
+            }
+        } finally {
+            loading = false;
+        }
+        newSession();
+    }
+
+    private void openBalanceFish(String id) {
+        for (FishTuningSheet.Row row : sheet.fish) if (row.id.equals(id)) fish.setSelectedItem(row);
+        tabs.setSelectedIndex(0);
     }
 
     private void resetClock() {
@@ -296,7 +351,7 @@ public final class FishDifficultyTuner extends JPanel {
         long now = System.nanoTime();
         double elapsed = Math.min(0.1, (now - previousTick) / 1_000_000_000d);
         previousTick = now;
-        if (paused.isSelected() || !windowActive
+        if (paused.isSelected() || !windowActive || tabs.getSelectedIndex() != 0
                 || (session.skill == SimulatedAngler.Skill.MANUAL && !track.hasFocus())) {
             accumulator = 0;
         } else {
@@ -566,6 +621,7 @@ public final class FishDifficultyTuner extends JPanel {
                     if (choice == JOptionPane.YES_OPTION && !saveChanges()) return;
                 }
                 timer.stop();
+                balance.close();
                 frame.dispose();
             }
         });
