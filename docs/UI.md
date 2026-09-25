@@ -202,7 +202,7 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 
 ### Minigame timing
 
-- A telegraphed move shows a tell for `MINIGAME_TELL_TIME` before it starts: the drawn marker shivers toward the coming move with a lean and two pulses. Like jitter, it never moves the hit position. `getTell` depends only on its arguments, and `FishingParityChecks` compares its body with `FishingSimulation.tell` as text, so keep the body brace-free. Its size grows with the species' jitter so shaky fish still show it.
+- A telegraphed move shows a tell for `MINIGAME_TELL_TIME` before it starts: the drawn marker leans toward the coming move and bobs twice, eased in and out so the path has no corners, peaking at about 5 px. Like jitter, it never moves the hit position. `getTell` depends only on its arguments, and `FishingParityChecks` compares its body with `FishingSimulation.tell` as text, so keep the body brace-free. Its size grows with the species' jitter so shaky fish still show it.
 - The line sound uses one continuously refreshed UI loop with changing volume.
 - The loot result has a backdrop clock that starts when the panel is created and
   a list clock that starts after the catch tally. Coin rain uses the backdrop clock.
