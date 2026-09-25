@@ -142,6 +142,9 @@ public class FishingParityChecks {
         fish.restlessness = 0.2f + seed * 0.3f;
         fish.progressRateMult = 0.5f + seed * 0.17f;
         fish.escapeRateMult = 0.8f + seed * 0.21f;
+        // some seeds keep a share at zero so the no-roll path is traced too
+        fish.specialChance = seed % 4 == 1 ? 0f : 0.08f + seed * 0.06f;
+        fish.mixChance = seed % 4 == 2 ? 0f : 0.05f + seed * 0.04f;
         fish.rarity = seed % 2 == 0 ? FishRarity.COMMON : FishRarity.LEGENDARY;
         environment.dev = seed % 3 == 0;
         float rumorSpeed = environment.setCalm(seed % 4 < 2);
@@ -156,8 +159,8 @@ public class FishingParityChecks {
         FishingMinigame game = new CatchOnlyMinigame(fish, tackle, environment.system);
         FishingSimulation tool = new FishingSimulation(fish.difficulty,
                 fish.motionSpeed * (fish.rarity == FishRarity.LEGENDARY ? 1f : rumorSpeed),
-                fish.restlessness, fish.progressRateMult, fish.escapeRateMult, motion,
-                tackle, bar,
+                fish.restlessness, fish.progressRateMult, fish.escapeRateMult,
+                fish.specialChance, fish.mixChance, motion, tackle, bar,
                 (min, max) -> min + toolRandom.nextFloat() * (max - min));
         tool.setPlayerRates(gain, loss);
         tool.setCannotLose(environment.dev);

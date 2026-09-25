@@ -64,6 +64,13 @@ public class FishBalanceChecks {
         notebook.save();
         FishBalanceNotebook loaded = new FishBalanceNotebook(notebookFile);
         check(loaded.references.equals(notebook.references) && loaded.presets.equals(notebook.presets), "notebook round-trip");
+        Path olderFile = notebookFile.resolveSibling("older.properties");
+        Files.writeString(olderFile, "version=1\nref." + FishBalanceNotebook.encode("old") + "=" + String.join("|",
+                FishBalanceNotebook.encode("a"), FishBalanceNotebook.encode("A"), FishBalanceNotebook.encode("COMMON"), "SMOOTH",
+                FishBalanceNotebook.encode(""), "50", "1", "1", "1", "1", "1") + "\n");
+        FishBalanceNotebook older = new FishBalanceNotebook(olderFile);
+        check(older.error == null && older.references.get("old").fish().value(FishTuningSheet.Field.MIX) == 0f,
+                "six-value references load with later fields at their defaults");
         Files.writeString(notebookFile, "external edit");
         try { notebook.save(); throw new AssertionError("external edit overwritten"); }
         catch (java.io.IOException expected) { }

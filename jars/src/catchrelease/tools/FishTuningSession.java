@@ -54,7 +54,7 @@ final class FishTuningSession {
         if (freshSeed) seed++;
         Random random = new Random(seed);
         game = new FishingSimulation(fish.value(DIFFICULTY), speed(), fish.value(RESTLESSNESS),
-                fish.value(GAIN), fish.value(LOSS), fish.motion, tackle, barPixels,
+                fish.value(GAIN), fish.value(LOSS), fish.value(SPECIAL), fish.value(MIX), fish.motion, tackle, barPixels,
                 (min, max) -> min + random.nextFloat() * (max - min));
         game.setPlayerRates(playerGain, playerLoss);
         game.setCannotLose(noLoss);
@@ -67,7 +67,7 @@ final class FishTuningSession {
 
     void tune() {
         game.tune(fish.value(DIFFICULTY), speed(), fish.value(RESTLESSNESS),
-                fish.value(GAIN), fish.value(LOSS), fish.motion);
+                fish.value(GAIN), fish.value(LOSS), fish.value(SPECIAL), fish.value(MIX), fish.motion);
         unscored = true;
         caught = lost = 0;
         catchSeconds = 0f;
@@ -103,10 +103,11 @@ final class FishTuningSession {
                 unscored ? " (practice/edited, not scored)" : "");
         endWait = RESULT_HOLD;
         onResult.accept(fish.id + " — " + lastResult + String.format(java.util.Locale.ROOT,
-                " | %s d=%.2f speed=%.2f restless=%.2f gain=%.2f loss=%.2f shake=%.2f"
+                " | %s d=%.2f speed=%.2f restless=%.2f gain=%.2f loss=%.2f shake=%.2f special=%.2f random=%.2f"
                         + " | %s bar=%.0f player=%.2f/%.2f rumor=%.2f",
                 fish.motion, fish.value(DIFFICULTY), fish.value(SPEED), fish.value(RESTLESSNESS),
-                fish.value(GAIN), fish.value(LOSS), fish.value(JITTER), tackle, barPixels, playerGain, playerLoss, rumorSpeed));
+                fish.value(GAIN), fish.value(LOSS), fish.value(JITTER), fish.value(SPECIAL), fish.value(MIX),
+                tackle, barPixels, playerGain, playerLoss, rumorSpeed));
     }
 
     float visibleFish() {

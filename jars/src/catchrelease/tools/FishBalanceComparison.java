@@ -29,7 +29,7 @@ final class FishBalanceComparison extends JPanel {
         super(new BorderLayout(4, 4));
         this.owner = owner;
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        owner.control(controls, "Baseline", baseline, "Saved CSV values, or a named snapshot captured before experimenting. Checkpoints retain the original movement and all six fish values.");
+        owner.control(controls, "Baseline", baseline, "Saved CSV values, or a named snapshot captured before experimenting. Checkpoints retain the original movement and every fish value.");
         owner.button(controls, "Capture checkpoint", "Name a snapshot of the selected fish's current values. Does not save or change fish.csv.", this::capture);
         owner.button(controls, "Compare selected fish", "Run before and after with identical seeds, attempt counts, equipment and time limit. Existing exact results are reused.", this::compare);
         add(controls, BorderLayout.NORTH);

@@ -18,7 +18,7 @@ import java.util.*;
 public class FishTunerChecks {
 
     static final Path OUTPUT = Path.of("out/fish-tuner-checks");
-    static final String HEADER = "id,name,icon,rarity,motion,difficulty,motionSpeed,restlessness,progressRateMult,escapeRateMult,jitter,spriteDirection,desc,comment";
+    static final String HEADER = "id,name,icon,rarity,motion,difficulty,motionSpeed,restlessness,progressRateMult,escapeRateMult,jitter,spriteDirection,desc,comment,specialChance,mixChance";
 
     public static void main(String[] args) throws Exception {
         Files.createDirectories(OUTPUT);
@@ -40,8 +40,8 @@ public class FishTunerChecks {
         Path csv = Files.createTempFile(OUTPUT, "sheet-", ".csv");
         String original = "\uFEFF" + HEADER + "\r\n"
                 + "# comment,,\n"
-                + "a,\"A, fish\",a.png,COMMON,SMOOTH,50,1,1,1,1,1,180,\"Line one\r\nLine \"\"two\"\"\",leave this\r\n"
-                + "b,B,b.png,RARE,LUNGER,90,1.4,1.6,0.8,1.2,2,90,Description,keep me";
+                + "a,\"A, fish\",a.png,COMMON,SMOOTH,50,1,1,1,1,1,180,\"Line one\r\nLine \"\"two\"\"\",leave this,0.2,0.1\r\n"
+                + "b,B,b.png,RARE,LUNGER,90,1.4,1.6,0.8,1.2,2,90,Description,keep me,,0.3";
         Files.writeString(csv, original);
         FishTuningSheet sheet = new FishTuningSheet(csv);
         check(sheet.fish.size() == 2, "comment rows skipped");
@@ -64,7 +64,7 @@ public class FishTunerChecks {
         facing.save(0, 42.5);
         check(Files.readString(csv).contains("1,1,1,42.50,"), "facing picker uses shared CSV writer");
         Path invalid = Files.createTempFile(OUTPUT, "invalid-", ".csv");
-        Files.writeString(invalid, HEADER + "\na,A,a.png,COMMON,SMOOTH,NaN,1,1,1,1,1,90,x,x");
+        Files.writeString(invalid, HEADER + "\na,A,a.png,COMMON,SMOOTH,NaN,1,1,1,1,1,90,x,x,0,0");
         try { new FishTuningSheet(invalid); throw new AssertionError("NaN accepted"); }
         catch (IOException expectedFailure) { }
         try { FishCsv.parse("id,\"unterminated"); throw new AssertionError("bad quote accepted"); }
@@ -73,7 +73,7 @@ public class FishTunerChecks {
 
     static FishTuningSheet.Row testFish() throws IOException {
         Path csv = Files.createTempFile(OUTPUT, "fish-", ".csv");
-        Files.writeString(csv, HEADER + "\na,A,a.png,COMMON,SMOOTH,50,1,1,1,1,1,180,x,x\n");
+        Files.writeString(csv, HEADER + "\na,A,a.png,COMMON,SMOOTH,50,1,1,1,1,1,180,x,x,0.2,0.1\n");
         return new FishTuningSheet(csv).fish.get(0);
     }
 
@@ -139,6 +139,24 @@ public class FishTunerChecks {
             }
             System.out.println(skill + ": " + wins + " caught, " + losses + " lost, " + timeouts + " timeout (20 seeds per fish, neutral tackle)");
         }
+        int worst = 0;
+        String worstFish = "";
+        for (FishTuningSheet.Row row : sheet.fish) {
+            for (boolean held : new boolean[]{true, false}) {
+                int wins = 0;
+                for (int seed = 0; seed < 20; seed++) {
+                    FishTuningSession run = session(row, SimulatedAngler.Skill.MANUAL, seed);
+                    for (int step = 0; run.game.isRunning() && step < 7200; step++) run.advance(FishTuningSession.STEP, held);
+                    if (run.game.isCaught()) wins++;
+                }
+                check(wins <= 10, row.id + " is caught by " + (held ? "holding" : "never pressing") + " in " + wins + " of 20");
+                if (wins > worst) {
+                    worst = wins;
+                    worstFish = row.id + (held ? " (held)" : " (never pressed)");
+                }
+            }
+        }
+        System.out.println("No input: at most " + worst + " of 20 caught by holding or never pressing" + (worst > 0 ? ", " + worstFish : ""));
     }
 
     static Object get(Object owner, String name) throws Exception {

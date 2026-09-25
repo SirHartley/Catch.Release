@@ -172,6 +172,7 @@ final class FishBalance {
         FishingSimulation game = new FishingSimulation(fish.value(Field.DIFFICULTY),
                 fish.value(Field.SPEED) * (fish.rarity.equals("LEGENDARY") ? 1 : setup.rumor),
                 fish.value(Field.RESTLESSNESS), fish.value(Field.GAIN), fish.value(Field.LOSS),
+                fish.value(Field.SPECIAL), fish.value(Field.MIX),
                 fish.motion, setup.tackle, setup.bar, (min, max) -> min + random.nextFloat() * (max - min));
         game.setPlayerRates(setup.gain, setup.loss);
         SimulatedAngler angler = new SimulatedAngler(skill, seed ^ 0x4f1bbcdcL);

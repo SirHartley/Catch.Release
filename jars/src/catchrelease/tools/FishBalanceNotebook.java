@@ -33,9 +33,13 @@ final class FishBalanceNotebook {
                 String value = properties.getProperty(key);
                 if (key.startsWith("ref.")) {
                     String[] parts = value.split("\\|", -1);
-                    if (parts.length != 11) throw new IOException("Invalid reference");
+                    int count = parts.length - 5;
+                    if (count < 1 || count > FishTuningSheet.Field.values().length) throw new IOException("Invalid reference");
+                    // a reference saved before a field existed reads that field at its default
                     List<Double> values = new ArrayList<>();
-                    for (int i = 5; i < 11; i++) values.add(Double.parseDouble(parts[i]));
+                    for (FishTuningSheet.Field field : FishTuningSheet.Field.values()) {
+                        values.add(field.ordinal() < count ? Double.parseDouble(parts[5 + field.ordinal()]) : field.fallback);
+                    }
                     references.put(decode(key.substring(4)), new Reference(new Spec(decode(parts[0]), decode(parts[1]),
                             decode(parts[2]), FishMotion.valueOf(parts[3]), values), decode(parts[4])));
                 } else if (key.startsWith("preset.")) {
