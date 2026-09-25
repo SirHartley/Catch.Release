@@ -528,9 +528,9 @@ final class FishingSimulation {
 
     // Same body as FishingMinigamePanel.getTell; FishingParityChecks compares the text.
     public static float tell(float progress, float direction, float jitter) {
-        float envelope = Math.min(Math.min(1f, progress / FishConstants.MINIGAME_TELL_RISE),
-                Math.min(1f, (1f - progress) / FishConstants.MINIGAME_TELL_FALL));
-        float pulse = (float) Math.abs(Math.sin(progress * Math.PI * FishConstants.MINIGAME_TELL_PULSES));
+        float swell = (float) Math.sin(progress * Math.PI);
+        float envelope = swell * swell;
+        float pulse = 0.5f - 0.5f * (float) Math.cos(progress * Math.PI * 2f * FishConstants.MINIGAME_TELL_PULSES);
         float reach = FishConstants.MINIGAME_TELL_LEAN + FishConstants.MINIGAME_TELL_PULSE * pulse
                 + FishConstants.MINIGAME_TELL_JITTER_SHARE * FishConstants.MINIGAME_FISH_JITTER * jitter;
         return direction * envelope * reach;
