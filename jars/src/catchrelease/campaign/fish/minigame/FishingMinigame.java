@@ -37,6 +37,11 @@ public class FishingMinigame {
     protected float legSpeedMult = 1f;
     protected float legThinkMult = 1f;
 
+    // a telegraphed move waits out its tell while the fish keeps its old course
+    protected Move pendingMove;
+    protected float tellLeft;
+    protected float tellDirection;
+
     protected float barPosition = 0.4f;
     protected float barHeight;
     protected float barVelocity = 0f;
@@ -62,7 +67,7 @@ public class FishingMinigame {
     protected float timeHeld = 0f;
     protected float timeTotal = 0f;
 
-    protected record Move(float target, FishMotion motion, float speedMult, float thinkMult) {
+    protected record Move(float target, FishMotion motion, float speedMult, float thinkMult, boolean telegraphed) {
 
     }
 
@@ -181,11 +186,23 @@ public class FishingMinigame {
     }
 
     protected void advanceFish(float amount) {
-        fishThinkTimer -= amount;
+        if (pendingMove != null) {
+            tellLeft -= amount;
+            if (tellLeft <= 0f) startMove(pendingMove);
+        } else {
+            fishThinkTimer -= amount;
 
-        if (fishThinkTimer <= 0f) {
-            applyMove(chooseMove());
-            fishThinkTimer = pickThinkTime();
+            if (fishThinkTimer <= 0f) {
+                Move move = chooseMove();
+
+                if (move.telegraphed()) {
+                    pendingMove = move;
+                    tellLeft = FishConstants.MINIGAME_TELL_TIME;
+                    tellDirection = Math.signum(move.target() - fishPosition);
+                } else {
+                    startMove(move);
+                }
+            }
         }
 
         float maxSpeed = FishConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult() * legSpeedMult;
@@ -292,44 +309,60 @@ public class FishingMinigame {
     // moves and a share of moves borrowed from the MIXED pool
     protected Move chooseMove() {
         FishMotion own = motion == null ? FishMotion.SMOOTH : motion;
-        if (own == FishMotion.MIXED) return plainMove(pickMixedMotion());
+        if (own == FishMotion.MIXED) return borrowedMove();
 
         // no roll without a share, so such a species draws exactly as it did before shares existed
         float roll = mixChance + specialChance > 0f ? MathUtils.getRandomNumberInRange(0f, 1f) : 1f;
-        if (roll < mixChance) return plainMove(pickMixedMotion());
+        if (roll < mixChance) return borrowedMove();
         if (roll < mixChance + specialChance) return pickSpecialMove(own);
 
-        return plainMove(own);
+        return new Move(pickTarget(own), own, 1f, 1f, false);
     }
 
+    // the think time starts with the move, not with the tell before it
+    protected void startMove(Move move) {
+        applyMove(move);
+        fishThinkTimer = pickThinkTime();
+    }
+
+    // also the opening move, which is replaced on the first frame and so never gets a tell
     protected void applyMove(Move move) {
         fishTarget = move.target();
         activeMotion = move.motion();
         legSpeedMult = move.speedMult();
         legThinkMult = move.thinkMult();
+        pendingMove = null;
+        tellLeft = 0f;
+        tellDirection = 0f;
     }
 
-    protected Move plainMove(FishMotion type) {
-        return new Move(pickTarget(type), type, 1f, 1f);
+    // no style predicts a borrowed move, so a big one gets a tell
+    protected Move borrowedMove() {
+        FishMotion type = pickMixedMotion();
+        float target = pickTarget(type);
+        boolean big = target != fishTarget
+                && Math.abs(target - fishPosition) >= FishConstants.MINIGAME_TELL_DISTANCE;
+
+        return new Move(target, type, 1f, 1f, big);
     }
 
-    // each signature move breaks its style's no-effort answer without leaving the style
+    // each signature move breaks its style's no-effort answer without leaving the style, and is always telegraphed
     protected Move pickSpecialMove(FishMotion own) {
         switch (own) {
             case DARTER:
                 // doubles back to the far end before the bar has settled
                 return new Move(fishPosition > 0.5f
                         ? MathUtils.getRandomNumberInRange(0f, 0.25f)
-                        : MathUtils.getRandomNumberInRange(0.75f, 1f), own, 1f, FishConstants.MINIGAME_QUICK_THINK);
+                        : MathUtils.getRandomNumberInRange(0.75f, 1f), own, 1f, FishConstants.MINIGAME_QUICK_THINK, true);
 
             case SINKER:
                 // surges into the upper track, so a bar parked at the bottom loses it
                 return new Move(MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_SURGE_MIN,
-                        FishConstants.MINIGAME_SURGE_MAX), own, 1f, FishConstants.MINIGAME_SURGE_THINK);
+                        FishConstants.MINIGAME_SURGE_MAX), own, 1f, FishConstants.MINIGAME_SURGE_THINK, true);
 
             case FLOATER:
                 return new Move(MathUtils.getRandomNumberInRange(1f - FishConstants.MINIGAME_SURGE_MAX,
-                        1f - FishConstants.MINIGAME_SURGE_MIN), own, 1f, FishConstants.MINIGAME_SURGE_THINK);
+                        1f - FishConstants.MINIGAME_SURGE_MIN), own, 1f, FishConstants.MINIGAME_SURGE_THINK, true);
 
             case WEAVER: {
                 // turns back mid-sweep, or stops short at the end of one, so the rhythm cannot be played blind
@@ -338,7 +371,7 @@ public class FishingMinigame {
                         : MathUtils.getRandomNumberInRange(FishConstants.MINIGAME_WEAVER_SHORT_MIN,
                                 FishConstants.MINIGAME_WEAVER_SHORT_MAX);
 
-                return new Move(target, own, 1f, 1f);
+                return new Move(target, own, 1f, 1f, true);
             }
 
             case TWITCHER: {
@@ -347,17 +380,17 @@ public class FishingMinigame {
 
                 return new Move(MathUtils.clamp(fishPosition + direction * MathUtils.getRandomNumberInRange(
                         FishConstants.MINIGAME_TWITCHER_BOUND_MIN, FishConstants.MINIGAME_TWITCHER_BOUND_MAX),
-                        0.05f, 0.95f), own, FishConstants.MINIGAME_TWITCHER_BOUND_SPEED, 1f);
+                        0.05f, 0.95f), own, FishConstants.MINIGAME_TWITCHER_BOUND_SPEED, 1f, true);
             }
 
             case LUNGER:
-                return new Move(MathUtils.getRandomNumberInRange(0f, 1f), own, 1f, FishConstants.MINIGAME_QUICK_THINK);
+                return new Move(MathUtils.getRandomNumberInRange(0f, 1f), own, 1f, FishConstants.MINIGAME_QUICK_THINK, true);
 
             default:
                 return new Move(fishPosition > 0.5f
                         ? MathUtils.getRandomNumberInRange(0f, FishConstants.MINIGAME_SMOOTH_BURST_REACH)
                         : MathUtils.getRandomNumberInRange(1f - FishConstants.MINIGAME_SMOOTH_BURST_REACH, 1f),
-                        own, FishConstants.MINIGAME_SMOOTH_BURST_SPEED, 1f);
+                        own, FishConstants.MINIGAME_SMOOTH_BURST_SPEED, 1f, true);
         }
     }
 
@@ -505,6 +538,19 @@ public class FishingMinigame {
     public void setMotion(FishMotion value) {
         motion = value;
         fishThinkTimer = 0f;
+        pendingMove = null;
+        tellLeft = 0f;
+        tellDirection = 0f;
+    }
+
+    // 0 when no tell is showing, otherwise how far the pending move is through its tell
+    public float getTellProgress() {
+        return pendingMove == null || state != State.RUNNING ? 0f : 1f - tellLeft / FishConstants.MINIGAME_TELL_TIME;
+    }
+
+    // +1 up the track, -1 down, 0 when no tell is showing
+    public float getTellDirection() {
+        return pendingMove == null || state != State.RUNNING ? 0f : tellDirection;
     }
 
     public State getState() {

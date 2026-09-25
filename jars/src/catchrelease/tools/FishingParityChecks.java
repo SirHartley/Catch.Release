@@ -117,6 +117,7 @@ public class FishingParityChecks {
 
     public static void main(String[] args) throws Exception {
         jitterFormula();
+        tellFormula();
         try (Environment environment = new Environment()) {
             for (FishMotion motion : FishMotion.values()) {
                 for (Tackle tackle : Tackle.values()) {
@@ -130,7 +131,7 @@ public class FishingParityChecks {
         require(Global.getSector() == null && Global.getSettings() == null, "test globals cleared");
         require(caught > 0 && lost > 0, "traces must reach both terminal states");
         System.out.printf("Physics parity passed: %,d frames, %,d catches, %,d losses; all movements/tackle, "
-                + "30/60/144Hz, restarts, live modifiers, protection and jitter formula.%n", frames, caught, lost);
+                + "30/60/144Hz, restarts, live modifiers, protection, tells, and jitter and tell formulas.%n", frames, caught, lost);
     }
 
     static void trace(Environment environment, FishMotion motion, Tackle tackle, int fps, int seed) {
@@ -225,6 +226,8 @@ public class FishingParityChecks {
         equal(game.getTimeTotal(), tool.getTimeTotal());
         require(game.getState().name().equals(tool.getState().name()), "state");
         require(game.isCannotLose() == tool.isCannotLose(), "protection");
+        equal(game.getTellProgress(), tool.getTellProgress());
+        equal(game.getTellDirection(), tool.getTellDirection());
     }
 
     static void jitterFormula() throws Exception {
@@ -235,6 +238,14 @@ public class FishingParityChecks {
         String tool = methodBody(Path.of("jars/src/catchrelease/tools/FishingSimulation.java"), "public static float jitter(");
         require(game.replaceAll("\\s+", "").equals(tool.replaceAll("\\s+", "")),
                 "jitter formula changed; compare the game panel with the tool");
+    }
+
+    static void tellFormula() throws Exception {
+        String game = methodBody(Path.of("jars/src/catchrelease/campaign/fish/minigame/FishingMinigamePanel.java"),
+                "protected float getTell(float progress, float direction, float jitter)");
+        String tool = methodBody(Path.of("jars/src/catchrelease/tools/FishingSimulation.java"), "public static float tell(");
+        require(game.replaceAll("\\s+", "").equals(tool.replaceAll("\\s+", "")),
+                "tell formula changed; compare the game panel with the tool");
     }
 
     static String methodBody(Path file, String signature) throws Exception {

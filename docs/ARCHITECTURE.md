@@ -99,7 +99,7 @@ The check's nested `Environment` supplies API proxies and private campaign data;
 it refuses to run with existing game globals and clears its globals on exit.
 `CatchOnlyMinigame` overrides only treasure generation, leaving catch physics
 unchanged. No duplicate game classes, source rewriting or separate test tree.
-This covers deterministic catch traces and jitter, not treasure or the engine.
+This covers deterministic catch traces, tells, and the jitter and tell formulas, not treasure or the engine.
 
 The tuner's Balance results tab uses `tools/FishBalance` for immutable run
 snapshots, per-attempt telemetry and bounded parallel batches. `FishBalancePanel`
@@ -244,8 +244,8 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 
 | File | Owner / connection |
 |---|---|
-| `FishingMinigame.java` | Owns in-game bar/fish movement, progress/escape and treasure; advances movement -> treasure -> progress. Each target choice is the species' own move, its movement type's signature move (`specialChance`) or a move borrowed from the MIXED pool (`mixChance`). Uses runtime `FishConstants`, tackle, campaign inputs and live player-rate lookups. Hooked legendaries receive at least three Epic rewards. No dependency on the authoring tools. |
-| `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure; handles input; records bycatch, catch intel, route progress, and legendary completion. |
+| `FishingMinigame.java` | Owns in-game bar/fish movement, progress/escape and treasure; advances movement -> treasure -> progress. Each target choice is the species' own move, its movement type's signature move (`specialChance`) or a move borrowed from the MIXED pool (`mixChance`). Signature moves and borrowed moves of at least `MINIGAME_TELL_DISTANCE` wait out a `MINIGAME_TELL_TIME` tell on the old course; the opening move never has one. Uses runtime `FishConstants`, tackle, campaign inputs and live player-rate lookups. Hooked legendaries receive at least three Epic rewards. No dependency on the authoring tools. |
+| `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure, including the tell before a telegraphed move; handles input; records bycatch, catch intel, route progress, and legendary completion. |
 | `FishingMinigameDialogPlugin.java` | Hosts the custom visual, preserves source rupture and quest identity for drone and harpoon catches, applies tutorial catch protection, preserves campaign music, and exposes dev reopens that bypass substitution. |
 
 ### `campaign/fish/entities` and `campaign/fish/spawner`
