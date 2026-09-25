@@ -121,6 +121,11 @@ It validates input, checks external edits, backs up an existing notebook before
 its first replacement, and writes through a temporary file. It never writes the
 fish CSV. Run `Fish Balance Checks` from IntelliJ for the workbench checks.
 
+`tools/rules/RulesCheck` checks `data/campaign/rules.csv` against the engine's loader
+and reads `docs/rules-reference/vanilla-rules-index.txt`. It touches no game class that
+needs `Global`. Run it with the `Rules Check` run configuration; usage, checks and
+limits are in [RULES.md](RULES.md#rules-check-tool).
+
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 
 ## Save identity
