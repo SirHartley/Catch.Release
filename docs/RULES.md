@@ -244,7 +244,7 @@ More of the same source (0.98a-RC8 `BarCMD`, `BarEventDialogPlugin`; `VisualPane
 2. Prove a byte-identical CSV round-trip before changing parsed rows. Detect the current line endings; do not assume LF or CRLF from an old note.
 3. Preserve row IDs, seven columns, quoting, embedded newlines, tokens, commands and ordering except where the technical task explicitly changes them. The loader keeps one list of rows per trigger, in file order (`Rules` loader, `sources-obf/campaign.rules.java` 681–686), and only rows of the same trigger that can match in the same call depend on that order: `FireAll` runs their Text and Script in it and keeps it among options of equal order (a stable `Collections.sort`, `rulecmd/FireAll.java`), so `AddBarEvents` entries are listed and take `maxBarEvents` slots in it; `getAllMatching` readers such as intel bullets and descriptions show it. Before moving rows between blocks, compare each trigger's row sequence before and after, and check every pair whose order changes.
 4. Check every affected entry, question loop, accept/decline path, hand-in, cancellation and exit. Include overlapping flags, completed states and save/load. Follow the [dialogue route checklist](DIALOGUE.md#technical-handoff) and [shared text checks](DIALOGUE.md#shared-text-presentation). When a Java custom panel is affected, also use its [UI checks](UI.md#review-the-affected-screen).
-5. Parse the edited file again, require seven fields per row, and inspect the diff. A small change must not rewrite unrelated rows.
+5. Parse the edited file again, require seven fields per row, and inspect the diff. A small change must not rewrite unrelated rows. Run the [rules check tool](#rules-check-tool) and fix every error it reports.
 6. Report static checks separately from in-game QA. The external Rules Visualizer is not bundled with this repository; use it only if available. Its absence is not a new tooling project or a reason to claim a test was run. DumpMemory can help during live QA.
 
 A round-trip probe for a file that uses LF record endings:
@@ -258,6 +258,64 @@ assert out.getvalue() == src
 ```
 
 If it differs, inspect the source format before editing. The loader strips carriage returns from Conditions, Script and Options, but not from Text: a CRLF inside a Text cell stops `OR` from splitting it. Commas in notes must remain inside a correctly quoted field.
+
+### Rules check tool
+
+`catchrelease.tools.rules.RulesCheck` reads `data/campaign/rules.csv` and reports problems in the mod's rows. It runs outside the game and touches no game class that needs `Global`.
+
+Run it after every change to `rules.csv`: use the `Rules Check` run configuration, or put the build output and the compile jars from [Building](../CLAUDE.md#building) on the class path:
+
+```sh
+java -cp "<build output>:<compile jars>" catchrelease.tools.rules.RulesCheck <repository root> [<vanilla rules.csv>]
+```
+
+It prints one line per finding, sorted by CSV line, then a summary with counts per check:
+
+```
+ERROR data/campaign/rules.csv:120 catchrelease_exCaptainOpt [handler] option catchrelease_exAccept has no DialogOptionSelected row with $option == catchrelease_exAccept
+```
+
+The exit status is 1 when there is an error, 0 when there are only warnings or none, and 2 for a usage or input problem.
+
+**Parsing.** Records are read as RFC 4180 CSV; the line number is the physical line where the record starts. Rows with an empty id and rows whose id starts with `#` are skipped, as the loader does. Conditions, Script and Options cells are split into lines the way the 0.98a-RC8 `Rules` loader does, and each Conditions or Script line is parsed with a port of `Misc.tokenize` and the rule expression constructor (`RuleExpression`). Running the tool on vanilla `rules.csv` gives no load, command or option-format error, which matches the game loading that file. The engine's `LoadingUtils` CSV reader is not in the `starsector-knowledge` sources, so the record parsing itself is standard CSV, not a port.
+
+**Checks.** An error is something that stops the file loading or leaves the player stuck; a warning is likely wrong but can be deliberate or caused by keys and triggers that Java builds at run time.
+
+| Check | Severity | Reports |
+|---|---|---|
+| `columns` | error | A header other than `id,trigger,conditions,script,text,options,notes`, or a row without exactly seven columns |
+| `csv` | error | An unterminated quote |
+| `empty-id` | warning | A row with content but an empty id, which the loader skips |
+| `duplicate-id` | error / warning | An id used twice under the same trigger (the file fails to load) / under different triggers |
+| `whitespace` | error | A Conditions, Script or Options line that holds only spaces |
+| `load` | error | A line the engine rejects at load: unmatched quotes, several operators, an operator in a command line, a bad `score:`, `=` in Conditions, `==` in Script |
+| `command` | error | A command that is not a class in the vanilla `ruleCommandPackages` or the mod's `data/config/settings.json` list. Only the class file is looked up; no class is loaded |
+| `option-format` | error | A colon in an option label (load failure for `id:text`, cut label for `order:id:text`), a line that is neither form, an option id starting with `$` |
+| `highlight-order` | error | A `SetTextHighlightColors` line that follows `SetTextHighlights` (or `Highlight`) in one Script with only highlight commands between them. `SetTextHighlightColors` calls `highlightInLastPara(color, "")`, which replaces the paragraph's phrases, so the earlier phrases are lost ([Highlights](RULES_WRITING.md#highlights-and-small-text)). Any other command may add a paragraph and ends the pair |
+| `text-cr` | warning | A carriage return in Text, which stops `OR` variants from splitting |
+| `fire-in-conditions` | error | `FireAll` or `FireBest` in Conditions |
+| `fire-target` | error | A literal `FireAll` or `FireBest` target that no mod or vanilla row uses |
+| `unreachable` | warning | A trigger with mod rows that nothing fires, reported once at its first row |
+| `handler` | error | An option id from the Options column, an `AddBarEvent` call or a `$option = <id>` line without a `DialogOptionSelected` or `NewGameOptionSelected` row testing `$option == <id>`, in the mod or vanilla |
+| `case` | warning | A trigger or memory key of a mod row that differs only by case from another trigger or key in the mod, vanilla or the engine list |
+| `unwritten` | warning | A `$catchrelease` key read in Conditions, Script, Text or option labels that no mod row writes and that no Java string literal under `jars/src` names |
+| `identical` | warning | Two rows on one trigger with the same condition lines in any order, unless both notes contain `variant`. Triggers fired with `FireAll` by a row, by vanilla rows or by the engine are skipped, because every match runs there |
+
+**What counts as fired.** A trigger is fired when a mod row fires it with `FireAll` or `FireBest`; when the engine list in `VanillaRules.ENGINE` names it; when it ends with a hub mission suffix (`_blurb`, `_option`, `_blurbBar`, `_optionBar`, `_startBar`); when vanilla rows use or fire it; or when a Java string literal under `jars/src` equals it.
+
+**Vanilla lists.** `VanillaRules.ENGINE` lists every trigger the 0.98a-RC8 game code fires or opens with a literal name (`FireBest.fire`, `FireAll.fire`, the dialog plugins' `fireBest` and `fireAll`, `getBestMatching`, `RuleBasedInteractionDialogPluginImpl`), each with its bundle file and line in the `starsector-knowledge` sources; triggers vanilla fires from variables, such as defeat triggers, are covered because vanilla rows use them. `VanillaRules.COMMAND_PACKAGES` is vanilla's `ruleCommandPackages`. `docs/rules-reference/vanilla-rules-index.txt` lists the triggers vanilla rows use, the literal `FireAll` and `FireBest` targets in vanilla rows, the option ids vanilla rows handle and the memory keys vanilla rows use. The tool reads it from the repository at run time (`VanillaRules.INDEX`); it sits outside `jars/src` because IntelliJ copies every non-Java file of a source root into `catchrelease.jar`. Regenerate it from a game version's `starsector-core/data/campaign/rules.csv`:
+
+```sh
+java -cp "<build output>:<compile jars>" catchrelease.tools.rules.RulesCheck --index <vanilla rules.csv> <game version> > docs/rules-reference/vanilla-rules-index.txt
+```
+
+Passing a vanilla `rules.csv` as the second argument of a check builds the same lists from that file instead of the index.
+
+**Limits.**
+
+- Other mods' rule command packages are not known, so rows that call another mod's command get a `command` error.
+- A mod row whose id equals a vanilla row id is not reported; the index holds no vanilla ids.
+- Keys and triggers that Java builds by concatenation are not found in its string literals. `CatchReleaseCMD` writes the crab ware keys as `key + "Owned"`, `"Afford"` and so on, and the distress framework fires its provider's trigger by name, so those give `unwritten` and `unreachable` warnings.
 
 ## Maintenance
 

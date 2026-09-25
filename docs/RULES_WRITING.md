@@ -350,7 +350,7 @@ A hub mission is its own command target: `Call $<ref> <action>`. Every hub missi
 - **Options.** Every option has a handler and no colon in its label. Every menu has an option that always shows. Every screen has a way out. Decorating commands run after their option exists.
 - **State.** Quest state comes from its owner. Conversation flags sit on the speaker. Display values have expiry `0`. Menu option rows change nothing.
 - **Text.** No leftover tokens, internal ids or `.0` numbers on screen. Highlights match what is shown. Paragraphs are short.
-- **CSV.** The file round-trips byte for byte, every row has seven columns, and no Conditions or Script line holds only spaces; see [Editing and validation](RULES.md#editing-and-validation).
+- **CSV.** The file round-trips byte for byte, every row has seven columns, no Conditions or Script line holds only spaces, and the [rules check tool](RULES.md#rules-check-tool) reports no errors; see [Editing and validation](RULES.md#editing-and-validation).
 - **Routes.** Trace entry, every option, refusal, lack of money, hand-in, return and exit, plus save and load. See [Technical handoff](DIALOGUE.md#technical-handoff).
 
 ## Maintenance
