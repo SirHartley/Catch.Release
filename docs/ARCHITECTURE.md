@@ -9,6 +9,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | [LORE.md](LORE.md) | Setting facts, knowledge limits, character voices and source-labelled prose examples |
 | [Needle quest concept](NEEDLE_QUEST_CONCEPT.md#overview) | Deferred narrative plan, with a short theme, philosophy and content overview; not current canon or implementation |
 | [RULES.md](RULES.md) | Rules syntax, execution and project routing contracts |
+| [RULES_WRITING.md](RULES_WRITING.md) | Writing process and structure of rules content: plain chains, `FireAll` menus, `FireBest` picks, entry points, state, text, options and exits |
 | [RULES_AUTHORING.md](RULES_AUTHORING.md) | Using and debugging commands, memory and text replacements, including Java integration; vanilla dictionaries and source corrections |
 | [UI.md](UI.md) | Java custom panels, widgets, renderers, sprites, tooltips, layout and input; shared text guidelines in DIALOGUE.md |
 | [Distress README](../jars/src/catchrelease/distress/README.md) | Reusable distress integration |
