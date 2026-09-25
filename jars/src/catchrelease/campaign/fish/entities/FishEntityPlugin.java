@@ -98,17 +98,19 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float TWITCHER_JINK = 9f;
     private static final float TWITCHER_JINK_RATE = 11f;
 
-    private static final float LUNGER_FREEZE_TIME = 2.4f;
+    // a stopped mote is a free harpoon shot, so the freeze is a hitch before the lunge, never a rest
+    private static final float LUNGER_FREEZE_TIME = 0.7f;
+    private static final float LUNGER_FREEZE_MAX = 0.6f;
     private static final float LUNGER_DASH_TIME = 0.5f;
     private static final float LUNGER_DASH_MULT = 2.6f;
-    private static final float LUNGER_FREEZE_MULT = 0.06f;
+    private static final float LUNGER_FREEZE_MULT = 0.12f;
 
     private static final float MIXED_REROLL = 6f;
 
     private static final FishRarity DIVE_FROM = FishRarity.RARE;
-    private static final float DIVE_INTERVAL = 4.5f;
-    private static final float DIVE_TIME = 1.6f;
-    private static final float DIVE_FADE = 0.35f;
+    private static final float DIVE_INTERVAL = 9f;
+    private static final float DIVE_TIME = 1.1f;
+    private static final float DIVE_FADE = 0.3f;
 
     public static final String HOLDS_KEY = "$catchrelease_moteHolds";
     public static final float HOLD_RANGE = 0.5f;
@@ -137,7 +139,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient float curveFlipLeft = 0f;
 
     private transient boolean diving = false;
+    private transient boolean diveScheduled = false;
     private transient float diveClock = 0f;
+    private transient float diveHeading;
     private SectorEntityToken pond;
     private boolean phantom;
 
@@ -310,9 +314,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (QuorumShellGame.advance(this, amount)) return;
         if (advanceLure(amount)) return;
 
-        float step = MOVE_SPEED * getRarity().speedMult * getSlowMult()
+        // under the fabric a mote holds a straight course at cruise speed, so where it went down tells where it surfaces
+        float step = MOVE_SPEED * getSpeedMult() * getSlowMult()
                 * LegendaryShields.getSpeedMult(this) * getLureSpeedMult()
-                * advanceMode(amount) * amount;
+                * (diving ? 1f : advanceMode(amount)) * amount;
         float distance = Misc.getDistance(entity.getLocation(), target);
 
         if (step >= distance) {
@@ -323,8 +328,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        float angle = Misc.getAngleInDegrees(entity.getLocation(), target);
-        angle += getWander();
+        float angle = diving ? diveHeading
+                : Misc.getAngleInDegrees(entity.getLocation(), target) + getWander();
 
         Vector2f next = MathUtils.getPointOnCircumference(
                 entity.getLocation(),
@@ -368,16 +373,16 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected float getWander() {
-        FishRarity rarity = getRarity();
+        float wanderMult = getWanderMult();
 
         float wander = (float) Math.sin(time * 1.5f) * sineVariance;
         float extra = (float) Math.sin(time * 2.63f + sineVariance) * sineVariance * 0.6f;
 
-        return (wander + extra * (rarity.wanderMult - 1f)) * rarity.wanderMult + getModeWander();
+        return (wander + extra * (wanderMult - 1f)) * wanderMult + getModeWander();
     }
 
     protected float advanceMode(float amount) {
-        float difficulty = getRarity().wanderMult;
+        float difficulty = getWanderMult();
 
         switch (getActiveMode(amount)) {
             case DARTER:
@@ -422,8 +427,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 if (phaseLeft <= 0f) {
                     dashing = !dashing;
                     phaseLeft = dashing ? LUNGER_DASH_TIME
-                            : LUNGER_FREEZE_TIME / difficulty
-                                    * MathUtils.getRandomNumberInRange(0.7f, 1.3f);
+                            : Math.min(LUNGER_FREEZE_MAX, LUNGER_FREEZE_TIME / difficulty
+                                    * MathUtils.getRandomNumberInRange(0.7f, 1.3f));
                 }
 
                 return dashing ? LUNGER_DASH_MULT + 0.4f * (difficulty - 1f) : LUNGER_FREEZE_MULT;
@@ -442,8 +447,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         if (held) {
             diving = false;
+            diveScheduled = true;
             diveClock = getDiveInterval();
             return;
+        }
+
+        // diveClock is transient, so a fresh or reloaded mote would otherwise vanish on its first frame
+        if (!diveScheduled) {
+            diveScheduled = true;
+            diveClock = getDiveInterval() * MathUtils.getRandomNumberInRange(0.3f, 1f);
         }
 
         diveClock -= amount;
@@ -451,6 +463,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         diving = !diving;
         diveClock = diving ? DIVE_TIME : getDiveInterval();
+        if (diving) diveHeading = Misc.getAngleInDegrees(entity.getLocation(), target);
     }
 
     protected boolean dives() {
@@ -460,7 +473,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected float getDiveInterval() {
-        return DIVE_INTERVAL * DIVE_FROM.wanderMult / Math.max(0.01f, getRarity().wanderMult);
+        return DIVE_INTERVAL * DIVE_FROM.wanderMult / Math.max(0.01f, getWanderMult())
+                * MathUtils.getRandomNumberInRange(0.8f, 1.2f);
     }
 
     public float getVisibility() {
@@ -766,7 +780,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected float getModeWander() {
-        float difficulty = getRarity().wanderMult;
+        float difficulty = getWanderMult();
 
         FishMotion mode = activeMode == null ? getMotion() : activeMode;
         if (mode == null) return 0f;
@@ -812,7 +826,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                     FishMotion.FLOATER, FishMotion.WEAVER, FishMotion.TWITCHER, FishMotion.LUNGER};
             activeMode = pool[(int) MathUtils.getRandomNumberInRange(0f, pool.length - 0.01f)];
 
-            rerollLeft = MIXED_REROLL / getRarity().wanderMult
+            rerollLeft = MIXED_REROLL / getWanderMult()
                     * MathUtils.getRandomNumberInRange(0.7f, 1.3f);
             phaseLeft = 0f;
             dashing = false;
@@ -848,6 +862,18 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         FishSpec spec = getFishSpec();
 
         return spec == null ? FishRarity.COMMON : spec.rarity;
+    }
+
+    protected float getSpeedMult() {
+        FishSpec spec = getFishSpec();
+
+        return spec == null ? FishRarity.COMMON.speedMult : spec.getCampaignSpeedMult();
+    }
+
+    protected float getWanderMult() {
+        FishSpec spec = getFishSpec();
+
+        return spec == null ? FishRarity.COMMON.wanderMult : spec.getCampaignWanderMult();
     }
 
     public void externalRender(ViewportAPI viewport){

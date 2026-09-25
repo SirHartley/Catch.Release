@@ -59,6 +59,18 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         return spec == null ? FishRarity.COMMON : spec.rarity;
     }
 
+    protected float getSpeedMult() {
+        FishSpec spec = getFishSpec();
+
+        return spec == null ? FishRarity.COMMON.speedMult : spec.getCampaignSpeedMult();
+    }
+
+    protected float getWanderMult() {
+        FishSpec spec = getFishSpec();
+
+        return spec == null ? FishRarity.COMMON.wanderMult : spec.getCampaignWanderMult();
+    }
+
     @Override
     public void advance(float amount) {
         time += amount;
@@ -67,17 +79,15 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         if (headingLeft <= 0f) {
             heading = Misc.normalizeAngle(heading
                     + MathUtils.getRandomNumberInRange(-FishConstants.BURIED_TURN, FishConstants.BURIED_TURN)
-                    * getRarity().wanderMult);
+                    * getWanderMult());
 
             pickHeadingTime();
         }
 
-        FishRarity rarity = getRarity();
-
         float weave = (float) Math.sin(time * 0.9f * sineVariance) * FishConstants.BURIED_WEAVE
-                * rarity.wanderMult;
+                * getWanderMult();
 
-        float step = FishConstants.BURIED_SPEED * rarity.speedMult * amount;
+        float step = FishConstants.BURIED_SPEED * getSpeedMult() * amount;
 
         Vector2f next = MathUtils.getPointOnCircumference(entity.getLocation(), step, heading + weave);
         entity.setLocation(next.x, next.y);
@@ -86,7 +96,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
     protected void pickHeadingTime() {
         headingLeft = MathUtils.getRandomNumberInRange(
                 FishConstants.BURIED_HEADING_TIME_MIN, FishConstants.BURIED_HEADING_TIME_MAX)
-                / Math.max(0.01f, getRarity().wanderMult);
+                / Math.max(0.01f, getWanderMult());
     }
 
     public SectorEntityToken unearth() {
