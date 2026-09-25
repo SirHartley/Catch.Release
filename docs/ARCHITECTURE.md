@@ -67,7 +67,7 @@ Load order in `ModPlugin`: pond listeners -> buried motes -> charges -> harpoone
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
 
-Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `HauntStatus`, `SpawnFisherman`, `SpawnFleetQuest`, `SpawnDistressCall`. `lw_Console.jar` is needed for compilation even when the runtime mod is absent.
+Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `HauntStatus`, `SpawnFisherman`, `SpawnFleetQuest`, `SpawnDistressCall`. They live in `commands/`, are the only classes that need `lw_Console.jar`, and nothing else references them; a build without the jar leaves them out ([Building](../CLAUDE.md#building)).
 
 Authoring tools live in `jars/src/catchrelease/tools/`, in the normal `catchrelease`
 module. They run as standalone Java 17 programs, without starting Starsector.
