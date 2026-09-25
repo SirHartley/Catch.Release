@@ -202,6 +202,7 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 
 ### Minigame timing
 
+- A telegraphed move shows a tell for `MINIGAME_TELL_TIME` before it starts: the drawn marker shivers toward the coming move with a lean and two pulses. Like jitter, it never moves the hit position. `getTell` depends only on its arguments, and `FishingParityChecks` compares its body with `FishingSimulation.tell` as text, so keep the body brace-free. Its size grows with the species' jitter so shaky fish still show it.
 - The line sound uses one continuously refreshed UI loop with changing volume.
 - The loot result has a backdrop clock that starts when the panel is created and
   a list clock that starts after the catch tally. Coin rain uses the backdrop clock.
@@ -210,7 +211,7 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 
 `catchrelease.tools.FishDifficultyTuner.main` in the normal `catchrelease` module
 opens a plain Swing authoring window outside the game. Its tool-only
-`FishingSimulation` copies the catch model and `FishingMinigamePanel` jitter,
+`FishingSimulation` copies the catch model and `FishingMinigamePanel` jitter and tell,
 using the existing game constants and types read-only. The game does not call
 the simulator. Gear/player/rumor controls are test conditions, not fish
 CSV fields. Treasure pursuit is not simulated. Saving and launch arguments are

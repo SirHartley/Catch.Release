@@ -16,8 +16,16 @@ final class FishingSimulation {
     protected float restlessness;
     protected float progressRateMult;
     protected float escapeRateMult;
+    protected float specialChance;
+    protected float mixChance;
     protected FishMotion motion;
     protected FishMotion activeMotion;
+    protected float legSpeedMult = 1f;
+    protected float legThinkMult = 1f;
+
+    protected Move pendingMove;
+    protected float tellLeft;
+    protected float tellDirection;
 
     protected float barPosition = 0.4f;
     protected float barHeight;
@@ -45,9 +53,13 @@ final class FishingSimulation {
         float between(float min, float max);
     }
 
+    protected record Move(float target, FishMotion motion, float speedMult, float thinkMult, boolean telegraphed) {
+
+    }
+
     public FishingSimulation(float difficulty, float motionSpeed, float restlessness,
-                             float progressRateMult, float escapeRateMult, FishMotion motion,
-                             Tackle tackle, float barPixels, RandomRange random) {
+                             float progressRateMult, float escapeRateMult, float specialChance, float mixChance,
+                             FishMotion motion, Tackle tackle, float barPixels, RandomRange random) {
         this.random = random;
         this.tackle = tackle == null ? Tackle.NONE : tackle;
         this.difficulty = difficulty;
@@ -55,9 +67,11 @@ final class FishingSimulation {
         this.restlessness = restlessness;
         this.progressRateMult = progressRateMult;
         this.escapeRateMult = escapeRateMult;
+        this.specialChance = specialChance;
+        this.mixChance = mixChance;
         this.motion = motion;
         barHeight = barHeight(barPixels, this.tackle.barSizeMult);
-        fishTarget = pickFishTarget();
+        applyMove(chooseMove());
     }
 
     public static float barHeight(float pixels, float tackleSize) {
@@ -73,7 +87,7 @@ final class FishingSimulation {
         fishPosition = 0.5f;
         fishVelocity = 0f;
         fishThinkTimer = 0f;
-        fishTarget = pickFishTarget();
+        applyMove(chooseMove());
         progress = FishConstants.MINIGAME_PROGRESS_START;
 
         state = State.RUNNING;
@@ -119,14 +133,26 @@ final class FishingSimulation {
     }
 
     protected void advanceFish(float amount) {
-        fishThinkTimer -= amount;
+        if (pendingMove != null) {
+            tellLeft -= amount;
+            if (tellLeft <= 0f) startMove(pendingMove);
+        } else {
+            fishThinkTimer -= amount;
 
-        if (fishThinkTimer <= 0f) {
-            fishTarget = pickFishTarget();
-            fishThinkTimer = pickThinkTime();
+            if (fishThinkTimer <= 0f) {
+                Move move = chooseMove();
+
+                if (move.telegraphed()) {
+                    pendingMove = move;
+                    tellLeft = FishConstants.MINIGAME_TELL_TIME;
+                    tellDirection = Math.signum(move.target() - fishPosition);
+                } else {
+                    startMove(move);
+                }
+            }
         }
 
-        float maxSpeed = FishConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult();
+        float maxSpeed = FishConstants.MINIGAME_FISH_BASE_SPEED * motionSpeed * getDifficultyMult() * legSpeedMult;
 
         if (activeMotion == FishMotion.LUNGER) {
             maxSpeed *= Math.abs(fishTarget - fishPosition) > FishConstants.MINIGAME_LUNGER_NEAR
@@ -194,21 +220,97 @@ final class FishingSimulation {
         return position >= barPosition && position <= barPosition + barHeight;
     }
 
-    protected float pickFishTarget() {
-        activeMotion = motion == FishMotion.MIXED ? pickMixedMotion() : motion;
-        if (activeMotion == null) activeMotion = FishMotion.SMOOTH;
+    protected Move chooseMove() {
+        FishMotion own = motion == null ? FishMotion.SMOOTH : motion;
+        if (own == FishMotion.MIXED) return borrowedMove();
 
-        switch (activeMotion) {
+        // Mirrors the game: no roll without a share.
+        float roll = mixChance + specialChance > 0f ? random.between(0f, 1f) : 1f;
+        if (roll < mixChance) return borrowedMove();
+        if (roll < mixChance + specialChance) return pickSpecialMove(own);
+
+        return new Move(pickTarget(own), own, 1f, 1f, false);
+    }
+
+    protected void startMove(Move move) {
+        applyMove(move);
+        fishThinkTimer = pickThinkTime();
+    }
+
+    protected void applyMove(Move move) {
+        fishTarget = move.target();
+        activeMotion = move.motion();
+        legSpeedMult = move.speedMult();
+        legThinkMult = move.thinkMult();
+        pendingMove = null;
+        tellLeft = 0f;
+        tellDirection = 0f;
+    }
+
+    protected Move borrowedMove() {
+        FishMotion type = pickMixedMotion();
+        float target = pickTarget(type);
+        boolean big = target != fishTarget
+                && Math.abs(target - fishPosition) >= FishConstants.MINIGAME_TELL_DISTANCE;
+
+        return new Move(target, type, 1f, 1f, big);
+    }
+
+    protected Move pickSpecialMove(FishMotion own) {
+        switch (own) {
+            case DARTER:
+                return new Move(fishPosition > 0.5f
+                        ? random.between(0f, 0.25f)
+                        : random.between(0.75f, 1f), own, 1f, FishConstants.MINIGAME_QUICK_THINK, true);
+
+            case SINKER:
+                return new Move(random.between(FishConstants.MINIGAME_SURGE_MIN,
+                        FishConstants.MINIGAME_SURGE_MAX), own, 1f, FishConstants.MINIGAME_SURGE_THINK, true);
+
+            case FLOATER:
+                return new Move(random.between(1f - FishConstants.MINIGAME_SURGE_MAX,
+                        1f - FishConstants.MINIGAME_SURGE_MIN), own, 1f, FishConstants.MINIGAME_SURGE_THINK, true);
+
+            case WEAVER: {
+                float target = Math.abs(fishPosition - fishTarget) >= FishConstants.MINIGAME_WEAVER_ARRIVE
+                        ? fishTarget > 0.5f ? FishConstants.MINIGAME_WEAVER_LOW : FishConstants.MINIGAME_WEAVER_HIGH
+                        : random.between(FishConstants.MINIGAME_WEAVER_SHORT_MIN,
+                                FishConstants.MINIGAME_WEAVER_SHORT_MAX);
+
+                return new Move(target, own, 1f, 1f, true);
+            }
+
+            case TWITCHER: {
+                float direction = fishPosition > 0.5f ? -1f : 1f;
+
+                return new Move(clamp(fishPosition + direction * random.between(
+                        FishConstants.MINIGAME_TWITCHER_BOUND_MIN, FishConstants.MINIGAME_TWITCHER_BOUND_MAX),
+                        0.05f, 0.95f), own, FishConstants.MINIGAME_TWITCHER_BOUND_SPEED, 1f, true);
+            }
+
+            case LUNGER:
+                return new Move(random.between(0f, 1f), own, 1f, FishConstants.MINIGAME_QUICK_THINK, true);
+
+            default:
+                return new Move(fishPosition > 0.5f
+                        ? random.between(0f, FishConstants.MINIGAME_SMOOTH_BURST_REACH)
+                        : random.between(1f - FishConstants.MINIGAME_SMOOTH_BURST_REACH, 1f),
+                        own, FishConstants.MINIGAME_SMOOTH_BURST_SPEED, 1f, true);
+        }
+    }
+
+    protected float pickTarget(FishMotion type) {
+        switch (type) {
             case DARTER:
                 return random.between(0f, 1f) < 0.5f
                         ? random.between(0f, 0.25f)
                         : random.between(0.75f, 1f);
 
             case SINKER:
-                return random.between(0f, 0.45f);
+                return random.between(0f, FishConstants.MINIGAME_SINKER_CEILING);
 
             case FLOATER:
-                return random.between(0.55f, 1f);
+                return random.between(FishConstants.MINIGAME_FLOATER_FLOOR, 1f);
 
             case WEAVER:
                 // Only reverse after arrival; timer-only reversals collapse into centre jitter.
@@ -278,7 +380,7 @@ final class FishingSimulation {
             think = Math.max(FishConstants.MINIGAME_WEAVER_DWELL_FLOOR, think);
         }
 
-        return think;
+        return think * legThinkMult;
     }
 
     protected float getDifficultyMult() {
@@ -320,6 +422,17 @@ final class FishingSimulation {
     public void setMotion(FishMotion value) {
         motion = value;
         fishThinkTimer = 0f;
+        pendingMove = null;
+        tellLeft = 0f;
+        tellDirection = 0f;
+    }
+
+    public float getTellProgress() {
+        return pendingMove == null || state != State.RUNNING ? 0f : 1f - tellLeft / FishConstants.MINIGAME_TELL_TIME;
+    }
+
+    public float getTellDirection() {
+        return pendingMove == null || state != State.RUNNING ? 0f : tellDirection;
     }
 
     public State getState() {
@@ -372,12 +485,15 @@ final class FishingSimulation {
         return timeTotal;
     }
 
-    public void tune(float difficulty, float speed, float restlessness, float gain, float loss, FishMotion motion) {
+    public void tune(float difficulty, float speed, float restlessness, float gain, float loss,
+                     float special, float mix, FishMotion motion) {
         this.difficulty = difficulty;
         motionSpeed = speed;
         this.restlessness = restlessness;
         progressRateMult = gain;
         escapeRateMult = loss;
+        specialChance = special;
+        mixChance = mix;
         if (this.motion != motion) setMotion(motion);
     }
 
@@ -408,6 +524,16 @@ final class FishingSimulation {
                 + Math.sin(time * 1.73f) * 0.3f + Math.sin(time * 2.61f) * 0.2f);
         float effort = 1f + Math.abs(velocity) * FishConstants.MINIGAME_FISH_JITTER_EFFORT;
         return wobble * FishConstants.MINIGAME_FISH_JITTER * jitter * effort;
+    }
+
+    // Same body as FishingMinigamePanel.getTell; FishingParityChecks compares the text.
+    public static float tell(float progress, float direction, float jitter) {
+        float envelope = Math.min(Math.min(1f, progress / FishConstants.MINIGAME_TELL_RISE),
+                Math.min(1f, (1f - progress) / FishConstants.MINIGAME_TELL_FALL));
+        float pulse = (float) Math.abs(Math.sin(progress * Math.PI * FishConstants.MINIGAME_TELL_PULSES));
+        float reach = FishConstants.MINIGAME_TELL_LEAN + FishConstants.MINIGAME_TELL_PULSE * pulse
+                + FishConstants.MINIGAME_TELL_JITTER_SHARE * FishConstants.MINIGAME_FISH_JITTER * jitter;
+        return direction * envelope * reach;
     }
 
     private static float clamp(float value, float min, float max) {

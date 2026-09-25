@@ -396,9 +396,10 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected void renderFish(FishingMinigameLayout layout, float alphaMult) {
         float size = FishConstants.MINIGAME_FISH_ICON_SIZE;
 
-        // jitter is visual only; the hit position the rules use is unaffected
+        // jitter and the tell are visual only; the hit position the rules use is unaffected
         float centerX = layout.getTrackCenterX() + getJitter(0f);
-        float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f);
+        float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f)
+                + getTell(minigame.getTellProgress(), minigame.getTellDirection(), minigame.getFish().jitter);
 
         // Sonar still earns the exact species reveal. The bought profile replaces only the unidentified mote, never the information a fitted head is meant to provide.
         if (!minigame.getTackle().sonar) {
@@ -545,6 +546,17 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         float effort = 1f + Math.abs(minigame.getFishVelocity()) * FishConstants.MINIGAME_FISH_JITTER_EFFORT;
 
         return wobble * FishConstants.MINIGAME_FISH_JITTER * minigame.getFish().jitter * effort;
+    }
+
+    // a one-sided shiver toward the coming move; FishingParityChecks compares this body with the tools' copy,
+    // so it stays brace-free and uses only its arguments
+    protected float getTell(float progress, float direction, float jitter) {
+        float envelope = Math.min(Math.min(1f, progress / FishConstants.MINIGAME_TELL_RISE),
+                Math.min(1f, (1f - progress) / FishConstants.MINIGAME_TELL_FALL));
+        float pulse = (float) Math.abs(Math.sin(progress * Math.PI * FishConstants.MINIGAME_TELL_PULSES));
+        float reach = FishConstants.MINIGAME_TELL_LEAN + FishConstants.MINIGAME_TELL_PULSE * pulse
+                + FishConstants.MINIGAME_TELL_JITTER_SHARE * FishConstants.MINIGAME_FISH_JITTER * jitter;
+        return direction * envelope * reach;
     }
 
     protected SpriteAPI getMoteSprite() {

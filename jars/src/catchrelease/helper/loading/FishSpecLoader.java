@@ -131,6 +131,8 @@ public class FishSpecLoader {
         s.difficulty = optFloat(row, "difficulty", 50f);
         s.progressRateMult = optFloat(row, "progressRateMult", 1f);
         s.escapeRateMult = optFloat(row, "escapeRateMult", 1f);
+        s.specialChance = clamp(optFloat(row, "specialChance", 0f), 0f, 1f);
+        s.mixChance = clamp(optFloat(row, "mixChance", 0f), 0f, 1f);
 
         s.baseValue = optFloat(row, "baseValue", 100f);
         s.lengthMin = optFloat(row, "lengthMin", 0.3f);

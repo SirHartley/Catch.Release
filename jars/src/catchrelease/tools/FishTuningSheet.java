@@ -8,6 +8,7 @@ import java.util.*;
 
 final class FishTuningSheet extends FishCsv {
 
+    // the balance notebook stores reference values by position, so new fields go last
     enum Field {
 
         DIFFICULTY("difficulty", "Difficulty", 1, 200, 50,
@@ -21,7 +22,11 @@ final class FishTuningSheet extends FishCsv {
         LOSS("escapeRateMult", "Escape loss", 0.01, 5, 1,
                 "Progress lost while uncovered. Higher is less forgiving. The game compresses 2 to 1.6 before other modifiers."),
         JITTER("jitter", "Visual shake", 0, 10, 1,
-                "Shakes the visible icon, not the true catch position. The simulated angler observes this shake too.");
+                "Shakes the visible icon, not the true catch position. The simulated angler observes this shake too."),
+        SPECIAL("specialChance", "Special moves", 0, 1, 0,
+                "Chance that a target choice is the movement type's signature move, shown by a tell. Mixed fish ignore it."),
+        MIX("mixChance", "Random moves", 0, 1, 0,
+                "Chance that a target choice borrows a random movement type, as Mixed does; long ones get a tell. Mixed fish ignore it.");
 
         final String column;
         final String label;

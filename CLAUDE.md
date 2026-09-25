@@ -58,7 +58,7 @@ The dictionaries distinguish checked recipes from extracted names, expressions a
 
 - Every runtime-affecting final branch must pass the full clean Java 17 build described in [Building](#building).
 - Build the exact final remote task-branch revision. Earlier builds, partial builds, IDE analysis, and static checks do not satisfy the gate.
-- Missing compilers or dependencies are merge blockers. Documentation-only changes do not require a Java build.
+- Missing compilers or required dependencies are merge blockers. Documentation-only changes do not require a Java build.
 - Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
 - Use the connected GitHub app to create, inspect, and merge pull requests. Use `gh` only if the app is unavailable. A broken `gh` login is not a blocker when the app works.
 - Fetch current remote `master` before branching and again before merging. Integrate intervening changes, push the exact final commit, and verify the merged remote revision.
@@ -234,10 +234,10 @@ After the final runtime-affecting commit and before merge:
 
 1. Fetch and build the exact remote task-branch revision.
 2. Use a clean, empty output directory.
-3. Compile every `.java` file under `jars/src` with Java 17 and the complete dependency set below.
+3. Compile every `.java` file under `jars/src` with Java 17 and the required dependencies below. Without `lw_Console.jar`, leave out `jars/src/catchrelease/commands/`; nothing else references those Console Commands classes.
 4. Require a successful exit with no compile errors.
-5. Record the command, branch commit, Java version, and result in the pull request. The final reply links the PR and states the result and any untested behavior.
-6. Stop before merge if the build or any dependency is unavailable.
+5. Record the command, branch commit, Java version, result, and whether the Console Commands classes were compiled in the pull request. The final reply links the PR and states the result and any untested behavior.
+6. Stop before merge if the build or a required dependency is unavailable. When the rest of the mod compiles, missing Console Commands classes do not block the merge.
 
 Documentation-only changes are exempt. Changes to runtime data, including text-only CSV changes, still require this gate unless the user explicitly grants an exemption.
 
@@ -248,22 +248,24 @@ The project uses Java 17; `.idea/misc.xml` sets the language level and the sourc
 Required compile dependencies:
 
 - `lib/starfarer.api.jar`;
-- `starfarer_obf.jar` from the game's `starsector-core` directory;
 - `Graphics.jar` from `lib/GraphicsLib.zip`;
 - `LazyLib.jar` and `LunaLib.jar` from `lib/Lazylib_lunalib.zip`;
 - `MagicLib.jar` from `lib/MagicLib.zip`;
-- `lib/lw_Console.jar`, used only to compile optional Console Commands classes;
 - `lwjgl-2.9.3.jar`;
 - `lwjgl_util-2.9.3.jar`;
 - `json-20140107.jar`;
 - `log4j-1.2.17.jar`.
 
-These dependencies provide `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json`, and `Global.getLogger()`. GraphicsLib, LazyLib, LunaLib, and MagicLib are also the declared runtime dependencies in `mod_info.json`. `lw_Console.jar` is compile-only because only Console Commands loads those optional classes.
+These dependencies provide `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json`, and `Global.getLogger()`. GraphicsLib, LazyLib, LunaLib, and MagicLib are also the declared runtime dependencies in `mod_info.json`. `starfarer_obf.jar` is not required; the source compiles against the API jar alone.
+
+Optional: `lw_Console.jar` compiles the Console Commands classes in `jars/src/catchrelease/commands/`. Only Console Commands loads them, so the mod runs without them.
 
 Reference command:
 
 ```sh
-javac --release 17 -cp "<all jars above>" -d <empty-output> $(find jars/src -name '*.java')
+javac --release 17 -encoding UTF-8 -cp "<jars above>" -d <empty-output> $(find jars/src -name '*.java')
+# without lw_Console.jar
+javac --release 17 -encoding UTF-8 -cp "<jars above>" -d <empty-output> $(find jars/src -name '*.java' -not -path 'jars/src/catchrelease/commands/*')
 ```
 
 ## Repository navigation

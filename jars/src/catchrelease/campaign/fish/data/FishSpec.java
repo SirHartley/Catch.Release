@@ -40,6 +40,8 @@ public class FishSpec {
     public float difficulty = 50f;
     public float progressRateMult = 1f;
     public float escapeRateMult = 1f;
+    public float specialChance = 0f;
+    public float mixChance = 0f;
     public float baseValue = 100f;
 
     // derived by FishSpecLoader from motionSpeed and restlessness; 1 means an ordinary member of the rarity

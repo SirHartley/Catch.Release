@@ -67,7 +67,7 @@ Load order in `ModPlugin`: pond listeners -> buried motes -> charges -> harpoone
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
 
-Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `HauntStatus`, `SpawnFisherman`, `SpawnFleetQuest`, `SpawnDistressCall`. `lw_Console.jar` is needed for compilation even when the runtime mod is absent.
+Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `HauntStatus`, `SpawnFisherman`, `SpawnFleetQuest`, `SpawnDistressCall`. They live in `commands/`, are the only classes that need `lw_Console.jar`, and nothing else references them; a build without the jar leaves them out ([Building](../CLAUDE.md#building)).
 
 Authoring tools live in `jars/src/catchrelease/tools/`, in the normal `catchrelease`
 module. They run as standalone Java 17 programs, without starting Starsector.
@@ -99,7 +99,7 @@ The check's nested `Environment` supplies API proxies and private campaign data;
 it refuses to run with existing game globals and clears its globals on exit.
 `CatchOnlyMinigame` overrides only treasure generation, leaving catch physics
 unchanged. No duplicate game classes, source rewriting or separate test tree.
-This covers deterministic catch traces and jitter, not treasure or the engine.
+This covers deterministic catch traces, tells, and the jitter and tell formulas, not treasure or the engine.
 
 The tuner's Balance results tab uses `tools/FishBalance` for immutable run
 snapshots, per-attempt telemetry and bounded parallel batches. `FishBalancePanel`
@@ -117,6 +117,8 @@ edit/Undo path and refuses a changed source fish or test setup.
 `FishBalanceReferences` groups fixed reference snapshots by movement and loads
 named test setups into the tuner. `FishBalanceNotebook` stores references,
 notes and equipment presets in the ignored mod-root `.fish-balancing.properties`.
+References store fish values by `FishTuningSheet.Field` position, so new fields
+go last; an older reference loads the missing fields at their defaults.
 It validates input, checks external edits, backs up an existing notebook before
 its first replacement, and writes through a temporary file. It never writes the
 fish CSV. Run `Fish Balance Checks` from IntelliJ for the workbench checks.
@@ -242,8 +244,8 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 
 | File | Owner / connection |
 |---|---|
-| `FishingMinigame.java` | Owns in-game bar/fish movement, progress/escape and treasure; advances movement -> treasure -> progress. Uses runtime `FishConstants`, tackle, campaign inputs and live player-rate lookups. Hooked legendaries receive at least three Epic rewards. No dependency on the authoring tools. |
-| `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure; handles input; records bycatch, catch intel, route progress, and legendary completion. |
+| `FishingMinigame.java` | Owns in-game bar/fish movement, progress/escape and treasure; advances movement -> treasure -> progress. Each target choice is the species' own move, its movement type's signature move (`specialChance`) or a move borrowed from the MIXED pool (`mixChance`). Signature moves and borrowed moves of at least `MINIGAME_TELL_DISTANCE` wait out a `MINIGAME_TELL_TIME` tell on the old course; the opening move never has one. Uses runtime `FishConstants`, tackle, campaign inputs and live player-rate lookups. Hooked legendaries receive at least three Epic rewards. No dependency on the authoring tools. |
+| `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure, including the tell before a telegraphed move; handles input; records bycatch, catch intel, route progress, and legendary completion. |
 | `FishingMinigameDialogPlugin.java` | Hosts the custom visual, preserves source rupture and quest identity for drone and harpoon catches, applies tutorial catch protection, preserves campaign music, and exposes dev reopens that bypass substitution. |
 
 ### `campaign/fish/entities` and `campaign/fish/spawner`
@@ -415,11 +417,12 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Ordinary species use one or two adjacent regions unless a stronger star, coherence, or theme gate already provides the range. Every region retains at least two ungated Common species.
 - The non-legendary roster is exactly 100 fish in a 59/23/12/6 Common/Uncommon/Rare/Epic split. The Abyss contributes 7/2/1/1 of those. Zero-weight mechanism rows, such as the Quorum splinter, are outside the hundred.
 - The Abyss uses its own high-difficulty ladder. Rarity controls frequency and value there, but even Abyssal Common rows use at least main-sheet Rare difficulty.
-- Balance every row for the base kit. `FishShopDialog` sells no catch-stat upgrades, so each species must stay catchable with the `MINIGAME_BAR_SIZE_FALLBACK` bar, neutral gain and loss, and no tackle. Tune `difficulty`, `restlessness`, `motionSpeed`, `progressRateMult`, and `escapeRateMult` together and simulate the result.
+- Balance every row for the base kit. `FishShopDialog` sells no catch-stat upgrades, so each species must stay catchable with the `MINIGAME_BAR_SIZE_FALLBACK` bar, neutral gain and loss, and no tackle. Tune `difficulty`, `restlessness`, `motionSpeed`, `progressRateMult`, `escapeRateMult`, `specialChance`, and `mixChance` together and simulate the result.
+- The base game is tuned for a practised player; later difficulty settings are meant to ease it. Band means for the workbench's Skilled angler are about 96/86/68/54/32% for main-sheet Common to Legendary, and about 58/34/26/15/6% for Regular. The Abyss sits roughly one band harder. No species may be caught in more than half of its attempts by holding the button or by never pressing it; `FishTunerChecks` asserts this over the real sheet. Signature and random moves carry most of that: sinkers and floaters also need a steeper gain/loss ratio because their home zone is where a parked bar sits.
 - `motionSpeed` and `restlessness` also move the campaign mote; see [fish entities](#fish-entities-and-catch-provenance). Restlessness pulls in opposite directions: a restless mote wanders more in the world, but on the line it retargets before finishing a move and is easier to cover.
 - `difficulty` is also the player-facing rating. `FishCodexEntry` labels it, and `FishermanQuest.isChartRequest()` routes a species rated 65 or more to a chart request. Keep main-sheet Commons below 65 and every other row at or above it.
 - Species that share a rarity and `motion` differ in at least one of `motionSpeed`, `restlessness`, or `jitter`, so players can learn them apart.
-- Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` may still roll either for one behavior interval.
+- Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` and a species' random moves may still roll either for one move.
 - `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
 - A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.

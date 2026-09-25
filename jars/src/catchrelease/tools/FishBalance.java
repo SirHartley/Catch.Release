@@ -172,6 +172,7 @@ final class FishBalance {
         FishingSimulation game = new FishingSimulation(fish.value(Field.DIFFICULTY),
                 fish.value(Field.SPEED) * (fish.rarity.equals("LEGENDARY") ? 1 : setup.rumor),
                 fish.value(Field.RESTLESSNESS), fish.value(Field.GAIN), fish.value(Field.LOSS),
+                fish.value(Field.SPECIAL), fish.value(Field.MIX),
                 fish.motion, setup.tackle, setup.bar, (min, max) -> min + random.nextFloat() * (max - min));
         game.setPlayerRates(setup.gain, setup.loss);
         SimulatedAngler angler = new SimulatedAngler(skill, seed ^ 0x4f1bbcdcL);
@@ -180,8 +181,10 @@ final class FishBalance {
         boolean previousHeld = false;
         while (game.isRunning() && frames < seconds * 60) {
             if ((frames & 255) == 0 && Thread.currentThread().isInterrupted()) throw new InterruptedException();
-            float visible = game.getFishPosition() + FishingSimulation.jitter(game.getTimeTotal(), 1.7f,
-                    game.getFishVelocity(), fish.value(Field.JITTER)) / FishConstants.MINIGAME_TRACK_HEIGHT;
+            float visible = game.getFishPosition() + (FishingSimulation.jitter(game.getTimeTotal(), 1.7f,
+                    game.getFishVelocity(), fish.value(Field.JITTER))
+                    + FishingSimulation.tell(game.getTellProgress(), game.getTellDirection(), fish.value(Field.JITTER)))
+                    / FishConstants.MINIGAME_TRACK_HEIGHT;
             boolean held = angler.input(game.getTimeTotal(), visible, game.getBarPosition(), game.getBarHeightFraction(),
                     FishConstants.MINIGAME_BAR_LIFT * setup.tackle.barLiftMult,
                     FishConstants.MINIGAME_BAR_GRAVITY * setup.tackle.barGravityMult);

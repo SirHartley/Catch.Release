@@ -502,7 +502,8 @@ public final class FishDifficultyTuner extends JPanel {
     private static String motionHelp() {
         return "motion: Smooth chooses targets across the track. Darter picks targets near either end. "
                 + "Sinker stays low; Floater high. Weaver sweeps between ends and waits on arrival. "
-                + "Twitcher makes small hops with occasional leaps. Lunger waits then dashes. Mixed changes type between target choices.";
+                + "Twitcher makes small hops with occasional leaps. Lunger waits then dashes. Mixed changes type between target choices. "
+                + "Special moves and Random moves add each type's signature move and borrowed Mixed moves.";
     }
 
     // Preview
