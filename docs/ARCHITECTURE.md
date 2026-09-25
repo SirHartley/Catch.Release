@@ -151,7 +151,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | File | Owner / connection |
 |---|---|
 | `FishingTaboo.java` | Central list of factions that reject fishing: the Church and the Path. |
-| `FishSpec.java` | Species row, stable save ID and display fields, minigame tuning, value/size, habitat and implements; display renames do not rename saved IDs. |
+| `FishSpec.java` | Species row, stable save ID and display fields, minigame tuning, the campaign pace and wander factors `FishSpecLoader` derives from it, value/size, habitat and implements; display renames do not rename saved IDs. |
 | `FishLocationSummary.java` | Shared habitat prose for range-data and caught-fish hovers (`FishTooltips`) and Codex range panels. Always names the catch sources, including both breach lights and ruptures for blank or mixed `reachedBy`. |
 | `FishCatch.java` | One specimen: size, weight, aberration, region, source rupture, timestamp, method, and optional chart-request provenance. |
 | `FishLog.java` | Persistent per-species discovery and record data. |
@@ -250,8 +250,8 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 
 | File | Owner / connection |
 |---|---|
-| `FishEntityPlugin.java` | World fish mote: movement, depth, held and stunned states, glow, source rupture, and legendary behavior. |
-| `BuriedMoteEntityPlugin.java` | Invisible open-water fish. |
+| `FishEntityPlugin.java` | World fish mote: per-species movement, straight-line dives, held and stunned states, glow, source rupture, and legendary behavior. |
+| `BuriedMoteEntityPlugin.java` | Invisible open-water fish; drifts with its species' campaign pace and wander. |
 | `PondFishSpawner.java` | Selects species by habitat, range, implement, weights, tackle, and rumor effects. |
 
 ### `campaign/fish/shop`
@@ -415,7 +415,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Ordinary species use one or two adjacent regions unless a stronger star, coherence, or theme gate already provides the range. Every region retains at least two ungated Common species.
 - The non-legendary roster is exactly 100 fish in a 59/23/12/6 Common/Uncommon/Rare/Epic split. The Abyss contributes 7/2/1/1 of those. Zero-weight mechanism rows, such as the Quorum splinter, are outside the hundred.
 - The Abyss uses its own high-difficulty ladder. Rarity controls frequency and value there, but even Abyssal Common rows use at least main-sheet Rare difficulty.
-- When changing a rarity band, tune `difficulty`, `restlessness`, `motionSpeed`, `progressRateMult`, and `escapeRateMult` together and simulate the result. Difficulty alone stops carrying the late game once bar-size upgrades are large.
+- When changing a rarity band, tune `difficulty`, `restlessness`, `motionSpeed`, `progressRateMult`, and `escapeRateMult` together and simulate the result. `motionSpeed` and `restlessness` also move the campaign mote; see [fish entities](#fish-entities-and-catch-provenance). Difficulty alone stops carrying the late game once bar-size upgrades are large.
 - Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` may still roll either for one behavior interval.
 - `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
 - A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
@@ -449,6 +449,8 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 
 - A mote spawned at its destination expires immediately. Spawn and target positions must differ.
 - `FishEntityPlugin.HOLDS_KEY` makes a tutorial mote choose another point in its pond instead of expiring. Chart and camp fish intentionally do not hold.
+- Campaign motes move at `FishRarity.speedMult` and `wanderMult` scaled per species through `FishSpec.getCampaignSpeedMult()` and `getCampaignWanderMult()`, for both surfaced and buried motes. `FishSpecLoader` derives the factors from `motionSpeed` and `restlessness` relative to the median of the rarity's weighted non-Abyssal roster. It clamps them to `CAMPAIGN_PACE_MIN`/`MAX` and `CAMPAIGN_WANDER_MIN`/`MAX` and caps combined wander at `CAMPAIGN_WANDER_CAP`. Legendaries keep factor 1 because their chases are scripted. Editing a species' minigame speed or restlessness therefore changes its world movement too.
+- No ordinary mote stands still for long: a lunger's freeze is capped at `LUNGER_FREEZE_MAX` and still creeps. Rare-and-above motes dive for `DIVE_TIME` about every `DIVE_INTERVAL`, shortened for more erratic species. Under the fabric they hold a straight course at cruise speed along the bearing they dived on, so the surfacing point can be anticipated.
 - The method says which rig caught a fish; the implement says what exposed it. Both values must follow the mote's actual provenance.
 - Pond and harpoon catches must carry the exact source rupture where applicable. Chart requests also carry target ID, target system, and earliest valid timestamp through loose fish and containers.
 - Chart and tutorial completion use the same `FishRequirement`/`FishCurrency` read and spend path as other quests. Do not add a separate cargo-completion check.

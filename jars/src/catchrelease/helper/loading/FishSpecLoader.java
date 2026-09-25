@@ -16,11 +16,13 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.ToDoubleFunction;
 
 public class FishSpecLoader {
 
@@ -50,8 +52,51 @@ public class FishSpecLoader {
             Global.getLogger(FishSpecLoader.class).error("Failed to load " + PATH, ex);
         }
 
+        assignCampaignCharacter(out.values());
+
         transientMemory.set(memKey, out);
         return out;
+    }
+
+    // measured against the rarity's ordinary roster so rarity still sets the pace; legendaries keep their scripted chase pacing
+    private static void assignCampaignCharacter(Collection<FishSpec> specs) {
+        for (FishRarity rarity : FishRarity.values()) {
+            if (rarity == FishRarity.LEGENDARY) continue;
+
+            List<FishSpec> band = new ArrayList<>();
+            List<FishSpec> peers = new ArrayList<>();
+
+            for (FishSpec spec : specs) {
+                if (spec.rarity != rarity) continue;
+
+                band.add(spec);
+                if (spec.spawnWeight > 0f && !spec.regions.contains(SectorRegion.ABYSSAL)) peers.add(spec);
+            }
+
+            if (band.isEmpty()) continue;
+            if (peers.isEmpty()) peers = band;
+
+            float pace = Math.max(0.01f, median(peers, spec -> spec.motionSpeed));
+            float wander = Math.max(0.01f, median(peers, spec -> spec.restlessness));
+
+            for (FishSpec spec : band) {
+                spec.campaignPace = clamp(spec.motionSpeed / pace,
+                        FishSpec.CAMPAIGN_PACE_MIN, FishSpec.CAMPAIGN_PACE_MAX);
+                spec.campaignWander = clamp(spec.restlessness / wander,
+                        FishSpec.CAMPAIGN_WANDER_MIN, FishSpec.CAMPAIGN_WANDER_MAX);
+            }
+        }
+    }
+
+    private static float median(List<FishSpec> specs, ToDoubleFunction<FishSpec> field) {
+        double[] values = specs.stream().mapToDouble(field).sorted().toArray();
+        int mid = values.length / 2;
+
+        return (float) (values.length % 2 == 1 ? values[mid] : (values[mid - 1] + values[mid]) * 0.5);
+    }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
     }
 
     public static FishSpec getFishSpec(String id) {

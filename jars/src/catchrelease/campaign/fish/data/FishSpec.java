@@ -15,6 +15,13 @@ public class FishSpec {
     public static final int RELAX_REGIONS = 4;
     public static final float RELAX_ABERRATION_WIDTH = 0.25f;
 
+    // campaign factors are relative to the rarity's ordinary roster, so clamps keep a minigame outlier from breaking world movement
+    public static final float CAMPAIGN_PACE_MIN = 0.8f;
+    public static final float CAMPAIGN_PACE_MAX = 1.25f;
+    public static final float CAMPAIGN_WANDER_MIN = 0.7f;
+    public static final float CAMPAIGN_WANDER_MAX = 1.4f;
+    public static final float CAMPAIGN_WANDER_CAP = 3f;
+
     public String id;
     public String name;
     public String icon;
@@ -35,6 +42,10 @@ public class FishSpec {
     public float escapeRateMult = 1f;
     public float baseValue = 100f;
 
+    // derived by FishSpecLoader from motionSpeed and restlessness; 1 means an ordinary member of the rarity
+    public float campaignPace = 1f;
+    public float campaignWander = 1f;
+
     public float lengthMin = 0.3f;
     public float lengthMax = 0.6f;
 
@@ -51,6 +62,14 @@ public class FishSpec {
 
     public String getDisplayName() {
         return name == null || name.isEmpty() ? id : name;
+    }
+
+    public float getCampaignSpeedMult() {
+        return rarity.speedMult * campaignPace;
+    }
+
+    public float getCampaignWanderMult() {
+        return Math.min(CAMPAIGN_WANDER_CAP, rarity.wanderMult * campaignWander);
     }
 
     public String getTypeName() {
