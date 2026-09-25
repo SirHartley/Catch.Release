@@ -165,7 +165,7 @@ If any check fails, keep local PC checkouts read-only and use the GitHub-app-onl
 
 ### Subagent dispatch template
 
-Use this template for authorized subagent work, including programming support, crawling, audits, questions and research. It applies across models. The main agent fills in the brief and sets the selected model and reasoning effort in the dispatch call. Include relevant user clarifications explicitly; do not assume the subagent received the conversation. Keep the permitted work within the ownership and model assignments above and below.
+Use this template for authorized subagent work, including programming support, crawling, audits, questions and research. It applies across models. The main agent fills in the brief and sets the selected model and reasoning effort in the dispatch call or through the agent definition it selects. Include relevant user clarifications explicitly; do not assume the subagent received the conversation. Keep the permitted work within the ownership and model assignments above and below.
 
 ```text
 Task: <specific question or result, and what counts as complete>
@@ -215,7 +215,7 @@ Opus 5 in the main session owns planning and shipped code. Clear names and struc
 | Work | Model |
 |---|---|
 | Planning, architecture, sequencing, and all Java changes | Opus 5 in the main session |
-| Repository search, call tracing, and reading game sources | Sonnet 5 subagents using `model: sonnet` |
+| Repository search, call tracing, and reading game sources | Opus 5.5 subagents at medium effort, using the `researcher` agent (`.claude/agents/researcher.md`) |
 | UI and UI-adjacent work, including panels, dialogs, tooltips, renderers, shaders, and sprites | Fable 5 subagents using `model: fable` |
 
 Subagents perform research and scoping, not shipped code. The UI assignment takes precedence whenever the player can see the result.
