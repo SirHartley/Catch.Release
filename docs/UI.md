@@ -202,7 +202,7 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 
 ### Minigame timing
 
-- A telegraphed move shows a tell for `MINIGAME_TELL_TIME` before it starts: the drawn marker leans toward the coming move and bobs twice, eased in and out so the path has no corners, peaking at about 5 px. Ordinary jitter calms to 15% over the same envelope (`MINIGAME_TELL_CALM`), the fish's glow flares over the same envelope, and from 35% of the tell a small detached glow mote slips about 34 px toward the move and fades out before the fish follows. The lean and calm are drawn position and are mirrored by the tools; the flare and mote are overlays and are not. None of them moves the hit position. `getJitter` also reads `getTellProgress()`, which the parity check maps to the tool's `tellProgress` parameter. `getTell` depends only on its arguments, and `FishingParityChecks` compares its body with `FishingSimulation.tell` as text, so keep the body brace-free. Its size grows with the species' jitter so shaky fish still show it.
+- A telegraphed move shows a tell for `MINIGAME_TELL_TIME` before it starts: the drawn marker leans toward the coming move and bobs twice, eased in and out so the path has no corners, peaking at about 5 px. Ordinary jitter calms to 15% over the same envelope (`MINIGAME_TELL_CALM`), the fish's glow flares over the same envelope, and from 35% of the tell a small detached glow mote slips about 34 px toward the move and fades out before the fish follows. The lean and calm are drawn position and are mirrored by the tools' simulation; the flare and mote are overlays, which the tools' `FishPreview` draws in the same colours but the simulation does not model. None of them moves the hit position. `getJitter` also reads `getTellProgress()`, which the parity check maps to the tool's `tellProgress` parameter. `getTell` depends only on its arguments, and `FishingParityChecks` compares its body with `FishingSimulation.tell` as text, so keep the body brace-free. Its size grows with the species' jitter so shaky fish still show it.
 - The line sound uses one continuously refreshed UI loop with changing volume.
 - The loot result has a backdrop clock that starts when the panel is created and
   a list clock that starts after the catch tally. Coin rain uses the backdrop clock.
@@ -235,7 +235,7 @@ and progress there. The last selected help stays visible, including while paused
 validation notices stay until the next hover or focus event.
 
 Run `Fish Tuner Checks` from IntelliJ for CSV saves, resets, determinism, profiles,
-input and off-screen panel rendering at two sizes. Run `Fishing Parity Checks`
+input, recording save/read/replay and off-screen panel rendering at two sizes. Run `Fishing Parity Checks`
 for game/model comparison. Both check classes live beside the tools under
 `jars/src/catchrelease/tools` and run headless with Java 17 and the normal module
 classpath; see [model ownership](ARCHITECTURE.md#registration-and-lifecycle).
@@ -268,8 +268,7 @@ Experiments run an inclusive, evenly spaced range for one field with identical
 seeds and setup. Candidate tables and charts retain completed snapshots.
 Applying a completed candidate changes only its tested field and adds a normal
 Undo entry; it does not save the CSV. A changed source fish or test setup blocks
-applying old candidates. Results keep their tested settings visible. No replay
-or frame-recording system is included.
+applying old candidates. Results keep their tested settings visible.
 Reference fish are fixed snapshots grouped by their recorded movement, with
 editable notes. Comparing a reference may cross species; it never copies
 reference stats onto the selected fish. Named setups store tackle, bar size,
@@ -279,6 +278,35 @@ References and setups persist in the notebook
 described in architecture; checkpoints and cached run results last only for
 the current tuner session. New panels use bottom-bar hover/focus help, with no
 floating tooltips.
+
+Record play (`FishRecordingPanel`) records a person playing a random run of fish
+for balancing against real skill. A session copies the fish values and the Live
+tuning test setup when it starts; later edits do not reach it. Each fish comes
+from a ticked rarity chosen uniformly, then from that rarity's shuffled species,
+so no species repeats before the rarity is used up. By default the marker is the
+game's unidentified mote in the rarity colour, as without sonar tackle; the
+species appears after the result. `FishPreview` also greys the bar when it
+misses the fish and colours the tell overlays, as the game does; the game's
+sounds are absent. Input is manual only, with normal losing, and as in game a
+press held over from the previous fish does not reel until released and pressed
+again. Each fish waits `READY_TIME` before it starts and shows its result, with
+the bots' outcomes, for `RESULT_TIME`.
+Frames advance only while the preview has focus, its tab is shown and the window
+is active. Stop drops the fish in progress, so a session holds finished attempts only.
+
+`FishRecording` writes each finished attempt at once to
+`fish-recordings/<start time>/` under the mod root. The folder is not ignored,
+so a session can be committed for balancing. `session.properties` holds the
+format, plan and setup. `attempts.csv` has one row per fish: its values at full
+precision, the setup, seed, bar height, preview track pixels, blind flag and
+outcome. `frames.csv` has one row per 1/60-second step: the state on screen when
+input was sampled (true, drawn and target fish position, fish velocity, bar,
+bar velocity, progress, coverage, active movement, tell progress and direction),
+wall-clock milliseconds, and the input applied during that step. Columns are
+read by name. The fish never reacts to the bar, so `FishBalance.game` with the
+attempt's seed gives every angler the same fish path: `FishRecording.replays`
+reproduces an attempt from its seed and inputs, and the summary shows the three
+bots' results on the same fish and seeds. `summary.txt` keeps that table.
 
 ## Keep optimizations local
 

@@ -487,6 +487,10 @@ final class FishingSimulation {
         return fishPosition;
     }
 
+    public float getFishTarget() {
+        return fishTarget;
+    }
+
     public float getTimeHeld() {
         return timeHeld;
     }

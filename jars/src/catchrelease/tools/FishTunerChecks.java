@@ -25,6 +25,7 @@ public class FishTunerChecks {
         csvChecks();
         sessionChecks();
         deterministicChecks();
+        recordingChecks();
         FishTuningSheet real = new FishTuningSheet(Path.of("data/campaign/fish.csv"));
         for (FishTuningSheet.Row row : real.fish) check(ImageIO.read(real.root.resolve(row.icon).toFile()) != null, row.id + " image");
         System.out.println("Loaded " + real.fish.size() + " fish and images");
@@ -122,6 +123,49 @@ public class FishTunerChecks {
                 }
             }
         }
+    }
+
+    static void recordingChecks() throws Exception {
+        Path csv = Files.createTempFile(OUTPUT, "recording-", ".csv");
+        Files.writeString(csv, HEADER + "\na,\"A, fish\",a.png,COMMON,SMOOTH,50,1,1,1,1,1,180,x,x,0.2,0.1"
+                + "\nb,B,b.png,RARE,LUNGER,90,1.4,1.6,0.8,1.2,2,90,x,x,0.1,0.3\nc,C,c.png,EPIC,WEAVER,90,1,1,1,1,1,90,x,x,0,0\n");
+        FishTuningSheet sheet = new FishTuningSheet(csv);
+        Path root = Files.createTempDirectory(OUTPUT, "recordings-");
+        FishBalance.Setup setup = new FishBalance.Setup(Tackle.NONE, 120, 1, 1, 1);
+        FishRecordingSession session = new FishRecordingSession(sheet.fish, List.of("COMMON", "RARE"), 4, setup, true, 11, root);
+        sheet.fish.get(0).values[FishTuningSheet.Field.SPEED.ordinal()] = 3;
+        SimulatedAngler angler = null;
+        FishingSimulation game = null;
+        for (int step = 0; session.phase != FishRecordingSession.Phase.FINISHED && step < 60 * 600; step++) {
+            if (session.game != game) {
+                game = session.game;
+                angler = new SimulatedAngler(SimulatedAngler.Skill.REGULAR, session.seed ^ 0x4f1bbcdcL);
+            }
+            boolean held = session.phase == FishRecordingSession.Phase.PLAYING && angler.input(session.game.getTimeTotal(),
+                    session.visibleFish(), session.game.getBarPosition(), session.game.getBarHeightFraction(),
+                    FishConstants.MINIGAME_BAR_LIFT, FishConstants.MINIGAME_BAR_GRAVITY);
+            session.advance(FishTuningSession.STEP, held, step * 16L, 360);
+        }
+        check(session.phase == FishRecordingSession.Phase.FINISHED && session.results.size() == 4, "planned recording completes");
+        FishRecording.Session saved = FishRecording.read(session.writer.folder);
+        check(saved.attempts().size() == 4 && Files.exists(session.writer.folder.resolve("summary.txt")), "attempts and summary saved");
+        for (int i = 0; i < 4; i++) {
+            FishRecording.Attempt attempt = saved.attempts().get(i);
+            FishRecordingSession.Played played = session.results.get(i);
+            check(!attempt.fish().rarity().equals("EPIC") && attempt.fish().equals(played.attempt().fish()), "chosen bands only, values round-trip");
+            check(attempt.fish().value(FishTuningSheet.Field.SPEED) != 3f, "session keeps the values it started with");
+            check(attempt.outcome() == played.attempt().outcome() && !attempt.frames().isEmpty(), "outcome and frames saved");
+            check(FishRecording.replays(attempt), "attempt " + attempt.index() + " replays from seed and inputs");
+            check(played.bots().size() == FishBalance.SKILLS.size()
+                    && played.bots().get(SimulatedAngler.Skill.REGULAR) == attempt.outcome(), "bots played the same fish");
+        }
+        FishRecordingSession stopped = new FishRecordingSession(sheet.fish, List.of("RARE"), 5, setup, true, 12, root);
+        for (int step = 0; step < 120; step++) stopped.advance(FishTuningSession.STEP, step % 20 < 10, step * 16L, 360);
+        check(stopped.phase == FishRecordingSession.Phase.PLAYING, "attempt in progress");
+        stopped.stop();
+        check(stopped.results.isEmpty() && FishRecording.read(stopped.writer.folder).attempts().isEmpty(),
+                "stopping drops the unfinished attempt");
+        System.out.println("Recording: 4 attempts saved, read back and replayed");
     }
 
     static void rosterChecks(FishTuningSheet sheet) {
@@ -235,6 +279,7 @@ public class FishTunerChecks {
         hover(speedInput);
         check(hints.getText().equals(speedInput.getClientProperty("fishHelp")), "hover replaces notice with help");
         check(ToolTipManager.sharedInstance().isEnabled(), "other Swing windows keep their tooltip settings");
+        recordingUiChecks(panel, hints);
         for (Dimension size : List.of(new Dimension(1020, 820), new Dimension(950, 720))) {
             panel.setSize(size);
             layout(panel);
@@ -251,6 +296,27 @@ public class FishTunerChecks {
             g.dispose();
             ImageIO.write(image, "png", OUTPUT.resolve("tuner-" + size.width + ".png").toFile());
         }
+    }
+
+    static void recordingUiChecks(FishDifficultyTuner panel, JTextArea hints) throws Exception {
+        JTabbedPane tabs = (JTabbedPane) get(panel, "tabs");
+        FishRecordingPanel recording = (FishRecordingPanel) get(panel, "recording");
+        recording.root = Files.createTempDirectory(OUTPUT, "recording-ui-");
+        tabs.setSelectedComponent(recording);
+        check(!((JComponent) get(panel, "fishRow")).isVisible(), "Live tuning fish choice hidden while recording");
+        bottomHelpChecks(recording, hints);
+        JButton start = (JButton) get(recording, "start");
+        JButton stop = (JButton) get(recording, "stop");
+        check(start.isEnabled() && !stop.isEnabled(), "idle controls");
+        start.doClick();
+        FishRecordingSession session = (FishRecordingSession) get(recording, "session");
+        check(session != null && !start.isEnabled() && stop.isEnabled(), "recording started");
+        recording.tick(0.1, true);
+        check(session.phase == FishRecordingSession.Phase.READY && session.game.getTimeTotal() == 0,
+                "no frames without preview focus");
+        stop.doClick();
+        check(start.isEnabled() && session.phase == FishRecordingSession.Phase.FINISHED, "stop ends the session");
+        tabs.setSelectedIndex(0);
     }
 
     static void bottomHelpChecks(JComponent component, JTextArea hints) throws Exception {
