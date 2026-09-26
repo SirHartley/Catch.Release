@@ -184,7 +184,7 @@ Use the [vanilla command dictionary](rules-reference/COMMANDS.md) for recipes, e
 
 ### Firing rules from Java
 
-`FireAll.fire(null, dialog, memoryMap, "CatchReleaseFisherResume")` and `FireBest.fire(null, dialog, memoryMap, "CatchReleaseHarpoonedGreeting")` fire a trigger into an open dialog with the active interaction's memory map. Imports and the boundary to `RulesAPI` are in [Command invocation and Java integration](RULES_AUTHORING.md#command-invocation-and-java-integration).
+`FireAll.fire(null, dialog, memoryMap, "CatchReleaseFisherResume")` and `FireBest.fire(null, dialog, memoryMap, "catchreleaseJobPaid")` fire a trigger into an open dialog with the active interaction's memory map. Imports and the boundary to `RulesAPI` are in [Command invocation and Java integration](RULES_AUTHORING.md#command-invocation-and-java-integration).
 
 ### Library shortcuts
 - `MagicLib.MagicBountyIntel` / `MagicBountyCoordinator` — full bounty flow (intel, rule hooks, bar event) from JSON. Use before rolling custom bounty dialogs.

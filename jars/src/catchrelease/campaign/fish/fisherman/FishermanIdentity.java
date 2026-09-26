@@ -14,7 +14,6 @@ public class FishermanIdentity {
     public static final String PERSON_KEY = "$catchrelease_fisherman_person";
     public static final String FIRST_NAME = "The";
     public static final String LAST_NAME = "Fisherman";
-    public static final String FORMER_NAME = "Baha";
     private static final String[] PORTRAIT_IDS = {
             "catchrelease_fisherman_stable",
             "catchrelease_fisherman_unsettled",
