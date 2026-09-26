@@ -1,4 +1,5 @@
 # Catch.Release: The Needle Theorem
+
 ## Concept reference - 6 September 2026
 
 **Status: deferred narrative brainstorming. Revisit quest design once the three fishing ships are finished.** This concept note preserves the author’s decisions and open options for that discussion. [LORE.md](LORE.md) remains the current lore authority; this note does not amend it or authorize quest implementation. Sections marked as directions or established concepts reflect the conversation’s decisions; suggested scenes, reward details and ending mechanics remain open where indicated.

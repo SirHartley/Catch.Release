@@ -182,7 +182,7 @@ public class FishConstants {
     public static final float MINIGAME_TELL_FLARE_SWELL = 0.35f;
     public static final float MINIGAME_TELL_FLARE_ALPHA = 0.3f;
     public static final float MINIGAME_TELL_MOTE_START = 0.35f;
-    public static final float MINIGAME_TELL_MOTE_TRAVEL = 34f;
+    public static final float MINIGAME_TELL_MOTE_TRAVEL = 20f;
     public static final float MINIGAME_TELL_MOTE_SIZE = 14f;
     public static final float MINIGAME_TELL_MOTE_ALPHA = 0.6f;
     public static final float MINIGAME_GLOBAL_DIFFICULTY = 1f;

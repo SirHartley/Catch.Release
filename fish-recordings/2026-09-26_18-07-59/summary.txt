@@ -1,0 +1,10 @@
+30 fish recorded. Bots played the same fish and seeds.
+Band             You  Beginner   Regular   Skilled
+Common           5/7       1/7       2/7       6/7
+Uncommon         4/4       0/4       1/4       4/4
+Rare             2/4       1/4       2/4       4/4
+Epic             3/7       0/7       2/7       3/7
+Legendary        0/8       0/8       0/8       3/8
+All            14/30      2/30      7/30     20/30
+Mean catch time 11.2s
+Saved in C:\Modding\mods\Catch.Release\fish-recordings\2026-09-26_18-07-59
