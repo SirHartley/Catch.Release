@@ -556,6 +556,25 @@ public final class FishDifficultyTuner extends JPanel {
                     game.getProgress() * 100, game.getTimeHeld(), game.getTimeTotal());
         }
 
+        // the game panel's caret, scaled to the preview; Swing's y runs down the screen
+        private void paintTellCue(Graphics2D g, FishingSimulation game, int fx, int fy, int height) {
+            float direction = game.getTellDirection();
+            if (direction == 0f) return;
+            float scale = height / FishConstants.MINIGAME_TRACK_HEIGHT;
+            float swell = (float) Math.sin(game.getTellProgress() * Math.PI);
+            int baseY = fy - Math.round(direction * (FishConstants.MINIGAME_TELL_CUE_GAP
+                    + FishConstants.MINIGAME_TELL_CUE_TRAVEL * game.getTellProgress()) * scale);
+            int apexY = baseY - Math.round(direction * FishConstants.MINIGAME_TELL_CUE_HEIGHT * scale);
+            int half = Math.round(FishConstants.MINIGAME_TELL_CUE_WIDTH * 0.5f * scale);
+            Graphics2D cue = (Graphics2D) g.create();
+            cue.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+                    Math.min(1f, swell * swell * FishConstants.MINIGAME_TELL_CUE_ALPHA)));
+            cue.setStroke(new BasicStroke(FishConstants.MINIGAME_TELL_CUE_LINE));
+            cue.setColor(Color.WHITE);
+            cue.drawPolyline(new int[]{fx - half, fx, fx + half}, new int[]{baseY, apexY, baseY}, 3);
+            cue.dispose();
+        }
+
         @Override
         protected void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
@@ -573,7 +592,8 @@ public final class FishDifficultyTuner extends JPanel {
                 g.setColor(new Color(82, 179, 105));
                 int barTop = bottom - Math.round((game.getBarPosition() + game.getBarHeightFraction()) * height);
                 g.fillRect(x, barTop, width, Math.round(game.getBarHeightFraction() * height));
-                float shakeX = FishingSimulation.jitter(game.getTimeTotal(), 0f, game.getFishVelocity(), selected().value(Field.JITTER));
+                float shakeX = FishingSimulation.jitter(game.getTimeTotal(), 0f, game.getFishVelocity(), selected().value(Field.JITTER),
+                        game.getTellProgress());
                 int fx = x + width / 2 + Math.round(shakeX * height / 360f);
                 int fy = bottom - Math.round(session.visibleFish() * height);
                 int size = Math.round(38f * height / 360f);
@@ -582,6 +602,7 @@ public final class FishDifficultyTuner extends JPanel {
                     g.setColor(Color.WHITE);
                     g.fillOval(fx - 5, fy - 5, 10, 10);
                 }
+                paintTellCue(g, game, fx, fy, height);
                 if (logicalPosition.isSelected()) {
                     int trueY = bottom - Math.round(game.getFishPosition() * height);
                     g.setColor(Color.YELLOW);

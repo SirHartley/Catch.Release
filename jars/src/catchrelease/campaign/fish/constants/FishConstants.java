@@ -178,6 +178,13 @@ public class FishConstants {
     public static final float MINIGAME_TELL_PULSE = 2f;
     public static final float MINIGAME_TELL_PULSES = 2f;
     public static final float MINIGAME_TELL_JITTER_SHARE = 0.2f;
+    public static final float MINIGAME_TELL_CALM = 0.85f;
+    public static final float MINIGAME_TELL_CUE_GAP = 24f;
+    public static final float MINIGAME_TELL_CUE_TRAVEL = 6f;
+    public static final float MINIGAME_TELL_CUE_WIDTH = 12f;
+    public static final float MINIGAME_TELL_CUE_HEIGHT = 5f;
+    public static final float MINIGAME_TELL_CUE_LINE = 2f;
+    public static final float MINIGAME_TELL_CUE_ALPHA = 0.8f;
     public static final float MINIGAME_GLOBAL_DIFFICULTY = 1f;
     public static final float MINIGAME_DIFFICULTY_BASELINE = 50f;
     public static final float MINIGAME_DIFFICULTY_FLOOR = 0.7f;
