@@ -2,6 +2,7 @@ package catchrelease.tools;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishMotion;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.Tackle;
 
 import javax.imageio.ImageIO;
@@ -38,7 +39,7 @@ public final class FishDifficultyTuner extends JPanel {
     private final EnumMap<Field, JPanel> fieldInputs = new EnumMap<>(Field.class);
     private final ArrayDeque<Edit> undo = new ArrayDeque<>();
 
-    private final Track track = new Track();
+    private final FishPreview track = new FishPreview(new LiveScene(), held -> manualHeld = held);
     private final JTextArea log = new JTextArea(5, 60);
     private final JTextArea hints = new JTextArea(3, 50);
     private final JLabel status = new JLabel();
@@ -49,7 +50,10 @@ public final class FishDifficultyTuner extends JPanel {
     private final javax.swing.Timer timer = new javax.swing.Timer(16, event -> tick());
 
     private FishBalancePanel balance;
+    private FishRecordingPanel recording;
     private final JTabbedPane tabs = new JTabbedPane();
+    private final JPanel fishRow = new JPanel(new BorderLayout(8, 0));
+    private final JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
     private FishTuningSession session;
     private JComponent helpTarget;
@@ -79,22 +83,26 @@ public final class FishDifficultyTuner extends JPanel {
         remove(preview);
         tabs.addTab("Live tuning", preview);
         tabs.addTab("Balance results", balance);
+        recording = new FishRecordingPanel(sheet, this::balanceSetup, this::help);
+        tabs.addTab("Record play", recording);
         tabs.addChangeListener(event -> {
             JScrollPane logScroll = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, log);
             logScroll.setVisible(tabs.getSelectedIndex() == 0);
             status.setVisible(tabs.getSelectedIndex() == 0);
+            fishRow.setVisible(tabs.getSelectedComponent() != recording);
+            buttons.setVisible(tabs.getSelectedComponent() != recording);
             manualHeld = false;
+            if (tabs.getSelectedComponent() == recording) recording.preview.requestFocusInWindow();
             revalidate();
         });
         add(tabs, BorderLayout.CENTER);
     }
 
     private void buildControls() {
-        JPanel top = new JPanel(new BorderLayout(8, 0));
-        top.add(new JLabel("Fish"), BorderLayout.WEST);
-        top.add(fish);
+        fishRow.add(new JLabel("Fish"), BorderLayout.WEST);
+        fishRow.add(fish);
         help(fish, "Select a species by name or ID. * means unsaved changes. Switching fish keeps those edits.");
-        add(top, BorderLayout.NORTH);
+        add(fishRow, BorderLayout.NORTH);
 
         JPanel controls = new JPanel();
         controls.setLayout(new BoxLayout(controls, BoxLayout.Y_AXIS));
@@ -166,7 +174,6 @@ public final class FishDifficultyTuner extends JPanel {
                 + "Disabled when there are no unsaved fish changes.");
         help(undoButton, "Undo the last fish edit, including edits on a different fish. Does not undo already saved files. "
                 + "Disabled when no edits remain in the undo history.");
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT));
         buttons.add(paused);
         buttons.add(restart);
         buttons.add(undoButton);
@@ -351,6 +358,7 @@ public final class FishDifficultyTuner extends JPanel {
         long now = System.nanoTime();
         double elapsed = Math.min(0.1, (now - previousTick) / 1_000_000_000d);
         previousTick = now;
+        recording.tick(elapsed, windowActive && tabs.getSelectedComponent() == recording);
         if (paused.isSelected() || !windowActive || tabs.getSelectedIndex() != 0
                 || (session.skill == SimulatedAngler.Skill.MANUAL && !track.hasFocus())) {
             accumulator = 0;
@@ -490,7 +498,7 @@ public final class FishDifficultyTuner extends JPanel {
     private void refreshHelp() {
         if (helpTarget == null) return;
         String text = (String) helpTarget.getClientProperty("fishHelp");
-        if (helpTarget == track && session != null) text += "\n" + track.describeState();
+        if (helpTarget == track && session != null) text += "\n" + describeState();
         if (!hints.getText().equals(text)) hints.setText(text);
     }
 
@@ -499,136 +507,69 @@ public final class FishDifficultyTuner extends JPanel {
         hints.setText(text);
     }
 
+    private String describeState() {
+        FishingSimulation game = session.game;
+        return String.format(Locale.ROOT, "Fish %.3f; window %.3f–%.3f; progress %.1f%%; covered %.1fs of %.1fs",
+                game.getFishPosition(), game.getBarPosition(), game.getBarPosition() + game.getBarHeightFraction(),
+                game.getProgress() * 100, game.getTimeHeld(), game.getTimeTotal());
+    }
+
+    private final class LiveScene implements FishPreview.Scene {
+
+        @Override
+        public FishingSimulation game() {
+            return session == null ? null : session.game;
+        }
+
+        @Override
+        public float visibleFish() {
+            return session.visibleFish();
+        }
+
+        @Override
+        public float jitter() {
+            return selected().value(Field.JITTER);
+        }
+
+        @Override
+        public BufferedImage icon() {
+            return image;
+        }
+
+        @Override
+        public Color moteColor() {
+            return FishRarity.parse(selected().rarity, FishRarity.COMMON).color;
+        }
+
+        @Override
+        public String title() {
+            return selected().name + " — " + selected().rarity;
+        }
+
+        @Override
+        public String footer() {
+            FishingSimulation game = session.game;
+            return String.format(Locale.ROOT, "%.1fs   %.0f%%   %s   %s", game.getTimeTotal(),
+                    game.getProgress() * 100, session.held ? "HOLD" : "RELEASE", game.getActiveMotion());
+        }
+
+        @Override
+        public String notice() {
+            if (!session.game.isRunning()) return session.game.isCaught() ? "Caught — restarting…" : "Lost — restarting…";
+            return session.skill == SimulatedAngler.Skill.MANUAL ? "Hold left mouse or Space in this preview" : null;
+        }
+
+        @Override
+        public boolean showTruePosition() {
+            return logicalPosition.isSelected();
+        }
+    }
+
     private static String motionHelp() {
         return "motion: Smooth chooses targets across the track. Darter picks targets near either end. "
                 + "Sinker stays low; Floater high. Weaver sweeps between ends and waits on arrival. "
                 + "Twitcher makes small hops with occasional leaps. Lunger waits then dashes. Mixed changes type between target choices. "
                 + "Special moves and Random moves add each type's signature move and borrowed Mixed moves.";
-    }
-
-    // Preview
-    final class Track extends JPanel {
-
-        Track() {
-            setPreferredSize(new Dimension(480, 470));
-            setFocusable(true);
-            setBackground(new Color(35, 39, 43));
-            addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent event) {
-                    if (!SwingUtilities.isLeftMouseButton(event)) return;
-                    requestFocusInWindow();
-                    manualHeld = true;
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent event) {
-                    if (SwingUtilities.isLeftMouseButton(event)) manualHeld = false;
-                }
-
-                @Override
-                public void mouseExited(MouseEvent event) {
-                    manualHeld = false;
-                }
-            });
-            addFocusListener(new FocusAdapter() {
-                @Override
-                public void focusLost(FocusEvent event) {
-                    manualHeld = false;
-                }
-            });
-            getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke("pressed SPACE"), "hold");
-            getInputMap(WHEN_FOCUSED).put(KeyStroke.getKeyStroke("released SPACE"), "release");
-            getActionMap().put("hold", new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent event) { manualHeld = true; }
-            });
-            getActionMap().put("release", new AbstractAction() {
-                @Override
-                public void actionPerformed(ActionEvent event) { manualHeld = false; }
-            });
-        }
-
-        String describeState() {
-            FishingSimulation game = session.game;
-            return String.format(Locale.ROOT, "Fish %.3f; window %.3f–%.3f; progress %.1f%%; covered %.1fs of %.1fs",
-                    game.getFishPosition(), game.getBarPosition(), game.getBarPosition() + game.getBarHeightFraction(),
-                    game.getProgress() * 100, game.getTimeHeld(), game.getTimeTotal());
-        }
-
-        // the game panel's flare and departing mote, scaled to the preview; Swing's y runs down the screen
-        private void paintTellCue(Graphics2D g, FishingSimulation game, int fx, int fy, int height) {
-            float progress = game.getTellProgress();
-            float direction = game.getTellDirection();
-            if (progress <= 0f) return;
-            float scale = height / FishConstants.MINIGAME_TRACK_HEIGHT;
-            float swell = (float) Math.sin(progress * Math.PI);
-            Graphics2D cue = (Graphics2D) g.create();
-            int flare = Math.round(FishConstants.MINIGAME_MOTE_HALO_SIZE * (1f + FishConstants.MINIGAME_TELL_FLARE_SWELL * swell * swell) * scale);
-            cue.setColor(new Color(1f, 1f, 1f, Math.min(1f, FishConstants.MINIGAME_TELL_FLARE_ALPHA * swell * swell * 0.5f)));
-            cue.fillOval(fx - flare / 2, fy - flare / 2, flare, flare);
-            if (direction != 0f && progress > FishConstants.MINIGAME_TELL_MOTE_START) {
-                float leave = (progress - FishConstants.MINIGAME_TELL_MOTE_START) / (1f - FishConstants.MINIGAME_TELL_MOTE_START);
-                float eased = 1f - (1f - leave) * (1f - leave);
-                int y = fy - Math.round(direction * FishConstants.MINIGAME_TELL_MOTE_TRAVEL * eased * scale);
-                int size = Math.max(2, Math.round(FishConstants.MINIGAME_TELL_MOTE_SIZE * (1f - 0.4f * leave) * scale));
-                float alpha = Math.min(1f, leave / 0.15f) * (1f - leave) * (1f - leave) * FishConstants.MINIGAME_TELL_MOTE_ALPHA;
-                cue.setColor(new Color(1f, 1f, 1f, Math.min(1f, alpha)));
-                cue.fillOval(fx - size / 2, y - size / 2, size, size);
-            }
-            cue.dispose();
-        }
-
-        @Override
-        protected void paintComponent(Graphics graphics) {
-            super.paintComponent(graphics);
-            if (session == null) return;
-            Graphics2D g = (Graphics2D) graphics.create();
-            try {
-                FishingSimulation game = session.game;
-                int height = Math.max(100, Math.min(360, getHeight() - 100));
-                int top = 40;
-                int bottom = top + height;
-                int x = getWidth() / 2 - 42;
-                int width = 52;
-                g.setColor(new Color(17, 21, 24));
-                g.fillRect(x, top, width, height);
-                g.setColor(new Color(82, 179, 105));
-                int barTop = bottom - Math.round((game.getBarPosition() + game.getBarHeightFraction()) * height);
-                g.fillRect(x, barTop, width, Math.round(game.getBarHeightFraction() * height));
-                float shakeX = FishingSimulation.jitter(game.getTimeTotal(), 0f, game.getFishVelocity(), selected().value(Field.JITTER),
-                        game.getTellProgress());
-                int fx = x + width / 2 + Math.round(shakeX * height / 360f);
-                int fy = bottom - Math.round(session.visibleFish() * height);
-                int size = Math.round(38f * height / 360f);
-                if (image != null) g.drawImage(image, fx - size / 2, fy - size / 2, size, size, null);
-                else {
-                    g.setColor(Color.WHITE);
-                    g.fillOval(fx - 5, fy - 5, 10, 10);
-                }
-                paintTellCue(g, game, fx, fy, height);
-                if (logicalPosition.isSelected()) {
-                    int trueY = bottom - Math.round(game.getFishPosition() * height);
-                    g.setColor(Color.YELLOW);
-                    g.drawLine(x - 6, trueY, x + width + 6, trueY);
-                }
-                g.setColor(Color.GRAY);
-                g.drawRect(x, top, width, height);
-                g.setColor(new Color(17, 21, 24));
-                g.fillRect(x + 72, top, 12, height);
-                g.setColor(game.getProgress() < 0.3f ? new Color(225, 95, 80) : new Color(110, 195, 130));
-                int filled = Math.round(game.getProgress() * height);
-                g.fillRect(x + 72, bottom - filled, 12, filled);
-                g.setColor(Color.WHITE);
-                g.drawString(selected().name + " — " + selected().rarity, 12, 22);
-                g.drawString(String.format(Locale.ROOT, "%.1fs   %.0f%%   %s   %s", game.getTimeTotal(),
-                        game.getProgress() * 100, session.held ? "HOLD" : "RELEASE", game.getActiveMotion()), 12, bottom + 25);
-                if (!game.isRunning()) g.drawString(game.isCaught() ? "Caught — restarting…" : "Lost — restarting…", 12, bottom + 45);
-                else if (session.skill == SimulatedAngler.Skill.MANUAL) g.drawString("Hold left mouse or Space in this preview", 12, bottom + 45);
-            } finally {
-                g.dispose();
-            }
-        }
     }
 
     private void showWindow() {
@@ -640,6 +581,9 @@ public final class FishDifficultyTuner extends JPanel {
             public void windowClosing(WindowEvent event) {
                 paused.setSelected(true);
                 manualHeld = false;
+                if (recording.active() && JOptionPane.showConfirmDialog(frame, "Stop recording and close? The fish in progress "
+                        + "is discarded; finished fish stay saved.", "Recording in progress", JOptionPane.OK_CANCEL_OPTION)
+                        != JOptionPane.OK_OPTION) return;
                 if (!sheet.changes().isEmpty()) {
                     int choice = JOptionPane.showConfirmDialog(frame, "Save unsaved fish changes before closing?",
                             "Unsaved changes", JOptionPane.YES_NO_CANCEL_OPTION);
@@ -647,6 +591,7 @@ public final class FishDifficultyTuner extends JPanel {
                     if (choice == JOptionPane.YES_OPTION && !saveChanges()) return;
                 }
                 timer.stop();
+                recording.end();
                 balance.close();
                 frame.dispose();
             }

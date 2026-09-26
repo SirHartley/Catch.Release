@@ -167,7 +167,8 @@ final class FishBalance {
         return new Result(request, results);
     }
 
-    static Attempt attempt(Spec fish, Setup setup, Skill skill, long seed, int seconds) throws InterruptedException {
+    // the fish never reacts to the bar, so one seed gives the same fish path to every angler, human or bot
+    static FishingSimulation game(Spec fish, Setup setup, long seed) {
         Random random = new Random(seed);
         FishingSimulation game = new FishingSimulation(fish.value(Field.DIFFICULTY),
                 fish.value(Field.SPEED) * (fish.rarity.equals("LEGENDARY") ? 1 : setup.rumor),
@@ -175,16 +176,26 @@ final class FishBalance {
                 fish.value(Field.SPECIAL), fish.value(Field.MIX),
                 fish.motion, setup.tackle, setup.bar, (min, max) -> min + random.nextFloat() * (max - min));
         game.setPlayerRates(setup.gain, setup.loss);
+        return game;
+    }
+
+    // the drawn position: jitter and tell move the marker, not the hit position
+    static float visibleFish(FishingSimulation game, float jitter) {
+        return game.getFishPosition() + (FishingSimulation.jitter(game.getTimeTotal(), 1.7f,
+                game.getFishVelocity(), jitter, game.getTellProgress())
+                + FishingSimulation.tell(game.getTellProgress(), game.getTellDirection(), jitter))
+                / FishConstants.MINIGAME_TRACK_HEIGHT;
+    }
+
+    static Attempt attempt(Spec fish, Setup setup, Skill skill, long seed, int seconds) throws InterruptedException {
+        FishingSimulation game = game(fish, setup, seed);
         SimulatedAngler angler = new SimulatedAngler(skill, seed ^ 0x4f1bbcdcL);
         double gap = 0, maxGap = 0, peak = game.getProgress();
         int switches = 0, frames = 0;
         boolean previousHeld = false;
         while (game.isRunning() && frames < seconds * 60) {
             if ((frames & 255) == 0 && Thread.currentThread().isInterrupted()) throw new InterruptedException();
-            float visible = game.getFishPosition() + (FishingSimulation.jitter(game.getTimeTotal(), 1.7f,
-                    game.getFishVelocity(), fish.value(Field.JITTER), game.getTellProgress())
-                    + FishingSimulation.tell(game.getTellProgress(), game.getTellDirection(), fish.value(Field.JITTER)))
-                    / FishConstants.MINIGAME_TRACK_HEIGHT;
+            float visible = visibleFish(game, fish.value(Field.JITTER));
             boolean held = angler.input(game.getTimeTotal(), visible, game.getBarPosition(), game.getBarHeightFraction(),
                     FishConstants.MINIGAME_BAR_LIFT * setup.tackle.barLiftMult,
                     FishConstants.MINIGAME_BAR_GRAVITY * setup.tackle.barGravityMult);

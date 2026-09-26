@@ -78,7 +78,7 @@ either `main` with the `catchrelease` classpath and mod root as working director
 | Entry point | Use / owners |
 |---|---|
 | `tools/FishFacingPicker.java` | Click a head to save `spriteDirection` and advance; Back revisits, Skip leaves the row unchanged. Image centre is the origin; right/up/left/down are 0/90/180/270 degrees. |
-| `tools/FishDifficultyTuner.java` | Live fish tuning, three simulated angler levels or manual hold/release. `FishTuningSheet` holds unsaved values; `FishTuningSession` owns attempts; `SimulatedAngler` consumes screen observations. `help`/`refreshHelp` route control help and preview readouts to the bottom bar. [Tool contract](UI.md#fish-difficulty-tuner). |
+| `tools/FishDifficultyTuner.java` | Live fish tuning, three simulated angler levels or manual hold/release. `FishTuningSheet` holds unsaved values; `FishTuningSession` owns attempts; `SimulatedAngler` consumes screen observations; `FishPreview` draws the track for Live tuning and Record play. `help`/`refreshHelp` route control help and preview readouts to the bottom bar. Record play: `FishRecordingPanel` UI, `FishRecordingSession` fish order and phases, `FishRecording` files, reading and replay. [Tool contract](UI.md#fish-difficulty-tuner). |
 
 The tools' `FishCsv` is their shared cell-preserving CSV reader/writer. It leaves other
 text and line endings intact, checks for external edits, and replaces the file
@@ -102,7 +102,8 @@ unchanged. No duplicate game classes, source rewriting or separate test tree.
 This covers deterministic catch traces, tells, and the jitter and tell formulas, not treasure or the engine.
 
 The tuner's Balance results tab uses `tools/FishBalance` for immutable run
-snapshots, per-attempt telemetry and bounded parallel batches. `FishBalancePanel`
+snapshots, per-attempt telemetry and bounded parallel batches; its `game` and
+`visibleFish` also build the simulation and drawn position for Record play. `FishBalancePanel`
 owns session results, exact-input cache, filters and stale-result checks;
 `FishBalanceChart` draws catch-rate and successful-time plots. Workers never
 read mutable sheet rows or game globals. `FishBalanceChecks` checks batch/preview

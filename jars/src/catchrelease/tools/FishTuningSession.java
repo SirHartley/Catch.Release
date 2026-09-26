@@ -111,10 +111,7 @@ final class FishTuningSession {
     }
 
     float visibleFish() {
-        return game.getFishPosition() + (FishingSimulation.jitter(game.getTimeTotal(), 1.7f,
-                game.getFishVelocity(), fish.value(JITTER), game.getTellProgress())
-                + FishingSimulation.tell(game.getTellProgress(), game.getTellDirection(), fish.value(JITTER)))
-                / FishConstants.MINIGAME_TRACK_HEIGHT;
+        return FishBalance.visibleFish(game, fish.value(JITTER));
     }
 
     private float speed() {
