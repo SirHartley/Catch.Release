@@ -123,8 +123,8 @@ public final class FishDifficultyTuner extends JPanel {
         }
         controls.add(Box.createVerticalStrut(10));
         addRow(controls, "Input", skill, "Beginner: 120ms observation delay / 80ms decisions. Regular: 85ms / 50ms. "
-                + "Skilled: 60ms / 35ms, better tracking and anticipation. No bot sees future targets. "
-                + "These are test profiles, not calibrated human skill. Manual: hold left mouse or Space over the focused preview. "
+                + "Skilled: 60ms / 35ms, better tracking; test profiles, not calibrated skill. Player: fitted to the recorded "
+                + "play in fish-recordings. No bot sees future targets. Manual: hold left mouse or Space over the focused preview. "
                 + "Switching starts a fresh attempt.");
         addRow(controls, "Tackle", tackle, "Uses the actual tackle multipliers. Only tackle affecting catch physics is listed. "
                 + "Changes test conditions, not fish.csv; starts a fresh attempt.");

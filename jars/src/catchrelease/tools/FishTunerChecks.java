@@ -30,6 +30,8 @@ public class FishTunerChecks {
         for (FishTuningSheet.Row row : real.fish) check(ImageIO.read(real.root.resolve(row.icon).toFile()) != null, row.id + " image");
         System.out.println("Loaded " + real.fish.size() + " fish and images");
         rosterChecks(real);
+        playerChecks();
+        rarityBandChecks(real);
         SwingUtilities.invokeAndWait(() -> {
             try { uiChecks(real); }
             catch (Exception ex) { throw new RuntimeException(ex); }
@@ -169,7 +171,7 @@ public class FishTunerChecks {
     }
 
     static void rosterChecks(FishTuningSheet sheet) {
-        for (SimulatedAngler.Skill skill : List.of(SimulatedAngler.Skill.BEGINNER, SimulatedAngler.Skill.REGULAR, SimulatedAngler.Skill.SKILLED)) {
+        for (SimulatedAngler.Skill skill : FishBalance.SKILLS) {
             int wins = 0, losses = 0, timeouts = 0;
             for (FishTuningSheet.Row row : sheet.fish) {
                 for (int seed = 0; seed < 20; seed++) {
@@ -203,6 +205,62 @@ public class FishTunerChecks {
         System.out.println("No input: at most " + worst + " of 20 caught by holding or never pressing" + (worst > 0 ? ", " + worstFish : ""));
     }
 
+    // Player catch-rate band per rarity, in percent; rarity must read as difficulty, so bands do not touch
+    static final Map<String, double[]> RARITY_BANDS = Map.of("COMMON", new double[]{84, 95}, "UNCOMMON", new double[]{65, 75},
+            "RARE", new double[]{47, 57}, "EPIC", new double[]{29, 39}, "LEGENDARY", new double[]{13, 21});
+    // 400 attempts measure a rate to about ±2.5 points
+    static final double BAND_ALLOWANCE = 4;
+
+    static void rarityBandChecks(FishTuningSheet sheet) {
+        FishBalance.Setup setup = new FishBalance.Setup(Tackle.NONE, FishConstants.MINIGAME_BAR_SIZE_FALLBACK, 1, 1, 1);
+        List<String> outside = sheet.fish.parallelStream().map(row -> {
+            FishBalance.Spec spec = FishBalance.Spec.of(row, false);
+            int caught = 0;
+            for (long seed = 0; seed < 400; seed++) {
+                try {
+                    if (FishBalance.attempt(spec, setup, SimulatedAngler.Skill.PLAYER, seed, 120).outcome() == FishBalance.Outcome.CAUGHT) caught++;
+                } catch (InterruptedException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+            double rate = caught / 4.0, low = RARITY_BANDS.get(row.rarity)[0], high = RARITY_BANDS.get(row.rarity)[1];
+            return rate < low - BAND_ALLOWANCE || rate > high + BAND_ALLOWANCE ? row.id + " " + row.rarity + " " + rate + "%" : null;
+        }).filter(Objects::nonNull).toList();
+        check(outside.isEmpty(), "Player catch rate outside its rarity band: " + outside);
+        System.out.println("Rarity bands: every fish's Player catch rate lies in its band");
+    }
+
+    // the Player profile must still play the recorded fish the way the recorded player did
+    static void playerChecks() throws Exception {
+        Path folder = Path.of(FishRecording.FOLDER);
+        if (!Files.isDirectory(folder)) {
+            System.out.println("No " + folder + " folder: Player calibration not checked");
+            return;
+        }
+        List<FishRecording.Attempt> attempts = FishAnglerCalibration.load(folder);
+        long replaying = attempts.stream().filter(FishRecording::replays).count();
+        if (replaying < attempts.size()) System.out.println("Warning: " + (attempts.size() - replaying) + " of " + attempts.size()
+                + " recorded attempts no longer replay; the catch physics changed since recording");
+        double[] recorded = FishAnglerCalibration.recorded(attempts).moments();
+        Map<SimulatedAngler.Skill, Double> scores = new EnumMap<>(SimulatedAngler.Skill.class);
+        double[] player = null;
+        for (SimulatedAngler.Skill skill : FishBalance.SKILLS) {
+            FishAnglerCalibration.Behaviour behaviour = FishAnglerCalibration.play(attempts, FishAnglerCalibration.hand(skill), 8,
+                    FishAnglerCalibration.REPORT_SEEDS);
+            scores.put(skill, FishAnglerCalibration.logScore(behaviour));
+            if (skill == SimulatedAngler.Skill.PLAYER) player = behaviour.moments();
+        }
+        check(Math.abs(player[5] - recorded[5]) <= 0.06, "Player catch rate " + player[5] + " vs recorded " + recorded[5]);
+        check(Math.abs(player[6] - recorded[6]) <= 0.02, "Player coverage " + player[6] + " vs recorded " + recorded[6]);
+        check(Math.abs(player[8] - recorded[8]) <= 0.4, "Player switches/s " + player[8] + " vs recorded " + recorded[8]);
+        for (SimulatedAngler.Skill skill : FishBalance.SKILLS) {
+            check(skill == SimulatedAngler.Skill.PLAYER || scores.get(SimulatedAngler.Skill.PLAYER) > scores.get(skill),
+                    "Player predicts the recorded catches better than " + skill);
+        }
+        System.out.printf(Locale.ROOT, "Player on %d recorded fish: caught %.0f%% (recorded %.0f%%), coverage %.0f%% (%.0f%%), log score %.3f%n",
+                attempts.size(), 100 * player[5], 100 * recorded[5], 100 * player[6], 100 * recorded[6], scores.get(SimulatedAngler.Skill.PLAYER));
+    }
+
     static Object get(Object owner, String name) throws Exception {
         Field field = owner.getClass().getDeclaredField(name);
         field.setAccessible(true);
@@ -219,7 +277,7 @@ public class FishTunerChecks {
         FishDifficultyTuner panel = new FishDifficultyTuner(sheet);
         JPanel track = (JPanel) get(panel, "track");
         JComboBox<SimulatedAngler.Skill> skill = (JComboBox<SimulatedAngler.Skill>) get(panel, "skill");
-        check(skill.getItemCount() == 4, "three bot levels and manual only");
+        check(skill.getItemCount() == 5, "three bot levels, the recorded player and manual");
         skill.setSelectedItem(SimulatedAngler.Skill.MANUAL);
         track.getActionMap().get("hold").actionPerformed(new ActionEvent(track, 0, "hold"));
         check((Boolean) get(panel, "manualHeld"), "manual keyboard hold");
