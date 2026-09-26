@@ -3428,18 +3428,6 @@ He gives the question some thought.
 Another moment.
 
 ""Been fishing longer.""",0:catchrelease_fisherAskBack:Something else,
-catchrelease_fisherOptAsk_baha,CatchReleaseFisherQuestions,"$catchreleaseStage >= 1
-!$global.catchrelease_fisherAsked_baha
-CatchReleaseCMD fisherAskOnPage",,,catchrelease_ask_baha:Do you have a name?,
-catchrelease_ask_baha,DialogOptionSelected,$option == catchrelease_ask_baha,$global.catchrelease_fisherAsked_baha = true,"""Registry says Baha.""
-
-The Fisherman takes a drink.
-
-""Registry says my last physical was overdue before half the officers who signed it were born.""
-
-He sets the mug down.
-
-""Fisherman will do.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_whyOut,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_whyOut
 CatchReleaseCMD fisherAskOnPage",,,catchrelease_ask_whyOut:Why are you always so far out?,
@@ -3569,9 +3557,6 @@ CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_fisherBycatch gray,
 catchrelease_fisherAsked_howLong,CatchReleaseFisherQuestions,"$catchreleaseStage >= 1
 $global.catchrelease_fisherAsked_howLong
 CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_howLong gray,,50:catchrelease_ask_howLong:How long have you been out here?,
-catchrelease_fisherAsked_baha,CatchReleaseFisherQuestions,"$catchreleaseStage >= 1
-$global.catchrelease_fisherAsked_baha
-CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_baha gray,,50:catchrelease_ask_baha:Do you have a name?,
 catchrelease_fisherAsked_whyOut,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
 $global.catchrelease_fisherAsked_whyOut
 CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_whyOut gray,,50:catchrelease_ask_whyOut:Why are you always so far out?,
@@ -3777,14 +3762,7 @@ You are short.
 Crablobab checks your credits, checks the crabs, then checks a pocket containing neither.
 
 ""Next time!""",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyCelebration,DialogOptionSelected,"$option == catchrelease_crabBuyCelebration
-!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
-
-""Celebrate responsibly.""
-
-""Baha handles the on-and-off! Outfitter. Very convenient.""",0:catchrelease_crabBaha:Baha?,
-catchrelease_crabBuyCelebrationKnown,DialogOptionSelected,"$option == catchrelease_crabBuyCelebration
-$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
+catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
 
 ""Celebrate responsibly.""
 
@@ -3822,18 +3800,7 @@ Crablobab counts your payment twice.
 ""Almost!""
 
 The earmuffs disappear into his sleeve without passing a cuff.",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyEarmuffs,DialogOptionSelected,"$option == catchrelease_crabBuyEarmuffs
-!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy EARMUFFS,"""Try them.""
-
-They are warm.
-
-Once fitted, the whispering is gone.
-
-Nothing else changes.
-
-""Baha handles the on-and-off! Outfitter. Very convenient.""",0:catchrelease_crabBaha:Baha?,
-catchrelease_crabBuyEarmuffsKnown,DialogOptionSelected,"$option == catchrelease_crabBuyEarmuffs
-$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy EARMUFFS,"""Try them.""
+catchrelease_crabBuyEarmuffs,DialogOptionSelected,$option == catchrelease_crabBuyEarmuffs,CatchReleaseCMD crabBuy EARMUFFS,"""Try them.""
 
 They are warm.
 
@@ -3886,21 +3853,7 @@ Crablobab counts the credits, then the crabs, then counts both again in the oppo
 He takes the tile back. The chicken continues marching.
 
 ""Good news! He'll still be here when you're richer.""",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyChicken_profile,DialogOptionSelected,"$option == catchrelease_crabBuyChicken_profile
-!$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your tripad, already held in his other hand.
-The chicken walks right over.
-
-""There we go! Installed, registered, acknowledged by whatever insists on acknowledging these things.""
-
-He gives the chicken an approving little nod.
-
-""If you get tired of him, put him away. He won't mind. Ask Baha.""
-
-Crablobab watches the chicken peck an app icon.
-
-""Professional.""",0:catchrelease_crabBaha:Baha?,
-catchrelease_crabBuyChicken_profileKnown,DialogOptionSelected,"$option == catchrelease_crabBuyChicken_profile
-$global.catchrelease_crabAskedBaha",CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your tripad, already held in his other hand.
+catchrelease_crabBuyChicken_profile,DialogOptionSelected,$option == catchrelease_crabBuyChicken_profile,CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your tripad, already held in his other hand.
 The chicken walks right over.
 
 ""There we go! Installed, registered, acknowledged by whatever insists on acknowledging these things.""
@@ -3912,7 +3865,6 @@ He gives the chicken an approving little nod.
 Crablobab watches the chicken peck an app icon.
 
 ""Professional.""",0:catchrelease_crabStall:Continue,
-catchrelease_crabBaha,DialogOptionSelected,$option == catchrelease_crabBaha,$global.catchrelease_crabAskedBaha = true 0,"""Oh, right, it became The Fisherman. Or was. Anyway, care for a crab?""",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabExplosive_headAfford",SetTextHighlights $catchreleaseCrabExplosive_headPrice $catchreleaseCrabExplosive_headCrabs,"""Explosive head!""

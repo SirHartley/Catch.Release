@@ -106,7 +106,6 @@ Custom-panel opening and return behavior is covered by [UI.md](UI.md#custom-dial
 - Business and panel-return triggers are listed in [RULES.md](RULES.md#project-routing).
 - Unasked questions precede answered ones. Answered questions remain selectable at the end, coloured with vanilla `Misc.getGrayColor()`, not Common fish-rarity beige. Paging and navigation must fit within the nine-option limit.
 - Terminal answers return to questions through Something else; the question-menu exit returns to business.
-- “Baha” is introduced by its answer, not assumed in the preceding question label.
 - Bycatch becomes a question topic after the first relevant catch. Tutorial disclosure and special-topic precedence follow the saved progression and `LORE.md`.
 
 ### Colours, rewards and sidebars

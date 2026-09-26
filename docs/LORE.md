@@ -682,31 +682,7 @@ The correction leads to a useful explanation and concern for the crew. He is lim
 
 Dealing with him has no secret catch. He supplies equipment, work, range data and useful advice. Do not add a betrayal merely because he is strange.
 
-### Name and catch
-
-#### Registry name
-
-His old registry name is Baha; he normally goes by Fisherman.
-
-Paperwork still identifies him as Baha. The name can degrade with local coherence. A particular location's missing letters must be consistent, not random dramatic corruption.
-
-Degradation belongs where the fabric is sufficiently thin. Do not corrupt his name on every appearance.
-
-**Existing dialogue — `catchrelease_ask_baha`, when asked about the registry name:**
-
-> "Registry says Baha."
->
-> The Fisherman takes a drink.
->
-> "Registry says my last physical was overdue before half the officers who signed it were born."
->
-> He sets the mug down.
->
-> "Fisherman will do."
-
-The old paperwork gives him something to joke about. He answers the name question without supplying an account of his transformation.
-
-#### The catch
+### The catch
 
 What he does with the catch is unavailable to the fiction. Do not answer it, hint that an answer exists, or imply that he eats it, feeds something, builds something, sacrifices it or sustains himself with it.
 
