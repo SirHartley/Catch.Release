@@ -3114,12 +3114,6 @@ $catchreleaseDrift == 3
 !$global.catchrelease_fisherAsked_okay",SetOptionColor catchrelease_fisherOkay highlight,,58:catchrelease_fisherOkay:Are you okay?,
 catchrelease_fisherOptContinuitySystem,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseContinuityQuestionAvailable",SetOptionColor catchrelease_intro_fourJumps highlight,,60:catchrelease_intro_fourJumps:I just left you in another system.,
-#catchrelease_fisherOptContinuityHull,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
-$catchreleaseStage == 3
-!$catchreleaseTargetMet
-$catchreleaseTargetHere
-!$catchreleaseDeepHandoff
-!$global.catchrelease_fisherAsked_sameHull",,,70:catchrelease_introSameHull:Is this the same ship?,
 catchrelease_fisherOptLeave,CatchReleaseFisherOptions,$menuState == catchreleaseFisher,"SetShortcut catchrelease_fisherLeave ""ESCAPE""",,100:catchrelease_fisherLeave:Leave,
 catchrelease_fisherLeave,DialogOptionSelected,$option == catchrelease_fisherLeave,"HideMapMarker
 CatchReleaseCMD leaveEncounter",,,
@@ -4560,12 +4554,6 @@ The Fisherman glances at the local plot.
 He shifts the rupture marker to the centre of the display.
 
 ""Your fish is still here too.""","0:catchrelease_introPressLocation:That does not answer the question.
-100:catchrelease_fisherBack:Let it go",
-catchrelease_introSameHull,DialogOptionSelected,$option == catchrelease_introSameHull,$global.catchrelease_fisherAsked_sameHull = true,"""If the registry asks.""
-
-He looks back toward the plot.
-
-""Your fish is still here.""","0:catchrelease_introPressLocation:How?
 100:catchrelease_fisherBack:Let it go",
 catchrelease_introPressLocation,DialogOptionSelected,$option == catchrelease_introPressLocation,$global.catchrelease_fisherPressedForFabricTruth = true,"The Fisherman looks at you for a moment.
 
