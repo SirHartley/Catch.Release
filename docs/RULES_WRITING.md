@@ -64,8 +64,8 @@ options: catchrelease_exBrief2:Continue
 
 id: catchrelease_exBrief2        trigger: DialogOptionSelected   conditions: $option == catchrelease_exBrief2
 text:    (second beat)
-options: catchrelease_exAccept:"I'll do it."
-         catchrelease_exDecline:"Not interested."
+options: catchrelease_exAccept:Accept the job.
+         catchrelease_exDecline:Decline.
 ```
 
 Use it for scenes, briefings, cutscenes and any exchange whose next screen does not depend on state. SotF's Elysium sequence (`sotfHFinaleElysium1` to `6`) and most of its Wendigo encounter are plain chains. When one option of a fixed screen depends on state, keep the plain chain and gate that one option with `SetEnabled` or a `RemoveOption` row, or switch the screen to a `FireAll` menu.
@@ -79,13 +79,13 @@ id: catchrelease_exAsk           trigger: DialogOptionSelected   conditions: $op
 script:  FireAll CatchReleaseExQuestions
 
 id: catchrelease_exQPay          trigger: CatchReleaseExQuestions       conditions: !$catchrelease_exAskedPay
-options: catchrelease_exPay:"What does it pay?"
+options: catchrelease_exPay:What does it pay?
 
 id: catchrelease_exQRisk         trigger: CatchReleaseExQuestions       conditions: !$catchrelease_exAskedRisk
-options: catchrelease_exRisk:"How dangerous is it?"
+options: catchrelease_exRisk:How dangerous is it?
 
 id: catchrelease_exQBack         trigger: CatchReleaseExQuestions
-options: 100:catchrelease_exBack:"That's all."
+options: 100:catchrelease_exBack:That's all.
 
 id: catchrelease_exPay           trigger: DialogOptionSelected   conditions: $option == catchrelease_exPay
 text:    (the answer)
@@ -154,11 +154,9 @@ Java must not print prose. It may print short receipt lines in the vanilla recei
 
 Options that change with data are a Java job only when the count or labels cannot be known in advance, such as one option per ship. Lines that change with data work the same way: for a list of unknown length, the command writes each item's tokens and fires a line trigger once per item with `FireBest`, so each line's wording and style stay in a row. A fixed set of options belongs in rows, even when Java decides whether each is available: expose that decision as a condition verb.
 
-These existing `CatchReleaseCMD` verbs show Java doing a row's job. Do not copy them into new work:
+A row may still ask Java to decorate an option it added when the decoration needs data rows cannot hold, such as a tooltip that lists every fish a sale would include (`CatchReleaseCMD sellTooltip`) or a cost tooltip built from item data (`CatchReleaseCMD crabTooltip`). Call it from the Script of the row that adds the option.
 
-- `dropCutComm` removes a hard-coded list of option ids from Java instead of `RemoveOption` lines.
-- `colorBulkSaleOptions` holds four copies of "if this cargo exists, color and describe this option" instead of four conditioned rows with `SetOptionColor` and `SetTooltip`.
-- `beginFisherQuestions` / `addFisherQuestion` and `beginCrabOptions` / `addCrabOption` add menu options from a command that does not report `doesCommandAddOptions()`, so `FireAll` never clears the old menu and the code clears it by hand.
+Paging follows the same split. Before the Fisherman question menu's `FireAll`, `CatchReleaseCMD fisherQuestions` lists the visible question rows with `getAllMatching` and stores the current page's row ids for the dialog; each question row's last condition, `CatchReleaseCMD fisherAskOnPage`, only reads that list. The rows keep the labels, order, colour and Previous, Next and Back options.
 
 ### Anti-patterns
 
@@ -195,7 +193,7 @@ Every line of the Conditions cell must pass. Lines are checked top to bottom and
 - **OR** is two rows, or a condition verb that answers the combined question.
 - **Line order.** Put the line that rules the row out most often first, and cheap lines before command calls.
 - **Flags.** `$flag` passes only when the value is `true` or the String `"true"`. An unset key fails. `!$flag` passes when the flag is unset or not true.
-- **Comparisons.** `==`, `!=`, `<`, `>`, `<=`, `>=`. The ordering comparisons parse both sides as numbers and count an unset key as 0. `==` against an unset key fails; `!=` passes. See [Operators](RULES.md#operators-verified-against-decompiled-source).
+- **Comparisons.** `==`, `!=`, `<`, `>`, `<=`, `>=`. The ordering comparisons parse both sides as numbers and count an unset key as 0. `==` also counts an unset key as 0, and 0 equals `false` and `null`: on an unset key `$x == false`, `$x == 0` and `$x == null` pass, and `==` against any other value fails. `!=` against an unset key passes, except `$x != null`, which fails; test that a key is set with `$x != null`, not `$x != false`. See [Operators](RULES.md#operators-verified-against-decompiled-source).
 - **Nothing else.** `is`, `in`, `has`, `has_not`, `does_not_have` and `+=` are not operators in this build. Such a line silently checks only its first `$key`.
 - **Scopes.** Write the scope when the key is not on `$local`: `$player.catchrelease_x`, `$global.catchrelease_x`, `$entity.catchrelease_x`. An absent scope falls back to local and silently reads a key literally named `$entity.catchrelease_x` there.
 - **Commands.** A command in Conditions answers a question: `PlayerHasCargo supplies 10`, `CatchReleaseCMD castawayEligible`. `!Command args` negates it. Condition commands run for every candidate row on every matching round, so they must be cheap and must not change state, grant anything or roll a new random target.
@@ -285,11 +283,12 @@ After the prose, small gray text can state a mechanical consequence the prose do
 - **Options column** for every option whose label is known in advance. Format `order:id:text`. Lower order shows higher.
 - **Order.** Normally leave it out, as 94% of SotF's and vanilla's options do: `id:text` has order 0, and equal orders show in the order the rows and lines are written. Write an order only to move an option away from that position, for example `100:defaultLeave:Leave` to keep Leave last in a menu assembled from several rows.
 - **No colons in labels.** The loader splits the line on every colon: a colon in an `id:text` label stops the file loading, and in `order:id:text` the label is cut at the next colon. A label that needs one gets it from `SetOptionText` in the Script of the row that adds the option ([CSV columns](RULES.md#csv-columns)).
-- **Labels.** Spoken options in quotation marks, actions without; see [Dialogue and player options](LORE.md#dialogue-and-player-options). Add a bracketed note only where the words hide the consequence: `(lie)`, `(decline)`, `(attack)`. SotF does this on under 5% of its options. Labels get token replacement.
+- **Labels.** Unquoted actions, following the menu's convention, as [Dialogue and player options](LORE.md#dialogue-and-player-options) requires. Add a bracketed note only where the words hide the consequence: `(lie)`, `(decline)`, `(attack)`. SotF does this on under 5% of its options. Labels get token replacement.
 - **Ids.** `catchrelease_<feature><Purpose>`, never starting with `$`. Name the handler row after the option it answers so a search finds both; SotF and Catch.Release add a suffix (option `catchrelease_hitmanBribeAsk`, handler `catchrelease_hitmanBribeAskSel`). The handler's condition is `$option == <optionId>`.
 - **Handlers.** Every option id needs a `DialogOptionSelected` row, except the ids vanilla already handles: `defaultLeave` and the `cutCommLink` family (see [Exits and returns](#exits-and-returns)). A click with no handler prints a red error and an "Exit dialog" option, unless the option went through a confirmation such as a story point option.
 - **Unavailable choices.** Keep the option and disable it when the player should see what is possible: `SetEnabled <id> false`, then `SetTooltip <id> "Requires 10 supplies."`, with `SetTooltipHighlights` and `SetTooltipHighlightColors` for the numbers. Hide it with a condition when the player should not know about it yet.
-- **Decorating an option.** `SetEnabled`, `SetTooltip`, `SetOptionColor`, `SetOptionText`, `SetShortcut` and `RemoveOption` do nothing if the option does not exist yet. Put them in the Script of the row that adds the option, or later.
+- **Decorating an option.** `SetEnabled`, `SetTooltip`, `SetOptionColor`, `SetOptionText` and `SetShortcut` do nothing if the option does not exist yet. Put them in the Script of the row that adds the option, or later; in a `FireAll`, any matched row's Script can decorate any option of the menu.
+- **Removing an option.** `RemoveOption` clears the panel and adds the remaining options again with only the text, colour and tooltip they had when they were added, even when the removed id is absent. Colours, tooltips, shortcuts and disabled states set since then are lost on every option. Run it before the decorating commands of the same menu, as vanilla's `LKEmazConvOptionLeaveAuto` does (`removeOption` and `restoreSavedOptions`, `sources-obf/ui.newui.java` bundle lines 4467–4490).
 - **Story point options.** `SetStoryOption <id> <points> <bonusXPKey> <sound> "<log text>"`, with the key registered under `bonusXP` in `data/config/settings.json`. It colors the option, adds the cost to its label, adds the confirmation and disables it when the player cannot pay. Always pass at least four arguments: with exactly three, the command reads them as `<id> <sound> <log text>` and charges one point. `leadership`, `combat`, `industry`, `technology`, `general` and `generic` are accepted as sounds; SotF uses `general`. Do not add `SetStoryColor` to the same option.
 - **Dev options.** An option id starting with `(dev)` only appears in dev mode.
 
@@ -327,7 +326,7 @@ Catch.Release has one rules command, `CatchReleaseCMD`, whose first argument sel
 - A **query** verb answers a condition and changes nothing.
 - An **action** verb does one game action and is called from a handler's Script.
 - A **token** verb writes display Strings with expiry `0` before the row that shows them, as `CatchReleaseCMD tokens` does.
-- A verb that adds options must report `doesCommandAddOptions()` so `FireAll` and `FireBest` include its options and clear the old menu. Prefer the Options column.
+- A command that adds options must report `doesCommandAddOptions()` so `FireAll` and `FireBest` include its options and clear the old menu. The engine asks the command class, not the verb, and skips every line of such a class in ordinary Script runs (`sources-obf/campaign.rules.java` bundle lines 905–911 and 1230–1236). A `CatchReleaseCMD` verb therefore cannot add options; put them in the Options column.
 - A verb never prints prose. Receipts only, when no vanilla command covers the grant.
 
 A hub mission is its own command target: `Call $<ref> <action>`. Every hub mission handles `updateStage`, `updateData`, `showMap <title>`, `hideMap`, `makeUnimportant`, `addContacts`, `repSuccess`, `repFailure` and `endFailure`; anything else goes to the mission's `callAction`, and an action nobody handles crashes the dialog. See [Reuse a mission object through Call](RULES_AUTHORING.md#reuse-a-mission-object-through-call). [Create a command only when needed](RULES_AUTHORING.md#create-a-command-only-when-needed) covers adding a command class.
@@ -339,7 +338,7 @@ A hub mission is its own command target: `Call $<ref> <action>`. Every hub missi
 - **Blank rows** separate conversations and menus.
 - **Moving rows.** Where a block sits in the file matters only for rows of one trigger that can match together, such as `FireAll` menus, `AddBarEvents` entries and intel text. Check them before moving a block ([Editing and validation](RULES.md#editing-and-validation)).
 - **Rule ids** `catchrelease_<feature><Purpose>`, as `catchrelease_hitmanBribeAsk`: sequential numbers for a strictly linear scene (`...Brief1`, `...Brief2`), short names for branches. The loader only rejects a duplicate id under the same trigger, so keep every id unique yourself.
-- **Private triggers** `CatchRelease<Feature><Purpose>`, as `CatchReleaseHitmanBribeOptions`: `...Options` for menus, `...Greeting` or `...Text` for picks and inserts, and a plain descriptive name for a shared insert or side effect, as SotF's `sotfLearnAboutDustkeepers`.
+- **Private triggers** `CatchRelease<Feature><Purpose>`, as `CatchReleaseFisherQuestions`: `...Options` or `...Questions` for menus, `...Greeting` or `...Text` for picks and inserts, and a plain descriptive name for a shared insert or side effect, as SotF's `sotfLearnAboutDustkeepers`.
 - **Comments.** A `#` line inside Conditions, Script or Options is skipped; use it for a non-obvious line, as SotF's `# removes map` explains a bare `ShowPersonVisual`. The notes column can say why a score exists or which rows are deliberate random variants; SotF leaves it empty, so this is a project convention. Keep jokes and history out.
 
 ## Review checklist

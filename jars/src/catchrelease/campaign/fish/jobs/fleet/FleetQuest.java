@@ -924,7 +924,9 @@ public class FleetQuest extends FishJob {
             return true;
         }
 
-        if ("hasRuleText".equals(action)) return ensureRuleTextMemory();
+        // a condition, so it must not write; rows prepare the text memory with prepareRuleText
+        if ("hasRuleText".equals(action)) return type != null && giver != null;
+        if ("prepareRuleText".equals(action)) return ensureRuleTextMemory();
 
         if ("clearRuleText".equals(action)) {
             clearRuleTextMemory();
