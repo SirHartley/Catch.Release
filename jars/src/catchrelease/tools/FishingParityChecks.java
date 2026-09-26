@@ -234,7 +234,8 @@ public class FishingParityChecks {
         String game = methodBody(Path.of("jars/src/catchrelease/campaign/fish/minigame/FishingMinigamePanel.java"),
                 "protected float getJitter(float offset)")
                 .replace("float time =", "time =").replace("jitterTime", "time")
-                .replace("minigame.getFishVelocity()", "velocity").replace("minigame.getFish().jitter", "jitter");
+                .replace("minigame.getFishVelocity()", "velocity").replace("minigame.getFish().jitter", "jitter")
+                .replace("minigame.getTellProgress()", "tellProgress");
         String tool = methodBody(Path.of("jars/src/catchrelease/tools/FishingSimulation.java"), "public static float jitter(");
         require(game.replaceAll("\\s+", "").equals(tool.replaceAll("\\s+", "")),
                 "jitter formula changed; compare the game panel with the tool");

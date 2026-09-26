@@ -518,12 +518,14 @@ final class FishingSimulation {
         return activeMotion;
     }
 
-    public static float jitter(float time, float offset, float velocity, float jitter) {
+    public static float jitter(float time, float offset, float velocity, float jitter, float tellProgress) {
         time = (time + offset) * FishConstants.MINIGAME_FISH_JITTER_SPEED;
         float wobble = (float) (Math.sin(time) * 0.5f
                 + Math.sin(time * 1.73f) * 0.3f + Math.sin(time * 2.61f) * 0.2f);
         float effort = 1f + Math.abs(velocity) * FishConstants.MINIGAME_FISH_JITTER_EFFORT;
-        return wobble * FishConstants.MINIGAME_FISH_JITTER * jitter * effort;
+        float swell = (float) Math.sin(tellProgress * Math.PI);
+        float calm = 1f - FishConstants.MINIGAME_TELL_CALM * swell * swell;
+        return wobble * FishConstants.MINIGAME_FISH_JITTER * jitter * effort * calm;
     }
 
     // Same body as FishingMinigamePanel.getTell; FishingParityChecks compares the text.

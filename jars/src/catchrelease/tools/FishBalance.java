@@ -182,7 +182,7 @@ final class FishBalance {
         while (game.isRunning() && frames < seconds * 60) {
             if ((frames & 255) == 0 && Thread.currentThread().isInterrupted()) throw new InterruptedException();
             float visible = game.getFishPosition() + (FishingSimulation.jitter(game.getTimeTotal(), 1.7f,
-                    game.getFishVelocity(), fish.value(Field.JITTER))
+                    game.getFishVelocity(), fish.value(Field.JITTER), game.getTellProgress())
                     + FishingSimulation.tell(game.getTellProgress(), game.getTellDirection(), fish.value(Field.JITTER)))
                     / FishConstants.MINIGAME_TRACK_HEIGHT;
             boolean held = angler.input(game.getTimeTotal(), visible, game.getBarPosition(), game.getBarHeightFraction(),
