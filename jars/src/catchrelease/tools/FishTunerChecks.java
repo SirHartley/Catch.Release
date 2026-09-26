@@ -30,6 +30,7 @@ public class FishTunerChecks {
         for (FishTuningSheet.Row row : real.fish) check(ImageIO.read(real.root.resolve(row.icon).toFile()) != null, row.id + " image");
         System.out.println("Loaded " + real.fish.size() + " fish and images");
         rosterChecks(real);
+        playerChecks();
         SwingUtilities.invokeAndWait(() -> {
             try { uiChecks(real); }
             catch (Exception ex) { throw new RuntimeException(ex); }
@@ -169,7 +170,7 @@ public class FishTunerChecks {
     }
 
     static void rosterChecks(FishTuningSheet sheet) {
-        for (SimulatedAngler.Skill skill : List.of(SimulatedAngler.Skill.BEGINNER, SimulatedAngler.Skill.REGULAR, SimulatedAngler.Skill.SKILLED)) {
+        for (SimulatedAngler.Skill skill : FishBalance.SKILLS) {
             int wins = 0, losses = 0, timeouts = 0;
             for (FishTuningSheet.Row row : sheet.fish) {
                 for (int seed = 0; seed < 20; seed++) {
@@ -203,6 +204,37 @@ public class FishTunerChecks {
         System.out.println("No input: at most " + worst + " of 20 caught by holding or never pressing" + (worst > 0 ? ", " + worstFish : ""));
     }
 
+    // the Player profile must still play the recorded fish the way the recorded player did
+    static void playerChecks() throws Exception {
+        Path folder = Path.of(FishRecording.FOLDER);
+        if (!Files.isDirectory(folder)) {
+            System.out.println("No " + folder + " folder: Player calibration not checked");
+            return;
+        }
+        List<FishRecording.Attempt> attempts = FishAnglerCalibration.load(folder);
+        long replaying = attempts.stream().filter(FishRecording::replays).count();
+        if (replaying < attempts.size()) System.out.println("Warning: " + (attempts.size() - replaying) + " of " + attempts.size()
+                + " recorded attempts no longer replay; the catch physics changed since recording");
+        double[] recorded = FishAnglerCalibration.recorded(attempts).moments();
+        Map<SimulatedAngler.Skill, Double> scores = new EnumMap<>(SimulatedAngler.Skill.class);
+        double[] player = null;
+        for (SimulatedAngler.Skill skill : FishBalance.SKILLS) {
+            FishAnglerCalibration.Behaviour behaviour = FishAnglerCalibration.play(attempts, FishAnglerCalibration.hand(skill), 8,
+                    FishAnglerCalibration.REPORT_SEEDS);
+            scores.put(skill, FishAnglerCalibration.logScore(behaviour));
+            if (skill == SimulatedAngler.Skill.PLAYER) player = behaviour.moments();
+        }
+        check(Math.abs(player[5] - recorded[5]) <= 0.06, "Player catch rate " + player[5] + " vs recorded " + recorded[5]);
+        check(Math.abs(player[6] - recorded[6]) <= 0.02, "Player coverage " + player[6] + " vs recorded " + recorded[6]);
+        check(Math.abs(player[8] - recorded[8]) <= 0.4, "Player switches/s " + player[8] + " vs recorded " + recorded[8]);
+        for (SimulatedAngler.Skill skill : FishBalance.SKILLS) {
+            check(skill == SimulatedAngler.Skill.PLAYER || scores.get(SimulatedAngler.Skill.PLAYER) > scores.get(skill),
+                    "Player predicts the recorded catches better than " + skill);
+        }
+        System.out.printf(Locale.ROOT, "Player on %d recorded fish: caught %.0f%% (recorded %.0f%%), coverage %.0f%% (%.0f%%), log score %.3f%n",
+                attempts.size(), 100 * player[5], 100 * recorded[5], 100 * player[6], 100 * recorded[6], scores.get(SimulatedAngler.Skill.PLAYER));
+    }
+
     static Object get(Object owner, String name) throws Exception {
         Field field = owner.getClass().getDeclaredField(name);
         field.setAccessible(true);
@@ -219,7 +251,7 @@ public class FishTunerChecks {
         FishDifficultyTuner panel = new FishDifficultyTuner(sheet);
         JPanel track = (JPanel) get(panel, "track");
         JComboBox<SimulatedAngler.Skill> skill = (JComboBox<SimulatedAngler.Skill>) get(panel, "skill");
-        check(skill.getItemCount() == 4, "three bot levels and manual only");
+        check(skill.getItemCount() == 5, "three bot levels, the recorded player and manual");
         skill.setSelectedItem(SimulatedAngler.Skill.MANUAL);
         track.getActionMap().get("hold").actionPerformed(new ActionEvent(track, 0, "hold"));
         check((Boolean) get(panel, "manualHeld"), "manual keyboard hold");

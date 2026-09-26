@@ -3,15 +3,17 @@ package catchrelease.tools;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.StringJoiner;
 
 import static catchrelease.tools.FishBalance.*;
 import static catchrelease.tools.SimulatedAngler.Skill;
 
 final class FishBalanceChart extends JPanel {
 
-    static final Color[] COLORS = {new Color(55, 112, 180), new Color(188, 103, 24), new Color(108, 70, 159)};
+    static final Color[] COLORS = {new Color(55, 112, 180), new Color(188, 103, 24), new Color(108, 70, 159), new Color(40, 140, 90)};
+    static final String[] COLOR_NAMES = {"blue", "orange", "purple", "green"};
     static final int LEFT = 205;
-    static final int ROW = 48;
+    static final int ROW = 60;
 
     List<Result> results = List.of();
     Skill profile = Skill.REGULAR;
@@ -37,8 +39,9 @@ final class FishBalanceChart extends JPanel {
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setColor(Color.DARK_GRAY);
-            g.drawString(times ? profile + " successful catch seconds: P10 — median — P90"
-                    : "Catch %: blue Beginner / orange Regular / purple Skilled", 12, 18);
+            StringJoiner legend = new StringJoiner(" / ", "Catch %: ", "");
+            for (int s = 0; s < SKILLS.size(); s++) legend.add(COLOR_NAMES[s] + " " + SKILLS.get(s));
+            g.drawString(times ? profile + " successful catch seconds: P10 — median — P90" : legend.toString(), 12, 18);
             if (results.isEmpty()) { g.drawString("Run fish first. Stale and filtered-out results are excluded.", 12, 70); return; }
             double max = times ? Math.max(1, results.stream().mapToDouble(r -> r.skills().get(profile).time(0.9))
                     .filter(Double::isFinite).max().orElse(1)) : 100;

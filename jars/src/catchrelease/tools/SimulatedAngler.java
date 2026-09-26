@@ -10,6 +10,8 @@ final class SimulatedAngler {
         BEGINNER("Beginner", 0.12f, 0.08f, 0.018f, 0.05f),
         REGULAR("Regular", 0.085f, 0.05f, 0.008f, 0.12f),
         SKILLED("Skilled", 0.06f, 0.035f, 0.003f, 0.18f),
+        // fitted to recorded manual play; the numbers above do not apply to it
+        PLAYER("Player", 0, 0, 0, 0),
         MANUAL("Manual", 0, 0, 0, 0);
 
         final String label;
@@ -34,6 +36,7 @@ final class SimulatedAngler {
 
     private final Skill skill;
     private final Random random;
+    private final PlayerModel player;
     private final ArrayDeque<Observation> history = new ArrayDeque<>();
     private Observation previous;
     private float fishSpeed;
@@ -47,10 +50,12 @@ final class SimulatedAngler {
     SimulatedAngler(Skill skill, long seed) {
         this.skill = skill;
         random = new Random(seed);
+        player = skill == Skill.PLAYER ? new PlayerModel(PlayerModel.RECORDED, random) : null;
     }
 
     // Only screen observations enter here; no simulation object or future targets.
     boolean input(float time, float fish, float bar, float height, float lift, float gravity) {
+        if (player != null) return player.input(time, fish, bar + height * 0.5f, lift, gravity);
         history.addLast(new Observation(time, fish, bar + height * 0.5f));
         Observation observed = null;
         while (!history.isEmpty() && history.peekFirst().time <= time - skill.delay) observed = history.removeFirst();

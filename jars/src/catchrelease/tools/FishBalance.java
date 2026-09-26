@@ -18,7 +18,7 @@ final class FishBalance {
         CAUGHT, LOST, TIMEOUT
     }
 
-    static final List<Skill> SKILLS = List.of(Skill.BEGINNER, Skill.REGULAR, Skill.SKILLED);
+    static final List<Skill> SKILLS = List.of(Skill.BEGINNER, Skill.REGULAR, Skill.SKILLED, Skill.PLAYER);
     static final float STEP = FishTuningSession.STEP;
 
     record Spec(String id, String name, String rarity, FishMotion motion, List<Double> values) {
