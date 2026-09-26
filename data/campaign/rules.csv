@@ -1331,101 +1331,130 @@ Call $entity.catchrelease_jobRef showRewardDetails
 FireAll CatchReleaseFleetQuestOfferOptions",,,shared by the comm-link pitch and the distress-call pitch
 catchrelease_fq_last_entry_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == last_entry,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises, but send me the details.
-8:catchrelease_fqQuestion:Who logged the sighting?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_last_entry_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == last_entry
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Who logged the sighting?,
 catchrelease_fq_escrow_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == escrow,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-8:catchrelease_fqQuestion:Who's the client?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_escrow_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == escrow
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Who's the client?,
 catchrelease_fq_interment_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == interment,,,"0:catchrelease_fqAccept:I'll do it.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-8:catchrelease_fqQuestion:Why does a fish go in the casket?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_interment_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == interment
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Why does a fish go in the casket?,
 catchrelease_fq_calibration_pair_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == calibration_pair,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-8:catchrelease_fqQuestion:What do you mean, they disagree?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_calibration_pair_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == calibration_pair
+!$entity.catchrelease_fqQuestionAsked",,,"8:catchrelease_fqQuestion:What do you mean, they disagree?",
 catchrelease_fq_mutiny_pot_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == mutiny_pot,,,"0:catchrelease_fqAccept:I'll take the crew's offer.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-8:catchrelease_fqQuestion:Why does the sale need a fish?
 9:catchrelease_fqCounter:Put your captain on.
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_mutiny_pot_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == mutiny_pot
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Why does the sale need a fish?,
 catchrelease_fq_tribute_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == tribute,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-8:catchrelease_fqQuestion:What happens if it's late?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_tribute_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == tribute
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What happens if it's late?,
 catchrelease_fq_reference_specimen_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == reference_specimen,,,"0:catchrelease_fqAccept:I'll take the subcontract.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the paperwork.
-8:catchrelease_fqQuestion:What's wrong with the cargo?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_reference_specimen_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == reference_specimen
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What's wrong with the cargo?,
 catchrelease_fq_quiet_ship_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == quiet_ship,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-8:catchrelease_fqQuestion:What does it actually do?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_quiet_ship_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == quiet_ship
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What does it actually do?,
 catchrelease_fq_exhibit_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == exhibit,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-7:catchrelease_fqExtraQuestion:You're asking me to help fake Navy evidence.
-8:catchrelease_fqQuestion:What happened to the original?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_exhibit_offerOptionsExtraQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == exhibit
+!$entity.catchrelease_fqExtraQuestionAsked",,,7:catchrelease_fqExtraQuestion:You're asking me to help fake Navy evidence.,
+catchrelease_fq_exhibit_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == exhibit
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What happened to the original?,
 catchrelease_fq_headliner_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == headliner,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-7:catchrelease_fqExtraQuestion:Where did your headliner go?
-8:catchrelease_fqQuestion:The backdrop, plus the fee, or no show.
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_headliner_offerOptionsExtraQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == headliner
+!$entity.catchrelease_fqExtraQuestionAsked",,,7:catchrelease_fqExtraQuestion:Where did your headliner go?,
+catchrelease_fq_headliner_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == headliner
+!$entity.catchrelease_fqQuestionAsked",,,"8:catchrelease_fqQuestion:The backdrop, plus the fee, or no show.",
 catchrelease_fq_follower_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == follower,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the request.
-8:catchrelease_fqQuestion:What exactly is following you?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_follower_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == follower
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What exactly is following you?,
 catchrelease_fq_state_dinner_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == state_dinner,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the requisition.
-8:catchrelease_fqQuestion:What happens if they eat it without?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_state_dinner_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == state_dinner
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What happens if they eat it without?,
 catchrelease_fq_claim_assay_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == claim_assay,,,"0:catchrelease_fqAccept:I'll take the contract.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the requirements.
-7:catchrelease_fqExtraQuestion:Who's the other survey ship?
-8:catchrelease_fqQuestion:What happened to your retrieval attempt?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_claim_assay_offerOptionsExtraQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == claim_assay
+!$entity.catchrelease_fqExtraQuestionAsked",,,7:catchrelease_fqExtraQuestion:Who's the other survey ship?,
+catchrelease_fq_claim_assay_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == claim_assay
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What happened to your retrieval attempt?,
 catchrelease_fq_mandate_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == mandate,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the requirements.
-8:catchrelease_fqQuestion:What happened to your rig?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_mandate_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == mandate
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What happened to your rig?,
 catchrelease_fq_parley_fish_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == parley_fish,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-7:catchrelease_fqExtraQuestion:You're paying me to legitimize a protection racket.
-8:catchrelease_fqQuestion:What if the parley fails?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_parley_fish_offerOptionsExtraQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == parley_fish
+!$entity.catchrelease_fqExtraQuestionAsked",,,7:catchrelease_fqExtraQuestion:You're paying me to legitimize a protection racket.,
+catchrelease_fq_parley_fish_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == parley_fish
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What if the parley fails?,
 catchrelease_fq_stranded_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == stranded,,,"0:catchrelease_fqAccept:I'll get what you need.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-7:catchrelease_fqExtraQuestion:Why not just eat the fish?
-8:catchrelease_fqQuestion:Your printer eats fish?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_stranded_offerOptionsExtraQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == stranded
+!$entity.catchrelease_fqExtraQuestionAsked",,,7:catchrelease_fqExtraQuestion:Why not just eat the fish?,
+catchrelease_fq_stranded_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == stranded
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Your printer eats fish?,
 catchrelease_fq_seeker_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == seeker,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-8:catchrelease_fqQuestion:Eleven weeks. What's it for?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_seeker_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == seeker
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Eleven weeks. What's it for?,
 catchrelease_fq_quota_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == quota,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-8:catchrelease_fqQuestion:Why is the water short?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_quota_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == quota
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Why is the water short?,
 catchrelease_fq_starving_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == starving,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the order.
-8:catchrelease_fqQuestion:Nobody's actually starving?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_starving_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == starving
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Nobody's actually starving?,
 catchrelease_fq_scavenger_engine_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == scavenger_engine,,,"0:catchrelease_fqAccept:I'll get what you need.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-8:catchrelease_fqQuestion:How does a fish pack a drive coil?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_scavenger_engine_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == scavenger_engine
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:How does a fish pack a drive coil?,
 catchrelease_fq_collector_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == collector,,,"0:catchrelease_fqAccept:I'll take the commission.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
-7:catchrelease_fqExtraQuestion:What's it for?
-8:catchrelease_fqQuestion:Why won't anyone sell to you?
 10:catchrelease_fqDecline:Decline.",
-catchrelease_fq_wager_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == wager,"# the label needs a colon, which the Options column cannot hold
-SetOptionText catchrelease_fqExtraQuestion ""For the record: which side am I proving?""",,"0:catchrelease_fqAccept:I'll take the job.
+catchrelease_fq_collector_offerOptionsExtraQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == collector
+!$entity.catchrelease_fqExtraQuestionAsked",,,7:catchrelease_fqExtraQuestion:What's it for?,
+catchrelease_fq_collector_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == collector
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Why won't anyone sell to you?,
+catchrelease_fq_wager_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == wager,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the logs.
-7:catchrelease_fqExtraQuestion:Which side am I proving?
-8:catchrelease_fqQuestion:What does each side claim?
 10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_wager_offerOptionsExtraQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == wager
+!$entity.catchrelease_fqExtraQuestionAsked","# the label needs a colon, which the Options column cannot hold
+SetOptionText catchrelease_fqExtraQuestion ""For the record: which side am I proving?""",,7:catchrelease_fqExtraQuestion:Which side am I proving?,
+catchrelease_fq_wager_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == wager
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What does each side claim?,
 catchrelease_fqEscrowHaggleOpt,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == escrow
 !$entity.catchrelease_fqHaggled
 !$entity.catchrelease_fqSoured",,,6:catchrelease_fqHaggle:Their exposure is bigger than your offer.,
@@ -1435,8 +1464,10 @@ $entity.catchrelease_fqHaggled
 catchrelease_fqEscrowReclaimOpt,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == escrow
 $entity.catchrelease_fqCanReclaim",SetStoryOption catchrelease_fqReclaim 1 avoidCargoScan ui_char_spent_story_point,,6:catchrelease_fqReclaim:Restore the raised offer.,
 catchrelease_fqQuestionSel,DialogOptionSelected,$option == catchrelease_fqQuestion,"FireBest CatchReleaseFleetQuestQuestionText
+$entity.catchrelease_fqQuestionAsked = true
 FireAll CatchReleaseFleetQuestOfferOptions",,,
 catchrelease_fqExtraQuestionSel,DialogOptionSelected,$option == catchrelease_fqExtraQuestion,"FireBest CatchReleaseFleetQuestExtraQuestionText
+$entity.catchrelease_fqExtraQuestionAsked = true
 FireAll CatchReleaseFleetQuestOfferOptions",,,
 catchrelease_fqHaggleSel,DialogOptionSelected,$option == catchrelease_fqHaggle,"Call $entity.catchrelease_jobRef haggle
 FireBest CatchReleaseFleetQuestHaggleText
