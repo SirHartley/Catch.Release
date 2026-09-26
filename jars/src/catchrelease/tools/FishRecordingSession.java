@@ -107,8 +107,9 @@ final class FishRecordingSession {
 
     String summary() {
         StringBuilder text = new StringBuilder(String.format(Locale.ROOT,
-                "%d fish recorded. Bots played the same fish and seeds.%n%-10s %9s %9s %9s %9s%n",
-                results.size(), "Band", "You", Skill.BEGINNER, Skill.REGULAR, Skill.SKILLED));
+                "%d fish recorded. Bots played the same fish and seeds.%n%-10s %9s", results.size(), "Band", "You"));
+        for (Skill skill : SKILLS) text.append(String.format(Locale.ROOT, " %9s", skill));
+        text.append('\n');
         List<String> rows = new ArrayList<>(bands);
         rows.add("All");
         for (String band : rows) {

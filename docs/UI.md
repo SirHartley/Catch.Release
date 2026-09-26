@@ -220,6 +220,23 @@ under [authoring tools](ARCHITECTURE.md#registration-and-lifecycle).
 Beginner, Regular and Skilled use delayed screen observations with different
 decision intervals, tracking error and anticipation. They do not read future
 fish targets. These are repeatable test profiles, not calibrated human skill.
+Player (`PlayerModel`) is fitted to the Record play sessions committed in
+`fish-recordings/`. On each 1/32-second tick, the display rate of the machine
+that recorded them, it compares the fish as seen `fishDelay` steps earlier, led
+by the fish's seen speed, with where the bar would stop. It adds aim noise, and
+it switches only past separate press and release thresholds and after a minimum
+press or pause. `FishAnglerCalibration` (run configuration `Fish Angler
+Calibration`, from the mod root, about seven minutes) fits the profile: every candidate plays
+the recorded fish with their recorded seeds. For each delay, Nelder-Mead matches
+the player's catch rate per rarity, coverage, held share, switches per second,
+median press and pause, miss spread and mean catch time. The delay is then
+chosen on seeds the search did not use, because the search overfits its own
+seeds. The tool prints the `RECORDED` line to paste and compares every angler
+with the recording, including a per-fish log score. `FishTunerChecks` requires
+Player to stay within 6 points of the recorded catch rate, 2 points of its
+coverage and 0.4 switches per second, and to predict the recorded catches
+better than every other profile. Refit after new recordings or catch-physics
+changes; recordings whose physics changed no longer replay, and both tools warn.
 Manual mode takes left-mouse or Space only in the focused preview. Losing focus
 releases input and pauses manual play; window focus loss pauses all modes.
 
@@ -241,7 +258,7 @@ for game/model comparison. Both check classes live beside the tools under
 classpath; see [model ownership](ARCHITECTURE.md#registration-and-lifecycle).
 Neither check replaces the full mod build or live in-game QA.
 
-Balance results runs all three anglers with normal losing at fixed 60 Hz, without
+Balance results runs every angler in `FishBalance.SKILLS` with normal losing at fixed 60 Hz, without
 drawing or real-time waits. Up to four workers run fish snapshots independently.
 The default is 30 attempts per angler and a 120-second limit. Timeouts stay
 separate from losses and remain in catch-rate denominators. Catch-time
@@ -305,8 +322,8 @@ bar velocity, progress, coverage, active movement, tell progress and direction),
 wall-clock milliseconds, and the input applied during that step. Columns are
 read by name. The fish never reacts to the bar, so `FishBalance.game` with the
 attempt's seed gives every angler the same fish path: `FishRecording.replays`
-reproduces an attempt from its seed and inputs, and the summary shows the three
-bots' results on the same fish and seeds. `summary.txt` keeps that table.
+reproduces an attempt from its seed and inputs, and the summary shows every
+angler's results on the same fish and seeds. `summary.txt` keeps that table.
 
 ## Keep optimizations local
 

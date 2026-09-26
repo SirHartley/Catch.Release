@@ -45,7 +45,7 @@ final class FishBalancePanel extends JPanel {
     final JTable table;
     final TableRowSorter<ResultTable> sorter;
     final JTextArea details = new JTextArea(7, 60);
-    final JLabel progress = new JLabel("No runs yet. All batches use normal losing and all three anglers.");
+    final JLabel progress = new JLabel("No runs yet. All batches use normal losing and every angler.");
     final JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT));
     final JTabbedPane views = new JTabbedPane();
     final FishBalanceChart chart = new FishBalanceChart();
@@ -95,7 +95,7 @@ final class FishBalancePanel extends JPanel {
         control(settings, "Attempts / angler", samples, "30 is a quick screen, not a precise estimate. Use 100–500 to confirm a suspected difference.");
         control(settings, "First seed", seed, "Each fish and angler gets the same seed list. This makes reruns repeatable.");
         control(settings, "Time limit (s)", limit, "An unfinished attempt is a timeout, never silently a loss. Timeouts count in the total attempts.");
-        control(settings, "Detail profile", profile, "Catch-rate columns show all three anglers. Other columns, time charts and movement summaries use this profile.");
+        control(settings, "Detail profile", profile, "Catch-rate columns show every angler. Other columns, time charts and movement summaries use this profile.");
         top.add(settings);
         JPanel filters = new JPanel(new FlowLayout(FlowLayout.LEFT));
         control(filters, "Find", search, "Case-insensitive name or ID filter. Run visible tests exactly this filtered list.");
@@ -126,8 +126,9 @@ final class FishBalancePanel extends JPanel {
         table.setDefaultRenderer(Object.class, new Cells());
         table.setDefaultRenderer(Double.class, new Cells());
         table.setDefaultRenderer(Integer.class, new Cells());
-        for (int i = 0; i < model.getColumnCount(); i++) table.getColumnModel().getColumn(i).setPreferredWidth(i == 0 ? 170 : i == 14 ? 240 : 108);
-        sorter.setSortKeys(List.of(new RowSorter.SortKey(15, SortOrder.ASCENDING), new RowSorter.SortKey(4, SortOrder.ASCENDING)));
+        for (int i = 0; i < model.getColumnCount(); i++) table.getColumnModel().getColumn(i).setPreferredWidth(i == 0 ? 170 : i == model.after(8) ? 240 : 108);
+        sorter.setSortKeys(List.of(new RowSorter.SortKey(model.after(9), SortOrder.ASCENDING),
+                new RowSorter.SortKey(3 + SKILLS.indexOf(Skill.REGULAR), SortOrder.ASCENDING)));
         table.getSelectionModel().addListSelectionListener(event -> {
             if (!refreshing && !event.getValueIsAdjusting()) {
                 showDetails();
@@ -150,7 +151,7 @@ final class FishBalancePanel extends JPanel {
         JPanel plots = new JPanel(new BorderLayout());
         plots.add(chartMode, BorderLayout.NORTH);
         plots.add(new JScrollPane(chart));
-        help.accept(chartMode, "Catch rates: three bars per fish, fixed 0–100% scale. Time spread: 10th–90th percentile of successful catches, with median. Few successes give weak estimates.");
+        help.accept(chartMode, "Catch rates: one bar per angler for each fish, fixed 0–100% scale. Time spread: 10th–90th percentile of successful catches, with median. Few successes give weak estimates.");
         help.accept(chart, "Charts follow filters and table sort, and exclude stale results. Colours distinguish anglers, not fish rarity.");
         views.addTab("Charts", plots);
         behaviors.setEditable(false);
@@ -402,24 +403,41 @@ final class FishBalancePanel extends JPanel {
     }
 
     void showColumnHelp(int column) {
+        if (column >= 3 && column < model.after(0)) {
+            Skill skill = SKILLS.get(column - 3);
+            bottomHelp.accept(skill + " catches / all attempts. Timeouts stay in the denominator."
+                    + (skill == Skill.PLAYER ? " Player is fitted to recorded manual play; see FishAnglerCalibration." : ""));
+            return;
+        }
         String[] text = {"Fish name; Open in tuner edits this species.", "Declared movement; MIXED remains a separate group.", "Rarity, not a difficulty rating.",
-                "Beginner catches / all attempts. Timeouts stay in the denominator.", "Regular catches / all attempts.", "Skilled catches / all attempts.",
                 "Attempts per angler. More samples reduce random uncertainty.", "Median successful catch time: half the catches took longer.",
                 "90th percentile: roughly one in ten successful catches took longer.", "Sample standard deviation of successful catch times; higher means more variation.",
                 "Actual covered time / total time across all attempts.", "Longest uninterrupted time outside the indicator in any attempt.",
                 "Total time spent on losses and timeouts divided by all attempts.", "Unfinished attempts at the time limit, not losses.", "Warnings for the detail profile; not automatic balance judgements.", "Freshness compared with current fish values, equipment, sample count, seeds and time limit."};
-        bottomHelp.accept(text[column]);
+        bottomHelp.accept(text[column < 3 ? column : column - SKILLS.size()]);
     }
 
     final class ResultTable extends AbstractTableModel {
 
-        final String[] columns = {"Fish", "Movement", "Rarity", "Beginner %", "Regular %", "Skilled %", "N / angler",
-                "Median catch s", "P90 catch s", "Catch SD s", "Coverage %", "Worst gap s", "Wasted s / try", "Timeouts", "Flags", "Status"};
+        final String[] columns;
+
+        ResultTable() {
+            List<String> names = new ArrayList<>(List.of("Fish", "Movement", "Rarity"));
+            for (Skill skill : SKILLS) names.add(skill + " %");
+            names.addAll(List.of("N / angler", "Median catch s", "P90 catch s", "Catch SD s", "Coverage %", "Worst gap s",
+                    "Wasted s / try", "Timeouts", "Flags", "Status"));
+            columns = names.toArray(String[]::new);
+        }
+
+        // index of a column after the per-angler catch rates, counted from "N / angler"
+        int after(int offset) { return 3 + SKILLS.size() + offset; }
 
         public int getRowCount() { return sheet.fish.size(); }
         public int getColumnCount() { return columns.length; }
         public String getColumnName(int column) { return columns[column]; }
-        public Class<?> getColumnClass(int column) { return column == 6 || column == 13 ? Integer.class : column >= 3 && column <= 12 ? Double.class : String.class; }
+        public Class<?> getColumnClass(int column) {
+            return column == after(0) || column == after(7) ? Integer.class : column >= 3 && column <= after(6) ? Double.class : String.class;
+        }
 
         public Object getValueAt(int index, int column) {
             FishTuningSheet.Row row = sheet.fish.get(index);
@@ -427,20 +445,20 @@ final class FishBalancePanel extends JPanel {
             if (column == 0) return row.name;
             if (column == 1) return row.motion.name();
             if (column == 2) return row.rarity;
-            if (column == 15) return result == null ? "Not tested" : fresh(row, result) ? "Current" : "Stale";
+            if (column == after(9)) return result == null ? "Not tested" : fresh(row, result) ? "Current" : "Stale";
             if (result == null) return null;
+            if (column < after(0)) return result.skills().get(SKILLS.get(column - 3)).catchRate();
             Stats stats = result.skills().get(profile());
-            return switch (column) {
-                case 3, 4, 5 -> result.skills().get(SKILLS.get(column - 3)).catchRate();
-                case 6 -> stats.attempts().size();
-                case 7 -> finite(stats.time(0.5));
-                case 8 -> finite(stats.time(0.9));
-                case 9 -> finite(stats.deviation());
-                case 10 -> stats.coverage();
-                case 11 -> stats.gap();
-                case 12 -> stats.failedSeconds();
-                case 13 -> (int) stats.count(Outcome.TIMEOUT);
-                case 14 -> stats.flags();
+            return switch (column - after(0)) {
+                case 0 -> stats.attempts().size();
+                case 1 -> finite(stats.time(0.5));
+                case 2 -> finite(stats.time(0.9));
+                case 3 -> finite(stats.deviation());
+                case 4 -> stats.coverage();
+                case 5 -> stats.gap();
+                case 6 -> stats.failedSeconds();
+                case 7 -> (int) stats.count(Outcome.TIMEOUT);
+                case 8 -> stats.flags();
                 default -> null;
             };
         }
@@ -459,7 +477,7 @@ final class FishBalancePanel extends JPanel {
                 Result result = results.get(fish.id);
                 setForeground(result != null && !fresh(fish, result) ? new Color(145, 80, 15) : Color.BLACK);
                 int actual = table.convertColumnIndexToModel(column);
-                setBackground(actual >= 3 && actual <= 5 && value instanceof Double d
+                setBackground(actual >= 3 && actual < model.after(0) && value instanceof Double d
                         ? new Color(255 - (int) (d * 0.6), 210 + (int) (d * 0.35), 210)
                         : row % 2 == 0 ? Color.WHITE : new Color(240, 243, 247));
             }

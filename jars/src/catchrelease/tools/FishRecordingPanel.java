@@ -99,7 +99,7 @@ final class FishRecordingPanel extends JPanel {
         }
         summary.setEditable(false);
         summary.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-        help.accept(summary, "Caught out of played per rarity, for you and for the three bots on the same fish and seeds, then one line "
+        help.accept(summary, "Caught out of played per rarity, for you and for every simulated angler on the same fish and seeds, then one line "
                 + "per finished fish. Mean catch time uses your catches only. The folder path can be selected and copied.");
         JPanel options = new JPanel(new BorderLayout(0, 4));
         options.add(form, BorderLayout.NORTH);
@@ -215,7 +215,8 @@ final class FishRecordingPanel extends JPanel {
 
     private void showSummary() {
         StringBuilder text = new StringBuilder(session.summary());
-        if (!session.results.isEmpty()) text.append("\nFish, result, time, bots (B/R/S)\n");
+        if (!session.results.isEmpty()) text.append("\nFish, result, time, bots (").append(String.join("/", SKILLS.stream()
+                .map(skill -> skill.toString().substring(0, 1)).toList())).append(")\n");
         for (FishRecordingSession.Played played : session.results) {
             FishRecording.Attempt attempt = played.attempt();
             text.append(String.format(Locale.ROOT, "%d/%d %-9s %-18.18s %-6s %5.1fs %s%n", attempt.index(), session.planned,

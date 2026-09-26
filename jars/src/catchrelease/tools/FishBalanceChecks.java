@@ -101,7 +101,7 @@ public class FishBalanceChecks {
                 check(panel.worker == null, "identical runs use cache");
                 panel.comparison.compare();
                 check(panel.comparison.before.equals(panel.comparison.after), "unchanged comparison reuses identical result");
-                check(panel.comparison.model.getRowCount() == 3, "comparison reports all anglers");
+                check(panel.comparison.model.getRowCount() == SKILLS.size(), "comparison reports all anglers");
                 check(panel.comparison.model.getValueAt(1, 3).equals("0.0"), "unchanged catch delta is zero");
                 row.values[Field.SPEED.ordinal()] += 0.1;
                 panel.comparison.refresh();

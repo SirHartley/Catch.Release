@@ -8,6 +8,7 @@ import java.util.List;
 
 import static catchrelease.tools.FishBalance.*;
 import static catchrelease.tools.FishTuningSheet.Field;
+import static catchrelease.tools.SimulatedAngler.Skill;
 
 final class FishBalanceExperiments extends JPanel {
 
@@ -16,12 +17,11 @@ final class FishBalanceExperiments extends JPanel {
     final JSpinner low = new JSpinner(new SpinnerNumberModel(0.8, 0d, 10000d, 0.05));
     final JSpinner high = new JSpinner(new SpinnerNumberModel(1.2, 0d, 10000d, 0.05));
     final JSpinner points = new JSpinner(new SpinnerNumberModel(5, 2, 21, 1));
-    final DefaultTableModel model = new DefaultTableModel(new String[]{"Value", "Beginner %", "Regular %", "Skilled %",
-            "Median s", "P90 s", "Timeouts", "Flags"}, 0) {
+    final DefaultTableModel model = new DefaultTableModel(columns(), 0) {
         @Override
         public boolean isCellEditable(int row, int column) { return false; }
         @Override
-        public Class<?> getColumnClass(int column) { return column == 7 ? String.class : Double.class; }
+        public Class<?> getColumnClass(int column) { return column == getColumnCount() - 1 ? String.class : Double.class; }
     };
     final JTable table = new JTable(model);
     final FishBalanceChart chart = new FishBalanceChart();
@@ -47,7 +47,7 @@ final class FishBalanceExperiments extends JPanel {
         owner.control(controls, "Field", field, "Vary one field while all other fish values and the test setup stay fixed.");
         owner.control(controls, "From", low, "Lowest candidate value, inclusive. Must be within this fish field's allowed range.");
         owner.control(controls, "To", high, "Highest candidate value, inclusive. Candidates are evenly spaced.");
-        owner.control(controls, "Steps", points, "Every candidate is tested with all three anglers and the same seeds.");
+        owner.control(controls, "Steps", points, "Every candidate is tested with every angler and the same seeds.");
         owner.button(controls, "Run sweep", "Run a one-field experiment for the selected fish. Does not edit fish.csv or the live values.", this::run);
         owner.button(controls, "Apply selected", "Apply just this candidate field through the tuner's normal Undo history. Save fish.csv is still separate.", this::apply);
         status.setEditable(false);
@@ -143,9 +143,11 @@ final class FishBalanceExperiments extends JPanel {
         for (Result result : completed) {
             Stats stats = result.skills().get(owner.profile());
             double value = result.request().fish().values().get(testedField.ordinal());
-            model.addRow(new Object[]{value, result.skills().get(SKILLS.get(0)).catchRate(), result.skills().get(SKILLS.get(1)).catchRate(),
-                    result.skills().get(SKILLS.get(2)).catchRate(), FishBalancePanel.finite(stats.time(0.5)), FishBalancePanel.finite(stats.time(0.9)),
-                    (double) stats.count(Outcome.TIMEOUT), stats.flags()});
+            List<Object> row = new ArrayList<>(List.of(value));
+            for (Skill skill : SKILLS) row.add(result.skills().get(skill).catchRate());
+            row.addAll(Arrays.asList(FishBalancePanel.finite(stats.time(0.5)), FishBalancePanel.finite(stats.time(0.9)),
+                    (double) stats.count(Outcome.TIMEOUT), stats.flags()));
+            model.addRow(row.toArray());
             Spec labelled = new Spec(original.id(), testedField.label + " " + value(value), original.rarity(), original.motion(), result.request().fish().values());
             chartRows.add(new Result(new Request(labelled, result.request().setup(), result.request().plan()), result.skills()));
         }
@@ -155,5 +157,12 @@ final class FishBalanceExperiments extends JPanel {
                 + (contextUnchanged() ? "" : " | STALE: test settings changed")
                 + "\n" + requests.get(0).setup() + " | " + requests.get(0).plan());
         status.setCaretPosition(0);
+    }
+
+    private static String[] columns() {
+        List<String> names = new ArrayList<>(List.of("Value"));
+        for (Skill skill : SKILLS) names.add(skill + " %");
+        names.addAll(List.of("Median s", "P90 s", "Timeouts", "Flags"));
+        return names.toArray(String[]::new);
     }
 }
