@@ -69,10 +69,14 @@ Unset keys in comparisons:
 |---|---|
 | `$x` | fails |
 | `!$x` | passes |
-| `$x == value` | fails |
+| `$x == value` | fails, except for the values below |
+| `$x == false`, `$x == 0`, `$x == null` | passes: `$x` counts as 0, and 0 equals `false` and `null` |
 | `$x != value` | passes |
+| `$x != null` | fails; use it to test that a key is set |
 | `$x > 3`, `<`, `<=`, `>=` | `$x` counts as 0 |
 | `$x == $y`, both unset | passes |
+
+`$x != false` therefore passes whether `$x` is unset or holds any value other than `false`; it does not test that the key exists (comparison in the rule expression's `isTrueFor`, `sources-obf/campaign.rules.java` bundle lines 1024–1131).
 
 `$x = 5` stores the String `"5"`; `$x = $y` copies whatever object `$y` holds; `$x++` stores a Float. Quote a String with spaces: `$x = "two words" 0`.
 
@@ -217,7 +221,7 @@ Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Shared text-presen
 - A harpoon offence may coexist with Fisherman flags. Preserve the Fisherman exclusion on generic harpooned-crew greetings.
 - Explicitly fire the intended menu trigger on entry and return; do not rely on the trigger's name to schedule it. Rows with no options may retain an old panel. Check actual rules and driver behavior for the path being edited.
 - `$hailing` and `$highlightComms` are consumed while vanilla builds fleet interaction. Do not treat them as lasting quest state.
-- Colour an option after it has been added. Use the existing later, condition-matched colour row rather than relying on an earlier script. Retain the shared `highlightJobText` path for job dialogue.
+- Colour an option after it has been added: in the Script of the row that adds it, or of a later row, never earlier. In a `FireAll` every collected option exists before any matched row's Script runs. Retain the shared `highlightJobText` path for job dialogue.
 
 Check displayed highlight occurrences using [DIALOGUE.md](DIALOGUE.md#shared-text-presentation). Java `QuestDialogMap` placement and cleanup are covered by [UI.md](UI.md#intel-and-sidebar-maps).
 
