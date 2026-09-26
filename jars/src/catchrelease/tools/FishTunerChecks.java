@@ -31,6 +31,7 @@ public class FishTunerChecks {
         System.out.println("Loaded " + real.fish.size() + " fish and images");
         rosterChecks(real);
         playerChecks();
+        rarityBandChecks(real);
         SwingUtilities.invokeAndWait(() -> {
             try { uiChecks(real); }
             catch (Exception ex) { throw new RuntimeException(ex); }
@@ -202,6 +203,31 @@ public class FishTunerChecks {
             }
         }
         System.out.println("No input: at most " + worst + " of 20 caught by holding or never pressing" + (worst > 0 ? ", " + worstFish : ""));
+    }
+
+    // Player catch-rate band per rarity, in percent; rarity must read as difficulty, so bands do not touch
+    static final Map<String, double[]> RARITY_BANDS = Map.of("COMMON", new double[]{84, 95}, "UNCOMMON", new double[]{65, 75},
+            "RARE", new double[]{47, 57}, "EPIC", new double[]{29, 39}, "LEGENDARY", new double[]{13, 21});
+    // 400 attempts measure a rate to about ±2.5 points
+    static final double BAND_ALLOWANCE = 4;
+
+    static void rarityBandChecks(FishTuningSheet sheet) {
+        FishBalance.Setup setup = new FishBalance.Setup(Tackle.NONE, FishConstants.MINIGAME_BAR_SIZE_FALLBACK, 1, 1, 1);
+        List<String> outside = sheet.fish.parallelStream().map(row -> {
+            FishBalance.Spec spec = FishBalance.Spec.of(row, false);
+            int caught = 0;
+            for (long seed = 0; seed < 400; seed++) {
+                try {
+                    if (FishBalance.attempt(spec, setup, SimulatedAngler.Skill.PLAYER, seed, 120).outcome() == FishBalance.Outcome.CAUGHT) caught++;
+                } catch (InterruptedException ex) {
+                    throw new IllegalStateException(ex);
+                }
+            }
+            double rate = caught / 4.0, low = RARITY_BANDS.get(row.rarity)[0], high = RARITY_BANDS.get(row.rarity)[1];
+            return rate < low - BAND_ALLOWANCE || rate > high + BAND_ALLOWANCE ? row.id + " " + row.rarity + " " + rate + "%" : null;
+        }).filter(Objects::nonNull).toList();
+        check(outside.isEmpty(), "Player catch rate outside its rarity band: " + outside);
+        System.out.println("Rarity bands: every fish's Player catch rate lies in its band");
     }
 
     // the Player profile must still play the recorded fish the way the recorded player did
