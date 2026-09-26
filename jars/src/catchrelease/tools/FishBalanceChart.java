@@ -16,7 +16,7 @@ final class FishBalanceChart extends JPanel {
     static final int ROW = 60;
 
     List<Result> results = List.of();
-    Skill profile = Skill.REGULAR;
+    Skill profile = Skill.PLAYER;
     boolean times;
 
     FishBalanceChart() {

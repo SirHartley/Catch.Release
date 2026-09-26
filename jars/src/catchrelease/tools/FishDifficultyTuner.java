@@ -73,7 +73,7 @@ public final class FishDifficultyTuner extends JPanel {
         this.sheet = sheet;
         setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         for (FishTuningSheet.Row row : sheet.fish) fish.addItem(row);
-        skill.setSelectedItem(SimulatedAngler.Skill.REGULAR);
+        skill.setSelectedItem(SimulatedAngler.Skill.PLAYER);
         buildControls();
         installEvents();
         selectFish();
