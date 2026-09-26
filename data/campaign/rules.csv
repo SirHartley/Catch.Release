@@ -2889,8 +2889,7 @@ CatchReleaseCMD leaveEncounter","$PersonRank $personName studies you.
 The claim file remains open when the link closes.",,
 ,,,,,,
 # tutorial wreck,,,,,,
-catchrelease_wreckOpen,OpenInteractionDialog,$catchrelease_tutorialWreck score:1000,"ShowDefaultVisual
-SetShortcut catchrelease_wreckLeave ""ESCAPE""","Your sensors officer picks a cold hull out of the debris field: an old auxiliary stripped farther than a salvage crew would ordinarily bother.
+catchrelease_wreckOpen,OpenInteractionDialog,$catchrelease_tutorialWreck score:1000,ShowDefaultVisual,"Your sensors officer picks a cold hull out of the debris field: an old auxiliary stripped farther than a salvage crew would ordinarily bother.
 
 One object remains attached to the dorsal handling deck.
 
@@ -2899,7 +2898,7 @@ At first it reads as part of the ship. Closer inspection resolves a reinforced s
 The frame is held to the wreck by three emergency clamps. None belong to the wreck.","catchrelease_wreckLook:Inspect the derelict
 catchrelease_wreckTake:Recover the service assembly
 catchrelease_wreckExplore:Explore the derelict
-catchrelease_wreckLeave:Leave the wreck alone",
+defaultLeave:Leave the wreck alone",
 catchrelease_wreckLook,DialogOptionSelected,$option == catchrelease_wreckLook,,"The boarding party finds an ordinary dead ship.
 
 The reactor is cold. The lockers have been emptied. Someone took the expensive avionics and left the galley fittings. There are no bodies.
@@ -2916,18 +2915,18 @@ catchrelease_wreckLook2,DialogOptionSelected,$option == catchrelease_wreckLook2,
 The transponder package still contains the last service handshake it accepted.
 
 The source is listed simply as FISHERMAN.","catchrelease_wreckTake:Recover the assembly
-catchrelease_wreckLeave:Leave it",
+catchrelease_wreckExplore:Explore the derelict
+defaultLeave:Leave it",
 catchrelease_wreckTake,DialogOptionSelected,$option == catchrelease_wreckTake,"CatchReleaseCMD carryFisherProperty
 CatchReleaseCMD showIntroIntel","The frame comes over on the heavy cargo crane.
 
 It is larger aboard your ship than it looked outside: several tonnes of scarred mechanism, docking hardware, and sealed electronics wrapped around an empty space - clearly intended to hold a craft of some kind, now absent.
 
 Your crew lash it down.","catchrelease_wreckExplore:Explore the derelict
-catchrelease_wreckLeave:Leave",
+defaultLeave:Leave",
 catchrelease_wreckExplore,DialogOptionSelected,$option == catchrelease_wreckExplore,"SalvageGenFromSeed
 FireBest ShowSalvageEntityDetails
 FireBest SalvageCheckHostile",,,
-catchrelease_wreckLeave,DialogOptionSelected,$option == catchrelease_wreckLeave,DismissDialog,,,
 ,,,,,,
 # tutorial castaway,,,,,,
 catchrelease_castawayOpen,OpenInteractionDialog,"$market.isPlanetConditionMarketOnly
