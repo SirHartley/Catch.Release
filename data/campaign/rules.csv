@@ -4084,12 +4084,6 @@ You do not remember offering it.
 
 ""Come back if you need anything unreasonable.""",,
 ,,,,,,
-# harpooned fleet greetings,,,,,,
-catchrelease_harpoonedGreet0,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 0,,,,
-catchrelease_harpoonedGreet1,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 1,,,,
-catchrelease_harpoonedGreet2,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 2,,,,
-catchrelease_harpoonedGreet3,CatchReleaseHarpoonedGreeting,$catchreleaseHarpoonLine == 3,,,,
-,,,,,,
 # tutorial dialogue,,,,,,
 catchrelease_introHarpoon,DialogOptionSelected,"$option == catchrelease_fisherIntro score:100
 CatchReleaseCMD tokens
