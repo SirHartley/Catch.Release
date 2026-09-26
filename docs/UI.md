@@ -237,6 +237,9 @@ Player to stay within 6 points of the recorded catch rate, 2 points of its
 coverage and 0.4 switches per second, and to predict the recorded catches
 better than every other profile. Refit after new recordings or catch-physics
 changes; recordings whose physics changed no longer replay, and both tools warn.
+Player is the default Live tuning input and the default Balance results detail
+profile, which drives the time, coverage, gap and flag columns, the time chart,
+the movement summaries and the advice; the table first sorts by Player catch rate.
 Manual mode takes left-mouse or Space only in the focused preview. Losing focus
 releases input and pauses manual play; window focus loss pauses all modes.
 

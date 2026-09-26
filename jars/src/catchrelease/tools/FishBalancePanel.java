@@ -79,7 +79,7 @@ final class FishBalancePanel extends JPanel {
         samples.setPreferredSize(new Dimension(65, 25));
         seed.setPreferredSize(new Dimension(90, 25));
         limit.setPreferredSize(new Dimension(65, 25));
-        profile.setSelectedItem(Skill.REGULAR);
+        profile.setSelectedItem(Skill.PLAYER);
         movement.addItem("All movements");
         for (FishMotion value : FishMotion.values()) movement.addItem(value.name());
         rarity.addItem("All rarities");
@@ -128,7 +128,7 @@ final class FishBalancePanel extends JPanel {
         table.setDefaultRenderer(Integer.class, new Cells());
         for (int i = 0; i < model.getColumnCount(); i++) table.getColumnModel().getColumn(i).setPreferredWidth(i == 0 ? 170 : i == model.after(8) ? 240 : 108);
         sorter.setSortKeys(List.of(new RowSorter.SortKey(model.after(9), SortOrder.ASCENDING),
-                new RowSorter.SortKey(3 + SKILLS.indexOf(Skill.REGULAR), SortOrder.ASCENDING)));
+                new RowSorter.SortKey(3 + SKILLS.indexOf(Skill.PLAYER), SortOrder.ASCENDING)));
         table.getSelectionModel().addListSelectionListener(event -> {
             if (!refreshing && !event.getValueIsAdjusting()) {
                 showDetails();
