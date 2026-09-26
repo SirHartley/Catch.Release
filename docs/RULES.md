@@ -210,6 +210,7 @@ Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Shared text-presen
 | `$catchrelease_fleetQuestThanksPending` | Separate gate for completed-job thanks; consumed with its saved text. |
 | `CatchReleaseFisherOptions` | Private Fisherman business menu; enter with `$menuState == catchreleaseFisher`. |
 | `CatchReleaseFisherResume` | Rebuild after picker/panel cancellation. |
+| `CatchReleaseFisherQuestions` | Private Fisherman question menu. Entry and page rows run `CatchReleaseCMD tokens` and `CatchReleaseCMD fisherQuestions` before firing it; `$catchreleaseFisherAskPage` selects the page. Unasked questions have no order, asked ones order 50 in gray, Previous and Next 90, Back 100. Every question row ends with `CatchReleaseCMD fisherAskOnPage`. |
 | `CatchReleaseRumorText` | Private Fisherman lead display. `CatchReleaseCMD tokens` prepares `$catchreleaseRumorKind` from the saved rumor before selecting one complete Text row, including combined effects or `none`. Rendering never rolls a new lead; the caller supplies Continue. |
 | `CatchReleaseFleetResolutionOptions` | Peaceful fleet result menu with Escape-bound Leave. |
 

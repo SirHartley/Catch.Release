@@ -37,6 +37,7 @@ import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.OptionPanelAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.rules.MemKeys;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.campaign.rules.RuleAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
@@ -49,6 +50,7 @@ import com.fs.starfarer.api.util.Misc.Token;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -108,9 +110,22 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String RUMOR_OUTSIDER = "$catchreleaseRumorOutsider";
     public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
 
+    public static final String SELL_COMMON_COLOR = "$catchreleaseSellCommonColor";
+    public static final String SELL_UNCOMMON_COLOR = "$catchreleaseSellUncommonColor";
+    public static final String SELL_RARE_COLOR = "$catchreleaseSellRareColor";
+    public static final String SELL_EPIC_COLOR = "$catchreleaseSellEpicColor";
+
+    protected static final String FISHER_QUESTIONS = "CatchReleaseFisherQuestions";
     protected static final String FISHER_ASK_PAGE = "$catchreleaseFisherAskPage";
-    protected static final String FISHER_ASK_COUNT = "$catchreleaseFisherAskCount";
+    protected static final String FISHER_ASK_SHOWN = "$catchreleaseFisherAskShown";
+    protected static final String FISHER_ASK_HAS_PREVIOUS = "$catchreleaseFisherAskHasPrevious";
+    protected static final String FISHER_ASK_HAS_NEXT = "$catchreleaseFisherAskHasNext";
     protected static final int FISHER_ASK_PAGE_SIZE = 6;
+    // questions sort before this option order; Previous, Next and Back sit at or after it
+    protected static final float FISHER_ASK_NAV_ORDER = 90f;
+
+    // true while prepareFisherQuestions lists every visible question, so the page condition lets all through
+    protected static boolean listingFisherQuestions;
 
     public static final String CRAB_ANY = "$catchreleaseCrabAny";
     public static final String CRAB_EXPLOSIVE_TARGET = "$catchreleaseCrabExplosiveTarget";
@@ -131,6 +146,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String LAMP_FINE_TEXT = "$catchrelease_lampFineDGS";
     public static final String LAMP_WHERE = "$catchrelease_lampWhere";
     public static final String LAMP_HAUL = "$catchrelease_lampHaul";
+    public static final String LAMP_ALREADY_DARK = "$catchrelease_lampAlreadyDark";
 
     protected transient InteractionDialogPlugin behind;
     protected transient boolean panelOpen;
@@ -150,9 +166,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 writeTokens(dialog, memoryMap);
                 return true;
 
-            case "dropCutComm":
-                return dropCutComm(dialog);
-
             case "leaveEncounter":
                 return leaveEncounter(dialog);
             case "bribeHitman":
@@ -167,14 +180,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
             case "sellUpTo":
                 return FishBuyer.sellUpTo(dialog, arg);
-            case "colorBulkSaleOptions":
-                return colorBulkSaleOptions(dialog);
-            case "beginFisherQuestions":
-                return beginFisherQuestions(dialog, memoryMap);
-            case "addFisherQuestion":
-                return addFisherQuestion(dialog, params, memoryMap);
-            case "finishFisherQuestions":
-                return finishFisherQuestions(dialog, params, memoryMap);
+            case "sellTooltip":
+                return sellTooltip(dialog, arg, params.size() > 2 ? params.get(2).getString(memoryMap) : null);
+            case "fisherQuestions":
+                return prepareFisherQuestions(dialog, memoryMap);
+            case "fisherAskOnPage":
+                return isFisherQuestionOnPage(ruleId, memoryMap);
             case "highlightJobText":
                 return highlightJobText(ruleId, dialog, params, memoryMap);
             case "highlightWorkText":
@@ -293,12 +304,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return CrabWares.buyFallbackBass();
             case "crabExplosivePending":
                 return CrabWares.hasUnmentionedExplosiveUse();
-            case "crabExplosiveSettled":
-                return !CrabWares.hasUnmentionedExplosiveUse();
-            case "beginCrabOptions":
-                return beginCrabOptions(dialog);
-            case "addCrabOption":
-                return addCrabOption(dialog, params, memoryMap);
+            case "crabTooltip":
+                return addCrabTooltip(dialog, arg, params.size() > 2 ? params.get(2).getString(memoryMap) : null);
             case "crabAcknowledgeExplosive":
                 CrabWares.acknowledgeExplosiveUse();
                 return true;
@@ -359,28 +366,12 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
-    protected boolean beginCrabOptions(InteractionDialogAPI dialog) {
-        if (dialog == null || dialog.getOptionPanel() == null) return false;
-
-        dialog.getOptionPanel().clearOptions();
-        return true;
-    }
-
-    protected boolean addCrabOption(InteractionDialogAPI dialog, List<Token> params,
-                                    Map<String, MemoryAPI> memoryMap) {
-        if (dialog == null || dialog.getOptionPanel() == null || params.size() < 3) return false;
-
-        String optionId = params.get(1).getString(memoryMap);
-        String label = params.get(2).getString(memoryMap);
-        String stock = params.size() > 3 ? params.get(3).getString(memoryMap) : null;
-        if (optionId == null || label == null) return false;
-
-        dialog.getOptionPanel().addOption(label, optionId);
-        if (stock == null || stock.isEmpty()) return true;
+    protected boolean addCrabTooltip(InteractionDialogAPI dialog, String optionId, String stock) {
+        if (dialog == null || dialog.getOptionPanel() == null || optionId == null || stock == null) return false;
 
         if ("BACKDROP".equalsIgnoreCase(stock)) {
             Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
-            if (scene == null) return true;
+            if (scene == null) return false;
 
             addCrabCostTooltip(dialog.getOptionPanel(), optionId,
                     "A rolled aquarium backdrop: " + scene.getDisplayName() + ".",
@@ -420,96 +411,62 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         });
     }
 
-    protected boolean colorBulkSaleOptions(InteractionDialogAPI dialog) {
-        if (dialog == null || dialog.getOptionPanel() == null) return false;
+    protected boolean sellTooltip(InteractionDialogAPI dialog, String optionId, String rarity) {
+        if (dialog == null || optionId == null || rarity == null) return false;
 
-        if (FishBuyer.countUpTo(FishRarity.COMMON) > 0) {
-            dialog.setOptionColor("catchrelease_fisherSellCommon", FishRarity.COMMON.color);
-            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellCommon",
-                    FishRarity.COMMON);
-        }
-        if (FishBuyer.countUpTo(FishRarity.UNCOMMON) > 0) {
-            dialog.setOptionColor("catchrelease_fisherSellUncommon", FishRarity.UNCOMMON.color);
-            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellUncommon",
-                    FishRarity.UNCOMMON);
-        }
-        if (FishBuyer.countUpTo(FishRarity.RARE) > 0) {
-            dialog.setOptionColor("catchrelease_fisherSellRare", FishRarity.RARE.color);
-            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellRare",
-                    FishRarity.RARE);
-        }
-        if (FishBuyer.countUpTo(FishRarity.EPIC) > 0) {
-            dialog.setOptionColor("catchrelease_fisherSellEpic", FishRarity.EPIC.color);
-            FishBuyer.addDescriptionTooltip(dialog, "catchrelease_fisherSellEpic",
-                    FishRarity.EPIC);
-        }
-
-        return true;
-    }
-
-    protected boolean beginFisherQuestions(InteractionDialogAPI dialog,
-                                           Map<String, MemoryAPI> memoryMap) {
-        MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
-        if (dialog == null || dialog.getOptionPanel() == null || local == null) return false;
-
-        dialog.getOptionPanel().clearOptions();
-        local.set(FISHER_ASK_COUNT, 0, 0);
-        return true;
-    }
-
-    protected boolean addFisherQuestion(InteractionDialogAPI dialog, List<Token> params,
-                                        Map<String, MemoryAPI> memoryMap) {
-        MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
-        if (dialog == null || dialog.getOptionPanel() == null || local == null
-                || params.size() < 4) {
+        try {
+            FishBuyer.addDescriptionTooltip(dialog, optionId, FishRarity.valueOf(rarity.trim().toUpperCase()));
+            return true;
+        } catch (IllegalArgumentException e) {
             return false;
         }
+    }
 
-        String optionId = params.get(1).getString(memoryMap);
-        String label = params.get(2).getString(memoryMap);
-        boolean asked = params.get(3).getBoolean(memoryMap);
-        if (optionId == null || label == null) return false;
+    // Rows own the questions; this works out which of the visible ones fall on the current page.
+    protected boolean prepareFisherQuestions(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
+        MemoryAPI local = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
+        if (dialog == null || local == null) return false;
 
-        int index = local.getInt(FISHER_ASK_COUNT);
-        int page = Math.max(0, local.getInt(FISHER_ASK_PAGE));
-        int first = page * FISHER_ASK_PAGE_SIZE;
+        List<RuleAPI> matched;
+        listingFisherQuestions = true;
+        try {
+            matched = Global.getSector().getRules().getAllMatching(null, FISHER_QUESTIONS, dialog, memoryMap);
+        } finally {
+            listingFisherQuestions = false;
+        }
 
-        if (index >= first && index < first + FISHER_ASK_PAGE_SIZE) {
-            if (asked) {
-                dialog.getOptionPanel().addOption(label, optionId, Misc.getGrayColor(), null);
-            } else {
-                dialog.getOptionPanel().addOption(label, optionId);
+        List<RuleAPI> questions = new ArrayList<>();
+        for (RuleAPI rule : matched) {
+            if (!rule.getOptions().isEmpty() && rule.getOptions().get(0).order < FISHER_ASK_NAV_ORDER) {
+                questions.add(rule);
             }
         }
+        // stable, as FireAll sorts the options it shows
+        questions.sort(Comparator.comparingDouble(rule -> rule.getOptions().get(0).order));
 
-        local.set(FISHER_ASK_COUNT, index + 1, 0);
+        int lastPage = Math.max(0, (questions.size() - 1) / FISHER_ASK_PAGE_SIZE);
+        int page = Math.max(0, Math.min(lastPage, local.getInt(FISHER_ASK_PAGE)));
+        int first = page * FISHER_ASK_PAGE_SIZE;
+
+        StringBuilder shown = new StringBuilder(",");
+        for (int i = first; i < Math.min(questions.size(), first + FISHER_ASK_PAGE_SIZE); i++) {
+            shown.append(questions.get(i).getId()).append(',');
+        }
+
+        local.set(FISHER_ASK_PAGE, page, 0);
+        local.set(FISHER_ASK_SHOWN, shown.toString(), 0);
+        local.set(FISHER_ASK_HAS_PREVIOUS, page > 0, 0);
+        local.set(FISHER_ASK_HAS_NEXT, page < lastPage, 0);
         return true;
     }
 
-    protected boolean finishFisherQuestions(InteractionDialogAPI dialog, List<Token> params,
-                                             Map<String, MemoryAPI> memoryMap) {
-        MemoryAPI local = memoryMap == null ? null : memoryMap.get("local");
-        if (dialog == null || dialog.getOptionPanel() == null || local == null
-                || params.size() < 7) {
-            return false;
-        }
+    // a condition: the engine passes the id of the row being matched
+    protected boolean isFisherQuestionOnPage(String ruleId, Map<String, MemoryAPI> memoryMap) {
+        if (listingFisherQuestions) return true;
 
-        int page = Math.max(0, local.getInt(FISHER_ASK_PAGE));
-        int count = local.getInt(FISHER_ASK_COUNT);
-
-        String previousId = params.get(1).getString(memoryMap);
-        String previousLabel = params.get(2).getString(memoryMap);
-        String nextId = params.get(3).getString(memoryMap);
-        String nextLabel = params.get(4).getString(memoryMap);
-        String backId = params.get(5).getString(memoryMap);
-        String backLabel = params.get(6).getString(memoryMap);
-
-        if (page > 0) dialog.getOptionPanel().addOption(previousLabel, previousId);
-        if (count > (page + 1) * FISHER_ASK_PAGE_SIZE) {
-            dialog.getOptionPanel().addOption(nextLabel, nextId);
-        }
-        dialog.getOptionPanel().addOption(backLabel, backId);
-        return true;
+        MemoryAPI local = memoryMap == null ? null : memoryMap.get(MemKeys.LOCAL);
+        String shown = local == null ? null : local.getString(FISHER_ASK_SHOWN);
+        return shown != null && ruleId != null && shown.contains("," + ruleId + ",");
     }
 
     protected boolean highlightJobText(String ruleId, InteractionDialogAPI dialog,
@@ -676,11 +633,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             LampOffence.applyRepLoss(factionId, LampOffence.REP_LOSS, text(dialog));
         }
 
-        if (!SearchlightAbilityPlugin.isBreaching()) {
-            text(dialog).addParagraph("The lamps are already dark. The patrol has the earlier "
-                    + "sensor return on display and proceeds with the stop.");
-        }
-
+        mem.set(LAMP_ALREADY_DARK, !SearchlightAbilityPlugin.isBreaching(), 0);
         return true;
     }
 
@@ -798,6 +751,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(SELL_UNCOMMON, FishBuyer.countUpTo(FishRarity.UNCOMMON) > 0, 0);
         local.set(SELL_RARE, FishBuyer.countUpTo(FishRarity.RARE) > 0, 0);
         local.set(SELL_EPIC, FishBuyer.countUpTo(FishRarity.EPIC) > 0, 0);
+        local.set(SELL_COMMON_COLOR, rgba(FishRarity.COMMON.color), 0);
+        local.set(SELL_UNCOMMON_COLOR, rgba(FishRarity.UNCOMMON.color), 0);
+        local.set(SELL_RARE_COLOR, rgba(FishRarity.RARE.color), 0);
+        local.set(SELL_EPIC_COLOR, rgba(FishRarity.EPIC.color), 0);
         local.set(RUMOR, FishingIntro.isAtLeast(FishingIntro.DONE)
                 && FishRumors.isAvailable(), 0);
 
@@ -849,6 +806,11 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         }
     }
 
+    // the form SetOptionColor and the other colour arguments parse from a memory String
+    protected static String rgba(Color color) {
+        return color.getRed() + "," + color.getGreen() + "," + color.getBlue() + "," + color.getAlpha();
+    }
+
     protected boolean leaveEncounter(InteractionDialogAPI dialog) {
         if (dialog == null) return false;
 
@@ -884,21 +846,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         Global.getSector().getMemoryWithoutUpdate()
                 .set(TutorialConstants.RATING_PLANET_NAME_KEY, market.getName());
-
-        return true;
-    }
-
-    protected boolean dropCutComm(InteractionDialogAPI dialog) {
-        if (dialog == null || dialog.getOptionPanel() == null) return false;
-
-        dialog.getOptionPanel().removeOption(
-                com.fs.starfarer.api.impl.campaign.FleetInteractionDialogPluginImpl.OptionId.CUT_COMM);
-
-        String[] ruleOptions = {
-                "cutCommLink", "cutCommLink2", "cutCommLinkPolite",
-                "cutCommLinkNoText", "cutCommLinkNoText2"
-        };
-        for (String option : ruleOptions) dialog.getOptionPanel().removeOption(option);
 
         return true;
     }

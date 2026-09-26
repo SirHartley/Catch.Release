@@ -154,11 +154,9 @@ Java must not print prose. It may print short receipt lines in the vanilla recei
 
 Options that change with data are a Java job only when the count or labels cannot be known in advance, such as one option per ship. Lines that change with data work the same way: for a list of unknown length, the command writes each item's tokens and fires a line trigger once per item with `FireBest`, so each line's wording and style stay in a row. A fixed set of options belongs in rows, even when Java decides whether each is available: expose that decision as a condition verb.
 
-These existing `CatchReleaseCMD` verbs show Java doing a row's job. Do not copy them into new work:
+A row may still ask Java to decorate an option it added when the decoration needs data rows cannot hold, such as a tooltip that lists every fish a sale would include (`CatchReleaseCMD sellTooltip`) or a cost tooltip built from item data (`CatchReleaseCMD crabTooltip`). Call it from the Script of the row that adds the option.
 
-- `dropCutComm` removes a hard-coded list of option ids from Java instead of `RemoveOption` lines.
-- `colorBulkSaleOptions` holds four copies of "if this cargo exists, color and describe this option" instead of four conditioned rows with `SetOptionColor` and `SetTooltip`.
-- `beginFisherQuestions` / `addFisherQuestion` and `beginCrabOptions` / `addCrabOption` add menu options from a command that does not report `doesCommandAddOptions()`, so `FireAll` never clears the old menu and the code clears it by hand.
+Paging follows the same split. Before the Fisherman question menu's `FireAll`, `CatchReleaseCMD fisherQuestions` lists the visible question rows with `getAllMatching` and stores the current page's row ids for the dialog; each question row's last condition, `CatchReleaseCMD fisherAskOnPage`, only reads that list. The rows keep the labels, order, colour and Previous, Next and Back options.
 
 ### Anti-patterns
 
@@ -340,7 +338,7 @@ A hub mission is its own command target: `Call $<ref> <action>`. Every hub missi
 - **Blank rows** separate conversations and menus.
 - **Moving rows.** Where a block sits in the file matters only for rows of one trigger that can match together, such as `FireAll` menus, `AddBarEvents` entries and intel text. Check them before moving a block ([Editing and validation](RULES.md#editing-and-validation)).
 - **Rule ids** `catchrelease_<feature><Purpose>`, as `catchrelease_hitmanBribeAsk`: sequential numbers for a strictly linear scene (`...Brief1`, `...Brief2`), short names for branches. The loader only rejects a duplicate id under the same trigger, so keep every id unique yourself.
-- **Private triggers** `CatchRelease<Feature><Purpose>`, as `CatchReleaseHitmanBribeOptions`: `...Options` for menus, `...Greeting` or `...Text` for picks and inserts, and a plain descriptive name for a shared insert or side effect, as SotF's `sotfLearnAboutDustkeepers`.
+- **Private triggers** `CatchRelease<Feature><Purpose>`, as `CatchReleaseFisherQuestions`: `...Options` or `...Questions` for menus, `...Greeting` or `...Text` for picks and inserts, and a plain descriptive name for a shared insert or side effect, as SotF's `sotfLearnAboutDustkeepers`.
 - **Comments.** A `#` line inside Conditions, Script or Options is skipped; use it for a non-obvious line, as SotF's `# removes map` explains a bare `ShowPersonVisual`. The notes column can say why a score exists or which rows are deliberate random variants; SotF leaves it empty, so this is a project convention. Keep jokes and history out.
 
 ## Review checklist
