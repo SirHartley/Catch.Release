@@ -171,7 +171,7 @@ public class FishConstants {
     public static final float MINIGAME_TWITCHER_BOUND_SPEED = 1.3f;
     public static final float MINIGAME_SMOOTH_BURST_REACH = 0.2f;
     public static final float MINIGAME_SMOOTH_BURST_SPEED = 1.5f;
-    public static final float MINIGAME_TELL_TIME = 0.3f;
+    public static final float MINIGAME_TELL_TIME = 0.2f;
     public static final float MINIGAME_TELL_DISTANCE = 0.4f;
     public static final float MINIGAME_TELL_SPEED = 0.9f;
     public static final float MINIGAME_TELL_LEAN = 4f;
