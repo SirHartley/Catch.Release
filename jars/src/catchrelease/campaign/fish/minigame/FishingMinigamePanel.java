@@ -402,8 +402,9 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f)
                 + getTell(progress, direction, minigame.getFish().jitter);
 
+        renderTellFlare(centerX, centerY, progress, alphaMult);
         renderMarker(centerX, centerY, alphaMult);
-        renderTellCue(layout, centerX, centerY, progress, direction, alphaMult);
+        renderTellMote(layout, centerX, centerY, progress, direction, alphaMult);
     }
 
     protected void renderMarker(float centerX, float centerY, float alphaMult) {
@@ -432,25 +433,48 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         sprite.renderAtCenter(centerX, centerY);
     }
 
-    // a caret beyond the marker on the side the fish is about to move; it never moves the drawn centre,
-    // so the tools do not mirror it
-    protected void renderTellCue(FishingMinigameLayout layout, float centerX, float centerY,
-                                 float progress, float direction, float alphaMult) {
-        if (direction == 0f) return;
-
+    // the fish's own glow flares before a telegraphed move. Flare and mote never move the drawn centre, so the tools do not mirror them
+    protected void renderTellFlare(float centerX, float centerY, float progress, float alphaMult) {
         float swell = (float) Math.sin(progress * Math.PI);
-        float alpha = swell * swell * FishConstants.MINIGAME_TELL_CUE_ALPHA * alphaMult;
-        float baseY = centerY + direction * (FishConstants.MINIGAME_TELL_CUE_GAP
-                + FishConstants.MINIGAME_TELL_CUE_TRAVEL * progress);
-        float apexY = baseY + direction * FishConstants.MINIGAME_TELL_CUE_HEIGHT;
+        float strength = swell * swell;
+        if (strength <= 0f) return;
 
-        // a short signature move can telegraph from a track end, pointing out past the track
-        float margin = FishConstants.MINIGAME_TELL_CUE_HEIGHT;
-        float shift = MathUtils.clamp(apexY, layout.trackY + margin, layout.trackY + layout.trackHeight - margin) - apexY;
-        float half = FishConstants.MINIGAME_TELL_CUE_WIDTH * 0.5f;
+        float size = FishConstants.MINIGAME_MOTE_HALO_SIZE * (1f + FishConstants.MINIGAME_TELL_FLARE_SWELL * strength);
+        renderGlow(centerX, centerY, size, minigame.getPresentedColor(),
+                FishConstants.MINIGAME_TELL_FLARE_ALPHA * strength * alphaMult);
+    }
 
-        drawChevron(centerX - half, baseY + shift, centerX, apexY + shift, centerX + half, baseY + shift,
-                Color.WHITE, alpha, FishConstants.MINIGAME_TELL_CUE_LINE);
+    // then a small glow slips off toward the coming move and is gone by the time the fish follows
+    protected void renderTellMote(FishingMinigameLayout layout, float centerX, float centerY,
+                                  float progress, float direction, float alphaMult) {
+        if (direction == 0f || progress <= FishConstants.MINIGAME_TELL_MOTE_START) return;
+
+        float leave = (progress - FishConstants.MINIGAME_TELL_MOTE_START) / (1f - FishConstants.MINIGAME_TELL_MOTE_START);
+        float eased = 1f - (1f - leave) * (1f - leave);
+        float y = MathUtils.clamp(centerY + direction * FishConstants.MINIGAME_TELL_MOTE_TRAVEL * eased,
+                layout.trackY, layout.trackY + layout.trackHeight);
+        float alpha = Math.min(1f, leave / 0.15f) * (1f - leave) * (1f - leave)
+                * FishConstants.MINIGAME_TELL_MOTE_ALPHA * alphaMult;
+        float size = FishConstants.MINIGAME_TELL_MOTE_SIZE * (1f - 0.4f * leave);
+
+        renderGlow(centerX, y, size, minigame.getPresentedColor(), alpha);
+        renderGlow(centerX, y, size * 0.3f, Color.WHITE, alpha);
+    }
+
+    protected void renderGlow(float x, float y, float size, Color color, float alpha) {
+        if (alpha <= 0f) return;
+
+        SpriteAPI sprite = getMoteSprite();
+        if (sprite == null) {
+            Disc.draw(x, y, size * 0.5f, color, alpha, 0f, true);
+            return;
+        }
+
+        sprite.setAdditiveBlend();
+        sprite.setColor(color);
+        sprite.setSize(size, size);
+        sprite.setAlphaMult(Math.min(1f, alpha));
+        sprite.renderAtCenter(x, y);
     }
 
     protected void renderChicken(float centerX, float centerY, float size, float alphaMult) {
@@ -646,28 +670,6 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         GL11.glVertex2f(x + width, y);
         GL11.glVertex2f(x + width, y + height);
         GL11.glVertex2f(x, y + height);
-        GL11.glEnd();
-
-        GL11.glPopAttrib();
-    }
-
-    protected static void drawChevron(float x1, float y1, float x2, float y2, float x3, float y3,
-                                      Color color, float alpha, float lineWidth) {
-        if (alpha <= 0f) return;
-
-        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_LINE_BIT | GL11.GL_COLOR_BUFFER_BIT);
-
-        GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glEnable(GL11.GL_BLEND);
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-        GL11.glLineWidth(lineWidth);
-        GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, alpha);
-
-        GL11.glBegin(GL11.GL_LINE_STRIP);
-        GL11.glVertex2f(x1, y1);
-        GL11.glVertex2f(x2, y2);
-        GL11.glVertex2f(x3, y3);
         GL11.glEnd();
 
         GL11.glPopAttrib();

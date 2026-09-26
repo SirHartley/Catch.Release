@@ -556,22 +556,26 @@ public final class FishDifficultyTuner extends JPanel {
                     game.getProgress() * 100, game.getTimeHeld(), game.getTimeTotal());
         }
 
-        // the game panel's caret, scaled to the preview; Swing's y runs down the screen
+        // the game panel's flare and departing mote, scaled to the preview; Swing's y runs down the screen
         private void paintTellCue(Graphics2D g, FishingSimulation game, int fx, int fy, int height) {
+            float progress = game.getTellProgress();
             float direction = game.getTellDirection();
-            if (direction == 0f) return;
+            if (progress <= 0f) return;
             float scale = height / FishConstants.MINIGAME_TRACK_HEIGHT;
-            float swell = (float) Math.sin(game.getTellProgress() * Math.PI);
-            int baseY = fy - Math.round(direction * (FishConstants.MINIGAME_TELL_CUE_GAP
-                    + FishConstants.MINIGAME_TELL_CUE_TRAVEL * game.getTellProgress()) * scale);
-            int apexY = baseY - Math.round(direction * FishConstants.MINIGAME_TELL_CUE_HEIGHT * scale);
-            int half = Math.round(FishConstants.MINIGAME_TELL_CUE_WIDTH * 0.5f * scale);
+            float swell = (float) Math.sin(progress * Math.PI);
             Graphics2D cue = (Graphics2D) g.create();
-            cue.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-                    Math.min(1f, swell * swell * FishConstants.MINIGAME_TELL_CUE_ALPHA)));
-            cue.setStroke(new BasicStroke(FishConstants.MINIGAME_TELL_CUE_LINE));
-            cue.setColor(Color.WHITE);
-            cue.drawPolyline(new int[]{fx - half, fx, fx + half}, new int[]{baseY, apexY, baseY}, 3);
+            int flare = Math.round(FishConstants.MINIGAME_MOTE_HALO_SIZE * (1f + FishConstants.MINIGAME_TELL_FLARE_SWELL * swell * swell) * scale);
+            cue.setColor(new Color(1f, 1f, 1f, Math.min(1f, FishConstants.MINIGAME_TELL_FLARE_ALPHA * swell * swell * 0.5f)));
+            cue.fillOval(fx - flare / 2, fy - flare / 2, flare, flare);
+            if (direction != 0f && progress > FishConstants.MINIGAME_TELL_MOTE_START) {
+                float leave = (progress - FishConstants.MINIGAME_TELL_MOTE_START) / (1f - FishConstants.MINIGAME_TELL_MOTE_START);
+                float eased = 1f - (1f - leave) * (1f - leave);
+                int y = fy - Math.round(direction * FishConstants.MINIGAME_TELL_MOTE_TRAVEL * eased * scale);
+                int size = Math.max(2, Math.round(FishConstants.MINIGAME_TELL_MOTE_SIZE * (1f - 0.4f * leave) * scale));
+                float alpha = Math.min(1f, leave / 0.15f) * (1f - leave) * (1f - leave) * FishConstants.MINIGAME_TELL_MOTE_ALPHA;
+                cue.setColor(new Color(1f, 1f, 1f, Math.min(1f, alpha)));
+                cue.fillOval(fx - size / 2, y - size / 2, size, size);
+            }
             cue.dispose();
         }
 
