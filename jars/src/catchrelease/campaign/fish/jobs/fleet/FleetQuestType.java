@@ -51,6 +51,7 @@ public enum FleetQuestType {
     STARVING(FleetTypes.TRADE_SMALL, 1.1f),
     SCAVENGER_ENGINE(FleetTypes.SCAVENGER_SMALL, 1.2f),
     BURN_WARD(FleetTypes.TRADE_SMALL, 1.2f),
+    FOULED_LINE(FleetTypes.SCAVENGER_SMALL, 1.2f),
     COLLECTOR(FleetTypes.TRADE_SMALL, 1.3f),
     WAGER(FleetTypes.SCAVENGER_SMALL, 1.15f);
 
@@ -356,6 +357,10 @@ public enum FleetQuestType {
                 ask.count = DemandScore.countFor(target, DemandScore.COMMON_BASE, 2, 5);
                 break;
 
+            case FOULED_LINE:
+                if (home == null) return null;
+                break;
+
             case QUOTA:
                 ask.minGrade = FishGrade.FINE;
                 ask.count = DemandScore.countFor(target, DemandScore.COMMON_BASE * 1.5f, 2, 6);
@@ -482,6 +487,7 @@ public enum FleetQuestType {
             case STARVING: return "catchrelease_galleyChief";
             case SCAVENGER_ENGINE: return "catchrelease_coilTechnician";
             case BURN_WARD: return "catchrelease_medicalOfficer";
+            case FOULED_LINE: return "catchrelease_skipper";
             case COLLECTOR: return "catchrelease_collector";
             default: return null;
         }
@@ -529,15 +535,22 @@ public enum FleetQuestType {
             return system != null && !system.hasTag(Tags.THEME_CORE)
                     && QuestPond.findFreePond(system) != null;
         }
+        if (this == FOULED_LINE) return system != null && QuestPond.findFreePond(system) != null;
 
         return !requiresLowCoherenceArea() || system != null
                 && Aberration.baseAt(system.getLocation(), system)
                 >= FishRequirement.LOW_COHERENCE;
     }
 
+    // The ask names one rupture in the giver's system; the job claims it while the catch is owed.
+    public boolean usesQuestPond() {
+        return this == PARLEY_FISH || this == FOULED_LINE;
+    }
+
     // Only catch landed after the job is accepted counts.
     public boolean requiresFreshCatch() {
-        return this == CLAIM_ASSAY || this == PARLEY_FISH || this == BURN_WARD;
+        return this == CLAIM_ASSAY || this == PARLEY_FISH || this == BURN_WARD
+                || this == FOULED_LINE;
     }
 
     // These offers only go to the faction fleets FleetQuestSpawner.fitsDedicatedGiver names.
