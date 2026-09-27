@@ -1,8 +1,3 @@
 id,providerId,weight,probability,factionId,fleetType,minFP,maxFP,cooldownDays,maxActive,dialogTrigger,tags
 catchrelease_stranded_fleet,catchrelease_fleet_quests,10,0.35,independent,smallTrader,20,45,45,1,CatchReleaseDistressFleetQuest,fish_job
 catchrelease_dead_engine,catchrelease_fleet_quests,10,0.35,independent,scavengerSmall,15,30,45,1,CatchReleaseDistressFleetQuest,fish_job
-catchrelease_follower,catchrelease_fleet_quests,10,0.35,hegemony,supplyFleet,45,75,60,1,CatchReleaseDistressFleetQuest,fish_job
-catchrelease_state_dinner,catchrelease_fleet_quests,10,0.35,sindrian_diktat,tradeLiner,40,65,60,1,CatchReleaseDistressFleetQuest,fish_job
-catchrelease_claim_assay,catchrelease_fleet_quests,10,0.35,tritachyon,scavengerMedium,45,75,60,1,CatchReleaseDistressFleetQuest,fish_job
-catchrelease_mandate,catchrelease_fleet_quests,10,0.35,persean,academyFleet,45,75,60,1,CatchReleaseDistressFleetQuest,fish_job
-catchrelease_parley_fish,catchrelease_fleet_quests,10,0.35,pirates,patrolMedium,50,80,60,1,CatchReleaseDistressFleetQuest,fish_job

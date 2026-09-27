@@ -549,7 +549,7 @@ public class FleetQuest extends FishJob {
             return;
         }
         if (type == FleetQuestType.MANDATE) {
-            mandate = String.format(Locale.ROOT, "PL-MSE-%04d-%03d",
+            mandate = String.format(Locale.ROOT, "GA-MSE-%04d-%03d",
                     Global.getSector().getClock().getCycle(), random().nextInt(1000));
             deploymentDepth = String.format(Locale.ROOT, "abyssal index %.2f",
                     0.65f + random().nextFloat() * 0.25f);
@@ -1415,10 +1415,6 @@ public class FleetQuest extends FishJob {
 
     public boolean isActiveRequest() {
         return Stage.WANTED.equals(currentStage) && !isEnding() && !isEnded();
-    }
-
-    public SectorEntityToken getQuestPond() {
-        return type == FleetQuestType.PARLEY_FISH ? questPond : null;
     }
 
     protected void claimQuestPond() {

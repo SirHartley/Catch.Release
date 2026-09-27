@@ -7,6 +7,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
@@ -19,11 +20,13 @@ import com.fs.starfarer.api.impl.campaign.fleets.RouteManager.RouteSegment;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
+import com.fs.starfarer.api.impl.campaign.intel.bases.PirateBaseIntel;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.RuinsFleetRouteManager;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.RouteFleetAssignmentAI;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.ScavengerFleetAssignmentAI;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
@@ -40,6 +43,9 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
     public static final String COOLDOWN_KEY = "$catchrelease_fleetQuestCooldown";
     public static final float COOLDOWN_DAYS = 45f;
+
+    // Nexerelin's MiningFleetManagerV2 writes this $fleetType as a plain literal.
+    public static final String NEX_MINING_FLEET_TYPE = "exerelinMiningFleet";
 
     public static final String TEST_ROUTE_SOURCE = "catchrelease_test_fleet_quest";
     public static final float TEST_ROUTE_DAYS = 60f;
@@ -140,7 +146,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
         StarSystemAPI system = (StarSystemAPI) Global.getSector().getPlayerFleet()
                 .getContainingLocation();
-        FleetQuestType type = FleetQuestType.rollAny(random, system);
+        FleetQuestType type = pickType(system);
         if (type == null) return;
 
         if (adopt(type)) markOffered(type);
@@ -155,6 +161,20 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (Global.getSector().getMemoryWithoutUpdate().getBoolean(COOLDOWN_KEY)) return false;
 
         return countActive() < MAX_ACTIVE;
+    }
+
+    // A dedicated offer is only rolled while one of its fleets is here, so it does not use up
+    // the roll of the offers that any scavenger or convoy can carry.
+    protected FleetQuestType pickType(StarSystemAPI system) {
+        WeightedRandomPicker<FleetQuestType> picker = new WeightedRandomPicker<>(random);
+        for (FleetQuestType type : FleetQuestType.getLocalOffers()) {
+            if (!type.canSpawnIn(system)) continue;
+            if (type.hasDedicatedGivers() && findDedicatedGivers(system, type).isEmpty()) continue;
+
+            picker.add(type, type.getOfferWeight());
+        }
+
+        return picker.pick();
     }
 
     protected void markOffered(FleetQuestType type) {
@@ -182,6 +202,18 @@ public class FleetQuestSpawner implements EveryFrameScript {
         }
         if (!type.canSpawnIn(system)) return null;
 
+        if (type.hasDedicatedGivers()) {
+            List<CampaignFleetAPI> givers = findDedicatedGivers(system, type);
+            if (givers.isEmpty()) return null;
+
+            CampaignFleetAPI giver = givers.get(new Random().nextInt(givers.size()));
+            FleetQuest quest = FleetQuest.startOn(giver, type);
+            if (quest == null) return null;
+
+            FleetQuestEncounter.attach(giver, quest);
+            return giver;
+        }
+
         RuinsFleetRouteManager scavengers = new RuinsFleetRouteManager(system);
         MarketAPI source = scavengers.pickSourceMarket();
         if (source == null) return null;
@@ -203,6 +235,13 @@ public class FleetQuestSpawner implements EveryFrameScript {
     protected boolean adopt(FleetQuestType type) {
         LocationAPI location = Global.getSector().getPlayerFleet().getContainingLocation();
 
+        if (type.hasDedicatedGivers()) {
+            List<CampaignFleetAPI> givers = findDedicatedGivers(location, type);
+            if (givers.isEmpty()) return false;
+
+            return startOffer(givers.get(random.nextInt(givers.size())), type);
+        }
+
         List<CampaignFleetAPI> any = new ArrayList<>();
         List<CampaignFleetAPI> matching = new ArrayList<>();
 
@@ -223,14 +262,66 @@ public class FleetQuestSpawner implements EveryFrameScript {
                 ? matching : (matching.isEmpty() ? any : matching);
         if (pool.isEmpty()) return false;
 
-        CampaignFleetAPI chosen = pool.get(random.nextInt(pool.size()));
+        return startOffer(pool.get(random.nextInt(pool.size())), type);
+    }
 
-        FleetQuest quest = FleetQuest.startOn(chosen, type);
+    protected boolean startOffer(CampaignFleetAPI giver, FleetQuestType type) {
+        FleetQuest quest = FleetQuest.startOn(giver, type);
         if (quest == null) return false;
 
-        FleetQuestEncounter.attach(chosen, quest);
+        FleetQuestEncounter.attach(giver, quest);
 
         return true;
+    }
+
+    protected static List<CampaignFleetAPI> findDedicatedGivers(LocationAPI location,
+                                                               FleetQuestType type) {
+        List<CampaignFleetAPI> givers = new ArrayList<>();
+        if (location == null) return givers;
+
+        for (CampaignFleetAPI fleet : location.getFleets()) {
+            if (fitsDedicatedGiver(fleet, type) && isAvailableGiver(fleet)) givers.add(fleet);
+        }
+
+        return givers;
+    }
+
+    protected static boolean fitsDedicatedGiver(CampaignFleetAPI fleet, FleetQuestType type) {
+        if (fleet == null || fleet.getFaction() == null) return false;
+
+        MemoryAPI memory = fleet.getMemoryWithoutUpdate();
+        String faction = fleet.getFaction().getId();
+        String fleetType = memory.getString(MemFlags.MEMORY_KEY_FLEET_TYPE);
+
+        switch (type) {
+            case FOLLOWER:
+                return Factions.HEGEMONY.equals(faction) && isTradeConvoy(fleetType);
+            case STATE_DINNER:
+                return Factions.DIKTAT.equals(faction) && isTradeConvoy(fleetType);
+            case CLAIM_ASSAY:
+                return Factions.TRITACHYON.equals(faction)
+                        && (memory.getBoolean(ProspectingRouteManager.FLEET_FLAG)
+                        || NEX_MINING_FLEET_TYPE.equals(fleetType));
+            case MANDATE:
+                return memory.getBoolean(ExpeditionRouteManager.FLEET_FLAG);
+            case PARLEY_FISH:
+                return isPirateBasePatrol(fleet, fleetType);
+            default:
+                return false;
+        }
+    }
+
+    protected static boolean isTradeConvoy(String fleetType) {
+        return FleetTypes.TRADE.equals(fleetType) || FleetTypes.TRADE_SMALL.equals(fleetType);
+    }
+
+    // Only procgen bases carry the flag; the pirate markets of the Core never do.
+    protected static boolean isPirateBasePatrol(CampaignFleetAPI fleet, String fleetType) {
+        if (!FleetTypes.PATROL_SMALL.equals(fleetType) && !FleetTypes.PATROL_MEDIUM.equals(fleetType)
+                && !FleetTypes.PATROL_LARGE.equals(fleetType)) return false;
+
+        MarketAPI source = Misc.getSourceMarket(fleet);
+        return source != null && source.getMemoryWithoutUpdate().getBoolean(PirateBaseIntel.MEM_FLAG);
     }
 
     protected static boolean isScavenger(CampaignFleetAPI fleet) {
@@ -253,6 +344,11 @@ public class FleetQuestSpawner implements EveryFrameScript {
             return false;
         }
 
+        return !HarpoonOffence.isCombatCrew(fleet) && isAvailableGiver(fleet);
+    }
+
+    // Pirate-base patrols pass through here too, so the combat-crew filter stays with the callers.
+    protected static boolean isAvailableGiver(CampaignFleetAPI fleet) {
         if (catchrelease.campaign.fish.fisherman.FishermanSpawner.isFisherman(fleet)) return false;
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -269,8 +365,6 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (catchrelease.campaign.fish.FishingTaboo.isTaboo(fleet.getFaction().getId())) return false;
 
         if (fleet.getCommander() == null) return false;
-
-        if (HarpoonOffence.isCombatCrew(fleet)) return false;
 
         if (FleetQuest.isQuestFleet(fleet)) return false;
         if (fleet.getMemoryWithoutUpdate().getBoolean(MemFlags.ENTITY_MISSION_IMPORTANT)) {

@@ -63,7 +63,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
 | `data/config/UpgradeData.csv` -> `memory/upgrades/` | Stat IDs, loader aliases, saved levels and runtime values |
 
-Load order in `ModPlugin`: pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims/range relock -> dev shortcut.
+Load order in `ModPlugin`: pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> expedition/prospecting routes -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims/range relock -> dev shortcut.
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
 
@@ -186,10 +186,13 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | File | Owner / connection |
 |---|---|
 | `FleetQuest.java` | Fleet-backed FishJob. Saves type/details/alternate client; replaces accepted source fleet with mission-owned members; owns active map proxy, exact provenance, stage handoff and final return/despawn. External construction requires tutorial completion. |
-| `FleetQuestSpawner.java` | One eligible local offer/wanted quest; tutorial gate, 7% checks, 45-day cooldown (QUIET_SHIP: 120). Uses scavengers except INTERMENT/MUTINY_POT/EXHIBIT trade convoys; low-coherence premises also gate the test path. |
+| `FleetQuestSpawner.java` | One eligible local offer/wanted quest; tutorial gate, 7% checks, 45-day cooldown (QUIET_SHIP: 120). Picks among offers that can spawn in the system, weighted (PARLEY_FISH 0.25); a dedicated-giver offer is only in the pick while one of its fleets is present. Uses scavengers except INTERMENT/MUTINY_POT/EXHIBIT trade convoys. Dedicated givers (`fitsDedicatedGiver`): FOLLOWER Hegemony and STATE_DINNER Diktat `trade`/`smallTrader` convoys; CLAIM_ASSAY Tri-Tachyon prospecting fleets or Nexerelin `exerelinMiningFleet`; MANDATE science expeditions; PARLEY_FISH patrols whose source market has `$core_pirateBase` (procgen bases only), outside `theme_core`. Every giver must be non-hostile. Low-coherence premises also gate the test path. |
 | `FleetQuestEncounter.java` | Runs one fleet offer, accepts or declines after dialogue closes, resolves distress entities, restores local offer marks after load, and expires old offers. |
 | `FleetQuestType.java` | 22 saved mechanical case definitions: demand shapes, reachability backoff, fleet/contact roles, reward exclusions and multipliers, alternate outcomes. No dialogue strings; inspect the case enum when changing a quest. |
-| `CatchReleaseDistressProvider.java` | Adapter between the generic distress framework and `FleetQuest`. |
+| `QuestRouteManager.java` | Base for the two route managers below: a saved `EconomyTickListener` and `RouteFleetSpawner` that adds a capped route on a per-tick chance. RouteManager spawns and despawns the fleets near the player. |
+| `ExpeditionRouteManager.java` | Up to 2 independent Galatia Academy science expeditions (`$catchrelease_scienceExpedition`) from `station_galatia_academy` to 2-3 non-Core systems near abyssal hyperspace and back. MANDATE givers. Skips when the Academy or Galatia's hyperspace link is missing. |
+| `ProspectingRouteManager.java` | Up to 2 Tri-Tachyon prospecting fleets (`$catchrelease_prospectingFleet`) from a Tri-Tachyon spaceport to an unsettled ore world in a marketless system within 12 LY, held there 30-50 days. CLAIM_ASSAY givers. Adds no routes while Nexerelin is enabled; its Tri-Tachyon mining fleets carry the offer instead. |
+| `CatchReleaseDistressProvider.java` | Adapter between the generic distress framework and `FleetQuest`. Only STRANDED and SCAVENGER_ENGINE are distress calls; both are emergencies. |
 
 ### `campaign/fish/colony`
 
@@ -385,7 +388,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Repair bills and fines return their outcomes through memory. The global pending marker prevents repeated sector-wide searches when the original fleet is no longer nearby.
 - Camp completion is polled because destruction, bribery, dialogue, and departure do not share a callback.
 - `despawn()` reports fleet removal to managers and starts the fleet's own fade. `FleetQuest` replacements additionally clear AI, move the original away, and call `Misc.fadeAndExpire()` so the replacement can occupy the same position immediately. Other retiring fleets must not move their still-rendering token during that fade.
-- A local fleet-job offer adds state and a cyan drawn marker to an existing eligible fleet; see `FleetQuestSpawner` above for fleet types and exceptions. It does not create or rename a fleet. Acceptance creates fresh members in a mission-owned replacement and reports the original despawn.
+- A local fleet-job offer adds state and a cyan drawn marker to an existing eligible fleet; see `FleetQuestSpawner` above for fleet types and exceptions. It does not create or rename a fleet; the expedition and prospecting route managers create the only fleets that exist to carry offers. Acceptance creates fresh members in a mission-owned replacement and reports the original despawn.
 - `$missionImportant` is not used for fleet-job offer markers because it changes both colour and story behavior. `FleetQuestMarker` copies vanilla placement and changes only tint.
 
 ### Save data, cargo, and shop state
