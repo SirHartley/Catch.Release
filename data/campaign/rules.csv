@@ -2410,7 +2410,7 @@ catchrelease_fq_stranded_action,CatchReleaseFleetQuestActionText,$entity.catchre
 catchrelease_fq_stranded_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == stranded,,"A stranded ship has an intermittent drive and a ration printer that can no longer process its normal feedstock. Engineering only has the parts and crew to repair one of them. The printer can take fresh catch directly, so the engineer needs $entity.catchrelease_fleetQuestAsk from this system or an adjacent one within $entity.catchreleaseFleetDays.",,
 catchrelease_fq_stranded_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == stranded,,The engineer's request is recorded on the following terms.,,
 catchrelease_fq_stranded_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == stranded,,"""Engineering officer aboard $entity.catchreleaseFleetFlagshipName. Our drive is failing and we've got another problem besides. If you've got a moment, we could use some support.""",,
-catchrelease_fq_stranded_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == stranded,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The engineers face shows deep, dark bags beneath $hisOrHer eyes, testament to the rather severe predicament $heOrShe appears to be in.
+catchrelease_fq_stranded_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == stranded,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The engineer's face shows deep, dark bags beneath $hisOrHer eyes, testament to the rather severe predicament $heOrShe appears to be in.
 
 ""Our drive keeps dropping out. That's where my repair crew ought to be, but they are stuck fixing a ludd-darned rations printer.""
 
@@ -2680,7 +2680,7 @@ catchrelease_fq_scavenger_engine_action,CatchReleaseFleetQuestActionText,$entity
 catchrelease_fq_scavenger_engine_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == scavenger_engine,,The scavenger $entity.catchreleaseFleetFlagshipName needs $entity.catchrelease_fleetQuestAsk to produce substitute packing gel for a failing drive coil. Catch from the current system or an adjacent one will qualify if delivered within $entity.catchreleaseFleetDays.,,
 catchrelease_fq_scavenger_engine_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == scavenger_engine,,The repair supply request is recorded on the following terms.,,
 catchrelease_fq_scavenger_engine_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == scavenger_engine,,"""Coil technician aboard the scavenger $entity.catchreleaseFleetFlagshipName. We've got a drive repair held up for lack of one consumable.""",,
-catchrelease_fq_scavenger_engine_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == scavenger_engine,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The technician his fiddling with the drive diagnostics.
+catchrelease_fq_scavenger_engine_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == scavenger_engine,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The technician is fiddling with the drive diagnostics.
 
 ""One of our drive coils is failing. We can save it if we repack the winding before the insulation goes.""
 
