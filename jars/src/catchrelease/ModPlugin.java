@@ -23,7 +23,9 @@ import catchrelease.campaign.fish.tutorial.RatingBarEvent;
 import catchrelease.campaign.fish.tutorial.FishermanInterception;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
+import catchrelease.campaign.fish.jobs.fleet.ExpeditionRouteManager;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuestSpawner;
+import catchrelease.campaign.fish.jobs.fleet.ProspectingRouteManager;
 import catchrelease.campaign.fish.jobs.fleet.CatchReleaseDistressProvider;
 import catchrelease.campaign.fish.map.FishIntelPlanetPanel;
 import catchrelease.campaign.fish.map.FishMapFilterScript;
@@ -65,6 +67,8 @@ public class ModPlugin extends BaseModPlugin {
         LampPatrolResponse.register();
 
         FleetQuestSpawner.register();
+        ExpeditionRouteManager.register();
+        ProspectingRouteManager.register();
 
         FishermanSpawner.register();
         CoreFisherSpawner.register();

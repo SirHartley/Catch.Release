@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.jobs.DemandScore;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestDuration;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -39,10 +40,10 @@ public enum FleetQuestType {
     QUIET_SHIP(FleetTypes.SCAVENGER_SMALL, 0.9f),
     EXHIBIT(FleetTypes.TRADE_SMALL, 1.15f),
     HEADLINER(FleetTypes.SCAVENGER_SMALL, 1.15f),
-    FOLLOWER(FleetTypes.SUPPLY_FLEET, 1.2f),
-    STATE_DINNER(FleetTypes.TRADE_LINER, 1.15f),
-    CLAIM_ASSAY(FleetTypes.SCAVENGER_MEDIUM, 1.25f),
-    MANDATE(FleetTypes.ACADEMY_FLEET, 1.1f),
+    FOLLOWER(FleetTypes.TRADE, 1.2f),
+    STATE_DINNER(FleetTypes.TRADE, 1.15f),
+    CLAIM_ASSAY(ProspectingRouteManager.FLEET_TYPE, 1.25f),
+    MANDATE(ExpeditionRouteManager.FLEET_TYPE, 1.1f),
     PARLEY_FISH(FleetTypes.PATROL_MEDIUM, 1.2f),
     STRANDED(FleetTypes.TRADE_SMALL, 1.15f),
     SEEKER(FleetTypes.SCAVENGER_SMALL, 1.25f),
@@ -63,6 +64,11 @@ public enum FleetQuestType {
             QUIET_SHIP,
             EXHIBIT,
             HEADLINER,
+            FOLLOWER,
+            STATE_DINNER,
+            CLAIM_ASSAY,
+            MANDATE,
+            PARLEY_FISH,
             SEEKER,
             QUOTA,
             STARVING,
@@ -509,9 +515,26 @@ public enum FleetQuestType {
     }
 
     public boolean canSpawnIn(StarSystemAPI system) {
+        if (this == MANDATE) return isNearAbyssal(system);
+        if (this == PARLEY_FISH) {
+            return system != null && !system.hasTag(Tags.THEME_CORE)
+                    && QuestPond.findFreePond(system) != null;
+        }
+
         return !requiresLowCoherenceArea() || system != null
                 && Aberration.baseAt(system.getLocation(), system)
                 >= FishRequirement.LOW_COHERENCE;
+    }
+
+    // These offers only go to the faction fleets FleetQuestSpawner.fitsDedicatedGiver names.
+    public boolean hasDedicatedGivers() {
+        return this == FOLLOWER || this == STATE_DINNER || this == CLAIM_ASSAY
+                || this == MANDATE || this == PARLEY_FISH;
+    }
+
+    // Procgen pirate bases keep several patrols in their systems at once.
+    public float getOfferWeight() {
+        return this == PARLEY_FISH ? 0.25f : 1f;
     }
 
     public boolean requiresIndependentFleet() {
@@ -549,18 +572,5 @@ public enum FleetQuestType {
         }
 
         return null;
-    }
-
-    public static FleetQuestType rollAny(Random random) {
-        return LOCAL_OFFERS[random.nextInt(LOCAL_OFFERS.length)];
-    }
-
-    public static FleetQuestType rollAny(Random random, StarSystemAPI system) {
-        List<FleetQuestType> eligible = new ArrayList<>();
-        for (FleetQuestType type : LOCAL_OFFERS) {
-            if (type.canSpawnIn(system)) eligible.add(type);
-        }
-
-        return eligible.isEmpty() ? null : eligible.get(random.nextInt(eligible.size()));
     }
 }
