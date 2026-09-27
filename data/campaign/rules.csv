@@ -3784,144 +3784,78 @@ FireAll CatchReleaseFleetResolutionOptions","You cut the link. The lamps keep bu
 Weapons come up across the formation.",,
 ,,,,,,
 # camped rupture job: pirates,,,,,,
-catchrelease_campPirate_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPirate score:100,,"The fisher answers with an account sheet still open. The protection payment has its own column now.
-
-""Captain.""
-
-$HeOrShe pushes the figures aside and brings up the job marker.
-
-""Tell me you've got something worth changing next month's numbers for.""",,
+catchrelease_campPirate_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPirate score:100,,"The fisher answers with an account sheet still open; the protection payment has its own column now. ""Captain."" $HeOrShe pushes the figures aside and brings up the job marker. ""Tell me you've got something worth changing next month's numbers for.""",,
 catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,A fisher is moving repair charges between columns on an account sheet. One recurring payment is larger than the rest combined.,,
 catchrelease_campPirate_optionBar,catchrelease_campPirate_optionBar,,,,catchrelease_campPirate_ask:Ask the fisher about the account sheet,
 catchrelease_campPirate_ask,DialogOptionSelected,$option == catchrelease_campPirate_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
-Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pirates found our rupture. Now they collect protection on it.""
-
-The fisher turns the account sheet around.
-
-""First payment bought us a week. Then they raised the rate because we kept working.""
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pirates found our rupture. Now they collect protection on it."" The fisher turns the account sheet around. ""First payment bought us a week. Then they raised the rate because we kept working.""
 
 The slate marks $catchreleaseCampMany in the $catchreleaseCampWhere system.
 
-""Get them off the rupture. Pay them, scare them, fight them, I don't care. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. Old cargo proves nothing.""
-
-""$catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture and you get $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
+""Get them off the rupture. Pay them, scare them, fight them, I don't care. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. Old cargo proves nothing. $catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture and you get $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:Decline.",
 catchrelease_campPirate_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPirate,,"The camp coordinates and pirate transponder codes are transferred.
 
 ""Whatever gets them off it. Just don't leave me owing them afterward.""",,
 catchrelease_campPirate_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPirate,,The fisher closes the job entry and moves another maintenance payment into next month.,,
 catchrelease_campPirate_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
-!$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still there.""
-
-The fisher checks the camp marker.
-
-""Raised the weekly number again, too.""",,
+!$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still there."" The fisher checks the camp marker. ""Raised the weekly number again, too.""",,
 catchrelease_campPirate_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPirate score:100
 $catchreleaseCampCleared","CatchReleaseCMD highlightJobText $catchreleaseAsk
-Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Camp's gone. Good.""
-
-$HeOrShe taps the rupture marker.
-
-""Now bring me $catchreleaseAsk out of that spot. I need a catch from after it was cleared.""",,
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Camp's gone. Good."" $HeOrShe taps the rupture marker. ""Now bring me $catchreleaseAsk out of that spot. I need a catch from after it was cleared.""",,
 catchrelease_campPirate_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPirate
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe checks the retrieval record, then deletes the protection payment from next month's accounts.
 
 ""Good. Boats go back out next shift.""",,
 ,,,,,,
 # camped rupture job: mercenaries,,,,,,
-catchrelease_campMerc_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campMerc score:100,,"The fisher accepts the call with both survey charts open and the claim file between them.
-
-""Captain.""
-
-$HeOrShe closes a fresh message from the claims office without reading it twice.
-
-""Any movement on your end?""",,
+catchrelease_campMerc_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campMerc score:100,,"The fisher accepts the call with both survey charts open and the claim file between them. ""Captain."" $HeOrShe closes a fresh message from the claims office without reading it twice. ""Any movement on your end?""",,
 catchrelease_campMerc_blurbBar,catchrelease_campMerc_blurbBar,,,A fisher has two survey charts open beside a rejected claim form. The disputed boundary occupies a different place on each chart.,,
 catchrelease_campMerc_optionBar,catchrelease_campMerc_optionBar,,,,catchrelease_campMerc_ask:Ask the fisher with the survey charts about the claim,
 catchrelease_campMerc_ask,DialogOptionSelected,$option == catchrelease_campMerc_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampWhere $catchreleaseCampMany $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
-Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""A company survey moved the boundary.""
-
-The fisher overlays the charts.
-
-""Their security contractor says the rupture falls inside the lease. My filed chart says it doesn't. The clerk won't decide while hired ships are sitting on the point.""
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""A company survey moved the boundary."" The fisher overlays the charts. ""Their security contractor says the rupture falls inside the lease. My filed chart says it doesn't. The clerk won't decide while hired ships are sitting on the point.""
 
 The disputed plot in the $catchreleaseCampWhere system shows $catchreleaseCampMany holding position.
 
-""Get them to leave. If they'll amend the contract and go quietly, better. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. Old cargo doesn't prove I can work the claim now.""
-
-""$catchreleaseDaysCap. $catchreleaseAsk as proof. $catchreleaseRewardCap when you bring it back.""","catchrelease_jobAccept:Agree to move them off.
+""Get them to leave. If they'll amend the contract and go quietly, better. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. Old cargo doesn't prove I can work the claim now. $catchreleaseDaysCap. $catchreleaseAsk as proof. $catchreleaseRewardCap when you bring it back.""","catchrelease_jobAccept:Agree to move them off.
 catchrelease_jobDecline:Decline.",
-catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""Try the contract line first. They're professionals.""
-
-$HeOrShe sends the fleet code and both boundary charts.
-
-""If their employer stops paying them to stand there, I'd prefer everyone keep their hulls.""",,
+catchrelease_campMerc_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campMerc,,"""Try the contract line first. They're professionals."" $HeOrShe sends the fleet code and both boundary charts. ""If their employer stops paying them to stand there, I'd prefer everyone keep their hulls.""",,
 catchrelease_campMerc_declined,catchreleaseJobDeclined,$missionId == catchrelease_campMerc,,$HeOrShe returns to the claim form and attaches the second survey chart again.,,
 catchrelease_campMerc_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
-!$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still holding position.""
-
-$HeOrShe checks the fleet code against the claim file.
-
-""My appeal has acquired another case number.""",,
+!$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still holding position."" $HeOrShe checks the fleet code against the claim file. ""My appeal has acquired another case number.""",,
 catchrelease_campMerc_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campMerc score:100
 $catchreleaseCampCleared","CatchReleaseCMD highlightJobText $catchreleaseAsk
-Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""They're gone.""
-
-$HeOrShe closes the exclusion notice.
-
-""Now bring me $catchreleaseAsk from that rupture. I need a post-clearance catch for the claim file.""",,
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""They're gone."" $HeOrShe closes the exclusion notice. ""Now bring me $catchreleaseAsk from that rupture. I need a post-clearance catch for the claim file.""",,
 catchrelease_campMerc_paid,catchreleaseJobPaid,"$missionId == catchrelease_campMerc
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe attaches the retrieval record to the claim. The disputed boundary disappears from $hisOrHer working chart.
 
 ""That's evidence I can use.""",,
 ,,,,,,
 # camped rupture job: pathers,,,,,,
-catchrelease_campPath_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPath score:100,,"The fisher answers after a short delay. The repaired rack component is on the table beside the comm unit; the door remains in view behind it.
-
-""Captain.""
-
-The fisher checks the doorway once, then brings up the camp marker.
-
-""What have you got?""",,
+catchrelease_campPath_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPath score:100,,"The fisher answers after a short delay, the repaired rack component on the table beside the comm unit and the door still in view behind it. ""Captain."" A glance at the doorway, then the camp marker comes up. ""What have you got?""",,
 catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,A fisher sits with the door in view. A scorched drone-rack isolator rests on the table beside an untouched drink.,,
 catchrelease_campPath_blurbBarHegemony,catchrelease_campPath_blurbBar,$faction.id == hegemony score:10,,"A licensed fisher sits facing the door with a damaged power coupler beside the licence slate. Each time the door opens, the inspection of the coupler stops.",,
 catchrelease_campPath_blurbBarIndependent,catchrelease_campPath_blurbBar,$faction.id == independent score:10,,A fisher is turning a burnt drone-rack relay over in both hands. The seat chosen gives a clear view of the door.,,
 catchrelease_campPath_optionBar,catchrelease_campPath_optionBar,,,,catchrelease_campPath_ask:Ask the fisher about the damaged equipment,
 catchrelease_campPath_ask,DialogOptionSelected,$option == catchrelease_campPath_ask,"CatchReleaseCMD highlightJobText $catchreleaseCampMany $catchreleaseCampWhere $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
-Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pathers. First they came to preach. Then they cut power to the drone rack.""
-
-The fisher puts the damaged component down.
-
-""Yesterday one stood on the launch gantry shouting that we were feeding Moloch through a wound in creation. Said if we worked the rupture again, the next sermon came with rifles.""
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Pathers. First they came to preach. Then they cut power to the drone rack."" The fisher puts the damaged component down. ""Yesterday one stood on the launch gantry shouting that we were feeding Moloch through a wound in creation. Said if we worked the rupture again, the next sermon came with rifles.""
 
 The transponder record shows $catchreleaseCampMany in the $catchreleaseCampWhere system.
 
-""Get them away from the rupture. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. I need to know the spot can be worked again before I send crews out.""
-
-""$catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture. Payment is $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
+""Get them away from the rupture. Once they're gone, catch any fish from that exact rupture and bring it back. It has to be caught after we make the deal. I need to know the spot can be worked again before I send crews out. $catchreleaseDaysCap. Bring me $catchreleaseAsk from the cleared rupture. Payment is $catchreleaseRewardCap.""","catchrelease_jobAccept:Agree to clear the spot.
 catchrelease_jobDecline:Decline.",
 catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"The fisher checks the door before sending the camp coordinates and transponder record.
 
 ""How you move them is your business. Just get them away from the boats.""",,
-catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"The fisher nods and deletes the transfer request.
-
-The damaged component goes back into a tool bag.",,
+catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"The fisher nods, deletes the transfer request and puts the damaged component back into a tool bag.",,
 catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
-!$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still there.""
-
-The fisher checks a message from the yard crew.
-
-""Rack's repaired. Nobody's taking a boat out while they're on the marker.""",,
+!$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still there."" The fisher checks a message from the yard crew. ""Rack's repaired. Nobody's taking a boat out while they're on the marker.""",,
 catchrelease_campPath_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
 $catchreleaseCampCleared","CatchReleaseCMD highlightJobText $catchreleaseAsk
-Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""They're gone.""
-
-The fisher checks the cleared marker once more.
-
-""Bring me $catchreleaseAsk out of that rupture. I want a catch from after they left before I put a deck crew back on the rack.""",,
+Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""They're gone."" The fisher checks the cleared marker once more. ""Bring me $catchreleaseAsk out of that rupture. I want a catch from after they left before I put a deck crew back on the rack.""",,
 catchrelease_campPath_paid,catchreleaseJobPaid,"$missionId == catchrelease_campPath
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The fisher checks the retrieval record and sends a launch order to the waiting boats.
 
@@ -3935,20 +3869,12 @@ catchrelease_campFirstHailPirate,OpenCommLink,"$entity.catchreleaseCampWho == pi
 $entity.catchrelease_campFleet
 !$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
 Highlight $entity.catchrelease_campBribeDGS
-FireAll CatchReleaseCampOptions","""This spot's off limits.""
-
-The pirate glances toward the rupture.
-
-""We found it empty. Now it isn't. Turn around, or transfer $entity.catchrelease_campBribeDGS credits and we'll find another quiet place.""",,
+FireAll CatchReleaseCampOptions","""This spot's off limits."" The pirate glances toward the rupture. ""We found it empty. Now it isn't. Turn around, or transfer $entity.catchrelease_campBribeDGS credits and we'll find another quiet place.""",,
 catchrelease_campFirstHailMerc,OpenCommLink,"$entity.catchreleaseCampWho == mercenaries
 $entity.catchrelease_campFleet
 !$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
 Highlight $entity.catchrelease_campBribeDGS
-FireAll CatchReleaseCampOptions","""You are entering a contracted exclusion zone. The rupture is off limits to fishing operations.""
-
-$PersonRank $personName sends over a file number.
-
-""Client identity is protected. The relocation figure is $entity.catchrelease_campBribeDGS credits. Otherwise, alter course.""",,
+FireAll CatchReleaseCampOptions","""You are entering a contracted exclusion zone. The rupture is off limits to fishing operations."" $PersonRank $personName sends over a file number. ""Client identity is protected. The relocation figure is $entity.catchrelease_campBribeDGS credits. Otherwise, alter course.""",,
 catchrelease_campFirstHailPath,OpenCommLink,"$entity.catchreleaseCampWho == pathers
 $entity.catchrelease_campFleet
 !$entity.catchrelease_campWarned score:1020","$entity.catchrelease_campWarned = true
@@ -3965,33 +3891,15 @@ The payment figure appears.
 
 ""$entity.catchrelease_campBribeDGS credits and we leave. Do not mistake that for permission.""",,
 catchrelease_campHail,OpenCommLink,$entity.catchrelease_campFleet score:1000,"Highlight $entity.catchrelease_campBribeDGS
-FireAll CatchReleaseCampOptions","""You've come about the fishing spot.""
-
-Whoever answers checks your fleet before continuing.
-
-""We're using it. You want us somewhere else, $entity.catchrelease_campBribeDGS credits makes somewhere else worth the trouble.""",,
+FireAll CatchReleaseCampOptions","""You've come about the fishing spot."" Whoever answers checks your fleet before continuing. ""We're using it. You want us somewhere else, $entity.catchrelease_campBribeDGS credits makes somewhere else worth the trouble.""",,
 catchrelease_campHailPirate,OpenCommLink,"$entity.catchreleaseCampWho == pirates
 $entity.catchrelease_campFleet score:1010","Highlight $entity.catchrelease_campBribeDGS
-FireAll CatchReleaseCampOptions","""Well. Somebody actually came out.""
-
-The pirate looks toward the rupture.
-
-""Nice bit of empty space. No patrols, no customs, no traffic unless somebody wants the fishing.""
-
-$HeOrShe looks back to you.
-
-""$entity.catchrelease_campBribeDGS buys us another quiet place. Otherwise this one's occupied.""",,
+FireAll CatchReleaseCampOptions","""Well. Somebody actually came out."" The pirate looks toward the rupture. ""Nice bit of empty space. No patrols, no customs, no traffic unless somebody wants the fishing. $entity.catchrelease_campBribeDGS buys us another quiet place. Otherwise this one's occupied.""",,
 catchrelease_campHailMerc,OpenCommLink,"$entity.catchreleaseCampWho == mercenaries
 $entity.catchrelease_campFleet score:1010","Highlight $entity.catchrelease_campBribeDGS
-FireAll CatchReleaseCampOptions","""Contracted denial of the site.""
+FireAll CatchReleaseCampOptions","""Contracted denial of the site."" $PersonRank $personName sends over a file number. ""Client identity is protected. Our instruction is simply that fishing operations do not resume while the contract remains active.""
 
-$PersonRank $personName sends over a file number.
-
-""Client identity is protected. Our instruction is simply that fishing operations do not resume while the contract remains active.""
-
-The buyout figure appears.
-
-""$entity.catchrelease_campBribeDGS. At that figure, relocation is cheaper than remaining on station.""",,
+The buyout figure appears. ""$entity.catchrelease_campBribeDGS. At that figure, relocation is cheaper than remaining on station.""",,
 catchrelease_campHailPath,OpenCommLink,"$entity.catchreleaseCampWho == pathers
 $entity.catchrelease_campFleet score:1010","Highlight $entity.catchrelease_campBribeDGS
 FireAll CatchReleaseCampOptions","The $manOrWoman on the screen is standing now. Somebody behind $himOrHer is shouting over a weapon check.
@@ -4012,21 +3920,13 @@ catchrelease_campPaySel,DialogOptionSelected,$option == catchrelease_campPay,"Ad
 $entity.catchrelease_campCleared = true
 MakeOtherFleetGoAway true
 ShowDefaultVisual
-FireAll CatchReleaseFleetResolutionOptions","The transfer clears.
-
-The formation begins to come about.",,
+FireAll CatchReleaseFleetResolutionOptions","The transfer clears, and the formation begins to come about.",,
 catchrelease_campScareSel,DialogOptionSelected,$option == catchrelease_campScare,"$entity.catchrelease_campCleared = true
 MakeOtherFleetGoAway true
 ShowDefaultVisual
-FireAll CatchReleaseFleetResolutionOptions","You do not argue ownership or doctrine.
+FireAll CatchReleaseFleetResolutionOptions","You do not argue ownership or doctrine. Instead you point out what holding this position means: a fixed transponder return, regular fishing traffic, limited room to maneuver, and more fleets coming out to contest the site.
 
-Instead you point out what holding this position means: a fixed transponder return, regular fishing traffic, limited room to maneuver, and more fleets coming out to contest the site.
-
-The person on the screen checks the local plot.
-
-Eventually:
-
-""We were moving on anyway.""
+The person on the screen checks the local plot. Eventually: ""We were moving on anyway.""
 
 The formation comes about.",,
 ,,,,,,
