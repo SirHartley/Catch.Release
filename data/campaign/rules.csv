@@ -1269,17 +1269,11 @@ catchrelease_cult_optionBar,catchrelease_cult_optionBar,,,,catchrelease_cult_ask
 catchrelease_cult_ask,DialogOptionSelected,$option == catchrelease_cult_ask,"CatchReleaseCMD highlightJobText $catchreleaseSpecies $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseCultOffer 0
-FireAll JobSpecificOptions","The first speaks.
+FireAll JobSpecificOptions","""$catchreleaseSpecies,"" says the first.
 
-""$catchreleaseSpecies.""
+""$catchreleaseRewardCap,"" says the second.
 
-The second follows.
-
-""$catchreleaseRewardCap.""
-
-The third completes it.
-
-""One specimen. $catchreleaseDaysCap.""",,
+""One specimen. $catchreleaseDaysCap,"" says the third.",,
 catchrelease_cult_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseCultOffer
 !$catchreleaseCultAskedPurpose",,,10:catchrelease_cult_purpose:What is it for?,
 catchrelease_cult_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseCultOffer,,,30:catchrelease_jobAccept:Agree to bring it.,
@@ -2826,7 +2820,7 @@ catchrelease_fq_fouled_line_waiting,CatchReleaseFleetQuestWaitingText,$entity.ca
 ""We still need $entity.catchrelease_fleetQuestAsk out of $entity.catchreleaseFleetRupture. We can hold for $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_fouled_line_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == fouled_line,,"A deckhand carries your catch aboard in a sealed tank and sets it down on the bridge. The skipper logs it against $entity.catchreleaseFleetRupture.
 
-A few minutes later, the first drone track starts to move. The second follows.",,
+A few minutes later, both drone tracks start moving toward the boat.",,
 catchrelease_fq_fouled_line_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == fouled_line,,"""Then I cut the lines and we go home with an empty rack.""
 
 The skipper looks at the drone telemetry for a moment.
@@ -3041,9 +3035,7 @@ Your ops chief sends back imagery of the external frame.
 
 ""Different story out here. LYNE markings. Rig service codes, maybe. Half of them don't resolve against anything in the registry.""
 
-A closer image follows.
-
-Someone has scratched maintenance intervals into the casing by hand.",catchrelease_wreckLook2:Continue,
+In a closer image, someone has scratched maintenance intervals into the casing by hand.",catchrelease_wreckLook2:Continue,
 catchrelease_wreckLook2,DialogOptionSelected,$option == catchrelease_wreckLook2,,"Your crew can recover the assembly intact. It will take a cargo crane and several hours of unproductive swearing.
 
 The transponder package still contains the last service handshake it accepted.
@@ -3143,7 +3135,7 @@ FireAll CatchReleaseFisherOptions","The Fisherman's voice reaches the bridge a m
 
 ""Evening.""
 
-When the picture follows, he is pouring something into the same battered mug.
+When the picture comes up, he is pouring something into the same battered mug.
 
 ""What's the trouble?""",,
 catchrelease_fisherComms3,OpenCommLink,"$entity.catchrelease_fisherman score:1030
@@ -3153,7 +3145,7 @@ FireAll CatchReleaseFisherOptions","The link opens on the Fisherman watching som
 
 ""Easy with that.""
 
-A metallic impact follows from your left audio channel, though the trawler lies to starboard.
+Something metallic hits a deck plate on your left audio channel, though the trawler lies to starboard.
 
 He looks back to you.
 
@@ -4260,7 +4252,7 @@ CatchReleaseCMD tokens","The Fisherman sends over a handling manifest.
 
 Your ops chief reads the mass figure twice.
 
-A cargo boom unfolds from the trawler and the LYNE drone comes across on external clamps. It is the size of a light fighter, built around a blunt ROD assembly and surrounded by maneuvering hardware. A launch rack follows, then the control package and enough supporting machinery to occupy a respectable section of working deck.
+A cargo boom unfolds from the trawler and the LYNE drone comes across on external clamps. It is the size of a light fighter, built around a blunt ROD assembly and surrounded by maneuvering hardware. It comes with a launch rack, the control package and enough supporting machinery to occupy a respectable section of working deck.
 
 Nothing involved could reasonably be carried by a person.
 
@@ -4406,7 +4398,7 @@ He signals someone off-screen.
 catchrelease_introShopLater2,DialogOptionSelected,$option == catchrelease_introShopLater2,,"He signals someone off-screen.
 
 ""Clear your heavy deck.""",catchrelease_introDeepGear:Continue,
-catchrelease_introDeepGear,DialogOptionSelected,$option == catchrelease_introDeepGear,CatchReleaseCMD giveDeepGear,"A second transfer begins.
+catchrelease_introDeepGear,DialogOptionSelected,$option == catchrelease_introDeepGear,CatchReleaseCMD giveDeepGear,"The trawler starts another transfer.
 
 The first assembly is a bank of articulated projectors mounted on a reinforced frame. The second takes two cargo booms together: a harpoon launcher, ammunition handling gear, and a ROD head built into a projectile large enough to make the word harpoon seem modest.
 
@@ -4864,18 +4856,12 @@ catchrelease_lampScanTT,OpenCommLink,"$faction.id == tritachyon
 $entity.catchrelease_lampConv score:1525
 $entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Your operating privilege, insofar as one ever existed, is terminated.""
 
-The inspection order follows.
+An inspection order arrives on your comms console.
 
-""Stand by for boarding. Recoveries associated with the incident are subject to seizure.""
-
-A final line appears beneath the order.
-
-""Obstruction will be treated as a separate liability.""",,
+""Stand by for boarding. Recoveries associated with the incident are subject to seizure. Obstruction will be treated as a separate liability.""",,
 catchrelease_lampScanLC,OpenCommLink,"$faction.id == luddic_church
 $entity.catchrelease_lampConv score:1525
 $entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Power it down.""
-
-The boarding order follows.
 
 ""You were warned, then fined. You have continued to put this work before the safety of every soul in those approaches.""
 
@@ -4918,8 +4904,6 @@ $entity.catchrelease_lampConv score:1525
 $entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"$PersonRank $personName opens the third provision.
 
 ""The convention has run out of prices. We are at remedies.""
-
-The boarding authorization follows.
 
 ""Inspection and seizure are authorized. Prepare to be boarded.""",,
 catchrelease_lampScanIndie,OpenCommLink,"$faction.id == independent
