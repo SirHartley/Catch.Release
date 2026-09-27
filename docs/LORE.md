@@ -322,9 +322,17 @@ These instructions govern player-facing prose. They do **not** govern how this r
 
 Catch.Release must sound at home in Starsector before the anomaly is added. Follow the [knowledge boundary](#what-observers-can-notice) in every voice, including narration. Character-specific instructions below take precedence over generic advice to shorten a passage.
 
+Vanilla Starsector's `rules.csv` is the model for paragraph length, speech tags and how often narration interrupts a speaker. Vanilla speakers usually say several sentences in one paragraph, and a gesture sits inside that paragraph or in the speech tag when it tells the reader something:
+
+> “Luddics protesting the planet-side burns,” $heOrShe explains. “Get these every other week due to the pilgrims. They consider it a sort of rite of passage.”
+>
+> $HeOrShe one-arm shrugs to suggest that $heOrShe doesn't find the matter worth getting too upset over, then speaks another string of tactical jargon into $hisOrHer comms.
+
+(Vanilla `lppJangalaShrineProtestStart2`.) The officer's attitude and the ongoing work arrive in one action paragraph, after a full spoken thought. Read vanilla dialogue for this density; do not use older Catch.Release rows as the style reference.
+
 ### People doing their jobs
 
-Write people who already had a working day before the player contacted them.
+Write people who had a working day before the player contacted them. Show it through what they say, what they want and what they decide.
 
 - An ops chief thinks about manifests, mass, deck space, cranes, repairs, crew assignments and invoices.
 - A science officer thinks about telemetry, sensor returns, measurements and calibration.
@@ -333,6 +341,8 @@ Write people who already had a working day before the player contacted them.
 - A trader thinks about the product, customer and price.
 
 Supporting characters are normally competent. Do not make them helpless so the player can appear impressive. When handling unfamiliar equipment, they check the manifest, read telemetry, identify the mass and determine what can be disconnected. Their competence concerns the job; it does not grant forbidden knowledge.
+
+Competence does not need a prop in every paragraph. One document, display or measured figure in a scene is usually enough. Do not signal professionalism with repeated handling gestures such as checking a figure, bringing up a file, tapping the relevant line or closing a display. If the document matters, have the speaker say what is in it.
 
 **Appropriate:**
 
@@ -354,7 +364,7 @@ Describe observable actions before interpreting them. Let conduct establish char
 
 **Why:** the second reports a professional response. The first supplies an emotional interpretation and labels the mass impossible.
 
-Use a specific noun when it matters: slate, bulkhead, cargo boom, docking frame, transponder return, tank lid, maintenance tag or sensor plot. Do not replace description with “eerie,” “uncanny,” “ominous,” “sinister” or “bizarre.”
+Use a specific noun when it matters: bulkhead, cargo boom, docking frame, transponder return, tank lid, maintenance tag or sensor plot. Do not reuse one prop across a conversation or across a family of similar scenes; a slate in every office reads as a template. Do not replace description with “eerie,” “uncanny,” “ominous,” “sinister” or “bizarre.”
 
 Technical language must identify something useful in the scene. A relevant handling frame or telemetry reading is sufficient; do not stack invented technical nouns to simulate expertise.
 
@@ -362,7 +372,31 @@ A corporate officer with an invoice prepared does not need narration explaining 
 
 ### Rhythm and length
 
-Mix sentence lengths and paragraph shapes. Dialogue must sound spoken, but it does not need every hesitation and filler word. A short sentence can provide a pause without announcing a dramatic moment.
+Write in full paragraphs. Let a speaker finish a thought in one paragraph instead of giving each sentence its own line. Mix sentence lengths inside the paragraph. Dialogue must sound spoken, but it does not need every hesitation and filler word.
+
+Put a small action in the speech tag, before the quote or inside the speaker's paragraph. Give an action its own paragraph only when it changes the scene: cargo crosses, the link is cut, a name comes off a list, a patrol changes course. An action that only fills the space between two lines of speech, such as “He looks at you.” or “They tap the display.”, should be merged or cut.
+
+A short sentence can still end a paragraph or land a point. It must be a sentence doing work in the scene, never a stage note such as “A pause.” or “A beat.”
+
+**Do not write:**
+
+> The engineer brings up a fault report.
+>
+> “Our drive keeps dropping out.”
+>
+> They tap the relevant line.
+>
+> “The ration printer won't take our feedstock either.”
+>
+> A pause.
+>
+> “I can only fix one of them.”
+
+**Write:**
+
+> “Our drive keeps dropping out, and now the ration printer won't take our feedstock either,” the engineer says, sending the fault report across. “I have the people to fix one of them. I'd rather fix the drive, so I need another way to feed the printer.”
+
+**Why:** the first version spends three paragraphs on gestures and a stage note, and the problem arrives in fragments. The second gives the whole problem in the engineer's own words. The fault report still arrives, in the same sentence as the speech it supports.
 
 **Example using the [LYNE/ROD installation](#rod-lyne-and-harpoon):**
 
@@ -374,12 +408,13 @@ Mix sentence lengths and paragraph shapes. Dialogue must sound spoken, but it do
 
 **Why:** this varies the pace while communicating scale, equipment and ordinary work. It is an example, not a paragraph template to repeat.
 
+- Most paragraphs should be more than one sentence. A run of one-sentence paragraphs alternating between speech and gesture is the pattern to avoid.
 - Break a sentence when it accumulates several independent descriptive clauses.
 - Use dashes for a genuine interruption, not every aside.
-- Choose a useful detail for a beat. One is often enough, but this is not a numerical limit.
+- Choose one useful detail for each moment. One is often enough, but this is not a numerical limit.
 - Do not remove explanation, character, pacing or necessary context merely to make a line shorter.
 - The Fisherman's restraint must not become clipped delivery. Crablobab must remain expansive.
-- Do not give every exchange a clever final line.
+- Do not give every exchange a clever final line. Most conversations should end on the practical point: the pay, the deadline, the next step.
 
 ### Dialogue and player options
 
@@ -407,9 +442,7 @@ Play the situation straight. Appropriate humor includes officers having to put �
 
 **Example:**
 
-> The blueprint is entered under COLONY INFRASTRUCTURE.
->
-> The category was already present.
+> The blueprint is entered under COLONY INFRASTRUCTURE, a category that was already on the list.
 
 **Why:** the existing category is the detail. Do not add an explanation of why the bureaucracy's readiness is funny or unsettling.
 
@@ -426,6 +459,12 @@ Crablobab's humor is more expansive and physical than the Fisherman's. Following
 - **Manufactured suspense:** an unexplained silence followed by the Fisherman's smile around ordinary information. Supply a concrete reason for the pause or remove it.
 - **Explained jokes:** a League officer finds no suitable form, followed by narration explaining the defeat of bureaucracy. Stop at the specific problem.
 - **Echo beats:** an action followed by a short sentence that repeats it with a new subject, such as “The first drone starts to move. The second follows.” or “The boarding order follows.” The second sentence pads the rhythm and adds no information. Put both actions in one sentence, or cut the second one and let the next line of dialogue carry the scene.
+- **Gesture between every line:** quote, small action, quote, small action. Each gesture is harmless alone; together they make every scene read alike. Merge the gestures into speech tags or into the speaker's paragraph, and keep a stand-alone action only when it changes the scene.
+- **Stage-note fragments:** “A pause.”, “A beat.”, “A second look.”, “Then, brightly:” or “It does not.” as a paragraph. Write the pause into a sentence with a reason (“He takes a drink before answering.”) or leave it out.
+- **Prop tics:** checking figures, bringing up files, tapping entries, closing displays, slates and manifests in every scene. Also watch “already,” “the same” and “still” when they are used to suggest readiness or continuity rather than to state a fact.
+- **Stock replies:** every speaker accepting with “Understood.”, refusing with “Understood. We'll manage.” or sending “the same” records. Give each speaker a reply that belongs to their job and situation.
+- **Rhetorical contrast:** “They're not lost, they're fouled.” or “It isn't a fine, it's a warning.” State the fact directly (“They're fouled on something.”) unless the speaker is correcting somebody.
+- **Narrator asides and closing jokes:** a final narration line that comments on the scene, such as “Nothing involved could reasonably be carried by a person.”, or a one-line punchline appended to every conversation. Let the scene end on its practical point.
 - **Accidental omniscience:** a skilled NPC explains reality's self-correction. Replace the diagnosis with measurement, practical response, doctrine, rumor or ignorance, as appropriate to that character.
 
 These are correction instructions, not bans on every smile, surprise, pause or comparison. The prohibited uses are specified above. Do not weaken an absolute knowledge limit into a stylistic preference.
@@ -504,17 +543,11 @@ Its visible retrieval trace is not a steel cable.
 
 The projectile is large enough to damage a ship conventionally. The Fisherman may explain it as work equipment, but he does not pretend a multi-tonne launcher is harmless.
 
-**Existing dialogue — `catchrelease_introDeepResume_continue`, after the equipment transfer:**
+**Example, after the equipment transfer:**
 
-> He points at the second rig.
+> “That's a harpoon,” he says, pointing at the second rig. “Name's apt, this time. It's the quick and hard way to get a pattern. The lights thin the fabric enough to bring one within reach, and the harpoon puts a ROD head on it before it slips away.”
 >
-> "That's a harpoon. Name's apt, this time."
->
-> "Quick and hard way to get a pattern. Lights thin the fabric enough to bring one within reach. Harpoon puts a ROD head on it before it slips away."
->
-> He looks directly at you.
->
-> "It's a heavy projectile. Treat it accordingly."
+> He turns from the rig to you. “It's a heavy projectile. Treat it accordingly.”
 
 He explains the job, then takes responsibility for the warning. The dry remark does not replace the operating instructions.
 
@@ -625,27 +658,17 @@ Show that through his priorities and omissions, not a confession, villainous smi
 
 **Keep both facts:** his immediate help and warmth are sincere; he does not share his whole calculation about the larger practice. Do not “resolve” this by making his kindness fake or by making him unaware of the consequences.
 
-**Existing dialogue — `catchrelease_introTurnIn2`, the first catch hand-in:**
+**Example, the first catch hand-in:**
 
-> The catch is transferred aboard the trawler.
+> The catch is transferred aboard the trawler. The Fisherman reads the ROD telemetry before he looks at the fish.
 >
-> The Fisherman checks the ROD telemetry first.
->
-> "Clean enough. Good."
->
-> Only then does he look at what you brought back.
->
-> "First trip's mostly about getting the rig home with you. You did."
+> “Clean enough. Good,” he says. “First trip's mostly about getting the rig home with you, and you did.”
 
 He checks the learner's safe return before the value of the catch. His approval is modest but genuine; no ominous qualification follows it.
 
-**Existing dialogue — `catchrelease_introTurnIn5_cont`, at graduation:**
+**Example, at graduation:**
 
-> "That's the lesson finished. You know enough now to make your own mistakes."
->
-> He gives the range records another glance.
->
-> "And if a return doesn't match what the chart promised, bring it here before you decide it's useless."
+> “That's the lesson finished. You know enough now to make your own mistakes.” He glances over the range records once more. “And if a return doesn't match what the chart promised, bring it here before you decide it's useless.”
 
 He gives the player independence without withdrawing help. These short responses suit their moments; longer teaching exchanges still need room to finish the thought.
 
@@ -657,23 +680,11 @@ He often answers the immediate question, recognizes the deeper one, and decides 
 
 For example:
 
-> “Pattern.”
->
-> He turns the container slightly.
->
-> “Fish is fine if you're buying supper. Pattern's the careful word.”
+> “Pattern,” he says, turning the container a little. “Fish is fine if you're buying supper. Pattern's the careful word.”
 
-**Existing dialogue — `catchrelease_ask_deepWater`, answering a question about thin fabric:**
+**Example, answering a question about thin fabric:**
 
-> "Not water."
->
-> There is no irritation in the correction.
->
-> "Thinner fabric. Pattern gets less help holding one shape."
->
-> He looks at you.
->
-> "Same rule applies to the crew. Keep the trip short. Don't turn it into research."
+> “Not water. Thinner fabric. A pattern gets less help holding one shape out there, and the same goes for your crew. Keep the trip short, and don't turn it into research.”
 
 The correction leads to a useful explanation and concern for the crew. He is limiting their exposure, not mocking the question or hiding ordinary operating advice behind a riddle.
 
