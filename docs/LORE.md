@@ -368,8 +368,6 @@ Mix sentence lengths and paragraph shapes. Dialogue must sound spoken, but it do
 
 > The first LYNE drone crosses on external clamps. It is roughly the size of a light fighter, with the ROD assembly buried inside a blunt maneuvering frame.
 >
-> A second follows.
->
 > “That's the line,” the Fisherman says.
 >
 > Your ops crew are already arguing about where to bolt down the launch rack.
@@ -427,6 +425,7 @@ Crablobab's humor is more expansive and physical than the Fisherman's. Following
 - **Repeated similes:** “with the expression of someone who…” or “in the voice of somebody who…” repeated across speakers. Describe the conduct itself.
 - **Manufactured suspense:** an unexplained silence followed by the Fisherman's smile around ordinary information. Supply a concrete reason for the pause or remove it.
 - **Explained jokes:** a League officer finds no suitable form, followed by narration explaining the defeat of bureaucracy. Stop at the specific problem.
+- **Echo beats:** an action followed by a short sentence that repeats it with a new subject, such as “The first drone starts to move. The second follows.” or “The boarding order follows.” The second sentence pads the rhythm and adds no information. Put both actions in one sentence, or cut the second one and let the next line of dialogue carry the scene.
 - **Accidental omniscience:** a skilled NPC explains reality's self-correction. Replace the diagnosis with measurement, practical response, doctrine, rumor or ignorance, as appropriate to that character.
 
 These are correction instructions, not bans on every smile, surprise, pause or comparison. The prohibited uses are specified above. Do not weaken an absolute knowledge limit into a stylistic preference.
