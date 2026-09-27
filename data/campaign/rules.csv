@@ -58,13 +58,13 @@ $faction.id == hegemony
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","""Hegemony Navy."" $PersonRank $personName reads from the incident form. ""Hull damage. Unregistered heavy projectile. Recovery of an unidentified ROD assembly from the impact site."" A second slate is passed into frame. ""Naval Intelligence gets the hardware. You get the report.""",,
+FireAll PopulateOptions","""Hegemony Navy."" $PersonRank $personName reads from the incident form. ""Hull damage. Unregistered heavy projectile. Recovery of unidentified hyperspace technology from the impact site."" A second slate is passed into frame. ""We will be shipping the object to naval intelligence. You may request a receipt at the closest hegemony military office. Be sure to proved the incident report number.""",,
 catchrelease_harpoonedCommsTT,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == tritachyon
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","""Damage assessment is complete."" $PersonRank $personName is already looking at the invoice. ""Repair labor, lost operating time, forensic recovery and disposal of your projectile."" A brief glance up. ""We retained the projectile.""",,
+FireAll PopulateOptions","""Damage assessment is complete."" $PersonRank $personName is already looking at the invoice. ""Repair labor, lost operating time, forensic recovery and disposal of your projectile."" A brief glance up. ""The Tri-Tachyon Legal Department will be in touch.""",,
 catchrelease_harpoonedCommsLC,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == luddic_church
 $entity.catchrelease_harpooned score:1110
@@ -88,19 +88,19 @@ $faction.id == pirates
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","$personName turns the recovered projectile toward the camera. ""You hooked us."" A grin appears despite everything. ""Actually hooked us."" The grin goes away. ""Don't do it twice.""",,
+FireAll PopulateOptions","$personName turns the recovered projectile toward the camera. ""You hooked us."" A grin appears despite everything. ""Actually hooked us."" The grin goes away. ""Don't do it again.""",,
 catchrelease_harpoonedCommsDiktat,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","""You discharged an unregistered heavy device at a vessel of the Sindrian Diktat."" $PersonRank $personName checks the record. ""I am required to ask whether the act was deliberate."" The slate is set aside. ""I have spared us both the formality.""",,
+FireAll PopulateOptions","""You discharged an unregistered heavy device at a vessel of the Sindrian Diktat."" $PersonRank $personName checks the record. ""I am required to ask whether the act was deliberate."" The slate is set aside. ""I have spared us both the formality. I will be less accomodating, should there be a next time.""",,
 catchrelease_harpoonedCommsLeague,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == persean_league
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","$PersonRank $personName has several regulations open. ""I have weapon discharge, negligent recovery operations and collision damage."" Another document opens. ""I do not have 'industrial harpoon'."" They sigh. ""I will improvise.""",,
+FireAll PopulateOptions","$PersonRank $personName has several regulations open. ""I have weapon discharge, negligent recovery operations and collision damage."" Another document opens. ""I do not have 'industrial harpoon'."" They sigh. ""Time to improvise.""",,
 catchrelease_harpoonedCommsIndie,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == independent
 $entity.catchrelease_harpooned score:1110
@@ -187,16 +187,14 @@ $PersonRank $personName checks the attached image.
 
 A second look.
 
-""Heavy fishing equipment.""
+""Yeah. Fishing equipment.""
 
-""The settlement is $entity.catchrelease_harpoonFineDGS credits. Pay it here and the incident closes as negligent discharge.""",,
+""We'll need $entity.catchrelease_harpoonFineDGS credits to repair the damage. Pay it and we will settle this as negligent discharge.""",,
 catchrelease_fineDemandHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
-FireAll CatchReleaseFineOptions","""Hegemony Navy. Heave to.""
-
-$PersonRank $personName reads the charge.
+FireAll CatchReleaseFineOptions","""The feed opens to a very displeased Hegemony $PersonRank.""
 
 ""Unregistered heavy projectile, damage to a registered hull and reckless discharge within a patrolled volume.""
 
@@ -204,16 +202,16 @@ $PersonRank $personName reads the charge.
 
 A slate is set aside.
 
-""Pay it and this remains an accident report.""",,
+""Pay it immediately and this remains an accident report. We will not be as forthcoming next time.""",,
 catchrelease_fineDemandTT,OpenCommLink,"$faction.id == tritachyon
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
-FireAll CatchReleaseFineOptions","""You've damaged Tri-Tachyon property. A fine for the damage and associated recovery costs has been assessed.""
+FireAll CatchReleaseFineOptions","“You have damaged Tri-Tachyon property. A liability assessment covering repairs and associated recovery costs has been issued.”
 
-The figure is already on-screen.
+The amount is already displayed.
 
-""Hull repair, lost schedule time and recovery of foreign hardware: $entity.catchrelease_harpoonFineDGS credits.""",,
+“Hull repair, schedule disruption, and removal of foreign hardware: $entity.catchrelease_harpoonFineDGS credits. Payment terms: Immediate.”",,
 catchrelease_fineDemandLC,OpenCommLink,"$faction.id == luddic_church
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
@@ -353,7 +351,7 @@ The reference closes.
 catchrelease_patrolUnpaid,OpenCommLink,"$entity.catchrelease_harpoonPatrolDone score:1250
 !$entity.catchrelease_harpoonFineSettled
 $entity.isHostile","ShowDefaultVisual
-EndConversation","The link is accepted somewhere on the other ship and left open, unattended, on what sounds like a compartment being cleared for action. Nobody comes to it.",,
+EndConversation","The link is accepted somewhere on the other ship and left open, unattended, on what sounds like a compartment being cleared for action.",,
 catchrelease_fineOptPay,CatchReleaseFineOptions,,DoCanAffordCheck $entity.catchrelease_harpoonFine catchrelease_payFine,,0:catchrelease_payFine:Pay the fine ($entity.catchrelease_harpoonFineDGS credits),
 catchrelease_fineOptTalk,CatchReleaseFineOptions,,"SetStoryOption catchrelease_talkFine 1 avoidCargoScan ui_char_spent_story_point ""Talked your way out of a fine""",,5:catchrelease_talkFine:Talk your way out of it,
 catchrelease_fineOptRefuse,CatchReleaseFineOptions,,,,10:catchrelease_refuseFine:Refuse and cut the comm link,
@@ -379,7 +377,7 @@ FireAll CatchReleaseFleetResolutionOptions","You spend several minutes establish
 
 Eventually $PersonRank $personName changes the category.
 
-""Industrial recovery equipment. Improperly operated.""
+""Industrial recovery equipment, improperly operated.""
 
 The report is filed.
 
@@ -3075,19 +3073,19 @@ $entity.catchrelease_intercepted
 $catchreleaseStage < 2","CatchReleaseCMD point
 $menuState = catchreleaseFisher 0
 $catchrelease_fisherInterceptOpened = true 0
-SetShortcut catchrelease_fisherLeave ""ESCAPE""","The trawler cuts across your approach before you get much closer to the unstable fabric.
+SetShortcut catchrelease_fisherLeave ""ESCAPE""","The trawler swings across your flight path, cutting you off before you can drift any closer to the unstable tear in space.
 
-The Fisherman comes on the channel.
+The Fisherman’s voice crackles over the comms.
 
-""Easy.""
+“Easy there.”
 
-He looks at your ship, then toward the rupture.
+He studies your ship, then glances toward the roiling distortion.
 
-""You've no ROD aboard. Another hundred klicks and I'll have to come fish you from the rupture instead of my catch.""
+“You go any closer without the right gear, and I’ll be hauling you out instead of my usual catch.”
 
-He gestures away from it.
+The trawler banks away from the anomaly, guiding you toward its port side.
 
-""Come alongside.""","0:catchrelease_fisherIntro:Move alongside.
+“Come alongside.”","0:catchrelease_fisherIntro:Move alongside.
 100:catchrelease_fisherLeave:Leave",
 catchrelease_fisherOptIntro,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseStage >= 2
@@ -3157,7 +3155,7 @@ catchrelease_introSkip,DialogOptionSelected,$option == catchrelease_introSkip,Ca
 
 A crewman adds the transfer to the manifest.
 
-""Take the rig. You're cleared for the rest.""",100:catchrelease_fisherBack:Continue,
+""Take the rig. Good luck.""",100:catchrelease_fisherBack:Continue,
 catchrelease_fisherShop,DialogOptionSelected,$option == catchrelease_fisherShop,CatchReleaseCMD openShop,,,
 catchrelease_fisherCharts,DialogOptionSelected,$option == catchrelease_fisherCharts,CatchReleaseCMD openCharts,,,
 catchrelease_fisherChartsBare,DialogOptionSelected,$option == catchrelease_fisherChartsBare,,"""Nothing new yet. What I had, you bought, and I don't redraw charts halfway through a trip.""

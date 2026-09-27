@@ -14,9 +14,11 @@ scrapped
 ---------------------
 qa_
 
-General
-- Audit the mod. Find places where the same problem or resource is solved / accessed in different ways, like for instance an icon being "blacked out" in different ways across classes - and centralize those cases via framework. I want as little in terms of class-specific custom implementations of repeated patterns as possible.
+Fisherman - tutorial intercept
+Just had the fleet get teleported, then teleported again when trying to approach, both way too far from the player instead of just outside viewport.
 
+Fisherman
+Fisherman map indicator doesn't correctly despawn when fleet is close enough to be on radar, causing overlap
 
 ---------------------
 
