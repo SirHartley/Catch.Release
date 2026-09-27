@@ -165,6 +165,7 @@ public class FleetQuest extends FishJob {
     protected String rupture;
     protected String catchTimestamp;
     protected String feedstockCode;
+    protected String casualties;
     protected String manualSection;
     protected String coilCondition;
     protected String filingDate;
@@ -237,9 +238,7 @@ public class FleetQuest extends FishJob {
         // the rows reach the job through the hull's own memory, and this is a different hull
         setEntityMissionRef(giver, REF_KEY);
 
-        if (type == FleetQuestType.CLAIM_ASSAY || type == FleetQuestType.PARLEY_FISH) {
-            requireFreshCatch();
-        }
+        if (type.requiresFreshCatch()) requireFreshCatch();
         claimQuestPond();
         mark();
         hold();
@@ -380,12 +379,12 @@ public class FleetQuest extends FishJob {
         setPersonOverride(contact);
         giver.getMemoryWithoutUpdate().set(TYPE_KEY, type.getId());
         prepareCaseDetails();
-        if (type == FleetQuestType.PARLEY_FISH && questPond == null) return false;
+        if (type.usesQuestPond() && questPond == null) return false;
 
         float target = DemandScore.rollTarget(random());
         FishRequirement ask = rollFillableAsk(target);
         if (ask == null) return false;
-        if (type == FleetQuestType.PARLEY_FISH) ask.sourceId = questPond.getId();
+        if (type.usesQuestPond()) ask.sourceId = questPond.getId();
         addAsk(ask);
 
         addRewards(QuestRewards.roll(type.createRewardRequest(asks, random())).rewards);
@@ -393,7 +392,7 @@ public class FleetQuest extends FishJob {
 
         setUpSpine();
 
-        if (type == FleetQuestType.PARLEY_FISH && !QuestPond.claim(questPond, REF_KEY)) {
+        if (type.usesQuestPond() && !QuestPond.claim(questPond, REF_KEY)) {
             return false;
         }
         if (!setEntityMissionRef(giver, REF_KEY)) {
@@ -558,12 +557,16 @@ public class FleetQuest extends FishJob {
                     0.25f + random().nextFloat() * 0.2f);
             return;
         }
-        if (type == FleetQuestType.PARLEY_FISH) {
+        if (type.usesQuestPond()) {
             StarSystemAPI system = giver.getContainingLocation() instanceof StarSystemAPI
                     ? (StarSystemAPI) giver.getContainingLocation() : null;
             questPond = QuestPond.findFreePond(system);
             rupture = system == null ? "the marked rupture"
                     : "the " + system.getName() + " rupture";
+            return;
+        }
+        if (type == FleetQuestType.BURN_WARD) {
+            casualties = String.valueOf(3 + random().nextInt(5));
             return;
         }
         if (type == FleetQuestType.STRANDED) {
@@ -706,6 +709,7 @@ public class FleetQuest extends FishJob {
         setOrUnset(memory, "$catchreleaseFleetRupture", rupture);
         setOrUnset(memory, "$catchreleaseFleetCatchTimestamp", catchTimestamp);
         setOrUnset(memory, "$catchreleaseFleetFeedstockCode", feedstockCode);
+        setOrUnset(memory, "$catchreleaseFleetCasualties", casualties);
         setOrUnset(memory, "$catchreleaseFleetManualSection", manualSection);
         setOrUnset(memory, "$catchreleaseFleetCoilCondition", coilCondition);
         setOrUnset(memory, "$catchreleaseFleetFilingDate", filingDate);
@@ -861,7 +865,7 @@ public class FleetQuest extends FishJob {
     protected void advanceImpl(float amount) {
         super.advanceImpl(amount);
 
-        if (type == FleetQuestType.PARLEY_FISH && takenUp) {
+        if (type.usesQuestPond() && takenUp) {
             boolean aboard = isSatisfied();
             if (aboard != parleyCatchAboard) {
                 parleyCatchAboard = aboard;
@@ -1367,7 +1371,7 @@ public class FleetQuest extends FishJob {
                 "$catchreleaseFleetFeedstockCode", "$catchreleaseFleetManualSection",
                 "$catchreleaseFleetCoilCondition", "$catchreleaseFleetFilingDate",
                 "$catchreleaseFleetBrokerDates", "$catchreleaseFleetRationDays",
-                "$catchreleaseFleetLiability"
+                "$catchreleaseFleetLiability", "$catchreleaseFleetCasualties"
         };
         for (String key : details) memory.unset(key);
     }
@@ -1417,12 +1421,16 @@ public class FleetQuest extends FishJob {
         return Stage.WANTED.equals(currentStage) && !isEnding() && !isEnded();
     }
 
+    public SectorEntityToken getQuestPond() {
+        return type.usesQuestPond() ? questPond : null;
+    }
+
     protected void claimQuestPond() {
-        if (type == FleetQuestType.PARLEY_FISH) QuestPond.claim(questPond, REF_KEY);
+        if (type.usesQuestPond()) QuestPond.claim(questPond, REF_KEY);
     }
 
     protected void releaseQuestPond() {
-        if (type == FleetQuestType.PARLEY_FISH) QuestPond.release(questPond, REF_KEY);
+        if (type.usesQuestPond()) QuestPond.release(questPond, REF_KEY);
     }
 
     @Override
@@ -1434,7 +1442,7 @@ public class FleetQuest extends FishJob {
 
     @Override
     protected SectorEntityToken getFishRequestRouteTarget() {
-        if (type == FleetQuestType.PARLEY_FISH) {
+        if (type.usesQuestPond()) {
             if (isSatisfied()) return giver != null && !giver.isExpired() ? giver : null;
             if (questPond != null && !questPond.isExpired()) return questPond;
         }

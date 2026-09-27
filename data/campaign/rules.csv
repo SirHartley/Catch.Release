@@ -2731,6 +2731,117 @@ The technician glances at the open copy of $entity.catchreleaseFleetManualSectio
 ""Manual was right.""",,
 catchrelease_fq_scavenger_engine_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == scavenger_engine,,A scavenger vessel is holding position with its drive cold. A standard assistance request is running on the local trade band.,,
 ,,,,,,
+# fleet quest: burn ward,,,,,,
+catchrelease_fq_burn_ward_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == burn_ward,,Burn Ward,,
+catchrelease_fq_burn_ward_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == burn_ward,,Treating burn casualties,,
+catchrelease_fq_burn_ward_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == burn_ward,,"A fire in the reactor space aboard $entity.catchreleaseFleetFlagshipName left $entity.catchreleaseFleetCasualties crew with severe burns, and the medbay is out of synthskin. The medical officer is dressing the burns with fish skin, an old frontier method, and needs $entity.catchrelease_fleetQuestAsk within $entity.catchreleaseFleetDays.",,
+catchrelease_fq_burn_ward_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == burn_ward,,The medical officer's request is recorded on the following terms.,,
+catchrelease_fq_burn_ward_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Thank you for answering. Medical officer, $entity.catchreleaseFleetFlagshipName. We had a fire and I have burn casualties.""",,
+catchrelease_fq_burn_ward_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == burn_ward,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The medical officer is still in surgical gloves. Every bed in the medbay behind them is taken.
+
+""The fire started in the reactor space. $entity.catchreleaseFleetCasualties of my crew went in to put it out, and every one of them came out burned.""
+
+""I used the last of our synthskin on the worst two. The rest are on gel and painkillers, and gel won't keep a burn clean for long.""
+
+The officer brings up a page from a field medicine reference.
+
+""Fish skin. It's an old frontier method. You clean the skin, lay it over the burn, and it keeps the wound covered while it heals. It has to be fresh.""
+
+""I need $entity.catchrelease_fleetQuestAsk, caught after you take this on. Anything that's been sitting in a hold is no use to me.""
+
+""We can pay $entity.catchrelease_fleetQuestReward. I can keep them stable for $entity.catchreleaseFleetDays.""",,
+catchrelease_fq_burn_ward_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == burn_ward,,,"0:catchrelease_fqAccept:I'll bring you the fish.
+5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
+10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_burn_ward_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == burn_ward
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Does that actually work?,
+catchrelease_fq_burn_ward_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Thank you. I'm sending our position and a handling note.""
+
+The note is two lines long. Keep the catch cold. Leave the skin on.",,
+catchrelease_fq_burn_ward_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == burn_ward,,"""That's more than I had an hour ago.""
+
+The medical officer sends the same handling note.
+
+""If you land $entity.catchrelease_fleetQuestAsk, hail us. I'll still need it.""",,
+catchrelease_fq_burn_ward_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Understood. We'll keep broadcasting.""
+
+The channel closes.",,
+catchrelease_fq_burn_ward_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == burn_ward,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Two of them are running fevers now. I'm changing the gel every watch, and it isn't enough.""
+
+""I still need $entity.catchrelease_fleetQuestAsk. They have $entity.catchreleaseFleetDays.""",,
+catchrelease_fq_burn_ward_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == burn_ward,,"A medic's mate meets the transfer at the airlock with an insulated tray and takes the catch straight to the medbay.
+
+The medical officer is already scrubbed in. The first fish is skinned before you close the channel, and the skin goes onto a burned forearm in one long strip.",,
+catchrelease_fq_burn_ward_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Out on the frontier it's what we had.""
+
+The officer pulls up an old treatment record: a mining hand with burns across most of his back, dressed in catch skin and changed every two days.
+
+""He walked out of my medbay. The smell gets into everything, but the wound stays clean under it.""
+
+""Synthskin is better. I don't have any synthskin.""",,
+catchrelease_fq_burn_ward_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == burn_ward,,"""All $entity.catchreleaseFleetCasualties are dressed, and the fevers are coming down.""
+
+The medical officer strips off a pair of gloves and drops them on a pile of others.
+
+""We're making for the nearest station with a real hospital. Thank you, captain.""",,
+catchrelease_fq_burn_ward_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == burn_ward,,A small trader is broadcasting a distress call with a medical priority code. Scans show fire damage around its reactor section.,,
+,,,,,,
+# fleet quest: fouled line,,,,,,
+catchrelease_fq_fouled_line_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == fouled_line,,Fouled Line,,
+catchrelease_fq_fouled_line_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == fouled_line,,Holding at a fouled breach,,
+catchrelease_fq_fouled_line_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == fouled_line,,"Both LYNE drones of the fishing boat $entity.catchreleaseFleetFlagshipName are fouled inside $entity.catchreleaseFleetRupture, and the skipper will not leave without them. By an old fishing practice, another crew lands a catch from the same breach and brings it aboard the fouled boat. The skipper needs $entity.catchrelease_fleetQuestAsk from $entity.catchreleaseFleetRupture within $entity.catchreleaseFleetDays.",,
+catchrelease_fq_fouled_line_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == fouled_line,,The skipper's request is recorded on the following terms.,,
+catchrelease_fq_fouled_line_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == fouled_line,,"""$entity.catchreleaseFleetFlagshipName. We're a fishing crew and we're stuck. You're the first hull that's stopped.""",,
+catchrelease_fq_fouled_line_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == fouled_line,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The skipper has the drone telemetry up on a side screen. Both tracks end at the same point inside $entity.catchreleaseFleetRupture.
+
+""Both drones went in six hours ago. The lines are still reading, so they're there. They're fouled on something and they won't come back.""
+
+""I can't recall them, and I won't cut them. Those drones cost more than the boat.""
+
+Behind the skipper, a deckhand is counting heads against the watch bill for the second time.
+
+""Coherence has been dropping since they fouled. Trade says keep your trips short in thin fabric. This one isn't short anymore.""
+
+""There's an old fix for a fouled line. Another crew works the same breach, lands something, and brings it aboard. The line usually comes loose after that.""
+
+""I need $entity.catchrelease_fleetQuestAsk out of $entity.catchreleaseFleetRupture, landed after you take the job. We can pay $entity.catchrelease_fleetQuestReward. We can hold here for $entity.catchreleaseFleetDays, no longer.""",,
+catchrelease_fq_fouled_line_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == fouled_line,,,"0:catchrelease_fqAccept:I'll work the breach.
+5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
+10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_fouled_line_offerOptionsExtraQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == fouled_line
+!$entity.catchrelease_fqExtraQuestionAsked",,,7:catchrelease_fqExtraQuestion:Why would that free your line?,
+catchrelease_fq_fouled_line_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == fouled_line
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:What if nobody lands anything?,
+catchrelease_fq_fouled_line_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrelease_fleetQuestType == fouled_line,,"""Thank you. Sending you the breach and both our drone tracks. Put your drones in clear of them.""
+
+The file arrives with the two tracks marked.",,
+catchrelease_fq_fouled_line_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == fouled_line,,"""Fair enough. Here's the breach and our tracks.""
+
+""If you land something in $entity.catchreleaseFleetRupture, bring it here first.""",,
+catchrelease_fq_fouled_line_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == fouled_line,,"""Understood. We'll keep calling.""
+
+The channel closes.",,
+catchrelease_fq_fouled_line_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == fouled_line,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Both lines are still reading. The meter's lower than when you left.""
+
+""We still need $entity.catchrelease_fleetQuestAsk out of $entity.catchreleaseFleetRupture. We can hold for $entity.catchreleaseFleetDays.""",,
+catchrelease_fq_fouled_line_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == fouled_line,,"A deckhand carries your catch aboard in a sealed tank and sets it down on the bridge. The skipper logs it against $entity.catchreleaseFleetRupture.
+
+A few minutes later, the first drone track starts to move. The second follows.",,
+catchrelease_fq_fouled_line_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == fouled_line,,"""Then I cut the lines and we go home with an empty rack.""
+
+The skipper looks at the drone telemetry for a moment.
+
+""Or we stay until the meter makes the decision for me. I'd rather cut them.""",,
+catchrelease_fq_fouled_line_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == fouled_line,,"""No idea. My first skipper did it twice while I was aboard. It worked both times.""
+
+""Nobody on this boat is going to argue with it today.""",,
+catchrelease_fq_fouled_line_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == fouled_line,,"""Both drones are back in the rack. One lost a sensor mast, but that we can fix.""
+
+The skipper is already plotting a course away from the breach.
+
+""Burn bright, captain.""",,
+catchrelease_fq_fouled_line_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == fouled_line,,A small fishing boat is holding station at a rupture and broadcasting a distress call. It has not moved since the call began.,,
+,,,,,,
 # fleet quest: collector,,,,,,
 catchrelease_fq_collector_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == collector,,Collector's Commission,,
 catchrelease_fq_collector_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == collector,,Waiting,,

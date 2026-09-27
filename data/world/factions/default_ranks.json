@@ -17,6 +17,8 @@
         "catchrelease_purser": {"name": "Purser"},
         "catchrelease_galleyChief": {"name": "Galley Chief"},
         "catchrelease_coilTechnician": {"name": "Coil Technician"},
+        "catchrelease_medicalOfficer": {"name": "Medical Officer"},
+        "catchrelease_skipper": {"name": "Skipper"},
         "catchrelease_collector": {"name": "Collector"},
         "catchrelease_subButler": {"name": "Sub-Butler"},
         "catchrelease_fightCommissioner": {"name": "Commissioner"},
