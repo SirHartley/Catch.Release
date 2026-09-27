@@ -50,6 +50,7 @@ public enum FleetQuestType {
     QUOTA(FleetTypes.TRADE_SMALL, 1f),
     STARVING(FleetTypes.TRADE_SMALL, 1.1f),
     SCAVENGER_ENGINE(FleetTypes.SCAVENGER_SMALL, 1.2f),
+    BURN_WARD(FleetTypes.TRADE_SMALL, 1.2f),
     COLLECTOR(FleetTypes.TRADE_SMALL, 1.3f),
     WAGER(FleetTypes.SCAVENGER_SMALL, 1.15f);
 
@@ -87,6 +88,7 @@ public enum FleetQuestType {
     public static final float HOME_SPECIES_WEIGHT = 4f;
     public static final float LAST_ENTRY_MAX_LY = 75f;
     public static final float QUIET_SHIP_COOLDOWN_DAYS = 120f;
+    public static final float BURN_WARD_MAX_LY = 6f;
     public static final List<String> BODY_TYPE_TAGS = List.of("fish", "crab", "mollusc");
 
     /** Picks from the home system or its nearest neighbour, preferring home. */
@@ -348,6 +350,12 @@ public enum FleetQuestType {
                 ask.count = DemandScore.countFor(target, DemandScore.COMMON_BASE, 3, 8);
                 break;
 
+            case BURN_WARD:
+                // skin for dressings, so it has to be a fish
+                ask.tag = "fish";
+                ask.count = DemandScore.countFor(target, DemandScore.COMMON_BASE, 2, 5);
+                break;
+
             case QUOTA:
                 ask.minGrade = FishGrade.FINE;
                 ask.count = DemandScore.countFor(target, DemandScore.COMMON_BASE * 1.5f, 2, 6);
@@ -473,6 +481,7 @@ public enum FleetQuestType {
             case QUOTA: return "catchrelease_purser";
             case STARVING: return "catchrelease_galleyChief";
             case SCAVENGER_ENGINE: return "catchrelease_coilTechnician";
+            case BURN_WARD: return "catchrelease_medicalOfficer";
             case COLLECTOR: return "catchrelease_collector";
             default: return null;
         }
@@ -526,6 +535,11 @@ public enum FleetQuestType {
                 >= FishRequirement.LOW_COHERENCE;
     }
 
+    // Only catch landed after the job is accepted counts.
+    public boolean requiresFreshCatch() {
+        return this == CLAIM_ASSAY || this == PARLEY_FISH || this == BURN_WARD;
+    }
+
     // These offers only go to the faction fleets FleetQuestSpawner.fitsDedicatedGiver names.
     public boolean hasDedicatedGivers() {
         return this == FOLLOWER || this == STATE_DINNER || this == CLAIM_ASSAY
@@ -547,6 +561,7 @@ public enum FleetQuestType {
     public float getMaximumTravelLY() {
         return this == LAST_ENTRY ? LAST_ENTRY_MAX_LY
                 : this == CALIBRATION_PAIR ? Float.MAX_VALUE
+                : this == BURN_WARD ? BURN_WARD_MAX_LY
                 : QuestDuration.MAX_SENSIBLE_LY;
     }
 

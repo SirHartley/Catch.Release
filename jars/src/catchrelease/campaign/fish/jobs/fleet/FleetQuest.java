@@ -165,6 +165,7 @@ public class FleetQuest extends FishJob {
     protected String rupture;
     protected String catchTimestamp;
     protected String feedstockCode;
+    protected String casualties;
     protected String manualSection;
     protected String coilCondition;
     protected String filingDate;
@@ -237,9 +238,7 @@ public class FleetQuest extends FishJob {
         // the rows reach the job through the hull's own memory, and this is a different hull
         setEntityMissionRef(giver, REF_KEY);
 
-        if (type == FleetQuestType.CLAIM_ASSAY || type == FleetQuestType.PARLEY_FISH) {
-            requireFreshCatch();
-        }
+        if (type.requiresFreshCatch()) requireFreshCatch();
         claimQuestPond();
         mark();
         hold();
@@ -566,6 +565,10 @@ public class FleetQuest extends FishJob {
                     : "the " + system.getName() + " rupture";
             return;
         }
+        if (type == FleetQuestType.BURN_WARD) {
+            casualties = String.valueOf(3 + random().nextInt(5));
+            return;
+        }
         if (type == FleetQuestType.STRANDED) {
             feedstockCode = String.format(Locale.ROOT, "DFT-FC-%02d",
                     10 + random().nextInt(90));
@@ -706,6 +709,7 @@ public class FleetQuest extends FishJob {
         setOrUnset(memory, "$catchreleaseFleetRupture", rupture);
         setOrUnset(memory, "$catchreleaseFleetCatchTimestamp", catchTimestamp);
         setOrUnset(memory, "$catchreleaseFleetFeedstockCode", feedstockCode);
+        setOrUnset(memory, "$catchreleaseFleetCasualties", casualties);
         setOrUnset(memory, "$catchreleaseFleetManualSection", manualSection);
         setOrUnset(memory, "$catchreleaseFleetCoilCondition", coilCondition);
         setOrUnset(memory, "$catchreleaseFleetFilingDate", filingDate);
@@ -1367,7 +1371,7 @@ public class FleetQuest extends FishJob {
                 "$catchreleaseFleetFeedstockCode", "$catchreleaseFleetManualSection",
                 "$catchreleaseFleetCoilCondition", "$catchreleaseFleetFilingDate",
                 "$catchreleaseFleetBrokerDates", "$catchreleaseFleetRationDays",
-                "$catchreleaseFleetLiability"
+                "$catchreleaseFleetLiability", "$catchreleaseFleetCasualties"
         };
         for (String key : details) memory.unset(key);
     }

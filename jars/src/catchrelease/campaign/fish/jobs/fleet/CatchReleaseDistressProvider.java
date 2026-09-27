@@ -14,6 +14,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
     public static final String PROVIDER_ID = "catchrelease_fleet_quests";
     public static final String STRANDED_ID = "catchrelease_stranded_fleet";
     public static final String DEAD_ENGINE_ID = "catchrelease_dead_engine";
+    public static final String BURN_WARD_ID = "catchrelease_burn_ward";
 
     public static void register() {
         DistressCallFramework.registerProvider(PROVIDER_ID, new CatchReleaseDistressProvider());
@@ -24,7 +25,8 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
         if (!FishingIntro.isComplete()) return false;
         if (FleetQuestSpawner.countActive() > 0) return false;
 
-        return typeFor(spec) != null;
+        FleetQuestType type = typeFor(spec);
+        return type != null && type.canSpawnIn(system);
     }
 
     @Override
@@ -62,6 +64,7 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
         if (spec == null) return null;
         if (STRANDED_ID.equals(spec.id)) return FleetQuestType.STRANDED;
         if (DEAD_ENGINE_ID.equals(spec.id)) return FleetQuestType.SCAVENGER_ENGINE;
+        if (BURN_WARD_ID.equals(spec.id)) return FleetQuestType.BURN_WARD;
 
         return null;
     }

@@ -2731,6 +2731,61 @@ The technician glances at the open copy of $entity.catchreleaseFleetManualSectio
 ""Manual was right.""",,
 catchrelease_fq_scavenger_engine_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == scavenger_engine,,A scavenger vessel is holding position with its drive cold. A standard assistance request is running on the local trade band.,,
 ,,,,,,
+# fleet quest: burn ward,,,,,,
+catchrelease_fq_burn_ward_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == burn_ward,,Burn Ward,,
+catchrelease_fq_burn_ward_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == burn_ward,,Treating burn casualties,,
+catchrelease_fq_burn_ward_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == burn_ward,,"A fire in the reactor space aboard $entity.catchreleaseFleetFlagshipName left $entity.catchreleaseFleetCasualties crew with severe burns, and the medbay is out of synthskin. The medical officer is dressing the burns with fish skin, an old frontier method, and needs $entity.catchrelease_fleetQuestAsk within $entity.catchreleaseFleetDays.",,
+catchrelease_fq_burn_ward_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == burn_ward,,The medical officer's request is recorded on the following terms.,,
+catchrelease_fq_burn_ward_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Thank you for answering. Medical officer, $entity.catchreleaseFleetFlagshipName. We had a fire and I have burn casualties.""",,
+catchrelease_fq_burn_ward_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == burn_ward,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The medical officer is still in surgical gloves. Every bed in the medbay behind them is taken.
+
+""The fire started in the reactor space. $entity.catchreleaseFleetCasualties of my crew went in to put it out, and every one of them came out burned.""
+
+""I used the last of our synthskin on the worst two. The rest are on gel and painkillers, and gel won't keep a burn clean for long.""
+
+The officer brings up a page from a field medicine reference.
+
+""Fish skin. It's an old frontier method. You clean the skin, lay it over the burn, and it keeps the wound covered while it heals. It has to be fresh.""
+
+""I need $entity.catchrelease_fleetQuestAsk, caught after you take this on. Anything that's been sitting in a hold is no use to me.""
+
+""We can pay $entity.catchrelease_fleetQuestReward. I can keep them stable for $entity.catchreleaseFleetDays.""",,
+catchrelease_fq_burn_ward_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == burn_ward,,,"0:catchrelease_fqAccept:I'll bring you the fish.
+5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
+10:catchrelease_fqDecline:Decline.",
+catchrelease_fq_burn_ward_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions,"$entity.catchrelease_fleetQuestType == burn_ward
+!$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Does that actually work?,
+catchrelease_fq_burn_ward_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Thank you. I'm sending our position and a handling note.""
+
+The note is two lines long. Keep the catch cold. Leave the skin on.",,
+catchrelease_fq_burn_ward_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == burn_ward,,"""That's more than I had an hour ago.""
+
+The medical officer sends the same handling note.
+
+""If you land $entity.catchrelease_fleetQuestAsk, hail us. I'll still need it.""",,
+catchrelease_fq_burn_ward_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Understood. We'll keep broadcasting.""
+
+The channel closes.",,
+catchrelease_fq_burn_ward_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == burn_ward,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Two of them are running fevers now. I'm changing the gel every watch, and it isn't enough.""
+
+""I still need $entity.catchrelease_fleetQuestAsk. They have $entity.catchreleaseFleetDays.""",,
+catchrelease_fq_burn_ward_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == burn_ward,,"A medic's mate meets the transfer at the airlock with an insulated tray and takes the catch straight to the medbay.
+
+The medical officer is already scrubbed in. The first fish is skinned before you close the channel, and the skin goes onto a burned forearm in one long strip.",,
+catchrelease_fq_burn_ward_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Out on the frontier it's what we had.""
+
+The officer pulls up an old treatment record: a mining hand with burns across most of his back, dressed in catch skin and changed every two days.
+
+""He walked out of my medbay. The smell gets into everything, but the wound stays clean under it.""
+
+""Synthskin is better. I don't have any synthskin.""",,
+catchrelease_fq_burn_ward_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == burn_ward,,"""All $entity.catchreleaseFleetCasualties are dressed, and the fevers are coming down.""
+
+The medical officer strips off a pair of gloves and drops them on a pile of others.
+
+""We're making for the nearest station with a real hospital. Thank you, captain.""",,
+catchrelease_fq_burn_ward_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == burn_ward,,A small trader is broadcasting a distress call with a medical priority code. Scans show fire damage around its reactor section.,,
+,,,,,,
 # fleet quest: collector,,,,,,
 catchrelease_fq_collector_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == collector,,Collector's Commission,,
 catchrelease_fq_collector_action,CatchReleaseFleetQuestActionText,$entity.catchrelease_fleetQuestType == collector,,Waiting,,
