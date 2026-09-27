@@ -558,7 +558,7 @@ Its visible retrieval trace is not a steel cable.
 
 The projectile is large enough to damage a ship conventionally. The Fisherman may explain it as work equipment, but he does not pretend a multi-tonne launcher is harmless.
 
-**Example, after the equipment transfer:**
+**Existing dialogue — `catchrelease_introDeepResume_continue`, after the equipment transfer:**
 
 > “That's a harpoon,” he says, pointing at the second rig. “Name's apt, this time. It's the quick and hard way to get a pattern. The lights thin the fabric enough to bring one within reach, and the harpoon puts a ROD head on it before it slips away.”
 >
@@ -673,7 +673,7 @@ Show that through his priorities and omissions, not a confession, villainous smi
 
 **Keep both facts:** his immediate help and warmth are sincere; he does not share his whole calculation about the larger practice. Do not “resolve” this by making his kindness fake or by making him unaware of the consequences.
 
-**Example, the first catch hand-in:**
+**Existing dialogue — `catchrelease_introTurnIn2`, the first catch hand-in:**
 
 > The catch is transferred aboard the trawler. The Fisherman reads the ROD telemetry before he looks at the fish.
 >
@@ -681,7 +681,7 @@ Show that through his priorities and omissions, not a confession, villainous smi
 
 He checks the learner's safe return before the value of the catch. His approval is modest but genuine; no ominous qualification follows it.
 
-**Example, at graduation:**
+**Existing dialogue — `catchrelease_introTurnIn5_cont`, at graduation:**
 
 > “That's the lesson finished. You know enough now to make your own mistakes.” He glances over the range records once more. “And if a return doesn't match what the chart promised, bring it here before you decide it's useless.”
 
@@ -693,11 +693,11 @@ Give him enough room to speak naturally. He can pause, teach, observe, joke and 
 
 He often answers the immediate question, recognizes the deeper one, and decides not to pursue it; this is a possible exchange, not a mandatory template.
 
-For example:
+**Existing dialogue — `catchrelease_introFirstQuestion`:**
 
 > “Pattern,” he says, turning the container a little. “Fish is fine if you're buying supper. Pattern's the careful word.”
 
-**Example, answering a question about thin fabric:**
+**Existing dialogue — `catchrelease_ask_deepWater`, answering a question about thin fabric:**
 
 > “Not water. Thinner fabric. A pattern gets less help holding one shape out there, and the same goes for your crew. Keep the trip short, and don't turn it into research.”
 
