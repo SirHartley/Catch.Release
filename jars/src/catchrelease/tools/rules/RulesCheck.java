@@ -183,6 +183,10 @@ public final class RulesCheck {
         }
         for (RulesFile.Record record : file.records.subList(1, file.records.size())) {
             String first = record.fields().get(0);
+            if (hasCurlyDoubleQuote(record)) {
+                add(Severity.ERROR, "curly-quote", record.line(), first.isEmpty() ? "-" : first,
+                        "holds a typographic double quote (U+201C or U+201D); the game's CSV reader takes it as a field quote and shifts the cells");
+            }
             if (record.fields().size() != RulesFile.HEADER.size()) {
                 add(Severity.ERROR, "columns", record.line(), first.isEmpty() ? "-" : first,
                         "has " + record.fields().size() + " columns; rows have " + RulesFile.HEADER.size());
@@ -208,6 +212,15 @@ public final class RulesCheck {
             }
         }
         return true;
+    }
+
+    // Inferred, not ported: LoadingUtils is not in the starsector-knowledge sources. Reading these characters as
+    // quotes reproduces the 0.98a-RC8 load failure NumberFormatException: For input string: "schedule disruption".
+    private static boolean hasCurlyDoubleQuote(RulesFile.Record record) {
+        for (String field : record.fields()) {
+            if (field.indexOf('“') >= 0 || field.indexOf('”') >= 0) return true;
+        }
+        return false;
     }
 
     // Engine load errors and CSV cell rules

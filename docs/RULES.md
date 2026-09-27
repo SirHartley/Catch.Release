@@ -264,6 +264,8 @@ assert out.getvalue() == src
 
 If it differs, inspect the source format before editing. The loader strips carriage returns from Conditions, Script and Options, but not from Text: a CRLF inside a Text cell stops `OR` from splitting it. Commas in notes must remain inside a correctly quoted field.
 
+Write quotation marks and apostrophes as straight ASCII `"` and `'`. The game's CSV reader treats the typographic double quotes `“` and `”` as field quotes: a Text cell holding them is split at its next comma and the remainder lands in Options, where the loader fails with `NumberFormatException` (0.98a-RC8; reproduced from the load log, since `LoadingUtils` is not in the `starsector-knowledge` sources). Vanilla `rules.csv` uses none.
+
 ### Rules check tool
 
 `catchrelease.tools.rules.RulesCheck` reads `data/campaign/rules.csv` and reports problems in the mod's rows. It runs outside the game and touches no game class that needs `Global`.
@@ -290,6 +292,7 @@ The exit status is 1 when there is an error, 0 when there are only warnings or n
 |---|---|---|
 | `columns` | error | A header other than `id,trigger,conditions,script,text,options,notes`, or a row without exactly seven columns |
 | `csv` | error | An unterminated quote |
+| `curly-quote` | error | A typographic double quote `“` or `”` in any cell, which the game's CSV reader takes as a field quote |
 | `empty-id` | warning | A row with content but an empty id, which the loader skips |
 | `duplicate-id` | error / warning | An id used twice under the same trigger (the file fails to load) / under different triggers |
 | `whitespace` | error | A Conditions, Script or Options line that holds only spaces |
