@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="manual play sessions">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="rules &amp; fish description work">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/campaign/fish.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/fish.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +143,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="rules work" />
     <MESSAGE value="Fisherman intro castaway" />
     <MESSAGE value="illustration" />
     <MESSAGE value="icons &amp; rules" />
@@ -170,7 +167,8 @@
     <MESSAGE value="changed module dep to coretto 17" />
     <MESSAGE value="dialogue &amp; formatting" />
     <MESSAGE value="manual play sessions" />
-    <option name="LAST_COMMIT_MESSAGE" value="manual play sessions" />
+    <MESSAGE value="rules &amp; fish description work" />
+    <option name="LAST_COMMIT_MESSAGE" value="rules &amp; fish description work" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

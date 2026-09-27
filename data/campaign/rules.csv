@@ -503,10 +503,10 @@ catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catch
 $HeOrShe brings your order to the center of the display.
 
 ""Where are we?""",,
-catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,A young factor in an expensive jacket has a ten-page business case open on $hisOrHer slate. A half-finished drink sits at one corner of the table.,,
+catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,"A young factor in an expensive sleeveless jacket has a ten-page business case open on $hisOrHer slate. A cheap, half-finished drink sits at one corner of the table.",,
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch from the young factor in the expensive jacket,
 catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"$menuState = catchreleaseStartupOffer 0
-FireAll JobSpecificOptions","""You fish. Good. That's the difficult side.""
+FireAll JobSpecificOptions","""You fish. Perfect. That's the difficult side.""
 
 $HeOrShe closes three projections and opens another, packed with margins and rising curves.
 
@@ -616,7 +616,9 @@ The three receipts take up half a page in the business case. A distribution netw
 
 ""Three completed runs. That's the supply chain proven.""
 
-$HeOrShe is already revising the demand projections.",,
+$HeOrShe is already revising the demand projections.
+
+It doesn't seem like there area any buyers yet.",,
 ,,,,,,
 # bar job: sub-butler,,,,,,
 catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The $manOrWoman answers promptly. A household schedule remains open on $hisOrHer slate, with your name brought discreetly to the top.
@@ -757,6 +759,7 @@ The quiet child points to two empty spaces near the bottom.
 
 ""But we need two more fish.""
 ""And he won't let me pick.""
+
 ""Because you always pick yours first.""
 
 The loud child looks at you.
@@ -961,7 +964,7 @@ catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ri
 ""Good. $catchreleaseAskCap, both from your catch. Bring them in before the fight in $catchreleaseDaysCap.""
 
 ""We'll weigh them in front of everyone, put the odds up, then you tell me whether you're taking the fee or backing one.""",,
-catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,"""Fair enough."" The Commissioner leaves the supplier line blank and reopens the notebook.
+catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,"""Fair enough."" The Commissioner reopens the notebook.
 
 The barkeeper calls down the bar, ""Still need two for the fight!""",,
 catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"The Commissioner looks up from the book.
@@ -993,7 +996,7 @@ A third figure goes underneath.
 
 ""House takes $catchreleaseHouseOdds.""
 
-That is enough to bring half the room toward the board. Money starts changing hands before the Commissioner has finished writing.",,
+That is enough to bring half the room toward the board. Cred-chips starts changing hands before the Commissioner has finished writing.",,
 catchrelease_ringAssignmentOptions,CatchReleaseRingWagerOptions,"$missionId == catchrelease_ring
 $catchreleaseRingSelectionReady","SetOptionColor catchrelease_ringFlat highlight
 SetOptionColor catchrelease_ringLeft highlight
@@ -1152,10 +1155,6 @@ The agreed transfer clears.",,
 # bar job: tuber,,,,,,
 catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp.
 
-""Wait. Captain's on comms.""
-
-The lens swings toward the display before the sentence is finished.
-
 ""CHAT. Stop scrolling. You are not going to believe who just called me.""
 
 $HeOrShe checks the recording indicator.
@@ -1192,9 +1191,9 @@ $HeOrShe starts recording before you can move.
 
 ""Everyone asking whether this is actually happening: it is happening. We are getting the specimen.""
 
-$HeOrShe stops the clip.
+$HeOrShe pauses the stream and looks at you with a tinge of desperation.
 
-""That is the teaser. Bring it back before everyone starts accusing me of faking the whole thing.""",,
+""Please bring it back before everyone starts accusing me of faking the whole thing.""",,
 catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow.""
 
 $HeOrShe turns to the lens without moving it off you.
@@ -1216,7 +1215,7 @@ $HeOrShe raises the camera as soon as $heOrShe sees you.
 
 $HeOrShe lowers the camera again.
 
-""Bring it back before they decide I made the whole thing up.""",,
+""Every time you walk in here without it, chat makes up three new conspiracy theories.""",,
 catchrelease_tuber_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
 $catchreleaseMore score:100","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
