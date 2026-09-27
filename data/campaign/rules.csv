@@ -2351,19 +2351,11 @@ catchrelease_crabBar,DialogOptionSelected,"$option == catchrelease_crabBar
 !$global.catchrelease_metCrablobab","SaveCurrentVisual
 CatchReleaseCMD showCrabPortrait
 $global.catchrelease_metCrablobab = true
-SetShortcut catchrelease_crabLeave ""ESCAPE""","""Terrible!""
-
-He says it with obvious satisfaction.
-
-""Crablobab. Me and the crabs. Saves introductions.""
+SetShortcut catchrelease_crabLeave ""ESCAPE""","""Terrible!"" He says it with obvious satisfaction. ""Crablobab. Me and the crabs. Saves introductions.""
 
 One crab has worked a claw through the side of its crate. Crablobab gently pushes the claw back in through a different side.
 
-""You fish.""
-
-This is not a question.
-
-""Excellent. You need things.""","0:catchrelease_crabStall:What sort of things?
+""You fish."" This is not a question. ""Excellent. You need things.""","0:catchrelease_crabStall:What sort of things?
 10:catchrelease_crabCrabs:Why the crabs?
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabBarExplosive,DialogOptionSelected,"$option == catchrelease_crabBar
@@ -2373,19 +2365,11 @@ CatchReleaseCMD tokens","SaveCurrentVisual
 CatchReleaseCMD showCrabPortrait
 CatchReleaseCMD crabAcknowledgeExplosive
 CatchReleaseCMD highlightFishText $catchreleaseCrabExplosiveTarget
-SetShortcut catchrelease_crabLeave ""ESCAPE""","""You're back!""
-
-Crablobab points at you.
-
-""$catchreleaseCrabExplosiveTarget!""
+SetShortcut catchrelease_crabLeave ""ESCAPE""","""You're back!"" Crablobab points at you. ""$catchreleaseCrabExplosiveTarget!""
 
 A pocket near his shoulder flashes once.
 
-""It worked, then. Excellent! Wasn't too sure about that one.""
-
-He looks expectantly at your empty hands.
-
-""You need things.""","0:catchrelease_crabStall:Show me what you have
+""It worked, then. Excellent! Wasn't too sure about that one."" He looks expectantly at your empty hands. ""You need things.""","0:catchrelease_crabStall:Show me what you have
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabBarRepeat,DialogOptionSelected,"$option == catchrelease_crabBar
 $global.catchrelease_metCrablobab
@@ -2393,128 +2377,62 @@ CatchReleaseCMD tokens","SaveCurrentVisual
 CatchReleaseCMD showCrabPortrait
 SetShortcut catchrelease_crabLeave ""ESCAPE""","""You're back!""
 
-Crablobab says it with obvious satisfaction.
-
-One of the crabs has got as far as the next stool. He returns it to the crate through a pocket in his coat.
-
-""Introductions already done. Saves time twice.""
-
-He spreads his hands toward you.
-
-""You need things.""","0:catchrelease_crabStall:Show me what you have
+One of the crabs has got as far as the next stool. Crablobab returns it to the crate through a pocket in his coat. ""Introductions already done. Saves time twice."" He spreads his hands toward you. ""You need things.""","0:catchrelease_crabStall:Show me what you have
 100:catchrelease_crabLeave:Leave",
-catchrelease_crabCrabs,DialogOptionSelected,$option == catchrelease_crabCrabs,"SetShortcut catchrelease_crabLeave ""ESCAPE""","""Crabs!""
+catchrelease_crabCrabs,DialogOptionSelected,$option == catchrelease_crabCrabs,"SetShortcut catchrelease_crabLeave ""ESCAPE""","""Crabs!"" He looks down at the crate as if reminded. ""Very dependable. Nearly all of them arrive.""
 
-He looks down at the crate as if reminded.
-
-""Very dependable. Nearly all of them arrive.""
-
-He pats the lid.
-
-Something inside the coat knocks back.","0:catchrelease_crabStall:Ask about the merchandise
+He pats the lid. Something inside the coat knocks back.","0:catchrelease_crabStall:Ask about the merchandise
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabStallEmpty,DialogOptionSelected,"$option == catchrelease_crabStall score:20
 CatchReleaseCMD tokens
 !$catchreleaseCrabAny","CatchReleaseCMD showCrabPortrait
-FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
-
-The shelves are empty.
+FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat. The shelves are empty.
 
 He checks one pocket, then another. A crab checks the first one again.
 
-""Nothing.""
-
-He considers this.
-
-""Except crabs.""",,
+""Nothing."" He considers this. ""Except crabs.""",,
 catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabAny","CatchReleaseCMD showCrabPortrait
-FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat.
-
-The inside contains shelves.
-
-One of them is far enough away to require a light.
+FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat. The inside contains shelves. One of them is far enough away to require a light.
 
 ""Shop!""",,
 catchrelease_crabWareCelebration,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabCelebrationAfford",SetTextHighlights $catchreleaseCrabCelebrationPrice $catchreleaseCrabCelebrationCrabs,"""Celebration charges.""
+$catchreleaseCrabCelebrationAfford",SetTextHighlights $catchreleaseCrabCelebrationPrice $catchreleaseCrabCelebrationCrabs,"Crablobab reaches past a shelf several metres inside the coat and retrieves a cartridge box.
 
-He produces a cartridge box.
-
-""Catch comes aboard, these go off. Paper everywhere. Colours. Terrible for the deck crew.""
-
-He beams.
-
-""Excellent for morale.""
+""Celebration charges! Catch comes aboard, these go off. Paper everywhere. Colours. Terrible for the deck crew."" He beams. ""Excellent for morale.""
 
 He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs.","0:catchrelease_crabBuyCelebration:Pay him
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareCelebrationShort,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabCelebrationAfford",SetTextHighlights $catchreleaseCrabCelebrationPrice $catchreleaseCrabCelebrationCrabs,"""Celebration charges!""
-
-Crablobab produces a cartridge box and gives it an encouraging shake.
-
-""Catch comes aboard, these go off. Paper everywhere. Colours everywhere. Deck crew complains.""
-
-He beams.
-
-""Excellent for morale.""
+!$catchreleaseCrabCelebrationAfford",SetTextHighlights $catchreleaseCrabCelebrationPrice $catchreleaseCrabCelebrationCrabs,"Crablobab produces a cartridge box and gives it an encouraging shake. ""Celebration charges! Catch comes aboard, these go off. Paper everywhere. Colours everywhere. Deck crew complains."" He beams. ""Excellent for morale.""
 
 He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs.
 
-You are short.
-
-Crablobab checks your credits, checks the crabs, then checks a pocket containing neither.
-
-""Next time!""",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening.
-
-""Celebrate responsibly.""
-
-""Outfitter toggles it! On, off, on again. You know the drill.""",0:catchrelease_crabStall:Continue,
+You are short. Crablobab checks your credits, checks the crabs, then checks a pocket containing neither. ""Next time!""",10:catchrelease_crabStall:Another time.,
+catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening. ""Celebrate responsibly. Outfitter toggles it! On, off, on again. You know the drill.""",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareEarmuffs,DialogOptionSelected,"$option == catchrelease_crabWareEarmuffs score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabEarmuffsAfford",SetTextHighlights $catchreleaseCrabEarmuffsPrice $catchreleaseCrabEarmuffsCrabs,"""Earmuffs.""
+$catchreleaseCrabEarmuffsAfford",SetTextHighlights $catchreleaseCrabEarmuffsPrice $catchreleaseCrabEarmuffsCrabs,"""Earmuffs."" They are already in his hands. ""Very comfortable. Good seal. You put them on and the whispering stops.""
 
-They are already in his hands.
-
-""Very comfortable. Good seal. You put them on and the whispering stops.""
-
-He places them on the table.
-
-The faint sound your bridge recordings have been carrying from low-coherence space continues normally.
+He places them on the table. The faint sound your bridge recordings have been carrying from low-coherence space continues normally.
 
 He wants $catchreleaseCrabEarmuffsPrice for them, and $catchreleaseCrabEarmuffsCrabs crabs.","0:catchrelease_crabBuyEarmuffs:Pay him
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareEarmuffsShort,DialogOptionSelected,"$option == catchrelease_crabWareEarmuffs score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabEarmuffsAfford",SetTextHighlights $catchreleaseCrabEarmuffsPrice $catchreleaseCrabEarmuffsCrabs,"""Earmuffs.""
+!$catchreleaseCrabEarmuffsAfford",SetTextHighlights $catchreleaseCrabEarmuffsPrice $catchreleaseCrabEarmuffsCrabs,"""Earmuffs."" They are already in his hands. ""Very comfortable. Good seal. You put them on and the whispering stops.""
 
-They are already in his hands.
-
-""Very comfortable. Good seal. You put them on and the whispering stops.""
-
-He places them on the table.
-
-The faint sound your bridge recordings have been carrying from low-coherence space continues normally.
+He places them on the table. The faint sound your bridge recordings have been carrying from low-coherence space continues normally.
 
 He wants $catchreleaseCrabEarmuffsPrice for them, and $catchreleaseCrabEarmuffsCrabs crabs.
 
-Crablobab counts your payment twice.
-
-""Almost!""
-
-The earmuffs disappear into his sleeve without passing a cuff.",10:catchrelease_crabStall:Another time.,
+Crablobab counts your payment twice. ""Almost!"" The earmuffs disappear into his sleeve without passing a cuff.",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyEarmuffs,DialogOptionSelected,$option == catchrelease_crabBuyEarmuffs,CatchReleaseCMD crabBuy EARMUFFS,"""Try them.""
 
-They are warm.
-
-Once fitted, the whispering is gone.
-
-Nothing else changes.
+They are warm. Once fitted, the whispering is gone. Nothing else changes.
 
 ""Outfitter toggles it! On, off, on again. You know the drill.""",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareChicken_profile,DialogOptionSelected,"$option == catchrelease_crabWareChicken_profile score:10
@@ -2540,80 +2458,37 @@ The chicken completes another circuit. Crablobab gives it an approving nod.
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareChicken_profileShort,DialogOptionSelected,"$option == catchrelease_crabWareChicken_profile score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabChicken_profileAfford",SetTextHighlights $catchreleaseCrabChicken_profilePrice $catchreleaseCrabChicken_profileCrabs,"""Chicken!""
-
-Crablobab reaches into his coat, past a rack of boxed merchandise, and produces a little display tile. He plants it on the counter with a flourish.
-
-""There he is!""
+!$catchreleaseCrabChicken_profileAfford",SetTextHighlights $catchreleaseCrabChicken_profilePrice $catchreleaseCrabChicken_profileCrabs,"""Chicken!"" Crablobab reaches into his coat, past a rack of boxed merchandise, and produces a little display tile. He plants it on the counter with a flourish. ""There he is!""
 
 A chicken marches across the screen, vanishes around one edge, and promptly returns from the other.
 
-""Fish not introduced yet? Chicken. Upright, punctual, excellent posture. Keeps the place occupied until something more fish-shaped turns up.""
+""Fish not introduced yet? Chicken. Upright, punctual, excellent posture. Keeps the place occupied until something more fish-shaped turns up."" He turns the tile toward you, then glances at your payment. ""Ah! Nearly a chicken.""
 
-He turns the tile toward you, then glances at your payment.
+Crablobab counts the credits, then the crabs, then counts both again in the opposite order. ""$catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. This is less than that.""
 
-""Ah! Nearly a chicken.""
+He takes the tile back. The chicken continues marching. ""Good news! He'll still be here when you're richer.""",10:catchrelease_crabStall:Another time.,
+catchrelease_crabBuyChicken_profile,DialogOptionSelected,$option == catchrelease_crabBuyChicken_profile,CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your tripad, already held in his other hand. The chicken walks right over.
 
-Crablobab counts the credits, then the crabs, then counts both again in the opposite order.
+""There we go! Installed, registered, acknowledged by whatever insists on acknowledging these things."" He gives the chicken an approving little nod. ""If you get tired of him, put him away. He won't mind.""
 
-""$catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. This is less than that.""
-
-He takes the tile back. The chicken continues marching.
-
-""Good news! He'll still be here when you're richer.""",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyChicken_profile,DialogOptionSelected,$option == catchrelease_crabBuyChicken_profile,CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your tripad, already held in his other hand.
-The chicken walks right over.
-
-""There we go! Installed, registered, acknowledged by whatever insists on acknowledging these things.""
-
-He gives the chicken an approving little nod.
-
-""If you get tired of him, put him away. He won't mind.""
-
-Crablobab watches the chicken peck an app icon.
-
-""Professional.""",0:catchrelease_crabStall:Continue,
+Crablobab watches the chicken peck an app icon. ""Professional.""",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareExplosive_head,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabExplosive_headAfford",SetTextHighlights $catchreleaseCrabExplosive_headPrice $catchreleaseCrabExplosive_headCrabs,"""Explosive head!""
+$catchreleaseCrabExplosive_headAfford",SetTextHighlights $catchreleaseCrabExplosive_headPrice $catchreleaseCrabExplosive_headCrabs,"""Explosive head!"" Crablobab carries the item in both hands at soup-bowl level, shoulders hunched to keep it steady. ""Harpoon goes in. This goes off. Whatever you were trying to catch has a very different afternoon.""
 
-Crablobab carries the item in both hands at soup-bowl level, shoulders hunched to keep it steady.
-
-""Harpoon goes in. This goes off. Whatever you were trying to catch has a very different afternoon.""
-
-He lowers his voice.
-
-""Also the harpoon.""
-
-Then, brightly:
-
-""Single use!""
+""Also the harpoon,"" he adds in a lower voice, and then, brightly, ""Single use!""
 
 He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs.","0:catchrelease_crabBuyExplosive_head:Pay him
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareExplosive_headShort,DialogOptionSelected,"$option == catchrelease_crabWareExplosive_head score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabExplosive_headAfford",SetTextHighlights $catchreleaseCrabExplosive_headPrice $catchreleaseCrabExplosive_headCrabs,"""Explosive head!""
+!$catchreleaseCrabExplosive_headAfford",SetTextHighlights $catchreleaseCrabExplosive_headPrice $catchreleaseCrabExplosive_headCrabs,"""Explosive head!"" Crablobab carries the item in both hands at soup-bowl level, shoulders hunched to keep it steady. ""Harpoon goes in. This goes off. Whatever you were trying to catch has a very different afternoon.""
 
-Crablobab carries the item in both hands at soup-bowl level, shoulders hunched to keep it steady.
-
-""Harpoon goes in. This goes off. Whatever you were trying to catch has a very different afternoon.""
-
-He lowers his voice.
-
-""Also the harpoon.""
-
-Then, brightly:
-
-""Single use!""
+""Also the harpoon,"" he adds in a lower voice, and then, brightly, ""Single use!""
 
 He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs.
 
-You do not have enough.
-
-""Probably for the best.""
-
-Crablobab puts it into an inside pocket. The pocket flashes once.",10:catchrelease_crabStall:Another time.,
+You do not have enough. ""Probably for the best."" Crablobab puts it into an inside pocket. The pocket flashes once.",10:catchrelease_crabStall:Another time.,
 catchrelease_crabBuyExplosive_head,DialogOptionSelected,$option == catchrelease_crabBuyExplosive_head,CatchReleaseCMD crabBuy EXPLOSIVE_HEAD,"The head comes out of the coat wrapped, tagged, and already entered against your ship's inventory.
 
 Your ops chief checks the timestamp.
@@ -2621,40 +2496,22 @@ Your ops chief checks the timestamp.
 The entry predates the sale by eleven minutes.",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareConservatory,DialogOptionSelected,"$option == catchrelease_crabWareConservatory score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabConservatoryAfford",SetTextHighlights $catchreleaseCrabConservatoryPrice $catchreleaseCrabConservatoryCrabs,"""Now this.""
+$catchreleaseCrabConservatoryAfford",SetTextHighlights $catchreleaseCrabConservatoryPrice $catchreleaseCrabConservatoryCrabs,"""Now this."" A blueprint chip appears between two fingers. ""Breach Conservatory. Public tank, outfitting desk, proper glass. Families love it. Children press their faces against everything.""
 
-A blueprint chip appears between two fingers.
-
-""Breach Conservatory. Public tank, outfitting desk, proper glass. Families love it. Children press their faces against everything.""
-
-He turns the chip over.
-
-""Build one and your colony can keep catch on display and work the trade locally.""
+He turns the chip over. ""Build one and your colony can keep catch on display and work the trade locally.""
 
 He wants $catchreleaseCrabConservatoryPrice for it, and $catchreleaseCrabConservatoryCrabs crabs.","0:catchrelease_crabBuyConservatory:Pay him
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareConservatoryShort,DialogOptionSelected,"$option == catchrelease_crabWareConservatory score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabConservatoryAfford",SetTextHighlights $catchreleaseCrabConservatoryPrice $catchreleaseCrabConservatoryCrabs,"""Now this.""
+!$catchreleaseCrabConservatoryAfford",SetTextHighlights $catchreleaseCrabConservatoryPrice $catchreleaseCrabConservatoryCrabs,"""Now this."" A blueprint chip appears between two fingers. ""Breach Conservatory. Public tank, outfitting desk, proper glass. Families love it. Children press their faces against everything.""
 
-A blueprint chip appears between two fingers.
-
-""Breach Conservatory. Public tank, outfitting desk, proper glass. Families love it. Children press their faces against everything.""
-
-He turns the chip over.
-
-""Build one and your colony can keep catch on display and work the trade locally.""
+He turns the chip over. ""Build one and your colony can keep catch on display and work the trade locally.""
 
 He wants $catchreleaseCrabConservatoryPrice for it, and $catchreleaseCrabConservatoryCrabs crabs.
 
-You are short.
-
-""No trouble.""
-
-The chip goes into a pocket already occupied by his left hand.",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyConservatory,DialogOptionSelected,$option == catchrelease_crabBuyConservatory,CatchReleaseCMD crabBuy CONSERVATORY,"The blueprint chip changes hands.
-
-Your ops chief signs it into inventory under COLONY INFRASTRUCTURE.
+You are short. ""No trouble,"" he says, and the chip goes into a pocket already occupied by his left hand.",10:catchrelease_crabStall:Another time.,
+catchrelease_crabBuyConservatory,DialogOptionSelected,$option == catchrelease_crabBuyConservatory,CatchReleaseCMD crabBuy CONSERVATORY,"The blueprint chip changes hands, and your ops chief signs it into inventory under COLONY INFRASTRUCTURE.
 
 The category was already present.",0:catchrelease_crabStall:Continue,
 catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,!$catchreleaseCrabCelebrationOwned,CatchReleaseCMD crabTooltip catchrelease_crabWareCelebration CELEBRATION,,catchrelease_crabWareCelebration:Celebration Charges,
@@ -2668,79 +2525,41 @@ catchrelease_crabOptionLeave,CatchReleaseCrabStallOptions,,"SetShortcut catchrel
 catchrelease_crabWareBackdrop,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:10
 CatchReleaseCMD tokens
 $catchreleaseCrabBackdropAfford","CatchReleaseCMD crabShowBackdrop
-SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","Crablobab produces the rolled backdrop from behind his knee.
-
-He unrolls it against the wall.
-
-""$catchreleaseCrabBackdropName.""
-
-He steps back to inspect it.
-
-""Good for the tank. Gives the fish somewhere to be from.""
+SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","Crablobab produces the rolled backdrop from behind his knee and unrolls it against the wall. ""$catchreleaseCrabBackdropName."" He steps back to inspect it. ""Good for the tank. Gives the fish somewhere to be from.""
 
 He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCrabs crabs.","0:catchrelease_crabBuyBackdrop:Pay him
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareBackdropShort,DialogOptionSelected,"$option == catchrelease_crabWareBackdrop score:5
 CatchReleaseCMD tokens
 !$catchreleaseCrabBackdropAfford","CatchReleaseCMD crabShowBackdrop
-SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","Crablobab snaps the backdrop open against the wall in one practiced movement.
-
-""$catchreleaseCrabBackdropName! Makes your aquarium look like an actual place. Nobody stands at a tank to look at water.""
+SetTextHighlights $catchreleaseCrabBackdropName $catchreleaseCrabBackdropPrice $catchreleaseCrabBackdropCrabs","Crablobab snaps the backdrop open against the wall in one practiced movement. ""$catchreleaseCrabBackdropName! Makes your aquarium look like an actual place. Nobody stands at a tank to look at water.""
 
 He wants $catchreleaseCrabBackdropPrice for it, and $catchreleaseCrabBackdropCrabs crabs.
 
-You are short.
-
-""No scenery today!""
-
-He rolls it up again without hurrying.",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyBackdrop,DialogOptionSelected,$option == catchrelease_crabBuyBackdrop,CatchReleaseCMD crabBuyBackdrop,"He rolls the backdrop, ties it, and hands it over.
-
-There is considerably less wall behind him afterward.",0:catchrelease_crabStall:Continue,
+You are short. ""No scenery today!"" He rolls it up again without hurrying.",10:catchrelease_crabStall:Another time.,
+catchrelease_crabBuyBackdrop,DialogOptionSelected,$option == catchrelease_crabBuyBackdrop,CatchReleaseCMD crabBuyBackdrop,"He rolls the backdrop, ties it and hands it over. There is considerably less wall behind him afterward.",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareBass,DialogOptionSelected,"$option == catchrelease_crabWareBass score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabBassAfford",CatchReleaseCMD highlightFishText $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice,"Crablobab reaches into an inside pocket and lifts out a shallow tray.
+$catchreleaseCrabBassAfford",CatchReleaseCMD highlightFishText $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice,"Crablobab reaches into an inside pocket and lifts out a shallow tray. On it is a $catchreleaseCrabBassName of emphatically terrible quality.
 
-On it is a $catchreleaseCrabBassName of emphatically terrible quality.
-
-""Crab!""
-
-He turns the tray slowly, presenting both sides.
-
-""Not a good crab. Good crabs cost more.""
+""Crab!"" He turns the tray slowly, presenting both sides. ""Not a good crab. Good crabs cost more.""
 
 He wants $catchreleaseCrabBassPrice for it, and $catchreleaseCrabBassCrabPrice.","0:catchrelease_crabBuyBass:Pay him
 10:catchrelease_crabStall:Another time.",
 catchrelease_crabWareBassShort,DialogOptionSelected,"$option == catchrelease_crabWareBass score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabBassAfford",CatchReleaseCMD highlightFishText $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice,"Crablobab reaches into an inside pocket and lifts out a shallow tray.
+!$catchreleaseCrabBassAfford",CatchReleaseCMD highlightFishText $catchreleaseCrabBassName $catchreleaseCrabBassPrice $catchreleaseCrabBassCrabPrice,"Crablobab reaches into an inside pocket and lifts out a shallow tray. On it is a $catchreleaseCrabBassName of emphatically terrible quality.
 
-On it is a $catchreleaseCrabBassName of emphatically terrible quality.
-
-""Crab!""
-
-He turns the tray slowly.
-
-""Not a good crab. Good crabs cost more.""
+""Crab!"" He turns the tray slowly, presenting both sides. ""Not a good crab. Good crabs cost more.""
 
 He wants $catchreleaseCrabBassPrice for it, and $catchreleaseCrabBassCrabPrice.
 
-You are short.
-
-""Even for this one!""
-
-He returns the tray to a pocket shallower than the crab.",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyBass,DialogOptionSelected,$option == catchrelease_crabBuyBass,CatchReleaseCMD crabBuyBass,"Crablobab presses the tray into your hands.
-
-""Sold! Very good. One less crab to inventory.""
+You are short. ""Even for this one!"" He returns the tray to a pocket shallower than the crab.",10:catchrelease_crabStall:Another time.,
+catchrelease_crabBuyBass,DialogOptionSelected,$option == catchrelease_crabBuyBass,CatchReleaseCMD crabBuyBass,"Crablobab presses the tray into your hands. ""Sold! Very good. One less crab to inventory.""
 
 The crab is entered into your hold as a purchase.",0:catchrelease_crabStall:Continue,
 catchrelease_crabLeave,DialogOptionSelected,$option == catchrelease_crabLeave,"RestoreSavedVisual
-BarCMD returnFromEvent false","""Of course!""
-
-Crablobab catches your hand in both of his and shakes it vigorously.
-
-You do not remember offering it.
+BarCMD returnFromEvent false","""Of course!"" Crablobab catches your hand in both of his and shakes it vigorously. You do not remember offering it.
 
 ""Come back if you need anything unreasonable.""",,
 ,,,,,,
