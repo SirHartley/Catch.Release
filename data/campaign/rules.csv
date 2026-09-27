@@ -432,89 +432,41 @@ FireBest catchreleaseJobGreeting
 FireAll JobSpecificOptions",,,
 ,,,,,,
 # bar job: standing order,,,,,,
-catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_standingOrder score:100,,"The provisioner looks up from a spread of manifests as your connection opens.
-
-""Captain. Good timing.""
-
-A supplier line is pulled to the front of the slate, your comm ID already attached to it.
-
-""Let's see where the order stands.""",,
+catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_standingOrder score:100,,"The provisioner looks up from a spread of manifests as your connection opens. ""Captain. Good timing."" A supplier line comes to the front of the list, your comm ID already attached to it. ""Let's see where the order stands.""",,
 catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has three delivery manifests open beside a supplier list. The outbound section has more orders than names.,,
 catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Talk to the provisioner with the delivery manifests,
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""You're supplying catch? Good. I've got kitchens buying faster than my regulars are landing.""
-
-The provisioner turns the open order toward you.
-
-""$catchreleaseAskCap. Meet the line as written.""
-
-""$catchreleaseDaysCap. $catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the order.
+Call $catchrelease_jobRef showRewardDetails","""You're supplying catch? Good. I've got kitchens buying faster than my regulars are landing."" The provisioner turns the open order toward you. ""$catchreleaseAskCap. Meet the line as written. $catchreleaseDaysCap, and $catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the order.
 catchrelease_jobDecline:Decline.",
-catchrelease_standingOrder_accepted,catchreleaseJobAccepted,$missionId == catchrelease_standingOrder,,"""Good.""
-
-Your comm ID goes into the next empty line.",,
+catchrelease_standingOrder_accepted,catchreleaseJobAccepted,$missionId == catchrelease_standingOrder,,"""Good."" Your comm ID goes into the next empty line.",,
 catchrelease_standingOrder_declined,catchreleaseJobDeclined,$missionId == catchrelease_standingOrder,,The provisioner closes the entry and opens the next name on the supplier list.,,
 catchrelease_standingOrder_remind,catchreleaseJobRemind,$missionId == catchrelease_standingOrder score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same order, $catchreleaseDaysLeft left.""",,
 catchrelease_standingOrder_paid,catchreleaseJobPaid,"$missionId == catchrelease_standingOrder
-$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The provisioner checks the containers against the manifest and closes the order.
-
-The agreed payment is transferred to your account.",,
+$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,The provisioner checks the containers against the manifest and closes the order. The agreed payment is transferred to your account.,,
 ,,,,,,
 # bar job: chef,,,,,,
-catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_chef score:100,,"The head chef answers from the edge of a roaring kitchen, wipes one hand on an apron and props a slate against a stack of ingredient cards.
-
-""Captain. Thank the gods.""
-
-$HeOrShe glances back toward the kitchen.
-
-""All right. Tell me you've got something useful.""",,
+catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_chef score:100,,"The head chef answers from the edge of a roaring kitchen, wiping one hand on an apron. ""Captain. Thank the gods."" A glance back toward the stoves. ""All right. Tell me you've got something useful.""",,
 catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,A cook in stained whites has three ingredient cards laid out beneath the name of one dish. Two supplier names have been crossed out hard enough to score the slate.,,
 catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Talk to the cook with the ingredient cards,
 catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""I'm putting $catchreleaseDish on the menu. Apparently half the station has decided they can't live without it. It needs three different catches.""
-
-The chef taps each card in turn.
-
-""$catchreleaseAsk. Yes, all of it. I know. Take it up with my customers.""
+Call $catchrelease_jobRef showRewardDetails","""I'm putting $catchreleaseDish on the menu. Apparently half the station has decided they can't live without it. It needs three different catches."" The chef taps each ingredient card in turn. ""$catchreleaseAsk. Yes, all of it. I know. Take it up with my customers.""
 
 ""$catchreleaseDaysCap. After that I either have the fish or I have a dining room full of people asking why I don't. $catchreleaseRewardCap when the full order reaches my kitchen.""","catchrelease_jobAccept:Take the order.
 catchrelease_jobDecline:Decline.",
 catchrelease_chef_accepted,catchreleaseJobAccepted,$missionId == catchrelease_chef,,"""Good. Leave the handling tags on. Last thing I need is the prep crew arguing over which one goes where.""",,
 catchrelease_chef_declined,catchreleaseJobDeclined,$missionId == catchrelease_chef,,"The chef removes your name from the supplier list, then stares at the three ingredient cards as though one of them has personally offended $himOrHer.",,
-catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. All three. $catchreleaseDaysLeft left.""
-
-""$PlayerSirOrMadam, I have every table booked for this. Please don't make me invent a new menu before service.""",,
+catchrelease_chef_remind,catchreleaseJobRemind,$missionId == catchrelease_chef score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. All three. $catchreleaseDaysLeft left. $PlayerSirOrMadam, I have every table booked for this. Please don't make me invent a new menu before service.""",,
 catchrelease_chef_paid,catchreleaseJobPaid,"$missionId == catchrelease_chef
-$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The chef checks each handling tag against the ingredient cards, then starts passing containers to the prep crew.
-
-""Yes. Good. That's all of them.""
-
-$HeOrShe turns toward the kitchen.
-
-""Move! I've got the fish, you've got no excuses!""
+$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"The chef checks each handling tag against the ingredient cards and starts passing containers to the prep crew. ""Yes. Good. That's all of them."" $HeOrShe spins toward the kitchen. ""Move! I've got the fish, you've got no excuses!""
 
 The agreed transfer clears. The transmission cuts while $heOrShe is still shouting instructions down the line.",,
 ,,,,,,
 # bar job: startup,,,,,,
-catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with the current order already open. It appears as a solid line among several dotted forecasts.
-
-""Captain. Good. I've been updating the model from the committed volume.""
-
-$HeOrShe brings your order to the center of the display.
-
-""Where are we?""",,
+catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with the current order already open, a solid line among several dotted forecasts. ""Captain. Good. I've been updating the model from the committed volume. Where are we?""",,
 catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,"A young factor in an expensive sleeveless jacket has a ten-page business case open on $hisOrHer slate. A cheap, half-finished drink sits at one corner of the table.",,
 catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_startup_ask:Hear the pitch from the young factor in the expensive jacket,
 catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"$menuState = catchreleaseStartupOffer 0
-FireAll JobSpecificOptions","""You fish. Perfect. That's the difficult side.""
-
-$HeOrShe closes three projections and opens another, packed with margins and rising curves.
-
-""I have ten pages proving people buy fresh catch. What I don't have is one supplier line I can point at and say, there, that works.""
-
-$HeOrShe taps the first empty figure in the model.
-
-""You give me that, I can build from something real.""",,
+FireAll JobSpecificOptions","""You fish. Perfect. That's the difficult side."" $HeOrShe closes three projections and opens another, packed with margins and rising curves. ""I have ten pages proving people buy fresh catch. What I don't have is one supplier line I can point at and say, there, that works. You give me that, and I can build from something real.""",,
 catchrelease_startup_offerDemandOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
 !$catchreleaseStartupAskedDemand",,,10:catchrelease_startup_demand:Who is buying?,
 catchrelease_startup_offerOperationsOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
@@ -526,118 +478,54 @@ $catchreleaseStartupTerms",,,30:catchrelease_jobAccept:Agree to the trial shipme
 catchrelease_startup_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseStartupOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_startup_demand,DialogOptionSelected,$option == catchrelease_startup_demand,"$catchreleaseStartupAskedDemand = true 0
 $menuState = catchreleaseStartupOffer 0
-FireAll JobSpecificOptions","""Restaurant kitchens already buy fresh catch, and between the private clubs and conservatories I have enough projected demand to fill several pages.""
-
-$HeOrShe flicks through sales projections tied to population and prevailing catch prices.
-
-""The demand case is finished. What I need now is a shipment I can put on the other side of it.""",,
+FireAll JobSpecificOptions","""Restaurant kitchens already buy fresh catch, and between the private clubs and conservatories I have enough projected demand to fill several pages."" $HeOrShe flicks through sales projections tied to population and prevailing catch prices. ""The demand case is finished. What I need now is a shipment to put on the other side of it.""",,
 catchrelease_startup_operations,DialogOptionSelected,$option == catchrelease_startup_operations,"$catchreleaseStartupAskedOperations = true 0
 $menuState = catchreleaseStartupOffer 0
-FireAll JobSpecificOptions","$HeOrShe opens a flow diagram running from your delivery to a projected customer handoff. Every stage has a margin and turnaround estimate. The operator fields are blank.
+FireAll JobSpecificOptions","$HeOrShe opens a flow diagram that runs from your delivery to a projected customer handoff. Every stage has a margin and a turnaround estimate. The operator fields are blank.
 
-""That's downstream execution.""
+""That's downstream execution."" You point at the empty fields. ""Of course they're empty. There isn't any volume yet. Once you prove the catch is coming in, I have something to negotiate around. The rest is capacity, and capacity is purchasable.""
 
-You indicate the empty fields.
-
-""Of course they're empty. There isn't any volume yet.""
-
-$HeOrShe enlarges the first stage instead.
-
-""Once you prove the catch is coming in, I have something to negotiate around. The rest is capacity, and capacity is purchasable.""
-
-$HeOrShe taps your end of the flow.
-
-""First, I need the part that isn't a projection.""",,
+$HeOrShe enlarges your end of the flow. ""First, I need the part that isn't a projection.""",,
 catchrelease_startup_terms,DialogOptionSelected,$option == catchrelease_startup_terms,"$catchreleaseStartupTerms = true 0
 CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseStartupOffer 0
-FireAll JobSpecificOptions","""Pilot shipment. $catchreleaseAskCap.""
-
-$HeOrShe brings up the payment line.
-
-""$catchreleaseRewardCap on delivery. No deadline. I need the completed shipment and the receipt.""
-
-A larger second order is already modeled beneath the first.
-
-""If this one closes, we raise the volume.""",,
-catchrelease_startup_accepted,catchreleaseJobAccepted,$missionId == catchrelease_startup,,"""Excellent.""
-
-A supplier brief arrives in your inbox. The agreed quantity is on the first page. The rest is projections built around it.
-
-""Now I have an active supplier line.""",,
-catchrelease_startup_declined,catchreleaseJobDeclined,$missionId == catchrelease_startup,,"""Understood. I have other supplier conversations.""
-
-$HeOrShe opens $hisOrHer contact list and starts again from the top.",,
-catchrelease_startup_remind,catchreleaseJobRemind,$missionId == catchrelease_startup score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Current run is $catchreleaseAskCap.""
-
-$HeOrShe checks the quantity against a page of revised projections.
-
-""Bring me that and everything downstream has a number to work from.""",,
+FireAll JobSpecificOptions","""Pilot shipment. $catchreleaseAskCap. $catchreleaseRewardCap on delivery. No deadline. I need the completed shipment and the receipt."" A larger second order is already modeled beneath the first. ""If this one closes, we raise the volume.""",,
+catchrelease_startup_accepted,catchreleaseJobAccepted,$missionId == catchrelease_startup,,"""Excellent."" A supplier brief arrives in your inbox, the agreed quantity on the first page and projections built around it on the rest. ""Now I have an active supplier line.""",,
+catchrelease_startup_declined,catchreleaseJobDeclined,$missionId == catchrelease_startup,,"""That's fine. I have other supplier conversations."" $HeOrShe opens $hisOrHer contact list and starts again from the top.",,
+catchrelease_startup_remind,catchreleaseJobRemind,$missionId == catchrelease_startup score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""Current run is $catchreleaseAskCap."" $HeOrShe checks the quantity against a page of revised projections. ""Bring me that and everything downstream has a number to work from.""",,
 catchrelease_startup_paid,catchreleaseJobPaid,"$missionId == catchrelease_startup
-$catchreleasePaid",,"$HeOrShe matches the delivery receipt to the current order and nods.
-
-The agreed transfer clears.",,
+$catchreleasePaid",,$HeOrShe matches the delivery receipt to the current order and nods. The agreed transfer clears.,,
 catchrelease_startup_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
 $catchreleaseMore
 $catchreleaseRound == 1 score:110","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. $HeOrShe folds the signed receipt into the model, replacing one of the projected figures with an actual one.
+Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. $HeOrShe folds the signed receipt into the model, and one projected figure becomes an actual one. ""There. That's a baseline. Now I can price growth against something that exists.""
 
-""There. That's a baseline.""
-
-The surrounding forecasts change immediately.
-
-""Now I can price growth against something that exists.""
-
-$HeOrShe sends the next order.
-
-""$catchreleaseAskCap. $catchreleaseRewardCap on delivery.""",,
+The surrounding forecasts change immediately, and $heOrShe sends the next order. ""$catchreleaseAskCap. $catchreleaseRewardCap on delivery.""",,
 catchrelease_startup_paidScale,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
 $catchreleaseMore
 $catchreleaseRound == 2 score:110","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. $HeOrShe lays the second receipt beside the first and compares the quantities, dates and payment lines.
+Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears. $HeOrShe lays the second receipt beside the first and compares the quantities, dates and payment lines. ""Twice means repeatable. That changes the financing case considerably.""
 
-""Twice means repeatable.""
+A much larger forecast opens behind $himOrHer. You notice the lack of confirmed customers.
 
-A much larger forecast opens behind them. You immediately notice the lack of confirmed customers.
-
-""That changes the financing case considerably.""
-
-$HeOrShe sends the next order.
-
-""$catchreleaseAskCap. $catchreleaseRewardCap. One more run.""",,
+$HeOrShe sends the next order. ""$catchreleaseAskCap. $catchreleaseRewardCap. One more run.""",,
 catchrelease_startup_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
-!$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"The agreed transfer clears. $HeOrShe reads the final delivery receipt twice.
+!$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"The agreed transfer clears. $HeOrShe reads the final delivery receipt twice. ""Three completed runs. That's the supply chain proven.""
 
-The three receipts take up half a page in the business case. A distribution network spreads across the rest in pale forecast lines.
-
-""Three completed runs. That's the supply chain proven.""
-
-$HeOrShe is already revising the demand projections.
-
-It doesn't seem like there area any buyers yet.",,
+The three receipts take up half a page in the business case, and a distribution network spreads across the rest in pale forecast lines. $HeOrShe is already revising the demand projections. None of the lines ends at a confirmed buyer.",,
 ,,,,,,
 # bar job: sub-butler,,,,,,
-catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The $manOrWoman answers promptly. A household schedule remains open on $hisOrHer slate, with your name brought discreetly to the top.
-
-""Captain. Good day.""
-
-$HeOrShe sets the slate aside.
-
-""You wished to speak about the little matter of the fish.""",,
+catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The $manOrWoman answers promptly, a household schedule open on $hisOrHer slate with your name brought discreetly to the top. ""Captain. Good day."" $HeOrShe sets the slate aside. ""You wished to speak about the little matter of the fish.""",,
 catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A $manOrWoman in an immaculately cut coat sits beside an untouched drink. The chair opposite has been placed a little farther from the table than would be strictly necessary.,,
 catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Talk to the $manOrWoman in the well-cut coat,
 catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"$menuState = catchreleaseButlerOffer 0
-FireAll JobSpecificOptions","The $manOrWoman rises before you reach the table and indicates it.
+FireAll JobSpecificOptions","The $manOrWoman rises before you reach the table and indicates it. ""Captain. How good of you to come. I make certain purchases on behalf of a private household, and I am given to understand that you procure live specimens.""
 
-""Captain. How good of you to come. I make certain purchases on behalf of a private household. I am given to understand that you procure live specimens.""
-
-$HeOrShe waits for you to sit. $HeOrShe remains standing.
-
-""We find ourselves in want of one.""",,
+$HeOrShe waits for you to sit, and remains standing. ""We find ourselves in want of one.""",,
 catchrelease_butler_offerWhoOption,JobSpecificOptions,"$menuState == catchreleaseButlerOffer
 !$catchreleaseButlerAskedWho",,,10:catchrelease_butler_who:Who are you buying for?,
 catchrelease_butler_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseButlerOffer
@@ -649,79 +537,33 @@ $catchreleaseButlerTerms",,,30:catchrelease_jobAccept:Accept the commission.,
 catchrelease_butler_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseButlerOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_butler_who,DialogOptionSelected,$option == catchrelease_butler_who,"$catchreleaseButlerAskedWho = true 0
 $menuState = catchreleaseButlerOffer 0
-FireAll JobSpecificOptions","The chief butler of the household.""
-
-""I attend to his rooms and appointments. He has entrusted the matter to me.""",,
+FireAll JobSpecificOptions","""The chief butler of the household. I attend to his rooms and appointments. He has entrusted the matter to me.""",,
 catchrelease_butler_purpose,DialogOptionSelected,$option == catchrelease_butler_purpose,"$catchreleaseButlerAskedPurpose = true 0
 $menuState = catchreleaseButlerOffer 0
-FireAll JobSpecificOptions","""Display.""
-
-$HeOrShe turns a slate sufficiently for you to see it, though does not pass it across. It shows a tank built neatly into the wall of an office.
-
-""For his receiving room. The space has already been measured. It will not be going anywhere near the kitchens, I assure you.""",,
+FireAll JobSpecificOptions","""Display."" $HeOrShe turns a slate just far enough for you to see it, without passing it across: a tank built neatly into the wall of an office. ""For his receiving room. The space has already been measured. It will not be going anywhere near the kitchens, I assure you.""",,
 catchrelease_butler_terms,DialogOptionSelected,$option == catchrelease_butler_terms,"$catchreleaseButlerTerms = true 0
 CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseButlerOffer 0
-FireAll JobSpecificOptions","$HeOrShe adjusts the slate by a fraction.
-
-""One specimen. $catchreleaseAsk.""
-
-A pause.
-
-""That is a minimum, captain. Something with a little presence is wanted. Species is immaterial, as is culinary merit.""
-
-""The household will pay $catchreleaseReward upon delivery.""",,
-catchrelease_butler_accepted,catchreleaseJobAccepted,$missionId == catchrelease_butler,,"""Very good.""
-
-$HeOrShe makes a small notation on the slate.
-
-""Return it here when convenient. There is no need to trouble the household with a delivery.""
+FireAll JobSpecificOptions","$HeOrShe adjusts the slate by a fraction. ""One specimen. $catchreleaseAsk. That is a minimum, captain. Something with a little presence is wanted. Species is immaterial, as is culinary merit. The household will pay $catchreleaseReward upon delivery.""",,
+catchrelease_butler_accepted,catchreleaseJobAccepted,$missionId == catchrelease_butler,,"""Very good."" $HeOrShe makes a small notation on the slate. ""Return it here when convenient. There is no need to trouble the household with a delivery.""
 
 Your mission log updates.",,
-catchrelease_butler_declined,catchreleaseJobDeclined,$missionId == catchrelease_butler,,"""I see.""
-
-$HeOrShe removes your name from the schedule with no visible disappointment.
-
-""I shall place the matter back with the usual suppliers.""",,
-catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""One specimen. $catchreleaseAskCap.""
-
-$HeOrShe consults the original note.
-
-""Here, if you please. The household needn't be involved.""",,
+catchrelease_butler_declined,catchreleaseJobDeclined,$missionId == catchrelease_butler,,"""I see."" $HeOrShe removes your name from the schedule with no visible disappointment. ""I shall place the matter back with the usual suppliers.""",,
+catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""One specimen. $catchreleaseAskCap."" $HeOrShe consults the original note. ""Here, if you please. The household needn't be involved.""",,
 catchrelease_butler_paid,catchreleaseJobPaid,"$missionId == catchrelease_butler
-$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"A dock porter places the container on the scale. The $manOrWoman watches the reading from $hisOrHer slate, then gives the specimen itself a brief, appraising look.
+$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"A dock porter places the container on the scale. The $manOrWoman watches the reading from $hisOrHer slate, then gives the specimen a brief, appraising look and the weight another glance. ""Yes. That will do very nicely.""
 
-""Yes.""
+The agreed payment changes hands. ""Thank you, captain. I shall see that it finds its proper place.""
 
-Another glance at the weight.
-
-""That will do very nicely.""
-
-The agreed payment changes hands.
-
-""Thank you, captain. I shall see that it finds its proper place.""
-
-By the time the porter takes the container away, the $manOrWoman has already moved on to the next item in $hisOrHer schedule.",,
+By the time the porter takes the container away, the $manOrWoman has moved on to the next item in $hisOrHer schedule.",,
 ,,,,,,
 # bar job: curator,,,,,,
-catchrelease_curator_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_curator score:100,,"The curator accepts the connection from beside a row of open accession entries.
-
-""$PlayerSirOrMadam. Good to hear from you.""
-
-$HeOrShe marks $hisOrHer place in the current record and brings your commission onto the main display.
-
-""Let's have a look at where things stand.""",,
+catchrelease_curator_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_curator score:100,,"The curator accepts the connection from beside a row of open accession entries. ""$PlayerSirOrMadam. Good to hear from you."" $HeOrShe marks $hisOrHer place in the current record. ""Let's have a look at where things stand.""",,
 catchrelease_curator_blurbBar,catchrelease_curator_blurbBar,,,"A curator with an academic lanyard is updating accession records beside photographs of a public aquarium, visibly frowning.",,
 catchrelease_curator_optionBar,catchrelease_curator_optionBar,,,,catchrelease_curator_ask:Talk to the curator with the aquarium photographs,
 catchrelease_curator_ask,DialogOptionSelected,$option == catchrelease_curator_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""I'm filling gaps in a public collection, and it's getting increasingly diffcult to find reliable personnel to get me the catch needed.""
-
-$HeOrShe turns an accession list toward you.
-
-""We're missing $catchreleaseAskCap.""
-
-""Fine-grade specimens can go on display, low-coherence specimens go into the comparative record. Either works for me.""
+Call $catchrelease_jobRef showRewardDetails","""I'm filling gaps in a public collection, and it's getting increasingly difficult to find reliable people to bring in the catch."" $HeOrShe turns an accession list toward you. ""We're missing $catchreleaseAskCap. Fine-grade specimens can go on display, low-coherence specimens go into the comparative record. Either works for me.""
 
 ""$catchreleaseDaysCap. $catchreleaseRewardCap on successful recovery.""","catchrelease_jobAccept:Agree to supply the collection.
 catchrelease_jobDecline:Decline.",
@@ -729,9 +571,7 @@ catchrelease_curator_accepted,catchreleaseJobAccepted,$missionId == catchrelease
 catchrelease_curator_declined,catchreleaseJobDeclined,$missionId == catchrelease_curator,,$HeOrShe returns to the records and moves to the next blank entry.,,
 catchrelease_curator_remind,catchreleaseJobRemind,$missionId == catchrelease_curator score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Fine grade or low coherence. There's $catchreleaseDaysLeft left before the exhibition.""",,
 catchrelease_curator_paid,catchreleaseJobPaid,"$missionId == catchrelease_curator
-$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe matches each seal to an entry before the first container is moved to the collection transport.
-
-""Good. That's enough for the exhibition.""
+$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe matches each seal to an entry before the first container goes onto the collection transport. ""Good. That's enough for the exhibition.""
 
 The agreed transfer clears.",,
 ,,,,,,
@@ -809,16 +649,13 @@ FireAll JobSpecificOptions","The quiet child checks the bracket.
 ""They don't have to be good.""
 ""They should be.""
 
-The quiet child ignores him.
-""Please bring them back in $catchreleaseDays or mom will find out.""
+The quiet child ignores him. ""Please bring them back in $catchreleaseDays or mom will find out.""
 
 They show you the prize: $catchreleaseRewardCap.
 
-""We saved our pocket money to get this just for this! Even got a second piece if one's of fine quality."" says the loud child.
+""We saved our pocket money for this! There's a second piece if one of them is Fine,"" says the loud child. ""When you come back, you pick who gets the better one.""
 
-""When you come back, please pick who gets the better one.""
-
-Clearly, both are hoping to be picked.",,
+Both of them are very obviously hoping to be picked.",,
 catchrelease_duel_termsAcceptOption,JobSpecificOptions,$menuState == catchreleaseDuelTerms,,,30:catchrelease_jobAccept:I'll find two fish.,
 catchrelease_duel_termsDeclineOption,JobSpecificOptions,$menuState == catchreleaseDuelTerms,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_duel_accepted,catchreleaseJobAccepted,$missionId == catchrelease_duel,,"The quiet child writes your ship's name at the top of the bracket.
@@ -906,15 +743,9 @@ $catchreleaseFightNights == 0","CatchReleaseCMD highlightJobText $catchreleaseAs
 Call $catchrelease_jobRef showContactVisual
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseRingOffer 0
-FireAll JobSpecificOptions","The Commissioner closes the notebook around one finger.
+FireAll JobSpecificOptions","The Commissioner closes the notebook around one finger. ""I'm short two fighters. I need $catchreleaseAsk. Species doesn't matter, but both have to come from the same catch. Fight's in $catchreleaseDaysCap, and the supplier's fee is $catchreleaseReward.""
 
-""I'm short two fighters. I need $catchreleaseAsk. Species doesn't matter, but both have to come from the same catch.""
-
-""Fight's in $catchreleaseDaysCap. Supplier's fee is $catchreleaseReward.""
-
-""We weigh them here, compare each one against the usual range for its species, then I put the odds up.""
-
-""You can take the fee, or bet the whole amount on either one. Double or nothing!""
+""We weigh them here, compare each one against the usual range for its species, then I put the odds up. You can take the fee, or bet the whole amount on either one. Double or nothing!""
 
 The barkeeper sets down a glass. ""House cut's posted with the rest.""",,
 catchrelease_ring_askReturning,DialogOptionSelected,"$option == catchrelease_ring_ask
@@ -924,13 +755,7 @@ Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseRingOffer 0
 FireAll JobSpecificOptions","$playerName appears on $catchreleaseFightNights earlier $catchreleaseFightNightWord on the board.
 
-The Commissioner taps an empty space beneath the latest results.
-
-""We're short another pair. $catchreleaseAskCap, both from your catch.""
-
-""Fight's in $catchreleaseDaysCap. Same fee: $catchreleaseReward.""
-
-The Commissioner nods toward the board. ""Same arrangement as before. Take the money, or back one of them after I've set the odds.""
+The Commissioner taps an empty space beneath the latest results. ""We're short another pair. $catchreleaseAskCap, both from your catch. Fight's in $catchreleaseDaysCap. Same fee: $catchreleaseReward. Same arrangement as before, too: take the money, or back one of them after I've set the odds.""
 
 The barkeeper fills a glass. ""House cut goes up with them.""",,
 catchrelease_ring_offerHowOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,10:catchrelease_ring_how:How does this work?,
@@ -938,13 +763,9 @@ catchrelease_ring_offerHouseOption,JobSpecificOptions,$menuState == catchrelease
 catchrelease_ring_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,SetOptionColor catchrelease_jobAccept highlight,,30:catchrelease_jobAccept:I'll supply the pair.,
 catchrelease_ring_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,40:catchrelease_jobDecline:Not this card.,
 catchrelease_ring_how,DialogOptionSelected,$option == catchrelease_ring_how,"$menuState = catchreleaseRingOffer 0
-FireAll JobSpecificOptions","The Commissioner opens the notebook. Several rules have been crossed out; later amendments carry different initials.
+FireAll JobSpecificOptions","The Commissioner opens the notebook. Several rules have been crossed out, and the later amendments carry different initials.
 
-""Both fighters come from one supplier. We tried mixing catches. Didn't work.""
-
-""I measure each against the normal size range for its species. That's what the odds are based on.""
-
-""If they come out even, they open at thirty-eight percent apiece. Once they're in the tank, I make the call.""
+""Both fighters come from one supplier. We tried mixing catches. Didn't work. I measure each against the normal size range for its species, and that's what the odds are based on. If they come out even, they open at thirty-eight percent apiece. Once they're in the tank, I make the call.""
 
 ""Back the winner and the house pays out a larger purse. Lose, and you lose only the fee.""",,
 catchrelease_ring_house,DialogOptionSelected,$option == catchrelease_ring_house,"$menuState = catchreleaseRingOffer 0
@@ -959,17 +780,11 @@ The bottle goes back on the shelf. ""And don't hit the glass. We already replace
 From the benches: ""Your shift hasn't picked a winner in three fights.""
 
 ""Four,"" somebody answers.",,
-catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,CatchReleaseCMD highlightJobText $catchreleaseAsk,"The Commissioner writes your name into the supplier line.
-
-""Good. $catchreleaseAskCap, both from your catch. Bring them in before the fight in $catchreleaseDaysCap.""
-
-""We'll weigh them in front of everyone, put the odds up, then you tell me whether you're taking the fee or backing one.""",,
+catchrelease_ring_accepted,catchreleaseJobAccepted,$missionId == catchrelease_ring,CatchReleaseCMD highlightJobText $catchreleaseAsk,"The Commissioner writes your name into the supplier line. ""Good. $catchreleaseAskCap, both from your catch. Bring them in before the fight in $catchreleaseDaysCap. We'll weigh them in front of everyone, put the odds up, then you tell me whether you're taking the fee or backing one.""",,
 catchrelease_ring_declined,catchreleaseJobDeclined,$missionId == catchrelease_ring,,"""Fair enough."" The Commissioner reopens the notebook.
 
 The barkeeper calls down the bar, ""Still need two for the fight!""",,
-catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"The Commissioner looks up from the book.
-
-""Still waiting on that pair, captain. $catchreleaseAskCap. $catchreleaseDaysLeft left.""",,
+catchrelease_ring_remind,catchreleaseJobRemind,$missionId == catchrelease_ring score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"The Commissioner looks up from the book. ""Still waiting on that pair, captain. $catchreleaseAskCap. $catchreleaseDaysLeft left.""",,
 catchrelease_ringHandOver,JobSpecificOptions,"$catchrelease_ringBet
 Call $catchrelease_jobRef updateData
 $catchreleaseHasFish
@@ -980,23 +795,13 @@ Call $catchrelease_jobRef updateData
 !$catchreleaseHasFish",,,catchrelease_jobShort:Not ready yet.,
 catchrelease_ringPickSel,DialogOptionSelected,$option == catchrelease_ringPick,Call $catchrelease_jobRef chooseFighters,,,
 catchrelease_ringAssignmentReady,CatchReleaseRingWagerReady,"$missionId == catchrelease_ring
-$catchreleaseRingSelectionReady",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseLeftFish $catchreleaseLeftOdds $catchreleaseRight $catchreleaseRightFish $catchreleaseRightOdds $catchreleaseHouseOdds,"The Commissioner measures the first entry, checks the species range, then writes a name on the board.
+$catchreleaseRingSelectionReady",CatchReleaseCMD highlightJobText $catchreleaseLeft $catchreleaseLeftFish $catchreleaseLeftOdds $catchreleaseRight $catchreleaseRightFish $catchreleaseRightOdds $catchreleaseHouseOdds,"The Commissioner measures the first entry, checks the species range and writes a name on the board. ""$catchreleaseLeft. $catchreleaseLeftFish. $catchreleaseLeftOdds.""
 
-""$catchreleaseLeft. $catchreleaseLeftFish. $catchreleaseLeftOdds.""
+The second goes up beside it. ""$catchreleaseRight. $catchreleaseRightFish. $catchreleaseRightOdds.""
 
-The second goes up beside it.
+The Commissioner looks between the two figures and adds a line beneath them. ""Those are your odds. House takes $catchreleaseHouseOdds.""
 
-""$catchreleaseRight. $catchreleaseRightFish. $catchreleaseRightOdds.""
-
-The Commissioner looks between the two figures and adds a line beneath them.
-
-""Those are your odds.""
-
-A third figure goes underneath.
-
-""House takes $catchreleaseHouseOdds.""
-
-That is enough to bring half the room toward the board. Cred-chips starts changing hands before the Commissioner has finished writing.",,
+That is enough to bring half the room toward the board. Cred-chips start changing hands before the Commissioner has finished writing.",,
 catchrelease_ringAssignmentOptions,CatchReleaseRingWagerOptions,"$missionId == catchrelease_ring
 $catchreleaseRingSelectionReady","SetOptionColor catchrelease_ringFlat highlight
 SetOptionColor catchrelease_ringLeft highlight
@@ -1060,23 +865,13 @@ Across the bar, the winning shift crew is collecting from the losing one. The ve
 $catchreleaseFightDate: $catchreleaseWinner over $catchreleaseLoser. Supplier: $playerName.",,
 ,,,,,,
 # bar job: companion,,,,,,
-catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection from a private booth, a drink at one elbow and a slim slate already open.
-
-""Captain.""
-
-The client's name is masked. $HeOrShe glances over it and brings up the specimen requirements instead.",,
+catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection from a private booth, a drink at one elbow and a slim slate open. ""Captain."" The client's name is masked; $heOrShe skips past it to the specimen requirements.",,
 catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A $manOrWoman in understated eveningwear sits alone with a nearly finished drink. A private order is open on the table beside $himOrHer. The client's name is masked.,,
 catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask the liaison about the private contract,
 catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseClientOffer 0
-FireAll JobSpecificOptions","""I'm arranging something for a patron. One specimen.""
-
-$HeOrShe turns the slate toward you.
-
-""$catchreleaseAskCap. No smaller.""
-
-The specification is very particular about that point.
+FireAll JobSpecificOptions","""I'm arranging something for a patron. One specimen."" $HeOrShe turns the slate toward you. ""$catchreleaseAskCap. No smaller."" The specification is very particular on that point.
 
 ""$catchreleaseDaysCap. $catchreleaseRewardCap when you bring it in. If you find an unusually large one, my patron is prepared to be generous.""",,
 catchrelease_client_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseClientOffer
@@ -1085,15 +880,9 @@ catchrelease_client_offerAcceptOption,JobSpecificOptions,$menuState == catchrele
 catchrelease_client_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseClientOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_client_purpose,DialogOptionSelected,$option == catchrelease_client_purpose,"$catchreleaseClientAskedPurpose = true 0
 $menuState = catchreleaseClientOffer 0
-FireAll JobSpecificOptions","""He intends to buy it.""
-
-$HeOrShe scrolls past the masked buyer field to the handling section.
-
-""I need the container sealed and the mass legible. Beyond that, I don't have instructions.""",,
+FireAll JobSpecificOptions","""He intends to buy it."" $HeOrShe scrolls past the masked buyer field to the handling section. ""I need the container sealed and the mass legible. Beyond that, I don't have instructions.""",,
 catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_client,,"""Discretion is enough. Secrecy only makes people curious.""",,
-catchrelease_client_declined,catchreleaseJobDeclined,$missionId == catchrelease_client,,"""Of course.""
-
-$HeOrShe closes the order and returns to $hisOrHer list of contacts.",,
+catchrelease_client_declined,catchreleaseJobDeclined,$missionId == catchrelease_client,,"""Of course."" $HeOrShe closes the order and returns to $hisOrHer list of contacts.",,
 catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same arrangement, $catchreleaseDaysLeft left. My patron hasn't changed his mind.""",,
 catchrelease_client_paid,catchreleaseJobPaid,"$missionId == catchrelease_client
 $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrShe has the sealed container weighed, watches the figures settle, and accepts the receipt.
@@ -1101,156 +890,62 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrSh
 The agreed payment changes hands.",,
 catchrelease_client_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_client
 $catchreleasePaid
-$catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"$HeOrShe looks at the scale once more.
+$catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"$HeOrShe looks at the scale once more and compares the specimen's recorded size with a short note on $hisOrHer slate. ""Upper two-fifths. That qualifies.""
 
-$HeOrShe compares the specimen's recorded size with a short note on $hisOrHer slate.
-
-""Upper two-fifths. That qualifies.""
-
-The agreed payment changes hands.
-
-There is no handshake. $HeOrShe is already checking the next appointment on $hisOrHer slate.",,
+The agreed payment changes hands. There is no handshake; $heOrShe is already checking the next appointment.",,
 ,,,,,,
 # bar job: academy,,,,,,
-catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"The Academy researcher looks up from a pair of sensor plots when the connection opens. A half-finished cup of something has gone cold beside the console.
-
-""Captain. Good. Please tell me you found something.""
-
-$HeOrShe saves one comparison, then drags your retrieval commission beside an almost empty column of results.
-
-""I have enough controls to bury myself with. What I don't have is anything useful.""",,
+catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"The Academy researcher looks up from a pair of sensor plots when the connection opens, a half-finished cup of something gone cold beside the console. ""Captain. Good. Please tell me you found something."" $HeOrShe drags your retrieval commission beside an almost empty column of results. ""I have enough controls to bury myself with. What I don't have is anything useful.""",,
 catchrelease_academy_blurbBar,catchrelease_academy_blurbBar,,,An Academy researcher is hunched over a spread of retrieval logs and sensor plots. Every confirmed match has been sorted into the smaller of two groups. Much smaller.,,
 catchrelease_academy_optionBar,catchrelease_academy_optionBar,,,,catchrelease_academy_ask:Ask the Academy researcher what $heOrShe is studying,
 catchrelease_academy_ask,DialogOptionSelected,$option == catchrelease_academy_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""Low-coherence retrievals. That's what I need.""
+Call $catchrelease_jobRef showRewardDetails","""Low-coherence retrievals. That's what I need."" $HeOrShe turns the current request toward you. ""$catchreleaseAskCap. $catchreleaseDaysCap. And I need the original retrieval records with the shipment. Please.""
 
-$HeOrShe turns the current request toward you.
-
-""$catchreleaseAskCap. $catchreleaseDaysCap. And I need the original retrieval records with the shipment. Please.""
-
-$HeOrShe indicates three columns: coherence, mass return, structural variance.
-
-""If I can fill this column, I may actually have a thesis. $catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the research commission.
+$HeOrShe points out three columns: coherence, mass return, structural variance. ""If I can fill this column, I may actually have a thesis. $catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the research commission.
 catchrelease_jobDecline:Decline.",
 catchrelease_academy_accepted,catchreleaseJobAccepted,$missionId == catchrelease_academy,,"""Good. Keep each retrieval record with its container. If the port relabels them, I can't use any of it.""",,
 catchrelease_academy_declined,catchreleaseJobDeclined,$missionId == catchrelease_academy,,$HeOrShe immediately returns to matching retrieval logs against the plots.,,
-catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Low coherence, original retrieval records, $catchreleaseDaysLeft left.""
-
-A pause.
-
-""I am very nearly begging, captain.""",,
+catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Low coherence, original retrieval records, $catchreleaseDaysLeft left."" $HeOrShe rubs both eyes. ""I am very nearly begging, captain.""",,
 catchrelease_academy_paid,catchreleaseJobPaid,"$missionId == catchrelease_academy
-$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"""Yes. Yes, that's right.""
-
-One measurement is taken twice. $HeOrShe stares at the second result, then enters it beside the first rather than replacing it.
-
-""That's horrible.""
-
-$HeOrShe looks delighted.
-
-""Perfect.""
+$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"""Yes. Yes, that's right."" One measurement is taken twice; $heOrShe stares at the second result, then enters it beside the first instead of replacing it. ""That's horrible."" $HeOrShe looks delighted. ""Perfect.""
 
 The agreed transfer clears.",,
 ,,,,,,
 # bar job: tuber,,,,,,
-catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp.
+catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp. ""CHAT. Stop scrolling. You are not going to believe who just called me.""
 
-""CHAT. Stop scrolling. You are not going to believe who just called me.""
-
-$HeOrShe checks the recording indicator.
-
-Then, quietly:
-
-""Please tell me you have something.""",,
+$HeOrShe checks the recording indicator, then drops $hisOrHer voice. ""Please tell me you have something.""",,
 catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A $manOrWoman has converted one end of the bar into a recording set: two lamps, a good lens, and a chair placed squarely in the main walkway. $HeOrShe is recording the same six-second introduction for the fourth time.",,
 catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask the $manOrWoman at the recording set what $heOrShe is filming,
 catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","$HeOrShe taps the lens awake before answering.
+Call $catchrelease_jobRef showRewardDetails","$HeOrShe taps the lens awake before answering. ""Chat, do not go anywhere. This is huge.""
 
-""Chat, do not go anywhere. This is huge.""
+$HeOrShe swings one lamp toward you. ""You. Captain. Look here. Perfect. Everyone, I have an actual fishing captain standing in front of me right now, and we may have the specimen.""
 
-$HeOrShe turns one lamp toward you.
+$HeOrShe points at the chair. ""I need $catchreleaseAsk. You bring it in, I open on the reveal, cut to you, then ask the question everybody is already typing: is this thing real?"" A lean toward the lens. ""You are NOT ready for this one.""
 
-""You. Captain. Look here. Perfect. Everyone, I have an actual fishing captain standing in front of me right now, and we may have the specimen.""
-
-$HeOrShe points to the chair.
-
-""I need $catchreleaseAsk. You bring it in, I open on the reveal, cut to you, then ask the question everybody is already typing: is this thing real?""
-
-$HeOrShe leans toward the lens.
-
-""You are NOT ready for this one.""
-
-Then, to you:
-
-""$catchreleaseReward. Entire sponsor pool. Sit down. I need your face for the thumbnail.""","catchrelease_jobAccept:Agree to supply the specimen.
+Then, to you: ""$catchreleaseReward. Entire sponsor pool. Sit down. I need your face for the thumbnail.""","catchrelease_jobAccept:Agree to supply the specimen.
 catchrelease_jobDecline:Decline.",
-catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes. Perfect. Chat, we have a captain.""
+catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes. Perfect. Chat, we have a captain."" $HeOrShe starts recording before you can move. ""Everyone asking whether this is actually happening: it is happening. We are getting the specimen.""
 
-$HeOrShe starts recording before you can move.
+$HeOrShe pauses the stream, and the grin goes a little desperate. ""Please bring it back before everyone starts accusing me of faking the whole thing.""",,
+catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow."" $HeOrShe turns to the lens without moving it off you. ""Chat, you just watched a captain walk away from easy sponsor money. Would you have taken it? Tell me I'm wrong.""
 
-""Everyone asking whether this is actually happening: it is happening. We are getting the specimen.""
+Then, quietly, to you: ""Please take the job.""",,
+catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Still waiting."" $HeOrShe raises the camera as soon as $heOrShe sees you. ""Chat, update. The captain is back. Do we have it? We do not have it.""
 
-$HeOrShe pauses the stream and looks at you with a tinge of desperation.
-
-""Please bring it back before everyone starts accusing me of faking the whole thing.""",,
-catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow.""
-
-$HeOrShe turns to the lens without moving it off you.
-
-""Chat, you just watched a captain walk away from easy sponsor money.""
-
-$HeOrShe pauses for dramatic effect.
-
-""Would you have taken it? Tell me I'm wrong.""
-
-Then, quietly, to you:
-
-""Please take the job.""",,
-catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Still waiting.""
-
-$HeOrShe raises the camera as soon as $heOrShe sees you.
-
-""Chat, update. The captain is back. Do we have it? We do not have it.""
-
-$HeOrShe lowers the camera again.
-
-""Every time you walk in here without it, chat makes up three new conspiracy theories.""",,
+The camera comes down again. ""Every time you walk in here without it, chat makes up three new conspiracy theories.""",,
 catchrelease_tuber_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
 $catchreleaseMore score:100","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","$HeOrShe watches the numbers climb, flatten, then stop.
+Call $catchrelease_jobRef showRewardDetails","$HeOrShe watches the numbers climb, flatten, then stop. ""No. No, no. Chat liked it. Chat did not care for it."" $HeOrShe scrubs backward through the clip. ""Look. Perfect specimen, perfect shot, it's just too obvious.""
 
-""No. No, no. Chat liked it. Chat did not care for it.""
+To the stream: ""YES, I KNOW IT'S A FISH.""
 
-$HeOrShe scrubs backward through the clip.
-
-""Look. Perfect specimen, perfect shot, it's just too obvious.""
-
-To the stream:
-
-""YES, I KNOW IT'S A FISH.""
-
-$HeOrShe turns the display toward you as though the graph has personally insulted $himOrHer.
-
-""I need a bad one, $catchreleaseAskCap. I want one where the first frame says one thing and the next frame makes everyone check the first frame again. I want three thousand comments from people absolutely certain they saw different things.""
-
-$HeOrShe is already changing the thumbnail.
-
-""$catchreleaseRewardCap. Bigger sponsor pool. This one could be enormous.""",,
+$HeOrShe turns the display toward you as though the graph has personally insulted $himOrHer. ""I need a bad one. $catchreleaseAskCap. I want one where the first frame says one thing and the next frame makes everyone check the first frame again. I want three thousand comments from people absolutely certain they saw different things. $catchreleaseRewardCap. Bigger sponsor pool. This one could be enormous.""",,
 catchrelease_tuber_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
-!$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"$HeOrShe watches the playback.
-
-""Oh, chat is going to hate this.""
-
-$HeOrShe crops in until the specimen fills the display.
-
-""Look at that. Do not look away. You think you've got it, then you look again.""
-
-$HeOrShe points at the frozen image.
-
-""A perfect thumbnail! Let everyone fight.""
+!$catchreleaseMore score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward,"""Oh, chat is going to hate this."" $HeOrShe crops in until the specimen fills the display. ""Look at that. Do not look away. You think you've got it, then you look again. A perfect thumbnail! Let everyone fight.""
 
 $HeOrShe authorizes the payment without taking $hisOrHer eyes off the viewer count.",,
 ,,,,,,
@@ -1285,7 +980,7 @@ CatchReleaseCMD highlightJobText $catchreleaseSpecies $catchreleaseSpecies $catc
 
 ""$catchreleaseSpecies,"" says the second.
 
-""$catchreleaseSpecies."" closes the third.",,
+""$catchreleaseSpecies,"" says the third.",,
 catchrelease_cult_accepted,catchreleaseJobAccepted,$missionId == catchrelease_cult,,"""Good,"" says the first.
 
 The other two remain still.",,
