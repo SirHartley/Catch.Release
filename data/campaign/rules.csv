@@ -58,7 +58,7 @@ $faction.id == hegemony
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","""Hegemony Navy."" $PersonRank $personName reads from the incident form. ""Hull damage. Unregistered heavy projectile. Recovery of unidentified hyperspace technology from the impact site."" A second slate is passed into frame. ""We will be shipping the object to naval intelligence. You may request a receipt at the closest hegemony military office. Be sure to proved the incident report number.""",,
+FireAll PopulateOptions","""Hegemony Navy."" $PersonRank $personName reads from the incident form. ""Hull damage. Unregistered heavy projectile. Recovery of unidentified hyperspace technology from the impact site."" A second slate is passed into frame. ""We will be shipping the object to Naval Intelligence. You may request a receipt at the closest Hegemony military office. Be sure to provide the incident report number.""",,
 catchrelease_harpoonedCommsTT,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == tritachyon
 $entity.catchrelease_harpooned score:1110
@@ -94,7 +94,7 @@ $faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","""You discharged an unregistered heavy device at a vessel of the Sindrian Diktat."" $PersonRank $personName checks the record. ""I am required to ask whether the act was deliberate."" The slate is set aside. ""I have spared us both the formality. I will be less accomodating, should there be a next time.""",,
+FireAll PopulateOptions","""You discharged an unregistered heavy device at a vessel of the Sindrian Diktat."" $PersonRank $personName checks the record. ""I am required to ask whether the act was deliberate."" The slate is set aside. ""I have spared us both the formality. I will be less accommodating, should there be a next time.""",,
 catchrelease_harpoonedCommsLeague,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == persean_league
 $entity.catchrelease_harpooned score:1110
@@ -194,7 +194,7 @@ catchrelease_fineDemandHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
-FireAll CatchReleaseFineOptions","""The feed opens to a very displeased Hegemony $PersonRank.""
+FireAll CatchReleaseFineOptions","The feed opens to a very displeased Hegemony $PersonRank.
 
 ""Unregistered heavy projectile, damage to a registered hull and reckless discharge within a patrolled volume.""
 
