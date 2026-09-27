@@ -207,11 +207,11 @@ catchrelease_fineDemandTT,OpenCommLink,"$faction.id == tritachyon
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
 !$entity.catchrelease_harpoonRepeat","SetTextHighlights $entity.catchrelease_harpoonFineDGS
-FireAll CatchReleaseFineOptions","“You have damaged Tri-Tachyon property. A liability assessment covering repairs and associated recovery costs has been issued.”
+FireAll CatchReleaseFineOptions","""You have damaged Tri-Tachyon property. A liability assessment covering repairs and associated recovery costs has been issued.""
 
 The amount is already displayed.
 
-“Hull repair, schedule disruption, and removal of foreign hardware: $entity.catchrelease_harpoonFineDGS credits. Payment terms: Immediate.”",,
+""Hull repair, schedule disruption, and removal of foreign hardware: $entity.catchrelease_harpoonFineDGS credits. Payment terms: Immediate.""",,
 catchrelease_fineDemandLC,OpenCommLink,"$faction.id == luddic_church
 $entity.catchrelease_fineConv score:1310
 $entity.catchrelease_harpoonPatrol
@@ -3075,17 +3075,17 @@ $menuState = catchreleaseFisher 0
 $catchrelease_fisherInterceptOpened = true 0
 SetShortcut catchrelease_fisherLeave ""ESCAPE""","The trawler swings across your flight path, cutting you off before you can drift any closer to the unstable tear in space.
 
-The Fisherman’s voice crackles over the comms.
+The Fisherman's voice crackles over the comms.
 
-“Easy there.”
+""Easy there.""
 
 He studies your ship, then glances toward the roiling distortion.
 
-“You go any closer without the right gear, and I’ll be hauling you out instead of my usual catch.”
+""You go any closer without the right gear, and I'll be hauling you out instead of my usual catch.""
 
 The trawler banks away from the anomaly, guiding you toward its port side.
 
-“Come alongside.”","0:catchrelease_fisherIntro:Move alongside.
+""Come alongside.""","0:catchrelease_fisherIntro:Move alongside.
 100:catchrelease_fisherLeave:Leave",
 catchrelease_fisherOptIntro,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseStage >= 2
@@ -3521,7 +3521,7 @@ catchrelease_ask_longliner,DialogOptionSelected,$option == catchrelease_ask_long
 
 He scrolls back through the return once.
 
-""Busy instruments make poor witnesses. I wouldn’t trouble them further.""",0:catchrelease_fisherAskBack:Something else,
+""Busy instruments make poor witnesses. I wouldn't trouble them further.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_tackle,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_tackle
 CatchReleaseCMD fisherAskOnPage",,,catchrelease_ask_tackle:What are rig modules?,
@@ -4073,11 +4073,11 @@ catchrelease_introCastawayAsk,DialogOptionSelected,"$option == catchrelease_fish
 $global.catchrelease_castawayRescued
 CatchReleaseCMD tokens
 $catchreleaseStage < 2
-!$catchreleaseCarrying",,"“Oh. Yes.”
+!$catchreleaseCarrying",,"""Oh. Yes.""
 
 He checks a slightly yellowed paper calendar hanging on the back wall, then signals someone off-feed.
 
-“A shuttle will be over in a second. Time to come home.”
+""A shuttle will be over in a second. Time to come home.""
 
 He pauses for half a second.
 
