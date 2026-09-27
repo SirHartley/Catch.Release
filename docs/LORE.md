@@ -1131,7 +1131,7 @@ Fleet quests are short conversations with people in the middle of a bad day. The
 | Researcher / principal investigator (Calibration Pair, Mandate, Last Entry) | Exact, allergic to uncertainty, tired. Humour comes from procedure. | “I dislike writing 'probably' in a calibration record.” |
 | Handler (Reference Specimen) | Form numbers and weary contractor humour. | “There's an L-14B extension form involved now, and my fee has not increased.” |
 | Maintenance chief (Quiet Ship) | Laconic, superstitious about a custom they will not over-explain. | “It helps.” |
-| Operator (Exhibit) | Owner-operator one inspection away from ruin. Tense, legalistic. | “If it fails inspection, bond $entity.catchreleaseFleetBond is forfeit.” |
+| Operator (Exhibit) | Owner-operator one inspection away from ruin. Tense, legalistic. | “If it fails inspection, bond $entity.catchreleaseFleetBond is forfeit, and $entity.catchreleaseFleetCompany folds.” |
 | Impresario (Headliner) | Showman: smooth, theatrical, faintly aggrieved, always selling. | “I've had a long conversation with the handlers about both of those facts.” |
 | Collector (Collector's Commission) | Formal, precise, obsessive; tank temperatures and grievances. | “I have had enough of being sniped.” |
 | Escort commander (Follower) | Hegemony Navy; see [Hegemony](#hegemony). | |
