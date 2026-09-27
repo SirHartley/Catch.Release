@@ -322,13 +322,15 @@ These instructions govern player-facing prose. They do **not** govern how this r
 
 Catch.Release must sound at home in Starsector before the anomaly is added. Follow the [knowledge boundary](#what-observers-can-notice) in every voice, including narration. Character-specific instructions below take precedence over generic advice to shorten a passage.
 
+**Keep the characters colourful.** The guidance below trims narration; it never flattens speech. People talk differently: a grizzled spacer, a Hegemony officer and a Tri-Tachyon account manager share no vocabulary and would not enjoy each other's company. Slang, dialect, accents, profanity, formality, pet phrases and odd rhythms are welcome when they belong to the speaker. Read the [faction voices](#faction-voices) and [character profiles](#other-characters) before writing a speaker, and keep their voice through every revision.
+
 Vanilla Starsector's `rules.csv` is the model for paragraph length, speech tags and how often narration interrupts a speaker. Vanilla speakers usually say several sentences in one paragraph, and a gesture sits inside that paragraph or in the speech tag when it tells the reader something:
 
 > “Luddics protesting the planet-side burns,” $heOrShe explains. “Get these every other week due to the pilgrims. They consider it a sort of rite of passage.”
 >
 > $HeOrShe one-arm shrugs to suggest that $heOrShe doesn't find the matter worth getting too upset over, then speaks another string of tactical jargon into $hisOrHer comms.
 
-(Vanilla `lppJangalaShrineProtestStart2`.) The officer's attitude and the ongoing work arrive in one action paragraph, after a full spoken thought. Read vanilla dialogue for this density; do not use older Catch.Release rows as the style reference.
+(Vanilla `lppJangalaShrineProtestStart2`.) The officer's attitude and the ongoing work arrive in one action paragraph, after a full spoken thought. Read vanilla dialogue for this density. For how a particular speaker talks, use the voice profiles and the model lines quoted in them; do not copy the paragraph layout of older Catch.Release rows.
 
 ### People doing their jobs
 
@@ -415,6 +417,19 @@ A short sentence can still end a paragraph or land a point. It must be a sentenc
 - Do not remove explanation, character, pacing or necessary context merely to make a line shorter.
 - The Fisherman's restraint must not become clipped delivery. Crablobab must remain expansive.
 - Do not give every exchange a clever final line. Most conversations should end on the practical point: the pay, the deadline, the next step.
+
+#### Pacing exceptions
+
+The paragraph guidance in [Rhythm and length](#rhythm-and-length) describes narration and ordinary conversation. Some speakers talk in bursts, and their bursts stay:
+
+- **Crablobab.** He is not human and does not have to sound like one. Exclamations, product names shouted as sentences (“Shop!”), statements that are not questions, and a gesture between lines of his sales pitch are part of the act. Use the cadence in a limited way: a whole scene of one-word lines stops being funny.
+- **Luddic Path confrontations.** Shouted short paragraphs and physical detail between them. See [Luddic Path](#luddic-path).
+- **The tournament children.** Quick back-and-forth between the two children is their voice. The quiet child's corrections and the loud child's objections should stay separate lines.
+- **The plain-coated buyers.** Three speakers dividing one sentence between them, each on its own line.
+- **The TriTuber.** Asides to the audience break the conversation by design (“CHAT.”), followed by the real request to the player in a quieter line.
+
+These exceptions cover how the character speaks. Narration around them still follows the general guidance: no stage-note fragments and no gestures that only fill space.
+
 
 ### Dialogue and player options
 
@@ -733,6 +748,8 @@ He is cheerful, colourful, expansive and physically comic. Show his merchant-clo
 He neither worries about this nor needs a theory of it. Do not interpret his ease with the changes as proof that he shares the Fisherman's awareness.
 
 Never flatten him into the Fisherman's measured pauses or clipped understatement.
+
+His speech comes in bursts: exclamations, product names shouted as whole sentences, flat statements that are not questions (“You fish.”). A gesture between two lines of his pitch is part of the act, because he is performing a human rather than being one. See the [pacing exceptions](#pacing-exceptions) for how far to take it.
 
 His scenes must be funny first. Their implications can trouble a player later. He does not lurk, threaten, whisper forbidden knowledge or become a sinister shopkeeper.
 
@@ -1053,9 +1070,13 @@ they change the menu rather than wait for a supplier.
 
 They are not secretly studying hyperspace and do not derive fabric theory from flavour or handling.
 
+Voice: harried and loud. A head chef talks to the player and the kitchen in the same breath, invokes the gods, blames the customers and ends the call still shouting orders down the line (“Move! I've got the fish, you've got no excuses!”, `catchrelease_chef_paid`).
+
 ### Independent fishermen
 
 Know practical gear and fishing procedure. They sincerely believe in the industry. They do not know the truth about the Fisherman's existence.
+
+Voice: working people with a grievance. Plain, contracted and specific about money, parts and crews (“Get them off the rupture. Pay them, scare them, fight them, I don't care.”, `catchrelease_campPirate_ask`). The pirate-camp fisher is angry about the numbers, the mercenary-camp fisher talks claims and case numbers, the Pather-camp fisher keeps checking the door.
 
 ### Researchers and the Academy
 
@@ -1077,6 +1098,8 @@ after handling is not equivalent to one logged that way when it came aboard.
 When a measurement disagrees with itself, they preserve both results and calibrate again. They do
 not turn the disagreement into a theory of reality.
 
+Voice: overworked, exact and a little desperate. The bar-job Academy researcher pleads for data and is delighted by a horrible result (“That's horrible.” … “Perfect.”, `catchrelease_academy_paid`).
+
 ### Public curators
 
 Public curators think in accession numbers, provenance, display condition, transport and
@@ -1088,6 +1111,39 @@ be catalogued. Their work is public-facing and practical: tanks, visitors, grant
 and collection vehicles.
 
 They may record measured anomalies. They do not explain the fabric behind them.
+
+### Fleet-quest contacts
+
+Fleet quests are short conversations with people in the middle of a bad day. The contact's job decides how they talk, and two contacts with the same job on different ships should still differ in temper. Each quest keeps one voice through hail, pitch, questions, waiting, hand-in and thanks. Do not give every contact the same acceptance line, refusal line or sign-off.
+
+| Contact | Voice | Model line |
+|---|---|---|
+| Engineer (Stranded) | Exhausted, blunt, a little profane. Talks about triage between two broken systems. | “I'd rather be stuck than starving, but it's not sustainable.” |
+| Coil technician (dead engine) | Deadpan, reads the manual aloud and distances themselves from it. | “I didn't write it.” |
+| Medical officer (Burn Ward) | Triage voice: counts, priorities, what's left in the cabinet. Warm only in private. | “I can keep them stable for $entity.catchreleaseFleetDays.” |
+| Skipper (Fouled Line, Escrow) | Working fisher or salvager. Practical, contracted, protective of the boat and the crew. | “Those drones cost more than the boat.” |
+| Purser (Quota) | Apologetic, precise, anxious about arbitration. Long careful sentences. | “I would very much prefer not to give them the opportunity.” |
+| Galley chief (Hungry Fleet) | Wounded professional pride played for comedy. Treats morale as a medical emergency. | “Nutritionally adequate, and thoroughly humiliating.” |
+| Quartermaster (Tribute) | Frightened and trying to stay businesslike. Breaks off to speak to someone off-channel. | “If you've got a fishing rig, answer private. Please.” |
+| Bosun (Mutiny Pot) | Conspiratorial, loyal to the crew, keeps it off the open channel. | “This stays off the ship's open channels until it's aboard.” |
+| Captain (Mutiny Pot counteroffer) | Old-school owner, proud, wants the story to stay his. | “A captain reads his own manifest. I know about the pot.” |
+| Convoy master (Interment) | Solemn guild formality; speaks of the dead as a colleague. | “First catch goes with them, last catch closes the log.” |
+| Researcher / principal investigator (Calibration Pair, Mandate, Last Entry) | Exact, allergic to uncertainty, tired. Humour comes from procedure. | “I dislike writing 'probably' in a calibration record.” |
+| Handler (Reference Specimen) | Form numbers and weary contractor humour. | “There's an L-14B extension form involved now, and my fee has not increased.” |
+| Maintenance chief (Quiet Ship) | Laconic, superstitious about a custom they will not over-explain. | “It helps.” |
+| Operator (Exhibit) | Owner-operator one inspection away from ruin. Tense, legalistic. | “If it fails inspection, bond $entity.catchreleaseFleetBond is forfeit.” |
+| Impresario (Headliner) | Showman: smooth, theatrical, faintly aggrieved, always selling. | “I've had a long conversation with the handlers about both of those facts.” |
+| Collector (Collector's Commission) | Formal, precise, obsessive; tank temperatures and grievances. | “I have had enough of being sniped.” |
+| Escort commander (Follower) | Hegemony Navy; see [Hegemony](#hegemony). | |
+| Protocol officer (State Dinner) | Diktat protocol; anxiety expressed as formality. | “That is not an acceptable amendment to the program.” |
+| Contract officer (Claim Assay) | Tri-Tachyon contract staff; exposure and vendor supply. | “We've moved the requirement to vendor supply.” |
+| Pirate captain (Parley Fish) | See [Pirates](#pirates); old rules of the trade, invoked with a grin. | “You claim the water, you bring something fresh out of it to the table.” |
+| Seeker captain (Fleet on a Hunt) | Worn down, terse, private about the reason. | “Eleven weeks. That's the part you need.” |
+| Wager captain (Settling a Bet) | Exasperated referee of their own crew. | “I'd rather they didn't start putting ship shares into the pot.” |
+
+### The young factor
+
+The startup factor in the bar speaks in models, projections, baselines, volume and the financing case. Every delivery becomes a data point that lets them build a larger forecast, and they never notice that the customers are still projected. Keep them bright, quick and sincere; the joke is the pale forecast lines, not a sneer at the character.
 
 ### The plain-coated buyers
 
@@ -1155,11 +1211,11 @@ are Harpoon Tips, Drone Cores and Lens Arrays; use “rig module” when discuss
 
 ## Faction voices
 
-Make faction dialogue recognizable through priorities and institutional habits, not caricatured accents.
+Each faction needs a voice a player could recognize with the name hidden. Institutional vocabulary is the foundation; the speaker's temper, humour and verbal habits are what make it a person. Accents, dialect, slang, formality, profanity and tics are welcome when they belong to the speaker. Avoid caricature: no cartoon fascist speeches, pirate-movie accents or Navy officers who are simply stupid.
 
-Recognizable does not mean flat. Patrol dialogue must retain colour, irritation, humour, menace
-and the sense that a particular officer is speaking. Institutional vocabulary is a foundation for
-voice, not a substitute for it.
+A Hegemony officer, a Tri-Tachyon security lead and an independent patrol captain handed the same harpoon incident must sound like three different people who would not enjoy each other's company. When a rewrite shortens or restructures faction dialogue, keep the speaker's diction, rhythm and attitude. A tidier paragraph that sounds like every other faction is a regression.
+
+Each profile below lists how the faction talks, then model lines from current rows. The model lines show the standard; they are not templates to repeat.
 
 ### Hegemony
 
@@ -1175,15 +1231,29 @@ Think:
 
 They are not universally stupid or fascist parody officers. Write a Hegemony officer whose institution expects the Sector to be legible.
 
-**Example retained from the original lore reference:**
+**How they talk:** full sentences, no slang, ranks and designations spoken in full. Charges are read as a list of offences. Orders are short and final (“Heave to.”, “Kill the lights. Now.”). They pass the problem up the chain in writing: incident report numbers, receipts at the nearest military office, Naval Intelligence. Their humour is a regulation meeting something it was never written for, and the officer's patience wearing thin because of it. As a situation escalates, their sentences get shorter, not louder.
 
-> "Hegemony Navy. Heave to."
+**Model lines:**
+
+> “Hegemony Navy. Heave to.”
 >
 > The officer brings up the damage image.
 >
-> "I am looking at a fishing harpoon in a registered hull. Start with your transponder code."
+> “I am looking at a fishing harpoon in a registered hull. Start with your transponder code.”
 
-The incongruous weapon irritates the officer; the next step is still identification and an incident report. No fabric theory is needed.
+(Retained from the original lore reference.) The incongruous weapon irritates the officer; the next step is still identification and an incident report. No fabric theory is needed.
+
+> “We will be shipping the object to Naval Intelligence. You may request a receipt at the closest Hegemony military office. Be sure to provide the incident report number.”
+
+(`catchrelease_harpoonedCommsHeg`)
+
+> “The first incident may have been an accident. The second is deliberate.” … “Weapons are authorized.”
+
+(`catchrelease_fineDemandRepeatHeg`)
+
+> “One of my crewmen used to fish. He says fishing crews deal with persistent contacts by releasing a specimen they're known to follow. I do not enjoy having that sentence in the incident log, but it is the only course with precedent.”
+
+(`catchrelease_fq_follower_pitch`) A Navy commander doing something unorthodox by the book, and disliking every word of it.
 
 ### Tri-Tachyon
 
@@ -1200,6 +1270,22 @@ Think:
 
 Keep the menace professional. The funniest Tri-Tachyon line is often an invoice.
 
+**How they talk:** corporate euphemism with a knife inside it. Damage becomes “property”, a threat becomes “considerably less routine”, a fight becomes a billing category. They are polite, quick and already holding the paperwork; the smile is part of the menace. They never shout and never say “I will kill you” when “further recurrence moves this out of billing” will do. Contract staff talk in claim files, write-offs, vendor supply and exposure.
+
+**Model lines:**
+
+> “Damage assessment is complete.” $PersonRank $personName is already looking at the invoice. “Repair labor, lost operating time, forensic recovery and disposal of your projectile.” A brief glance up. “The Tri-Tachyon Legal Department will be in touch.”
+
+(`catchrelease_harpoonedCommsTT`)
+
+> “You've done it twice. That does simplify things. Your fleet is now recorded as deliberately hostile to Tri-Tachyon assets. I expect the consequences will be considerably less routine.”
+
+(`catchrelease_fineDemandRepeatTT`)
+
+> “The device is being removed. What remains is a question of how much of your hull it is still attached to.”
+
+(`catchrelease_lampGunsTT`)
+
 ### Luddic Church
 
 Think:
@@ -1215,6 +1301,30 @@ Do not write every Church character as a fanatic. Faith can be completely sincer
 When reckless technology threatens inhabited space, that sincerity may become vivid moral force:
 creation, stewardship, trespass, mercy and the danger imposed on ordinary souls are natural Church
 language. They still do not know the fabric's technical mechanics.
+
+**How they talk:** calm, measured, and heavier for it. A greeting of peace comes before the order. Sentences are complete and often balanced, with the weight on the last clause. They point the player at the people who carry the cost (the crew whose hull was opened, the souls in the approaches) rather than at the rule that was broken. They rarely raise their voices; when mercy runs out, they say so plainly.
+
+The current Church lines are the reference standard for this faction. A rewrite may merge a gesture into a paragraph around them; it must not reword, trim or reorder the Church speech itself.
+
+**Model lines:**
+
+> “Peace be with you. Cut your drive.” … “You damaged a crewed vessel with equipment no prudent captain should point at one.” … “Pay the people whose hull you opened.”
+
+(`catchrelease_fineDemandLC`)
+
+> “A warning is mercy when it is heard. Ignored, it becomes indulgence.”
+
+(`catchrelease_lampFineLC`)
+
+> “We asked. We fined. We took what you had taken. And here it is again, burning over people.”
+>
+> “Ludd forgive you. We will not.”
+
+(`catchrelease_lampGunsLC`)
+
+> “We took payment for the hull and said nothing about the gear that made the hole. That was a courtesy, and you have shown us what it bought.”
+
+(`catchrelease_fineDemandRepeatLC`)
 
 ### Luddic Path
 
@@ -1233,6 +1343,24 @@ furious, unreasonable and ready to scream about Moloch's tools, defilement and v
 God's work. They may be emotionally close to the truth without possessing Fisherman-level physics;
 their response is accusation and holy violence, not calm administration.
 
+**How they talk:** scripture used as a weapon. Moloch's iron, hook, lantern and tools; Ludd's children; God's work and creation; a wound, a knife, meat and coin, appetite. Rhetorical questions thrown at the player. Repetition when angry (“Again? Again?”). Threats are concrete and physical (“Break the lamps. Break the hands that light them.”). The camera shakes, fingers jab, spittle hits the visor, somebody behind them calls for weapons.
+
+Their cadence is short, broken and loud on purpose. Shouted one-line paragraphs and the physical detail between them are part of this voice; the general guidance against stand-alone gestures does not apply to Pather confrontations. The current Path lines are the reference standard; do not reword, soften or merge them.
+
+**Model lines:**
+
+> “You wound God's work with Moloch's tools so you can drag supper through it, and you call that trade?”
+
+(`catchrelease_lampWarnLP`)
+
+> “Of course you kept it. Moloch hands you a knife for creation and you haggle over the handle.” … “$entity.catchrelease_lampFineDGS credits. Pay it if numbers are the only language you still understand.”
+
+(`catchrelease_lampFineLP`)
+
+> “$entity.catchrelease_campBribeDGS credits buys our absence. It does not make you clean.”
+
+(`catchrelease_campHailPath`) The quiet Pather: the same contempt without the shouting.
+
 ### Persean League
 
 Think:
@@ -1245,6 +1373,24 @@ Think:
 
 Bureaucratic complexity can be comic without making League officers buffoons.
 
+**How they talk:** tired, competent lawyers in uniform. They assemble statutes into a workable stack, find no clause for a fishing harpoon and improvise one. Provisions are numbered, committees meet quarterly, an interpretation is “favourable”. The humour is dry and self-aware (“Time to improvise.”); they know the system is absurd and enforce it anyway. Contractions are fine; the occasional trailing “Yeah.” is theirs.
+
+**Model lines:**
+
+> “League regulations authorize a fine of $entity.catchrelease_harpoonFineDGS credits for damage to associated hulls by... heavy salvaging equipment. Yeah.”
+>
+> “If you dislike my interpretation, the appeals committee meets quarterly.”
+
+(`catchrelease_fineDemandLeague`)
+
+> “The convention has run out of prices. We are at remedies.”
+
+(`catchrelease_lampScanLeague`)
+
+> “There is no fourth provision. The drafters assumed three opportunities would be sufficient.”
+
+(`catchrelease_lampGunsLeague`)
+
 ### Sindrian Diktat
 
 Think:
@@ -1255,6 +1401,22 @@ Think:
 - certainty that the state gets the final word.
 
 Avoid cartoon fascist speeches.
+
+**How they talk:** formal, no contractions, “the State”, “under Sindrian protection”, “a direct order”. Courtesy is offered once and described as a favour. Every threat is phrased as procedure, and the calm makes it worse. Protocol and procurement staff share the register (“That is not an acceptable amendment to the program.”) with less menace and more anxiety.
+
+**Model lines:**
+
+> “I am required to ask whether the act was deliberate.” The slate is set aside. “I have spared us both the formality.”
+
+(`catchrelease_harpoonedCommsDiktat`)
+
+> “You have mistaken restraint for negotiability.”
+
+(`catchrelease_lampScanDiktat`)
+
+> “There is no fourth penalty. There is a standing order, and you are now the subject of it.”
+
+(`catchrelease_lampGunsDiktat`)
 
 ### Independents
 
@@ -1268,6 +1430,18 @@ Think:
 
 They often have the least ideological language.
 
+**How they talk:** plain, contracted, local. They talk about their own day: the yardmaster, the claim, the flight out here. Exasperation is their humour (“I have to explain that sentence to a yardmaster.”). Orders are casual (“Ease off.”, “Hey. Lights off.”). They want the problem gone more than they want to win.
+
+**Model lines:**
+
+> “Somebody you hooked filed a claim. Filing a claim means I get to fly out here and say $entity.catchrelease_harpoonFineDGS credits.” … “Pay it and both of us get our day back.”
+
+(`catchrelease_fineDemandIndie`)
+
+> “I'd like this to be the last time I learn something new about fishing.”
+
+(`catchrelease_lampFineIndie`)
+
 ### Pirates
 
 Think:
@@ -1278,6 +1452,26 @@ Think:
 - willing to appreciate something funny until it becomes expensive.
 
 Do not make every pirate a theatrical rogue.
+
+**How they talk:** casual, profane when it suits them, grinning until the grin costs money. Slang for the powers that chase them (“Heggies”), references to places they have been (“since Corvus”), a sense of running a business on the wrong side of the law. They admire a good joke, then charge for it. Threats are economic before they are violent (“Twice costs money. Next time costs ships.”).
+
+**Model lines:**
+
+> “You hooked us.” A grin appears despite everything. “Actually hooked us.” The grin goes away. “Don't do it again.”
+
+(`catchrelease_harpoonedCommsPirate`)
+
+> “You are lighting up half our scopes and upsetting people who pay us specifically not to be upset.”
+
+(`catchrelease_lampWarnPirate`)
+
+> “Told you what was happening if you did it twice.” A pause. “I didn't, actually. My mistake.”
+
+(`catchrelease_fineDemandRepeatPirate`)
+
+### Mercenaries and contractors
+
+Hired guns, hitmen and security contractors speak contract. Client identity is protected; there is a relocation figure; cancellation is permitted if fees are settled in full. They are the calmest people in the Sector, and their jokes are one dry line after the business is done (“Try not to harpoon someone important, next time.”). They have no ideology and no grudge.
 
 ## Species identities
 
