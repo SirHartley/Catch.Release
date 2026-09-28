@@ -569,7 +569,7 @@ The projectile is large enough to damage a ship conventionally. The Fisherman ma
 
 **Existing dialogue — `catchrelease_introDeepResume_continue`, after the equipment transfer:**
 
-> “That's a harpoon,” he says, pointing at the second rig. “Name's apt, this time. It's the quick and hard way to get a pattern. The lights thin the fabric enough to bring one within reach, and the harpoon puts a ROD head on it before it slips away.”
+> “That's a harpoon,” he says, pointing at the second rig. “Name's apt, this time. It's the quick and hard way to get a pattern. The lights thin the fabric enough to bring one within reach. The harpoon puts a ROD head on it before it slips away.”
 >
 > He turns from the rig to you. “It's a heavy projectile. Treat it accordingly.”
 
@@ -708,7 +708,7 @@ He often answers the immediate question, recognizes the deeper one, and decides 
 
 **Existing dialogue — `catchrelease_ask_deepWater`, answering a question about thin fabric:**
 
-> “Not water. Thinner fabric. A pattern gets less help holding one shape out there, and the same goes for your crew. Keep the trip short, and don't turn it into research.”
+> “Not water. Thinner fabric. A pattern gets less help holding one shape out there. Same goes for your crew. Keep the trip short, and don't turn it into research.”
 
 The correction leads to a useful explanation and concern for the crew. He is limiting their exposure, not mocking the question or hiding ordinary operating advice behind a riddle.
 
