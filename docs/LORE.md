@@ -387,6 +387,8 @@ Do not overcorrect into one dense block. Vanilla breaks a row where the scene or
 - When a speaker moves on to a new subject, such as from the problem to the request or from the request to the terms, start a new paragraph. The gesture that marks the shift can open that paragraph.
 - Normally a paragraph holds one gesture. A second gesture inside the same paragraph usually means it needs a break.
 
+The [dialogue check](DIALOGUE.md#dialogue-check) measures `rules.csv` paragraphs against vanilla in both directions and reports stage-note fragments.
+
 **Do not write:**
 
 > The engineer brings up a fault report.
@@ -435,7 +437,7 @@ The paragraph guidance in [Rhythm and length](#rhythm-and-length) describes narr
 - **The plain-coated buyers.** Three speakers dividing one sentence between them, each on its own line.
 - **The TriTuber.** Asides to the audience break the conversation by design (“CHAT.”), followed by the real request to the player in a quieter line.
 
-These exceptions cover how the character speaks. Narration around them still follows the general guidance: no stage-note fragments and no gestures that only fill space.
+These exceptions cover how the character speaks. Narration around them still follows the general guidance: no stage-note fragments and no gestures that only fill space. The [dialogue check](DIALOGUE.md#dialogue-check) exempts the same speakers by row id; update its list when this one changes.
 
 
 ### Dialogue and player options

@@ -86,6 +86,51 @@ Does the line fit the speaker's job and knowledge? Does it tell the player what 
 
 Apply the [common mistakes and corrections](LORE.md#common-mistakes-and-corrections) to the complete exchange. Check the speaker's knowledge separately from the player's possible interpretation; a stylistically restrained line can still reveal a forbidden fact.
 
+### Dialogue check
+
+`catchrelease.tools.rules.DialogueCheck` checks the mod's `rules.csv` Text. It measures how Text is broken into paragraphs and compares the result with vanilla, enforcing the paragraph guidance in [LORE.md Rhythm and length](LORE.md#rhythm-and-length) in both directions. Rows fragmented into one-line speech and gesture paragraphs fail, and so do rows packed into single dense blocks. It also reports stage-note fragments, `LORE.md` excerpts that no longer match their rows and, against a base file, changed tokens and changed Church or Path rows. It does not judge wording or voice. Run it after every change to `rules.csv` Text or to a quoted `LORE.md` line, along with the [rules check](RULES.md#rules-check-tool). Use the `Dialogue Check` run configuration, or:
+
+```sh
+java -cp "<build output>" catchrelease.tools.rules.DialogueCheck <repository root> [--changed <base rules.csv>]
+```
+
+The rules tool package needs no dependency jars, so `javac --release 17 -encoding UTF-8 -d <out> jars/src/catchrelease/tools/rules/*.java` is enough to run it. `--changed` limits the row findings and measures to rows whose Text differs from a base file, such as `git show origin/master:data/campaign/rules.csv` saved to a temporary file, and adds the `token` and `reference` checks. The excerpt check always covers the whole of `LORE.md`. Measures are compared only when the selection holds at least 40 paragraphs in multi-paragraph variants. The exit status is 1 for an error or a measure outside its band, 0 otherwise and 2 for a usage or input problem.
+
+**Scope.** Rows without the `catchrelease_` prefix are ignored. Text is split into `OR` variants as the loader does; only variants containing a straight double quote are measured. Church and Path rows (`…LC` and `…LP` fine, lamp and harpooned-comms rows, `campFirstHailPath`, `campHailPath`) are the reference standard for their voices. They are not measured, and with `--changed` any change to them is an error. The [pacing exceptions](LORE.md#pacing-exceptions) get only the stage-note check and stay out of the measures: Crablobab (`crab…`), the tournament children (`duel…`), the plain-coated buyers (`cult…`) and the TriTuber (`tuber…`). Keep these lists in step with `LORE.md`.
+
+**Findings.**
+
+| Check | Severity | Reports |
+|---|---|---|
+| `stage-note` | error | A narration sentence such as “A pause.”, “A small shrug.”, “Another look at the countdown.” or “Then, brightly:”. The pattern list is not exhaustive |
+| `excerpt` | error | A `LORE.md` quotation of a named row that is no longer in that row's Text. Three forms are read: an **Existing dialogue — `id`** label followed by a block quote, a block quote followed by a `(`id`)` line, and an inline (“line”, `id`) citation. A line in a **Model line** table column must appear in some row. An ellipsis marks an omission, and each side is matched on its own |
+| `reference` | error | With `--changed`: a Church or Path row whose Text changed. Change these rows only on the user's explicit request, and say so in the pull request |
+| `token` | warning | With `--changed`: a `$` token removed from or added to a row. Pronoun tokens are compared without case. Each one needs a reason; an added pronoun needs a person in the dialogue context ([person and player text](rules-reference/MEMORY.md#person-and-player-text)) |
+| `alternation` | warning | Three or more consecutive paragraphs of 12 words or fewer that alternate between speech-only and narration-only |
+| `crowded` | warning | A speech paragraph with three or more separate stretches of narration that each end a sentence |
+| `wall` | warning | A paragraph over 80 words |
+
+**Measures.** Paragraphs per variant and words per paragraph count every variant. The shares count only paragraphs in variants with two or more paragraphs, because a one-paragraph reply has no break to judge. The vanilla values come from `docs/rules-reference/vanilla-pacing-baseline.txt`.
+
+| Measure | Band around vanilla |
+|---|---|
+| Paragraphs per variant, words per paragraph | ±20% of the vanilla value |
+| Paragraphs of 8 words or fewer, narration-only paragraphs | ±8 points |
+| Narration beats of 10 words or fewer | ±6 points |
+| Speech-only paragraphs | −8 / +16 points |
+| Speech and narration paragraphs | −16 / +8 points |
+| Mixed paragraphs with two or more gestures, paragraphs over 60 words | at most 5 points above vanilla |
+
+Speech-only paragraphs run above vanilla and mixed paragraphs below it by design. Offers keep their terms (the ask, pay and deadline) in a speech paragraph of their own, and closing narration after a short reply gets its own paragraph. Do not widen a band to pass a change. A band change is a style decision: record the reason here and in the tool's `MEASURES` comment.
+
+**Limits.** The check cannot see prop tics, stock replies, echo beats, rhetorical contrasts, narrator asides or a flattened voice. Review those against the [common mistakes](LORE.md#common-mistakes-and-corrections) and the voice profiles. A clean result means the paragraph shape matches vanilla and the quoted lines still match, not that the prose is good. The token check compares token sets, not how often each token appears.
+
+Regenerate the baseline from a game version's `starsector-core/data/campaign/rules.csv`; do not edit it by hand:
+
+```sh
+java -cp "<build output>" catchrelease.tools.rules.DialogueCheck --baseline <vanilla rules.csv> <game version> > docs/rules-reference/vanilla-pacing-baseline.txt
+```
+
 ## Dialogue behavior and presentation checks
 
 Use the [shared text presentation checks](#shared-text-presentation) alongside these dialogue-flow criteria. `RULES.md` owns rules implementation; `UI.md` owns Java custom UI implementation.
