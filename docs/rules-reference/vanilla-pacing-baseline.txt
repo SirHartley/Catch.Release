@@ -1,0 +1,17 @@
+# Vanilla dialogue pacing for catchrelease.tools.rules.DialogueCheck.
+# Game version 0.98a-RC8. Generated from starsector-core/data/campaign/rules.csv with
+#   java -cp "<build output>:<compile jars>" catchrelease.tools.rules.DialogueCheck --baseline <vanilla rules.csv> 0.98a-RC8
+# Regenerate it for a new game version; do not edit it by hand.
+version=0.98a-RC8
+variants=5119
+paragraphs=11054
+multiParagraphParagraphs=9617
+paragraphsPerVariant=2.1594
+meanWords=23.4314
+shortShare=0.1435
+speechShare=0.2048
+mixedShare=0.4941
+narrationShare=0.3010
+beatShare=0.1030
+crowdedShare=0.0657
+longShare=0.0261
