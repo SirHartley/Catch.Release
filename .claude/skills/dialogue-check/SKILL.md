@@ -9,6 +9,8 @@ This skill runs the checks that keep `rules.csv` dialogue at vanilla's paragraph
 
 ## Run the tools
 
+The project hook already runs `DialogueCheck` after each change to `rules.csv` or `LORE.md`, and the `Rules checks` GitHub workflow runs both tools on the pull request ([DIALOGUE.md, When it runs](../../../docs/DIALOGUE.md#dialogue-check)). Treat hook output as findings to act on now. Run the steps below by hand before committing a batch, to get the base-branch comparison and the measure table for the report, or when the hook cannot run because `java` or `javac` is missing.
+
 Work in a temporary directory outside the repository for the base file and build output.
 
 1. Save the base Text for the comparison, normally current remote `master`:
