@@ -380,6 +380,13 @@ Put a small action in the speech tag, before the quote or inside the speaker's p
 
 A short sentence can still end a paragraph or land a point. It must be a sentence doing work in the scene, never a stage note such as “A pause.” or “A beat.”
 
+Do not overcorrect into one dense block. Vanilla breaks a row where the scene or the subject changes:
+
+- Scene-setting that describes the speaker or the place when the link opens gets its own paragraph before the first line of speech.
+- A closing event that happens after the speaker has finished, such as files arriving, the channel closing or the galley getting to work, gets its own paragraph at the end.
+- When a speaker moves on to a new subject, such as from the problem to the request or from the request to the terms, start a new paragraph. The gesture that marks the shift can open that paragraph.
+- Normally a paragraph holds one gesture. A second gesture inside the same paragraph usually means it needs a break.
+
 **Do not write:**
 
 > The engineer brings up a fault report.
