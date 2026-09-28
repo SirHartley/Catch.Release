@@ -8,15 +8,18 @@ public class FishLogEntry implements Serializable {
 
     public enum Method {
 
-        DRONE("LYNE drones"),
-        HARPOON("Harpoon"),
-        BOMB("Depth bomb"),
-        UNKNOWN("Unrecorded");
+        DRONE("LYNE drones", "LYNE drones"),
+        HARPOON("Harpoon", "a harpoon"),
+        BOMB("Depth bomb", "a depth bomb"),
+        UNKNOWN("Unrecorded", null);
 
         public final String name;
+        // Completes "caught with ..." in request and specimen text; null when nothing was recorded.
+        public final String phrase;
 
-        Method(String name) {
+        Method(String name, String phrase) {
             this.name = name;
+            this.phrase = phrase;
         }
     }
 

@@ -6,7 +6,6 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
@@ -17,6 +16,7 @@ import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.awt.Color;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -149,60 +149,65 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         }
 
         FishSpec spec = contents.get(0).getSpec();
-        float opad = 10f;
+        float pad = FishItemTooltips.PAD;
+        float opad = FishItemTooltips.OPAD;
+        Color h = Misc.getHighlightColor();
 
         // without this, F2 resolves to the generic bundle item spec rather than the species it holds
         FishCodex.link(tooltip, contents.get(0).speciesId);
 
-        if (!Global.CODEX_TOOLTIP_MODE) {
-            tooltip.addTitle(getName());
-        } else {
-            tooltip.addSpacer(-opad);
-        }
-
-        if (spec != null) {
-            tooltip.addPara("Species type: %s", opad, Misc.getGrayColor(), spec.rarity.color,
-                    Misc.ucFirst(spec.rarity.name().toLowerCase()));
-        }
-
-        if (Global.CODEX_TOOLTIP_MODE) {
-            tooltip.setParaSmallInsignia();
-        }
-
-        tooltip.addPara("Contains: %s", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
-                contents.size() + " specimens of " + contents.get(0).getDisplayName());
-
-        java.util.List<String> requiredBy = new java.util.ArrayList<>();
-        for (FishCatch entry : contents) {
-            for (String name : ShopMarks.getRequiredBy(entry)) {
-                if (!requiredBy.contains(name)) requiredBy.add(name);
-            }
-        }
-        if (!requiredBy.isEmpty()) {
-            tooltip.addPara("Yellow dot: needed for %s", opad, Misc.getGrayColor(),
-                    Misc.getHighlightColor(), String.join(", ", requiredBy));
-        }
+        FishItemTooltips.addTitle(tooltip, getName(), spec);
+        FishItemTooltips.addClassification(tooltip, spec);
 
         Map<FishGrade, Integer> byGrade = new EnumMap<>(FishGrade.class);
-        float best = 0f;
+        FishGrade bestGrade = FishGrade.TERRIBLE;
+        float longest = 0f;
+        float leastAberration = 1f;
+        float mostAberration = 0f;
         for (FishCatch entry : contents) {
-            byGrade.merge(entry.getGrade(), 1, Integer::sum);
-            best = Math.max(best, entry.length);
+            FishGrade grade = entry.getGrade();
+            byGrade.merge(grade, 1, Integer::sum);
+            if (grade.rank > bestGrade.rank) bestGrade = grade;
+            longest = Math.max(longest, entry.length);
+            leastAberration = Math.min(leastAberration, entry.aberration);
+            mostAberration = Math.max(mostAberration, entry.aberration);
         }
 
-        for (Map.Entry<FishGrade, Integer> line : byGrade.entrySet()) {
-            tooltip.addPara(BaseIntelPlugin.BULLET + "%s   %s", 3f, line.getKey().getColor(),
-                    line.getKey().name, "x" + line.getValue());
+        tooltip.addPara("%s, best %s, longest %s.", opad, Misc.getGrayColor(), h,
+                FishItemTooltips.plural(contents.size(), "specimen", "specimens"), bestGrade.name,
+                String.format("%.2f m", longest)).setHighlightColors(h, bestGrade.getColor(), h);
+
+        FishGrade[] grades = FishGrade.values();
+        for (int i = grades.length - 1; i >= 0; i--) {
+            Integer count = byGrade.get(grades[i]);
+            if (count == null) continue;
+
+            tooltip.addPara(BaseIntelPlugin.BULLET + "%s   %s", pad, new Color[]{grades[i].getColor(), h},
+                    grades[i].name, "x" + count);
         }
 
-        tooltip.addPara("Longest: %s", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
-                String.format("%.2f m", best));
+        addCoherenceRange(tooltip, leastAberration, mostAberration);
+        FishItemTooltips.addDescription(tooltip, spec);
+        FishItemTooltips.addWantedFor(tooltip, contents);
 
         addCostLabel(tooltip, opad, transferHandler, stackSource);
 
-        if (!Global.CODEX_TOOLTIP_MODE) {
-            tooltip.addPara("Right-click to unpack; hold %s to sweep every fish aboard into one"
-                    + " pile.", opad, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
+        FishItemTooltips.addActions(tooltip, "Right-click to unpack into loose specimens.",
+                "Control-right-click sweeps every fish aboard into one pile.");
+    }
+
+    // Coherence asks accept a band or worse, so the crate shows the spread rather than an average.
+    protected void addCoherenceRange(TooltipMakerAPI tooltip, float least, float most) {
+        String low = Misc.ucFirst(FishItemPlugin.getAberrationLabel(least));
+        String high = Misc.ucFirst(FishItemPlugin.getAberrationLabel(most));
+        Color lowColor = FishItemPlugin.getAberrationColor(least);
+        Color highColor = FishItemPlugin.getAberrationColor(most);
+
+        if (low.equals(high)) {
+            tooltip.addPara("Coherence: %s", FishItemTooltips.OPAD, Misc.getGrayColor(), lowColor, low);
+        } else {
+            tooltip.addPara("Coherence: %s to %s", FishItemTooltips.OPAD, Misc.getGrayColor(), lowColor,
+                    low, high).setHighlightColors(lowColor, highColor);
         }
     }
 }

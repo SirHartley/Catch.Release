@@ -3,10 +3,8 @@ package catchrelease.campaign.fish.items;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
-import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
@@ -146,49 +144,21 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
         }
 
         FishSpec spec = entry.getSpec();
-        FishGrade grade = entry.getGrade();
-        float opad = 10f;
 
         // vanilla resolves F2 to the generic "Fish" item spec; point it at this specimen's species instead
         FishCodex.link(tooltip, entry.speciesId);
 
-        if (!Global.CODEX_TOOLTIP_MODE) {
-            tooltip.addTitle(entry.getDisplayName());
-        } else {
-            tooltip.addSpacer(-opad);
-        }
+        FishItemTooltips.addTitle(tooltip, entry.getDisplayName(), spec);
+        FishItemTooltips.addClassification(tooltip, spec);
+        FishItemTooltips.addStats(tooltip, entry);
+        FishItemTooltips.addProvenance(tooltip, entry);
+        FishItemTooltips.addDescription(tooltip, spec);
+        FishItemTooltips.addWantedFor(tooltip, List.of(entry));
 
-        if (spec != null) {
-            tooltip.addPara("Species type: %s", opad, Misc.getGrayColor(), spec.rarity.color,
-                    Misc.ucFirst(spec.rarity.name().toLowerCase()));
-        }
+        addCostLabel(tooltip, FishItemTooltips.OPAD, transferHandler, stackSource);
 
-        if (Global.CODEX_TOOLTIP_MODE) {
-            tooltip.setParaSmallInsignia();
-        }
-
-        tooltip.addPara("Specimen grade: %s", opad, Misc.getGrayColor(), grade.getColor(), grade.name);
-        tooltip.addPara("Length: %s   Weight: %s", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),
-                String.format("%.2f m", entry.length), String.format("%.1f kg", entry.weight));
-        tooltip.addPara("Coherence: %s", 3f, Misc.getGrayColor(), getAberrationColor(entry.aberration),
-                getAberrationLabel(entry.aberration));
-
-        if (spec != null && spec.desc != null && !spec.desc.isEmpty()) {
-            tooltip.addPara(spec.desc, Misc.getTextColor(), opad);
-        }
-
-        java.util.List<String> requiredBy = ShopMarks.getRequiredBy(entry);
-        if (!requiredBy.isEmpty()) {
-            tooltip.addPara("Yellow dot: needed for %s", opad, Misc.getGrayColor(),
-                    Misc.getHighlightColor(), String.join(", ", requiredBy));
-        }
-
-        addCostLabel(tooltip, opad, transferHandler, stackSource);
-
-        if (!Global.CODEX_TOOLTIP_MODE) {
-            tooltip.addPara("Right-click to stow it with others of its kind; hold %s to stow every"
-                    + " one aboard.", opad, Misc.getGrayColor(), Misc.getHighlightColor(), "control");
-        }
+        FishItemTooltips.addActions(tooltip, "Right-click to stow it with others of its kind.",
+                "Control-right-click stows every loose one of its kind aboard.");
     }
 
     public static int getAberrationBand(float aberration) {

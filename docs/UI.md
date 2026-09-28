@@ -122,6 +122,37 @@ Do not cache a tooltip that reads changing state unless its owner refreshes it.
 Source: `StandardTooltipV2Expandable.addTooltipTo/addTooltipToPrevious`,
 `beforeShown` and `advanceImpl` in the knowledge base's `sources-obf/ui.impl.java`.
 
+## Catch item and species tooltips
+
+The specimen, crate and pile tooltips follow vanilla's special-item order through
+`FishItemTooltips`:
+
+1. title, in the rarity colour for one species;
+2. classification (Rarity, Type);
+3. data: the stats grid, the crate's grade list or the pile's species list;
+4. provenance and description;
+5. "Wanted for";
+6. vanilla's `addCostLabel`;
+7. action hints.
+
+Use pad 10 between blocks and 3 inside one. The primary right-click hint is
+positive and a Control-click tip is gray. Hints are omitted in Codex mode,
+which also replaces the title with `addSpacer(-10)`, as
+`BaseSpecialItemPlugin` does.
+
+Specimen provenance uses the same phrases as request text, `FishLogEntry.Method.phrase`,
+`CatchImplement.name` and `SectorRegion.describe()`, so a specimen can be
+checked against an ask by eye. Keep the three in step with `FishRequirement`.
+
+The species hover (`FishTooltips`) puts the icon beside the name in a custom
+header panel, because `FishIcons.draw` must paint the silhouette of an uncaught
+species and `beginImageWithText` only takes a sprite. Its range prose is body
+text under a gray "Range:" label, never a whole-paragraph highlight.
+
+Sources: `BaseSpecialItemPlugin.createTooltip/addCostLabel` and the vanilla item
+plugins in the knowledge base's `sources-api/campaign.impl.java`; `Misc.addDesignTypePara`
+in `sources-api/util.java`.
+
 ## Rebuilding lists
 
 Create a UI element and call `addUIElement` on the same `CustomPanelAPI`.

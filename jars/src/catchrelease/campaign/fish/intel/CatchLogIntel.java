@@ -205,7 +205,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
         else if (date != null) taken.setHighlight(method, implement, date);
 
         FishGrade grade = specimen.getGrade();
-        info.addPara("Specimen grade: %s", opad, gray, grade.getColor(), grade.name);
+        info.addPara("Grade: %s", opad, gray, grade.getColor(), grade.name);
         info.addPara("Length: %s   Weight: %s", 3f, gray, h,
                 String.format("%.2f m", specimen.length),
                 String.format("%.1f kg", specimen.weight));

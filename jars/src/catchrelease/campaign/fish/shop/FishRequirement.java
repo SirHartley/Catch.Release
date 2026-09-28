@@ -4,7 +4,6 @@ import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
-import catchrelease.campaign.fish.data.FishLocationSummary;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
@@ -437,20 +436,11 @@ public class FishRequirement {
     }
 
     protected String getMethodName() {
-        switch (method) {
-            case HARPOON: return "a harpoon";
-            case DRONE: return "LYNE drones";
-            default: return "no recorded gear";
-        }
+        return method.phrase == null ? "no recorded gear" : method.phrase;
     }
 
     protected String getOriginName() {
-        if (origin == SectorRegion.ABYSSAL) return "in the Abyss";
-
-        String band = origin.isCore() ? "the core" : "the far reaches";
-        String quadrant = origin.name().substring(origin.name().length() - 2);
-
-        return "in " + band + " of the " + FishLocationSummary.getDirectionName(quadrant);
+        return origin.describe();
     }
 
     protected static String trim(float value) {

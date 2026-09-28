@@ -283,6 +283,8 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 | File | Owner / connection |
 |---|---|
 | `FishItems.java` | Item IDs, encoding, decoding, landing, unboxing, and transaction-screen packing. |
+| `FishItemPlugin.java`, `FishBundleItemPlugin.java`, `FishPileItemPlugin.java` | Specimen, crate and pile cargo items: names, prices, right-click stowing and unpacking, icons and tooltips. The three rows in `special_items.csv` carry `hide_in_codex`; species pages live in the mod's own Codex category. |
+| `FishItemTooltips.java` | Shared tooltip blocks for the three items; layout contract in [UI.md](UI.md#catch-item-and-species-tooltips). |
 
 ### `campaign/fish/crab`
 
@@ -305,6 +307,7 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 | `FishMapPane.java` | Search, type filters, species list, coherence toggle, request restrictions, and no-data/reset states. |
 | `FishPresence.java` | Species/system visibility: caught or learned data in normal play; computed, non-persistent full chart in dev mode; optional request allowlists. |
 | `FishRoutePlanner.java` | Builds route suggestions from every `FishAsker` and shop mark, expands broad requirements, and orders stops using stability and slipstreams. |
+| `FishTooltips.java` | Species hover for map rows, route-planner rows, system pane and intel planet cells; layout contract in [UI.md](UI.md#catch-item-and-species-tooltips). |
 
 ### `campaign/fish/codex`
 

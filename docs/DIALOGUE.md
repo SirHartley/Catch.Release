@@ -158,6 +158,8 @@ Custom-panel opening and return behavior is covered by [UI.md](UI.md#custom-dial
 These are Catch.Release-specific uses of the shared presentation guidelines, not exceptions to them.
 
 - Fish names use their rarity colours from `FishRarity.color`; Common uses the shared beige, not white or grey. Non-fish rewards, places and final hand-in choices use the established quest highlight. Do not substitute the positive-gain colour for the last fish in a list.
+- Grades use `FishGrade.getColor()`, a five-step scale from dark red (Terrible) through vanilla's negative orange (Poor), amber (Average) and yellow-green (Fine) to vanilla's positive green (Exceptional). Do not show a grade in the plain value highlight or in gray.
+- Label specimen facts as Rarity, Type, Grade, Length, Weight and Coherence, and shop-list matches as "Wanted for". Count catches as "Landed".
 - Use shared reward cards for initial offers, counteroffers and follow-ups. Receipts report actual grant results, including a learned-range reward converted to its saved credit fallback.
 - Standard `FishReward` receipts use Gained; fleet contracts use Received. Do not change an established receipt label as incidental prose cleanup.
 - Fish-request hovers retain size, grade, origin, time and method restrictions; a geographic range alone does not satisfy them.
