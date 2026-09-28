@@ -62,6 +62,16 @@ public enum SectorRegion {
         return name().startsWith("CORE");
     }
 
+    // "in the core of the north-east"; shared by request and specimen text.
+    public String describe() {
+        if (this == ABYSSAL) return "in the Abyss";
+
+        String band = isCore() ? "the core" : "the far reaches";
+        String quadrant = name().substring(name().length() - 2);
+
+        return "in " + band + " of the " + FishLocationSummary.getDirectionName(quadrant);
+    }
+
     public static SectorRegion parse(String name) {
         if (name == null) return null;
 

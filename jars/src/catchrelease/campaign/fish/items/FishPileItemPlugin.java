@@ -4,7 +4,6 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.CargoTransferHandlerAPI;
@@ -16,12 +15,16 @@ import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class FishPileItemPlugin extends BaseSpecialItemPlugin {
+
+    public static final int MAX_LINES = 8;
 
     public List<FishCatch> getContents() {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
@@ -146,45 +149,52 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
             return;
         }
 
-        float opad = 10f;
+        float opad = FishItemTooltips.OPAD;
+        Color h = Misc.getHighlightColor();
 
-        if (!Global.CODEX_TOOLTIP_MODE) {
-            tooltip.addTitle(getName());
-        } else {
-            tooltip.addSpacer(-opad);
-        }
+        FishItemTooltips.addTitle(tooltip, getName(), null);
 
-        Map<String, Integer> bySpecies = new LinkedHashMap<>();
+        Map<String, List<FishCatch>> bySpecies = new LinkedHashMap<>();
         for (FishCatch entry : contents) {
-            bySpecies.merge(entry.getDisplayName(), 1, Integer::sum);
+            bySpecies.computeIfAbsent(entry.speciesId, id -> new ArrayList<>()).add(entry);
         }
 
-        tooltip.addPara("Holds %s of %s.", opad, Misc.getGrayColor(), Misc.getHighlightColor(),
-                contents.size() + (contents.size() == 1 ? " specimen" : " specimens"),
-                bySpecies.size() + (bySpecies.size() == 1 ? " species" : " species"));
+        List<List<FishCatch>> lines = new ArrayList<>(bySpecies.values());
+        lines.sort(Comparator.comparingInt((List<FishCatch> line) -> getRarityRank(line.get(0))).reversed()
+                .thenComparing(Comparator.comparingInt((List<FishCatch> line) -> line.size()).reversed()));
 
-        for (Map.Entry<String, Integer> line : bySpecies.entrySet()) {
-            tooltip.addPara(BaseIntelPlugin.BULLET + "%s   %s", 3f, Misc.getHighlightColor(),
-                    line.getKey(), "x" + line.getValue());
+        tooltip.addPara("Holds %s of %s.", opad, Misc.getGrayColor(), h,
+                FishItemTooltips.plural(contents.size(), "specimen", "specimens"),
+                FishItemTooltips.plural(lines.size(), "species", "species"));
+
+        int shown = Math.min(lines.size(), MAX_LINES);
+        for (int i = 0; i < shown; i++) {
+            List<FishCatch> line = lines.get(i);
+            FishSpec spec = line.get(0).getSpec();
+            float value = 0f;
+            for (FishCatch entry : line) value += entry.getValue();
+
+            tooltip.addPara(BaseIntelPlugin.BULLET + "%s   %s   %s", i == 0 ? 5f : FishItemTooltips.PAD,
+                    new Color[]{spec == null ? h : spec.rarity.color, h, h},
+                    line.get(0).getDisplayName(), "x" + line.size(), Misc.getDGSCredits(value));
         }
 
-        List<String> requiredBy = new ArrayList<>();
-        for (FishCatch entry : contents) {
-            for (String name : ShopMarks.getRequiredBy(entry)) {
-                if (!requiredBy.contains(name)) requiredBy.add(name);
-            }
+        if (lines.size() > shown) {
+            tooltip.addPara(BaseIntelPlugin.INDENT + "... and %s other species.", FishItemTooltips.PAD, h,
+                    String.valueOf(lines.size() - shown));
         }
 
-        if (!requiredBy.isEmpty()) {
-            tooltip.addPara("Yellow dot: needed for %s", opad, Misc.getGrayColor(),
-                    Misc.getHighlightColor(), String.join(", ", requiredBy));
-        }
+        FishItemTooltips.addWantedFor(tooltip, contents);
 
         addCostLabel(tooltip, opad, transferHandler, stackSource);
 
-        if (!Global.CODEX_TOOLTIP_MODE) {
-            tooltip.addPara("Right-click to unpack loose singles and crate repeated species.",
-                    Misc.getGrayColor(), opad);
-        }
+        FishItemTooltips.addActions(tooltip,
+                "Right-click to unpack: singles come out loose, repeated species in crates.", null);
+    }
+
+    protected static int getRarityRank(FishCatch entry) {
+        FishSpec spec = entry.getSpec();
+
+        return spec == null ? -1 : spec.rarity.rank;
     }
 }
