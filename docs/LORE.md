@@ -387,6 +387,18 @@ Do not overcorrect into one dense block. Vanilla breaks a row where the scene or
 - When a speaker moves on to a new subject, such as from the problem to the request or from the request to the terms, start a new paragraph. The gesture that marks the shift can open that paragraph.
 - Normally a paragraph holds one gesture. A second gesture inside the same paragraph usually means it needs a break.
 
+**Merge paragraphs, not sentences.** When fragmented paragraphs are joined, keep the sentences they held. Do not weld them together with “, and”, “, then”, “, where”, “, because”, a semicolon, a list of three verbs or a trailing descriptive phrase. One long chained sentence after another reads as a list, and every speaker ends up with the same breathless rhythm.
+
+**Do not write:**
+
+> A deckhand seals the container and enters the new custody transfer, and the original handling report goes into the same folder, because the bond requires it to travel with the exhibit.
+
+**Write:**
+
+> A deckhand seals the container and enters the new custody transfer. The original handling report goes into the same folder. The bond requires it to travel with the exhibit.
+
+**Why:** both versions are one paragraph with the same facts. The second lets each action land on its own. The dialogue check's `welded` warning reports a rewrite that loses sentences this way.
+
 The [dialogue check](DIALOGUE.md#dialogue-check) measures `rules.csv` paragraphs against vanilla in both directions and reports stage-note fragments.
 
 **Do not write:**
@@ -405,9 +417,9 @@ The [dialogue check](DIALOGUE.md#dialogue-check) measures `rules.csv` paragraphs
 
 **Write:**
 
-> “Our drive keeps dropping out, and now the ration printer won't take our feedstock either,” the engineer says, sending the fault report across. “I have the people to fix one of them. I'd rather fix the drive, so I need another way to feed the printer.”
+> “Our drive keeps dropping out. Now the ration printer won't take our feedstock either.” The engineer sends the fault report across. “I have the people to fix one of them. I'd rather fix the drive, so I need another way to feed the printer.”
 
-**Why:** the first version spends three paragraphs on gestures and a stage note, and the problem arrives in fragments. The second gives the whole problem in the engineer's own words. The fault report still arrives, in the same sentence as the speech it supports.
+**Why:** the first version spends three paragraphs on gestures and a stage note, and the problem arrives in fragments. The second gives the whole problem in the engineer's own words, in one paragraph of short sentences. The fault report still arrives, inside the speech it supports.
 
 **Example using the [LYNE/ROD installation](#rod-lyne-and-harpoon):**
 
@@ -569,7 +581,7 @@ The projectile is large enough to damage a ship conventionally. The Fisherman ma
 
 **Existing dialogue — `catchrelease_introDeepResume_continue`, after the equipment transfer:**
 
-> “That's a harpoon,” he says, pointing at the second rig. “Name's apt, this time. It's the quick and hard way to get a pattern. The lights thin the fabric enough to bring one within reach, and the harpoon puts a ROD head on it before it slips away.”
+> “That's a harpoon,” he says, pointing at the second rig. “Name's apt, this time. It's the quick and hard way to get a pattern. The lights thin the fabric enough to bring one within reach. The harpoon puts a ROD head on it before it slips away.”
 >
 > He turns from the rig to you. “It's a heavy projectile. Treat it accordingly.”
 
@@ -708,7 +720,7 @@ He often answers the immediate question, recognizes the deeper one, and decides 
 
 **Existing dialogue — `catchrelease_ask_deepWater`, answering a question about thin fabric:**
 
-> “Not water. Thinner fabric. A pattern gets less help holding one shape out there, and the same goes for your crew. Keep the trip short, and don't turn it into research.”
+> “Not water. Thinner fabric. A pattern gets less help holding one shape out there. Same goes for your crew. Keep the trip short, and don't turn it into research.”
 
 The correction leads to a useful explanation and concern for the crew. He is limiting their exposure, not mocking the question or hiding ordinary operating advice behind a riddle.
 

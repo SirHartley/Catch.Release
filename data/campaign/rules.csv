@@ -8,7 +8,7 @@ catchrelease_hitmanHail,OpenCommLink,"$entity.catchrelease_harpoonHitman score:1
 !$entity.catchrelease_harpoonHitmanHailed
 !$entity.catchrelease_harpoonHitmanClientGone","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
 $entity.catchrelease_harpoonHitmanHailed = true 30
-$entity.ignorePlayerCommRequests = true 30","The channel opens on an officer in an unmarked pressure suit, your transponder record and a damage report open side by side.
+$entity.ignorePlayerCommRequests = true 30","The channel opens on an officer in an unmarked pressure suit. Your transponder record and a damage report are open side by side.
 
 ""You hit $entity.catchrelease_harpoonHitmanVictim with $entity.catchrelease_harpoonHitmanOffence in $entity.catchrelease_harpoonHitmanOrigin. Recovery logged your transponder code. Probably shouldn't have done that.""
 
@@ -18,7 +18,7 @@ catchrelease_hitmanHailFromGrave,OpenCommLink,"$entity.catchrelease_harpoonHitma
 !$entity.catchrelease_harpoonHitmanHailed
 $entity.catchrelease_harpoonHitmanClientGone","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
 $entity.catchrelease_harpoonHitmanHailed = true 30
-$entity.ignorePlayerCommRequests = true 30","The channel opens on an officer in an unmarked pressure suit, your transponder record and a damage report open side by side.
+$entity.ignorePlayerCommRequests = true 30","The channel opens on an officer in an unmarked pressure suit. Your transponder record and a damage report are open side by side.
 
 ""You hit $entity.catchrelease_harpoonHitmanVictim with $entity.catchrelease_harpoonHitmanOffence in $entity.catchrelease_harpoonHitmanOrigin. Recovery logged your transponder code.""
 
@@ -340,7 +340,7 @@ $entity.catchrelease_harpoonPatrolDone = true 30
 unset $entity.catchrelease_fineConv
 $entity.ignorePlayerCommRequests = true 0
 ShowDefaultVisual
-EndConversation","You get a blank stare for an answer, and the link closes.
+EndConversation","You get a blank stare for an answer. The link closes.
 
 Your sensors officer has the formation opening out before the channel has finished dropping, and calls the gun ports as they come up, one ship at a time.",,
 ,,,,,,
@@ -388,7 +388,7 @@ catchrelease_standingOrder_contactGreeting,catchreleaseJobGreeting,$missionId ==
 catchrelease_standingOrder_blurbBar,catchrelease_standingOrder_blurbBar,,,A local provisioner has three delivery manifests open beside a supplier list. The outbound section has more orders than names.,,
 catchrelease_standingOrder_optionBar,catchrelease_standingOrder_optionBar,,,,catchrelease_standingOrder_ask:Talk to the provisioner with the delivery manifests,
 catchrelease_standingOrder_ask,DialogOptionSelected,$option == catchrelease_standingOrder_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""You're supplying catch? Good. I've got kitchens buying faster than my regulars are landing."" The provisioner turns the open order toward you. ""$catchreleaseAskCap. Meet the line as written. $catchreleaseDaysCap, and $catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the order.
+Call $catchrelease_jobRef showRewardDetails","""You're supplying catch? Good. I've got kitchens buying faster than my regulars are landing."" The provisioner turns the open order toward you. ""$catchreleaseAskCap. Meet the line as written. $catchreleaseDaysCap. $catchreleaseRewardCap on delivery.""","catchrelease_jobAccept:Take the order.
 catchrelease_jobDecline:Decline.",
 catchrelease_standingOrder_accepted,catchreleaseJobAccepted,$missionId == catchrelease_standingOrder,,"""Good.""
 
@@ -422,7 +422,7 @@ $HeOrShe spins toward the kitchen. ""Move! I've got the fish, you've got no excu
 The agreed transfer clears. The transmission cuts while $heOrShe is still shouting instructions down the line.",,
 ,,,,,,
 # bar job: startup,,,,,,
-catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with the current order already open, a solid line among several dotted forecasts.
+catchrelease_startup_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_startup score:100,,"The young factor accepts the connection with the current order already open. It sits as one solid line among several dotted forecasts.
 
 ""Captain. Good. I've been updating the model from the committed volume. Where are we?""",,
 catchrelease_startup_blurbBar,catchrelease_startup_blurbBar,,,"A young factor in an expensive sleeveless jacket has a ten-page business case open on $hisOrHer slate. A cheap, half-finished drink sits at one corner of the table.",,
@@ -430,7 +430,7 @@ catchrelease_startup_optionBar,catchrelease_startup_optionBar,,,,catchrelease_st
 catchrelease_startup_ask,DialogOptionSelected,$option == catchrelease_startup_ask,"$menuState = catchreleaseStartupOffer 0
 FireAll JobSpecificOptions","""You fish. Perfect. That's the difficult side.""
 
-$HeOrShe closes three projections and opens another, packed with margins and rising curves. ""I have ten pages proving people buy fresh catch. What I don't have is one supplier line I can point at and say, there, that works. You give me that, and I can build from something real.""",,
+$HeOrShe closes three projections and opens another, packed with margins and rising curves. ""I have ten pages proving people buy fresh catch. What I don't have is one supplier line I can point at and say, there, that works. You give me that, I can build from something real.""",,
 catchrelease_startup_offerDemandOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
 !$catchreleaseStartupAskedDemand",,,10:catchrelease_startup_demand:Who is buying?,
 catchrelease_startup_offerOperationsOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
@@ -455,7 +455,7 @@ CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseStartupOffer 0
 FireAll JobSpecificOptions","""Pilot shipment. $catchreleaseAskCap. $catchreleaseRewardCap on delivery. No deadline. I need the completed shipment and the receipt."" A larger second order is already modeled beneath the first. ""If this one closes, we raise the volume.""",,
-catchrelease_startup_accepted,catchreleaseJobAccepted,$missionId == catchrelease_startup,,"""Excellent."" A supplier brief arrives in your inbox, the agreed quantity on the first page and projections built around it on the rest. ""Now I have an active supplier line.""",,
+catchrelease_startup_accepted,catchreleaseJobAccepted,$missionId == catchrelease_startup,,"""Excellent."" A supplier brief arrives in your inbox. The agreed quantity is on the first page. The rest is projections built around it. ""Now I have an active supplier line.""",,
 catchrelease_startup_declined,catchreleaseJobDeclined,$missionId == catchrelease_startup,,"""That's fine. I have other supplier conversations.""
 
 $HeOrShe opens $hisOrHer contact list and starts again from the top.",,
@@ -468,9 +468,9 @@ $catchreleaseMore
 $catchreleaseRound == 1 score:110","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails","The agreed transfer clears.
 
-$HeOrShe folds the signed receipt into the model, and one projected figure becomes an actual one. ""There. That's a baseline. Now I can price growth against something that exists.""
+$HeOrShe folds the signed receipt into the model, replacing one of the projected figures with an actual one. ""There. That's a baseline. Now I can price growth against something that exists.""
 
-The surrounding forecasts change immediately, and $heOrShe sends the next order. ""$catchreleaseAskCap. $catchreleaseRewardCap on delivery.""",,
+The surrounding forecasts change immediately. $HeOrShe sends the next order. ""$catchreleaseAskCap. $catchreleaseRewardCap on delivery.""",,
 catchrelease_startup_paidScale,catchreleaseJobPaid,"$missionId == catchrelease_startup
 $catchreleasePaid
 $catchreleaseMore
@@ -488,20 +488,18 @@ $catchreleasePaid
 
 $HeOrShe reads the final delivery receipt twice. ""Three completed runs. That's the supply chain proven.""
 
-The three receipts take up half a page in the business case, and a distribution network spreads across the rest in pale forecast lines. $HeOrShe is already revising the demand projections. None of the lines ends at a confirmed buyer.",,
+The three receipts take up half a page in the business case. A distribution network spreads across the rest in pale forecast lines. $HeOrShe is already revising the demand projections. None of the lines ends at a confirmed buyer.",,
 ,,,,,,
 # bar job: sub-butler,,,,,,
-catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The $manOrWoman answers promptly, a household schedule open on $hisOrHer slate with your name brought discreetly to the top.
+catchrelease_butler_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_butler score:100,,"The $manOrWoman answers promptly. A household schedule is open on $hisOrHer slate, with your name brought discreetly to the top.
 
 ""Captain. Good day."" $HeOrShe sets the slate aside. ""You wished to speak about the little matter of the fish.""",,
 catchrelease_butler_blurbBar,catchrelease_butler_blurbBar,,,A $manOrWoman in an immaculately cut coat sits beside an untouched drink. The chair opposite has been placed a little farther from the table than would be strictly necessary.,,
 catchrelease_butler_optionBar,catchrelease_butler_optionBar,,,,catchrelease_butler_ask:Talk to the $manOrWoman in the well-cut coat,
 catchrelease_butler_ask,DialogOptionSelected,$option == catchrelease_butler_ask,"$menuState = catchreleaseButlerOffer 0
-FireAll JobSpecificOptions","The $manOrWoman rises before you reach the table and indicates it.
+FireAll JobSpecificOptions","The $manOrWoman rises before you reach the table and indicates it. ""Captain. How good of you to come. I make certain purchases on behalf of a private household. I am given to understand that you procure live specimens.""
 
-""Captain. How good of you to come. I make certain purchases on behalf of a private household, and I am given to understand that you procure live specimens.""
-
-$HeOrShe waits for you to sit, and remains standing. ""We find ourselves in want of one.""",,
+$HeOrShe waits for you to sit. $HeOrShe remains standing. ""We find ourselves in want of one.""",,
 catchrelease_butler_offerWhoOption,JobSpecificOptions,"$menuState == catchreleaseButlerOffer
 !$catchreleaseButlerAskedWho",,,10:catchrelease_butler_who:Who are you buying for?,
 catchrelease_butler_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseButlerOffer
@@ -516,7 +514,7 @@ $menuState = catchreleaseButlerOffer 0
 FireAll JobSpecificOptions","""The chief butler of the household. I attend to his rooms and appointments. He has entrusted the matter to me.""",,
 catchrelease_butler_purpose,DialogOptionSelected,$option == catchrelease_butler_purpose,"$catchreleaseButlerAskedPurpose = true 0
 $menuState = catchreleaseButlerOffer 0
-FireAll JobSpecificOptions","""Display."" $HeOrShe turns a slate just far enough for you to see it, without passing it across: a tank built neatly into the wall of an office. ""For his receiving room. The space has already been measured. It will not be going anywhere near the kitchens, I assure you.""",,
+FireAll JobSpecificOptions","""Display."" $HeOrShe turns a slate just far enough for you to see it, but does not pass it across. It shows a tank built neatly into the wall of an office. ""For his receiving room. The space has already been measured. It will not be going anywhere near the kitchens, I assure you.""",,
 catchrelease_butler_terms,DialogOptionSelected,$option == catchrelease_butler_terms,"$catchreleaseButlerTerms = true 0
 CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
 Call $catchrelease_jobRef showRewardDetails
@@ -528,7 +526,7 @@ Your mission log updates.",,
 catchrelease_butler_declined,catchreleaseJobDeclined,$missionId == catchrelease_butler,,"""I see."" $HeOrShe removes your name from the schedule with no visible disappointment. ""I shall place the matter back with the usual suppliers.""",,
 catchrelease_butler_remind,catchreleaseJobRemind,$missionId == catchrelease_butler score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""One specimen. $catchreleaseAskCap."" $HeOrShe consults the original note. ""Here, if you please. The household needn't be involved.""",,
 catchrelease_butler_paid,catchreleaseJobPaid,"$missionId == catchrelease_butler
-$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"A dock porter places the container on the scale. The $manOrWoman watches the reading from $hisOrHer slate, then gives the specimen a brief, appraising look and the weight another glance.
+$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"A dock porter places the container on the scale. The $manOrWoman watches the reading from $hisOrHer slate, then gives the specimen itself a brief, appraising look.
 
 ""Yes. That will do very nicely.""
 
@@ -727,9 +725,7 @@ $catchreleaseFightNights == 0","CatchReleaseCMD highlightJobText $catchreleaseAs
 Call $catchrelease_jobRef showContactVisual
 Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseRingOffer 0
-FireAll JobSpecificOptions","The Commissioner closes the notebook around one finger.
-
-""I'm short two fighters. I need $catchreleaseAsk. Species doesn't matter, but both have to come from the same catch. Fight's in $catchreleaseDaysCap, and the supplier's fee is $catchreleaseReward.""
+FireAll JobSpecificOptions","The Commissioner closes the notebook around one finger. ""I'm short two fighters. I need $catchreleaseAsk. Species doesn't matter, but both have to come from the same catch. Fight's in $catchreleaseDaysCap. Supplier's fee is $catchreleaseReward.""
 
 ""We weigh them here, compare each one against the usual range for its species, then I put the odds up. You can take the fee, or bet the whole amount on either one. Double or nothing!""
 
@@ -749,9 +745,9 @@ catchrelease_ring_offerHouseOption,JobSpecificOptions,$menuState == catchrelease
 catchrelease_ring_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,SetOptionColor catchrelease_jobAccept highlight,,30:catchrelease_jobAccept:I'll supply the pair.,
 catchrelease_ring_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,40:catchrelease_jobDecline:Not this card.,
 catchrelease_ring_how,DialogOptionSelected,$option == catchrelease_ring_how,"$menuState = catchreleaseRingOffer 0
-FireAll JobSpecificOptions","The Commissioner opens the notebook. Several rules have been crossed out, and the later amendments carry different initials.
+FireAll JobSpecificOptions","The Commissioner opens the notebook. Several rules have been crossed out. Later amendments carry different initials.
 
-""Both fighters come from one supplier. We tried mixing catches. Didn't work. I measure each against the normal size range for its species, and that's what the odds are based on. If they come out even, they open at thirty-eight percent apiece. Once they're in the tank, I make the call.""
+""Both fighters come from one supplier. We tried mixing catches. Didn't work. I measure each against the normal size range for its species. That's what the odds are based on. If they come out even, they open at thirty-eight percent apiece. Once they're in the tank, I make the call.""
 
 ""Back the winner and the house pays out a larger purse. Lose, and you lose only the fee.""",,
 catchrelease_ring_house,DialogOptionSelected,$option == catchrelease_ring_house,"$menuState = catchreleaseRingOffer 0
@@ -890,10 +886,10 @@ $catchreleaseBonus score:100",CatchReleaseCMD highlightJobText $catchreleaseAsk 
 
 ""Upper two-fifths. That qualifies.""
 
-The agreed payment changes hands. There is no handshake; $heOrShe is already checking the next appointment.",,
+The agreed payment changes hands. There is no handshake. $HeOrShe is already checking the next appointment.",,
 ,,,,,,
 # bar job: academy,,,,,,
-catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"The Academy researcher looks up from a pair of sensor plots when the connection opens, a half-finished cup of something gone cold beside the console.
+catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"The Academy researcher looks up from a pair of sensor plots when the connection opens. A half-finished cup of something has gone cold beside the console.
 
 ""Captain. Good. Please tell me you found something.""
 
@@ -909,9 +905,7 @@ catchrelease_academy_accepted,catchreleaseJobAccepted,$missionId == catchrelease
 catchrelease_academy_declined,catchreleaseJobDeclined,$missionId == catchrelease_academy,,$HeOrShe immediately returns to matching retrieval logs against the plots.,,
 catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Low coherence, original retrieval records, $catchreleaseDaysLeft left."" $HeOrShe rubs both eyes. ""I am very nearly begging, captain.""",,
 catchrelease_academy_paid,catchreleaseJobPaid,"$missionId == catchrelease_academy
-$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"""Yes. Yes, that's right.""
-
-One measurement is taken twice; $heOrShe stares at the second result, then enters it beside the first instead of replacing it.
+$catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"""Yes. Yes, that's right."" One measurement is taken twice. $HeOrShe stares at the second result, then enters it beside the first instead of replacing it.
 
 ""That's horrible."" $HeOrShe looks delighted. ""Perfect.""
 
@@ -1155,11 +1149,11 @@ catchrelease_fq_last_entry_action,CatchReleaseFleetQuestActionText,$entity.catch
 catchrelease_fq_last_entry_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == last_entry,,"Expedition $entity.catchreleaseFleetExpedition has completed its survey, but one specimen entry remains open. $entity.catchreleaseFleetFlagshipName needs the requested specimen to close the entry and file the catalogue without voiding the expedition's survey classification.",,
 catchrelease_fq_last_entry_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == last_entry,,The expedition will accept delivery on the following terms.,,
 catchrelease_fq_last_entry_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == last_entry,,"""Survey vessel $entity.catchreleaseFleetFlagshipName, registry $entity.catchreleaseFleetRegistry, expedition $entity.catchreleaseFleetExpedition.""",,
-catchrelease_fq_last_entry_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == last_entry,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Expedition $entity.catchreleaseFleetExpedition has finished its survey. Telemetry's in, and every accession record is closed except one.""
+catchrelease_fq_last_entry_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == last_entry,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Expedition $entity.catchreleaseFleetExpedition has finished its survey. Telemetry's in. Every accession record is closed except one.""
 
-The data officer puts the open entry on the channel. ""If I file the catalogue incomplete, the expedition loses its survey classification, so I'm holding it open. Berth and specimen-holding fees keep running while I do.""
+The data officer puts the open entry on the channel. ""If I file the catalogue incomplete, the expedition loses its survey classification. So I'm holding it open. Berth and specimen-holding fees keep running while I do.""
 
-""We need $entity.catchrelease_fleetQuestAsk. Compensation is $entity.catchrelease_fleetQuestReward, and I can hold the filing for $entity.catchreleaseFleetDays.""",,
+""We need $entity.catchrelease_fleetQuestAsk. Compensation is $entity.catchrelease_fleetQuestReward. I can hold the filing for $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_last_entry_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == last_entry,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises, but send me the details.
 10:catchrelease_fqDecline:Decline.",
@@ -1172,7 +1166,7 @@ catchrelease_fq_last_entry_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromise
 catchrelease_fq_last_entry_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == last_entry,,"""Then the entry stays open and we keep looking.""
 
 The data officer closes the channel.",,
-catchrelease_fq_last_entry_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == last_entry,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Survey vessel $entity.catchreleaseFleetFlagshipName, registry $entity.catchreleaseFleetRegistry. The catalogue is still open, and the berth and specimen-holding fees are still running. We still need $entity.catchrelease_fleetQuestAsk.""",,
+catchrelease_fq_last_entry_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == last_entry,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Survey vessel $entity.catchreleaseFleetFlagshipName, registry $entity.catchreleaseFleetRegistry. The catalogue is still open. Berth and specimen-holding fees are still running. We still need $entity.catchrelease_fleetQuestAsk.""",,
 catchrelease_fq_last_entry_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == last_entry,,"The expedition staff take custody of the specimen. It goes to the scale, then beneath a fixed imaging rig while the data officer matches the accession number against the open catalogue entry.
 
 ""Measurements accepted, photographs attached."" The final field goes in and the record closes. ""Catalogue filed.""",,
@@ -1187,9 +1181,9 @@ catchrelease_fq_escrow_action,CatchReleaseFleetQuestActionText,$entity.catchrele
 catchrelease_fq_escrow_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == escrow,,"Recovery vessel $entity.catchreleaseFleetFlagshipName is trying to close contract $entity.catchreleaseFleetContract. The original specimen disappeared with its carrier, but the contract allows a replacement. The skipper needs $entity.catchrelease_fleetQuestAsk before the outstanding liability grows any further.",,
 catchrelease_fq_escrow_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == escrow,,The skipper offers the following terms for a replacement.,,
 catchrelease_fq_escrow_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == escrow,,"""Recovery vessel $entity.catchreleaseFleetFlagshipName. Skipper speaking. I've got a contract I need off my books.""",,
-catchrelease_fq_escrow_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Somebody sold a specimen two cycles ago, and the carrier vanished before delivery, cargo and all. We got handed the recovery."" The skipper scrolls through several pages of figures. ""Right now we're liable for $entity.catchreleaseFleetLiability, and that number keeps climbing until somebody closes the delivery.""
+catchrelease_fq_escrow_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Somebody sold a specimen two cycles ago. Carrier vanished before delivery, cargo and all. We got handed the recovery."" The skipper scrolls through several pages of figures. ""Right now we're liable for $entity.catchreleaseFleetLiability. That number keeps climbing until somebody closes the delivery.""
 
-""Good news is it doesn't have to be the original. There's a replacement clause, and $entity.catchrelease_fleetQuestAsk will satisfy it. I'll pay $entity.catchrelease_fleetQuestReward if you can get one here inside $entity.catchreleaseFleetDays.""",,
+""Good news is it doesn't have to be the original. There's a replacement clause. $entity.catchrelease_fleetQuestAsk will satisfy it. I'll pay $entity.catchrelease_fleetQuestReward if you can get one here inside $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_escrow_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == escrow,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
 10:catchrelease_fqDecline:Decline.",
@@ -1206,11 +1200,11 @@ $entity.catchrelease_fqCanReclaim",SetStoryOption catchrelease_fqReclaim 1 avoid
 catchrelease_fq_escrow_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrelease_fleetQuestType == escrow,,"""All right. I'll put you down as an outside supplier."" The relevant pages of $entity.catchreleaseFleetContract and the specimen specification come over the link. ""Bring it to us before the deadline.""",,
 catchrelease_fq_escrow_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == escrow,,"""That's fine. Nothing owed unless you bring it in."" The skipper sends the contract extract and specification anyway. ""If you find one before the deadline, hail us.""",,
 catchrelease_fq_escrow_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == escrow,,"""All right. I've got other calls out. $entity.catchreleaseFleetFlagshipName out.""",,
-catchrelease_fq_escrow_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Still open, and liability's up to $entity.catchreleaseFleetLiability. I still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_escrow_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == escrow,,"The skipper checks the specimen against the contract while a deckhand readies the container for transfer, then enters your transponder ID, signs the receipt and sends you a copy.
+catchrelease_fq_escrow_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Still open. Liability's up to $entity.catchreleaseFleetLiability. I still need $entity.catchrelease_fleetQuestAsk.""",,
+catchrelease_fq_escrow_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == escrow,,"The skipper checks the specimen against the contract while a deckhand readies the container for transfer. Then the skipper enters your transponder ID, signs the receipt and sends you a copy.
 
 ""That's accepted.""",,
-catchrelease_fq_escrow_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Client name's withheld. Came to us that way."" The skipper scrolls down to the delivery specification. ""This part isn't. They want $entity.catchrelease_fleetQuestAsk, and that's all I need to know to close it.""",,
+catchrelease_fq_escrow_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Client name's withheld. Came to us that way."" The skipper scrolls down to the delivery specification. ""This part isn't. They want $entity.catchrelease_fleetQuestAsk. That's all I need to know to close it.""",,
 catchrelease_fq_escrow_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == escrow,,"""That's done. Liability's stopped and the contract's closed. Thanks for the work, captain. $entity.catchreleaseFleetFlagshipName out.""",,
 catchrelease_fq_escrow_haggle,CatchReleaseFleetQuestHaggleText,$entity.catchrelease_fleetQuestType == escrow,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestReward $entity.catchreleaseFleetDays,"The skipper goes back through the payment terms and stops at one of the later clauses.
 
@@ -1224,7 +1218,7 @@ catchrelease_fq_interment_action,CatchReleaseFleetQuestActionText,$entity.catchr
 catchrelease_fq_interment_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == interment,,Burial convoy $entity.catchreleaseFleetFlagshipName needs the first species named in a guild elder's will before the appointed interment. The convoy has no fishing rig and cannot make a port stop without missing the window.,,
 catchrelease_fq_interment_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == interment,,The estate will accept delivery on the following terms.,,
 catchrelease_fq_interment_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == interment,,"""Burial convoy $entity.catchreleaseFleetFlagshipName. Convoy master speaking. We have a time-sensitive request.""",,
-catchrelease_fq_interment_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == interment,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The link opens on the lead freighter, with an escort keeping station nearby under the same guild pennant.
+catchrelease_fq_interment_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == interment,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The link opens on the lead freighter. An escort keeps station nearby under the same guild pennant.
 
 ""We're carrying one of our guild elders to interment. Old colleague of mine.""
 
@@ -1244,9 +1238,9 @@ catchrelease_fq_interment_decline,CatchReleaseFleetQuestDeclineText,$entity.catc
 
 The convoy master closes the channel.",,
 catchrelease_fq_interment_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == interment,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""$entity.catchreleaseFleetFlagshipName here. We're still holding position, and the interment window is getting shorter. We still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_interment_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == interment,,"A deckhand receives the container with both hands and carries it to a cleared section of the hold, where it is wrapped, sealed and marked with the elder's name from the will.",,
+catchrelease_fq_interment_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == interment,,"A deckhand receives the container with both hands and carries it to a cleared section of the hold. There it is wrapped, sealed and marked with the elder's name from the will.",,
 catchrelease_fq_interment_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == interment,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""It's in the will,"" the convoy master says, glancing at the document. ""First catch goes with them, last catch closes the log.""",,
-catchrelease_fq_interment_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == interment,,"""The casket is complete, and we can make the interment window."" The convoy master is already checking the departure order. ""We're getting underway. Safe passage, captain.""",,
+catchrelease_fq_interment_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == interment,,"""The casket is complete. We can make the interment window."" The convoy master is already checking the departure order. ""We're getting underway. Safe passage, captain.""",,
 ,,,,,,
 # fleet quest: calibration pair,,,,,,
 catchrelease_fq_calibration_pair_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == calibration_pair,,The Calibration Pair,,
@@ -1254,7 +1248,7 @@ catchrelease_fq_calibration_pair_action,CatchReleaseFleetQuestActionText,$entity
 catchrelease_fq_calibration_pair_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == calibration_pair,,"Under an Academy field contract, survey vessel $entity.catchreleaseFleetFlagshipName needs a matched local specimen pair to calibrate instruments that began disagreeing after transit through worn fabric.",,
 catchrelease_fq_calibration_pair_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == calibration_pair,,The Academy field contract offers the following terms.,,
 catchrelease_fq_calibration_pair_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == calibration_pair,,"""Survey vessel $entity.catchreleaseFleetFlagshipName, operating under Academy field contract. We require assistance with our equipment.""",,
-catchrelease_fq_calibration_pair_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == calibration_pair,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""We passed through worn fabric on the last leg. Since then, two of our meters have been giving different results from the same standards. Procedure calls for a matched local pair before we recalibrate either instrument, so we need $entity.catchrelease_fleetQuestAsk.""
+catchrelease_fq_calibration_pair_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == calibration_pair,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""We passed through worn fabric on the last leg,"" the researcher says. ""Since then, two of our meters have been giving different results from the same standards. Procedure calls for a matched local pair before we recalibrate either instrument. We need $entity.catchrelease_fleetQuestAsk.""
 
 ""The contract authorizes $entity.catchrelease_fleetQuestReward. The calibration window is $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_calibration_pair_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == calibration_pair,,,"0:catchrelease_fqAccept:I'll take the job.
@@ -1270,24 +1264,22 @@ catchrelease_fq_calibration_pair_decline,CatchReleaseFleetQuestDeclineText,$enti
 
 The researcher closes the channel.",,
 catchrelease_fq_calibration_pair_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == calibration_pair,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""The meters still disagree. I've started marking one 'probably correct,' and I dislike writing 'probably' in a calibration record. We still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_calibration_pair_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == calibration_pair,,"The researcher has both specimens moved to the calibration bench. The pair goes through the instrument set together, then a second time, and both sets of readings are entered into the record.",,
+catchrelease_fq_calibration_pair_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == calibration_pair,,"The researcher has both specimens moved to the calibration bench. The pair goes through the instrument set together, then a second time. Both sets of readings are entered into the record.",,
 catchrelease_fq_calibration_pair_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == calibration_pair,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""The same certified mass produces one number on one meter and a different number on the other."" The researcher brings up both entries. ""We keep both results. That's why procedure calls for the reference pair.""",,
 catchrelease_fq_calibration_pair_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == calibration_pair,,"""That's enough. I can file the calibration certificate."" The researcher signs the final sheet. ""If the Academy wants a fourth column, they can issue a new contract. $entity.catchreleaseFleetFlagshipName out.""",,
 catchrelease_fq_calibration_pair_followupPitch,CatchReleaseFleetQuestFollowupPitchText,$entity.catchrelease_fleetQuestType == calibration_pair,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""One specimen returned a different number on the second pass,"" the researcher says, studying the finished table. ""Procedure calls for a tiebreaker: one more specimen of the same species.""
 
-""We need $entity.catchrelease_fleetQuestAsk. The follow-up pays $entity.catchrelease_fleetQuestReward, and the window is $entity.catchreleaseFleetDays.""",,
+""We need $entity.catchrelease_fleetQuestAsk. The follow-up pays $entity.catchrelease_fleetQuestReward. The window is $entity.catchreleaseFleetDays.""",,
 catchrelease_fqFollowupOptions,CatchReleaseFleetQuestFollowupOptions,$entity.catchrelease_fleetQuestType == calibration_pair,,,"0:catchrelease_fqFollowupAccept:I'll get the tiebreaker.
 10:catchrelease_fqFollowupDecline:Decline.",
 catchrelease_fq_calibration_pair_followupAccept,CatchReleaseFleetQuestFollowupAcceptText,$entity.catchrelease_fleetQuestType == calibration_pair,,"""Good. I'll transmit the amended calibration request.""
 
 The new reference line appears in the existing record.",,
-catchrelease_fq_calibration_pair_followupDecline,CatchReleaseFleetQuestFollowupDeclineText,$entity.catchrelease_fleetQuestType == calibration_pair,,"""Understood. The first pair stays accepted and paid, and we'll handle the remaining calibration from here.""
-
-The researcher closes the additional request.",,
+catchrelease_fq_calibration_pair_followupDecline,CatchReleaseFleetQuestFollowupDeclineText,$entity.catchrelease_fleetQuestType == calibration_pair,,"""Understood. The first pair stays accepted and paid. We'll handle the remaining calibration from here."" The researcher closes the additional request.",,
 catchrelease_fq_calibration_pair_followupWaiting,CatchReleaseFleetQuestWaitingText,"$entity.catchrelease_fleetQuestType == calibration_pair
 $entity.catchreleaseFleetQuestRound > 0 score:20",CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""The calibration certificate is still sitting in drafts. We need $entity.catchrelease_fleetQuestAsk.""",,
 catchrelease_fq_calibration_pair_followupTurnIn,CatchReleaseFleetQuestTurnInText,"$entity.catchrelease_fleetQuestType == calibration_pair
-$entity.catchreleaseFleetQuestRound > 0 score:20",,"All three specimens go through the same instrument sequence, and the researcher enters the readings in three columns on the calibration sheet.",,
+$entity.catchreleaseFleetQuestRound > 0 score:20",,"All three specimens go through the same instrument sequence. The researcher enters the readings in three columns on the calibration sheet.",,
 catchrelease_fq_calibration_pair_followupPurpose,CatchReleaseFleetQuestIntelPurpose,"$entity.catchrelease_fleetQuestType == calibration_pair
 $entity.catchreleaseFleetQuestRound > 0 score:20",,One reference specimen on $entity.catchreleaseFleetFlagshipName returned a different result on its second pass. Procedure requires a third specimen of the same species as a tiebreaker.,,
 catchrelease_fq_calibration_pair_followupTerms,CatchReleaseFleetQuestIntelTerms,"$entity.catchrelease_fleetQuestType == calibration_pair
@@ -1299,13 +1291,11 @@ catchrelease_fq_mutiny_pot_action,CatchReleaseFleetQuestActionText,$entity.catch
 catchrelease_fq_mutiny_pot_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == mutiny_pot,,The crew of $entity.catchreleaseFleetFlagshipName has pooled shares for three years to buy out its captain. They hired you privately to supply the specimen required by the sale agreement.,,
 catchrelease_fq_mutiny_pot_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == mutiny_pot,,The crew's private offer has the following terms.,,
 catchrelease_fq_mutiny_pot_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == mutiny_pot,,"""Bosun of $entity.catchreleaseFleetFlagshipName. Requesting a private word on ship's business.""",,
-catchrelease_fq_mutiny_pot_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == mutiny_pot,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The bosun waits for the channel security check to clear before speaking.
-
-""We've been putting crew shares into a buyout pot for three years, every contributor on the ledger, and it's finally enough to buy $entity.catchreleaseFleetFlagshipName from the captain.""
+catchrelease_fq_mutiny_pot_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == mutiny_pot,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The bosun waits for the channel security check to clear before speaking. ""We've been putting crew shares into a buyout pot for three years. Every contributor is on the ledger. Pot's finally enough to buy $entity.catchreleaseFleetFlagshipName from the captain.""
 
 The bosun opens a copy of the sale agreement. ""Captain agreed, on one condition: the pot, plus the fish from a cargo wager he lost decades ago. Still tells the story.""
 
-""We need $entity.catchrelease_fleetQuestAsk. This stays off the ship's open channels until it's aboard. The crew's offer is $entity.catchrelease_fleetQuestReward, and that includes discretion. We have $entity.catchreleaseFleetDays to complete the sale.""",,
+""We need $entity.catchrelease_fleetQuestAsk. This stays off the ship's open channels until it's aboard. Crew offer is $entity.catchrelease_fleetQuestReward. That includes discretion. We have $entity.catchreleaseFleetDays to complete the sale.""",,
 catchrelease_fq_mutiny_pot_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == mutiny_pot,,,"0:catchrelease_fqAccept:I'll take the crew's offer.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
 9:catchrelease_fqCounter:Put your captain on.
@@ -1316,20 +1306,22 @@ catchrelease_fq_mutiny_pot_accept,CatchReleaseFleetQuestAcceptText,$entity.catch
 catchrelease_fq_mutiny_pot_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == mutiny_pot,,"""That's fair. I won't put you on the ledger."" The bosun sends the sale clause and the wager entry anyway. ""If you find it in time, hail me directly. Not the bridge.""",,
 catchrelease_fq_mutiny_pot_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == mutiny_pot,,"""Fair. Appreciate the discretion. $entity.catchreleaseFleetFlagshipName out.""",,
 catchrelease_fq_mutiny_pot_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == mutiny_pot,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Bosun here. Buyout fund's still locked, and the clock's getting tight. We still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_mutiny_pot_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == mutiny_pot,,"The bosun authorizes your payment before the specimen leaves your cargo bay, and a deckhand enters the container against the sale agreement.
+catchrelease_fq_mutiny_pot_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == mutiny_pot,,"The bosun authorizes your payment before the specimen leaves your cargo bay. A deckhand takes the container and enters it against the sale agreement.
 
 ""That's our clause satisfied. Once the captain signs, $entity.catchreleaseFleetFlagshipName gets a new registry name.""",,
 catchrelease_fq_mutiny_pot_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == mutiny_pot,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The bosun finds the line in the sale agreement. ""'Purchase price: crew fund, plus delivery of the wager fish specified in the attached schedule.'""
 
 ""Captain tells that wager differently every year. Nobody aboard has a better answer.""",,
 catchrelease_fq_mutiny_pot_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == mutiny_pot,,"""The ship's ours."" The bosun has the new registry filing open beside the duty roster. ""Watches stay as posted until next port. Thanks, captain. $entity.catchreleaseFleetFlagshipName out.""",,
-catchrelease_fq_mutiny_pot_counterPitch,CatchReleaseFleetQuestCounterPitchText,$entity.catchrelease_fleetQuestType == mutiny_pot,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestCounterReward,"The captain replaces the bosun on the link, a cargo manifest open on the console beside them.
+catchrelease_fq_mutiny_pot_counterPitch,CatchReleaseFleetQuestCounterPitchText,$entity.catchrelease_fleetQuestType == mutiny_pot,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestCounterReward,"The captain replaces the bosun on the link. A cargo manifest is open on the console beside them.
 
-""A captain reads his own manifest. I know about the pot."" The captain glances at the sale agreement. ""Bring me $entity.catchrelease_fleetQuestAsk, privately, and I'll pay $entity.catchrelease_fleetQuestCounterReward from my own account. When the papers come out, I landed it.""",,
+""A captain reads his own manifest. I know about the pot."" The captain glances at the sale agreement. ""Bring me $entity.catchrelease_fleetQuestAsk. Privately. I'll pay $entity.catchrelease_fleetQuestCounterReward from my own account. When the papers come out, I landed it.""",,
 catchrelease_fqCounterOptions,CatchReleaseFleetQuestCounterOptions,$entity.catchrelease_fleetQuestType == mutiny_pot,,,"0:catchrelease_fqCounterAccept:I'll take your offer.
 10:catchrelease_fqCounterReturn:Put the bosun back on.",
 catchrelease_fq_mutiny_pot_counterAccept,CatchReleaseFleetQuestCounterAcceptText,$entity.catchrelease_fleetQuestType == mutiny_pot,,"""Done."" The captain sends the wager entry and a private hand-in code. ""Bring it to me. Don't route the container through general cargo.""",,
-catchrelease_fq_mutiny_pot_counterReturn,CatchReleaseFleetQuestCounterReturnText,$entity.catchrelease_fleetQuestType == mutiny_pot,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Fair enough."" The captain hands the channel back, and the bosun returns with the buyout ledger still open. ""You had our terms.""",,
+catchrelease_fq_mutiny_pot_counterReturn,CatchReleaseFleetQuestCounterReturnText,$entity.catchrelease_fleetQuestType == mutiny_pot,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Fair enough."" The captain hands the channel back.
+
+The bosun returns with the buyout ledger still open. ""You had our terms.""",,
 catchrelease_fq_mutiny_pot_counterWaiting,CatchReleaseFleetQuestWaitingText,"$entity.catchrelease_fleetQuestType == mutiny_pot
 $entity.catchrelease_potCaptain score:30",CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Captain here. The purchase papers are still waiting on the last line. I still need $entity.catchrelease_fleetQuestAsk.""",,
 catchrelease_fq_mutiny_pot_counterTurnIn,CatchReleaseFleetQuestTurnInText,"$entity.catchrelease_fleetQuestType == mutiny_pot
@@ -1337,7 +1329,7 @@ $entity.catchrelease_potCaptain score:30",,"The captain takes the container thro
 
 ""There. Wager settled.""",,
 catchrelease_fq_mutiny_pot_counterThanks,CatchReleaseFleetQuestThanksText,"$entity.catchrelease_fleetQuestType == mutiny_pot
-$entity.catchrelease_potCaptain score:30",,"""Sale's signed, and the crew got their ship."" The captain gives you a small nod. ""Fair trade. Safe flying.""",,
+$entity.catchrelease_potCaptain score:30",,"""Sale's signed. Crew got their ship."" The captain gives you a small nod. ""Fair trade. Safe flying.""",,
 catchrelease_fq_mutiny_pot_counterPurpose,CatchReleaseFleetQuestIntelPurpose,"$entity.catchrelease_fleetQuestType == mutiny_pot
 $entity.catchrelease_potCaptain score:30",,The captain of $entity.catchreleaseFleetFlagshipName knows about the crew's buyout and has made a private counteroffer for the same specimen. They intend to present it as their own catch.,,
 catchrelease_fq_mutiny_pot_counterTerms,CatchReleaseFleetQuestIntelTerms,"$entity.catchrelease_fleetQuestType == mutiny_pot
@@ -1349,13 +1341,13 @@ catchrelease_fq_tribute_action,CatchReleaseFleetQuestActionText,$entity.catchrel
 catchrelease_fq_tribute_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == tribute,,"Independent salvage crew $entity.catchreleaseFleetFlagshipName owes its yearly tribute to a local pirate ring. The courier sent to fetch the requested specimen never returned, and the ring's enforcers have arrived to collect. The crew needs $entity.catchrelease_fleetQuestAsk within $entity.catchreleaseFleetDays.",,
 catchrelease_fq_tribute_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == tribute,,$entity.catchreleaseFleetFlagshipName is offering salvage from its hold on the following terms.,,
 catchrelease_fq_tribute_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == tribute,,"""Independent freighter $entity.catchreleaseFleetFlagshipName. Quartermaster speaking. If you've got a fishing rig, answer private. Please.""",,
-catchrelease_fq_tribute_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == tribute,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The quartermaster comes on from a cramped cargo office, a salvage ledger open behind the pickup and a countdown running beside it.
+catchrelease_fq_tribute_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == tribute,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The quartermaster comes on from a cramped cargo office. A salvage ledger is open behind the pickup. Beside it, a countdown is running.
 
-""We work a claim inside a pirate ring's territory. We pay once a year and they leave us alone. That's the arrangement. This year their boss asked for something for his display tank, so we sent a courier to get it.""
+""We work a claim inside a pirate ring's territory. We pay once a year and they leave us alone. That's the arrangement. This year their boss asked for something for his display tank. We sent a courier to get it.""
 
-The quartermaster's eyes go to another screen. ""Courier never came back. The collection crew did. They're sitting out there now, and they gave us until the deadline because we've always paid on time.""
+The quartermaster's eyes go to another screen. ""Courier never came back. The collection crew did. They're sitting out there now. They gave us until the deadline because we've always paid on time.""
 
-A hand goes over the mouthpiece for a low exchange with someone off-channel.
+A hand goes over the mouthpiece. There is a low exchange with someone off-channel.
 
 ""We need $entity.catchrelease_fleetQuestAsk. I can give you $entity.catchrelease_fleetQuestReward out of the salvage hold. We have $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_tribute_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == tribute,,,"0:catchrelease_fqAccept:I'll take the job.
@@ -1371,11 +1363,9 @@ The channel closes.",,
 catchrelease_fq_tribute_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == tribute,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""They're still here."" The quartermaster glances at something outside the pickup's view. ""One of their ships moved closer last watch. Close enough that half the crew stopped pretending not to watch it.""
 
 ""We've got $entity.catchreleaseFleetDays. We still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_tribute_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == tribute,,"The quartermaster checks the specimen against a creased set of display instructions, then checks it again.
+catchrelease_fq_tribute_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == tribute,,"The quartermaster checks the specimen against a creased set of display instructions, then checks it again. ""That's it.""
 
-""That's it.""
-
-The hand-in code goes in, and the quartermaster calls someone off-channel. ""Tell them we've got their tribute. Now, before they decide to come over and ask for it themselves.""",,
+The quartermaster enters the hand-in code and calls someone off-channel. ""Tell them we've got their tribute. Now. Before they decide to come over and ask for it themselves.""",,
 catchrelease_fq_tribute_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == tribute,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""They board us,"" the quartermaster says after a moment. ""Maybe they take twice what we owe and call it a late fee. Maybe they decide the claim belongs to them now. Maybe somebody says the wrong thing while they're going through our holds.""
 
 The quartermaster looks at the countdown again. ""I'd rather not find out which.""",,
@@ -1391,9 +1381,9 @@ catchrelease_fq_reference_specimen_intelTerms,CatchReleaseFleetQuestIntelTerms,$
 catchrelease_fq_reference_specimen_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == reference_specimen,,"""This is $entity.catchreleaseFleetCompany, Independent handling contractor aboard $entity.catchreleaseFleetFlagshipName, working League contract $entity.catchreleaseFleetContract. We have a subcontract available.""",,
 catchrelease_fq_reference_specimen_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == reference_specimen,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The handler comes on with a League release form open.
 
-""We're working through the impound backlog. One sealed hauler has catch that doesn't match its origin stamps. Bad manifest, most likely. Form L-17C wants an outside reference before they'll release the ship, and our license covers handling, not fishing, so I can't provide one under my own contract.""
+""We're working through the impound backlog. One sealed hauler has catch that doesn't match its origin stamps. Bad manifest, most likely. Form L-17C wants an outside reference before they'll release the ship. Our license covers handling, not fishing, so I can't provide one under my own contract.""
 
-""We need $entity.catchrelease_fleetQuestAsk. The service allocation is $entity.catchrelease_fleetQuestReward, and I've got $entity.catchreleaseFleetDays before the release window closes.""",,
+""We need $entity.catchrelease_fleetQuestAsk. The service allocation is $entity.catchrelease_fleetQuestReward. I've got $entity.catchreleaseFleetDays before the release window closes.""",,
 catchrelease_fq_reference_specimen_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == reference_specimen,,,"0:catchrelease_fqAccept:I'll take the subcontract.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the paperwork.
 10:catchrelease_fqDecline:Decline.",
@@ -1405,11 +1395,11 @@ Three documents arrive, each with a different League stamp.",,
 catchrelease_fq_reference_specimen_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == reference_specimen,,"""Fine. I won't file you as committed."" The handler sends the procedure, profile and authorization anyway. ""If you get what the form calls for before the window closes, hail us.""",,
 catchrelease_fq_reference_specimen_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == reference_specimen,,"""No harm done. Back to the backlog. $entity.catchreleaseFleetFlagshipName out.""",,
 catchrelease_fq_reference_specimen_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == reference_specimen,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""The release window's getting narrow. There's an L-14B extension form involved now, and my fee has not increased. We still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_reference_specimen_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == reference_specimen,,"A technician logs the reference beside the sealed hauler's sample record. The handler checks the comparison, completes the release form and adds their contract seal. Behind them, dock crew strip the impound tags from the hauler, and its tug lights come on.
+catchrelease_fq_reference_specimen_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == reference_specimen,,"A technician logs the reference beside the sealed hauler's sample record. The handler checks the comparison, completes the release form and adds their contract seal. Behind them, dock crew strip the impound tags from the hauler. Its tug lights come on.
 
 ""Released.""",,
 catchrelease_fq_reference_specimen_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == reference_specimen,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The handler opens the discrepancy page. ""Origin stamp: $entity.catchreleaseFleetOriginStamp. Sample profile: $entity.catchreleaseFleetProfileOrigin. Registry volume $entity.catchreleaseFleetRegistryVolume isn't in the League database. Case code $entity.catchreleaseFleetDiscrepancyCode. That's what we're clearing.""",,
-catchrelease_fq_reference_specimen_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == reference_specimen,,"""The League closed $entity.catchreleaseFleetContract, which means $entity.catchreleaseFleetCompany gets paid."" The freed hauler is already moving away from the impound berth, and the handler opens the next file. ""One less. $entity.catchreleaseFleetFlagshipName out.""",,
+catchrelease_fq_reference_specimen_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == reference_specimen,,"""The League closed $entity.catchreleaseFleetContract. That means $entity.catchreleaseFleetCompany gets paid."" The freed hauler is already moving away from the impound berth. The handler opens the next file. ""One less. $entity.catchreleaseFleetFlagshipName out.""",,
 ,,,,,,
 # fleet quest: quiet ship,,,,,,
 catchrelease_fq_quiet_ship_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == quiet_ship,,The Quiet Ship,,
@@ -1417,11 +1407,9 @@ catchrelease_fq_quiet_ship_action,CatchReleaseFleetQuestActionText,$entity.catch
 catchrelease_fq_quiet_ship_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == quiet_ship,,Maintenance tender $entity.catchreleaseFleetFlagshipName is working $entity.catchreleaseFleetRelayRun and wants to replace the catch its crews traditionally keep aboard. The current window closes in $entity.catchreleaseFleetDays.,,
 catchrelease_fq_quiet_ship_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == quiet_ship,,The chief's request has the following terms.,,
 catchrelease_fq_quiet_ship_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == quiet_ship,,"""Maintenance tender $entity.catchreleaseFleetFlagshipName. Chief here. I've got a private request. Bit outside the usual stores list.""",,
-catchrelease_fq_quiet_ship_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == quiet_ship,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The chief has the duty board open behind the comm pickup.
+catchrelease_fq_quiet_ship_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == quiet_ship,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The chief has the duty board open behind the comm pickup. ""We're on $entity.catchreleaseFleetRelayRun. Long trip, thin fabric for most of it. The technicians' logs keep recording a whispering we haven't been able to place.""
 
-""We're on $entity.catchreleaseFleetRelayRun. Long trip, thin fabric for most of it. The technicians' logs keep recording a whispering we haven't been able to place.""
-
-""There's an old custom on this run. Ships on this contract keep a catch aboard, more or less like a ship's cat. The last rotation took ours with them, and we sailed without replacing it. We need $entity.catchrelease_fleetQuestAsk. I've got $entity.catchrelease_fleetQuestReward cleared for it, and we have $entity.catchreleaseFleetDays.""",,
+""There's an old custom on this run. Ships on this contract keep a catch aboard, more or less like a ship's cat. The last rotation took ours with them, and we sailed without replacing it. We need $entity.catchrelease_fleetQuestAsk. I've got $entity.catchrelease_fleetQuestReward cleared for it. We have $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_quiet_ship_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == quiet_ship,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
 10:catchrelease_fqDecline:Decline.",
@@ -1431,11 +1419,11 @@ catchrelease_fq_quiet_ship_accept,CatchReleaseFleetQuestAcceptText,$entity.catch
 catchrelease_fq_quiet_ship_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == quiet_ship,,"""Fair. I won't put you down as committed."" The chief sends the request and hand-in instructions anyway. ""If you find one in time, it's still wanted.""",,
 catchrelease_fq_quiet_ship_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == quiet_ship,,"""Fair enough. We'll keep asking around. $entity.catchreleaseFleetFlagshipName out.""",,
 catchrelease_fq_quiet_ship_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == quiet_ship,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Still on $entity.catchreleaseFleetRelayRun, with $entity.catchreleaseFleetDays left in the window. We still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_quiet_ship_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == quiet_ship,,"A technician carries the specimen into the mess and settles it into a bracketed tank built against the bulkhead. The locking slots are worn bright, and older names are painted beneath the current stencil.",,
+catchrelease_fq_quiet_ship_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == quiet_ship,,"A technician carries the specimen into the mess and settles it into a bracketed tank built against the bulkhead. The locking slots are worn bright. Older names are painted beneath the current stencil.",,
 catchrelease_fq_quiet_ship_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == quiet_ship,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The chief looks over at the maintenance board. ""Long run. Fabric stays thin for most of it. Crews on this route have kept one aboard longer than anyone serving can remember.""
 
 They straighten a stack of work orders. ""It helps.""",,
-catchrelease_fq_quiet_ship_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == quiet_ship,,"The chief has the regular maintenance board open again, and two technicians are disputing a parts allotment off-screen.
+catchrelease_fq_quiet_ship_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == quiet_ship,,"The chief has the regular maintenance board open again. Two technicians are disputing a parts allotment off-screen.
 
 ""Crew's settled back into the run. That's enough for me. I've got a relay to keep alive. $entity.catchreleaseFleetFlagshipName out.""",,
 ,,,,,,
@@ -1447,7 +1435,7 @@ catchrelease_fq_exhibit_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catc
 catchrelease_fq_exhibit_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == exhibit,,"""This is $entity.catchreleaseFleetCompany, owner-operator aboard $entity.catchreleaseFleetFlagshipName. I've got a custody problem and not much time.""",,
 catchrelease_fq_exhibit_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == exhibit,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The operator comes on holding a Hegemony evidence log.
 
-""We're bonded to carry a confiscated specimen to a prosecution. Exhibit $entity.catchreleaseFleetExhibit. It left impound matching the evidence log, and somewhere in transit it stopped matching the documented measurements.""
+""We're bonded to carry a confiscated specimen to a prosecution. Exhibit $entity.catchreleaseFleetExhibit. It left impound matching the evidence log. Somewhere in transit, it stopped matching the documented measurements.""
 
 The operator brings up the custody bond. ""The bond calls that 'custodial variance attributable to carrier handling.' If it fails inspection, bond $entity.catchreleaseFleetBond is forfeit, and $entity.catchreleaseFleetCompany folds.""
 
@@ -1464,13 +1452,13 @@ catchrelease_fq_exhibit_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrel
 They arrive with the Navy seal still on the log.",,
 catchrelease_fq_exhibit_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == exhibit,,"""Fine. No commitment."" The operator sends the custody extract, evidence log and hand-in code anyway. ""If you get what we need before delivery, hail us.""",,
 catchrelease_fq_exhibit_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == exhibit,,"""Right. I need to keep looking, then. $entity.catchreleaseFleetFlagshipName out.""",,
-catchrelease_fq_exhibit_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == exhibit,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""The delivery date didn't move. $entity.catchreleaseFleetDays left, and I still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_exhibit_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == exhibit,,"The operator measures the replacement against the evidence log. A deckhand seals the container under exhibit $entity.catchreleaseFleetExhibit and enters the new custody transfer, and the original handling report goes into the same folder, because the bond requires it to travel with the exhibit.",,
+catchrelease_fq_exhibit_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == exhibit,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""The delivery date didn't move. $entity.catchreleaseFleetDays left. I still need $entity.catchrelease_fleetQuestAsk.""",,
+catchrelease_fq_exhibit_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == exhibit,,"The operator measures the replacement against the evidence log. A deckhand seals the container under exhibit $entity.catchreleaseFleetExhibit and enters the new custody transfer. The original handling report goes into the same folder. The bond requires it to travel with the exhibit.",,
 catchrelease_fq_exhibit_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == exhibit,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The operator opens the handling report. ""Exhibit $entity.catchreleaseFleetExhibit. Container nominal. Mass return $entity.catchreleaseFleetMassReturn: inconsistent. Configuration not retained. Equipment-failure code $entity.catchreleaseFleetFailureCode.""
 
 The report closes. ""That's what I've got.""",,
-catchrelease_fq_exhibit_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == exhibit,,"""Bond cleared, and $entity.catchreleaseFleetCompany keeps $entity.catchreleaseFleetFlagshipName."" The operator closes the custody file. ""I had my tools priced for sale. Glad that list's useless now. $entity.catchreleaseFleetFlagshipName out.""",,
-catchrelease_fq_exhibit_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == exhibit,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""The confiscation is real, and so is the prosecution. We took custody of the exhibit, and our storage failed.""
+catchrelease_fq_exhibit_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == exhibit,,"""Bond cleared. $entity.catchreleaseFleetCompany keeps $entity.catchreleaseFleetFlagshipName."" The operator closes the custody file. ""I had my tools priced for sale. Glad that list's useless now. $entity.catchreleaseFleetFlagshipName out.""",,
+catchrelease_fq_exhibit_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == exhibit,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""The confiscation is real. The prosecution is real. We took custody of the exhibit, and our storage failed.""
 
 The operator taps the bond entry. ""That makes the failure ours to answer for. If the chain doesn't pass inspection, the contractual fault is ours. So is the criminal exposure.""",,
 ,,,,,,
@@ -1480,11 +1468,11 @@ catchrelease_fq_headliner_action,CatchReleaseFleetQuestActionText,$entity.catchr
 catchrelease_fq_headliner_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == headliner,,The exhibition vessel $entity.catchreleaseFleetFlagshipName has lost the headline specimen for $entity.catchreleaseFleetShow shortly before a booking at $entity.catchreleaseFleetBookedPort. The impresario needs a replacement within $entity.catchreleaseFleetDays.,,
 catchrelease_fq_headliner_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == headliner,,The impresario offers the following terms.,,
 catchrelease_fq_headliner_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == headliner,,"""This is $entity.catchreleaseFleetShow, aboard $entity.catchreleaseFleetFlagshipName. Captain, I've lost one of my exhibits at a very inconvenient time. I think you may be able to help.""",,
-catchrelease_fq_headliner_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == headliner,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""We're due at $entity.catchreleaseFleetBookedPort, and the tickets are sold. Cancelling would be expensive and embarrassing, in that order.""
+catchrelease_fq_headliner_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == headliner,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""We're due at $entity.catchreleaseFleetBookedPort,"" the impresario says. ""Tickets are sold. Cancelling would be expensive and embarrassing, in that order.""
 
 He brings up the livestock manifest. ""Our headliner is gone. The tank is fine, the paperwork says it's aboard, and I've had a long conversation with the handlers about both of those facts.""
 
-""$entity.catchreleaseFleetReplacementPlan I need $entity.catchrelease_fleetQuestAsk before we make port. I'll pay $entity.catchrelease_fleetQuestReward, which gives us $entity.catchreleaseFleetDays.""",,
+""$entity.catchreleaseFleetReplacementPlan I need $entity.catchrelease_fleetQuestAsk before we make port. I'll pay $entity.catchrelease_fleetQuestReward. That gives us $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_headliner_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == headliner,,,"0:catchrelease_fqAccept:I'll take the job.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
 10:catchrelease_fqDecline:Decline.",
@@ -1515,9 +1503,9 @@ catchrelease_fq_follower_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.cat
 catchrelease_fq_follower_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == follower,,"""Hegemony logistics formation $entity.catchreleaseFleetFlagshipName. We have an open auxiliary position.""",,
 catchrelease_fq_follower_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == follower,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The escort commander has three days of sensor records open.
 
-""We acquired an unidentified contact three days ago. Passive return strength is $entity.catchreleaseFleetReturnStrength. It holds $entity.catchreleaseFleetStationOffset from the formation. Paint it with active sensors and the return drops out; go passive again and we reacquire it at the same station. Course changes haven't shaken it.""
+""We acquired an unidentified contact three days ago. Passive return strength is $entity.catchreleaseFleetReturnStrength. It holds $entity.catchreleaseFleetStationOffset from the formation. Paint it with active sensors and the return drops out. When we go passive, we reacquire it at the same station. Course changes haven't shaken it.""
 
-""Standing orders don't permit me to fire on an unclassified contact. I am also not taking this logistics train toward inhabited space with it in trail.""
+The commander closes the maneuver record. ""Standing orders don't permit me to fire on an unclassified contact. I am also not taking this logistics train toward inhabited space with it in trail.""
 
 ""One of my crewmen used to fish. He says fishing crews deal with persistent contacts by releasing a specimen they're known to follow. I do not enjoy having that sentence in the incident log, but it is the only course with precedent. On his recommendation, we need $entity.catchrelease_fleetQuestAsk. The Navy service voucher is $entity.catchrelease_fleetQuestReward. We can hold here for $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_follower_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == follower,,,"0:catchrelease_fqAccept:I'll take the job.
@@ -1587,7 +1575,7 @@ catchrelease_fq_claim_assay_pitch,CatchReleaseFleetQuestPitchText,$entity.catchr
 
 ""We hold exclusive survey rights in $entity.catchreleaseFleetSystem. Those rights lapse within $entity.catchreleaseFleetDays unless the claim file demonstrates biological viability. The clause was written for terrestrial claims. Legal's position is that a live local specimen is the cheapest valid proof.""
 
-""The specimen must be caught in $entity.catchreleaseFleetSystem after you accept this subcontract. The capture timestamp and system coordinates go into the claim file, so anything already in your hold does not qualify. Our own retrieval attempt has been written off. Personnel are unharmed. There is another survey ship at the jump point waiting for the rights to lapse.""
+The officer brings up the filing requirements. ""The specimen must be caught in $entity.catchreleaseFleetSystem after you accept this subcontract. The capture timestamp and system coordinates go into the claim file. Anything already in your hold does not qualify. Our own retrieval attempt has been written off. Personnel are unharmed. There is another survey ship at the jump point waiting for the rights to lapse.""
 
 ""We need $entity.catchrelease_fleetQuestAsk. Compensation is $entity.catchrelease_fleetQuestReward. You have $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_claim_assay_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == claim_assay,,,"0:catchrelease_fqAccept:I'll take the contract.
@@ -1603,7 +1591,7 @@ The contract packet arrives with every page already countersigned.",,
 catchrelease_fq_claim_assay_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == claim_assay,,"""Understood. No commitment will be recorded."" The officer sends the claim extract and logging requirements anyway. ""If you make the required catch before the rights lapse, hail $entity.catchreleaseFleetFlagshipName.""",,
 catchrelease_fq_claim_assay_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == claim_assay,,"""Understood. We'll source elsewhere. $entity.catchreleaseFleetFlagshipName out.""",,
 catchrelease_fq_claim_assay_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == claim_assay,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Claim file $entity.catchreleaseFleetCharter lapses in $entity.catchreleaseFleetDays. The other survey ship is still at the jump point, and the countdown is now on every internal message. We still need $entity.catchrelease_fleetQuestAsk, caught in $entity.catchreleaseFleetSystem under this subcontract.""",,
-catchrelease_fq_claim_assay_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == claim_assay,,"The prospecting crew photographs the specimen beside the capture record. The contract officer verifies the timestamp and $entity.catchreleaseFleetSystem coordinates, appends both to claim file $entity.catchreleaseFleetCharter and transmits the updated file before the specimen is moved to storage.",,
+catchrelease_fq_claim_assay_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == claim_assay,,"The prospecting crew photographs the specimen beside the capture record. The contract officer verifies the timestamp and $entity.catchreleaseFleetSystem coordinates, then appends both to claim file $entity.catchreleaseFleetCharter. The updated file goes out before the specimen is moved to storage.",,
 catchrelease_fq_claim_assay_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == claim_assay,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The officer opens the loss entry. ""Field equipment failure. Write-off: $entity.catchreleaseFleetWriteoff. Personnel unharmed."" The entry closes. ""We've moved the requirement to vendor supply.""",,
 catchrelease_fq_claim_assay_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == claim_assay,,"""Claim file $entity.catchreleaseFleetCharter has cleared review. Our exclusive survey rights in $entity.catchreleaseFleetSystem are renewed."" The unaffiliated survey ship leaves the jump point shortly after the renewal posts. ""That closes the exposure. $entity.catchreleaseFleetFlagshipName out.""",,
 catchrelease_fq_claim_assay_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == claim_assay,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""We're not naming them. They are unaffiliated and have not breached our survey rights."" The officer opens the traffic record. ""Recorded loiter time: $entity.catchreleaseFleetCompetitorLoiter. Estimated fuel endurance: $entity.catchreleaseFleetCompetitorEndurance. They can afford to wait.""",,
@@ -1614,7 +1602,7 @@ catchrelease_fq_mandate_action,CatchReleaseFleetQuestActionText,$entity.catchrel
 catchrelease_fq_mandate_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == mandate,,Science expedition $entity.catchreleaseFleetFlagshipName needs $entity.catchrelease_fleetQuestAsk to close the final deliverable under mandate $entity.catchreleaseFleetMandate. The convoy must depart within $entity.catchreleaseFleetDays when its escort fuel window closes.,,
 catchrelease_fq_mandate_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == mandate,,The expedition's contingency request is recorded on the following terms.,,
 catchrelease_fq_mandate_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == mandate,,"""Science expedition $entity.catchreleaseFleetFlagshipName, operating under mandate $entity.catchreleaseFleetMandate. We could use your help.""",,
-catchrelease_fq_mandate_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == mandate,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""I've spent years on this expedition. Mandate $entity.catchreleaseFleetMandate has one deliverables line left open: a specimen with abyssal provenance. Our retrieval rig was lost at the site, the escort's fuel window is fixed, and an incomplete mandate will not renew.""
+catchrelease_fq_mandate_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == mandate,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""I've spent years on this expedition. Mandate $entity.catchreleaseFleetMandate has one deliverables line left open: a specimen with abyssal provenance. Our retrieval rig was lost at the site. The escort's fuel window is fixed, and an incomplete mandate will not renew.""
 
 The principal investigator glances at the departure schedule. ""We need $entity.catchrelease_fleetQuestAsk. The contingency allocation is $entity.catchrelease_fleetQuestReward. We have $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_mandate_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == mandate,,,"0:catchrelease_fqAccept:I'll take the job.
@@ -1630,9 +1618,9 @@ catchrelease_fq_mandate_decline,CatchReleaseFleetQuestDeclineText,$entity.catchr
 catchrelease_fq_mandate_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == mandate,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""When we first spoke, the fuel margin was a departure date. Now it's a departure time.""
 
 ""We have $entity.catchreleaseFleetDays. We still need $entity.catchrelease_fleetQuestAsk.""",,
-catchrelease_fq_mandate_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == mandate,,"The principal investigator checks the specimen's provenance against the expedition telemetry, signs the final deliverables line under mandate $entity.catchreleaseFleetMandate and sends the completed file to the Academy review office.
+catchrelease_fq_mandate_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == mandate,,"The principal investigator checks the specimen's provenance against the expedition telemetry, then signs the final deliverables line under mandate $entity.catchreleaseFleetMandate. The completed file goes to the Academy review office.
 
-Then they hand you a worn physical folder: the surviving drawings from the lost rig.",,
+They hand you a worn physical folder with the surviving drawings from the lost rig.",,
 catchrelease_fq_mandate_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == mandate,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The principal investigator opens the equipment-loss report.
 
 ""Deployment nominal at $entity.catchreleaseFleetDeploymentDepth. Last telemetry ended $entity.catchreleaseFleetTelemetryEnd. No recovery attempt remained inside the $entity.catchreleaseFleetSafetyMargin safety margin.""
@@ -1648,7 +1636,7 @@ catchrelease_fq_parley_fish_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.
 catchrelease_fq_parley_fish_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == parley_fish,,"""Pirate fleet $entity.catchreleaseFleetFlagshipName. You got a fishing rig that works?""",,
 catchrelease_fq_parley_fish_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == parley_fish,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The captain has a scratched-up chart of $entity.catchreleaseFleetRupture open when the link comes through.
 
-""We collect off crews working this rupture. Another pack of bastards decided they'd rather collect it themselves. We traded a little fire, nobody lost a ship, and somebody had the bright idea to talk before that changes.""
+""We collect off crews working this rupture. Another pack of bastards decided they'd rather collect it themselves. We traded a little fire. Nobody lost a ship, so somebody had the bright idea to talk before that changes.""
 
 The captain taps the rupture on the chart. ""There's an old rule for this. You claim the water, you bring something fresh out of it to the table. Shows you're actually working the place and not just sitting on it with guns. Has to be caught after I stamp the job. Don't bring me something that's been rolling around your hold since Corvus.""
 
@@ -1666,7 +1654,7 @@ catchrelease_fq_parley_fish_decline,CatchReleaseFleetQuestDeclineText,$entity.ca
 catchrelease_fq_parley_fish_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == parley_fish,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Other crew's still across the rupture. Every time one of ours gets close, they light their drives and act like they're about to do something.""
 
 ""We've got $entity.catchreleaseFleetDays. I still need $entity.catchrelease_fleetQuestAsk out of $entity.catchreleaseFleetRupture.""",,
-catchrelease_fq_parley_fish_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == parley_fish,,"A deckhand hauls a battered cold-case onto the bridge, and the captain checks your catch against the job record.
+catchrelease_fq_parley_fish_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == parley_fish,,"A deckhand hauls a battered cold-case onto the bridge. The captain checks your catch against the job record.
 
 ""$entity.catchreleaseFleetRupture. Timestamp $entity.catchreleaseFleetCatchTimestamp. Good.""
 
@@ -1675,9 +1663,7 @@ catchrelease_fq_parley_fish_question,CatchReleaseFleetQuestQuestionText,$entity.
 
 The display goes dark. ""I'd rather buy a fish.""",,
 catchrelease_fq_parley_fish_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == parley_fish,,"""Parley held. Other lot took the terms, and everybody left with the same number of ships they came in with."" The captain clears the engagement marks from the plot. ""We're square, captain.""",,
-catchrelease_fq_parley_fish_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == parley_fish,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Protection money, tolls, licensing. Call it what you want."" The captain points at $entity.catchreleaseFleetRupture. ""Crews work our water, they pay, and we keep the next pack of guns from taking it off them. That's the arrangement.""
-
-""Still need the fish.""",,
+catchrelease_fq_parley_fish_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == parley_fish,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Protection money, tolls, licensing. Call it what you want."" The captain points at $entity.catchreleaseFleetRupture. ""Crews work our water, they pay. We keep the next pack of guns from taking it off them. That's the arrangement. Still need the fish.""",,
 ,,,,,,
 # fleet quest: stranded fleet,,,,,,
 catchrelease_fq_stranded_title,CatchReleaseFleetQuestTitle,$entity.catchrelease_fleetQuestType == stranded,,Stranded Fleet,,
@@ -1691,7 +1677,7 @@ catchrelease_fq_stranded_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrele
 
 $HeOrShe sends over a page from the printer manual. ""There's a bypass. The printer takes fresh catch directly, under commodity code $entity.catchreleaseFleetFeedstockCode in the Domain feedstock table.""
 
-""It has to be fresh enough for the intake, so it needs to come from this system or one next to it. Bring us $entity.catchrelease_fleetQuestAsk and my people can go back to the drive. We can pay $entity.catchrelease_fleetQuestReward, and we can hold out for $entity.catchreleaseFleetDays.""",,
+""It has to be fresh enough for the intake. That means this system or one next to it. Bring us $entity.catchrelease_fleetQuestAsk and my people can go back to the drive. We can pay $entity.catchrelease_fleetQuestReward. We can hold out for $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_stranded_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == stranded,,,"0:catchrelease_fqAccept:I'll get what you need.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
 10:catchrelease_fqDecline:Decline.",
@@ -1706,14 +1692,12 @@ catchrelease_fq_stranded_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseTe
 catchrelease_fq_stranded_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == stranded,,"""Yeah. We'll keep at the drive.""
 
 The channel closes.",,
-catchrelease_fq_stranded_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == stranded,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Printer's still down. We're into reserve rations now, and every watch has sent somebody down to ask about it.""
-
-""We still need $entity.catchrelease_fleetQuestAsk, and we have $entity.catchreleaseFleetDays.""",,
+catchrelease_fq_stranded_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == stranded,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Printer's still down. We're into reserve rations now, and every watch has sent somebody down to ask about it. We still need $entity.catchrelease_fleetQuestAsk. We have $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_stranded_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == stranded,,"The catch goes straight into the ration printer's feedstock intake. The engineer checks the commodity code, closes the access panel and starts the processing cycle. The fault indicator clears, and a few seconds later the machinery starts up.",,
 catchrelease_fq_stranded_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == stranded,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The engineer opens the feedstock table. ""Code $entity.catchreleaseFleetFeedstockCode. Fresh catch. Rendered protein stock above it, agricultural slurry below.""
 
 The manual closes. ""The printer doesn't care much where the protein came from.""",,
-catchrelease_fq_stranded_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == stranded,,"""Printer's running, so that's food taken care of."" The engineer puts the drive repair schedule back up. ""Now I can keep everyone on the drive.""",,
+catchrelease_fq_stranded_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == stranded,,"""Printer's running. That's food taken care of."" The engineer puts the drive repair schedule back up. ""Now I can keep everyone on the drive.""",,
 catchrelease_fq_stranded_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == stranded,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""The printer can turn one fish into weeks of ration stock,"" the engineer says. ""We cook it ourselves, we get dinner. I'd rather have the weeks.""",,
 catchrelease_fq_stranded_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == stranded,,A ship is broadcasting a standard distress call. Its drive plume flickers in and out as it struggles to hold position.,,
 ,,,,,,
@@ -1757,7 +1741,9 @@ catchrelease_fq_quota_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchr
 catchrelease_fq_quota_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == quota,,"""Fishing fleet $entity.catchreleaseFleetFlagshipName, purser's office. Sorry to trouble you, captain. We're short on a provisioning contract and I understand you've got fishing gear aboard.""",,
 catchrelease_fq_quota_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == quota,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The purser comes on from the working deck with a ledger slate tucked under $hisOrHer arm. Someone calls a tally in the background; $heOrShe waits for it and enters the figure before looking back to the pickup.
 
-""We're short $entity.catchrelease_fleetQuestAsk on contract $entity.catchreleaseFleetContract. I've had the hold counted three times, and that's the number. The return goes in on $entity.catchreleaseFleetFilingDate. If I send it short, the station can kick the contract into arbitration. They may leave the rate alone. They may decide the whole schedule needs reviewing. I would very much prefer not to give them the opportunity.""
+""We're short $entity.catchrelease_fleetQuestAsk on contract $entity.catchreleaseFleetContract. I've had the hold counted three times. That's the number.""
+
+$HeOrShe brings up the filing schedule. ""The return goes in on $entity.catchreleaseFleetFilingDate. If I send it short, the station can kick the contract into arbitration. They may leave the rate alone. They may decide the whole schedule needs reviewing. I would very much prefer not to give them the opportunity.""
 
 ""I don't have authority to amend the quota, but I can buy against the shortfall. I can authorize $entity.catchrelease_fleetQuestReward from this season's margin without sending it upstairs for approval. If you can bring us $entity.catchrelease_fleetQuestAsk within $entity.catchreleaseFleetDays, I can still file the contract complete.""",,
 catchrelease_fq_quota_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == quota,,,"0:catchrelease_fqAccept:I'll take the job.
@@ -1771,7 +1757,7 @@ catchrelease_fq_quota_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrel
 catchrelease_fq_quota_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == quota,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"The purser has the quota ledger open before the channel finishes connecting.
 
 ""We're still short $entity.catchrelease_fleetQuestAsk. A boat came in last watch and I thought we'd made some of it back, but most of the catch graded below contract. $entity.catchreleaseFleetFilingDate is in $entity.catchreleaseFleetDays. I'm keeping the purchase authorization open as long as I can.""",,
-catchrelease_fq_quota_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == quota,,"The purser meets the transfer on the working deck with two tally clerks and the contract grade sheet. The catch is counted and checked as it comes across; one specimen is set aside, examined again and returned to the accepted lot.
+catchrelease_fq_quota_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == quota,,"The purser meets the transfer on the working deck with two tally clerks and the contract grade sheet. The catch is counted and checked as it comes across. One specimen is set aside, examined again, then returned to the accepted lot.
 
 ""There. That's the quota.""
 
@@ -1803,11 +1789,11 @@ catchrelease_fq_starving_offerOptionsQuestion,CatchReleaseFleetQuestOfferOptions
 !$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Nobody's actually starving?,
 catchrelease_fq_starving_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrelease_fleetQuestType == starving,,"""Good. I'll send the order and receiving instructions. The crew will want to know your name.""",,
 catchrelease_fq_starving_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == starving,,"""Fair. I'm sending the order anyway; the crew would never forgive me otherwise. If you can fill it before the window closes, hail us.""",,
-catchrelease_fq_starving_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == starving,,"""A pity. I'll keep looking, and I'll tell the petition committee you were polite. $entity.catchreleaseFleetFlagshipName out.""",,
+catchrelease_fq_starving_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == starving,,"""A pity. I'll keep looking. I'll tell the petition committee you were polite. $entity.catchreleaseFleetFlagshipName out.""",,
 catchrelease_fq_starving_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == starving,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""We're at $entity.catchreleaseFleetRationDays days on printed protein."" The galley chief holds up the petition. ""It has an appendix now.""
 
 ""We still need $entity.catchrelease_fleetQuestAsk. We have $entity.catchreleaseFleetDays.""",,
-catchrelease_fq_starving_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == starving,,"The galley chief inspects the delivery container by container before waving each one through to prep, and their shoulders finally come down.
+catchrelease_fq_starving_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == starving,,"The galley chief inspects the delivery container by container before waving each one through to prep. Their shoulders finally come down.
 
 ""Good. Cold storage, second rack. Knives out. Somebody get the large pans hot.""
 
@@ -1827,7 +1813,7 @@ catchrelease_fq_scavenger_engine_pitch,CatchReleaseFleetQuestPitchText,$entity.c
 
 ""One of our drive coils is failing. We can save it if we repack the winding before the insulation goes. What we don't have is packing gel. Yard manual section $entity.catchreleaseFleetManualSection lists an approved substitute compound rendered from fresh local catch. Apparently.""
 
-""Catch from this system or an adjacent one is acceptable. We need $entity.catchrelease_fleetQuestAsk. We can pay $entity.catchrelease_fleetQuestReward out of the salvage haul, and we have $entity.catchreleaseFleetDays.""",,
+""Catch from this system or an adjacent one is acceptable. We need $entity.catchrelease_fleetQuestAsk. We can pay $entity.catchrelease_fleetQuestReward out of the salvage haul. We have $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_scavenger_engine_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == scavenger_engine,,,"0:catchrelease_fqAccept:I'll get what you need.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
 10:catchrelease_fqDecline:Decline.",
@@ -1836,14 +1822,14 @@ catchrelease_fq_scavenger_engine_offerOptionsQuestion,CatchReleaseFleetQuestOffe
 catchrelease_fq_scavenger_engine_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrelease_fleetQuestType == scavenger_engine,,"""Good. I'll send the manual extract and receiving instructions. Try to believe the manual. I'm trying.""",,
 catchrelease_fq_scavenger_engine_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == scavenger_engine,,"""Suit yourself. I'll send the manual extract anyway, so you know what qualifies. If you find it before the coil goes, hail us.""",,
 catchrelease_fq_scavenger_engine_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == scavenger_engine,,"""Figured. We'll keep looking for another supply. $entity.catchreleaseFleetFlagshipName out.""",,
-catchrelease_fq_scavenger_engine_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == scavenger_engine,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Coil condition is $entity.catchreleaseFleetCoilCondition. It was better yesterday. We still need $entity.catchrelease_fleetQuestAsk, and we have $entity.catchreleaseFleetDays.""",,
-catchrelease_fq_scavenger_engine_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == scavenger_engine,,"The specimen is transferred to engineering. Some time later the repaired drive comes up to a steady tone, and conversation on the working deck stops for a few seconds while the crew listens.
+catchrelease_fq_scavenger_engine_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == scavenger_engine,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""Coil condition is $entity.catchreleaseFleetCoilCondition. It was better yesterday. We still need $entity.catchrelease_fleetQuestAsk. We have $entity.catchreleaseFleetDays.""",,
+catchrelease_fq_scavenger_engine_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == scavenger_engine,,"The specimen is transferred to engineering. Some time later, the repaired drive comes up to a steady tone. Conversation on the working deck stops for a few seconds while the crew listens.
 
 A deckhand starts the salvage invoice, reaches the description field and leaves the cursor blinking.",,
 catchrelease_fq_scavenger_engine_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == scavenger_engine,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The technician opens section $entity.catchreleaseFleetManualSection again. ""Rendered fraction, eighteen to twenty-two percent by mass. Stable from minus forty to two hundred ten Celsius. Render, filter, bring to working temperature, pack the winding voids, then cycle the coil twice under low load.""
 
 The manual closes. ""I didn't write it.""",,
-catchrelease_fq_scavenger_engine_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == scavenger_engine,,"""The gel packed cleanly, and the coil is holding."" The technician glances at the open copy of $entity.catchreleaseFleetManualSection. ""Manual was right.""",,
+catchrelease_fq_scavenger_engine_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == scavenger_engine,,"""The gel packed cleanly. Coil is holding."" The technician glances at the open copy of $entity.catchreleaseFleetManualSection. ""Manual was right.""",,
 catchrelease_fq_scavenger_engine_distressIntel,CatchReleaseFleetQuestDistressIntel,$entity.catchrelease_fleetQuestType == scavenger_engine,,A scavenger vessel is holding position with its drive cold. A standard assistance request is running on the local trade band.,,
 ,,,,,,
 # fleet quest: burn ward,,,,,,
@@ -1852,13 +1838,13 @@ catchrelease_fq_burn_ward_action,CatchReleaseFleetQuestActionText,$entity.catchr
 catchrelease_fq_burn_ward_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == burn_ward,,"A fire in the reactor space aboard $entity.catchreleaseFleetFlagshipName left $entity.catchreleaseFleetCasualties crew with severe burns, and the medbay is out of synthskin. The medical officer is dressing the burns with fish skin, an old frontier method, and needs $entity.catchrelease_fleetQuestAsk within $entity.catchreleaseFleetDays.",,
 catchrelease_fq_burn_ward_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == burn_ward,,The medical officer's request is recorded on the following terms.,,
 catchrelease_fq_burn_ward_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Thank you for answering. Medical officer, $entity.catchreleaseFleetFlagshipName. We had a fire and I have burn casualties.""",,
-catchrelease_fq_burn_ward_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == burn_ward,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The medical officer is still in surgical gloves, and every bed in the medbay behind them is taken.
+catchrelease_fq_burn_ward_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == burn_ward,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The medical officer is still in surgical gloves. Every bed in the medbay behind them is taken.
 
-""The fire started in the reactor space. $entity.catchreleaseFleetCasualties of my crew went in to put it out, and every one of them came out burned. I used the last of our synthskin on the worst two. The rest are on gel and painkillers, and gel won't keep a burn clean for long.""
+""The fire started in the reactor space. $entity.catchreleaseFleetCasualties of my crew went in to put it out, and every one of them came out burned. I used the last of our synthskin on the worst two. The rest are on gel and painkillers. Gel won't keep a burn clean for long.""
 
-The officer brings up a page from a field medicine reference. ""Fish skin. It's an old frontier method. You clean the skin, lay it over the burn, and it keeps the wound covered while it heals.""
+The officer brings up a page from a field medicine reference. ""Fish skin. It's an old frontier method. You clean the skin, lay it over the burn, and it keeps the wound covered while it heals. It has to be fresh.""
 
-""It has to be fresh, so I need $entity.catchrelease_fleetQuestAsk, caught after you take this on. Anything that's been sitting in a hold is no use to me. We can pay $entity.catchrelease_fleetQuestReward. I can keep them stable for $entity.catchreleaseFleetDays.""",,
+""I need $entity.catchrelease_fleetQuestAsk, caught after you take this on. Anything that's been sitting in a hold is no use to me. We can pay $entity.catchrelease_fleetQuestReward. I can keep them stable for $entity.catchreleaseFleetDays.""",,
 catchrelease_fq_burn_ward_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == burn_ward,,,"0:catchrelease_fqAccept:I'll bring you the fish.
 5:catchrelease_fqAcceptNoPromise:No promises. Send me the details.
 10:catchrelease_fqDecline:Decline.",
@@ -1866,7 +1852,7 @@ catchrelease_fq_burn_ward_offerOptionsQuestion,CatchReleaseFleetQuestOfferOption
 !$entity.catchrelease_fqQuestionAsked",,,8:catchrelease_fqQuestion:Does that actually work?,
 catchrelease_fq_burn_ward_accept,CatchReleaseFleetQuestAcceptText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Thank you. I'm sending our position and a handling note.""
 
-The note is two lines long: keep the catch cold, and leave the skin on.",,
+The note is two lines long. Keep the catch cold. Leave the skin on.",,
 catchrelease_fq_burn_ward_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == burn_ward,,"""That's more than I had an hour ago."" The medical officer sends the same handling note. ""If you land $entity.catchrelease_fleetQuestAsk, hail us. I'll still need it.""",,
 catchrelease_fq_burn_ward_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == burn_ward,,"""Then we'll keep broadcasting.""
 
@@ -1891,11 +1877,9 @@ catchrelease_fq_fouled_line_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.
 catchrelease_fq_fouled_line_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == fouled_line,,"""$entity.catchreleaseFleetFlagshipName. We're a fishing crew and we're stuck. You're the first hull that's stopped.""",,
 catchrelease_fq_fouled_line_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == fouled_line,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The skipper has the drone telemetry up on a side screen. Both tracks end at the same point inside $entity.catchreleaseFleetRupture.
 
-""Both drones went in six hours ago. The lines are still reading, so they're there, but they're fouled on something and won't come back. I can't recall them, and I won't cut them. Those drones cost more than the boat.""
+""Both drones went in six hours ago. The lines are still reading, so they're there. They're fouled on something and they won't come back. I can't recall them, and I won't cut them. Those drones cost more than the boat.""
 
-Behind the skipper, a deckhand is counting heads against the watch bill for the second time.
-
-""Coherence has been dropping since they fouled. Trade says keep your trips short in thin fabric, and this one isn't short anymore. There's an old fix for a fouled line: another crew works the same breach, lands something and brings it aboard. The line usually comes loose after that.""
+Behind the skipper, a deckhand is counting heads against the watch bill for the second time. ""Coherence has been dropping since they fouled. Trade says keep your trips short in thin fabric. This one isn't short anymore. There's an old fix for a fouled line. Another crew works the same breach, lands something and brings it aboard. The line usually comes loose after that.""
 
 ""I need $entity.catchrelease_fleetQuestAsk out of $entity.catchreleaseFleetRupture, landed after you take the job. We can pay $entity.catchrelease_fleetQuestReward. We can hold here for $entity.catchreleaseFleetDays, no longer.""",,
 catchrelease_fq_fouled_line_offerOptions,CatchReleaseFleetQuestOfferOptions,$entity.catchrelease_fleetQuestType == fouled_line,,,"0:catchrelease_fqAccept:I'll work the breach.
@@ -1947,12 +1931,14 @@ catchrelease_fq_collector_accept,CatchReleaseFleetQuestAcceptText,$entity.catchr
 catchrelease_fq_collector_acceptNoPromise,CatchReleaseFleetQuestAcceptNoPromiseText,$entity.catchrelease_fleetQuestType == collector,,"""Understood. I will record no commitment."" The collector sends the collection entry and receiving requirements regardless. ""Should you obtain $entity.catchrelease_fleetQuestAsk within the window, hail $entity.catchreleaseFleetFlagshipName.""",,
 catchrelease_fq_collector_decline,CatchReleaseFleetQuestDeclineText,$entity.catchrelease_fleetQuestType == collector,,"""Understood. I will continue the search. $entity.catchreleaseFleetFlagshipName out.""",,
 catchrelease_fq_collector_waiting,CatchReleaseFleetQuestWaitingText,$entity.catchrelease_fleetQuestType == collector,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk,"""The tank is still running. I checked the water chemistry this morning; it remains within the holding profile. I still require $entity.catchrelease_fleetQuestAsk. There are $entity.catchreleaseFleetDays remaining.""",,
-catchrelease_fq_collector_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == collector,,"The collector receives the container personally and takes it to the display tank, compares the holding temperatures, sets the acclimation flow and waits beside the tank until the transfer is complete. The specimen settles behind the glass beneath the engraved nameplate.",,
+catchrelease_fq_collector_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrelease_fleetQuestType == collector,,"The collector receives the container personally and takes it to the display tank. They compare the holding temperatures, set the acclimation flow and wait beside the tank until the transfer is complete.
+
+The specimen settles behind the glass beneath the engraved nameplate.",,
 catchrelease_fq_collector_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == collector,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""Carthen & Vale, Morrow Exchange, and Silex Acquisitions. Dates: $entity.catchreleaseFleetBrokerDates."" The collector opens the three transaction records. ""Each accepted my deposit. Each returned it when the specimen was reallocated immediately before transfer. The records suggest the same outside buyer acting through agents.""
 
 ""I have had enough of being sniped.""",,
 catchrelease_fq_collector_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == collector,,"""Two years of refusals, and there it is."" The collector checks the tank once more. ""Whoever was buying all of these can keep them. Mine is the best.""",,
-catchrelease_fq_collector_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == collector,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The collector turns the pickup toward a display tank: empty, lit and filtered, with an engraved nameplate fixed beneath the glass.
+catchrelease_fq_collector_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == collector,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"The collector turns the pickup toward a display tank. It is empty, lit and filtered. An engraved nameplate is fixed beneath the glass.
 
 ""Eighteen point five Celsius. Ten-hour display cycle.""",,
 ,,,,,,
@@ -1988,7 +1974,7 @@ There is some muttering before the captain cuts them off and checks the specimen
 The captain authorizes the transfer to your account.",,
 catchrelease_fq_wager_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == wager,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""First watch saw the same kind of return several times and called it a run. Second watch says there wasn't enough there to call it anything.""
 
-The captain brings up the relevant entries. ""I've looked at both, and I can see why they're arguing. I also don't intend to spend another shift doing it with them.""",,
+The captain brings up the relevant entries. ""I've looked at both. I can see why they're arguing. I also don't intend to spend another shift doing it with them.""",,
 catchrelease_fq_wager_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == wager,,"""That settles it. More or less."" The captain looks past the pickup at someone off-screen. ""No, we're not taking bets on whether the catch was representative.""
 
 $HeOrShe turns back to you. ""Thanks, captain.""",,
@@ -2148,7 +2134,7 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 0","CatchReleaseCMD point
 $menuState = catchreleaseFisher 0
 CatchReleaseCMD tokens
-FireAll CatchReleaseFisherOptions","The hail is accepted promptly. An older man in patched working clothes studies your transponder return: grey beard, old scar tissue, the posture of someone who spent enough years on command decks to stop sitting properly in chairs.
+FireAll CatchReleaseFisherOptions","The hail is accepted promptly. An older man in patched working clothes studies your transponder return. Grey beard, old scar tissue, the posture of someone who spent enough years on command decks to stop sitting properly in chairs.
 
 ""Haven't got you in the ledger."" He takes a drink. ""That's usually how new work starts.""",,
 catchrelease_fisherIntercept,OpenCommLink,"$entity.catchrelease_fisherman score:1100
@@ -2411,7 +2397,7 @@ catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_pa
 catchrelease_fisherOptAsk_deepWater,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_deepWater
 CatchReleaseCMD fisherAskOnPage",,,catchrelease_ask_deepWater:Why is the deep water worse?,
-catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,$global.catchrelease_fisherAsked_deepWater = true,"""Not water. Thinner fabric. A pattern gets less help holding one shape out there, and the same goes for your crew. Keep the trip short, and don't turn it into research.""",0:catchrelease_fisherAskBack:Something else,
+catchrelease_ask_deepWater,DialogOptionSelected,$option == catchrelease_ask_deepWater,$global.catchrelease_fisherAsked_deepWater = true,"""Not water. Thinner fabric. A pattern gets less help holding one shape out there. Same goes for your crew. Keep the trip short, and don't turn it into research.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_searchlightDrones,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_searchlightDrones
 CatchReleaseCMD fisherAskOnPage",,,catchrelease_ask_searchlightDrones:Why can't I use the drones with the searchlights?,
@@ -2520,7 +2506,7 @@ CatchReleaseCMD point
 CatchReleaseCMD showIntroIntel
 FireAll CatchReleaseRatingQuestions","The spacer hears you out, turning the glass between both hands.
 
-""You're going beyond the picket?"" The spacer nods vaguely at the ceiling. ""There's fishing work out there. Proper work, if you've got a ship and don't mind machinery that takes a crane to service. Look for a trawler holding outside the inhabited traffic lanes, and hail them.""
+""You're going beyond the picket?"" The spacer nods vaguely at the ceiling. ""There's fishing work out there. Proper work, if you've got a ship and don't mind machinery that takes a crane to service. Look for a trawler holding outside the inhabited traffic lanes. Hail them.""
 
 The spacer takes a drink before finishing. ""Ask for the Fisherman.""",,
 catchrelease_ratingQuestionWhere,CatchReleaseRatingQuestions,!$catchrelease_ratingAskedWhere,,,0:catchrelease_ratingBarWhere:Where do I find the trawler?,
@@ -2699,7 +2685,7 @@ He turns the chip over. ""Build one and your colony can keep catch on display an
 He wants $catchreleaseCrabConservatoryPrice for it, and $catchreleaseCrabConservatoryCrabs crabs.
 
 You are short. ""No trouble,"" he says, and the chip goes into a pocket already occupied by his left hand.",10:catchrelease_crabStall:Another time.,
-catchrelease_crabBuyConservatory,DialogOptionSelected,$option == catchrelease_crabBuyConservatory,CatchReleaseCMD crabBuy CONSERVATORY,"The blueprint chip changes hands, and your ops chief signs it into inventory under COLONY INFRASTRUCTURE.
+catchrelease_crabBuyConservatory,DialogOptionSelected,$option == catchrelease_crabBuyConservatory,CatchReleaseCMD crabBuy CONSERVATORY,"The blueprint chip changes hands. Your ops chief signs it into inventory under COLONY INFRASTRUCTURE.
 
 The category was already present.",0:catchrelease_crabStall:Continue,
 catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,!$catchreleaseCrabCelebrationOwned,CatchReleaseCMD crabTooltip catchrelease_crabWareCelebration CELEBRATION,,catchrelease_crabWareCelebration:Celebration Charges,
@@ -2761,7 +2747,7 @@ Behind him, somebody calls for a crane crew. Another voice answers from somewher
 100:catchrelease_fisherBack:I only came to return it.",
 catchrelease_introHarpoonReturn,DialogOptionSelected,$option == catchrelease_introHarpoonReturn,,"""If you've no use for half a docking rack and a dead transponder."" A cargo boom unfolds from the trawler. ""Bring her alongside.""
 
-The transfer takes considerably longer than the conversation. The Fisherman's crew handle the frame as familiar equipment, and one of them signs the receipt with a name already printed beneath the signature line.
+The transfer takes considerably longer than the conversation. The Fisherman's crew handle the frame as familiar equipment. One of them signs the receipt with a name already printed beneath the signature line.
 
 When the crane clears your hull, the Fisherman is still on the channel. ""You found the fabric before you found the trade, then."" He scratches at the grey along his jaw. ""Might as well learn the trade.""","0:catchrelease_introWantWork:I'm up for some work.
 10:catchrelease_introCurious:The trade? What trade?
@@ -2818,7 +2804,7 @@ Your science officer quietly points out that the D already stands for Device. Th
 10:catchrelease_intro_rod:Show me the equipment.",
 catchrelease_introRodMeaning,DialogOptionSelected,$option == catchrelease_introRodMeaning,,"""Depends which manual you found."" He reaches for a control slate. ""None of the good ones agree.""",catchrelease_intro_rod:Continue,
 catchrelease_intro_rod,DialogOptionSelected,$option == catchrelease_intro_rod,"CatchReleaseCMD giveRod
-CatchReleaseCMD tokens","The Fisherman sends over a handling manifest, and your ops chief reads the mass figure twice.
+CatchReleaseCMD tokens","The Fisherman sends over a handling manifest. Your ops chief reads the mass figure twice.
 
 A cargo boom unfolds from the trawler and the LYNE drone comes across on external clamps. It is the size of a light fighter, built around a blunt ROD assembly and surrounded by maneuvering hardware. It comes with a launch rack, the control package and enough supporting machinery to occupy a respectable section of working deck.
 
@@ -2897,7 +2883,7 @@ catchrelease_introShopLater2,DialogOptionSelected,$option == catchrelease_introS
 catchrelease_introDeepGear,DialogOptionSelected,$option == catchrelease_introDeepGear,CatchReleaseCMD giveDeepGear,"The trawler starts another transfer. The first assembly is a bank of articulated projectors mounted on a reinforced frame. The second takes two cargo booms together: a harpoon launcher, ammunition handling gear, and a ROD head built into a projectile large enough to make the word harpoon seem modest.
 
 The Fisherman watches your crew guide the first frame into place. ""Breach lights,"" he says, pointing at the projector rig. ""Name's poor. They don't light much. They work the fabric until the ROD can punch through without a rupture.""",0:catchrelease_introDeepResume_continue:Continue,
-catchrelease_introDeepResume_continue,DialogOptionSelected,$option == catchrelease_introDeepResume_continue,FireAll CatchReleaseIntroDeepQuestions,"""That's a harpoon,"" he says, pointing at the second rig. ""Name's apt, this time. It's the quick and hard way to get a pattern. The lights thin the fabric enough to bring one within reach, and the harpoon puts a ROD head on it before it slips away.""
+catchrelease_introDeepResume_continue,DialogOptionSelected,$option == catchrelease_introDeepResume_continue,FireAll CatchReleaseIntroDeepQuestions,"""That's a harpoon,"" he says, pointing at the second rig. ""Name's apt, this time. It's the quick and hard way to get a pattern. The lights thin the fabric enough to bring one within reach. The harpoon puts a ROD head on it before it slips away.""
 
 He turns from the rig to you. ""It's a heavy projectile. Treat it accordingly.""",,
 catchrelease_introLightQuestion,DialogOptionSelected,$option == catchrelease_introLightQuestion,$catchreleaseIntroLightAsked = true 0,"""Near enough for deck work."" The Fisherman brings up the local plot. ""They wear the fabric down until the ROD can reach through.""
@@ -2956,7 +2942,7 @@ $catchreleaseTargetMet","CatchReleaseCMD takeTarget
 Highlight ""Four additional records transfer:""
 CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
-AddTextSmall ""Range data purchasing unlocked"" highlight","The two catches are checked against their range records, and the Fisherman marks each entry complete.
+AddTextSmall ""Range data purchasing unlocked"" highlight","The two catches are checked against their range records. The Fisherman marks each entry complete.
 
 ""There.""
 
@@ -3245,7 +3231,7 @@ $entity.catchrelease_lampRung == 4",FireBest CatchReleaseLampOpenFire,"""Fourth 
 The link closes. Weapons come up across the formation in one motion.",,
 catchrelease_lampGunsLeague,OpenCommLink,"$faction.id == persean_league
 $entity.catchrelease_lampConv score:1535
-$entity.catchrelease_lampRung == 4",FireBest CatchReleaseLampOpenFire,"$PersonRank $personName has the convention open on a screen, and closes it.
+$entity.catchrelease_lampRung == 4",FireBest CatchReleaseLampOpenFire,"$PersonRank $personName has the convention open on a screen and closes it.
 
 ""There is no fourth provision. The drafters assumed three opportunities would be sufficient.""
 
@@ -3289,7 +3275,7 @@ CatchReleaseCMD lampForgive
 MakeOtherFleetPreventDisengage catchreleaseLamps false
 unset $entity.catchrelease_lampConv
 ShowDefaultVisual
-FireAll CatchReleaseFleetResolutionOptions","You power the rig down while the conversation is still underway, and spend the rest of it on operating categories, survey work and a license number nobody checks closely enough.
+FireAll CatchReleaseFleetResolutionOptions","You power the rig down while the conversation is still underway. The rest of it goes on operating categories, survey work and a license number nobody checks closely enough.
 
 Eventually $PersonRank $personName changes the incident classification. ""Survey equipment.""
 
@@ -3321,7 +3307,7 @@ FireAll CatchReleaseFleetResolutionOptions","You cut the link. The lamps keep bu
 Weapons come up across the formation.",,
 ,,,,,,
 # camped rupture job: pirates,,,,,,
-catchrelease_campPirate_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPirate score:100,,"The fisher answers with an account sheet still open; the protection payment has its own column now.
+catchrelease_campPirate_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPirate score:100,,"The fisher answers with an account sheet still open. The protection payment has its own column now.
 
 ""Captain."" $HeOrShe pushes the figures aside and brings up the job marker. ""Tell me you've got something worth changing next month's numbers for.""",,
 catchrelease_campPirate_blurbBar,catchrelease_campPirate_blurbBar,,,A fisher is moving repair charges between columns on an account sheet. One recurring payment is larger than the rest combined.,,
@@ -3375,7 +3361,7 @@ $catchreleasePaid",CatchReleaseCMD highlightJobText $catchreleaseReward,"$HeOrSh
 ""That's evidence I can use.""",,
 ,,,,,,
 # camped rupture job: pathers,,,,,,
-catchrelease_campPath_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPath score:100,,"The fisher answers after a short delay, the repaired rack component on the table beside the comm unit and the door still in view behind it.
+catchrelease_campPath_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_campPath score:100,,"The fisher answers after a short delay. The repaired rack component is on the table beside the comm unit. The door is still in view behind it.
 
 ""Captain."" $HeOrShe glances at the doorway before bringing up the camp marker. ""What have you got?""",,
 catchrelease_campPath_blurbBar,catchrelease_campPath_blurbBar,,,A fisher sits with the door in view. A scorched drone-rack isolator rests on the table beside an untouched drink.,,
@@ -3395,7 +3381,7 @@ catchrelease_jobDecline:Decline.",
 catchrelease_campPath_accepted,catchreleaseJobAccepted,$missionId == catchrelease_campPath,,"The fisher checks the door before sending the camp coordinates and transponder record.
 
 ""How you move them is your business. Just get them away from the boats.""",,
-catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"The fisher nods, deletes the transfer request and puts the damaged component back into a tool bag.",,
+catchrelease_campPath_declined,catchreleaseJobDeclined,$missionId == catchrelease_campPath,,"The fisher nods and deletes the transfer request. The damaged component goes back into a tool bag.",,
 catchrelease_campPath_remindCamp,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
 !$catchreleaseCampCleared","Call $catchrelease_jobRef showRemoteMap ""Target: $catchreleaseCampWhere""","""Still there."" The fisher checks a message from the yard crew. ""Rack's repaired. Nobody's taking a boat out while they're on the marker.""",,
 catchrelease_campPath_remindFish,catchreleaseJobRemind,"$missionId == catchrelease_campPath score:100
@@ -3465,7 +3451,7 @@ catchrelease_campPaySel,DialogOptionSelected,$option == catchrelease_campPay,"Ad
 $entity.catchrelease_campCleared = true
 MakeOtherFleetGoAway true
 ShowDefaultVisual
-FireAll CatchReleaseFleetResolutionOptions","The transfer clears, and the formation begins to come about.",,
+FireAll CatchReleaseFleetResolutionOptions","The transfer clears. The formation begins to come about.",,
 catchrelease_campScareSel,DialogOptionSelected,$option == catchrelease_campScare,"$entity.catchrelease_campCleared = true
 MakeOtherFleetGoAway true
 ShowDefaultVisual

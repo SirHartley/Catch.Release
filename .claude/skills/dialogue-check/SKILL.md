@@ -1,6 +1,6 @@
 ---
 name: dialogue-check
-description: Validate Catch.Release dialogue after any change to data/campaign/rules.csv Text or to a rules.csv line quoted in docs/LORE.md, including every batch of a rewrite pass. Runs DialogueCheck (paragraph pacing against vanilla, stage-note fragments, LORE excerpts, tokens, Church and Path rows) and RulesCheck, then the manual prose review the tools cannot do. Use it before committing dialogue, and when asked to audit or compare dialogue with vanilla.
+description: Validate Catch.Release dialogue after any change to data/campaign/rules.csv Text or to a rules.csv line quoted in docs/LORE.md, including every batch of a rewrite pass. Runs DialogueCheck (paragraph pacing against vanilla, stage-note fragments, LORE excerpts, tokens, welded sentences, Church and Path rows) and RulesCheck, then the manual prose review the tools cannot do. Use it before committing dialogue, and when asked to audit or compare dialogue with vanilla.
 ---
 
 # Dialogue check
@@ -43,6 +43,7 @@ Work in a temporary directory outside the repository for the base file and build
 - **`excerpt`:** decide which side is right. If the row improved, update the `LORE.md` quotation in the same commit, and check that the surrounding explanation still fits it. If the quoted line was the better one, restore the row. Never leave a quotation that no row contains.
 - **`reference`:** undo the change unless the user explicitly asked to change that Church or Path row. If they did, say so in the pull request.
 - **`token`:** every removed or added token needs a reason you can state in the pull request. An added pronoun token needs a person in that dialogue context. Otherwise restore the token.
+- **`welded`:** split the joined clauses back into sentences inside the merged paragraph, as in [LORE.md, Rhythm and length](../../../docs/LORE.md#rhythm-and-length). Leave it only when the longer sentence is a speech tag or reads naturally aloud.
 - **`alternation`, `crowded`, `wall`:** apply [LORE.md, Rhythm and length](../../../docs/LORE.md#rhythm-and-length):
   - merge gestures that only fill the space between lines;
   - break a paragraph at scene-setting, at a closing event and where the speaker changes subject.
