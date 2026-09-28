@@ -284,7 +284,7 @@ ERROR data/campaign/rules.csv:120 catchrelease_exCaptainOpt [handler] option cat
 
 The exit status is 1 when there is an error, 0 when there are only warnings or none, and 2 for a usage or input problem.
 
-The rules check does not look at prose. After a Text change, also run the [dialogue check](DIALOGUE.md#dialogue-check).
+The rules check does not look at prose. After a Text change, also run the [dialogue check](DIALOGUE.md#dialogue-check). The `Rules checks` GitHub workflow runs both tools on every pull request that touches `rules.csv` or the tools; see [when it runs](DIALOGUE.md#dialogue-check).
 
 **Parsing.** Records are read as RFC 4180 CSV; the line number is the physical line where the record starts. Rows with an empty id and rows whose id starts with `#` are skipped, as the loader does. Conditions, Script and Options cells are split into lines the way the 0.98a-RC8 `Rules` loader does, and each Conditions or Script line is parsed with a port of `Misc.tokenize` and the rule expression constructor (`RuleExpression`). Running the tool on vanilla `rules.csv` gives no load, command or option-format error, which matches the game loading that file. The engine's `LoadingUtils` CSV reader is not in the `starsector-knowledge` sources, so the record parsing itself is standard CSV, not a port.
 

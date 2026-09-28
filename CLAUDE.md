@@ -59,7 +59,7 @@ The dictionaries distinguish checked recipes from extracted names, expressions a
 - Every runtime-affecting final branch must pass the full clean Java 17 build described in [Building](#building).
 - Build the exact final remote task-branch revision. Earlier builds, partial builds, IDE analysis, and static checks do not satisfy the gate.
 - Missing compilers or required dependencies are merge blockers. Documentation-only changes do not require a Java build.
-- A change to `data/campaign/rules.csv` Text, or to a `rules.csv` line quoted in `docs/LORE.md`, must pass the [dialogue check](docs/DIALOGUE.md#dialogue-check) against the base branch and on the whole file. Claude sessions run it with the `dialogue-check` skill (`.claude/skills/dialogue-check/SKILL.md`).
+- A change to `data/campaign/rules.csv` Text, or to a `rules.csv` line quoted in `docs/LORE.md`, must pass the [dialogue check](docs/DIALOGUE.md#dialogue-check) against the base branch and on the whole file. The `Rules checks` GitHub workflow runs it and the rules check on every such pull request; do not merge while it is red. In Claude sessions a project hook runs it after each change to those files, and the `dialogue-check` skill (`.claude/skills/dialogue-check/SKILL.md`) covers the review and report.
 - Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
 - Use the connected GitHub app to create, inspect, and merge pull requests. Use `gh` only if the app is unavailable. A broken `gh` login is not a blocker when the app works.
 - Fetch current remote `master` before branching and again before merging. Integrate intervening changes, push the exact final commit, and verify the merged remote revision.
@@ -92,6 +92,7 @@ Update documents automatically as part of each relevant change, not by a backgro
 | `docs/rules/*.md` | Preserved external simulator references | Preserve upstream text and provenance. Record source-verified corrections in `docs/RULES_AUTHORING.md`'s correction section and update affected `RULES.md` summaries/links, rather than silently altering the reference. |
 | Framework `README.md` files | Integration and extension instructions for that framework | Update when its API, registration, dependencies, paths or lifecycle changes. |
 | `.claude/skills/*/SKILL.md` | Claude procedures that run the project's checks, such as `dialogue-check` | Update when the tool, its guide or the workflow changes. Link to the owning guide for rules, bands and conventions instead of copying them. |
+| `.claude/settings.json`, `.claude/hooks/*`, `.github/workflows/*` | Automatic runs of the project's checks in Claude sessions and on GitHub | Update with the tools they run, their arguments and their dependencies. Keep check logic in `jars/src`; these files only call it. |
 
 Give each fact one home. Move useful detail to its proper owner and link to it; do not keep a second copy in architecture. After moving a section, repair inbound links and check that no requirement or technical constraint was lost. Keep architecture compact and readable; do not create a parallel human version to maintain.
 
