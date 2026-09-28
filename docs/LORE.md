@@ -1466,7 +1466,9 @@ Do not make every pirate a theatrical rogue.
 
 **Model lines:**
 
-> “You hooked us.” A grin appears despite everything. “Actually hooked us.” The grin goes away. “Don't do it again.”
+> “You hooked us.”
+>
+> The pirate grins despite everything. “Actually hooked us.” Then the grin goes away. “Don't do it again.”
 
 (`catchrelease_harpoonedCommsPirate`)
 
@@ -1474,7 +1476,7 @@ Do not make every pirate a theatrical rogue.
 
 (`catchrelease_lampWarnPirate`)
 
-> “Told you what was happening if you did it twice.” A pause. “I didn't, actually. My mistake.”
+> “Told you what was happening if you did it twice.” The pirate stops to think about it. “I didn't, actually. My mistake.”
 
 (`catchrelease_fineDemandRepeatPirate`)
 

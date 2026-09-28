@@ -78,7 +78,9 @@ $faction.id == pirates
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","$personName turns the recovered projectile toward the camera. ""You hooked us."" A grin appears despite everything. ""Actually hooked us."" The grin goes away. ""Don't do it again.""",,
+FireAll PopulateOptions","$personName turns the recovered projectile toward the camera. ""You hooked us.""
+
+The pirate grins despite everything. ""Actually hooked us."" Then the grin goes away. ""Don't do it again.""",,
 catchrelease_harpoonedCommsDiktat,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1110
@@ -90,7 +92,9 @@ $faction.id == persean_league
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","$PersonRank $personName has several regulations open. ""I have weapon discharge, negligent recovery operations and collision damage."" Another document opens. ""I do not have 'industrial harpoon'."" They sigh. ""Time to improvise.""",,
+FireAll PopulateOptions","$PersonRank $personName has several regulations open. ""I have weapon discharge, negligent recovery operations and collision damage.""
+
+Another document opens. ""I do not have 'industrial harpoon'."" They sigh. ""Time to improvise.""",,
 catchrelease_harpoonedCommsIndie,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == independent
 $entity.catchrelease_harpooned score:1110
@@ -286,7 +290,7 @@ Spittle marks the inside of the visor.
 catchrelease_fineDemandRepeatPirate,OpenCommLink,"$faction.id == pirates
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
-$entity.catchrelease_harpoonCount == 2",FireBest CatchReleaseHarpoonPatrolAttack,"""Told you what was happening if you did it twice."" A pause. ""I didn't, actually. My mistake.""",,
+$entity.catchrelease_harpoonCount == 2",FireBest CatchReleaseHarpoonPatrolAttack,"""Told you what was happening if you did it twice."" The pirate stops to think about it. ""I didn't, actually. My mistake.""",,
 catchrelease_fineDemandRepeatDiktat,OpenCommLink,"$faction.id == sindrian_diktat
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
@@ -1374,7 +1378,7 @@ catchrelease_fq_tribute_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchrel
 The hand-in code goes in, and the quartermaster calls someone off-channel. ""Tell them we've got their tribute. Now, before they decide to come over and ask for it themselves.""",,
 catchrelease_fq_tribute_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == tribute,CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk $entity.catchrelease_fleetQuestReward,"""They board us,"" the quartermaster says after a moment. ""Maybe they take twice what we owe and call it a late fee. Maybe they decide the claim belongs to them now. Maybe somebody says the wrong thing while they're going through our holds.""
 
-Another look at the countdown. ""I'd rather not find out which.""",,
+The quartermaster looks at the countdown again. ""I'd rather not find out which.""",,
 catchrelease_fq_tribute_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == tribute,,"""They took it."" The quartermaster watches another display for a few seconds. ""They're breaking away. We're clear.""
 
 The protection ledger closes. ""Your payment's through. Thank you, captain.""",,
@@ -2289,7 +2293,7 @@ catchrelease_rumorCalm,CatchReleaseRumorText,"CatchReleaseCMD tokens
 $catchreleaseRumorKind == calm score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
 CatchReleaseCMD showRumorIntel","""One more for your planner. $catchreleaseRumorSystem."" The Fisherman scratches at his jaw. ""Fish there haven't been running as hard during retrieval. Easier to follow, easier to stay on.""
 
-A shrug. ""They can still slip you. I'd just rather work an easy fish than a difficult one.""",,
+He shrugs. ""They can still slip you. I'd just rather work an easy fish than a difficult one.""",,
 catchrelease_rumorValuableLoot,CatchReleaseRumorText,"CatchReleaseCMD tokens
 $catchreleaseRumorKind == valuable_loot score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
 CatchReleaseCMD showRumorIntel","A bycatch tally is visible on the Fisherman's side of the link, several entries marked for value.
@@ -2457,7 +2461,7 @@ catchrelease_ask_upgrade,DialogOptionSelected,$option == catchrelease_ask_upgrad
 catchrelease_fisherOptAsk_outfitterPayment,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_outfitterPayment
 CatchReleaseCMD fisherAskOnPage",,,catchrelease_ask_outfitterPayment:Why does the outfitter take fish for payment?,
-catchrelease_ask_outfitterPayment,DialogOptionSelected,$option == catchrelease_ask_outfitterPayment,$global.catchrelease_fisherAsked_outfitterPayment = true,"""Trade buys catch. I sell hardware. Fish move through both ledgers."" A small shrug. ""No reason to write two invoices when one will do.""",0:catchrelease_fisherAskBack:Something else,
+catchrelease_ask_outfitterPayment,DialogOptionSelected,$option == catchrelease_ask_outfitterPayment,$global.catchrelease_fisherAsked_outfitterPayment = true,"""Trade buys catch. I sell hardware. Fish move through both ledgers."" He gives a small shrug. ""No reason to write two invoices when one will do.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherAsked_bycatch,CatchReleaseFisherQuestions,"CatchReleaseCMD bycatchExplained
 CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_fisherBycatch gray,,50:catchrelease_fisherBycatch:Ask about what came up with the catch.,
 catchrelease_fisherAsked_howLong,CatchReleaseFisherQuestions,"$catchreleaseStage >= 1
