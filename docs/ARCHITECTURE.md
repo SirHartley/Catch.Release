@@ -133,8 +133,6 @@ limits are in [RULES.md](RULES.md#rules-check-tool).
 `docs/rules-reference/vanilla-pacing-baseline.txt`, reports stage-note fragments and checks that
 the rows `docs/LORE.md` quotes still match (`LoreExcerpts`). Run it with the `Dialogue Check` run
 configuration; usage, checks, bands and exemptions are in [DIALOGUE.md](DIALOGUE.md#dialogue-check).
-The `Rules checks` workflow (`.github/workflows/rules-checks.yml`) runs both tools on pull requests
-and `master` pushes; `.claude/hooks/dialogue-check.sh` runs `DialogueCheck` inside Claude Code sessions.
 
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 
