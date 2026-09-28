@@ -17,7 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 // Checks of the mod's rules.csv Text: paragraph pacing against vanilla, stage-note fragments and docs/LORE.md excerpts,
-// plus token and reference-row changes against a base file. Runs outside the game.
+// plus token, welded-sentence and reference-row changes against a base file. Runs outside the game.
 // Usage, measures, bands and exemptions are in docs/DIALOGUE.md, "Dialogue check".
 public final class DialogueCheck {
 
@@ -40,6 +40,7 @@ public final class DialogueCheck {
     private static final int ALTERNATION_WORDS = 12;
     private static final int ALTERNATION_RUN = 3;
     private static final int CROWDED_GESTURES = 3;
+    private static final int WELD_WORDS = 16;
 
     // Church and Path lines are the reference standard for their voices (docs/LORE.md). They are not measured, and
     // against a base file any change to them is an error.
@@ -55,6 +56,7 @@ public final class DialogueCheck {
             "$ManOrWoman", "$manOrWoman");
     private static final Pattern PARAGRAPH_BREAK = Pattern.compile("\\n\\s*\\n");
     private static final Pattern SENTENCE = Pattern.compile("[^.!?:]*[.!?:]");
+    private static final Pattern SENTENCE_BREAK = Pattern.compile("(?<=[.!?])\\s+|\\n\\s*\\n");
     private static final Pattern STAGE_NOTE = Pattern.compile(
             "(?:(?:A|An|Another|One more)\\s+(?:[a-z]+\\s+){0,2}"
                     + "(?:pause|beat|moment|look|glance|lean|nod|smile|shrug|sigh|silence|breath|grin|wince|laugh|frown|second)"
@@ -81,6 +83,9 @@ public final class DialogueCheck {
     private int warnings;
 
     record Paragraph(Kind kind, int words, int gestures) {
+    }
+
+    record Sentences(int count, int longest) {
     }
 
     record Measure(String key, String label, boolean share, double below, double above, boolean relative) {
@@ -188,7 +193,10 @@ public final class DialogueCheck {
                 }
                 continue;
             }
-            if (before != null) checkTokens(row, before);
+            if (before != null) {
+                checkTokens(row, before);
+                checkWelds(row, before);
+            }
             boolean burst = BURST.matcher(row.id()).lookingAt();
             for (String variant : variants(row.text())) {
                 checkStageNotes(row, variant);
@@ -284,6 +292,31 @@ public final class DialogueCheck {
             tokens.add(PRONOUNS.contains(token) ? "$" + Character.toLowerCase(token.charAt(1)) + token.substring(2) : token);
         }
         return tokens;
+    }
+
+    // Merging paragraphs should keep their sentences. Fewer sentences and a longer longest one mean clauses were joined
+    // with commas and conjunctions instead.
+    private void checkWelds(RulesFile.Row row, String before) {
+        Sentences old = sentences(before);
+        Sentences now = sentences(row.text());
+        if (now.count < old.count && now.longest > old.longest && now.longest >= WELD_WORDS) {
+            report(false, "welded", row, old.count + " sentences became " + now.count + " and the longest grew from " + old.longest
+                    + " to " + now.longest + " words; merge paragraphs without joining their sentences");
+        }
+    }
+
+    // Tokens are masked first because their dots are not full stops.
+    private static Sentences sentences(String text) {
+        String plain = TOKEN.matcher(text).replaceAll("X").replace("\"", "");
+        int count = 0;
+        int longest = 0;
+        for (String sentence : SENTENCE_BREAK.split(plain)) {
+            int words = words(sentence);
+            if (words < 2) continue;
+            count++;
+            longest = Math.max(longest, words);
+        }
+        return new Sentences(count, longest);
     }
 
     private static String abbreviate(String text) {
