@@ -235,14 +235,14 @@ public final class DialogueCheck {
     }
 
     private void checkExcerpts(Path lore, List<RulesFile.Row> rows) throws IOException {
-        Map<String, RulesFile.Row> byId = new HashMap<>();
+        Map<String, String> textById = new HashMap<>();
         for (RulesFile.Row row : rows) {
-            byId.put(row.id(), row);
+            textById.put(row.id(), LoreExcerpts.normalize(row.text()));
         }
         for (LoreExcerpts.Excerpt excerpt : LoreExcerpts.read(lore)) {
             if (excerpt.id() == null) {
                 for (String piece : excerpt.pieces()) {
-                    if (rows.stream().noneMatch(row -> row.text().contains(piece))) {
+                    if (textById.values().stream().noneMatch(text -> text.contains(piece))) {
                         errors++;
                         findings.add("ERROR " + LoreExcerpts.LORE + ":" + excerpt.line() + " [excerpt] model line is in no row: "
                                 + abbreviate(piece) + " Update the model line or keep the row's wording");
@@ -250,15 +250,15 @@ public final class DialogueCheck {
                 }
                 continue;
             }
-            RulesFile.Row row = byId.get(excerpt.id());
+            String text = textById.get(excerpt.id());
             String where = LoreExcerpts.LORE + ":" + excerpt.line() + " " + excerpt.id() + " [excerpt] ";
-            if (row == null) {
+            if (text == null) {
                 errors++;
                 findings.add("ERROR " + where + "the quoted row does not exist");
                 continue;
             }
             for (String piece : excerpt.pieces()) {
-                if (!row.text().contains(piece)) {
+                if (!text.contains(piece)) {
                     errors++;
                     findings.add("ERROR " + where + "no longer matches the row: " + abbreviate(piece)
                             + " Update the excerpt or keep the row's wording");

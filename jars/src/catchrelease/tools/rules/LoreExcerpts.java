@@ -115,8 +115,11 @@ final class LoreExcerpts {
         return pieces;
     }
 
+    // Quotes are compared as straight marks and all whitespace as one space, so line and paragraph breaks in a row
+    // do not stop an excerpt from matching its wording.
     static String normalize(String text) {
-        return text.replace('“', '"').replace('”', '"').replace('‘', '\'').replace('’', '\'');
+        return text.replace('“', '"').replace('”', '"').replace('‘', '\'').replace('’', '\'')
+                .replaceAll("\\s+", " ");
     }
 
     private static int next(List<String> lines, int from) {
