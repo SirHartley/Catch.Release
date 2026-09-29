@@ -374,18 +374,44 @@ A corporate officer with an invoice prepared does not need narration explaining 
 
 ### Rhythm and length
 
-Write in full paragraphs. Let a speaker finish a thought in one paragraph instead of giving each sentence its own line. Mix sentence lengths inside the paragraph. Dialogue must sound spoken, but it does not need every hesitation and filler word.
+Build a row out of beats. A beat is one move in the scene: something is set up, something is revealed, somebody reacts, a point lands. Give each beat its own paragraph and keep the sentences inside it short and spoken. Dialogue must sound spoken, but it does not need every hesitation and filler word.
 
-Put a small action in the speech tag, before the quote or inside the speaker's paragraph. Give an action its own paragraph only when it changes the scene: cargo crosses, the link is cut, a name comes off a list, a patrol changes course. An action that only fills the space between two lines of speech, such as “He looks at you.” or “They tap the display.”, should be merged or cut.
+Use two sizes of break:
 
-A short sentence can still end a paragraph or land a point. It must be a sentence doing work in the scene, never a stage note such as “A pause.” or “A beat.”
+- **A blank line** starts a new beat: a turn in the conversation, a reaction, a change of subject, the terms of an offer, a punchline.
+- **A single line break** separates two small steps inside one beat: two people acting in the same room, two instructions in a row, two details of the same scene.
 
-Do not overcorrect into one dense block. Vanilla breaks a row where the scene or the subject changes:
+Where the beats usually fall:
 
-- Scene-setting that describes the speaker or the place when the link opens gets its own paragraph before the first line of speech.
-- A closing event that happens after the speaker has finished, such as files arriving, the channel closing or the galley getting to work, gets its own paragraph at the end.
-- When a speaker moves on to a new subject, such as from the problem to the request or from the request to the terms, start a new paragraph. The gesture that marks the shift can open that paragraph.
-- Normally a paragraph holds one gesture. A second gesture inside the same paragraph usually means it needs a break.
+- Scene-setting that describes the speaker or the place when the link opens comes first, before the first line of speech.
+- When a speaker moves to a new subject, such as from the problem to the request, start a new paragraph. The gesture that marks the shift can open it.
+- The terms of an offer (the ask, the deadline, the pay) get a paragraph of their own after the gesture that presents them.
+- A closing event that happens after the speaker has finished, such as files arriving, the channel closing or the galley getting to work, ends the row in its own paragraph.
+- In a bar description, the detail that tells the player who this person is gets its own line or paragraph.
+- A speech can break where the speaker would pause for breath between two thoughts. Leave the first paragraph's quotation open and reopen it on the next: `"...can't live without it.` / `"It needs three different catches."`
+
+A small action belongs in the speech tag or inside the speaker's paragraph. Give an action its own paragraph when it changes the scene, or when it times the next line: a glance up before the punchline, a second slate passed into frame before the order. It must be something that happens. A stage note such as “A pause.” or “A beat.” is never a beat. An action that only fills the space between two lines of speech, such as “He looks at you.” or “They tap the display.”, should be merged or cut.
+
+**Existing dialogue — `catchrelease_harpoonedComms`, a harpooned crew answering the comm:**
+
+> The channel opens on a busy damage-control compartment. Someone reads your transponder code.
+> Someone else asks whether the object recovered from their hull belongs to you.
+>
+> Your comms officer confirms that it does.
+>
+> There is a short silence. "Fishing gear." The speaker looks off-screen. "You fired fishing gear at our ship."
+
+**Why:** the compartment is one beat, with its two people on separate lines. The admission is the turn the scene depends on, so it stands alone. The joke lands in a paragraph of its own.
+
+**Existing dialogue — `catchrelease_harpoonedCommsTT`, the Tri-Tachyon version:**
+
+> "Damage assessment is complete." $PersonRank $personName is already looking at the invoice. "Repair labor, lost operating time, forensic recovery and disposal of your projectile."
+>
+> A brief glance up.
+>
+> "The Tri-Tachyon Legal Department will be in touch."
+
+**Why:** the glance is timing. It holds the pause before the threat, and the threat reads flatter without it.
 
 **Merge paragraphs, not sentences.** When fragmented paragraphs are joined, keep the sentences they held. Do not weld them together with “, and”, “, then”, “, where”, “, because”, a semicolon, a list of three verbs or a trailing descriptive phrase. One long chained sentence after another reads as a list, and every speaker ends up with the same breathless rhythm.
 
@@ -417,9 +443,11 @@ The [dialogue check](DIALOGUE.md#dialogue-check) measures `rules.csv` paragraphs
 
 **Write:**
 
-> “Our drive keeps dropping out. Now the ration printer won't take our feedstock either.” The engineer sends the fault report across. “I have the people to fix one of them. I'd rather fix the drive, so I need another way to feed the printer.”
+> “Our drive keeps dropping out. Now the ration printer won't take our feedstock either.”
+>
+> The engineer sends the fault report across. “I have the people to fix one of them. I'd rather fix the drive, so I need another way to feed the printer.”
 
-**Why:** the first version spends three paragraphs on gestures and a stage note, and the problem arrives in fragments. The second gives the whole problem in the engineer's own words, in one paragraph of short sentences. The fault report still arrives, inside the speech it supports.
+**Why:** the first version spends three paragraphs on gestures and a stage note, and the problem arrives in fragments. The second has two beats, the problem and the decision, each in the engineer's own words. The fault report still arrives, opening the beat it supports.
 
 **Example using the [LYNE/ROD installation](#rod-lyne-and-harpoon):**
 
@@ -431,7 +459,8 @@ The [dialogue check](DIALOGUE.md#dialogue-check) measures `rules.csv` paragraphs
 
 **Why:** this varies the pace while communicating scale, equipment and ordinary work. It is an example, not a paragraph template to repeat.
 
-- Most paragraphs should be more than one sentence. A run of one-sentence paragraphs alternating between speech and gesture is the pattern to avoid.
+- A one-sentence paragraph is right when it is a beat of its own. A whole row of one-sentence paragraphs alternating between speech and gesture is the pattern to avoid.
+- Do not pack several beats into one dense paragraph to reduce the paragraph count. Density follows from where the beats fall.
 - Break a sentence when it accumulates several independent descriptive clauses.
 - Use dashes for a genuine interruption, not every aside.
 - Choose one useful detail for each moment. One is often enough, but this is not a numerical limit.
@@ -495,7 +524,7 @@ Crablobab's humor is more expansive and physical than the Fisherman's. Following
 - **Manufactured suspense:** an unexplained silence followed by the Fisherman's smile around ordinary information. Supply a concrete reason for the pause or remove it.
 - **Explained jokes:** a League officer finds no suitable form, followed by narration explaining the defeat of bureaucracy. Stop at the specific problem.
 - **Echo beats:** an action followed by a short sentence that repeats it with a new subject, such as “The first drone starts to move. The second follows.” or “The boarding order follows.” The second sentence pads the rhythm and adds no information. Put both actions in one sentence, or cut the second one and let the next line of dialogue carry the scene.
-- **Gesture between every line:** quote, small action, quote, small action. Each gesture is harmless alone; together they make every scene read alike. Merge the gestures into speech tags or into the speaker's paragraph, and keep a stand-alone action only when it changes the scene.
+- **Gesture between every line:** quote, small action, quote, small action. Each gesture is harmless alone; together they make every scene read alike. Merge the gestures into speech tags or into the speaker's paragraph, and keep a stand-alone action only when it changes the scene or times the next line.
 - **Stage-note fragments:** “A pause.”, “A beat.”, “A second look.”, “Then, brightly:” or “It does not.” as a paragraph. Write the pause into a sentence with a reason (“He takes a drink before answering.”) or leave it out.
 - **Prop tics:** checking figures, bringing up files, tapping entries, closing displays, slates and manifests in every scene. Also watch “already,” “the same” and “still” when they are used to suggest readiness or continuity rather than to state a fact.
 - **Stock replies:** every speaker accepting with “Understood.”, refusing with “Understood. We'll manage.” or sending “the same” records. Give each speaker a reply that belongs to their job and situation.

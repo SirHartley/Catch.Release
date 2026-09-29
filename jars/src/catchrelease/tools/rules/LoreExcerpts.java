@@ -100,23 +100,23 @@ final class LoreExcerpts {
         return paragraphs;
     }
 
-    // An ellipsis marks an omission, so each side is checked on its own. A piece cut at an omission may have lost one
-    // of its quotation marks; the outer quotation marks are dropped for that reason.
+    // An ellipsis marks an omission, so each side is checked on its own.
     private static List<String> pieces(List<String> paragraphs) {
         List<String> pieces = new ArrayList<>();
         for (String paragraph : paragraphs) {
             for (String piece : normalize(paragraph).split("\\s*…\\s*")) {
                 piece = piece.trim();
-                if (piece.startsWith("\"")) piece = piece.substring(1);
-                if (piece.endsWith("\"")) piece = piece.substring(0, piece.length() - 1);
                 if (!piece.isBlank()) pieces.add(piece);
             }
         }
         return pieces;
     }
 
+    // Wording only: double quotes are dropped and all whitespace counts as one space, so line and paragraph breaks
+    // in a row, and the quote mark that reopens a speech split across paragraphs, do not stop an excerpt matching.
     static String normalize(String text) {
-        return text.replace('“', '"').replace('”', '"').replace('‘', '\'').replace('’', '\'');
+        return text.replace("“", "").replace("”", "").replace("\"", "").replace('‘', '\'').replace('’', '\'')
+                .replaceAll("\\s+", " ").trim();
     }
 
     private static int next(List<String> lines, int from) {

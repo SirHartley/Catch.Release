@@ -64,15 +64,15 @@ public final class DialogueCheck {
                     + "|Then,\\s+[a-z]+|Half a second later|Silence)[.:]");
 
     // Measure.below and Measure.above are the allowed distance from vanilla: share points for shares, a fraction of
-    // the vanilla value for relative measures. Speech-only runs above vanilla and mixed below it by design: fleet-quest
-    // and job offers keep their terms in a speech paragraph of their own, and closing narration after a short reply
-    // gets its own paragraph as in vanilla.
+    // the vanilla value for relative measures. Rows are paragraphed by beat (docs/LORE.md, "Rhythm and length"): offer
+    // terms and mid-speech pauses get speech paragraphs of their own, so paragraphs run shorter, and more of them are
+    // speech-only, than in vanilla.
     private static final List<Measure> MEASURES = List.of(
             new Measure("paragraphsPerVariant", "paragraphs per text variant", false, 0.20, 0.20, true),
-            new Measure("meanWords", "words per paragraph", false, 0.20, 0.20, true),
-            new Measure("shortShare", "paragraphs of " + SHORT_WORDS + " words or fewer", true, 0.08, 0.08, false),
-            new Measure("speechShare", "speech-only paragraphs", true, 0.08, 0.16, false),
-            new Measure("mixedShare", "speech and narration paragraphs", true, 0.16, 0.08, false),
+            new Measure("meanWords", "words per paragraph", false, 0.35, 0.20, true),
+            new Measure("shortShare", "paragraphs of " + SHORT_WORDS + " words or fewer", true, 0.08, 0.10, false),
+            new Measure("speechShare", "speech-only paragraphs", true, 0.08, 0.22, false),
+            new Measure("mixedShare", "speech and narration paragraphs", true, 0.20, 0.08, false),
             new Measure("narrationShare", "narration-only paragraphs", true, 0.08, 0.08, false),
             new Measure("beatShare", "narration beats of " + BEAT_WORDS + " words or fewer", true, 0.06, 0.06, false),
             new Measure("crowdedShare", "mixed paragraphs with 2+ gestures", true, 1, 0.05, false),
@@ -231,18 +231,21 @@ public final class DialogueCheck {
             }
         }
         out.printf("%nDialogueCheck: %d errors, %d warnings, %d measures outside the band%n", errors, warnings, outside);
-        return errors > 0 || outside > 0 ? 1 : 0;
+        // A pass edits the rows that need it, so the changed rows are never a representative sample; only the
+        // whole-file measures fail the check.
+        if (base != null && outside > 0) out.println("Measures of the changed rows are for reference; the whole-file run gates them.");
+        return errors > 0 || (base == null && outside > 0) ? 1 : 0;
     }
 
     private void checkExcerpts(Path lore, List<RulesFile.Row> rows) throws IOException {
-        Map<String, RulesFile.Row> byId = new HashMap<>();
+        Map<String, String> textById = new HashMap<>();
         for (RulesFile.Row row : rows) {
-            byId.put(row.id(), row);
+            textById.put(row.id(), LoreExcerpts.normalize(row.text()));
         }
         for (LoreExcerpts.Excerpt excerpt : LoreExcerpts.read(lore)) {
             if (excerpt.id() == null) {
                 for (String piece : excerpt.pieces()) {
-                    if (rows.stream().noneMatch(row -> row.text().contains(piece))) {
+                    if (textById.values().stream().noneMatch(text -> text.contains(piece))) {
                         errors++;
                         findings.add("ERROR " + LoreExcerpts.LORE + ":" + excerpt.line() + " [excerpt] model line is in no row: "
                                 + abbreviate(piece) + " Update the model line or keep the row's wording");
@@ -250,15 +253,15 @@ public final class DialogueCheck {
                 }
                 continue;
             }
-            RulesFile.Row row = byId.get(excerpt.id());
+            String text = textById.get(excerpt.id());
             String where = LoreExcerpts.LORE + ":" + excerpt.line() + " " + excerpt.id() + " [excerpt] ";
-            if (row == null) {
+            if (text == null) {
                 errors++;
                 findings.add("ERROR " + where + "the quoted row does not exist");
                 continue;
             }
             for (String piece : excerpt.pieces()) {
-                if (!row.text().contains(piece)) {
+                if (!text.contains(piece)) {
                     errors++;
                     findings.add("ERROR " + where + "no longer matches the row: " + abbreviate(piece)
                             + " Update the excerpt or keep the row's wording");
