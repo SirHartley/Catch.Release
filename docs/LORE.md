@@ -388,7 +388,7 @@ Where the beats usually fall:
 - The terms of an offer (the ask, the deadline, the pay) get a paragraph of their own after the gesture that presents them.
 - A closing event that happens after the speaker has finished, such as files arriving, the channel closing or the galley getting to work, ends the row in its own paragraph.
 - In a bar description, the detail that tells the player who this person is gets its own line or paragraph.
-- A speech can break where the speaker would pause for breath between two thoughts. Leave the first paragraph's quotation open and reopen it on the next: `"...can't live without it.` / `"It needs three different catches."`
+- A speech can break where the speaker would pause for breath between two thoughts. Close the quotation at the end of the first paragraph and open it again on the next: `"...can't live without it."` / `"It needs three different catches."`
 
 A small action belongs in the speech tag or inside the speaker's paragraph. Give an action its own paragraph when it changes the scene, or when it times the next line: a glance up before the punchline, a second slate passed into frame before the order. It must be something that happens. A stage note such as “A pause.” or “A beat.” is never a beat. An action that only fills the space between two lines of speech, such as “He looks at you.” or “They tap the display.”, should be merged or cut.
 
