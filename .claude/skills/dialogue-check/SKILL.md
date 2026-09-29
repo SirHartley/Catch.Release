@@ -33,7 +33,7 @@ Work in a temporary directory outside the repository for the base file and build
    java -cp "$TMP/rules-tools" catchrelease.tools.rules.DialogueCheck .
    ```
 
-   Both must exit 0. The changed-rows run compares measures only when the selection is large enough; the whole-file run always does.
+   Both must exit 0. The changed-rows run prints its measures for reference only, because a pass edits a biased set of rows; the whole-file run gates them.
 
 4. Run `RulesCheck` as described in [RULES.md, Rules check tool](../../../docs/RULES.md#rules-check-tool). It looks up command classes, so it needs the full module build and the compile jars from `CLAUDE.md` Building, not the rules package alone. It must report 0 errors, with no more warnings than the base.
 

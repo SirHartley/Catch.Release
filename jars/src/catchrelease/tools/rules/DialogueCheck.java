@@ -231,7 +231,10 @@ public final class DialogueCheck {
             }
         }
         out.printf("%nDialogueCheck: %d errors, %d warnings, %d measures outside the band%n", errors, warnings, outside);
-        return errors > 0 || outside > 0 ? 1 : 0;
+        // A pass edits the rows that need it, so the changed rows are never a representative sample; only the
+        // whole-file measures fail the check.
+        if (base != null && outside > 0) out.println("Measures of the changed rows are for reference; the whole-file run gates them.");
+        return errors > 0 || (base == null && outside > 0) ? 1 : 0;
     }
 
     private void checkExcerpts(Path lore, List<RulesFile.Row> rows) throws IOException {
