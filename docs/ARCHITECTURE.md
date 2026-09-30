@@ -179,6 +179,12 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishRewardRoller.java` | Tier/ownership/active-job exclusions; distinct chart reservations; 3–10× fish-value multiplier (10× = 0.5%). Backdrop rolls require conservatory plans; compatibility conversions retain fixed values. |
 | `QuestPond.java` | Claims ponds by a set of job IDs, adds vanilla mission importance, plants identified quest motes, and releases claims and motes. |
 
+`FishJob` supplies complete offer/remaining deadline sentences as
+`$catchreleaseDeadline` and `$catchreleaseDeadlineLeft`; unlimited jobs say so
+explicitly in dialogue and intel. Old Days fragment tokens remain available.
+Contact reopening and round changes refresh the tokens. Intel contact names use
+display post, then display rank, then name alone.
+
 ### `campaign/fish/jobs/camp`
 
 | File | Owner / connection |
@@ -198,6 +204,17 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `ExpeditionRouteManager.java` | Up to 2 independent Galatia Academy science expeditions (`$catchrelease_scienceExpedition`) from `station_galatia_academy` to 2-3 non-Core systems near abyssal hyperspace and back. MANDATE givers. Skips when the Academy or Galatia's hyperspace link is missing. |
 | `ProspectingRouteManager.java` | Up to 2 Tri-Tachyon prospecting fleets (`$catchrelease_prospectingFleet`) from a Tri-Tachyon spaceport to an unsettled ore world in a marketless system within 12 LY, held there 30-50 days. CLAIM_ASSAY givers. Adds no routes while Nexerelin is enabled; its Tri-Tachyon mining fleets carry the offer instead. |
 | `CatchReleaseDistressProvider.java` | Adapter between the generic distress framework and `FleetQuest`. STRANDED, SCAVENGER_ENGINE, BURN_WARD and FOULED_LINE are the distress calls; each is an emergency aboard the caller. A FOULED_LINE caller is anchored at its claimed rupture (`getFleetAnchor`). |
+
+`FleetQuest` mirrors the complete deadline sentences into entity memory
+(`$catchreleaseFleetDeadline` / `$catchreleaseFleetDeadlineLeft`) and clears them
+with its other rule text. The waiting comm route calls `prepareRuleText` before
+selecting its Text row, so elapsed time is current for every type. Intel's next
+step names the flagship, not a generic catch action.
+
+Dialogue remains in `rules.csv`: each of the 24 cases owns its pitch, questions,
+reminder, delivery and thanks. Qualified acceptance options explicitly say
+`(Accept)`; they use the ordinary acceptance path. The Last Entry and Interment
+follow-up questions use the existing extra-question routing and saved flags.
 
 ### `campaign/fish/colony`
 

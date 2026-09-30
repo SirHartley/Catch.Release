@@ -394,24 +394,27 @@ A small action belongs in the speech tag or inside the speaker's paragraph. Give
 
 **Existing dialogue — `catchrelease_harpoonedComms`, a harpooned crew answering the comm:**
 
-> The channel opens on a busy damage-control compartment. Someone reads your transponder code.
-> Someone else asks whether the object recovered from their hull belongs to you.
+> Your call reaches a damage-control compartment. Someone reads out your transponder code.
 >
-> Your comms officer confirms that it does.
+> "Is this yours?"
 >
-> There is a short silence. "Fishing gear." The speaker looks off-screen. "You fired fishing gear at our ship."
+> An image of the recovered harpoon head appears. Your comms officer confirms that it is fishing equipment.
+>
+> "Yes, we'd worked that out. What were you trying to catch?"
 
-**Why:** the compartment is one beat, with its two people on separate lines. The admission is the turn the scene depends on, so it stands alone. The joke lands in a paragraph of its own.
+The recovered head gives the crew a concrete complaint. The caller's explanation does not answer the question they actually care about.
 
 **Existing dialogue — `catchrelease_harpoonedCommsTT`, the Tri-Tachyon version:**
 
-> "Damage assessment is complete." $PersonRank $personName is already looking at the invoice. "Repair labor, lost operating time, forensic recovery and disposal of your projectile."
+> $PersonRank $personName has an invoice open.
 >
-> A brief glance up.
+> "Repairs, operating time, removal and disposal. Legal is still deciding how to classify the projectile, but I don't expect that to reduce the amount."
 >
-> "The Tri-Tachyon Legal Department will be in touch."
+> The invoice closes.
+>
+> "They'll contact you."
 
-**Why:** the glance is timing. It holds the pause before the threat, and the threat reads flatter without it.
+The officer discusses the bill before passing the matter to Legal. The threat remains part of ordinary corporate business.
 
 **Merge paragraphs, not sentences.** When fragmented paragraphs are joined, keep the sentences they held. Do not weld them together with “, and”, “, then”, “, where”, “, because”, a semicolon, a list of three verbs or a trailing descriptive phrase. One long chained sentence after another reads as a list, and every speaker ends up with the same breathless rhythm.
 
@@ -610,11 +613,11 @@ The projectile is large enough to damage a ship conventionally. The Fisherman ma
 
 **Existing dialogue — `catchrelease_introDeepResume_continue`, after the equipment transfer:**
 
-> “That's a harpoon,” he says, pointing at the second rig. “Name's apt, this time. It's the quick and hard way to get a pattern. The lights thin the fabric enough to bring one within reach. The harpoon puts a ROD head on it before it slips away.”
+> "The head carries a ROD. When you've got a return under the lights, put the harpoon into it. The ROD takes hold and the return trace brings the catch across."
 >
-> He turns from the rig to you. “It's a heavy projectile. Treat it accordingly.”
+> He waits for your deck officer to acknowledge the installation instructions. "Mind where you aim it. The projectile is quite real."
 
-He explains the job, then takes responsibility for the warning. The dry remark does not replace the operating instructions.
+He explains retrieval and warns that the projectile itself can cause damage. The visible return trace is not a physical cable.
 
 ### Legality and Breach Lights
 
@@ -725,17 +728,19 @@ Show that through his priorities and omissions, not a confession, villainous smi
 
 **Existing dialogue — `catchrelease_introTurnIn2`, the first catch hand-in:**
 
-> The catch is transferred aboard the trawler. The Fisherman reads the ROD telemetry before he looks at the fish.
+> The Fisherman has a crewman bring your catch over while he reads the retrieval log. He checks the specimen against the display, then waves the crewman on.
 >
-> “Clean enough. Good,” he says. “First trip's mostly about getting the rig home with you, and you did.”
+> "Good. Nothing wrong with that return. How did you find it?"
 
-He checks the learner's safe return before the value of the catch. His approval is modest but genuine; no ominous qualification follows it.
+He checks the retrieval before approving the catch. His concern is whether the player can operate the rig.
 
 **Existing dialogue — `catchrelease_introTurnIn5_cont`, at graduation:**
 
-> “That's the lesson finished. You know enough now to make your own mistakes.” He glances over the range records once more. “And if a return doesn't match what the chart promised, bring it here before you decide it's useless.”
+> "That's all I needed to show you. There are buyers in port and captains who'll pay for a particular catch. Read the request before you agree to it."
+>
+> He closes the service ledger. "Keep the rig working, and bring me anything you want to sell. I may have some other work for you as well."
 
-He gives the player independence without withdrawing help. These short responses suit their moments; longer teaching exchanges still need room to finish the thought.
+He ends the lessons without ending the working relationship.
 
 #### Speech
 
@@ -745,7 +750,9 @@ He often answers the immediate question, recognizes the deeper one, and decides 
 
 **Existing dialogue — `catchrelease_introFirstQuestion`:**
 
-> “Pattern,” he says, turning the container a little. “Fish is fine if you're buying supper. Pattern's the careful word.”
+> "A pattern. Fish is what we call the catch; pattern is what you'll see in the technical records."
+>
+> The Fisherman brings the specimen back into view. "The distinction matters when it stops looking quite so much like a fish."
 
 **Existing dialogue — `catchrelease_ask_deepWater`, answering a question about thin fabric:**
 
@@ -847,22 +854,19 @@ Neither characters nor narration comment on the coat's spatial inconsistency.
 
 > "Chicken!"
 >
-> Crablobab reaches into his coat, past a rack of boxed merchandise, and produces a little display tile. He plants it on the counter with a flourish.
-> A chicken marches across the screen, vanishes around one edge, and promptly returns from the other.
+> Crablobab produces a display tile from behind a rack of boxed merchandise inside his coat. A chicken crosses the screen, disappears off one edge and comes back at the other.
 >
-> "Fish not introduced yet? Chicken. Upright, punctual, excellent posture. Keeps the place occupied until something more fish-shaped turns up."
+> "For the fishing display. When you haven't got a head that shows the fish on the hook, he stands in. See? Already at work."
 >
-> Crablobab turns the tile toward you.
+> He turns the tile to give you a better view. The chicken turns with it.
 >
-> "Very important: not a fish. If he were a fish, I'd have to charge you for the fish."
+> "Doesn't tell you what you've hooked. He's a chicken. But you can follow him about just as well."
 >
-> He considers this, then brightens.
+> "$catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. Once! You keep him."
 >
-> "$catchreleaseCrabChicken_profilePrice credits, $catchreleaseCrabChicken_profileCrabs crabs. Permanent! Buy him once, chicken forever."
+> The chicken pecks at the edge of the screen.
 >
-> The chicken completes another circuit. Crablobab gives it an approving nod.
->
-> "Look at him go."
+> "No feed bill either. I've checked."
 
 He demonstrates the product, enjoys its performance and gets back to the sale. Longer sentences give the enthusiasm room; the price and permanent ownership remain clear. Do not reduce all his merchandise to a product-name exclamation and a pause.
 
@@ -1126,7 +1130,7 @@ Voice: harried and loud. A head chef talks to the player and the kitchen in the 
 
 Know practical gear and fishing procedure. They sincerely believe in the industry. They do not know the truth about the Fisherman's existence.
 
-Voice: working people with a grievance. Plain, contracted and specific about money, parts and crews (“Get them off the rupture. Pay them, scare them, fight them, I don't care.”, `catchrelease_campPirate_ask`). The pirate-camp fisher is angry about the numbers, the mercenary-camp fisher talks claims and case numbers, the Pather-camp fisher keeps checking the door.
+Voice: working people with a grievance. Plain, contracted and specific about money, parts and crews (“Get them away from there. Pay them, talk them round, shoot them if that's what it takes. I need the rupture clear.”, `catchrelease_campPirate_ask`). The pirate-camp fisher is angry about the numbers, the mercenary-camp fisher talks claims and case numbers, the Pather-camp fisher keeps checking the door.
 
 ### Researchers and the Academy
 
@@ -1168,12 +1172,12 @@ Fleet quests are short conversations with people in the middle of a bad day. The
 
 | Contact | Voice | Model line |
 |---|---|---|
-| Engineer (Stranded) | Exhausted, blunt, a little profane. Talks about triage between two broken systems. | “I'd rather be stuck than starving, but it's not sustainable.” |
-| Coil technician (dead engine) | Deadpan, reads the manual aloud and distances themselves from it. | “I didn't write it.” |
-| Medical officer (Burn Ward) | Triage voice: counts, priorities, what's left in the cabinet. Warm only in private. | “I can keep them stable for $entity.catchreleaseFleetDays.” |
-| Skipper (Fouled Line, Escrow) | Working fisher or salvager. Practical, contracted, protective of the boat and the crew. | “Those drones cost more than the boat.” |
-| Purser (Quota) | Apologetic, precise, anxious about arbitration. Long careful sentences. | “I would very much prefer not to give them the opportunity.” |
-| Galley chief (Hungry Fleet) | Wounded professional pride played for comedy. Treats morale as a medical emergency. | “Nutritionally adequate, and thoroughly humiliating.” |
+| Engineer (Stranded) | Exhausted, blunt, a little profane. Talks about triage between two broken systems. | “Neither job's getting done.” |
+| Coil technician (dead engine) | Deadpan, reads the manual aloud and distances themselves from it. | “I was hoping you'd say you'd heard of it.” |
+| Medical officer (Burn Ward) | Triage voice: counts, priorities, what's left in the cabinet. Warm only in private. | “I'd be grateful if you came straight back once you have it.” |
+| Skipper (Fouled Line, Escrow) | Working fisher or salvager. Practical, contracted, protective of the boat and the crew. | “Those drones are worth more than the boat.” |
+| Purser (Quota) | Apologetic, precise, anxious about arbitration. Long careful sentences. | “I know what the count is. I'd just rather it weren't.” |
+| Galley chief (Hungry Fleet) | Wounded professional pride played for comedy. Treats morale as a medical emergency. | “I've worked in galleys for twenty years. I don't need a gunner explaining stew to me.” |
 | Quartermaster (Tribute) | Frightened and trying to stay businesslike. Breaks off to speak to someone off-channel. | “If you've got a fishing rig, answer private. Please.” |
 | Bosun (Mutiny Pot) | Conspiratorial, loyal to the crew, keeps it off the open channel. | “This stays off the ship's open channels until it's aboard.” |
 | Captain (Mutiny Pot counteroffer) | Old-school owner, proud, wants the story to stay his. | “A captain reads his own manifest. I know about the pot.” |
@@ -1183,13 +1187,13 @@ Fleet quests are short conversations with people in the middle of a bad day. The
 | Maintenance chief (Quiet Ship) | Laconic, superstitious about a custom they will not over-explain. | “It helps.” |
 | Operator (Exhibit) | Owner-operator one inspection away from ruin. Tense, legalistic. | “If it fails inspection, bond $entity.catchreleaseFleetBond is forfeit, and $entity.catchreleaseFleetCompany folds.” |
 | Impresario (Headliner) | Showman: smooth, theatrical, faintly aggrieved, always selling. | “I've had a long conversation with the handlers about both of those facts.” |
-| Collector (Collector's Commission) | Formal, precise, obsessive; tank temperatures and grievances. | “I have had enough of being sniped.” |
+| Collector (Collector's Commission) | Formal, precise, obsessive; tank temperatures and grievances. | “They are perfectly willing to sell. Right up until it is time to deliver.” |
 | Escort commander (Follower) | Hegemony Navy; see [Hegemony](#hegemony). | |
 | Protocol officer (State Dinner) | Diktat protocol; anxiety expressed as formality. | “That is not an acceptable amendment to the program.” |
-| Contract officer (Claim Assay) | Tri-Tachyon contract staff; exposure and vendor supply. | “We've moved the requirement to vendor supply.” |
-| Pirate captain (Parley Fish) | See [Pirates](#pirates); old rules of the trade, invoked with a grin. | “You claim the water, you bring something fresh out of it to the table.” |
-| Seeker captain (Fleet on a Hunt) | Worn down, terse, private about the reason. | “Eleven weeks. That's the part you need.” |
-| Wager captain (Settling a Bet) | Exasperated referee of their own crew. | “I'd rather they didn't start putting ship shares into the pot.” |
+| Contract officer (Claim Assay) | Tri-Tachyon contract staff; exposure and vendor supply. | “Engineering proposed a second attempt. I asked for a cost estimate. That's when we started looking for a supplier.” |
+| Pirate captain (Parley Fish) | See [Pirates](#pirates); old rules of the trade, invoked with a grin. | “There's a custom. You bring a fresh catch out of the water you're claiming.” |
+| Seeker captain (Fleet on a Hunt) | Worn down, terse, private about the reason. | “Now he's retiring. Wants the collection packed up and sent on. Which means someone is going to count it.” |
+| Wager captain (Settling a Bet) | Exasperated referee of their own crew. | “I've forbidden any more betting. That hasn't improved the atmosphere.” |
 
 ### The young factor
 
@@ -1293,7 +1297,11 @@ They are not universally stupid or fascist parody officers. Write a Hegemony off
 
 (Retained from the original lore reference.) The incongruous weapon irritates the officer; the next step is still identification and an incident report. No fabric theory is needed.
 
-> “We will be shipping the object to Naval Intelligence. You may request a receipt at the closest Hegemony military office. Be sure to provide the incident report number.”
+> "We've recovered your projectile. Naval Intelligence will examine it. You can apply for a receipt at a military office; quote the number on that report."
+>
+> $HeOrShe looks up.
+>
+> "That isn't an invitation to come and collect it."
 
 (`catchrelease_harpoonedCommsHeg`)
 
@@ -1301,7 +1309,7 @@ They are not universally stupid or fascist parody officers. Write a Hegemony off
 
 (`catchrelease_fineDemandRepeatHeg`)
 
-> “One of my crewmen used to fish. He says fishing crews deal with persistent contacts by releasing a specimen they're known to follow. I do not enjoy having that sentence in the incident log, but it is the only course with precedent.”
+> "That recommendation is going in my incident log. I'd appreciate having a result to put beside it."
 
 (`catchrelease_fq_follower_pitch`) A Navy commander doing something unorthodox by the book, and disliking every word of it.
 
@@ -1324,7 +1332,13 @@ Keep the menace professional. The funniest Tri-Tachyon line is often an invoice.
 
 **Model lines:**
 
-> “Damage assessment is complete.” $PersonRank $personName is already looking at the invoice. “Repair labor, lost operating time, forensic recovery and disposal of your projectile.” A brief glance up. “The Tri-Tachyon Legal Department will be in touch.”
+> $PersonRank $personName has an invoice open.
+>
+> "Repairs, operating time, removal and disposal. Legal is still deciding how to classify the projectile, but I don't expect that to reduce the amount."
+>
+> The invoice closes.
+>
+> "They'll contact you."
 
 (`catchrelease_harpoonedCommsTT`)
 
@@ -1332,7 +1346,13 @@ Keep the menace professional. The funniest Tri-Tachyon line is often an invoice.
 
 (`catchrelease_fineDemandRepeatTT`)
 
-> “The device is being removed. What remains is a question of how much of your hull it is still attached to.”
+> "Security has authorized force."
+>
+> $PersonRank $personName closes the incident file.
+>
+> "We gave you several opportunities to stop operating the device. You've declined all of them."
+>
+> The link closes as the formation spreads.
 
 (`catchrelease_lampGunsTT`)
 
@@ -1427,17 +1447,29 @@ Bureaucratic complexity can be comic without making League officers buffoons.
 
 **Model lines:**
 
-> “League regulations authorize a fine of $entity.catchrelease_harpoonFineDGS credits for damage to associated hulls by... heavy salvaging equipment. Yeah.”
+> "Damage to an associated hull through negligent operation of heavy recovery equipment."
 >
-> “If you dislike my interpretation, the appeals committee meets quarterly.”
+> $PersonRank $personName checks the wording against a regulation.
+>
+> "$entity.catchrelease_harpoonFineDGS credits. I appreciate that the equipment was intended for fishing. That does not alter the condition of the other ship."
 
 (`catchrelease_fineDemandLeague`)
 
-> “The convention has run out of prices. We are at remedies.”
+> "The fine did not settle this, so we are proceeding to inspection."
+>
+> $PersonRank $personName sends the boarding authorization.
+>
+> "Power down. The team will examine your records and seize all catch aboard, including packed crates."
 
 (`catchrelease_lampScanLeague`)
 
-> “There is no fourth provision. The drafters assumed three opportunities would be sufficient.”
+> $PersonRank $personName closes the incident record.
+>
+> "The previous stops are all on file. Command has authorized engagement."
+>
+> $HeOrShe glances at the tactical display.
+>
+> "We are done discussing the regulations."
 
 (`catchrelease_lampGunsLeague`)
 
@@ -1456,15 +1488,21 @@ Avoid cartoon fascist speeches.
 
 **Model lines:**
 
-> “I am required to ask whether the act was deliberate.” The slate is set aside. “I have spared us both the formality.”
+> "I am required to establish whether the act was deliberate. For your sake, I have entered it as an accident. Do not give me cause to amend that finding."
 
 (`catchrelease_harpoonedCommsDiktat`)
 
-> “You have mistaken restraint for negotiability.”
+> "Your equipment will be inspected and all catch aboard seized, including packed crates. Shut it down now. I will not repeat the order while our people are crossing."
 
 (`catchrelease_lampScanDiktat`)
 
-> “There is no fourth penalty. There is a standing order, and you are now the subject of it.”
+> "You have repeatedly defied a direct order of the Sindrian Diktat."
+>
+> $PersonRank $personName signs the finding.
+>
+> "Force is authorized."
+>
+> Weapons come online across the formation.
 
 (`catchrelease_lampGunsDiktat`)
 
@@ -1484,7 +1522,11 @@ They often have the least ideological language.
 
 **Model lines:**
 
-> “Somebody you hooked filed a claim. Filing a claim means I get to fly out here and say $entity.catchrelease_harpoonFineDGS credits.” … “Pay it and both of us get our day back.”
+> "Ease off, captain. Someone you harpooned has filed a claim."
+>
+> $personName sends the yard estimate.
+>
+> "$entity.catchrelease_harpoonFineDGS credits. I'm sure you've got an explanation, but they've still got a hole in the hull. Can we settle it?"
 
 (`catchrelease_fineDemandIndie`)
 
