@@ -413,7 +413,7 @@ $catchreleasePaid",,"The provisioner has the containers checked against the orde
 catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_chef score:100,,"The chef answers over the noise of the kitchen. ""Captain! Tell me you've got the fish. Not you, I'm talking to the captain! Put that down before you break it.""",,
 catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,"A cook in stained whites is shouting into a comm unit. ""Then why did you take the bloody order?"" Three ingredient cards lie beside an untouched drink. The cook stabs a finger at each one, though the supplier cannot possibly see them.",,
 catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Talk to the cook with the ingredient cards,
-catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,Call $catchrelease_jobRef showRewardDetails,"""You catch fish? Good. My supplier's apparently taken up another profession without telling me. I've got $catchreleaseDish on the menu, every table booked, and nothing to put on the plates.""
+catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,Call $catchrelease_jobRef showRewardDetails,"""You catch fish? Good. My supplier's apparently taken up another profession without telling me. I'm putting $catchreleaseDish on the menu. Apparently half the station has decided they can't live without it.""
 
 The chef shoves three ingredient cards toward you. ""$catchreleaseAskCap. All three. Don't bring me a hold full of one and tell me it's just as good. I know what goes in my own dish.""
 
