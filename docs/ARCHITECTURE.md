@@ -171,6 +171,8 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | File | Owner / connection |
 |---|---|
 | `FishJob.java` | Mission base -> FishRequirement/FishCurrency -> picker -> QuestRewards -> intel. Shared acceptance-time restriction; progress compares capped displayed counts; selected specimens reach rewards before the next round rolls. |
+| `ChefJob.java` | Three ingredient types and a saved dish; supplies `$catchreleaseDish` to the chef's rules dialogue. |
+| `TuberJob.java` | Two paid deliveries: a Fine Uncommon/Rare specimen, then a low-coherence catch. Rules disclose both before acceptance; follow-up and camera questions return to the offer without changing mission state. |
 | `DemandScore.java` | Scores actual requirements (unmodified Common = 10), including diminishing extra specimens and cheapest anyOf branch; supplies ambition/count helpers and EASY/MEDIUM/HARD/SEVERE reward tiers. |
 | `QuestRewards.java` | Shared reward budget: score × 600 credits × 0.75–1.35; fixed rewards, tier-gated extras, remaining guaranteed credits, saved hand-in value multiplier. Later cash stages guarantee ≥20% total and ≥25% base-credit growth, each ≥2,000; multiplier cannot decrease. |
 | `QuestDuration.java` | Satisfiability gate and deadline: nearest valid range + round-trip fleet travel + work, rounded to 30/60/90/120/180 days or unlimited; +30 for required Rare/Epic and +30 for post-acceptance catch. |
@@ -190,8 +192,11 @@ mission outcome. Final replies are added through `JobSpecificOptions` after the
 shared reward receipts.
 
 `CompanionJob` owns A Client's Preference; its `catchrelease_client_*` rules and
-intel describe the same private commission. Weight and size-premium checks remain
-in the job, not in dialogue.
+intel describe the same private commission. The request uses `minLength`; the
+bonus requires the upper two-fifths of the species' length range, ignoring weight.
+`FishJobAsks` supplies the length floor. `ModPlugin.onGameLoad` migrates active
+saved weight requests; token preparation covers unaccepted bar offers. Migration
+keeps rewards, deadlines and catch provenance unchanged.
 
 ### `campaign/fish/jobs/camp`
 

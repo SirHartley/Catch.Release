@@ -413,7 +413,7 @@ $catchreleasePaid",,"The provisioner has the containers checked against the orde
 catchrelease_chef_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_chef score:100,,"The chef answers over the noise of the kitchen. ""Captain! Tell me you've got the fish. Not you, I'm talking to the captain! Put that down before you break it.""",,
 catchrelease_chef_blurbBar,catchrelease_chef_blurbBar,,,"A cook in stained whites is shouting into a comm unit. ""Then why did you take the bloody order?"" Three ingredient cards lie beside an untouched drink. The cook stabs a finger at each one, though the supplier cannot possibly see them.",,
 catchrelease_chef_optionBar,catchrelease_chef_optionBar,,,,catchrelease_chef_ask:Talk to the cook with the ingredient cards,
-catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,Call $catchrelease_jobRef showRewardDetails,"""You catch fish? Good. My supplier's apparently taken up another profession without telling me. I've got $catchreleaseDish on the menu, every table booked, and nothing to put on the plates.""
+catchrelease_chef_ask,DialogOptionSelected,$option == catchrelease_chef_ask,Call $catchrelease_jobRef showRewardDetails,"""You catch fish? Good. My supplier's apparently taken up another profession without telling me. I'm putting $catchreleaseDish on the menu. Apparently half the station has decided they can't live without it.""
 
 The chef shoves three ingredient cards toward you. ""$catchreleaseAskCap. All three. Don't bring me a hold full of one and tell me it's just as good. I know what goes in my own dish.""
 
@@ -881,45 +881,46 @@ Across the bar, the winning shift crew is collecting from the losing one. The ve
 $catchreleaseFightDate: $catchreleaseWinner over $catchreleaseLoser. Supplier: $playerName.",,
 ,,,,,,
 # bar job: companion,,,,,,
-catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"""Captain. Is this about our arrangement?"" The $manOrWoman checks the time. ""Good. My client has been asking.""",,
-catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,"A $manOrWoman at the end of the bar is dressed for somewhere else entirely and is not troubled by this. $HeOrShe has been looking at you for a while, and it is not the look you would assume.",,
-catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Approach the $manOrWoman in eveningwear,
-catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"Call $catchrelease_jobRef showRewardDetails
+catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection from a private booth, a drink at one elbow and a slim slate open.
+
+""Captain."" The client's name is masked; $heOrShe skips past it to the specimen requirements.",,
+catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A $manOrWoman in understated eveningwear sits alone with a nearly finished drink. A private order is open on the table beside $himOrHer. The client's name is masked.,,
+catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask the liaison about the private contract,
+catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseClientOffer 0
-FireAll JobSpecificOptions","""I have a client,"" $heOrShe says. ""That is the word I am going to use and we are both going to leave it there.""
+FireAll JobSpecificOptions","""I'm arranging something for a patron. One specimen.""
 
-""He wants a fish. A real one, not off a menu. $catchreleaseAskCap. That is the minimum, Captain. I want you to understand that it is a minimum.""
+$HeOrShe turns the slate toward you. ""$catchreleaseAskCap. No smaller.""
 
-$catchreleaseDeadline
+The specification is very particular on that point.
 
-""$catchreleaseRewardCap. More if it is especially big for its species. That is the entire arrangement, and it is a very good one.""",,
+""$catchreleaseDeadline $catchreleaseRewardCap when you bring it in. If you find an unusually large one, my patron is prepared to be generous.""",,
 catchrelease_client_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseClientOffer
 !$catchreleaseClientAskedPurpose",,,10:catchrelease_client_purpose:What does the buyer want it for?,
 catchrelease_client_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseClientOffer,,,30:catchrelease_jobAccept:Take the contract.,
 catchrelease_client_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseClientOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_client_purpose,DialogOptionSelected,$option == catchrelease_client_purpose,"$catchreleaseClientAskedPurpose = true 0
 $menuState = catchreleaseClientOffer 0
-FireAll JobSpecificOptions","$HeOrShe looks at you with enormous patience.
-
-""My client has booked a private evening. I am making the arrangements. You are supplying the fish. Are we going to have any difficulty with your part?""",,
-catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_client,,"""Lovely. Call me when it's aboard. A sealed container, please, and no need to tell the dockmaster whom you're meeting.""",,
+FireAll JobSpecificOptions","""He intends to buy it."" $HeOrShe scrolls past the masked buyer field to the handling section. ""I need the container sealed and the length legible. Beyond that, I don't have instructions.""",,
+catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_client,,"""Discretion is enough. Secrecy only makes people curious.""",,
 catchrelease_client_declined,catchreleaseJobDeclined,$missionId == catchrelease_client,,"""Of course.""
 
 $HeOrShe closes the order and returns to $hisOrHer list of contacts.",,
-catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,,"""$catchreleaseAskCap. My client hasn't changed his mind. Believe me, I checked.""
+catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same arrangement. My patron hasn't changed his mind.""
 
 $catchreleaseDeadlineLeft",,
 catchrelease_client_paid,catchreleaseJobPaid,"$missionId == catchrelease_client
-$catchreleasePaid",,"$HeOrShe measures the catch, then consults a message on $hisOrHer tripad.
+$catchreleasePaid",,"$HeOrShe checks the catch's recorded length against the order and accepts the receipt.
 
-""Yes. That will do. Thank you, Captain.""
-
-Payment is settled before a porter arrives for the sealed container. ""If anyone asks, you made a delivery. I wouldn't embellish it.""",,
+The agreed payment changes hands.",,
 catchrelease_client_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_client
 $catchreleasePaid
-$catchreleaseBonus score:100",,"""Oh, that is over."" $HeOrShe checks the measurements again. ""That is comfortably over.""
+$catchreleaseBonus score:100",,"$HeOrShe checks the measurements once more and compares the specimen's recorded length with a short note on $hisOrHer slate.
 
-The promised extra is included in your payment. $HeOrShe dictates a short message, deletes it, and tries again before letting the porter take the container.",,
+""Upper two-fifths. That qualifies.""
+
+The agreed payment changes hands. There is no handshake. $HeOrShe is already checking the next appointment.",,
 ,,,,,,
 # bar job: academy,,,,,,
 catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"""Please tell me you've brought something, Captain. I've spent the morning explaining to suppliers that I do want the bad ones.""",,
@@ -948,56 +949,60 @@ $catchreleasePaid",,"The researcher takes a measurement, adjusts the instrument,
 An assistant is called over to check the first result. Neither of them seems likely to remember you are there without a reminder.",,
 ,,,,,,
 # bar job: tuber,,,,,,
-catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"""Chat! The captain's back. Get in here, we're doing the reveal.""
+catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp.
 
-The TriTuber drags a lamp into position. ""You have brought it, right? Don't answer yet. Let me get the lens on you.""",,
-catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A $manOrWoman has set up two lamps and a good lens at one end of the bar. The chair is in the main walkway, forcing servers to squeeze around a recording of the same six-second introduction.",,
+""CHAT. Stop scrolling. You are not going to believe who just called me.""
+
+$HeOrShe checks the recording indicator, then drops $hisOrHer voice. ""Please tell me you have something.""",,
+catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A $manOrWoman has converted one end of the bar into a recording set: two lamps, a good lens, and a chair placed squarely in the main walkway. $HeOrShe is recording the same six-second introduction for the fourth time.",,
 catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask the $manOrWoman at the recording set what $heOrShe is filming,
-catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,"CatchReleaseCMD highlightJobText $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""Chat, do not go anywhere. Actual fishing captain. Right here."" The TriTuber swings a lamp toward you. ""Captain, look beside the lens. Brilliant. Keep doing that.""
+catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails","$HeOrShe taps the lens awake before answering. ""Chat, do not go anywhere. This is huge.""
 
-A request appears on your tripad: $catchreleaseAsk.
+$HeOrShe swings one lamp toward you. ""You. Captain. Look here. Perfect. Everyone, I have an actual fishing captain standing in front of me right now, and we may have the specimen.""
 
-""I want a reveal. We open the box, cut to you, and I ask what everyone's typing. Is this thing real? Chat, you are not ready.""
+$HeOrShe points at the chair. ""I need $catchreleaseAsk. You bring it in, I open on the reveal, cut to you, then ask the question everybody is already typing: is this thing real?""
 
-$HeOrShe lowers the lens. ""Two specimens, two deliveries. Good one first, low-coherence one for the follow-up. $catchreleaseReward for this delivery, out of the sponsor pool.""
+$HeOrShe leans into the lens. ""You are NOT ready for this one.""
 
-$catchreleaseDeadline The same terms start afresh for the second delivery.
+Then, to you: ""$catchreleaseReward. Entire sponsor pool. Sit down. I need your face for the thumbnail.""
 
-""Sit down. I need your face for the thumbnail.""","catchrelease_tuber_followup:What sort of follow-up?
+The order is for two deliveries: this specimen first, then a low-coherence catch. Each is paid separately. $catchreleaseDeadline The second delivery gets its own deadline.","catchrelease_tuber_followup:What sort of follow-up?
 catchrelease_tuber_camera:Are you recording this conversation?
 catchrelease_jobAccept:Agree to supply both specimens.
 catchrelease_jobDecline:Decline.",
-catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes! Chat, we have a captain. Everyone saying I made this up can apologize whenever they're ready.""
+catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes. Perfect. Chat, we have a captain."" $HeOrShe starts recording before you can move. ""Everyone asking whether this is actually happening: it is happening. We are getting the specimen.""
 
-$HeOrShe pauses the recording. ""Please bring it back before they start digging through my old clips. They've done that before.""",,
-catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow. Chat, you just watched a captain walk away from sponsor money. Would you have taken it? Tell me I'm wrong.""
+$HeOrShe pauses the stream, and the grin goes a little desperate. ""Please bring it back before everyone starts accusing me of faking the whole thing.""",,
+catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow."" $HeOrShe turns to the lens without moving it off you. ""Chat, you just watched a captain walk away from easy sponsor money. Would you have taken it? Tell me I'm wrong.""
 
-The lens follows you. ""Captain? Could you walk away again? Slower. I cut your head off.""",,
-catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,,"""Chat, update. The captain is back. Do we have it? Captain?""
+Then, quietly, to you: ""Please take the job.""",,
+catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Still waiting."" $HeOrShe raises the camera as soon as $heOrShe sees you. ""Chat, update. The captain is back. Do we have it? We do not have it.""
 
-You are shown the outstanding request: $catchreleaseAsk. $catchreleaseDeadlineLeft
+The camera comes down again. ""Every time you walk in here without it, chat makes up three new conspiracy theories.""
 
-The lens comes down. ""They're counting how many times I've said 'soon'. Someone's made a compilation. Please bring me the fish.""",,
+$catchreleaseDeadlineLeft",,
 catchrelease_tuber_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
-$catchreleaseMore score:100","CatchReleaseCMD highlightJobText $catchreleaseAsk
-Call $catchrelease_jobRef showRewardDetails","The TriTuber watches the viewer count climb, flatten, then fall.
+$catchreleaseMore score:100","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails","$HeOrShe watches the numbers climb, flatten, then stop.
 
-""No, chat. I know it's a fish. That's why I hired a fishing captain. What did you think was going to be in the box?""
+""No. No, no. Chat liked it. Chat did not care for it.""
 
-$HeOrShe scrubs back to the reveal. ""They saw the whole thing and left. I need the bad one now. $catchreleaseAskCap. Something they'll replay.""
+$HeOrShe scrubs backward through the clip. ""Look. Perfect specimen, perfect shot, it's just too obvious.""
 
-Your first payment is arranged. The second delivery pays $catchreleaseReward. $catchreleaseDeadline
+To the stream: ""YES, I KNOW IT'S A FISH.""
 
-The lens goes up again. ""If that looked normal to you, good. Remember what you said. We're doing another one.""",,
+$HeOrShe turns the display toward you as though the graph has personally insulted $himOrHer. ""I need a bad one. $catchreleaseAskCap.""
+
+""I want one where the first frame says one thing and the next frame makes everyone check the first frame again. I want three thousand comments from people absolutely certain they saw different things. $catchreleaseRewardCap. Bigger sponsor pool. This one could be enormous.""
+
+$catchreleaseDeadline",,
 catchrelease_tuber_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
-!$catchreleaseMore score:100",,"""Oh, chat is going to hate this."" The TriTuber crowds the lens against the container. ""Look at that. No, look again. Tell me what you saw. Don't read anyone else's answer first.""
+!$catchreleaseMore score:100",,"""Oh, chat is going to hate this."" $HeOrShe crops in until the specimen fills the display. ""Look at that. Do not look away. You think you've got it, then you look again. A perfect thumbnail! Let everyone fight.""
 
-$HeOrShe checks the comments and starts laughing. ""They're fighting already. Captain, don't explain anything. Let them.""
-
-Your final payment is authorized without a break in the recording.",,
+$HeOrShe authorizes the payment without taking $hisOrHer eyes off the viewer count.",,
 ,,,,,,
 # bar job: cult,,,,,,
 catchrelease_cult_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_cult score:100,,"The three buyers sit shoulder to shoulder before the pickup. Each inclines their head, in order.
@@ -3750,14 +3755,16 @@ catchrelease_academy_research,DialogOptionSelected,$option == catchrelease_acade
 
 ""I recalibrated and got a third result. My supervisor suggested discarding the first one. On what grounds? I followed the same procedure for all three. I need more specimens before I can get anywhere with this.""","catchrelease_jobAccept:Take the research commission.
 catchrelease_jobDecline:Decline.",
-catchrelease_tuber_followup,DialogOptionSelected,$option == catchrelease_tuber_followup,,"""The low-coherence one. We need a good specimen first so chat knows what normal looks like. Then we bring out the other one and watch them lose their minds.""
+catchrelease_tuber_followup,DialogOptionSelected,$option == catchrelease_tuber_followup,,"""Captain, I am thinking two videos. Two reveals. First we give them the beautiful one. Then you bring me something from low-coherence space and we see how long it takes chat to decide I've been replaced.""
 
-$HeOrShe points at you. ""And you're coming back for the reveal. Same captain, same chair, none of that 'hired actor' business. You'll get the second order and its payment offer when you deliver the first.""","catchrelease_tuber_camera:Are you recording this conversation?
+$HeOrShe glances at the lens. ""Chat. You cannot accuse me of faking footage I haven't filmed yet.""
+
+""First specimen, first payment. Then I'll give you the second order and the new offer. And you have to sit in the same chair. Last time I moved the chair, they said we'd switched studios.""","catchrelease_tuber_camera:Are you recording this conversation?
 catchrelease_jobAccept:Agree to supply both specimens.
 catchrelease_jobDecline:Decline.",
-catchrelease_tuber_camera,DialogOptionSelected,$option == catchrelease_tuber_camera,,"""Chat, the captain wants to know if we're recording."" The lens stays on you. ""Look at that face. That's a genuine reaction.""
+catchrelease_tuber_camera,DialogOptionSelected,$option == catchrelease_tuber_camera,,"""Chat. The captain has just noticed the camera. Look at that. That's the thumbnail.""
 
-$HeOrShe checks the recording indicator. ""Yes, Captain. Please don't look at the red light. Look at me.""","catchrelease_tuber_followup:What sort of follow-up are you planning?
+$HeOrShe reaches past you to adjust a lamp. ""Yes, Captain, we're recording. Please keep looking exactly like that. No, don't look at the lens. You were doing it perfectly a moment ago.""","catchrelease_tuber_followup:What sort of follow-up are you planning?
 catchrelease_jobAccept:Agree to supply both specimens.
 catchrelease_jobDecline:Decline.",
 catchrelease_introContinuityOption,CatchReleaseIntroContinuityOption,$catchreleaseContinuityQuestionAvailable,,,-10:catchrelease_intro_fourJumps:I just left you in another system.,
