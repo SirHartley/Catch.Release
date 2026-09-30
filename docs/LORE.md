@@ -846,15 +846,17 @@ Neither characters nor narration comment on the coat's spatial inconsistency.
 
 **Existing dialogue — `catchrelease_crabWareChicken_profile`, the chicken display offer. Price tokens are unchanged:**
 
-> "You want to see what you've hooked? Can't help you. You need a proper head for that. But look!"
+> "Chicken!"
 >
-> Crablobab produces a display tile from behind a rack of boxes inside his coat. A chicken marches across it.
+> Crablobab reaches into his coat, past a rack of boxed merchandise, and produces a little display tile. A chicken marches across the screen, vanishes around one edge, and promptly returns from the other.
 >
-> "Chicken! You follow him instead. Goes everywhere the catch goes. Much easier to keep an eye on, and he works until you've got a head that shows the real fish. Then he can have a rest."
+> "No Sonar Head? Follow him instead. Goes where the catch goes. If you've got a head that shows the fish, he'll leave that to the fish."
 >
-> He tilts the tile toward you. The chicken turns with it.
+> He turns the tile toward you. "Very important: not a fish. If he were a fish, I'd have to charge you for the fish."
 >
-> "$catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. You keep him. I wouldn't ask you to pay every time you wanted your chicken."
+> "$catchreleaseCrabChicken_profilePrice credits, $catchreleaseCrabChicken_profileCrabs crabs. Permanent! Buy him once, chicken forever."
+>
+> The chicken completes another circuit. "Look at him go."
 
 He demonstrates the product, enjoys its performance and gets back to the sale. Longer sentences give the enthusiasm room; the price and permanent ownership remain clear. Do not reduce all his merchandise to a product-name exclamation and a pause.
 
@@ -1036,17 +1038,17 @@ handling or catch method because those are purchasing terms.
 They do not investigate the trade's larger logistics. A shortage means another empty supplier line,
 not an invitation to discover why the industry does not add up.
 
-### Private-buyer liaisons
+### The client's companion
 
-Private-buyer liaisons are contract-minded, discreet and unromantic. They know the minimum mass,
-delivery window, handling instructions, payment schedule and any measurable premium. The client's
-purpose is outside their brief.
+The buyer in A Client's Preference is an escort arranging a private appointment.
+The client wants the fish for sexual use. The escort knows this and declines to
+discuss it; they are not an uninformed procurement liaison. The dialogue leaves
+the purpose implied through the appointment, the insistence on size and the
+escort's patience with the captain's questions.
 
-Put the boundary in the paperwork: a masked buyer field beside an unmasked specification, a sealed
-container, a legible mass and a signed receipt. They do not tease a secret or invite speculation.
-
-When the contract says discretion, they mean fewer people and fewer forms. They do not know anything
-about the catch beyond what the purchase schedule requires.
+The minimum weight, delivery terms and premium for a specimen large for its
+species are real purchasing requirements. Discretion concerns the client and
+the appointment, not forbidden knowledge about fish or the fabric.
 
 ### The household under-butler
 
@@ -1162,25 +1164,25 @@ Fleet quests are short conversations with people in the middle of a bad day. The
 |---|---|---|
 | Engineer (Stranded) | Exhausted, blunt, a little profane. Talks about triage between two broken systems. | “Neither job's getting done.” |
 | Coil technician (dead engine) | Deadpan, reads the manual aloud and distances themselves from it. | “Have you heard of this? Nobody here has tried it.” |
-| Medical officer (Burn Ward) | Triage voice: counts, priorities, what's left in the cabinet. Warm only in private. | “Please come straight back once you have it.” |
-| Skipper (Fouled Line, Escrow) | Working fisher or salvager. Practical, contracted, protective of the boat and the crew. | “Those drones are worth more than the boat.” |
+| Medical officer (Burn Ward) | Triage voice: counts, priorities, what's left in the cabinet. Warm only in private. | “$entity.catchrelease_fleetQuestReward. That's authorized. Keep the catch cold and come straight back.” |
+| Skipper (Fouled Line, Escrow) | Working fisher or salvager. Practical, contracted, protective of the boat and the crew. | “Trade says keep your trips short in thin fabric. This one isn't short anymore. Those drones are worth more than the boat, but I can't sit here forever.” |
 | Purser (Quota) | Apologetic, precise, anxious about arbitration. Long careful sentences. | “I know what the count is. I'd just rather it weren't.” |
 | Galley chief (Hungry Fleet) | Wounded professional pride played for comedy. Treats morale as a medical emergency. | “I've worked in galleys for twenty years. I don't need a gunner explaining stew to me.” |
 | Quartermaster (Tribute) | Frightened and trying to stay businesslike. Breaks off to speak to someone off-channel. | “If you've got a fishing rig, answer private. Please.” |
 | Bosun (Mutiny Pot) | Conspiratorial, loyal to the crew, keeps it off the open channel. | “Keep this off the open channels, will you?” |
 | Captain (Mutiny Pot counteroffer) | Old-school owner, proud, wants the story to stay his. | “A captain reads his own manifest. I know about the pot.” |
 | Convoy master (Interment) | Solemn guild formality; speaks of the dead as a colleague. | “First catch goes with them, last catch closes the log.” |
-| Researcher / principal investigator (Calibration Pair, Mandate, Last Entry) | Exact, allergic to uncertainty, tired. Humour comes from procedure. | “I dislike writing 'probably' in a calibration record.” |
+| Researcher / principal investigator (Calibration Pair, Mandate, Last Entry) | Exact, allergic to uncertainty, tired. Humour comes from procedure. | “I still need $entity.catchrelease_fleetQuestAsk. I've labelled one of the meters 'probably correct'. In my own handwriting.” |
 | Handler (Reference Specimen) | Form numbers and weary contractor humour. | “There's an L-14B extension form involved now, and my fee has not increased.” |
 | Maintenance chief (Quiet Ship) | Laconic, superstitious about a custom they will not over-explain. | “It helps.” |
 | Operator (Exhibit) | Owner-operator one inspection away from ruin. Tense, legalistic. | “If it fails inspection, bond $entity.catchreleaseFleetBond is forfeit, and $entity.catchreleaseFleetCompany folds.” |
-| Impresario (Headliner) | Showman: smooth, theatrical, faintly aggrieved, always selling. | “I've had a long conversation with the handlers about both of those facts.” |
+| Impresario (Headliner) | Showman: smooth, theatrical, faintly aggrieved, always selling. | “Have you ever stood in front of a sold-out house and explained why the attraction isn't there? I have. I recommend a different profession.” |
 | Collector (Collector's Commission) | Formal, precise, obsessive; tank temperatures and grievances. | “Different brokers, almost identical apologies.” |
 | Escort commander (Follower) | Hegemony Navy; see [Hegemony](#hegemony). | |
 | Protocol officer (State Dinner) | Diktat protocol; anxiety expressed as formality. | “That is not an acceptable amendment to the program.” |
 | Contract officer (Claim Assay) | Tri-Tachyon contract staff; exposure and vendor supply. | “Engineering wanted to try again. After reading this, I thought I'd ask what you'd charge.” |
-| Pirate captain (Parley Fish) | See [Pirates](#pirates); old rules of the trade, invoked with a grin. | “There's a custom. You bring a fresh catch out of the water you're claiming.” |
-| Seeker captain (Fleet on a Hunt) | Worn down, terse, private about the reason. | “Now he's retiring and he wants the collection packed up and sent on. Someone's going to count it.” |
+| Pirate captain (Parley Fish) | See [Pirates](#pirates); old rules of the trade, invoked with a grin. | “We're sitting down for a parley. Custom says you bring a fresh catch from the patch you're claiming. My grandmother's crew did it that way. Good enough for me.” |
+| Seeker captain (Fleet on a Hunt) | Worn down, terse, private about the reason. | “Got into debt. Sold one. My decision. Wasn't my property.” |
 | Wager captain (Settling a Bet) | Exasperated referee of their own crew. | “I've forbidden any more betting. That hasn't improved the atmosphere.” |
 
 ### The young factor
@@ -1297,7 +1299,7 @@ They are not universally stupid or fascist parody officers. Write a Hegemony off
 
 (`catchrelease_fineDemandRepeatHeg`)
 
-> "That recommendation is going in my incident log. I'd appreciate having a result to put beside it."
+> "A crewman with fishing experience recommends releasing a specimen these contacts have been known to follow. I do not enjoy having that sentence in the incident log, but it is the only course with precedent."
 
 (`catchrelease_fq_follower_pitch`) A Navy commander doing something unorthodox by the book, and disliking every word of it.
 

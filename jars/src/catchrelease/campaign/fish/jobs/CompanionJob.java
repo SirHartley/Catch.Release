@@ -65,8 +65,9 @@ public class CompanionJob extends FishJob {
 
     @Override
     protected String getIntelPurpose() {
-        return "A discreet private-buyer contract calls for a specimen matching the written "
-                + "specification. The client's purpose is outside the brief.";
+        return "An escort is arranging a private evening for a client with a particular request. "
+                + "Your part is to supply the fish, in a sealed container, without discussing "
+                + "the delivery around the port.";
     }
 
     @Override

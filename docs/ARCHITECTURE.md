@@ -189,6 +189,10 @@ Startup's skeptical acceptance rejoins `catchrelease_jobAccept`; it has no separ
 mission outcome. Final replies are added through `JobSpecificOptions` after the
 shared reward receipts.
 
+`CompanionJob` owns A Client's Preference; its `catchrelease_client_*` rules and
+intel describe the same private commission. Weight and size-premium checks remain
+in the job, not in dialogue.
+
 ### `campaign/fish/jobs/camp`
 
 | File | Owner / connection |
