@@ -185,6 +185,10 @@ explicitly in dialogue and intel. Old Days fragment tokens remain available.
 Contact reopening and round changes refresh the tokens. Intel contact names use
 display post, then display rank, then name alone.
 
+Startup's skeptical acceptance rejoins `catchrelease_jobAccept`; it has no separate
+mission outcome. Final replies are added through `JobSpecificOptions` after the
+shared reward receipts.
+
 ### `campaign/fish/jobs/camp`
 
 | File | Owner / connection |
@@ -265,6 +269,9 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 | `FishingIntro.java` | Six-stage tutorial, grants, target selection, save repair and IntroIntel. Shared requirement/currency path; fifth valid same-rarity miss substitutes the single lesson target; invalid locations pause the count. Final multi-species lesson is excluded. |
 | `TutorialWreck.java` | Creates a vanilla derelict cruiser beside the first suitable rupture. |
 | `Castaway.java` | Stores planet eligibility and rescue state for the stranded crewman encounter. |
+
+The first-catch questions return to one another; only `catchrelease_introFirstDone`
+advances that lesson.
 
 ### `campaign/fish/minigame`
 
