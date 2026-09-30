@@ -949,56 +949,60 @@ $catchreleasePaid",,"The researcher takes a measurement, adjusts the instrument,
 An assistant is called over to check the first result. Neither of them seems likely to remember you are there without a reminder.",,
 ,,,,,,
 # bar job: tuber,,,,,,
-catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"""Chat! The captain's back. Get in here, we're doing the reveal.""
+catchrelease_tuber_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_tuber score:100,,"The connection opens on the TriTuber halfway through adjusting a lamp.
 
-The TriTuber drags a lamp into position. ""You have brought it, right? Don't answer yet. Let me get the lens on you.""",,
-catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A $manOrWoman has set up two lamps and a good lens at one end of the bar. The chair is in the main walkway, forcing servers to squeeze around a recording of the same six-second introduction.",,
+""CHAT. Stop scrolling. You are not going to believe who just called me.""
+
+$HeOrShe checks the recording indicator, then drops $hisOrHer voice. ""Please tell me you have something.""",,
+catchrelease_tuber_blurbBar,catchrelease_tuber_blurbBar,,,"A $manOrWoman has converted one end of the bar into a recording set: two lamps, a good lens, and a chair placed squarely in the main walkway. $HeOrShe is recording the same six-second introduction for the fourth time.",,
 catchrelease_tuber_optionBar,catchrelease_tuber_optionBar,,,,catchrelease_tuber_ask:Ask the $manOrWoman at the recording set what $heOrShe is filming,
-catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,"CatchReleaseCMD highlightJobText $catchreleaseReward
-Call $catchrelease_jobRef showRewardDetails","""Chat, do not go anywhere. Actual fishing captain. Right here."" The TriTuber swings a lamp toward you. ""Captain, look beside the lens. Brilliant. Keep doing that.""
+catchrelease_tuber_ask,DialogOptionSelected,$option == catchrelease_tuber_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails","$HeOrShe taps the lens awake before answering. ""Chat, do not go anywhere. This is huge.""
 
-A request appears on your tripad: $catchreleaseAsk.
+$HeOrShe swings one lamp toward you. ""You. Captain. Look here. Perfect. Everyone, I have an actual fishing captain standing in front of me right now, and we may have the specimen.""
 
-""I want a reveal. We open the box, cut to you, and I ask what everyone's typing. Is this thing real? Chat, you are not ready.""
+$HeOrShe points at the chair. ""I need $catchreleaseAsk. You bring it in, I open on the reveal, cut to you, then ask the question everybody is already typing: is this thing real?""
 
-$HeOrShe lowers the lens. ""Two specimens, two deliveries. Good one first, low-coherence one for the follow-up. $catchreleaseReward for this delivery, out of the sponsor pool.""
+$HeOrShe leans into the lens. ""You are NOT ready for this one.""
 
-$catchreleaseDeadline The same terms start afresh for the second delivery.
+Then, to you: ""$catchreleaseReward. Entire sponsor pool. Sit down. I need your face for the thumbnail.""
 
-""Sit down. I need your face for the thumbnail.""","catchrelease_tuber_followup:What sort of follow-up?
+The order is for two deliveries: this specimen first, then a low-coherence catch. Each is paid separately. $catchreleaseDeadline The second delivery gets its own deadline.","catchrelease_tuber_followup:What sort of follow-up?
 catchrelease_tuber_camera:Are you recording this conversation?
 catchrelease_jobAccept:Agree to supply both specimens.
 catchrelease_jobDecline:Decline.",
-catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes! Chat, we have a captain. Everyone saying I made this up can apologize whenever they're ready.""
+catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes. Perfect. Chat, we have a captain."" $HeOrShe starts recording before you can move. ""Everyone asking whether this is actually happening: it is happening. We are getting the specimen.""
 
-$HeOrShe pauses the recording. ""Please bring it back before they start digging through my old clips. They've done that before.""",,
-catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow. Chat, you just watched a captain walk away from sponsor money. Would you have taken it? Tell me I'm wrong.""
+$HeOrShe pauses the stream, and the grin goes a little desperate. ""Please bring it back before everyone starts accusing me of faking the whole thing.""",,
+catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow."" $HeOrShe turns to the lens without moving it off you. ""Chat, you just watched a captain walk away from easy sponsor money. Would you have taken it? Tell me I'm wrong.""
 
-The lens follows you. ""Captain? Could you walk away again? Slower. I cut your head off.""",,
-catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,,"""Chat, update. The captain is back. Do we have it? Captain?""
+Then, quietly, to you: ""Please take the job.""",,
+catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Still waiting."" $HeOrShe raises the camera as soon as $heOrShe sees you. ""Chat, update. The captain is back. Do we have it? We do not have it.""
 
-You are shown the outstanding request: $catchreleaseAsk. $catchreleaseDeadlineLeft
+The camera comes down again. ""Every time you walk in here without it, chat makes up three new conspiracy theories.""
 
-The lens comes down. ""They're counting how many times I've said 'soon'. Someone's made a compilation. Please bring me the fish.""",,
+$catchreleaseDeadlineLeft",,
 catchrelease_tuber_paidMore,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
-$catchreleaseMore score:100","CatchReleaseCMD highlightJobText $catchreleaseAsk
-Call $catchrelease_jobRef showRewardDetails","The TriTuber watches the viewer count climb, flatten, then fall.
+$catchreleaseMore score:100","CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails","$HeOrShe watches the numbers climb, flatten, then stop.
 
-""No, chat. I know it's a fish. That's why I hired a fishing captain. What did you think was going to be in the box?""
+""No. No, no. Chat liked it. Chat did not care for it.""
 
-$HeOrShe scrubs back to the reveal. ""They saw the whole thing and left. I need the bad one now. $catchreleaseAskCap. Something they'll replay.""
+$HeOrShe scrubs backward through the clip. ""Look. Perfect specimen, perfect shot, it's just too obvious.""
 
-Your first payment is arranged. The second delivery pays $catchreleaseReward. $catchreleaseDeadline
+To the stream: ""YES, I KNOW IT'S A FISH.""
 
-The lens goes up again. ""If that looked normal to you, good. Remember what you said. We're doing another one.""",,
+$HeOrShe turns the display toward you as though the graph has personally insulted $himOrHer. ""I need a bad one. $catchreleaseAskCap.""
+
+""I want one where the first frame says one thing and the next frame makes everyone check the first frame again. I want three thousand comments from people absolutely certain they saw different things. $catchreleaseRewardCap. Bigger sponsor pool. This one could be enormous.""
+
+$catchreleaseDeadline",,
 catchrelease_tuber_paidDone,catchreleaseJobPaid,"$missionId == catchrelease_tuber
 $catchreleasePaid
-!$catchreleaseMore score:100",,"""Oh, chat is going to hate this."" The TriTuber crowds the lens against the container. ""Look at that. No, look again. Tell me what you saw. Don't read anyone else's answer first.""
+!$catchreleaseMore score:100",,"""Oh, chat is going to hate this."" $HeOrShe crops in until the specimen fills the display. ""Look at that. Do not look away. You think you've got it, then you look again. A perfect thumbnail! Let everyone fight.""
 
-$HeOrShe checks the comments and starts laughing. ""They're fighting already. Captain, don't explain anything. Let them.""
-
-Your final payment is authorized without a break in the recording.",,
+$HeOrShe authorizes the payment without taking $hisOrHer eyes off the viewer count.",,
 ,,,,,,
 # bar job: cult,,,,,,
 catchrelease_cult_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_cult score:100,,"The three buyers sit shoulder to shoulder before the pickup. Each inclines their head, in order.
@@ -3751,14 +3755,16 @@ catchrelease_academy_research,DialogOptionSelected,$option == catchrelease_acade
 
 ""I recalibrated and got a third result. My supervisor suggested discarding the first one. On what grounds? I followed the same procedure for all three. I need more specimens before I can get anywhere with this.""","catchrelease_jobAccept:Take the research commission.
 catchrelease_jobDecline:Decline.",
-catchrelease_tuber_followup,DialogOptionSelected,$option == catchrelease_tuber_followup,,"""The low-coherence one. We need a good specimen first so chat knows what normal looks like. Then we bring out the other one and watch them lose their minds.""
+catchrelease_tuber_followup,DialogOptionSelected,$option == catchrelease_tuber_followup,,"""Captain, I am thinking two videos. Two reveals. First we give them the beautiful one. Then you bring me something from low-coherence space and we see how long it takes chat to decide I've been replaced.""
 
-$HeOrShe points at you. ""And you're coming back for the reveal. Same captain, same chair, none of that 'hired actor' business. You'll get the second order and its payment offer when you deliver the first.""","catchrelease_tuber_camera:Are you recording this conversation?
+$HeOrShe glances at the lens. ""Chat. You cannot accuse me of faking footage I haven't filmed yet.""
+
+""First specimen, first payment. Then I'll give you the second order and the new offer. And you have to sit in the same chair. Last time I moved the chair, they said we'd switched studios.""","catchrelease_tuber_camera:Are you recording this conversation?
 catchrelease_jobAccept:Agree to supply both specimens.
 catchrelease_jobDecline:Decline.",
-catchrelease_tuber_camera,DialogOptionSelected,$option == catchrelease_tuber_camera,,"""Chat, the captain wants to know if we're recording."" The lens stays on you. ""Look at that face. That's a genuine reaction.""
+catchrelease_tuber_camera,DialogOptionSelected,$option == catchrelease_tuber_camera,,"""Chat. The captain has just noticed the camera. Look at that. That's the thumbnail.""
 
-$HeOrShe checks the recording indicator. ""Yes, Captain. Please don't look at the red light. Look at me.""","catchrelease_tuber_followup:What sort of follow-up are you planning?
+$HeOrShe reaches past you to adjust a lamp. ""Yes, Captain, we're recording. Please keep looking exactly like that. No, don't look at the lens. You were doing it perfectly a moment ago.""","catchrelease_tuber_followup:What sort of follow-up are you planning?
 catchrelease_jobAccept:Agree to supply both specimens.
 catchrelease_jobDecline:Decline.",
 catchrelease_introContinuityOption,CatchReleaseIntroContinuityOption,$catchreleaseContinuityQuestionAvailable,,,-10:catchrelease_intro_fourJumps:I just left you in another system.,
