@@ -1046,8 +1046,9 @@ discuss it; they are not an uninformed procurement liaison. The dialogue leaves
 the purpose implied through the appointment, the insistence on size and the
 escort's patience with the captain's questions.
 
-The minimum weight, delivery terms and premium for a specimen large for its
-species are real purchasing requirements. Discretion concerns the client and
+The minimum length, delivery terms and premium for a specimen in the upper
+two-fifths of its species' length range are real purchasing requirements.
+Weight is irrelevant to this order. Discretion concerns the client and
 the appointment, not forbidden knowledge about fish or the fabric.
 
 ### The household under-butler

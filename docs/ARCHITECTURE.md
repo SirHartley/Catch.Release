@@ -191,8 +191,11 @@ mission outcome. Final replies are added through `JobSpecificOptions` after the
 shared reward receipts.
 
 `CompanionJob` owns A Client's Preference; its `catchrelease_client_*` rules and
-intel describe the same private commission. Weight and size-premium checks remain
-in the job, not in dialogue.
+intel describe the same private commission. The request uses `minLength`; the
+bonus requires the upper two-fifths of the species' length range, ignoring weight.
+`FishJobAsks` supplies the length floor. `ModPlugin.onGameLoad` migrates active
+saved weight requests; token preparation covers unaccepted bar offers. Migration
+keeps rewards, deadlines and catch provenance unchanged.
 
 ### `campaign/fish/jobs/camp`
 

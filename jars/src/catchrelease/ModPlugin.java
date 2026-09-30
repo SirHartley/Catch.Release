@@ -15,6 +15,7 @@ import catchrelease.campaign.fish.colony.AquariumTankScript;
 import catchrelease.campaign.fish.colony.ConservatoryOptionProvider;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
+import catchrelease.campaign.fish.jobs.CompanionJob;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -97,6 +98,7 @@ public class ModPlugin extends BaseModPlugin {
         Global.getSector().addTransientScript(new CoherenceOverlayScript());
 
         // housekeeping, once, before anything is looked at
+        CompanionJob.migrateSavedJobs();
         sweepPondClaims();
         FishLog.relockLegendaryRangeData();
 

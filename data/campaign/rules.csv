@@ -881,45 +881,46 @@ Across the bar, the winning shift crew is collecting from the losing one. The ve
 $catchreleaseFightDate: $catchreleaseWinner over $catchreleaseLoser. Supplier: $playerName.",,
 ,,,,,,
 # bar job: companion,,,,,,
-catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"""Captain. Is this about our arrangement?"" The $manOrWoman checks the time. ""Good. My client has been asking.""",,
-catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,"A $manOrWoman at the end of the bar is dressed for somewhere else entirely and is not troubled by this. $HeOrShe has been looking at you for a while, and it is not the look you would assume.",,
-catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Approach the $manOrWoman in eveningwear,
-catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"Call $catchrelease_jobRef showRewardDetails
+catchrelease_client_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_client score:100,,"The liaison accepts the connection from a private booth, a drink at one elbow and a slim slate open.
+
+""Captain."" The client's name is masked; $heOrShe skips past it to the specimen requirements.",,
+catchrelease_client_blurbBar,catchrelease_client_blurbBar,,,A $manOrWoman in understated eveningwear sits alone with a nearly finished drink. A private order is open on the table beside $himOrHer. The client's name is masked.,,
+catchrelease_client_optionBar,catchrelease_client_optionBar,,,,catchrelease_client_ask:Ask the liaison about the private contract,
+catchrelease_client_ask,DialogOptionSelected,$option == catchrelease_client_ask,"CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseReward
+Call $catchrelease_jobRef showRewardDetails
 $menuState = catchreleaseClientOffer 0
-FireAll JobSpecificOptions","""I have a client,"" $heOrShe says. ""That is the word I am going to use and we are both going to leave it there.""
+FireAll JobSpecificOptions","""I'm arranging something for a patron. One specimen.""
 
-""He wants a fish. A real one, not off a menu. $catchreleaseAskCap. That is the minimum, Captain. I want you to understand that it is a minimum.""
+$HeOrShe turns the slate toward you. ""$catchreleaseAskCap. No smaller.""
 
-$catchreleaseDeadline
+The specification is very particular on that point.
 
-""$catchreleaseRewardCap. More if it is especially big for its species. That is the entire arrangement, and it is a very good one.""",,
+""$catchreleaseDeadline $catchreleaseRewardCap when you bring it in. If you find an unusually large one, my patron is prepared to be generous.""",,
 catchrelease_client_offerPurposeOption,JobSpecificOptions,"$menuState == catchreleaseClientOffer
 !$catchreleaseClientAskedPurpose",,,10:catchrelease_client_purpose:What does the buyer want it for?,
 catchrelease_client_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseClientOffer,,,30:catchrelease_jobAccept:Take the contract.,
 catchrelease_client_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseClientOffer,,,40:catchrelease_jobDecline:Decline.,
 catchrelease_client_purpose,DialogOptionSelected,$option == catchrelease_client_purpose,"$catchreleaseClientAskedPurpose = true 0
 $menuState = catchreleaseClientOffer 0
-FireAll JobSpecificOptions","$HeOrShe looks at you with enormous patience.
-
-""My client has booked a private evening. I am making the arrangements. You are supplying the fish. Are we going to have any difficulty with your part?""",,
-catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_client,,"""Lovely. Call me when it's aboard. A sealed container, please, and no need to tell the dockmaster whom you're meeting.""",,
+FireAll JobSpecificOptions","""He intends to buy it."" $HeOrShe scrolls past the masked buyer field to the handling section. ""I need the container sealed and the length legible. Beyond that, I don't have instructions.""",,
+catchrelease_client_accepted,catchreleaseJobAccepted,$missionId == catchrelease_client,,"""Discretion is enough. Secrecy only makes people curious.""",,
 catchrelease_client_declined,catchreleaseJobDeclined,$missionId == catchrelease_client,,"""Of course.""
 
 $HeOrShe closes the order and returns to $hisOrHer list of contacts.",,
-catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,,"""$catchreleaseAskCap. My client hasn't changed his mind. Believe me, I checked.""
+catchrelease_client_remind,catchreleaseJobRemind,$missionId == catchrelease_client score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk,"""$catchreleaseAskCap. Same arrangement. My patron hasn't changed his mind.""
 
 $catchreleaseDeadlineLeft",,
 catchrelease_client_paid,catchreleaseJobPaid,"$missionId == catchrelease_client
-$catchreleasePaid",,"$HeOrShe measures the catch, then consults a message on $hisOrHer tripad.
+$catchreleasePaid",,"$HeOrShe checks the catch's recorded length against the order and accepts the receipt.
 
-""Yes. That will do. Thank you, Captain.""
-
-Payment is settled before a porter arrives for the sealed container. ""If anyone asks, you made a delivery. I wouldn't embellish it.""",,
+The agreed payment changes hands.",,
 catchrelease_client_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_client
 $catchreleasePaid
-$catchreleaseBonus score:100",,"""Oh, that is over."" $HeOrShe checks the measurements again. ""That is comfortably over.""
+$catchreleaseBonus score:100",,"$HeOrShe checks the measurements once more and compares the specimen's recorded length with a short note on $hisOrHer slate.
 
-The promised extra is included in your payment. $HeOrShe dictates a short message, deletes it, and tries again before letting the porter take the container.",,
+""Upper two-fifths. That qualifies.""
+
+The agreed payment changes hands. There is no handshake. $HeOrShe is already checking the next appointment.",,
 ,,,,,,
 # bar job: academy,,,,,,
 catchrelease_academy_contactGreeting,catchreleaseJobGreeting,$missionId == catchrelease_academy score:100,,"""Please tell me you've brought something, Captain. I've spent the morning explaining to suppliers that I do want the bad ones.""",,
