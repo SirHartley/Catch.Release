@@ -254,7 +254,7 @@ public abstract class CampedSpotJob extends FishJob {
         if (getListInfoParam() == Update.CAMP_CLEARED) {
             info.addPara(receiptAboard
                             ? "The camp has left. Return to the fisher for payment."
-                            : "The camp has left. Catch any fish from the marked rupture.",
+                            : "The camp has left. Bring back a catch from the marked rupture.",
                     getBulletColorForMode(mode), 0f);
             return;
         }
@@ -266,7 +266,7 @@ public abstract class CampedSpotJob extends FishJob {
             return;
         }
         if (getListInfoParam() == Update.RECEIPT_LOST) {
-            info.addPara("The proof is no longer aboard. Catch another fish from the marked rupture.",
+            info.addPara("The proof is no longer aboard. Bring back another catch from the marked rupture.",
                     getBulletColorForMode(mode), 0f);
             return;
         }
@@ -281,10 +281,10 @@ public abstract class CampedSpotJob extends FishJob {
         if (!cleared) {
             return receiptAboard
                     ? "Clear the camp at the marked rupture; the proof is already aboard."
-                    : "Clear the camp at the marked rupture, then catch any fish there as proof.";
+                    : "Clear the camp and bring back a catch from the marked rupture.";
         }
 
-        if (!receiptAboard) return "Catch any fish from the marked rupture as proof.";
+        if (!receiptAboard) return "Bring back a catch from the marked rupture as proof.";
 
         MarketAPI market = getGiverMarket();
         if (getPerson() == null || market == null) return "Return to the fisher for payment.";
@@ -309,15 +309,15 @@ public abstract class CampedSpotJob extends FishJob {
             if (receiptAboard) {
                 info.addPara("The proof is already aboard. What remains is clearing the camp.", pad);
             } else {
-                info.addPara("After the camp is gone, catch any fish from this exact rupture and"
-                        + " bring it back as proof that the spot can be worked again.", pad);
+                info.addPara("Bring back a catch from this exact rupture, taken after you accepted"
+                        + " the job. The fleet must also be gone before the fisher will pay.", pad);
             }
         } else if (receiptAboard) {
             info.addPara("The rupture in %s is clear and the proof is aboard. Return to the fisher"
                             + " for payment.", pad, Misc.getHighlightColor(), systemName);
         } else {
-            info.addPara("The rupture in %s is clear. Catch any fish from this exact rupture and"
-                            + " bring it back as proof.", pad,
+            info.addPara("The rupture in %s is clear. Bring back a catch from this exact rupture,"
+                            + " taken after you accepted the job.", pad,
                     Misc.getHighlightColor(), systemName);
         }
 
@@ -330,7 +330,7 @@ public abstract class CampedSpotJob extends FishJob {
         if (days > 0f) {
             addDays(info, "left before they give the spot up for good.", getDaysLeft(),
                     getBulletColorForMode(ListInfoMode.IN_DESC), pad);
-        }
+        } else info.addPara("No deadline.", pad);
     }
 
     @Override

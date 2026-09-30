@@ -155,6 +155,7 @@ Custom-panel opening and return behavior is covered by [UI.md](UI.md#custom-dial
 - Unasked questions precede answered ones. Answered questions remain selectable at the end, coloured with vanilla `Misc.getGrayColor()`, not Common fish-rarity beige. Paging and navigation must fit within the nine-option limit.
 - Terminal answers return to questions through Something else; the question-menu exit returns to business.
 - Bycatch becomes a question topic after the first relevant catch. Tutorial disclosure and special-topic precedence follow the saved progression and `LORE.md`.
+- Tutorial outfitter and harpoon questions follow the same read-again convention. Continue does not require exhausting the optional questions; the equipment handoff supplies the essential instructions first.
 
 ### Colours, rewards and sidebars
 

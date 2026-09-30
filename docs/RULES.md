@@ -201,6 +201,7 @@ Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Shared text-presen
 | `$catchrelease_jobDeliver`, `$catchreleaseHasFish` | Valid delivery route; matching cargo available. |
 | `$catchreleaseAsk` / `…AskCap`, `$catchreleaseReward` / `…RewardCap` | Shared demand/reward descriptions. |
 | `$catchreleaseDays` / `…DaysCap`, `$catchreleaseDaysLeft` | Total deadline; remaining time. |
+| `$catchreleaseDeadline` / `$catchreleaseDeadlineLeft` | Complete offer/remaining sentences from FishJob; unlimited jobs say there is no deadline. Insert as sentences, not after “within” or before “left”. FleetQuest mirrors them as entity `$catchreleaseFleetDeadline` / `$catchreleaseFleetDeadlineLeft`. |
 | `$catchreleasePaid`, `$catchreleaseBonus`, `$catchreleaseMore` | Payout completed; bonus eligible; another round follows. |
 | `<missionId>_blurbBar`, `<missionId>_optionBar`, `<missionId>_ask` | Bar description, bar entry, and DialogOptionSelected offer handler. |
 | `JobSpecificOptions` | Private bar-job options; accepted contacts use the mission-owned greeting wrapper. |
@@ -211,6 +212,8 @@ Code owners are mapped in [ARCHITECTURE.md](ARCHITECTURE.md). Shared text-presen
 | `CatchReleaseFisherOptions` | Private Fisherman business menu; enter with `$menuState == catchreleaseFisher`. |
 | `CatchReleaseFisherResume` | Rebuild after picker/panel cancellation. |
 | `CatchReleaseFisherQuestions` | Private Fisherman question menu. Entry and page rows run `CatchReleaseCMD tokens` and `CatchReleaseCMD fisherQuestions` before firing it; `$catchreleaseFisherAskPage` selects the page. Unasked questions have no order, asked ones order 50 in gray, Previous and Next 90, Back 100. Every question row ends with `CatchReleaseCMD fisherAskOnPage`. |
+| `CatchReleaseIntroContinuityOption` | Private second-system question injection. Uses the existing `$catchreleaseContinuityQuestionAvailable` Boolean; the contradiction, practical fishing advice and crew-safety answers have separate returns. |
+| `ShopIntroQuestions` / `CatchReleaseIntroDeepQuestions` | Tutorial information menus. Asked options remain selectable in gray at order 50; Continue stays available. Reading an answer neither advances the task nor forces the other questions. |
 | `CatchReleaseRumorText` | Private Fisherman lead display. `CatchReleaseCMD tokens` prepares `$catchreleaseRumorKind` from the saved rumor before selecting one complete Text row, including combined effects or `none`. Rendering never rolls a new lead; the caller supplies Continue. |
 | `CatchReleaseFleetResolutionOptions` | Peaceful fleet result menu with Escape-bound Leave. |
 

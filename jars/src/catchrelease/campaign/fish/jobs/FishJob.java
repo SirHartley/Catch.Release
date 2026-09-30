@@ -61,6 +61,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
     public static final String DAYS_KEY = "$catchreleaseDays";
     public static final String DAYS_CAP_KEY = "$catchreleaseDaysCap";
     public static final String DAYS_LEFT_KEY = "$catchreleaseDaysLeft";
+    public static final String DEADLINE_KEY = "$catchreleaseDeadline";
+    public static final String DEADLINE_LEFT_KEY = "$catchreleaseDeadlineLeft";
     public static final String OPTIONS_TRIGGER = "JobSpecificOptions";
     public static final String CATCH_PROGRESS_UPDATE = "catchrelease_fish_job_progress";
     public static final float FRESH_CATCH_CHANCE = 0.25f;
@@ -216,6 +218,14 @@ public abstract class FishJob extends HubMissionWithBarEvent
         int left = Math.max(1, (int) Math.ceil(getDaysLeft()));
 
         return left + (left == 1 ? " day" : " days");
+    }
+
+    public String describeDeadline() {
+        return days > 0f ? "You have " + describeDays() + " to deliver." : "There is no deadline.";
+    }
+
+    public String describeDeadlineLeft() {
+        return days > 0f ? "You have " + describeDaysLeft() + " left to deliver." : "There is no deadline.";
     }
 
     protected float getDaysLeft() {
@@ -699,6 +709,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
         token(mem, DAYS_KEY, describeDays());
         token(mem, DAYS_CAP_KEY, Misc.ucFirst(describeDays()));
         token(mem, DAYS_LEFT_KEY, describeDaysLeft());
+        token(mem, DEADLINE_KEY, describeDeadline());
+        token(mem, DEADLINE_LEFT_KEY, describeDeadlineLeft());
         token(mem, HAS_FISH_KEY, isSatisfied());
 
         setJobTokens(mem);
@@ -761,11 +773,13 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         if (person != null) {
             info.addImages(width, 128, opad, opad, person.getPortraitSprite(), faction.getCrest());
-            String post = "one";
-            if (person.getPost() != null) post = person.getPost().toLowerCase();
-            if (post == null && person.getRank() != null) post = person.getRank().toLowerCase();
-            info.addPara(Misc.ucFirst(getMissionTypeNoun()) + " given by " + post + " "
-                            + person.getNameString() + ", affiliated with "
+            String role = person.getPost();
+            if (role == null || role.trim().isEmpty()) role = person.getRank();
+            String giverName = person.getNameString();
+            if (role != null && !role.trim().isEmpty()) {
+                giverName = role.toLowerCase(java.util.Locale.ROOT) + " " + giverName;
+            }
+            info.addPara(Misc.ucFirst(getMissionTypeNoun()) + " given by " + giverName + ", affiliated with "
                             + faction.getDisplayNameWithArticle() + ".",
                     opad, faction.getBaseUIColor(),
                     faction.getDisplayNameWithArticleWithoutArticle());
@@ -858,6 +872,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
         }
 
         if (days > 0f) addDays(info, "remaining", getDaysLeft(), text);
+        else info.addPara("No deadline.", text, 0f);
         unindent(info);
 
         info.addPara("On delivery:", opad);
@@ -916,7 +931,10 @@ public abstract class FishJob extends HubMissionWithBarEvent
             pad = 0f;
         }
 
-        if (days > 0f && !isEnding()) addDays(info, "remaining", getDaysLeft(), text, 0f);
+        if (!isEnding()) {
+            if (days > 0f) addDays(info, "remaining", getDaysLeft(), text, 0f);
+            else info.addPara("No deadline.", text, 0f);
+        }
     }
 
     @Override
@@ -926,9 +944,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
         PersonAPI person = getPerson();
         MarketAPI market = getGiverMarket();
 
-        if (person == null || market == null) return "Catch " + describeAsks() + ".";
+        if (person == null || market == null) return "Supply " + describeAsks() + ".";
 
-        return "Catch " + describeAsks() + ", then find " + person.getNameString()
+        return "Deliver " + describeAsks() + " to " + person.getNameString()
                 + " on " + market.getName() + ".";
     }
 

@@ -403,12 +403,12 @@ public class FishRequirement {
         if (minGrade != null) text.append(", graded ").append(minGrade.name).append(" or better");
 
         // weight and length are separate asks, described in their own units
-        if (minWeight > 0f) text.append(", over ").append(trim(minWeight)).append(" kg");
-        if (minLength > 0f) text.append(", over ").append(trim(minLength)).append(" m");
+        if (minWeight > 0f) text.append(", at least ").append(trim(minWeight)).append(" kg");
+        if (minLength > 0f) text.append(", at least ").append(trim(minLength)).append(" m");
 
         if (origin != null) text.append(", taken ").append(getOriginName());
 
-        if (lowCoherence) text.append(", coherence unstable or worse");
+        if (lowCoherence) text.append(", with unstable or worse coherence");
 
         append(text, describeCatch());
         if (freshCatch) append(text, FRESH_CATCH_DESCRIPTION);
@@ -461,9 +461,9 @@ public class FishRequirement {
         }
         if (lowCoherence) {
             if (minRarity != null || minGrade != null) text.append(", ");
-            text.append("barely holding together");
+            text.append("with unstable or worse coherence");
         }
-        if (minWeight > 0f) text.append(", over ").append(trim(minWeight)).append(" kg");
+        if (minWeight > 0f) text.append(", at least ").append(trim(minWeight)).append(" kg");
 
         append(text, describeCatch());
         if (freshCatch) append(text, FRESH_CATCH_DESCRIPTION);

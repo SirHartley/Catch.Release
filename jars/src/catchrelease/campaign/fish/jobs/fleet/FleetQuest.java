@@ -102,6 +102,8 @@ public class FleetQuest extends FishJob {
     public static final String POT_CAPTAIN_FLAG = "$catchrelease_potCaptain";
     public static final String ROUND_KEY = "$catchreleaseFleetQuestRound";
     public static final String DAYS_TEXT_KEY = "$catchreleaseFleetDays";
+    public static final String DEADLINE_TEXT_KEY = "$catchreleaseFleetDeadline";
+    public static final String DEADLINE_LEFT_TEXT_KEY = "$catchreleaseFleetDeadlineLeft";
     public static final String BOSUN_RANK = "catchrelease_bosun";
 
     public static final String TITLE_TRIGGER = "CatchReleaseFleetQuestTitle";
@@ -449,8 +451,8 @@ public class FleetQuest extends FishJob {
             days = QuestDuration.daysForTravelLY(nearest, ask);
             if (type == FleetQuestType.HEADLINER) {
                 replacementPlan = i == 0 ? "So we hire a replacement."
-                        : "Fine. We promote a strong supporting act to the headline and hire for"
-                        + " the slot they leave open.";
+                        : "I'll move one of the supporting exhibits into the headline slot."
+                        + " You can replace that one.";
             }
             if (type == FleetQuestType.STATE_DINNER) {
                 course = pickCourseName(ask.speciesId);
@@ -670,6 +672,8 @@ public class FleetQuest extends FishJob {
         memory.set(REWARD_KEY, describeRewards());
         memory.set(ROUND_KEY, round);
         memory.set(DAYS_TEXT_KEY, describeDays());
+        memory.set(DEADLINE_TEXT_KEY, describeDeadline());
+        memory.set(DEADLINE_LEFT_TEXT_KEY, describeDeadlineLeft());
 
         setOrUnset(memory, "$catchreleaseFleetName", fleetName);
         setOrUnset(memory, "$catchreleaseFleetFlagshipName", getFlagshipName());
@@ -1341,6 +1345,8 @@ public class FleetQuest extends FishJob {
         memory.unset(REWARD_KEY);
         memory.unset(ROUND_KEY);
         memory.unset(DAYS_TEXT_KEY);
+        memory.unset(DEADLINE_TEXT_KEY);
+        memory.unset(DEADLINE_LEFT_TEXT_KEY);
         memory.unset(HAGGLED_FLAG);
         memory.unset(SOURED_FLAG);
         memory.unset(CAN_RECLAIM_FLAG);
@@ -1458,6 +1464,13 @@ public class FleetQuest extends FishJob {
     @Override
     protected String getIntelSpecialTerms() {
         return getRuleText(TERMS_TRIGGER);
+    }
+
+    @Override
+    public String getNextStepText() {
+        if (isEnding()) return null;
+
+        return "Deliver " + describeAsks() + " to " + getFlagshipName() + ".";
     }
 
     @Override
