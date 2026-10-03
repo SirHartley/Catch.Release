@@ -479,7 +479,6 @@ FireAll CatchReleaseStartupDemandQuestions","""Private buyers initially. Establi
 The factor shows you a page divided into three shaded columns. ""These are conservative estimates. I've assumed most people won't buy anything.""",,
 catchrelease_startupDemandEstimatesOption,CatchReleaseStartupDemandQuestions,!$catchreleaseStartupAskedEstimates,,,catchrelease_startup_estimates:That still leaves quite a few who will.,
 catchrelease_startupDemandCustomersOption,CatchReleaseStartupDemandQuestions,!$catchreleaseStartupAskedCustomers,,,catchrelease_startup_customers:Have any of them agreed to buy?,
-catchrelease_startupDemandOperationsOption,CatchReleaseStartupDemandQuestions,!$catchreleaseStartupAskedOperations,,,catchrelease_startup_operations:How are you handling fulfillment?,
 catchrelease_startupDemandBackOption,CatchReleaseStartupDemandQuestions,,,,100:catchrelease_startup_back:Go over the rest of the proposal.,
 catchrelease_startup_operations,DialogOptionSelected,$option == catchrelease_startup_operations,"$catchreleaseStartupAskedOperations = true 0
 FireAll CatchReleaseStartupOperationsQuestions","""Centralized purchasing, followed by direct distribution. I handle the buyers, you supply the fish. A very straightforward division of responsibilities.""

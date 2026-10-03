@@ -197,6 +197,7 @@ They rebuild through `FireAll`, with speaker-local read flags lasting for the
 offer conversation. Answered topics disappear; forward, accept/decline and back
 options remain. Startup's main offer keeps menu-only links to unfinished buyer
 and distribution subquestions without repeating the answered introduction.
+The buyer branch returns to the main offer before switching to distribution.
 
 `CompanionJob` owns A Client's Preference; its `catchrelease_client_*` rules and
 intel describe the same private commission. The request uses `minLength`; the
