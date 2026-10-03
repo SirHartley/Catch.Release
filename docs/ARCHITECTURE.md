@@ -279,6 +279,7 @@ Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge 
 | File | Owner / connection |
 |---|---|
 | `CatchReleaseCMD.java` | Single rules bridge: temporary tokens, conditions, actions, custom panels, highlights, question paging and fleet teardown. Restores prior rules plugin and options once after panels. |
+| `QuestTextHighlights.java` | Splits explicit dialogue highlights into fish/rarity colours and ordinary requirement/reward emphasis. Preserves surrounding terms, displayed casing and repeated occurrences. Text rows supply values in display order before reward cards or other text. |
 | `QuestDialogMap.java` | Shared temporary sidebar map for local and remote dialogue targets, matching vanilla mission icons, tags, and colours. `showIntroMap`, `showWorkMap` and FishJob's `showRemoteMap` action use `show()`; unresolved targets clear the preview. |
 | `FishBuyer.java` | Immutable bulk-sale preview, revalidated before sale; protects active FishAsker and marked-gear specimens. Picker packing uses scoped reflection for input and transfer reset, copies the packed hold into the offer, and restores surviving original containers on exit. See [cargo pickers](UI.md#cargo-pickers). |
 

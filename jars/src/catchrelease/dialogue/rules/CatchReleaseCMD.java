@@ -53,14 +53,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CatchReleaseCMD extends BaseCommandPlugin {
-
-    protected static final Pattern CREDIT_REWARD =
-            Pattern.compile("\\b(?:[\\d,.]+ credits(?: guaranteed, plus [\\d.]+x the value of "
-                    + "the fish handed in)?|[\\d.]+x the value of the fish handed in)\\b");
 
     public static final String DRIFT = "$catchreleaseDrift";
     public static final String STAGE = "$catchreleaseStage";
@@ -542,63 +536,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             if (!duplicate) rarity.add(entry);
         }
 
-        List<String> highlights = new ArrayList<>();
-        List<Color> colors = new ArrayList<>();
-        for (String value : values) {
-            boolean containsRarity = false;
-            for (FishRequirement.RarityHighlight entry : rarity) {
-                if (value.contains(entry.text)) {
-                    containsRarity = true;
-                    break;
-                }
-            }
-
-            if (!containsRarity) {
-                highlights.add(value);
-                colors.add(Misc.getHighlightColor());
-                continue;
-            }
-
-            addHighlightOccurrences(value, rarity, highlights, colors);
-        }
-        if (highlights.isEmpty()) return true;
-
-        panel.highlightInLastPara(highlights.toArray(new String[0]));
-        panel.setHighlightColorsInLastPara(colors.toArray(new Color[0]));
+        com.fs.starfarer.api.util.Highlights highlights =
+                QuestTextHighlights.create(values, rarity, Misc.getHighlightColor());
+        if (highlights.getText().length > 0) panel.setHighlightsInLastPara(highlights);
         return true;
-    }
-
-    protected void addHighlightOccurrences(String value,
-                                           List<FishRequirement.RarityHighlight> rarity,
-                                           List<String> highlights, List<Color> colors) {
-        int from = 0;
-        while (from < value.length()) {
-            FishRequirement.RarityHighlight nextRarity = null;
-            int nextRarityAt = -1;
-            for (FishRequirement.RarityHighlight entry : rarity) {
-                int at = value.indexOf(entry.text, from);
-                if (at >= 0 && (nextRarityAt < 0 || at < nextRarityAt
-                        || at == nextRarityAt
-                        && entry.text.length() > nextRarity.text.length())) {
-                    nextRarity = entry;
-                    nextRarityAt = at;
-                }
-            }
-
-            Matcher credits = CREDIT_REWARD.matcher(value);
-            int nextCreditAt = credits.find(from) ? credits.start() : -1;
-            if (nextRarityAt < 0 && nextCreditAt < 0) break;
-
-            if (nextCreditAt >= 0 && (nextRarityAt < 0 || nextCreditAt < nextRarityAt)) {
-                highlights.add(credits.group());
-                colors.add(Misc.getHighlightColor());
-                from = credits.end();
-            } else {
-                highlights.add(nextRarity.text);
-                colors.add(nextRarity.rarity.color);
-                from = nextRarityAt + nextRarity.text.length();
-            }
-        }
     }
 
     protected com.fs.starfarer.api.campaign.TextPanelAPI text(InteractionDialogAPI dialog) {
