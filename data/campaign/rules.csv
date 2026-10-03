@@ -2065,7 +2065,7 @@ catchrelease_fq_burn_ward_turnIn,CatchReleaseFleetQuestTurnInText,$entity.catchr
 ""Bed four first. Have someone stay with him.""
 
 By the time your receipt is signed, the first dressing is being applied.",,
-catchrelease_fq_burn_ward_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == burn_ward,,"""A miner, burns across most of his back. The supply shuttle was three weeks late. I used what we had, and he walked out of my medbay.""
+catchrelease_fq_burn_ward_question,CatchReleaseFleetQuestQuestionText,$entity.catchrelease_fleetQuestType == burn_ward,,"""A miner, burns across most of his back. The supply shuttle was three weeks late. I used what we had, and he walked out of my medbay alive.""
 
 The officer turns at a call from one of the beds, then comes back. ""I'd use synthskin if I had it, Captain. I don't. My people need covering.""",,
 catchrelease_fq_burn_ward_thanks,CatchReleaseFleetQuestThanksText,$entity.catchrelease_fleetQuestType == burn_ward,,"""All $entity.catchreleaseFleetCasualties have proper dressings now. We're arranging a transfer to a hospital. Thank you, Captain. They needed this.""",,
@@ -2987,8 +2987,8 @@ $catchreleaseStage < 2
 $catchrelease_fisherInterceptOpened",,"""Captain. I take it you haven't worked a rupture before.""
 
 The Fisherman has your fleet on his plot. He waits for your answer without closing the distance any further.","0:catchrelease_introWantWork:No. Is there work in it?
-10:catchrelease_introCurious:No. What do you catch out here?
-100:catchrelease_fisherBack:No. I'm just passing through.",
+10:catchrelease_introCurious:What do you catch out here?
+100:catchrelease_fisherBack:I'm just passing through.",
 catchrelease_introHelloRating,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
 CatchReleaseCMD tokens
 $catchreleaseStage < 2
@@ -3008,7 +3008,7 @@ $catchreleaseStage < 2
 The Fisherman moves closer to the pickup to hear your answer over the machinery.","0:catchrelease_introWantWork:I'm looking for work.
 10:catchrelease_introCurious:I want to know what you're doing out here.
 100:catchrelease_fisherBack:Not today.",
-catchrelease_introWantWork,DialogOptionSelected,$option == catchrelease_introWantWork,,"""You could do worse than fishing. You've got a ship; I can supply the rig. Bring something back with it and we'll see how you get on.""
+catchrelease_introWantWork,DialogOptionSelected,$option == catchrelease_introWantWork,,"""You could do worse than fishing. You've got a ship; I can give you the rig. Bring something back with it and we'll see how you get on.""
 
 Your deck officer receives a handling manifest and calls for permission to bring the trawler alongside.",catchrelease_intro_rod:Authorize the equipment transfer.,
 catchrelease_introCuriousIntercepted,DialogOptionSelected,"$option == catchrelease_introCurious
