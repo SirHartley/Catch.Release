@@ -1,7 +1,5 @@
 package catchrelease.dialogue.rules;
 
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
@@ -19,13 +17,12 @@ public final class QuestDialogMap {
     private QuestDialogMap() {
     }
 
-    public static boolean showRemote(InteractionDialogAPI dialog, String targetSystemId,
-                                     SectorEntityToken mapLocation, String title,
-                                     FactionAPI uiFaction, String icon, Set<String> intelTags) {
+    public static boolean show(InteractionDialogAPI dialog, SectorEntityToken mapLocation,
+                               String title, FactionAPI uiFaction, String icon, Set<String> intelTags) {
         if (dialog == null || dialog.getVisualPanel() == null) return false;
 
         hide(dialog);
-        if (mapLocation == null || !isRemote(targetSystemId, mapLocation)) return true;
+        if (mapLocation == null) return true;
 
         Set<String> tags = intelTags == null
                 ? new LinkedHashSet<>() : new LinkedHashSet<>(intelTags);
@@ -58,18 +55,5 @@ public final class QuestDialogMap {
 
         dialog.getVisualPanel().removeMapMarkerFromPersonInfo();
         return true;
-    }
-
-    protected static boolean isRemote(String targetSystemId, SectorEntityToken mapLocation) {
-        String systemId = targetSystemId;
-        if (systemId == null && mapLocation != null && mapLocation.getStarSystem() != null) {
-            systemId = mapLocation.getStarSystem().getId();
-        }
-        if (systemId == null) return false;
-
-        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        StarSystemAPI here = player == null ? null : player.getStarSystem();
-
-        return here == null || !systemId.equals(here.getId());
     }
 }

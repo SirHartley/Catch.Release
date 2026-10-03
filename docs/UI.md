@@ -34,8 +34,8 @@ module. UI text must distinguish them.
 
 ## Intel and sidebar maps
 
-- Remote offers and location reminders use `QuestDialogMap` below the portrait.
-  Use the stored target; do not display a map for a local or unresolved destination.
+- Offers and location reminders use `QuestDialogMap` below the portrait, including
+  targets in the current system. Use the stored target; omit unresolved destinations.
   Remove only the temporary map/marker owned by that preview after acceptance,
   leaving, or switching surfaces.
 - Navigation follows the current objective: Open fishing map for fish requests
