@@ -228,6 +228,9 @@ Dialogue remains in `rules.csv`: each of the 24 cases owns its pitch, questions,
 reminder, delivery and thanks. Qualified acceptance options explicitly say
 `(Accept)`; they use the ordinary acceptance path. The Last Entry and Interment
 follow-up questions use the existing extra-question routing and saved flags.
+Scavenger Engine switches its acceptance labels after the technical question,
+using complementary `$entity.catchrelease_fqQuestionAsked` conditions; both menus
+retain the shared acceptance and decline handlers.
 
 ### `campaign/fish/colony`
 
@@ -281,6 +284,10 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 
 The first-catch questions return to one another; only `catchrelease_introFirstDone`
 advances that lesson.
+
+The `catchrelease_introCurious` and `catchrelease_introCuriousIntercepted` replies
+offer rig delivery or a return to business without accepting it. Both delivery
+options route to `catchrelease_intro_rod`, which owns the `giveRod` grant.
 
 ### `campaign/fish/minigame`
 

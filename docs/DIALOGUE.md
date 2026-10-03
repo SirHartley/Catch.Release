@@ -140,6 +140,7 @@ Use the [shared text presentation checks](#shared-text-presentation) alongside t
 
 ### Navigation
 
+- When revising dialogue, read each incoming player option, the NPC reply and the outgoing options together. Update repeated/read-again labels too. Responses must fit the exchange, use only information the player has received and state what accepting or leaving will do.
 - Every reachable state needs an intentional next step or exit, including insufficient cargo, unavailable stock, decline, cancellation, and completed hand-in.
 - Reading one informational option must return to the appropriate question menu so the others remain available. It must not accept, decline, pay, or end the exchange.
 - Accepted-job comms must show the active task's hand-in, reminder, not-yet, and exit choices, not the original offer's accept/decline menu.
