@@ -79,13 +79,13 @@ id: catchrelease_exAsk           trigger: DialogOptionSelected   conditions: $op
 script:  FireAll CatchReleaseExQuestions
 
 id: catchrelease_exQPay          trigger: CatchReleaseExQuestions       conditions: !$catchrelease_exAskedPay
-options: catchrelease_exPay:What does it pay?
+options: catchrelease_exPay:"What does it pay?"
 
 id: catchrelease_exQRisk         trigger: CatchReleaseExQuestions       conditions: !$catchrelease_exAskedRisk
-options: catchrelease_exRisk:How dangerous is it?
+options: catchrelease_exRisk:"How dangerous is it?"
 
 id: catchrelease_exQBack         trigger: CatchReleaseExQuestions
-options: 100:catchrelease_exBack:That's all.
+options: 100:catchrelease_exBack:"That's all."
 
 id: catchrelease_exPay           trigger: DialogOptionSelected   conditions: $option == catchrelease_exPay
 text:    (the answer)
@@ -283,7 +283,7 @@ After the prose, small gray text can state a mechanical consequence the prose do
 - **Options column** for every option whose label is known in advance. Format `order:id:text`. Lower order shows higher.
 - **Order.** Normally leave it out, as 94% of SotF's and vanilla's options do: `id:text` has order 0, and equal orders show in the order the rows and lines are written. Write an order only to move an option away from that position, for example `100:defaultLeave:Leave` to keep Leave last in a menu assembled from several rows.
 - **No colons in labels.** The loader splits the line on every colon: a colon in an `id:text` label stops the file loading, and in `order:id:text` the label is cut at the next colon. A label that needs one gets it from `SetOptionText` in the Script of the row that adds the option ([CSV columns](RULES.md#csv-columns)).
-- **Labels.** Unquoted actions, following the menu's convention, as [Dialogue and player options](LORE.md#dialogue-and-player-options) requires. Add a bracketed note only where the words hide the consequence: `(lie)`, `(decline)`, `(attack)`. SotF does this on under 5% of its options. Labels get token replacement.
+- **Labels.** Quote spoken replies; leave actions and navigation unquoted. See [Dialogue and player options](LORE.md#dialogue-and-player-options). Keep consequence notes outside the quotes: `"I'll try." (Accept)`. Add a note only where the words hide the consequence: `(lie)`, `(decline)`, `(attack)`. SotF does this on under 5% of its options. Labels get token replacement.
 - **Ids.** `catchrelease_<feature><Purpose>`, never starting with `$`. Name the handler row after the option it answers so a search finds both; SotF and Catch.Release add a suffix (option `catchrelease_hitmanBribeAsk`, handler `catchrelease_hitmanBribeAskSel`). The handler's condition is `$option == <optionId>`.
 - **Handlers.** Every option id needs a `DialogOptionSelected` row, except the ids vanilla already handles: `defaultLeave` and the `cutCommLink` family (see [Exits and returns](#exits-and-returns)). A click with no handler prints a red error and an "Exit dialog" option, unless the option went through a confirmation such as a story point option.
 - **Unavailable choices.** Keep the option and disable it when the player should see what is possible: `SetEnabled <id> false`, then `SetTooltip <id> "Requires 10 supplies."`, with `SetTooltipHighlights` and `SetTooltipHighlightColors` for the numbers. Hide it with a condition when the player should not know about it yet.

@@ -25,7 +25,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Camp, chart or tutorial proof | `CampedSpotJob/FishermanQuest/FishingIntro -> QuestPond/FishRequirement -> FishItems.stow` |
 | Fish shop and schematics | `FishShopDialog -> ShopEntry -> ShopPricing/ShopSchematics -> TackleManager/UpgradeManager` |
 | Fisherman fleet, identity, shelf | `CoreFisherSpawner/FishermanSpawner -> behavior -> FishermanIdentity/FishermanShelf` |
-| Rules menu, panel return, highlights | `rules.csv -> CatchReleaseCMD`; [project routing](RULES.md#project-routing), [shared text presentation](DIALOGUE.md#shared-text-presentation) and [Java panel returns](UI.md#custom-dialog-hosts) |
+| Rules menu, panel return, highlights | `rules.csv -> CatchReleaseCMD`; [project routing](RULES.md#project-routing), [option wording and quotation](LORE.md#dialogue-and-player-options), [shared text presentation](DIALOGUE.md#shared-text-presentation) and [Java panel returns](UI.md#custom-dialog-hosts) |
 | Command arguments, mission calls, memory lifetime, missing text replacements | [Rules implementation guide](RULES_AUTHORING.md) and its dictionaries, including for Java-only fixes; [project routing](RULES.md#project-routing) for local contracts |
 | Harpoon, drones, Breach Lights | `abilities/*/ability -> entities/scripts -> renderers`; shared targeting in `skillshot/` |
 | Camera, pond opening | `PondInteractionAbilityPlugin -> RodMoteEntityPlugin -> MaskedFishingPondTerrainPlugin -> PondCameraFocusScript` |
@@ -197,6 +197,9 @@ They rebuild through `FireAll`, with speaker-local read flags lasting for the
 offer conversation. Answered topics disappear; forward, accept/decline and back
 options remain. Startup's main offer keeps menu-only links to unfinished buyer
 and distribution subquestions without repeating the answered introduction.
+The buyer branch returns to the main offer before switching to distribution.
+Fight Night's offer records its rules and house-cut questions in speaker memory
+for the conversation; answered questions disappear while accept and decline remain.
 
 `CompanionJob` owns A Client's Preference; its `catchrelease_client_*` rules and
 intel describe the same private commission. The request uses `minLength`; the
@@ -276,6 +279,7 @@ Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge 
 | File | Owner / connection |
 |---|---|
 | `CatchReleaseCMD.java` | Single rules bridge: temporary tokens, conditions, actions, custom panels, highlights, question paging and fleet teardown. Restores prior rules plugin and options once after panels. |
+| `QuestTextHighlights.java` | Splits explicit dialogue highlights into fish/rarity colours and ordinary requirement/reward emphasis. Preserves surrounding terms, displayed casing and repeated occurrences. Text rows supply values in display order before reward cards or other text. |
 | `QuestDialogMap.java` | Shared temporary sidebar map for local and remote dialogue targets, matching vanilla mission icons, tags, and colours. `showIntroMap`, `showWorkMap` and FishJob's `showRemoteMap` action use `show()`; unresolved targets clear the preview. |
 | `FishBuyer.java` | Immutable bulk-sale preview, revalidated before sale; protects active FishAsker and marked-gear specimens. Picker packing uses scoped reflection for input and transfer reset, copies the packed hold into the offer, and restores surviving original containers on exit. See [cargo pickers](UI.md#cargo-pickers). |
 
