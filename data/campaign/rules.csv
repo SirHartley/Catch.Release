@@ -790,15 +790,19 @@ FireAll JobSpecificOptions","The Commissioner recognizes you. ""$catchreleaseFig
 ""Fancy another? We're after $catchreleaseAsk. $catchreleaseDeadline Fee's $catchreleaseReward.""
 
 The barkeeper comes over to hear your answer. ""Same arrangement. Take the fee or back a fighter once the odds are up.""",,
-catchrelease_ring_offerHowOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,10:catchrelease_ring_how:How does this work?,
-catchrelease_ring_offerHouseOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,20:catchrelease_ring_house:What's the house's end?,
+catchrelease_ring_offerHowOption,JobSpecificOptions,"$menuState == catchreleaseRingOffer
+!$catchreleaseRingAskedHow",,,10:catchrelease_ring_how:How does this work?,
+catchrelease_ring_offerHouseOption,JobSpecificOptions,"$menuState == catchreleaseRingOffer
+!$catchreleaseRingAskedHouse",,,20:catchrelease_ring_house:What's the house's end?,
 catchrelease_ring_offerAcceptOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,SetOptionColor catchrelease_jobAccept highlight,,30:catchrelease_jobAccept:I'll supply the pair.,
 catchrelease_ring_offerDeclineOption,JobSpecificOptions,$menuState == catchreleaseRingOffer,,,40:catchrelease_jobDecline:Not this card.,
-catchrelease_ring_how,DialogOptionSelected,$option == catchrelease_ring_how,"$menuState = catchreleaseRingOffer 0
+catchrelease_ring_how,DialogOptionSelected,$option == catchrelease_ring_how,"$catchreleaseRingAskedHow = true 0
+$menuState = catchreleaseRingOffer 0
 FireAll JobSpecificOptions","""You supply both fighters. I measure each against the normal size range for its species, so a big specimen counts for more than a species that just happens to be big.""
 
 The Commissioner shows you the calculations in the book. ""An even pair starts at thirty-eight percent each. The rest goes to the house. You can keep the supplier's fee or wager it on either fighter. If your fighter loses, the fee is all you lose.""",,
-catchrelease_ring_house,DialogOptionSelected,$option == catchrelease_ring_house,"$menuState = catchreleaseRingOffer 0
+catchrelease_ring_house,DialogOptionSelected,$option == catchrelease_ring_house,"$catchreleaseRingAskedHouse = true 0
+$menuState = catchreleaseRingOffer 0
 FireAll JobSpecificOptions","The barkeeper pours another drink.
 
 ""House gets whatever's left between the two. It's all written up there.""
