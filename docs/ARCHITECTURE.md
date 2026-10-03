@@ -25,7 +25,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Camp, chart or tutorial proof | `CampedSpotJob/FishermanQuest/FishingIntro -> QuestPond/FishRequirement -> FishItems.stow` |
 | Fish shop and schematics | `FishShopDialog -> ShopEntry -> ShopPricing/ShopSchematics -> TackleManager/UpgradeManager` |
 | Fisherman fleet, identity, shelf | `CoreFisherSpawner/FishermanSpawner -> behavior -> FishermanIdentity/FishermanShelf` |
-| Rules menu, panel return, highlights | `rules.csv -> CatchReleaseCMD`; [project routing](RULES.md#project-routing), [shared text presentation](DIALOGUE.md#shared-text-presentation) and [Java panel returns](UI.md#custom-dialog-hosts) |
+| Rules menu, panel return, highlights | `rules.csv -> CatchReleaseCMD`; [project routing](RULES.md#project-routing), [option wording and quotation](LORE.md#dialogue-and-player-options), [shared text presentation](DIALOGUE.md#shared-text-presentation) and [Java panel returns](UI.md#custom-dialog-hosts) |
 | Command arguments, mission calls, memory lifetime, missing text replacements | [Rules implementation guide](RULES_AUTHORING.md) and its dictionaries, including for Java-only fixes; [project routing](RULES.md#project-routing) for local contracts |
 | Harpoon, drones, Breach Lights | `abilities/*/ability -> entities/scripts -> renderers`; shared targeting in `skillshot/` |
 | Camera, pond opening | `PondInteractionAbilityPlugin -> RodMoteEntityPlugin -> MaskedFishingPondTerrainPlugin -> PondCameraFocusScript` |

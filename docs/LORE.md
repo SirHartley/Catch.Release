@@ -488,15 +488,15 @@ Choices must express the player's intent, not paraphrase the preceding paragraph
 
 Useful option examples include:
 
-- You give this equipment to every stranger?
-- I just left you in another system.
-- This is a weapon.
-- Where does the range data come from?
+- "You give this equipment to every stranger?"
+- "I just left you in another system."
+- "This is a weapon."
+- "Where does the range data come from?"
 - Decline.
 - Pay the fine.
 - Cut the comm link.
 
-Write option labels as unquoted actions, following the existing menu's convention. Offer different plausible responses when they matter. Use Continue when no meaningful decision exists. Do not offer cosmetically different choices unless the roleplay distinction itself matters. Menu routing, availability and return behavior are specified in [DIALOGUE.md](DIALOGUE.md#navigation).
+Put spoken player replies in straight double quotes, as vanilla does. Leave actions and navigation unquoted: Pay the fine, Continue, Leave. Keep consequence notes outside the quotes, for example `"I'll try. No promises." (Accept)`. Offer different plausible responses when they matter. Use Continue when no meaningful decision exists. Do not offer cosmetically different choices unless the roleplay distinction itself matters. Menu routing, availability and return behavior are specified in [DIALOGUE.md](DIALOGUE.md#navigation).
 
 Repetition must belong to a speaker. Crablobab may enthusiastically repeat a product name; an anxious bureaucrat may repeat a regulation. The plain-coated buyers repeat the exact requested species, not a paraphrase, when asked its purpose. Do not make every speaker repeat the player's question before answering.
 
