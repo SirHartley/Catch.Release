@@ -140,9 +140,10 @@ Use the [shared text presentation checks](#shared-text-presentation) alongside t
 
 ### Navigation
 
-- When revising dialogue, read each incoming player option, the NPC reply and the outgoing options together. Update repeated/read-again labels too. Responses must fit the exchange, use only information the player has received and state what accepting or leaving will do.
+- When revising dialogue, read each incoming player option, the NPC reply and the outgoing options together. Check shared labels too. Responses must fit the exchange, use only information the player has received and state what accepting or leaving will do.
 - Every reachable state needs an intentional next step or exit, including insufficient cargo, unavailable stock, decline, cancellation, and completed hand-in.
 - Reading one informational option must return to the appropriate question menu so the others remain available. It must not accept, decline, pay, or end the exchange.
+- Hide answered questions instead of graying them out. Keep navigation to any unread subquestions without replaying their introduction; every menu must still have a way forward or out.
 - Accepted-job comms must show the active task's hand-in, reminder, not-yet, and exit choices, not the original offer's accept/decline menu.
 - Keep generated targets, prices, rewards and case details stable when leaving and reopening an unaccepted offer. Display saved values; prose must not reroll them.
 - Show hand-in prose and actual reward receipts before moving to a new offer or ending the interaction. Multi-stage hand-ins use a Continue handoff before the next stage's accept/decline choices.
@@ -153,10 +154,10 @@ Custom-panel opening and return behavior is covered by [UI.md](UI.md#custom-dial
 ### Fisherman questions
 
 - Business and panel-return triggers are listed in [RULES.md](RULES.md#project-routing).
-- Unasked questions precede answered ones. Answered questions remain selectable at the end, coloured with vanilla `Misc.getGrayColor()`, not Common fish-rarity beige. Paging and navigation must fit within the nine-option limit.
+- Show only unanswered questions. Rebuild pagination after an answer so shrinking menus never leave an empty last page. Paging and navigation must fit within the nine-option limit.
 - Terminal answers return to questions through Something else; the question-menu exit returns to business.
 - Bycatch becomes a question topic after the first relevant catch. Tutorial disclosure and special-topic precedence follow the saved progression and `LORE.md`.
-- Tutorial outfitter and harpoon questions follow the same read-again convention. Continue does not require exhausting the optional questions; the equipment handoff supplies the essential instructions first.
+- Tutorial ROD, first-catch, outfitter, harpoon and range-data questions use one shared menu per lesson and persistent read flags on the speaker. Hide each answered topic. Continue does not require exhausting the optional questions; the equipment handoff supplies the essential instructions first.
 
 ### Colours, rewards and sidebars
 

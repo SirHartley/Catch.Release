@@ -191,6 +191,13 @@ Startup's skeptical acceptance rejoins `catchrelease_jobAccept`; it has no separ
 mission outcome. Final replies are added through `JobSpecificOptions` after the
 shared reward receipts.
 
+TriTuber's offer uses `CatchReleaseTuberQuestions`; Startup's nested questions use
+`CatchReleaseStartupDemandQuestions` and `CatchReleaseStartupOperationsQuestions`.
+They rebuild through `FireAll`, with speaker-local read flags lasting for the
+offer conversation. Answered topics disappear; forward, accept/decline and back
+options remain. Startup's main offer keeps menu-only links to unfinished buyer
+and distribution subquestions without repeating the answered introduction.
+
 `CompanionJob` owns A Client's Preference; its `catchrelease_client_*` rules and
 intel describe the same private commission. The request uses `minLength`; the
 bonus requires the upper two-fifths of the species' length range, ignoring weight.
@@ -269,7 +276,7 @@ Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge 
 | File | Owner / connection |
 |---|---|
 | `CatchReleaseCMD.java` | Single rules bridge: temporary tokens, conditions, actions, custom panels, highlights, question paging and fleet teardown. Restores prior rules plugin and options once after panels. |
-| `QuestDialogMap.java` | Shared temporary sidebar map for remote dialogue targets, matching vanilla mission icons, tags, and colours. |
+| `QuestDialogMap.java` | Shared temporary sidebar map for local and remote dialogue targets, matching vanilla mission icons, tags, and colours. `showIntroMap`, `showWorkMap` and FishJob's `showRemoteMap` action use `show()`; unresolved targets clear the preview. |
 | `FishBuyer.java` | Immutable bulk-sale preview, revalidated before sale; protects active FishAsker and marked-gear specimens. Picker packing uses scoped reflection for input and transfer reset, copies the packed hold into the offer, and restores surviving original containers on exit. See [cargo pickers](UI.md#cargo-pickers). |
 
 Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchreleaseWorkInstructions` reads a Text-only `CatchReleaseWorkPondInstructions` or `CatchReleaseWorkLampInstructions` row from `rules.csv`, chosen by the saved source before outer Text replacement; these private lookups do not execute scripts or add options.
@@ -282,8 +289,11 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 | `TutorialWreck.java` | Creates a vanilla derelict cruiser beside the first suitable rupture. |
 | `Castaway.java` | Stores planet eligibility and rescue state for the stranded crewman encounter. |
 
-The first-catch questions return to one another; only `catchrelease_introFirstDone`
-advances that lesson.
+Tutorial questions rebuild shared `FireAll` menus: `CatchReleaseIntroRodQuestions`,
+`CatchReleaseIntroFirstQuestions`, `ShopIntroQuestions`, `CatchReleaseIntroDeepQuestions`
+and `CatchReleaseRangeDataBrief`. Persistent speaker-memory flags hide answered
+questions. Each menu keeps its forward
+option at order 100; only `catchrelease_introFirstDone` advances the first-catch lesson.
 
 The `catchrelease_introCurious` and `catchrelease_introCuriousIntercepted` replies
 offer rig delivery or a return to business without accepting it. Both delivery

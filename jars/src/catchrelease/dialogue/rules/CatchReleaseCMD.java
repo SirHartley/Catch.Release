@@ -320,12 +320,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     }
 
     protected boolean showIntroMap(InteractionDialogAPI dialog, String title) {
-        FishingIntro.Target target = FishingIntro.getTarget();
         FishingIntro.IntroIntel intel = new FishingIntro.IntroIntel();
 
-        return QuestDialogMap.showRemote(dialog,
-                target == null ? null : target.systemId,
-                intel.getMapLocation(null),
+        return QuestDialogMap.show(dialog, intel.getMapLocation(null),
                 title == null ? "Target" : title,
                 intel.getFishermanFaction(), intel.getIcon(), intel.getIntelTags(null));
     }
@@ -336,7 +333,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         if (work == null) return QuestDialogMap.hide(dialog);
 
         FishermanQuest.QuestIntel intel = new FishermanQuest.QuestIntel(work);
-        return QuestDialogMap.showRemote(dialog, work.systemId, intel.getMapLocation(null),
+        return QuestDialogMap.show(dialog, intel.getMapLocation(null),
                 title == null ? "Target" : title,
                 intel.getFishermanFaction(), intel.getIcon(), intel.getIntelTags(null));
     }

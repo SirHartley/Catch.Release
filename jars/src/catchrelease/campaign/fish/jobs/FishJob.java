@@ -437,13 +437,11 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         if ("showRemoteMap".equals(action)) {
             SectorEntityToken location = getMapLocation(null);
-            String systemId = location == null || location.getStarSystem() == null
-                    ? null : location.getStarSystem().getId();
             String title = params.size() > 1
                     ? params.get(1).getStringWithTokenReplacement(ruleId, dialog, memoryMap)
                     : "Target";
 
-            return QuestDialogMap.showRemote(dialog, systemId, location, title,
+            return QuestDialogMap.show(dialog, location, title,
                     getGiverFaction(), getIcon(), getIntelTags(null));
         }
 
