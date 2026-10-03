@@ -3038,13 +3038,14 @@ catchrelease_introFirstContinue,DialogOptionSelected,$option == catchrelease_int
 
 The crewman lifts the container a little so you can see it better. The Fisherman lets you look.",,
 catchrelease_introFirstShapeOption,CatchReleaseIntroFirstQuestions,!$catchrelease_introAskedFishShape,,,catchrelease_intro_ghosts:Why a fish?,
-catchrelease_introFirstGhostOption,CatchReleaseIntroFirstQuestions,!$catchrelease_introAskedGhostWord,,,catchrelease_introGhostWord:Ghost is an odd name for it.,
+catchrelease_introFirstGhostOption,CatchReleaseIntroFishShapeQuestions,!$catchrelease_introAskedGhostWord,,,catchrelease_introGhostWord:Ghost is an odd name for it.,
+catchrelease_introFirstShapeReturnOption,CatchReleaseIntroFishShapeQuestions,$catchrelease_introAskedGhostWord,,,100:catchrelease_introFirstQuestionsBack:Continue,
 catchrelease_introFirstToldBeforeOption,CatchReleaseIntroFirstQuestions,!$catchrelease_introAskedToldBefore,,,catchrelease_introToldBefore:You could have told me this before I started.,
 catchrelease_introFirstContinueOption,CatchReleaseIntroFirstQuestions,,,,100:catchrelease_introFirstDone:What's next?,
 catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_ghosts,"$catchrelease_introAskedFishShape = true
-FireAll CatchReleaseIntroFirstQuestions","""It isn't always a fish. We've had crabs, shells, things you'd have trouble fitting a name to. Fish are easier to talk about.""",,
-catchrelease_introGhostWord,DialogOptionSelected,$option == catchrelease_introGhostWord,"$catchrelease_introAskedGhostWord = true
-FireAll CatchReleaseIntroFirstQuestions","""Spacers have a lot of names for things out there. Usually a story to go with each one. I've heard enough versions that I wouldn't use any of them as a guide to what you've caught.""",,
+FireAll CatchReleaseIntroFishShapeQuestions","""It isn't always a fish. We've had crabs, shells, things you'd have trouble fitting a name to. Fish are easier to talk about.""",,
+catchrelease_introGhostWord,DialogOptionSelected,$option == catchrelease_introGhostWord,$catchrelease_introAskedGhostWord = true,"""Spacers have a lot of names for things out there. Usually a story to go with each one. I've heard enough versions that I wouldn't use any of them as a guide to what you've caught.""",catchrelease_introFirstQuestionsBack:Continue,
+catchrelease_introFirstQuestionsBack,DialogOptionSelected,$option == catchrelease_introFirstQuestionsBack,FireAll CatchReleaseIntroFirstQuestions,,,
 catchrelease_introFirstDone,DialogOptionSelected,"$option == catchrelease_introFirstDone
 CatchReleaseCMD tokens
 $catchreleaseStage == 2","CatchReleaseCMD sendOut
@@ -3764,8 +3765,7 @@ catchrelease_fq_interment_offerOptionsExtraQuestion,CatchReleaseFleetQuestOfferO
 catchrelease_fq_interment_extraQuestion,CatchReleaseFleetQuestExtraQuestionText,$entity.catchrelease_fleetQuestType == interment,,"""Good company on a long passage. Thorough about the work. Thorough about other people's work, too, which could be less welcome.""
 
 The convoy master looks back at the will. ""They would have checked this clause before departure. I should have done the same.""",,
-catchrelease_introToldBefore,DialogOptionSelected,$option == catchrelease_introToldBefore,"$catchrelease_introAskedToldBefore = true
-FireAll CatchReleaseIntroFirstQuestions","""I wanted you to know how to bring it back before we got into what it might be. Ask your questions, Captain. We're not going anywhere yet.""",,
+catchrelease_introToldBefore,DialogOptionSelected,$option == catchrelease_introToldBefore,$catchrelease_introAskedToldBefore = true,"""I wanted you to know how to bring it back before we got into what it might be. Ask your questions, Captain. We're not going anywhere yet.""",catchrelease_introFirstQuestionsBack:Continue,
 catchrelease_startup_offerSkepticalOption,JobSpecificOptions,"$menuState == catchreleaseStartupOffer
 $catchreleaseStartupTerms",,,101:catchrelease_startup_acceptSkeptical:I'll supply the fish. Don't mistake that for an endorsement. (Accept),
 catchrelease_startup_acceptSkeptical,DialogOptionSelected,$option == catchrelease_startup_acceptSkeptical,"$catchreleaseStartupSkeptical = true 0

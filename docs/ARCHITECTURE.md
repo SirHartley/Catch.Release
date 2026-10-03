@@ -292,8 +292,11 @@ Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchrele
 Tutorial questions rebuild shared `FireAll` menus: `CatchReleaseIntroRodQuestions`,
 `CatchReleaseIntroFirstQuestions`, `ShopIntroQuestions`, `CatchReleaseIntroDeepQuestions`
 and `CatchReleaseRangeDataBrief`. Persistent speaker-memory flags hide answered
-questions. Each menu keeps its forward
-option at order 100; only `catchrelease_introFirstDone` advances the first-catch lesson.
+questions. Each main menu keeps its forward option at order 100.
+`CatchReleaseIntroFishShapeQuestions` contains the first-catch ghost-name follow-up,
+not the main menu. That answer and `catchrelease_introToldBefore` return through
+`catchrelease_introFirstQuestionsBack`; only `catchrelease_introFirstDone` advances
+the first-catch lesson.
 
 The `catchrelease_introCurious` and `catchrelease_introCuriousIntercepted` replies
 offer rig delivery or a return to business without accepting it. Both delivery
