@@ -200,8 +200,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         float width = panelPos.getWidth() - x - GAP;
         if (width < CELL + 30f) return;
 
-        // the card it stands beside is the ceiling: never taller, scroll instead
-        float maxHeight = cardPos.getHeight();
+        float height = cardPos.getHeight();
 
         float innerWidth = width - INNER_PAD * 2f;
         int total = known.size() + unknown;
@@ -209,12 +208,10 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         int rows = (total + perRow - 1) / perRow;
 
         float rowsNeeded = rows * CELL + (rows - 1) * CELL_GAP;
-        float contentBudget = maxHeight - TITLE_HEIGHT - INNER_PAD * 2f;
+        float contentBudget = height - TITLE_HEIGHT - INNER_PAD * 2f;
 
         boolean scrolls = rowsNeeded > contentBudget;
         float contentHeight = Math.min(rowsNeeded, contentBudget);
-
-        float height = TITLE_HEIGHT + INNER_PAD * 2f + contentHeight;
 
         fishPanel = Global.getSettings().createCustom(width, height, new BoxPlugin());
 
