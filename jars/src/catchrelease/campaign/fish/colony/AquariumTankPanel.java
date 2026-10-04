@@ -16,6 +16,7 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL13;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
@@ -331,20 +332,42 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
 
             float renderAngle = pitch * turnover;
 
-            GL11.glPushMatrix();
-            GL11.glTranslatef(cx, cy, 0f);
-            GL11.glRotatef(renderAngle, 0f, 0f, 1f);
-            GL11.glScalef(turnover * breathe, breatheAcross, 1f);
-
-            GL11.glEnable(GL11.GL_TEXTURE_2D);
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            sprite.bindTexture();
-            GL11.glColor4f(1f, 1f, 1f, alphaMult);
-
             float waveAmp = breadth * 0.09f * Math.max(0.5f, spec.jitter);
             float waveSpeed = 5f + 3f * spec.motionSpeed;
 
+            int textureUnit = GL11.glGetInteger(GL13.GL_ACTIVE_TEXTURE);
+            int previousProgram = -1;
+            GL11.glPushAttrib(GL11.GL_CURRENT_BIT | GL11.GL_ENABLE_BIT
+                    | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_TEXTURE_BIT);
+            GL11.glPushMatrix();
+            try {
+                GL11.glTranslatef(cx, cy, 0f);
+                GL11.glRotatef(renderAngle, 0f, 0f, 1f);
+                GL11.glScalef(turnover * breathe, breatheAcross, 1f);
+
+                GL13.glActiveTexture(GL13.GL_TEXTURE0);
+                GL11.glEnable(GL11.GL_TEXTURE_2D);
+                GL11.glEnable(GL11.GL_BLEND);
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+                sprite.bindTexture();
+                GL11.glColor4f(1f, 1f, 1f, alphaMult);
+
+                float imageWidth = length * (float) Math.hypot(
+                        pose.x(1f, 0f) - pose.x(0f, 0f), pose.y(1f, 0f) - pose.y(0f, 0f));
+                float imageHeight = length * (float) Math.hypot(
+                        pose.x(0f, 1f) - pose.x(0f, 0f), pose.y(0f, 1f) - pose.y(0f, 0f));
+                previousProgram = AquariumFishShader.begin(sprite, data.aberration, time,
+                        wavePhase, imageWidth, imageHeight);
+                renderMesh(length, waveAmp, waveSpeed, time);
+            } finally {
+                AquariumFishShader.end(previousProgram);
+                GL11.glPopMatrix();
+                GL11.glPopAttrib();
+                GL13.glActiveTexture(textureUnit);
+            }
+        }
+
+        protected void renderMesh(float length, float waveAmp, float waveSpeed, float time) {
             // Rotate the mesh, not the UVs: diagonal corners stay inside the source image.
             for (int row = 0; row < WARP_SEGMENTS; row++) {
                 float bottom = row / (float) WARP_SEGMENTS;
@@ -357,8 +380,6 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
                 }
                 GL11.glEnd();
             }
-
-            GL11.glPopMatrix();
         }
 
         protected void vertex(float u, float v, float length, float waveAmp, float waveSpeed, float time) {

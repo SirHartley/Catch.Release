@@ -86,6 +86,14 @@ therefore reconcile these markers; no separate sector-wide polling script is nee
   proportions and the old mirroring convention for left-painted fish. Tail sway
   follows the aligned body axis; UVs stay within the sprite's texture region.
   The IDE-facing picker is described under [registration and lifecycle](ARCHITECTURE.md#registration-and-lifecycle).
+- Aquarium distortion reads each specimen's saved `FishCatch.aberration`. Stable
+  fish bypass it; colour separation grows continuously above 0.12 aberration,
+  with stronger strip displacement, pixel breakup and partial dropouts at low
+  coherence. `AquariumFishShader` samples only the fish texture inside its UV
+  region. It never samples the screen or changes sprite properties. The tank,
+  cargo icons, shops and Codex are unaffected. Keep the previous shader, texture
+  unit, binding, blend and colour state intact after drawing. Disabled or failed
+  shaders leave the ordinary swimming mesh visible.
 
 Fisherman identity and vanilla person-panel setup are covered by
 [ARCHITECTURE.md](ARCHITECTURE.md#fisherman-and-tutorial-lifecycle).
