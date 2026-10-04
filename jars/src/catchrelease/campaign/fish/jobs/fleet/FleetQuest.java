@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -119,13 +120,14 @@ public class FleetQuest extends FishJob {
     public static final int ASK_ATTEMPTS = 5;
     public static final float ASK_BACKOFF = 0.7f;
 
-    public static final String OFFER_SPRITE_CATEGORY = "systemMap";
-    public static final String OFFER_SPRITE = "mission_indicator";
+    public static final String MARKER_SPRITE_CATEGORY = ModPlugin.MOD_ID;
+    public static final String MARKER_SPRITE = "fleet_quest_map_icon";
     public static final Color OFFER_COLOR = new Color(95, 200, 215);
 
     protected FleetQuestType type;
     protected CampaignFleetAPI giver;
     protected transient FleetMarkerRenderer marker;
+    protected boolean customMarkerReady;
     protected boolean takenUp = false;
     protected boolean distressOffer = false;
     protected String fleetName;
@@ -332,11 +334,17 @@ public class FleetQuest extends FishJob {
     }
 
     public void ensureMarked() {
-        if (distressOffer || takenUp || giver == null || giver.isExpired()) return;
+        if (giver == null || giver.isExpired() || !isQuestFleet(giver)
+                || (distressOffer && !takenUp)) {
+            dropMarker();
+            return;
+        }
+        if (takenUp) markDeliverable();
         if (marker != null && !marker.isExpired()) return;
 
-        marker = FleetMarkerRenderer.addTo(giver, OFFER_SPRITE_CATEGORY, OFFER_SPRITE,
-                OFFER_COLOR, FleetMarkerRenderer.SIZE);
+        Color color = takenUp ? FleetQuestMapIcon.getMarkerColor() : OFFER_COLOR;
+        marker = FleetMarkerRenderer.addTo(giver, MARKER_SPRITE_CATEGORY, MARKER_SPRITE,
+                color, FleetMarkerRenderer.SIZE);
     }
 
     protected void dropMarker() {
@@ -644,8 +652,6 @@ public class FleetQuest extends FishJob {
     }
 
     protected void mark() {
-        Misc.makeImportant(giver, IMPORTANT_REASON);
-
         writeDialogueMemory();
 
         // carried over rather than re-derived: the answer was given to the hull that is now gone, and without it the copy would open by making the same offer over again
@@ -659,6 +665,7 @@ public class FleetQuest extends FishJob {
         if (title != null && !title.isEmpty()) giver.setName(title);
 
         FleetQuestMapIcon.findOrAdd(giver);
+        ensureMarked();
         keepStanding();
     }
 
@@ -895,6 +902,7 @@ public class FleetQuest extends FishJob {
             }
             keepStanding();
             if (takenUp && giver != null && !giver.isExpired()) {
+                ensureMarked();
                 FleetQuestMapIcon.findOrAdd(giver);
             }
         }
@@ -902,9 +910,13 @@ public class FleetQuest extends FishJob {
 
     @Override
     protected void markDeliverable() {
-        if (!takenUp || giver == null) return;
+        if (!takenUp || giver == null || customMarkerReady) return;
 
-        makeImportant(giver, getDeliverFlag(), Stage.WANTED);
+        // Old saves stored both a direct reason and stage-owned importance.
+        makeUnimportant(giver, Stage.WANTED);
+        Misc.makeUnimportant(giver, IMPORTANT_REASON);
+        setFlag(giver, getDeliverFlag(), false, Stage.WANTED);
+        customMarkerReady = true;
     }
 
     @Override
@@ -1276,6 +1288,7 @@ public class FleetQuest extends FishJob {
         MemoryAPI memory = giver.getMemoryWithoutUpdate();
         memory.unset(QUEST_FLAG);
         memory.unset(TAKEN_FLAG);
+        memory.unset(getDeliverFlag());
         if (!Stage.DONE.equals(currentStage)) memory.unset(REF_KEY);
 
         clearLegacyDialogueMemory(memory);
@@ -1289,6 +1302,7 @@ public class FleetQuest extends FishJob {
 
         if (!takenUp) return;
 
+        makeUnimportant(giver, Stage.WANTED);
         Misc.makeUnimportant(giver, IMPORTANT_REASON);
 
         if (fleetName != null && !fleetName.isEmpty()) {
