@@ -3,6 +3,7 @@ package catchrelease.rendering.renderers;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
@@ -18,7 +19,7 @@ public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
     public static final float OFFSET_DIVISOR = 1.41f;
 
     public static final float PULSE_RATE = 1.6f;
-    public static final float PULSE_DEPTH = 0.25f;
+    public static final float PULSE_DEPTH = 0.4f;
 
     protected final CampaignFleetAPI fleet;
     protected final String spriteCategory;
@@ -73,16 +74,18 @@ public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
 
         if (fleet.getContainingLocation() != Global.getSector().getCurrentLocation()) return;
 
-        float alpha = viewport.getAlphaMult() * fleet.getSensorFaderBrightness();
+        if (fleet.getVisibilityLevelToPlayerFleet() == SectorEntityToken.VisibilityLevel.NONE) return;
+
+        float alpha = viewport.getAlphaMult();// * fleet.getSensorFaderBrightness();
         if (alpha <= 0f) return;
 
         SpriteAPI sprite = Global.getSettings().getSprite(spriteCategory, spriteId);
         if (sprite == null) return;
 
-        float zoom = Math.max(1f, Global.getSector().getCampaignUI().getZoomFactor());
+        float zoom = Math.max(1f, Global.getSector().getCampaignUI().getZoomFactor() *0.9f);
         float drawn = size * zoom;
 
-        float offset = (fleet.getRadius() + drawn * 0.5f) / OFFSET_DIVISOR;
+        float offset = 8f + (fleet.getRadius() + drawn * 0.5f) / OFFSET_DIVISOR;
         Vector2f at = fleet.getLocation();
 
         float pulse = 1f - PULSE_DEPTH * (0.5f - 0.5f * (float) Math.cos(elapsed * PULSE_RATE));

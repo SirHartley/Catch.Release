@@ -122,7 +122,7 @@ public class FleetQuest extends FishJob {
 
     public static final String MARKER_SPRITE_CATEGORY = ModPlugin.MOD_ID;
     public static final String MARKER_SPRITE = "fleet_quest_map_icon";
-    public static final Color OFFER_COLOR = new Color(95, 200, 215);
+    public static final Color OFFER_COLOR = new Color(174, 227, 255);
 
     protected FleetQuestType type;
     protected CampaignFleetAPI giver;
