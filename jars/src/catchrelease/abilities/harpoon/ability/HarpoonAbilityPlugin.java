@@ -7,6 +7,8 @@ import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -204,33 +206,44 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         if (!Global.CODEX_TOOLTIP_MODE) tooltip.addTitle(spec.getName());
         else tooltip.addSpacer(-10f);
 
-        tooltip.addPara("Fires a head on a line at whatever the fabric is showing. A hit drives it back"
-                + " and holds it while it is played, and a landed specimen comes home on the line.",
-                pad);
+        tooltip.addPara("Hooks fish exposed by ruptures or breach lamps, pushing them back on impact.", pad);
 
-        tooltip.addPara("It will stick in a hull just as well. A lighter fleet comes to you; a"
-                + " heavier one takes you with it.", Misc.getGrayColor(), pad);
+        tooltip.addPara("Charges: %s    Recharge: %s per charge", pad, highlight,
+                getCharges() + "/" + getMaxCharges(),
+                Misc.getRoundedValueOneAfterDecimalIfNotWhole(Math.max(0.1f, UpgradeManager.getValue(
+                        StatIds.HARPOON_RECHARGE_TIME, HarpoonConstants.RECHARGE_FALLBACK))) + " seconds");
+        tooltip.addPara("Range: %s    Shot speed: %s", 3f, highlight,
+                Misc.getRoundedValue(HarpoonConstants.RANGE) + " units",
+                Misc.getRoundedValue(UpgradeManager.getValue(StatIds.HARPOON_SPEED, HarpoonConstants.SPEED)) + " units/s");
 
-        tooltip.addPara("The head will go through the fabric for anything a breach lamp has"
-                + " exposed.", Misc.getGrayColor(), pad);
-
-        if (!Global.CODEX_TOOLTIP_MODE && HarpoonEntityPlugin.isExplosive()) {
-            tooltip.addPara("A charge is fitted. Nothing comes back on this line: whatever the head"
-                    + " reaches goes up with it, and a hull it reaches will not be waiting to hear"
-                    + " your side of it.", Misc.getNegativeHighlightColor(), pad);
+        float assist = UpgradeManager.getValue(StatIds.HARPOON_AIM_ASSIST, 0f);
+        if (assist > 0f) {
+            tooltip.addPara("Aim correction: up to %s either side", 3f, highlight,
+                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(assist) + " degrees");
         }
 
-        tooltip.addPara("Range: %s", pad, highlight, (int) HarpoonConstants.RANGE + " units");
-
-        tooltip.addPara("Charges: %s of %s", 3f, highlight,
-                "" + getCharges(), "" + getMaxCharges());
+        Tackle fitted = TackleManager.get(Tackle.Fit.HARPOON);
+        if (fitted != Tackle.NONE) tooltip.addPara("Fitted: %s", pad, highlight, fitted.name);
+        if (fitted.explosive) {
+            tooltip.addPara("Detonates instead of catching fish. Consumed on detonation;"
+                    + " fleet hits cause damage and immediate hostility.", Misc.getNegativeHighlightColor(), 3f);
+        } else {
+            if (fitted.deepStrike) {
+                tooltip.addPara("Can also hit diving fish and unexposed lamp contacts.", 3f);
+            } else if (fitted.retrievesCharge) {
+                tooltip.addPara("A fish hit restores %s.", 3f, highlight, "1 charge");
+            }
+            tooltip.addPara("Fleet hits pull the weaker fleet toward the stronger one and can damage relations."
+                    + " Activate again to cut a tow line.", pad);
+        }
+        tooltip.addPara("Cannot be used in hyperspace.", Misc.getGrayColor(), pad);
 
         if (!Global.CODEX_TOOLTIP_MODE && !hasCharge()) {
             tooltip.addPara("No harpoons ready.", Misc.getNegativeHighlightColor(), pad);
         }
 
         if (!Global.CODEX_TOOLTIP_MODE && HarpoonEntityPlugin.isAnyHauling()) {
-            tooltip.addPara("A line is out. Activate again to cut it.", highlight, pad);
+            tooltip.addPara("Tow line attached. Activate to cut it.", highlight, pad);
         }
 
         addIncompatibleToTooltip(tooltip, false);

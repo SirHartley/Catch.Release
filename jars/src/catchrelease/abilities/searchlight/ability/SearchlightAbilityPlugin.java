@@ -369,21 +369,13 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         float pad = 10f;
 
-        tooltip.addPara("Toggle the breach lamps installed on fishing trawlers.", pad);
-
-        tooltip.addPara("Each lamp burns a window through the fabric as it sweeps. Whatever swims"
-                        + " under one is %s and can be harpooned before the mark fades."
-                        + " The severe radiation increases the range at which the fleet can be"
-                        + " detected by %s.", pad,
-                highlight,
-                "exposed",
-                "" + (int)(DETECTABILITY_PERCENT) + "%"
-        );
-
-        tooltip.addPara("The lamps will not run beside an open pond rupture - that one is the"
-                + " R.O.D.'s.", Misc.getGrayColor(), pad);
+        tooltip.addPara("Sweeps temporary openings through the fabric, exposing fish for the harpoon.", pad);
 
         addUpgradesToTooltip(tooltip, pad);
+
+        tooltip.addPara("Increases the range at which your fleet is detected by %s.", pad, highlight,
+                Misc.getRoundedValue(DETECTABILITY_PERCENT) + "%");
+        tooltip.addPara("Cannot be used near an open rupture or in hyperspace.", gray, pad);
 
         addIncompatibleToTooltip(tooltip, expanded);
     }
@@ -391,40 +383,55 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     protected void addUpgradesToTooltip(TooltipMakerAPI tooltip, float pad) {
         Color highlight = Misc.getHighlightColor();
 
-        int lights = getSearchlightNum();
-        tooltip.addPara("Sweeping with %s, each reaching %s.", pad, highlight,
-                lights == 1 ? "one lamp" : lights + " lamps",
-                (int) Searchlight.getArea() + " units");
+        Tackle fitted = TackleManager.get(Tackle.Fit.SEARCHLIGHT);
+        float area = Searchlight.getArea();
+        float speed = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SPEED, 30f);
+        if (fitted.fanBeam) speed *= Searchlight.FAN_SWEEP_MULT;
+
+        if (fitted.fanBeam) {
+            tooltip.addPara("Lamps: %s    Fan angle: %s", pad, highlight,
+                    "" + getSearchlightNum(), Misc.getRoundedValueOneAfterDecimalIfNotWhole(
+                            2f * Searchlight.FAN_HALF_ANGLE * area / Searchlight.AREA_FALLBACK) + " degrees");
+        } else {
+            tooltip.addPara("Lamps: %s    Beam radius: %s", pad, highlight,
+                    "" + getSearchlightNum(), Misc.getRoundedValue(area) + " units");
+        }
+        tooltip.addPara("Sweep speed: %s", 3f, highlight,
+                Misc.getRoundedValueOneAfterDecimalIfNotWhole(speed) + " units/s");
 
         float detect = UpgradeManager.getValue(StatIds.SEARCHLIGHT_DETECT_RADIUS,
                 FishConstants.IMPRESSION_DETECT_FALLBACK);
         if (detect > 0f) {
-            tooltip.addPara("The fabric bruises within %s of a beam, betraying anything under it"
-                    + " as a dent.", 3f, highlight, (int) detect + " units");
+            tooltip.addPara("Detects hidden fish within %s of each lamp's aim point.", 3f, highlight,
+                    Misc.getRoundedValue(detect) + " units");
         }
 
         float track = UpgradeManager.getValue(StatIds.SEARCHLIGHT_TRACK_TIME, 0f);
         if (track > 0f) {
-            tooltip.addPara("Whatever the light passes over stays marked for %s afterwards.",
-                    3f, highlight, Misc.getRoundedValue(track) + " seconds");
+            tooltip.addPara("Fish remain visible for up to %s after illumination.",
+                    3f, highlight, Misc.getRoundedValueOneAfterDecimalIfNotWhole(track) + " seconds");
         }
 
-        float lock = TackleManager.get(Tackle.Fit.SEARCHLIGHT).lockTime;
-        if (lock > 0f) {
-            tooltip.addPara("A light that finds something breaks off its sweep and follows it for %s.",
-                    3f, highlight, Misc.getRoundedValue(lock) + " seconds");
-        }
-
-        float rare = UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
-        if (rare > 0f) {
-            tooltip.addPara("Rarer species are more likely to be down there to begin with.",
-                    Misc.getGrayColor(), 3f);
+        float rarityWeight = TackleManager.get(Tackle.Fit.DRONE).rarityBias
+                + UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
+        if (rarityWeight != 1f) {
+            tooltip.addPara("Equipment rarity weighting: %s per tier above common.", 3f, highlight,
+                    String.format(java.util.Locale.ROOT, "x%.2f", rarityWeight));
         }
 
         float slow = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SLOW, 0f);
         if (slow > 0f) {
-            tooltip.addPara("The light itself drags: anything swimming through a beam is slowed"
-                    + " by %s.", 3f, highlight, Math.round(slow * 100f) + "%");
+            tooltip.addPara("Slows surfaced fish in the beam by %s.", 3f, highlight,
+                    Math.round(slow * 100f) + "%");
+        }
+
+        if (fitted != Tackle.NONE) tooltip.addPara("Fitted: %s", pad, highlight, fitted.name);
+        if (fitted.lockTime > 0f) {
+            tooltip.addPara("Tracks each contact for %s; %s between locks.", 3f, highlight,
+                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(fitted.lockTime) + " seconds",
+                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(Searchlight.LOCK_COOLDOWN) + " seconds");
+        } else if (fitted.fanBeam) {
+            tooltip.addPara("Fan beams weaken toward their edges and tips.", 3f);
         }
     }
 

@@ -164,6 +164,29 @@ Do not cache a tooltip that reads changing state unless its owner refreshes it.
 Source: `StandardTooltipV2Expandable.addTooltipTo/addTooltipToPrevious`,
 `beforeShown` and `advanceImpl` in the knowledge base's `sources-obf/ui.impl.java`.
 
+## Ability tooltips
+
+The ROD, Harpoon and Breach Lamps use ordinary body text at vanilla's 350-unit
+width. Keep the purpose paragraph short, group live stats with pad 3, and separate
+blocks with pad 10. Highlight values in the normal highlight colour; reserve red
+for current failures or explosive-head danger. Do not append module descriptions
+from the shop. Show the fitted module and any change to targeting or operation.
+Codex mode omits the repeated title and transient availability notices.
+
+Read current values through `UpgradeManager` and the runtime getters. ROD pursuit
+radius includes its ring and chase margin; lamp mode adds `Searchlight.getMaxReach()`.
+The lamp spot radius is not its distance from the fleet. Fanned Array changes
+coverage to an angle and reduces sweep speed. Retained visibility is an upper
+limit, since partially illuminated fish fade sooner. Equipment rarity weighting
+combines the fitted drone module and lamp upgrade; it is not a probability and
+does not include temporary local rumor effects. Harpoon recharge is seconds per
+charge, with fractional seconds retained.
+
+Sources (0.98a-RC8): `BaseAbilityPlugin`, `SensorBurstAbility` and
+`EmergencyBurnAbility` in `sources-api/impl.campaign.java`; the ability-slot
+tooltip builder in `sources-obf/ui.newui.java`. The engine appends neither the
+CSV description nor cooldown stats after the plugin tooltip.
+
 ## Catch item and species tooltips
 
 The specimen, crate and pile tooltips follow vanilla's special-item order through

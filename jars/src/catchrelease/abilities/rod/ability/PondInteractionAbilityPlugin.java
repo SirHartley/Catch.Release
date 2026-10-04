@@ -1,15 +1,19 @@
 package catchrelease.abilities.rod.ability;
 
 import catchrelease.ModPlugin;
+import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.RodMoteEntityPlugin;
 import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
 import catchrelease.abilities.rod.scripts.RoamingDroneSwarmScript;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.skillshot.ability.BaseSkillshotAbility;
 import catchrelease.skillshot.render.AreaReticuleRenderer;
@@ -179,36 +183,56 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         }
 
         float pad = 10f;
-        tooltip.addPara("Forces open a pond rupture.", pad);
+        tooltip.addPara("Opens a nearby rupture. Activate again to send fishing drones to the selected spot."
+                + " Activate while they are hunting to recall them.", pad);
 
-        tooltip.addPara("Away from any rupture, with a %s fitted and the %s lit, sends a drone screen"
-                        + " out around the fleet instead - it flies with you and goes through the"
-                        + " beams' own openings after whatever they have found down there.", pad,
-                highlight, Tackle.BREACH_COUPLER.name, "breach lamps");
+        float reach = FishingDroneSwarmScript.getRingRadius() + FishingDroneSwarmScript.getChaseMargin();
+        boolean roaming = isRoamingAvailable();
+        if (roaming) reach += Searchlight.getMaxReach();
+
+        tooltip.addPara("Drones: %s    Speed: %s", pad, highlight,
+                "" + FishingDroneSwarmScript.getDroneCount(),
+                Misc.getRoundedValue(UpgradeManager.getValue(StatIds.DRONE_SPEED, RodConstants.DRONE_SPEED)) + " units/s");
+        tooltip.addPara("Pursuit radius: %s from %s", 3f, highlight,
+                Misc.getRoundedValue(reach) + " units", roaming ? "your fleet" : "the selected spot");
+        tooltip.addPara("Chase time per target: %s", 3f, highlight,
+                Misc.getRoundedValueOneAfterDecimalIfNotWhole(UpgradeManager.getValue(
+                        StatIds.DRONE_CHASE_TIME, RodConstants.CHASE_TIME_FALLBACK)) + " seconds");
+
+        float rare = UpgradeManager.getValue(StatIds.DRONE_RARE_PRIORITY, 0f);
+        if (rare > 0f) {
+            tooltip.addPara("Chance to choose the rarest nearby fish: %s", 3f, highlight,
+                    Math.round(rare * 100f) + "%");
+        }
+
+        Tackle fitted = TackleManager.get(Tackle.Fit.DRONE);
+        if (fitted != Tackle.NONE) tooltip.addPara("Fitted: %s", pad, highlight, fitted.name);
+        if (hasBreachCoupler()) {
+            tooltip.addPara("With breach lamps on, drones follow the fleet and catch illuminated fish.", 3f);
+        } else {
+            tooltip.addPara("Using drones with breach lamps requires a %s.", pad, highlight,
+                    Tackle.BREACH_COUPLER.name);
+        }
 
         if (!Global.CODEX_TOOLTIP_MODE) {
+            FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
             SectorEntityToken pond = getPond();
 
-            if (CampedSpot.isPondBlocked(pond)) {
-                tooltip.addPara("A fleet is sitting on this rupture. The ROD cannot be deployed here.",
+            if (swarm != null) {
+                if (!swarm.isRecalling() && swarm.hasRecallableDrones()) {
+                    tooltip.addPara("Drones deployed. Activate to recall.", highlight, pad);
+                } else {
+                    tooltip.addPara("Waiting for all drones to return.", gray, pad);
+                }
+            } else if (CampedSpot.isPondBlocked(pond)) {
+                tooltip.addPara("A fleet is blocking this rupture.",
                         Misc.getNegativeHighlightColor(), pad);
             } else if (!isPondActive(pond) && RodMoteEntityPlugin.isOpening(pond)) {
-                tooltip.addPara("This rupture is already being forced open.", gray, pad);
+                tooltip.addPara("Opening the rupture.", gray, pad);
             } else if (SearchlightAbilityPlugin.isBreaching() && !hasBreachCoupler()) {
-                tooltip.addPara("The breach lamps are lit, but the drone rig needs a %s to use their"
-                                + " openings.", pad, Misc.getNegativeHighlightColor(),
-                        Tackle.BREACH_COUPLER.name);
-            } else if (isRoamingAvailable()) {
-                tooltip.addPara("The breach lamps are lit. The drones will roam.", highlight, pad);
-            } else if (pond == null) {
-                tooltip.addPara("Your fleet is not currently near a pond rupture.", Misc.getNegativeHighlightColor(), pad);
-            }
-
-            FishingDroneSwarmScript swarm = FishingDroneSwarmScript.getExisting();
-            if (swarm != null && !swarm.isRecalling() && swarm.hasRecallableDrones()) {
-                tooltip.addPara("Drones are out. Activate again to recall them.", highlight, pad);
-            } else if (swarm != null) {
-                tooltip.addPara("Drones are on their way back.", gray, pad);
+                tooltip.addPara("Turn off the breach lamps to use this rig.", Misc.getNegativeHighlightColor(), pad);
+            } else if (!roaming && pond == null) {
+                tooltip.addPara("No rupture in range.", Misc.getNegativeHighlightColor(), pad);
             }
         }
 
