@@ -253,7 +253,19 @@ public class FishermanBehavior implements EveryFrameScript {
     }
 
     protected void keepMarker(boolean watched) {
-        if (CoreFisherSpawner.isStanding(fleet)) {
+        SectorEntityToken posting = fleet.getContainingLocation() instanceof StarSystemAPI system
+                ? FishermanMapIcon.findStanding(system) : null;
+        boolean attachedPosting = posting != null
+                && ((FishermanMapIcon) posting.getCustomPlugin()).isFor(fleet);
+        if (attachedPosting) {
+            if (marker != null && marker != posting
+                    && marker.getCustomPlugin() instanceof FishermanMapIcon icon && !icon.standing) {
+                icon.remove();
+            }
+            marker = posting;
+            markerReconciled = true;
+        }
+        if (attachedPosting || CoreFisherSpawner.isStanding(fleet)) {
             if (!markerReconciled || marker == null
                     || marker.getContainingLocation() != fleet.getContainingLocation()) {
                 marker = FishermanMapIcon.findOrAdd(fleet);
@@ -275,6 +287,9 @@ public class FishermanBehavior implements EveryFrameScript {
                 || marker.getContainingLocation() != fleet.getContainingLocation()) {
             marker = FishermanMapIcon.findOrAdd(fleet);
             markerReconciled = true;
+        }
+        if (marker != null && marker.getCustomPlugin() instanceof FishermanMapIcon icon) {
+            icon.syncVisibility();
         }
     }
 

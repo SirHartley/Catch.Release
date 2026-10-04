@@ -1,6 +1,7 @@
 package catchrelease.tools;
 
 import catchrelease.campaign.fish.fisherman.FishermanMapIcon;
+import catchrelease.campaign.fish.fisherman.FishermanBehavior;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuest;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuestMapIcon;
 import catchrelease.campaign.fish.map.FleetMapVisibility;
@@ -66,10 +67,43 @@ public final class FleetMapVisibilityCheck {
             FishermanMapIcon.removeFor(f.fleet);
             require(f.entities.size() == 1, "Hidden standing token missed teardown");
             require(FishermanMapIcon.findStanding(f.system) == f.marker, "Teardown forgot posting");
+            checkBoatOwner();
             checkQuest();
             System.out.println("Fleet map visibility: radar levels, restoration, navigation and teardown passed");
         } finally {
             Global.setSector(original);
+        }
+    }
+
+    private static void checkBoatOwner() {
+        Fixture f = new Fixture();
+        Global.setSector(f.sector);
+        MarkerOwner owner = new MarkerOwner(f.fleet);
+        owner.update();
+        f.visibility = VisibilityLevel.SENSOR_CONTACT;
+        f.plugin.syncVisibility();
+        require(f.entities.isEmpty(), "Temporary marker did not hide");
+        f.visibility = VisibilityLevel.NONE;
+        owner.update();
+        require(f.entities.size() == 1, "Temporary owner did not restore hidden marker");
+
+        FishermanMapIcon.findOrAddStanding(f.system, f.fleet);
+        f.visibility = VisibilityLevel.SENSOR_CONTACT;
+        owner.update();
+        require(f.entities.isEmpty(), "Attached posting did not hide");
+        f.visibility = VisibilityLevel.NONE;
+        owner.update();
+        require(f.entities.size() == 1, "Non-standing boat did not restore its posting");
+    }
+
+    private static class MarkerOwner extends FishermanBehavior {
+
+        private MarkerOwner(CampaignFleetAPI fleet) {
+            super(fleet);
+        }
+
+        private void update() {
+            keepMarker(true);
         }
     }
 
