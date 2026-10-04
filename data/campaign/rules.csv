@@ -2693,6 +2693,44 @@ catchrelease_fisherOptAsk_outfitterPayment,CatchReleaseFisherQuestions,"$catchre
 !$global.catchrelease_fisherAsked_outfitterPayment
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_outfitterPayment:""Why does the outfitter take fish for payment?""",
 catchrelease_ask_outfitterPayment,DialogOptionSelected,$option == catchrelease_ask_outfitterPayment,$global.catchrelease_fisherAsked_outfitterPayment = true,"""You've got fish, and I've got parts. Saves you finding a buyer first. Check what's wanted before you go catching something to pay with.""",0:catchrelease_fisherAskBack:Something else,
+catchrelease_fisherAsked_bycatch,CatchReleaseFisherQuestions,"CatchReleaseCMD bycatchExplained
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_fisherBycatch gray,,50:catchrelease_fisherBycatch:Ask about what came up with the catch.,
+catchrelease_fisherAsked_howLong,CatchReleaseFisherQuestions,"$catchreleaseStage >= 1
+$global.catchrelease_fisherAsked_howLong
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_howLong gray,,"50:catchrelease_ask_howLong:""How long have you been out here?""",
+catchrelease_fisherAsked_whyOut,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
+$global.catchrelease_fisherAsked_whyOut
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_whyOut gray,,"50:catchrelease_ask_whyOut:""Why are you always so far out?""",
+catchrelease_fisherAsked_looking,CatchReleaseFisherQuestions,"$catchreleaseStage >= 5
+$global.catchrelease_fisherAsked_looking
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_looking gray,,"50:catchrelease_ask_looking:""Are the fish watching us?""",
+catchrelease_fisherAsked_patterns,CatchReleaseFisherQuestions,"$catchreleaseStage >= 3
+$global.catchrelease_fisherAsked_patterns
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_patterns gray,,"50:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
+catchrelease_fisherAsked_deepWater,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
+$global.catchrelease_fisherAsked_deepWater
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_deepWater gray,,"50:catchrelease_ask_deepWater:""Why is the deep water worse?""",
+catchrelease_fisherAsked_searchlightDrones,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
+$global.catchrelease_fisherAsked_searchlightDrones
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_searchlightDrones gray,,"50:catchrelease_ask_searchlightDrones:""Why can't I use the drones with the searchlights?""",
+catchrelease_fisherAsked_fishBack,CatchReleaseFisherQuestions,"$catchreleaseStage >= 5
+$global.catchrelease_fisherAsked_fishBack
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_fishBack gray,,"50:catchrelease_ask_fishBack:""Does anything out there fish back?""",
+catchrelease_fisherAsked_largest,CatchReleaseFisherQuestions,"$catchreleaseStage >= 6
+$global.catchrelease_fisherAsked_largest
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_largest gray,,"50:catchrelease_ask_largest:""What is the largest thing you have landed?""",
+catchrelease_fisherAsked_longliner,CatchReleaseFisherQuestions,"CatchReleaseCMD longlinerEncountered
+$global.catchrelease_fisherAsked_longliner
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_longliner gray,,"50:catchrelease_ask_longliner:""I just had you turn into a fish.""",
+catchrelease_fisherAsked_tackle,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
+$global.catchrelease_fisherAsked_tackle
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_tackle gray,,"50:catchrelease_ask_tackle:""What are rig modules?""",
+catchrelease_fisherAsked_upgrade,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
+$global.catchrelease_fisherAsked_upgrade
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_upgrade gray,,"50:catchrelease_ask_upgrade:""What is an upgrade?""",
+catchrelease_fisherAsked_outfitterPayment,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
+$global.catchrelease_fisherAsked_outfitterPayment
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_outfitterPayment gray,,"50:catchrelease_ask_outfitterPayment:""Why does the outfitter take fish for payment?""",
 catchrelease_fisherAskPageNext,DialogOptionSelected,$option == catchrelease_fisherAskPageNext,"$catchreleaseFisherAskPage++ 0
 CatchReleaseCMD tokens
 CatchReleaseCMD fisherQuestions
