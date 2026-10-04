@@ -55,9 +55,10 @@ and `FishRumors`. Quest-specific destinations come from their saved state.
 
 In Intel's Planets view, Patterns keeps the selected planet detail card's full
 height even with few fish. Its width fills the remaining right-hand column.
-Centre the non-scrolling grid below the heading and centre each row, including
-an incomplete last row. Scale cells and gaps down together only if needed to fit
-the available height. Clear `addCustom`'s first-row text inset. Match the planet
+Top-align the non-scrolling grid below the heading with ten units of padding.
+Centre each row horizontally, including an incomplete last row. Scale cells and
+gaps down together only if needed to fit the available height. Clear
+`addCustom`'s first-row text inset. Match the planet
 card's full-alpha dark player colour for the heading and border; its interior
 uses black at 0.67 alpha, without a black underlay beneath the heading.
 

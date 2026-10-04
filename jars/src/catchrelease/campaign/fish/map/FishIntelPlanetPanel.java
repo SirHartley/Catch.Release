@@ -198,7 +198,7 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         float contentHeight = rows * CELL + (rows - 1) * CELL_GAP;
         float gridScale = Math.min(1f, availableHeight / contentHeight);
         contentHeight *= gridScale;
-        float contentTop = TITLE_HEIGHT + (height - TITLE_HEIGHT - contentHeight) * 0.5f;
+        float contentTop = TITLE_HEIGHT + INNER_PAD;
 
         fishPanel = Global.getSettings().createCustom(width, height, new BoxPlugin());
 
