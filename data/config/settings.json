@@ -10,6 +10,7 @@
           "ring_noise":"graphics/catchrelease/effects/ripple_map_1.png",
           "drone":"graphics/ships/munitions_drone.png",
           "fisherman_map_icon":"graphics/catchrelease/ui/fisherman.png",
+          "fleet_quest_map_icon":"graphics/catchrelease/icon/small_icon_catchrelease.png",
           "unstable_fabric_map_icon":"graphics/catchrelease/ui/unstable_fabric.png",
           "pane_fish":"graphics/catchrelease/ui/fish.png",
           "pane_crab":"graphics/catchrelease/ui/crab.png",

@@ -6,6 +6,7 @@ import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.map.FleetMapVisibility;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.campaign.fish.tutorial.FishermanInterception;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -252,16 +253,32 @@ public class FishermanBehavior implements EveryFrameScript {
     }
 
     protected void keepMarker(boolean watched) {
-        if (CoreFisherSpawner.isStanding(fleet)) {
+        SectorEntityToken posting = fleet.getContainingLocation() instanceof StarSystemAPI system
+                ? FishermanMapIcon.findStanding(system) : null;
+        boolean attachedPosting = posting != null
+                && ((FishermanMapIcon) posting.getCustomPlugin()).isFor(fleet);
+        if (attachedPosting) {
+            if (marker != null && marker != posting
+                    && marker.getCustomPlugin() instanceof FishermanMapIcon icon && !icon.standing) {
+                icon.remove();
+            }
+            marker = posting;
+            markerReconciled = true;
+        }
+        if (attachedPosting || CoreFisherSpawner.isStanding(fleet)) {
             if (!markerReconciled || marker == null
                     || marker.getContainingLocation() != fleet.getContainingLocation()) {
                 marker = FishermanMapIcon.findOrAdd(fleet);
                 markerReconciled = true;
             }
+            if (marker != null && marker.getCustomPlugin() instanceof FishermanMapIcon icon) {
+                icon.syncVisibility();
+            }
             return;
         }
 
-        if (!watched || fleet.isVisibleToPlayerFleet()) {
+        if (!watched || FleetMapVisibility.isDetected(fleet)) {
+            FleetMapVisibility.redirectCourse(marker, fleet);
             dropMarker();
             return;
         }
@@ -270,6 +287,9 @@ public class FishermanBehavior implements EveryFrameScript {
                 || marker.getContainingLocation() != fleet.getContainingLocation()) {
             marker = FishermanMapIcon.findOrAdd(fleet);
             markerReconciled = true;
+        }
+        if (marker != null && marker.getCustomPlugin() instanceof FishermanMapIcon icon) {
+            icon.syncVisibility();
         }
     }
 
@@ -380,13 +400,13 @@ public class FishermanBehavior implements EveryFrameScript {
             FishermanInterception.cancelApproach(fleet);
         }
         SectorEntityToken target = assignment == null ? null : assignment.getTarget();
-        if (target != null && !target.isExpired() && target.getContainingLocation() == system
-                && OuterReaches.canTravel(system, fleet.getLocation(), fleet.getMoveDestination())) {
+        if (target != null && !target.isExpired() && target.getContainingLocation() == system) {
             if (assignment.getAssignment() == FleetAssignment.INTERCEPT
                     && !FishingIntro.isAtLeast(FishingIntro.RODDED)
                     && target == Global.getSector().getPlayerFleet()
                     && OuterReaches.isLegClear(system, fleet.getLocation(), target.getLocation())) return;
             if (assignment.getAssignment() == FleetAssignment.GO_TO_LOCATION
+                    && OuterReaches.canTravel(system, fleet.getLocation(), fleet.getMoveDestination())
                     && OuterReaches.canTravel(system, fleet.getLocation(), target.getLocation())) return;
         }
 

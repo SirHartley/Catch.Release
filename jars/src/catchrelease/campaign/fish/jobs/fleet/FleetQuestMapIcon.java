@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.campaign.fish.map.FleetMapVisibility;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CustomCampaignEntityAPI;
@@ -14,15 +15,29 @@ import java.util.ArrayList;
 public class FleetQuestMapIcon extends BaseCustomEntityPlugin {
 
     public static final String ENTITY_ID = "catchrelease_FleetQuestMapIcon";
+    private static final String MARKER_KEY = "$catchrelease_fleetQuestMapMarker";
     protected static final float AUTOPILOT_CHECK_SECONDS = 1f;
 
     protected CampaignFleetAPI fleet;
     protected float autopilotCheckElapsed;
 
     public static SectorEntityToken findOrAdd(CampaignFleetAPI fleet) {
-        if (fleet == null || fleet.getContainingLocation() == null) return null;
+        if (!isActive(fleet)) {
+            removeFor(fleet);
+            return null;
+        }
 
         LocationAPI location = fleet.getContainingLocation();
+        Object saved = fleet.getMemoryWithoutUpdate().get(MARKER_KEY);
+        if (saved instanceof SectorEntityToken marker) {
+            if (!marker.isExpired() && marker.getContainingLocation() == location
+                    && marker.getCustomPlugin() instanceof FleetQuestMapIcon icon && icon.isFor(fleet)) {
+                FleetMapVisibility.sync(marker, fleet);
+                return marker;
+            }
+            removeFor(fleet);
+        }
+
         SectorEntityToken found = null;
         for (CustomCampaignEntityAPI candidate : new ArrayList<>(location.getCustomEntities())) {
             if (!ENTITY_ID.equals(candidate.getCustomEntityType())) continue;
@@ -33,20 +48,24 @@ public class FleetQuestMapIcon extends BaseCustomEntityPlugin {
             else location.removeEntity(candidate);
         }
 
-        if (found != null) {
-            found.setLocation(fleet.getLocation().x, fleet.getLocation().y);
-            return found;
+        if (found == null) {
+            found = location.addCustomEntity(Misc.genUID(), null, ENTITY_ID,
+                    fleet.getFaction().getId(), fleet);
         }
 
-        SectorEntityToken icon = location.addCustomEntity(Misc.genUID(), null, ENTITY_ID,
-                fleet.getFaction().getId(), fleet);
-        icon.setLocation(fleet.getLocation().x, fleet.getLocation().y);
-
-        return icon;
+        fleet.getMemoryWithoutUpdate().set(MARKER_KEY, found);
+        FleetMapVisibility.sync(found, fleet);
+        return found;
     }
 
     public static void removeFor(CampaignFleetAPI fleet) {
         if (fleet == null || Global.getSector() == null) return;
+
+        Object saved = fleet.getMemoryWithoutUpdate().get(MARKER_KEY);
+        if (saved instanceof SectorEntityToken marker && marker.getContainingLocation() != null) {
+            marker.getContainingLocation().removeEntity(marker);
+        }
+        fleet.getMemoryWithoutUpdate().unset(MARKER_KEY);
 
         for (LocationAPI location : Global.getSector().getAllLocations()) {
             for (CustomCampaignEntityAPI candidate : new ArrayList<>(location.getCustomEntities())) {
@@ -74,7 +93,7 @@ public class FleetQuestMapIcon extends BaseCustomEntityPlugin {
             return;
         }
 
-        entity.setLocation(fleet.getLocation().x, fleet.getLocation().y);
+        FleetMapVisibility.sync(entity, fleet);
         redirectAutopilot(amount);
     }
 
@@ -83,6 +102,10 @@ public class FleetQuestMapIcon extends BaseCustomEntityPlugin {
     }
 
     protected boolean isActive() {
+        return isActive(fleet);
+    }
+
+    private static boolean isActive(CampaignFleetAPI fleet) {
         return fleet != null && !fleet.isExpired() && fleet.isAlive()
                 && fleet.getMemoryWithoutUpdate().getBoolean(FleetQuest.QUEST_FLAG)
                 && fleet.getMemoryWithoutUpdate().getBoolean(FleetQuest.TAKEN_FLAG);
@@ -107,6 +130,9 @@ public class FleetQuestMapIcon extends BaseCustomEntityPlugin {
     protected void remove() {
         if (entity == null || entity.getContainingLocation() == null) return;
         entity.getContainingLocation().removeEntity(entity);
+        if (fleet != null && fleet.getMemoryWithoutUpdate().get(MARKER_KEY) == entity) {
+            fleet.getMemoryWithoutUpdate().unset(MARKER_KEY);
+        }
     }
 
     @Override

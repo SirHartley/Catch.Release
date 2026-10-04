@@ -99,7 +99,7 @@
 		"showNameOnMap":false,
 		"scaleNameWithZoom":false,
 		"scaleIconWithZoom":true,
-		"icon":"graphics/catchrelease/intel/intel_any.png",
+		"icon":"graphics/catchrelease/icon/small_icon_catchrelease.png",
 		"iconWidth":22,
 		"iconHeight":22,
 		"iconColor":[95,200,215,255],

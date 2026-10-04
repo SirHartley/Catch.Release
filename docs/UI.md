@@ -53,6 +53,21 @@ module. UI text must distinguish them.
 Navigation owners: `FishIntelMapButton`, `FishJob`, `FishingIntro`, `FishermanQuest`
 and `FishRumors`. Quest-specific destinations come from their saved state.
 
+### Fleet map markers
+
+`FleetMapVisibility` uses the fleet's logical visibility in the player's location,
+not sprite-fader brightness. Even `SENSOR_CONTACT` has a real radar icon. Remove
+the proxy entity from its location while detected; restore it at `NONE` or when
+a standing boat unloads. Redirect an active local course to the fleet before
+hiding its proxy. Retained tokens must stay with their saved owner.
+
+In 0.98a-RC8, `BaseLocation.removeEntity` leaves the token's containing location
+intact; `isAlive()` checks membership. The map has its own fader and uses the
+shared custom-entity spec, so neither sensor-fader changes nor mutating that spec
+is a per-marker visibility switch. `DetectedEntityListener` omits some initial,
+off-location and no-profile transitions. Existing fleet/mission advance callbacks
+therefore reconcile these markers; no separate sector-wide polling script is needed.
+
 ## Portraits and sprites
 
 - `SpriteLoader` and `FishIcons` use fresh sprite wrappers. Never retain mutable
