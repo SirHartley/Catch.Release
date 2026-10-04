@@ -388,7 +388,7 @@ options route to `catchrelease_intro_rod`, which owns the `giveRod` grant.
 |---|---|
 | `FishMapFilterScript.java` | Map filter installation, UI mounting and deferred Codex/intel handoffs. Reuses an underlying map only on a return originating there; preserves saved range knowledge. |
 | `FishMapPane.java` | Search, type filters, species list, coherence toggle, request restrictions, and no-data/reset states. |
-| `FishIntelPlanetPanel.java` | Patterns column beside the selected planet in Intel; matches the detail card's height and colours, with a centred, non-scrolling fish grid. Layout contract in [UI.md](UI.md#intel-and-sidebar-maps). |
+| `FishIntelPlanetPanel.java` | Patterns column beside the selected planet in Intel; matches the detail card's height and colours, with a top-aligned, horizontally centred, non-scrolling fish grid. Layout contract in [UI.md](UI.md#intel-and-sidebar-maps). |
 | `FishPresence.java` | Species/system visibility: caught or learned data in normal play; computed, non-persistent full chart in dev mode; optional request allowlists. |
 | `FishRoutePlanner.java` | Builds route suggestions from every `FishAsker` and shop mark, expands broad requirements, and orders stops using stability and slipstreams. |
 | `FishTooltips.java` | Species hover for map rows, route-planner rows, system pane and intel planet cells; layout contract in [UI.md](UI.md#catch-item-and-species-tooltips). |
