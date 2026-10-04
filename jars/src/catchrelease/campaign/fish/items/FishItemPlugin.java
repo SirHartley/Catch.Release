@@ -172,7 +172,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
     public static String getAberrationLabel(float aberration) {
         return switch (getAberrationBand(aberration)) {
-            case 4 -> "barely holding";
+            case 4 -> "failing";
             case 3 -> "unstable";
             case 2 -> "slipping";
             case 1 -> "unsettled";
