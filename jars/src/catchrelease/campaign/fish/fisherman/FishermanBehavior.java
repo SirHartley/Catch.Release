@@ -380,13 +380,13 @@ public class FishermanBehavior implements EveryFrameScript {
             FishermanInterception.cancelApproach(fleet);
         }
         SectorEntityToken target = assignment == null ? null : assignment.getTarget();
-        if (target != null && !target.isExpired() && target.getContainingLocation() == system
-                && OuterReaches.canTravel(system, fleet.getLocation(), fleet.getMoveDestination())) {
+        if (target != null && !target.isExpired() && target.getContainingLocation() == system) {
             if (assignment.getAssignment() == FleetAssignment.INTERCEPT
                     && !FishingIntro.isAtLeast(FishingIntro.RODDED)
                     && target == Global.getSector().getPlayerFleet()
                     && OuterReaches.isLegClear(system, fleet.getLocation(), target.getLocation())) return;
             if (assignment.getAssignment() == FleetAssignment.GO_TO_LOCATION
+                    && OuterReaches.canTravel(system, fleet.getLocation(), fleet.getMoveDestination())
                     && OuterReaches.canTravel(system, fleet.getLocation(), target.getLocation())) return;
         }
 
