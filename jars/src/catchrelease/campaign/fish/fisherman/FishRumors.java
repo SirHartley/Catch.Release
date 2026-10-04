@@ -536,8 +536,8 @@ public class FishRumors {
             case VALUABLE_LOOT -> "Bycatch recovered in $catchreleaseRumorSystem has been skewing toward more valuable finds.";
             case EXTREME_STABILITY -> "Local fabric in $catchreleaseRumorSystem is currently stable, a marked improvement "
                     + "over the system's usual coherence.";
-            case EXTREME_INSTABILITY -> "Local fabric in $catchreleaseRumorSystem is currently barely holding, a sharp "
-                    + "decline from the system's usual coherence.";
+            case EXTREME_INSTABILITY -> "Local fabric in $catchreleaseRumorSystem is currently failing, a sharp decline "
+                    + "from the system's usual coherence.";
             case RARITY_LOOT -> "Rarer species are turning up more often in $catchreleaseRumorSystem, and retrievals there are "
                     + "producing bycatch opportunities more frequently.";
             case SIZE_CALM -> "Catches in $catchreleaseRumorSystem are tending larger and heavier, while fish there are moving more "

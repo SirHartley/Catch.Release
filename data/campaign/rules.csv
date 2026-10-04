@@ -2538,7 +2538,7 @@ catchrelease_rumorExtremeInstability,CatchReleaseRumorText,"CatchReleaseCMD toke
 $catchreleaseRumorKind == extreme_instability score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
 CatchReleaseCMD showRumorIntel","""If you're bound for $catchreleaseRumorSystem, have your navigator look at this first.""
 
-The coherence report puts it at barely holding, well below its usual condition.
+The coherence report puts it at failing, well below its usual condition.
 
 ""You can fish it. Get what you came for and move on. Don't leave your crew sitting there while you work out where to go next.""",,
 catchrelease_rumorUnavailable,CatchReleaseRumorText,CatchReleaseCMD tokens,,"""Nothing worth sending you after.""",,fallback for a missing or unknown rumor kind
