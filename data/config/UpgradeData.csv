@@ -10,7 +10,7 @@ searchlight_track_time,0,DOUBLE,2,FLAT,4,CAMPAIGN,Keeps buried patterns exposed 
 searchlight_detect_radius,400,INT,200,FLAT,3,CAMPAIGN,Widens the area around each Breach Light head where buried patterns appear as dents without being fully exposed.,
 searchlight_slow,0,DOUBLE,0.25,FLAT,2,CAMPAIGN,Increases the slowing effect on surfaced patterns while they remain inside a Breach Light beam.,
 drone_speed,300,INT,0.12,MULT,4,CAMPAIGN,Increases ROD drone travel speed.,
-drone_acceleration,0.45,DOUBLE,0.1,MULT,4,CAMPAIGN,Makes ROD drones turn and adjust velocity more responsively.,
+drone_acceleration,0.45,DOUBLE,-0.1,MULT,4,CAMPAIGN,Makes ROD drones turn and adjust velocity more responsively.,
 drone_catch_area,150,INT,0.15,MULT,4,CAMPAIGN,Expands the visible fishing ring and the drones' base search reach.,
 drone_chase_time,8,DOUBLE,2,FLAT,4,CAMPAIGN,Keeps a drone pursuing a pattern for longer before it abandons the chase and returns to the fishing ring.,
 drone_chase_margin,40,INT,80,FLAT,3,CAMPAIGN,Lets drones acquire and continue chasing patterns farther beyond the visible fishing ring.,

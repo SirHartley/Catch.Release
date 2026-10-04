@@ -507,6 +507,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Abilities read tuning values when activated. Any code that changes their upgrade or module inputs must restart the affected running ability.
 - `StatIds.getAbilityId()` uses an explicit map. Do not infer the ability from a stat-name prefix.
 - ROD chase duration and rarity priority are progressive stats: every purchased tier must affect runtime behavior.
+- `drone_acceleration` is a steering response time in seconds: upgrades reduce it. `tools/DroneSteeringCheck` checks acceleration, turning and return approach across every tier at 30/60/144 Hz.
 - Retrieval Head refunds one charge only after a confirmed player mote collision. It preserves fractional recharge progress, respects the cap, and uses the ordinary charge-ready callback.
 - Explosive Head never lands a fish. Its blast state is terminal, consumes the head, and can immediately make a fleet hostile. Vanilla's explosion entity supplies fleet damage, visuals, and sound.
 - An industry blueprint is `industry_bp` with the industry ID as item data. The industry must still override availability and `showWhenUnavailable` against `knowsIndustry()`; the blueprint item alone does not gate construction.
