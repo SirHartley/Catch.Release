@@ -39,7 +39,7 @@ public class TutorialConstants {
     public static final String MARKETS_SEEN_KEY = "$catchrelease_marketsSeen";
     public static final String RATING_PLANET_NAME_KEY = "$catchrelease_ratingPlanetName";
 
-    public static final float INTERCEPT_VIEWPORT_MARGIN_PX = 50f;
+    public static final float INTERCEPT_VIEWPORT_MARGIN_PX = 200f;
     public static final float INTERCEPT_TRIGGER_RANGE = 1400f;
     public static final float INTERCEPT_CHECK_SECONDS = 0.5f;
 

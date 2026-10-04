@@ -14,12 +14,6 @@ scrapped
 ---------------------
 qa_
 
-Fisherman - tutorial intercept
-Just had the fleet get teleported, then teleported again when trying to approach, both way too far from the player instead of just outside viewport.
-
-Fisherman
-Fisherman map indicator doesn't correctly despawn when fleet is close enough to be on radar, causing overlap
-
 ---------------------
 
 Impactful Upgrades

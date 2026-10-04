@@ -2624,13 +2624,11 @@ catchrelease_fisherBycatch,DialogOptionSelected,$option == catchrelease_fisherBy
 catchrelease_fisherOptAsk_howLong,CatchReleaseFisherQuestions,"$catchreleaseStage >= 1
 !$global.catchrelease_fisherAsked_howLong
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_howLong:""How long have you been out here?""",
-catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,$global.catchrelease_fisherAsked_howLong = true,"""Since before we were calling it fishing. We started out trying to move cargo with the ROD. Took a while to get to this.""
-
-He turns the dismantled control unit over in his hands. ""Still finding things to change.""",0:catchrelease_fisherAskBack:Something else,
+catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,$global.catchrelease_fisherAsked_howLong = true,"""Fishing?"" He gives the question some thought. ""Since the ROD was supposed to move cargo."" Another moment. ""Been fishing longer.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_whyOut,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_whyOut
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_whyOut:""Why are you always so far out?""",
-catchrelease_ask_whyOut,DialogOptionSelected,$option == catchrelease_ask_whyOut,$global.catchrelease_fisherAsked_whyOut = true,"""Fabric's thick where people are. All that living holds it down. Easier to open a rupture out here, where there's less to interfere with it. And I don't have to stop work every time a freighter wants to go past.""",0:catchrelease_fisherAskBack:Something else,
+catchrelease_ask_whyOut,DialogOptionSelected,$option == catchrelease_ask_whyOut,$global.catchrelease_fisherAsked_whyOut = true,"""Fabric's thick where people are."" He presses one palm flat against the table. ""All that living. All those buildings. Ships, stations, names on doors. Holds things down."" He lifts the hand. ""You want a clean rupture, you go where there's less holding.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_looking,CatchReleaseFisherQuestions,"$catchreleaseStage >= 5
 !$global.catchrelease_fisherAsked_looking
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_looking:""Are the fish watching us?""",
@@ -2980,7 +2978,8 @@ $catchreleaseStage < 2
 $catchrelease_fisherInterceptOpened",,"""Captain. I take it you haven't worked a rupture before.""
 
 The Fisherman has your fleet on his plot. He waits for your answer without closing the distance any further.","0:catchrelease_introWantWork:""No. Is there work in it?""
-10:catchrelease_introCurious:""What do you catch out here?""
+10:catchrelease_introCurious:""No. What even is this place?""
+30:catchrelease_introSpawnQuestion:""Where did you just come from?""
 100:catchrelease_fisherBack:""I'm just passing through.""",
 catchrelease_introHelloRating,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
 CatchReleaseCMD tokens
@@ -3005,11 +3004,13 @@ catchrelease_introWantWork,DialogOptionSelected,$option == catchrelease_introWan
 
 Your deck officer receives a handling manifest and calls for permission to bring the trawler alongside.",catchrelease_intro_rod:Authorize the equipment transfer.,
 catchrelease_introCuriousIntercepted,DialogOptionSelected,"$option == catchrelease_introCurious
-$entity.catchrelease_intercepted",,"""Fish, mostly. Come alongside and I'll get you equipped. You can have a look at our catch while the deck crews are busy, but you'll learn more bringing in one of your own.""","catchrelease_intro_rod:""All right. Bring the rig over.""
+$entity.catchrelease_intercepted",,"""It's a patch of unstable realspace. We use it to fish. Come alongside and I'll get you equipped, if you want. You can have a look at our catch while the deck crews are busy, but you'll learn more bringing in one of your own.""","catchrelease_intro_rod:""All right. Bring the rig over.""
 catchrelease_fisherBack:""No, thanks. I was only curious.""",
 catchrelease_introCurious,DialogOptionSelected,"$option == catchrelease_introCurious
 !$entity.catchrelease_intercepted",,"""Fishing. There's a market for what comes through here, if you can get it aboard. Want to try? I've got a rig you can use.""","catchrelease_intro_rod:""I'll try it. Bring the rig over.""
 catchrelease_fisherBack:""No, thanks. I was only curious.""",
+catchrelease_introSpawnQuestion,DialogOptionSelected,$option == catchrelease_introSpawnQuestion,,"""I was nearby. A fishing fleet is small and hard to spot, your sensor officer probably just missed our signature. Now, about the ruputre.""","10:catchrelease_introCurious:""What is this place?""
+100:catchrelease_fisherBack:""I'm not interested.""",
 catchrelease_introRodQuestion,DialogOptionSelected,$option == catchrelease_introRodQuestion,,"""ROD device.""
 
 Your science officer quietly points out that the D already stands for Device. The Fisherman hears this. ""Yes.""","0:catchrelease_introRodMeaning:""What do the other letters stand for?""
@@ -3032,7 +3033,7 @@ FireAll CatchReleaseIntroRodQuestions","""Take the fleet up to the unstable fabr
 
 He points out the retrieval display. ""Once it takes hold, keep the catch in the indicator while the drone brings it through. If you need the drones back, use the ability again.""",,
 catchrelease_introRodTrust,DialogOptionSelected,$option == catchrelease_introRodTrust,"$catchrelease_introAskedRodTrust = true
-FireAll CatchReleaseIntroRodQuestions","""Not anyone. You've got a working ship and a crew who can handle it. The rig won't earn either of us much sitting on my deck, will it? Look after it.""",,
+FireAll CatchReleaseIntroRodQuestions","""No. I give it to captains that will not squander it. You've got a working ship and a crew who can handle it, and the rig won't earn either of us much sitting on my deck and taking up space.""",,
 catchrelease_introRodGo,DialogOptionSelected,$option == catchrelease_introRodGo,"FireBest CatchReleaseIntroBrief
 CatchReleaseCMD showIntroIntel",,,
 catchrelease_introTurnIn2,DialogOptionSelected,"$option == catchrelease_fisherIntro score:62
@@ -3053,7 +3054,11 @@ catchrelease_introFirstShapeOption,CatchReleaseIntroFirstQuestions,!$catchreleas
 catchrelease_introFirstGhostOption,CatchReleaseIntroFishShapeQuestions,!$catchrelease_introAskedGhostWord,,,"catchrelease_introGhostWord:""Ghost is an odd name for it.""",
 catchrelease_introFirstShapeReturnOption,CatchReleaseIntroFishShapeQuestions,$catchrelease_introAskedGhostWord,,,100:catchrelease_introFirstQuestionsBack:Continue,
 catchrelease_introFirstToldBeforeOption,CatchReleaseIntroFirstQuestions,!$catchrelease_introAskedToldBefore,,,"catchrelease_introToldBefore:""You could have told me this before I started.""",
-catchrelease_introFirstContinueOption,CatchReleaseIntroFirstQuestions,,,,"100:catchrelease_introFirstDone:""What's next?""",
+catchrelease_introFirstContinueOption,CatchReleaseIntroFirstQuestions,"!$catchrelease_introAskedToldBefore
+!$catchrelease_introAskedFishShape",,,"100:catchrelease_introFirstDone:""What's next?""",
+catchrelease_introFirstAutoContinueOption,CatchReleaseIntroFirstQuestions,"$catchrelease_introAskedToldBefore
+$catchrelease_introAskedFishShape","$option = catchrelease_introFirstDone 0
+FireBest DialogOptionSelected",,,
 catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_ghosts,"$catchrelease_introAskedFishShape = true
 FireAll CatchReleaseIntroFishShapeQuestions","""It isn't always a fish. We've had crabs, shells, things you'd have trouble fitting a name to. Fish are easier to talk about.""",,
 catchrelease_introGhostWord,DialogOptionSelected,$option == catchrelease_introGhostWord,$catchrelease_introAskedGhostWord = true,"""Spacers have a lot of names for things out there. Usually a story to go with each one. I've heard enough versions that I wouldn't use any of them as a guide to what you've caught.""",catchrelease_introFirstQuestionsBack:Continue,
