@@ -53,6 +53,10 @@ module. UI text must distinguish them.
 Navigation owners: `FishIntelMapButton`, `FishJob`, `FishingIntro`, `FishermanQuest`
 and `FishRumors`. Quest-specific destinations come from their saved state.
 
+In Intel's Planets view, Patterns keeps the selected planet detail card's full
+height even with few fish. Its width fills the remaining right-hand column.
+The icon grid stays top-aligned and scrolls when it exceeds the available height.
+
 ### Fleet map markers
 
 Fleet jobs use `fleet_quest_map_icon` beside the fleet and for the accepted map
