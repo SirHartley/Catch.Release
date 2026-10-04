@@ -35,13 +35,10 @@ public class SpawnFleetQuest implements BaseCommandWithSuggestion {
             return CommandResult.ERROR;
         }
 
-        CampaignFleetAPI fleet = FleetQuestSpawner.spawnForTesting(type);
+        CampaignFleetAPI fleet = FleetQuestSpawner.spawnForTesting(type,
+                reason -> Console.showMessage("Could not start " + type.getId() + " in "
+                        + system.getNameWithLowercaseType() + ": " + reason));
         if (fleet == null) {
-            Console.showMessage(type.hasDedicatedGivers()
-                    ? "No fleet in " + system.getNameWithLowercaseType() + " can carry the "
-                    + type.getId() + " quest."
-                    : "Could not create a route-backed scavenger fleet in "
-                    + system.getNameWithLowercaseType() + ".");
             return CommandResult.ERROR;
         }
 
