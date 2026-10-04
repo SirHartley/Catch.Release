@@ -6,6 +6,7 @@ import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.map.FleetMapVisibility;
 import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.campaign.fish.tutorial.FishermanInterception;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -258,10 +259,14 @@ public class FishermanBehavior implements EveryFrameScript {
                 marker = FishermanMapIcon.findOrAdd(fleet);
                 markerReconciled = true;
             }
+            if (marker != null && marker.getCustomPlugin() instanceof FishermanMapIcon icon) {
+                icon.syncVisibility();
+            }
             return;
         }
 
-        if (!watched || fleet.isVisibleToPlayerFleet()) {
+        if (!watched || FleetMapVisibility.isDetected(fleet)) {
+            FleetMapVisibility.redirectCourse(marker, fleet);
             dropMarker();
             return;
         }

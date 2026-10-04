@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.campaign.fish.map.FleetMapVisibility;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CustomCampaignEntityAPI;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
     public static final String ENTITY_ID = "catchrelease_FisherMapIcon";
+    private static final String STANDING_MARKER_KEY = "$catchrelease_standingFisherMarker";
     protected static final float AUTOPILOT_CHECK_SECONDS = 1f;
     private static final String SERVICE_LINE =
             "Fishing. Trades in range data, buys a catch, and carries an outfitter.";
@@ -63,8 +65,16 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
     public static SectorEntityToken findStanding(StarSystemAPI system) {
         if (system == null) return null;
 
+        Object saved = system.getMemoryWithoutUpdate().get(STANDING_MARKER_KEY);
+        if (saved instanceof SectorEntityToken marker && !marker.isExpired()
+                && marker.getContainingLocation() == system
+                && marker.getCustomPlugin() instanceof FishermanMapIcon icon && icon.standing) {
+            return marker;
+        }
+
         for (CustomCampaignEntityAPI candidate : system.getCustomEntities()) {
             if (candidate.getCustomPlugin() instanceof FishermanMapIcon icon && icon.standing) {
+                system.getMemoryWithoutUpdate().set(STANDING_MARKER_KEY, candidate);
                 return candidate;
             }
         }
@@ -91,9 +101,11 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
         FishermanMapIcon icon = (FishermanMapIcon) found.getCustomPlugin();
         icon.standing = true;
+        system.getMemoryWithoutUpdate().set(STANDING_MARKER_KEY, found);
         if (fleet != null) icon.attach(fleet);
         found.setDiscoverable(false);
         found.setSensorProfile(null);
+        icon.syncVisibility();
 
         return found;
     }
@@ -107,6 +119,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
         if (fleet != null) entity.setLocation(fleet.getLocation().x, fleet.getLocation().y);
         fleet = null;
         autopilotCheckElapsed = 0f;
+        FleetMapVisibility.restore(entity);
     }
 
     public static void detachStanding(CampaignFleetAPI fleet) {
@@ -121,6 +134,7 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
     public static void removeFor(CampaignFleetAPI fleet) {
         if (fleet == null) return;
 
+        detachStanding(fleet);
         for (LocationAPI location : Global.getSector().getAllLocations()) {
             for (CustomCampaignEntityAPI candidate : new ArrayList<>(location.getCustomEntities())) {
                 if (!ENTITY_ID.equals(candidate.getCustomEntityType())) continue;
@@ -171,13 +185,23 @@ public class FishermanMapIcon extends BaseCustomEntityPlugin {
 
         if (fleet == null || fleet.isExpired() || !fleet.isAlive()
                 || fleet.getContainingLocation() != entity.getContainingLocation()) {
-            if (standing) fleet = null;
+            if (standing) detach();
             else remove();
             return;
         }
 
-        entity.setLocation(fleet.getLocation().x, fleet.getLocation().y);
+        syncVisibility();
         redirectAutopilot(amount);
+    }
+
+    public void syncVisibility() {
+        if (fleet != null && (fleet.isExpired() || !fleet.isAlive()
+                || fleet.getContainingLocation() != entity.getContainingLocation())) {
+            if (standing) detach();
+            else remove();
+            return;
+        }
+        FleetMapVisibility.sync(entity, fleet);
     }
 
     protected void redirectAutopilot(float amount) {
