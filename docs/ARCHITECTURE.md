@@ -264,7 +264,14 @@ retain the shared acceptance and decline handlers.
 | `AquariumTransfers.java` | Vanilla cargo pickers for transfers. |
 | `AquariumTankScript.java` | Mounts the tank below the colony image whenever no covering visual is open, and removes it when another visual takes over. |
 | `FishSpritePose.java` | Converts native image coordinates into a head-right mesh using precise `spriteDirection`; `AquariumTankPanel` bends that mesh and applies swimming turns. |
+| `AquariumFishShader.java` | Aquarium-only filter around that mesh; lazy shared shader from `data/catchrelease/shaders/aquarium_fish_*`. Per-specimen coherence controls RGB separation and intermittent digital artefacts. No sprite mutation or screen capture; drawing contracts are in [UI.md](UI.md#portraits-and-sprites). |
 | `Backdrops.java` | Separates campaign-wide backdrop ownership from the scene selected by each conservatory. |
+
+`tools/AquariumShaderCheck` checks the strength curve outside the game. Add `--gl`
+and the game's native library directory to `java.library.path` for off-screen
+GLSL compilation and rendering checks: transparency, texture-region bounds,
+mirroring, fade alpha, disabled shaders and restoration of the previous program.
+Run from the mod root with the normal compile dependencies.
 
 ### `campaign/fish/fisherman`
 
