@@ -14,6 +14,22 @@ scrapped
 ---------------------
 qa_
 
+General todos before release
+Settings (+disable sidequest icon!)
+loot types and rarities
+fish descriptions
+fish tank movement facings
+legendary haunts
+quorum splinter hiding
+item sprite label offsets
+shop prices
+Ghost asteroid frames
+
+Placeholder art
+15 fish
+industry
+item box
+
 ---------------------
 
 Impactful Upgrades
@@ -40,7 +56,6 @@ self_
 - Industry icon
 - Fix fish crate display icon
 - fish heading all wrong
-- fix item tooltip, move text to top, stats to chart, shorten & clarify click tooltips
 - melon fish
 - radioactive fish
 
