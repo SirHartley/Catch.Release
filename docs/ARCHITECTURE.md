@@ -85,6 +85,8 @@ text and line endings intact, checks for external edits, and replaces the file
 through a temporary file. The first changed save creates `fish.csv.facing-*.bak`
 or `fish.csv.tuning-*.bak` beside the CSV. External edits require reopening the
 tool. The tuner writes only on explicit Save; the facing picker saves each click.
+Facing imports match species by `id` and copy only `spriteDirection`; a backup may
+have older balance values or descriptions. Commit the edited CSV, not the backup.
 
 `tools/FishingSimulation` owns the simulator's catch model. It reads the existing
 `FishConstants`, `FishMotion` and `Tackle` directly; do not duplicate those defaults
