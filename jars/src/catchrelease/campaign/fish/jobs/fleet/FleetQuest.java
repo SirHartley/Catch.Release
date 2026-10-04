@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class FleetQuest extends FishJob {
 
@@ -204,28 +205,44 @@ public class FleetQuest extends FishJob {
     };
 
     public static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type) {
-        return startOn(giver, type, false);
+        return startOn(giver, type, false, null);
+    }
+
+    public static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type,
+                                     Consumer<String> onFailure) {
+        return startOn(giver, type, false, onFailure);
     }
 
     public static FleetQuest startDistressOn(CampaignFleetAPI giver, FleetQuestType type) {
-        return startOn(giver, type, true);
+        return startOn(giver, type, true, null);
     }
 
     private static FleetQuest startOn(CampaignFleetAPI giver, FleetQuestType type,
-                                      boolean distressOffer) {
-        if (!FishingIntro.isComplete()) return null;
-        if (giver == null || giver.isExpired() || type == null) return null;
-        if (isQuestFleet(giver)) return null;
+                                      boolean distressOffer, Consumer<String> onFailure) {
+        String failure = null;
+        if (!FishingIntro.isComplete()) failure = "The fishing tutorial is not complete.";
+        else if (giver == null) failure = "No quest fleet was supplied.";
+        else if (giver.isExpired()) failure = "The selected fleet has expired.";
+        else if (type == null) failure = "No quest type was supplied.";
+        else if (isQuestFleet(giver)) failure = "The selected fleet already carries a fishing quest.";
+        if (failure != null) {
+            failCreation(onFailure, failure);
+            return null;
+        }
         StarSystemAPI system = giver.getContainingLocation() instanceof StarSystemAPI
                 ? (StarSystemAPI) giver.getContainingLocation() : null;
-        if (!type.canSpawnIn(system)) return null;
+        failure = type.getSpawnFailure(system);
+        if (failure != null) {
+            failCreation(onFailure, failure);
+            return null;
+        }
 
         FleetQuest quest = new FleetQuest();
         quest.type = type;
         quest.giver = giver;
         quest.distressOffer = distressOffer;
 
-        if (!quest.create(null, false)) return null;
+        if (!quest.create(null, false, onFailure)) return null;
 
         return quest;
     }
@@ -359,15 +376,23 @@ public class FleetQuest extends FishJob {
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
-        if (barEvent || giver == null || type == null) return false;
+        return create(createdAt, barEvent, null);
+    }
+
+    private boolean create(MarketAPI createdAt, boolean barEvent, Consumer<String> onFailure) {
+        if (barEvent || giver == null || type == null) {
+            return failCreation(onFailure, "Fleet quest creation requires a fleet and quest type, not a bar event.");
+        }
 
         PersonAPI captain = giver.getCommander();
-        if (captain == null) return false;
+        if (captain == null) return failCreation(onFailure, "The selected fleet has no commander.");
 
         PersonAPI contact;
         if (type.usesBosunContact()) {
             contact = createBosun(captain);
-            if (contact == null) return false;
+            if (contact == null) {
+                return failCreation(onFailure, "Could not create a bosun with a portrait different from the captain's.");
+            }
 
             contact.setRankId(BOSUN_RANK);
             contact.setPostId(null);
@@ -377,7 +402,7 @@ public class FleetQuest extends FishJob {
             contact = type.usesMaleContact()
                     ? giver.getFaction().createRandomPerson(FullName.Gender.MALE, random())
                     : giver.getFaction().createRandomPerson(random());
-            if (contact == null) return false;
+            if (contact == null) return failCreation(onFailure, "Could not create the quest contact.");
 
             contact.setRankId(type.getContactRankId());
             contact.setPostId(null);
@@ -389,11 +414,16 @@ public class FleetQuest extends FishJob {
         setPersonOverride(contact);
         giver.getMemoryWithoutUpdate().set(TYPE_KEY, type.getId());
         prepareCaseDetails();
-        if (type.usesQuestPond() && questPond == null) return false;
+        if (type.usesQuestPond() && questPond == null) {
+            return failCreation(onFailure, "No unclaimed rupture was found for the quest.");
+        }
 
         float target = DemandScore.rollTarget(random());
         FishRequirement ask = rollFillableAsk(target);
-        if (ask == null) return false;
+        if (ask == null) {
+            return failCreation(onFailure, "Could not generate a fish request with reachable habitat after "
+                    + ASK_ATTEMPTS + " attempts.");
+        }
         if (type.usesQuestPond()) ask.sourceId = questPond.getId();
         addAsk(ask);
 
@@ -403,16 +433,21 @@ public class FleetQuest extends FishJob {
         setUpSpine();
 
         if (type.usesQuestPond() && !QuestPond.claim(questPond, REF_KEY)) {
-            return false;
+            return failCreation(onFailure, "Could not claim the selected rupture for the quest.");
         }
         if (!setEntityMissionRef(giver, REF_KEY)) {
             releaseQuestPond();
-            return false;
+            return failCreation(onFailure, "The fleet's mission reference is already occupied: " + REF_KEY + ".");
         }
 
         offer();
 
         return true;
+    }
+
+    private static boolean failCreation(Consumer<String> onFailure, String reason) {
+        if (onFailure != null) onFailure.accept(reason);
+        return false;
     }
 
     protected PersonAPI createBosun(PersonAPI captain) {

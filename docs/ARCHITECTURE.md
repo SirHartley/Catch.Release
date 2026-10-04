@@ -229,6 +229,14 @@ keeps rewards, deadlines and catch provenance unchanged.
 | `ProspectingRouteManager.java` | Up to 2 Tri-Tachyon prospecting fleets (`$catchrelease_prospectingFleet`) from a Tri-Tachyon spaceport to an unsettled ore world in a marketless system within 12 LY, held there 30-50 days. CLAIM_ASSAY givers. Adds no routes while Nexerelin is enabled; its Tri-Tachyon mining fleets carry the offer instead. |
 | `CatchReleaseDistressProvider.java` | Adapter between the generic distress framework and `FleetQuest`. STRANDED, SCAVENGER_ENGINE, BURN_WARD and FOULED_LINE are the distress calls; each is an emergency aboard the caller. A FOULED_LINE caller is anchored at its claimed rupture (`getFleetAnchor`). |
 
+`SpawnFleetQuest` prints the rejection passed back by `FleetQuestSpawner.spawnForTesting`
+and `FleetQuest.startOn`. `FleetQuestType.getSpawnFailure` owns the location checks
+used by both diagnostics and normal eligibility. Test failures distinguish missing
+dedicated givers from unavailable ones, report coherence and its limit, and retain
+source-market, route, fleet-factory and quest-creation failures. The optional
+failure callbacks are not saved or retained by fleets. `FleetQuestSpawnCheck`
+under `jars/src/catchrelease/tools` checks rejection propagation and legacy callers.
+
 `FleetQuest` mirrors the complete deadline sentences into entity memory
 (`$catchreleaseFleetDeadline` / `$catchreleaseFleetDeadlineLeft`) and clears them
 with its other rule text. The waiting comm route calls `prepareRuleText` before

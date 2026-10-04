@@ -31,7 +31,10 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class FleetQuestSpawner implements EveryFrameScript {
 
@@ -58,6 +61,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
         private final StarSystemAPI system;
         private final FleetQuestType type;
+        private transient String failureReason;
 
         private TestRouteSpawner(StarSystemAPI system, FleetQuestType type) {
             this.system = system;
@@ -66,6 +70,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
         @Override
         public CampaignFleetAPI spawnFleet(RouteData route) {
+            failureReason = null;
             Random random = route.getRandom();
             CampaignFleetAPI fleet;
             if (type.usesTradeConvoy()) {
@@ -79,7 +84,12 @@ public class FleetQuestSpawner implements EveryFrameScript {
                 fleet = RuinsFleetRouteManager.createScavenger(
                         null, system.getLocation(), route, route.getMarket(), false, random);
             }
-            if (fleet == null) return null;
+            if (fleet == null) {
+                failureReason = type.usesTradeConvoy()
+                        ? "The fleet factory returned no trade convoy."
+                        : "The scavenger factory returned no fleet or an empty fleet.";
+                return null;
+            }
 
             if (type.usesTradeConvoy()) {
                 fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_TRADE_FLEET, true);
@@ -95,7 +105,7 @@ public class FleetQuestSpawner implements EveryFrameScript {
                 fleet.setLocation(location.x, location.y);
             }
 
-            FleetQuest quest = FleetQuest.startOn(fleet, type);
+            FleetQuest quest = FleetQuest.startOn(fleet, type, reason -> failureReason = reason);
             if (quest == null) {
                 Misc.fadeAndExpire(fleet);
                 return null;
@@ -193,21 +203,29 @@ public class FleetQuestSpawner implements EveryFrameScript {
     }
 
     public static CampaignFleetAPI spawnForTesting(FleetQuestType type) {
+        return spawnForTesting(type, null);
+    }
+
+    public static CampaignFleetAPI spawnForTesting(FleetQuestType type, Consumer<String> onFailure) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null || !(player.getContainingLocation() instanceof StarSystemAPI system)) {
-            return null;
+            return failSpawn(onFailure, "SpawnFleetQuest is only available inside a star system.");
         }
-        if (type == null || !FleetQuestType.getLocalOffers().contains(type) || countActive() > 0) {
-            return null;
+        if (type == null || !FleetQuestType.getLocalOffers().contains(type)) {
+            return failSpawn(onFailure, "The quest type is not a local fleet offer.");
         }
-        if (!type.canSpawnIn(system)) return null;
+        if (countActive() > 0) {
+            return failSpawn(onFailure, "A fleet quest offer or accepted fleet quest is already active.");
+        }
+        String failure = type.getSpawnFailure(system);
+        if (failure != null) return failSpawn(onFailure, failure);
 
         if (type.hasDedicatedGivers()) {
             List<CampaignFleetAPI> givers = findDedicatedGivers(system, type);
-            if (givers.isEmpty()) return null;
+            if (givers.isEmpty()) return failSpawn(onFailure, describeMissingGiver(system, type));
 
             CampaignFleetAPI giver = givers.get(new Random().nextInt(givers.size()));
-            FleetQuest quest = FleetQuest.startOn(giver, type);
+            FleetQuest quest = FleetQuest.startOn(giver, type, onFailure);
             if (quest == null) return null;
 
             FleetQuestEncounter.attach(giver, quest);
@@ -216,20 +234,58 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
         RuinsFleetRouteManager scavengers = new RuinsFleetRouteManager(system);
         MarketAPI source = scavengers.pickSourceMarket();
-        if (source == null) return null;
+        if (source == null) {
+            return failSpawn(onFailure, "No source market is available: it must be visible, inside a system,"
+                    + " and non-hostile to the Independents.");
+        }
 
         RouteManager routes = RouteManager.getInstance();
         OptionalFleetData optional = new OptionalFleetData(source);
+        TestRouteSpawner spawner = new TestRouteSpawner(system, type);
         RouteData route = routes.addRoute(TEST_ROUTE_SOURCE, source, Misc.genRandomSeed(),
-                optional, new TestRouteSpawner(system, type));
+                optional, spawner);
         route.addSegment(new RouteSegment(TEST_ROUTE_DAYS, system.getCenter()));
 
         // RouteManager owns activeFleet; a zero-day advance keeps the test hull on its normal lifecycle.
         routes.advance(0f);
 
         CampaignFleetAPI fleet = route.getActiveFleet();
-        if (fleet == null) routes.removeRoute(route);
+        if (fleet == null) {
+            routes.removeRoute(route);
+            return failSpawn(onFailure, spawner.failureReason != null ? spawner.failureReason
+                    : "RouteManager did not activate the test fleet during its spawn pass.");
+        }
         return fleet;
+    }
+
+    private static CampaignFleetAPI failSpawn(Consumer<String> onFailure, String reason) {
+        if (onFailure != null) onFailure.accept(reason);
+        return null;
+    }
+
+    private static String describeMissingGiver(StarSystemAPI system, FleetQuestType type) {
+        String required = switch (type) {
+            case FOLLOWER -> "a Hegemony trade convoy";
+            case STATE_DINNER -> "a Sindrian Diktat trade convoy";
+            case CLAIM_ASSAY -> "a Tri-Tachyon prospecting fleet or Nexerelin mining fleet";
+            case MANDATE -> "an Academy science expedition";
+            case PARLEY_FISH -> "a patrol from a procedurally generated pirate base";
+            default -> "a matching quest fleet";
+        };
+        Map<String, Integer> rejected = new LinkedHashMap<>();
+        for (CampaignFleetAPI fleet : system.getFleets()) {
+            if (!fitsDedicatedGiver(fleet, type)) continue;
+            String reason = getGiverFailure(fleet);
+            if (reason != null) rejected.merge(reason, 1, Integer::sum);
+        }
+        String message = "Requires " + required + ". This command only uses an existing fleet for this quest.";
+        if (rejected.isEmpty()) return message + " None of that type are present in this system.";
+
+        StringBuilder detail = new StringBuilder(message).append(" Matching fleets were rejected:");
+        for (Map.Entry<String, Integer> entry : rejected.entrySet()) {
+            detail.append("\n").append(entry.getValue()).append(" fleet(s): ").append(entry.getKey());
+        }
+        return detail.toString();
     }
 
     protected boolean adopt(FleetQuestType type) {
@@ -349,28 +405,44 @@ public class FleetQuestSpawner implements EveryFrameScript {
 
     // Pirate-base patrols pass through here too, so the combat-crew filter stays with the callers.
     protected static boolean isAvailableGiver(CampaignFleetAPI fleet) {
-        if (catchrelease.campaign.fish.fisherman.FishermanSpawner.isFisherman(fleet)) return false;
+        return getGiverFailure(fleet) == null;
+    }
+
+    private static String getGiverFailure(CampaignFleetAPI fleet) {
+        if (catchrelease.campaign.fish.fisherman.FishermanSpawner.isFisherman(fleet)) {
+            return "The Fisherman cannot carry this quest.";
+        }
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
 
-        if (fleet == null || fleet == player) return false;
-        if (fleet.isExpired() || !fleet.isAlive() || fleet.isEmpty()) return false;
-        if (fleet.isStationMode() || fleet.isHidden() || fleet.isDespawning()) return false;
-        if (fleet.getBattle() != null || fleet.isInHyperspaceTransition()) return false;
+        if (fleet == null) return "No fleet was supplied.";
+        if (fleet == player) return "This is the player's fleet.";
+        if (fleet.isExpired()) return "The fleet has expired.";
+        if (!fleet.isAlive()) return "The fleet is no longer alive.";
+        if (fleet.isEmpty()) return "The fleet has no ships.";
+        if (fleet.isStationMode()) return "The fleet is a station.";
+        if (fleet.isHidden()) return "The fleet is hidden.";
+        if (fleet.isDespawning()) return "The fleet is despawning.";
+        if (fleet.getBattle() != null) return "The fleet is in battle.";
+        if (fleet.isInHyperspaceTransition()) return "The fleet is making a hyperspace transition.";
 
-        if (fleet.getFaction() == null || fleet.getFaction().isPlayerFaction()) return false;
-        if (fleet.isHostileTo(player)) return false;
+        if (fleet.getFaction() == null) return "The fleet has no faction.";
+        if (fleet.getFaction().isPlayerFaction()) return "The fleet belongs to the player faction.";
+        if (fleet.isHostileTo(player)) return "The fleet is hostile to the player.";
 
-        // a Church or Path hull does not stop a passing stranger to ask for a fish, whatever else it might stop them for - see FishingTaboo
-        if (catchrelease.campaign.fish.FishingTaboo.isTaboo(fleet.getFaction().getId())) return false;
-
-        if (fleet.getCommander() == null) return false;
-
-        if (FleetQuest.isQuestFleet(fleet)) return false;
-        if (fleet.getMemoryWithoutUpdate().getBoolean(MemFlags.ENTITY_MISSION_IMPORTANT)) {
-            return false;
+        // Church and Path fleets do not offer fishing work.
+        if (catchrelease.campaign.fish.FishingTaboo.isTaboo(fleet.getFaction().getId())) {
+            return "The fleet's faction does not offer fishing work.";
         }
 
-        return !Misc.isFleetReturningToDespawn(fleet);
+        if (fleet.getCommander() == null) return "The fleet has no commander.";
+
+        if (FleetQuest.isQuestFleet(fleet)) return "The fleet already carries a fishing quest.";
+        if (fleet.getMemoryWithoutUpdate().getBoolean(MemFlags.ENTITY_MISSION_IMPORTANT)) {
+            return "The fleet is marked important for a mission.";
+        }
+
+        return Misc.isFleetReturningToDespawn(fleet)
+                ? "The fleet is returning to despawn." : null;
     }
 }

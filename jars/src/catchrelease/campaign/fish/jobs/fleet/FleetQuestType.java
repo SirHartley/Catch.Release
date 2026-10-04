@@ -530,16 +530,32 @@ public enum FleetQuestType {
     }
 
     public boolean canSpawnIn(StarSystemAPI system) {
-        if (this == MANDATE) return isNearAbyssal(system);
-        if (this == PARLEY_FISH) {
-            return system != null && !system.hasTag(Tags.THEME_CORE)
-                    && QuestPond.findFreePond(system) != null;
-        }
-        if (this == FOULED_LINE) return system != null && QuestPond.findFreePond(system) != null;
+        return getSpawnFailure(system) == null;
+    }
 
-        return !requiresLowCoherenceArea() || system != null
-                && Aberration.baseAt(system.getLocation(), system)
-                >= FishRequirement.LOW_COHERENCE;
+    public String getSpawnFailure(StarSystemAPI system) {
+        if (this == MANDATE) {
+            return isNearAbyssal(system) ? null
+                    : "Requires an abyssal system within " + QuestDuration.MAX_SENSIBLE_LY + " LY.";
+        }
+        if (this == PARLEY_FISH) {
+            if (system == null) return "Requires a fleet inside a star system.";
+            if (system.hasTag(Tags.THEME_CORE)) return "Cannot be offered in a Core system.";
+        }
+        if (usesQuestPond()) {
+            return system != null && QuestPond.findFreePond(system) != null ? null
+                    : "Requires an unclaimed rupture in the current system.";
+        }
+        if (requiresLowCoherenceArea()) {
+            if (system == null) return "Requires a fleet inside a low-coherence system.";
+            float aberration = Aberration.baseAt(system.getLocation(), system);
+            if (!(aberration >= FishRequirement.LOW_COHERENCE)) {
+                return String.format(Locale.ROOT,
+                        "System coherence is %.1f%%; this quest requires %.1f%% or lower.",
+                        (1f - aberration) * 100f, (1f - FishRequirement.LOW_COHERENCE) * 100f);
+            }
+        }
+        return null;
     }
 
     // The ask names one rupture in the giver's system; the job claims it while the catch is owed.
