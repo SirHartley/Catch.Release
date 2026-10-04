@@ -243,8 +243,13 @@ with its other rule text. The waiting comm route calls `prepareRuleText` before
 selecting its Text row, so elapsed time is current for every type. Intel's next
 step names the flagship, not a generic catch action.
 
-Dialogue remains in `rules.csv`: each of the 24 cases owns its pitch, questions,
-reminder, delivery and thanks. Qualified acceptance options explicitly say
+Dialogue remains in `rules.csv`: each of the 24 cases owns its pitch, terms,
+questions, reminder, delivery and thanks. Ordinary comms and distress calls share
+`CatchReleaseFleetQuestOffer`: portrait, hail and story, then Continue to
+`CatchReleaseFleetQuestTermsText`. Requirements, deadline, reward cards and the
+offer menu appear on this second page. Questions and negotiations return directly
+to the offer menu; alternate clients and stage follow-ups keep their own routes.
+Qualified acceptance options explicitly say
 `(Accept)`; they use the ordinary acceptance path. The Last Entry and Interment
 follow-up questions use the existing extra-question routing and saved flags.
 Scavenger Engine switches its acceptance labels after the technical question,
