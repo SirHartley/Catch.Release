@@ -443,9 +443,15 @@ options route to `catchrelease_intro_rod`, which owns the `giveRod` grant.
 | `rod/entities/FishingDroneEntityPlugin.java` | Drone launch, orbit, timed chase, catch, and return. |
 | `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast, staggered launches, recall, target assignment, hit cues, and reachability checks. |
 | `rod/scripts/RoamingDroneSwarmScript.java` | Pondless Breach Coupler swarm. |
+| `harpoon/ability/HarpoonAbilityPlugin.java` | Charged targeting, aim assist and tow-line cutting. |
 | `harpoon/entities/HarpoonEntityPlugin.java` | Flight, collision, shields, mines, hauling, fleet contact, rope, catch, and return. |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | Breach Lights activation, spool, slow, detection penalty, and all beam renderers. |
 | `searchlight/scripts/Searchlight.java` | Beam sweep, lock-on, distortion, and ripples. |
+
+The three ability plugins own their tooltips and read current upgrades and fitted
+modules when opened. Display contracts are in [UI.md](UI.md#ability-tooltips).
+`tools/AbilityTooltipCheck.java` checks their text, highlights, upgraded values,
+equipment and availability notices against `UpgradeData.csv` in a separate JVM.
 
 ### `memory`, `helper`, `reflection`, and `testing`
 
