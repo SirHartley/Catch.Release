@@ -10,6 +10,7 @@ import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 public class FleetQuestMapIcon extends BaseCustomEntityPlugin {
@@ -20,6 +21,10 @@ public class FleetQuestMapIcon extends BaseCustomEntityPlugin {
 
     protected CampaignFleetAPI fleet;
     protected float autopilotCheckElapsed;
+
+    public static Color getMarkerColor() {
+        return Global.getSettings().getCustomEntitySpec(ENTITY_ID).getIconColor();
+    }
 
     public static SectorEntityToken findOrAdd(CampaignFleetAPI fleet) {
         if (!isActive(fleet)) {
