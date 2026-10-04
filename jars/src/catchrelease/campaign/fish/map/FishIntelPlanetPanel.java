@@ -1,13 +1,8 @@
 package catchrelease.campaign.fish.map;
 
-import catchrelease.campaign.fish.codex.FishCodex;
-import catchrelease.campaign.fish.constants.FishConstants;
-import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.ui.ShopUi;
-import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.reflection.ReflectionUtils;
-import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -15,8 +10,6 @@ import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.CoreUITabId;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
-import com.fs.starfarer.api.graphics.SpriteAPI;
-import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -24,10 +17,8 @@ import com.fs.starfarer.api.ui.UIComponentAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
-import org.lwjgl.input.Keyboard;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FishIntelPlanetPanel implements EveryFrameScript {
@@ -36,7 +27,6 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
     public static final float CELL = 38f;
     public static final float CELL_GAP = 6f;
 
-    public static final float ICON_SHARE = 0.66f;
     public static final float TITLE_HEIGHT = 30f;
     public static final float INNER_PAD = 10f;
 
@@ -63,12 +53,15 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
             float w = pos.getWidth();
             float h = pos.getHeight();
 
-            // the field is transparent black, the way the screen's own panels sit on it
-            ShopUi.drawQuad(x, y, w, h, Color.BLACK, 0.7f * alphaMult);
-
-            float titleAlpha = 0.65f;
-            ShopUi.drawQuad(x, y + h - TITLE_HEIGHT, w, TITLE_HEIGHT,
-                    Misc.getDarkPlayerColor(), titleAlpha * alphaMult);
+            float bodyHeight = h - TITLE_HEIGHT;
+            Color frame = Misc.getDarkPlayerColor();
+            ShopUi.drawQuad(x, y, 1f, bodyHeight, frame, alphaMult);
+            ShopUi.drawQuad(x + w - 1f, y, 1f, bodyHeight, frame, alphaMult);
+            ShopUi.drawQuad(x + 1f, y, w - 2f, 1f, frame, alphaMult);
+            ShopUi.drawQuad(x + 1f, y + bodyHeight - 1f, w - 2f, 1f, frame, alphaMult);
+            ShopUi.drawQuad(x + 1f, y + 1f, w - 2f, bodyHeight - 1f,
+                    Color.BLACK, 0.67f * alphaMult);
+            ShopUi.drawQuad(x, y + bodyHeight, w, TITLE_HEIGHT, frame, alphaMult);
 
             LazyFont body = ShopUi.getBodyFont();
             if (body != null) {
@@ -88,13 +81,6 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
 
                 title.draw(titleX, titleY);
             }
-
-            // the border wears exactly the title bar's colour, so the bar reads as part of the frame
-            Color border = Misc.getDarkPlayerColor();
-            ShopUi.drawQuad(x, y, w, 1f, border, titleAlpha * alphaMult);
-            ShopUi.drawQuad(x, y + h - 1f, w, 1f, border, titleAlpha * alphaMult);
-            ShopUi.drawQuad(x, y, 1f, h, border, titleAlpha * alphaMult);
-            ShopUi.drawQuad(x + w - 1f, y, 1f, h, border, titleAlpha * alphaMult);
         }
     }
 
@@ -201,21 +187,23 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         if (width < CELL + 30f) return;
 
         float height = cardPos.getHeight();
+        float availableHeight = height - TITLE_HEIGHT - INNER_PAD * 2f;
+        if (availableHeight <= 0f) return;
 
         float innerWidth = width - INNER_PAD * 2f;
         int total = known.size() + unknown;
         int perRow = Math.max(1, (int) ((innerWidth + CELL_GAP) / (CELL + CELL_GAP)));
         int rows = (total + perRow - 1) / perRow;
 
-        float rowsNeeded = rows * CELL + (rows - 1) * CELL_GAP;
-        float contentBudget = height - TITLE_HEIGHT - INNER_PAD * 2f;
-
-        boolean scrolls = rowsNeeded > contentBudget;
-        float contentHeight = Math.min(rowsNeeded, contentBudget);
+        float contentHeight = rows * CELL + (rows - 1) * CELL_GAP;
+        float gridScale = Math.min(1f, availableHeight / contentHeight);
+        contentHeight *= gridScale;
+        float contentTop = TITLE_HEIGHT + (height - TITLE_HEIGHT - contentHeight) * 0.5f;
 
         fishPanel = Global.getSettings().createCustom(width, height, new BoxPlugin());
 
-        buildContent(fishPanel, innerWidth, contentHeight, scrolls, perRow, known, unknown);
+        buildContent(fishPanel, innerWidth, contentHeight, contentTop, gridScale,
+                perRow, known, unknown);
 
         ((UIPanelAPI) planetsPanel).addComponent(fishPanel)
                 .setSize(width, height)
@@ -223,8 +211,11 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
     }
 
     protected void buildContent(CustomPanelAPI panel, float innerWidth, float contentHeight,
-                                boolean scrolls, int perRow, List<FishSpec> known, int unknown) {
-        TooltipMakerAPI content = panel.createUIElement(innerWidth, contentHeight, scrolls);
+                                float contentTop, float gridScale, int perRow,
+                                List<FishSpec> known, int unknown) {
+        TooltipMakerAPI content = panel.createUIElement(innerWidth, contentHeight, false);
+        float cellSize = CELL * gridScale;
+        float cellGap = CELL_GAP * gridScale;
 
         int total = known.size() + unknown;
         int rows = (total + perRow - 1) / perRow;
@@ -232,8 +223,10 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
         int placed = 0;
         for (int row = 0; row < rows; row++) {
             int inThisRow = Math.min(perRow, total - placed);
+            float rowWidth = inThisRow * cellSize + (inThisRow - 1) * cellGap;
+            float rowLeft = (innerWidth - rowWidth) * 0.5f;
 
-            CustomPanelAPI rowPanel = panel.createCustomPanel(innerWidth, CELL,
+            CustomPanelAPI rowPanel = panel.createCustomPanel(innerWidth, cellSize,
                     new BaseCustomUIPanelPlugin() {
                     });
 
@@ -241,9 +234,9 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 int index = placed + i;
                 FishSpec spec = index < known.size() ? known.get(index) : null;
 
-                CustomPanelAPI cell = panel.createCustomPanel(CELL, CELL,
+                CustomPanelAPI cell = panel.createCustomPanel(cellSize, cellSize,
                         new FishHolderPlugin(spec));
-                rowPanel.addComponent(cell).inTL(i * (CELL + CELL_GAP), 0f);
+                rowPanel.addComponent(cell).inTL(rowLeft + i * (cellSize + cellGap), 0f);
 
                 if (spec != null) {
                     content.addTooltipTo(FishTooltips.create(spec), cell,
@@ -251,12 +244,14 @@ public class FishIntelPlanetPanel implements EveryFrameScript {
                 }
             }
 
-            content.addCustom(rowPanel, row == 0 ? 0f : CELL_GAP);
+            // addCustom gives the first row a five-pixel text inset.
+            content.addCustom(rowPanel, row == 0 ? 0f : cellGap)
+                    .getPosition().setXAlignOffset(0f);
             placed += inThisRow;
         }
 
         panel.updateUIElementSizeAndMakeItProcessInput(content);
-        panel.addUIElement(content).inTL(INNER_PAD, TITLE_HEIGHT + INNER_PAD);
+        panel.addUIElement(content).inTL(INNER_PAD, contentTop);
     }
 
     protected void removePanel() {
