@@ -194,6 +194,7 @@ public class SpawnFish implements BaseCommandWithSuggestion {
         state.caught = false;
         // SpawnFish creates the actual mote, so the Longliner's separate boat must stay retired.
         state.revealed = LonglinerDecoy.spawnsAsBoat(spec);
+        if (state.revealed) LegendaryChases.noteRevealed(spec.id);
         state.shieldPopped = false;
         state.shieldUnits = -1;
         state.shieldStampAt = 0L;

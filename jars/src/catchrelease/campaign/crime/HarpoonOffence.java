@@ -443,12 +443,6 @@ public class HarpoonOffence {
         String suffix = "|" + where.getId();
         // copy: isOutstanding() mutates the map it iterates
         for (String key : new ArrayList<>(getOutstanding().keySet())) {
-            // pre-composite entries from old saves have no home system to match;
-            // drop them rather than let them sit unservable forever
-            if (!key.contains("|")) {
-                getOutstanding().remove(key);
-                continue;
-            }
             if (!key.endsWith(suffix)) continue;
 
             String factionId = key.substring(0, key.length() - suffix.length());

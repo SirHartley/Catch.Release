@@ -1273,16 +1273,7 @@ public class FishingIntro {
         com.fs.starfarer.api.campaign.rules.MemoryAPI memory =
                 Global.getSector().getMemoryWithoutUpdate();
 
-        if (memory.getBoolean(TutorialConstants.FISHER_PROPERTY_KEY)) return true;
-
-        // A pre-overhaul save carrying the old breadcrumb is carrying the new fiction's assembly.
-        if (memory.getBoolean(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY)) {
-            memory.set(TutorialConstants.FISHER_PROPERTY_KEY, true);
-            memory.unset(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY);
-            return true;
-        }
-
-        return false;
+        return memory.getBoolean(TutorialConstants.FISHER_PROPERTY_KEY);
     }
 
     public static void takeFisherProperty() {
@@ -1294,8 +1285,6 @@ public class FishingIntro {
 
     public static void dropFisherProperty() {
         Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.FISHER_PROPERTY_KEY);
-        Global.getSector().getMemoryWithoutUpdate()
-                .unset(TutorialConstants.LEGACY_CARRYING_HARPOON_KEY);
     }
 
     public static SectorEntityToken getNearestBoat() {

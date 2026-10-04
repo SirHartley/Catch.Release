@@ -7,8 +7,7 @@ import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.minigame.FishingMinigame;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.memory.upgrades.UpgradeManager;
-import catchrelease.memory.upgrades.UpgradeStat;
-import catchrelease.memory.upgrades.StatIds;
+import catchrelease.campaign.fish.constants.FishConstants;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CampaignClockAPI;
@@ -69,15 +68,6 @@ public class FishingParityChecks {
             });
             Global.setSector(sector);
             Global.setSettings(settings);
-        }
-
-        void setStat(String id, float value) {
-            UpgradeStat stat = new UpgradeStat();
-            stat.id = id;
-            stat.baseType = UpgradeStat.BaseType.DOUBLE;
-            stat.upgradeType = UpgradeStat.UpgradeType.FLAT;
-            stat.baseValue = value;
-            upgrades.levelMap.put(id, stat);
         }
 
         float setCalm(boolean active) {
@@ -149,21 +139,14 @@ public class FishingParityChecks {
         fish.rarity = seed % 2 == 0 ? FishRarity.COMMON : FishRarity.LEGENDARY;
         environment.dev = seed % 3 == 0;
         float rumorSpeed = environment.setCalm(seed % 4 < 2);
-        float bar = seed == 0 ? 1f : seed == 7 ? 400f : 80 + seed * 25;
-        float gain = 1 + seed * 0.08f;
-        float loss = 1 - seed * 0.07f;
-        environment.setStat(StatIds.FISHING_BAR_SIZE, bar);
-        environment.setStat(StatIds.MINIGAME_PROGRESS_RATE, gain);
-        environment.setStat(StatIds.MINIGAME_ESCAPE_RESIST, loss);
         Random toolRandom = new Random(seed);
         MathUtils.getRandom().setSeed(seed);
         FishingMinigame game = new CatchOnlyMinigame(fish, tackle, environment.system);
         FishingSimulation tool = new FishingSimulation(fish.difficulty,
                 fish.motionSpeed * (fish.rarity == FishRarity.LEGENDARY ? 1f : rumorSpeed),
                 fish.restlessness, fish.progressRateMult, fish.escapeRateMult,
-                fish.specialChance, fish.mixChance, motion, tackle, bar,
+                fish.specialChance, fish.mixChance, motion, tackle, FishConstants.MINIGAME_BAR_SIZE_FALLBACK,
                 (min, max) -> min + toolRandom.nextFloat() * (max - min));
-        tool.setPlayerRates(gain, loss);
         tool.setCannotLose(environment.dev);
         compare(game, tool);
         for (int frame = 0; frame < fps * 20; frame++) {
@@ -187,13 +170,6 @@ public class FishingParityChecks {
                 game.restart();
                 tool.restart();
                 compare(game, tool);
-            }
-            if (frame == fps * 5) {
-                gain *= 1.3f;
-                loss *= 0.7f;
-                environment.setStat(StatIds.MINIGAME_PROGRESS_RATE, gain);
-                environment.setStat(StatIds.MINIGAME_ESCAPE_RESIST, loss);
-                tool.setPlayerRates(gain, loss);
             }
             if (frame == fps * 9) {
                 game.setCannotLose(!environment.dev);

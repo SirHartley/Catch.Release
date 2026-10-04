@@ -239,12 +239,6 @@ public class FishermanBehavior implements EveryFrameScript {
         keepStanding();
         keepPace();
 
-        // a boat out there since before there were two kinds of schedule. Written once, and only because the shelf and the spawner both ask which kind of boat this is
-        if (isVisiting()
-                && !fleet.getMemoryWithoutUpdate().getBoolean(FishermanConstants.VISITING_FLAG)) {
-            fleet.getMemoryWithoutUpdate().set(FishermanConstants.VISITING_FLAG, true);
-        }
-
         keepMarker(watched);
         if (!watched) return;
 

@@ -1,12 +1,10 @@
 package catchrelease;
 
-import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.data.FishRanges;
-import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.campaign.fish.legendary.LonglinerDecoy;
 import catchrelease.campaign.fish.data.Aberration;
@@ -15,7 +13,6 @@ import catchrelease.campaign.fish.colony.AquariumTankScript;
 import catchrelease.campaign.fish.colony.ConservatoryOptionProvider;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
-import catchrelease.campaign.fish.jobs.CompanionJob;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -87,7 +84,6 @@ public class ModPlugin extends BaseModPlugin {
         FishRanges.register();
         LegendaryHaunt.register();
         LonglinerDecoy.register();
-        UpgradeManager.getInstance().updateBaseValues();
         CatchReleaseDistressProvider.register();
         DistressCallFramework.register();
         SkillshotFramework.register();
@@ -98,9 +94,7 @@ public class ModPlugin extends BaseModPlugin {
         Global.getSector().addTransientScript(new CoherenceOverlayScript());
 
         // housekeeping, once, before anything is looked at
-        CompanionJob.migrateSavedJobs();
         sweepPondClaims();
-        FishLog.relockLegendaryRangeData();
 
         // an input listener rather than a script; inert unless dev mode is on
         DevShortcut.register();

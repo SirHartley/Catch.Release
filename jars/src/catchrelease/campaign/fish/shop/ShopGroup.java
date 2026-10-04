@@ -41,8 +41,6 @@ public enum ShopGroup {
     }
 
     public static ShopGroup forStat(UpgradeStat stat) {
-        if (stat.category == UpgradeStat.Category.MINIGAME) return THE_CATCH;
-
         String id = stat.id == null ? "" : stat.id;
 
         if (id.startsWith("searchlight")) return SEARCHLIGHTS;

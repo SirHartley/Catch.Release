@@ -23,10 +23,6 @@ public class StatIds {
             HARPOON_RECHARGE_TIME = "harpoon_recharge_time",
             HARPOON_SPEED = "harpoon_speed",
             HARPOON_AIM_ASSIST = "harpoon_aim_assist";
-    public static final String
-            FISHING_BAR_SIZE = "fishing_bar_size",
-            MINIGAME_PROGRESS_RATE = "minigame_progress_rate",
-            MINIGAME_ESCAPE_RESIST = "minigame_escape_resist";
 
     public static final String
             LAMPS_ABILITY = "catchrelease_searchlights",

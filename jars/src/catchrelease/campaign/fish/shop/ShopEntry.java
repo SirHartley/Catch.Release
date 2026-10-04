@@ -83,7 +83,6 @@ public class ShopEntry {
         if (kind == Kind.CURIO) return ware.name;
         if (kind == Kind.TACKLE) return tackle.name;
 
-        // ids stay "searchlight" (renaming ids needs a save migration); display follows the rig's new name "lamp"
         String id = stat.id.startsWith("searchlight")
                 ? stat.id.replaceFirst("^searchlight", "lamp") : stat.id;
 

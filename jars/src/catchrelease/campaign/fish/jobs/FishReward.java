@@ -7,8 +7,6 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.tackle.Tackle;
-import catchrelease.campaign.fish.tackle.TackleManager;
-import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.ShopEntry;
 import catchrelease.campaign.fish.shop.ShopGroup;
 import catchrelease.campaign.fish.shop.ShopMarks;
@@ -28,7 +26,6 @@ import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.UIPanelAPI;
@@ -171,57 +168,6 @@ public abstract class FishReward {
             return tenths % 10 == 0
                     ? String.valueOf(tenths / 10)
                     : (tenths / 10) + "." + Math.abs(tenths % 10);
-        }
-    }
-
-    public static class Upgrade extends FishReward {
-
-        public final String statId;
-        public final int levels;
-
-        public Upgrade(String statId, int levels) {
-            this.statId = statId;
-            this.levels = levels;
-        }
-
-        @Override
-        public String describe() {
-            UpgradeStat stat = UpgradeManager.getInstance() == null
-                    ? null : UpgradeManager.getInstance().getAll().get(statId);
-
-            String name = stat == null ? statId : Misc.ucFirst(statId.replace('_', ' '));
-
-            return levels == 1 ? "an upgrade to " + name : levels + " upgrades to " + name;
-        }
-
-        @Override
-        public void grant() {
-            if (UpgradeManager.getInstance() == null) return;
-
-            UpgradeManager.getInstance().addLevels(statId, levels);
-        }
-    }
-
-    public static class TackleReward extends FishReward {
-
-        public final Tackle tackle;
-
-        public TackleReward(Tackle tackle) {
-            this.tackle = tackle;
-        }
-
-        @Override
-        public String describe() {
-            return "a " + tackle.name;
-        }
-
-        @Override
-        public void grant() {
-            Tackle.Fit rig = tackle.fit == Tackle.Fit.BOTH ? Tackle.Fit.DRONE : tackle.fit;
-
-            // grants ownership, not just a fit - removing it later must not require buying it back
-            TackleManager.own(tackle);
-            TackleManager.fit(rig, tackle);
         }
     }
 
@@ -533,31 +479,6 @@ public abstract class FishReward {
         }
     }
 
-    public static class Commodity extends FishReward {
-
-        public final String commodityId;
-        public final int quantity;
-
-        public Commodity(String commodityId, int quantity) {
-            this.commodityId = commodityId;
-            this.quantity = quantity;
-        }
-
-        @Override
-        public String describe() {
-            return new Credits(getCreditValue()).describe();
-        }
-
-        @Override
-        public void grant() {
-            new Credits(getCreditValue()).grant();
-        }
-
-        protected int getCreditValue() {
-            return FishRewardRoller.creditPayout(quantity * 120);
-        }
-    }
-
     public abstract String describe();
 
     public abstract void grant();
@@ -630,16 +551,8 @@ public abstract class FishReward {
         return new Credits(amount, valueMultiplier);
     }
 
-    public static FishReward upgrade(String statId, int levels) {
-        return new Upgrade(statId, levels);
-    }
-
     public static FishReward upgradeSchematic(String statId, int targetLevel) {
         return new UpgradeSchematic(statId, targetLevel);
-    }
-
-    public static FishReward tackle(Tackle tackle) {
-        return new TackleReward(tackle);
     }
 
     public static FishReward tackleSchematic(Tackle tackle) {

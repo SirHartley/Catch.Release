@@ -45,7 +45,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Registry / hook | Owners |
 |---|---|
 | `ModPlugin.onCodexDataGenerated()` | `FishCodex`, only while Codex data is generated |
-| `ModPlugin.onGameLoad()` | Idempotent script/listener registration and save repair; order below |
+| `ModPlugin.onGameLoad()` | Idempotent script/listener registration and current-state cleanup; order below |
 | `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting |
 | `data/campaign/fish.csv` | Species; `FishSpecLoader` |
 | `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon |
@@ -61,9 +61,9 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/special_items.csv` | Fish cargo |
 | `data/campaign/industries.csv` | Breach Conservatory |
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
-| `data/config/UpgradeData.csv` -> `memory/upgrades/` | Stat IDs, loader aliases, saved levels and runtime values |
+| `data/config/UpgradeData.csv` -> `memory/upgrades/` | Current stat definitions, saved levels and runtime values |
 
-Load order in `ModPlugin`: pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> expedition/prospecting routes -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> upgrade base refresh -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims/range relock -> dev shortcut.
+Load order in `ModPlugin`: pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> expedition/prospecting routes -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims -> dev shortcut.
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
 
@@ -96,7 +96,7 @@ not make runtime code depend on `tools/`. The simulator owns its state and loop.
 When game physics changes, compare and update the tool model using
 `tools/FishingParityChecks`. Both it and `tools/FishTunerChecks` have IDE run
 configurations in the normal module; run them from the mod root in a separate
-JVM. Parity checks use the real minigame, fish, rumors, upgrades and LazyLib RNG.
+JVM. Parity checks use the real minigame, fish, rumors and LazyLib RNG at base-kit values.
 The check's nested `Environment` supplies API proxies and private campaign data;
 it refuses to run with existing game globals and clears its globals on exit.
 `CatchOnlyMinigame` overrides only treasure generation, leaving catch physics
@@ -138,7 +138,7 @@ configuration; usage, checks, bands and exemptions are in [DIALOGUE.md](DIALOGUE
 
 `AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
 
-## Save identity
+## Data identity
 
 | Stable ID | Display name |
 |---|---|
@@ -148,7 +148,7 @@ configuration; usage, checks, bands and exemptions are in [DIALOGUE.md](DIALOGUE
 | `longliner` | The Imposter |
 | `miscount` | Relic Crab |
 
-Display renames do not migrate IDs. `LonglinerDecoy` and Longliner-named memory, sound and option keys remain compatible with older saves. Asset status is recorded beside each species row (`placeholder art`). The `desc` column loads into `FishSpec.desc`, shared by `FishItemTooltips` and `FishCodexEntry`; handling advice and hazards in that text do not add campaign mechanics.
+Display names and internal IDs are separate. `LonglinerDecoy` and Longliner-named memory, sound and option keys still identify The Imposter. Asset status is recorded beside each species row (`placeholder art`). The `desc` column loads into `FishSpec.desc`, shared by `FishItemTooltips` and `FishCodexEntry`; handling advice and hazards in that text do not add campaign mechanics.
 
 `RatingBarEvent` and rating-named rule IDs, commands and memory keys still identify the tutorial crew referrals. Player-facing job descriptions do not rename these bindings or saved keys.
 
@@ -179,13 +179,13 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `QuestRewards.java` | Shared reward budget: score × 600 credits × 0.75–1.35; fixed rewards, tier-gated extras, remaining guaranteed credits, saved hand-in value multiplier. Later cash stages guarantee ≥20% total and ≥25% base-credit growth, each ≥2,000; multiplier cannot decrease. |
 | `QuestDuration.java` | Satisfiability gate and deadline: nearest valid range + round-trip fleet travel + work, rounded to 30/60/90/120/180 days or unlimited; +30 for required Rare/Epic and +30 for post-acceptance catch. |
 | `FishHandoffPicker.java` | Validates non-overlapping specimen assignments; autoSelect takes the minimum valid set, worst first. Invalid confirmation reopens next frame after modal release; preserves container ID when repacking. |
-| `FishReward.java` | Reward values, grants and actual grant results; quest credits use the exact selected specimens. Known range grants convert to stored credit fallback; legacy commodity rewards convert to fixed credits. |
-| `FishRewardRoller.java` | Tier/ownership/active-job exclusions; distinct chart reservations; 3–10× fish-value multiplier (10× = 0.5%). Backdrop rolls require conservatory plans; compatibility conversions retain fixed values. |
+| `FishReward.java` | Reward values, grants and actual grant results; quest credits use the exact selected specimens. Known range grants convert to stored credit fallback. Equipment rewards unlock schematics, not purchased tiers or modules. |
+| `FishRewardRoller.java` | Tier/ownership/active-job exclusions; distinct chart reservations; 3–10× fish-value multiplier (10× = 0.5%). Backdrop rolls require conservatory plans. |
 | `QuestPond.java` | Claims ponds by a set of job IDs, adds vanilla mission importance, plants identified quest motes, and releases claims and motes. |
 
 `FishJob` supplies complete offer/remaining deadline sentences as
 `$catchreleaseDeadline` and `$catchreleaseDeadlineLeft`; unlimited jobs say so
-explicitly in dialogue and intel. Old Days fragment tokens remain available.
+explicitly in dialogue and intel.
 Contact reopening and round changes refresh the tokens. Intel contact names use
 display post, then display rank, then name alone.
 
@@ -206,15 +206,13 @@ for the conversation; answered questions disappear while accept and decline rema
 `CompanionJob` owns A Client's Preference; its `catchrelease_client_*` rules and
 intel describe the same private commission. The request uses `minLength`; the
 bonus requires the upper two-fifths of the species' length range, ignoring weight.
-`FishJobAsks` supplies the length floor. `ModPlugin.onGameLoad` migrates active
-saved weight requests; token preparation covers unaccepted bar offers. Migration
-keeps rewards, deadlines and catch provenance unchanged.
+`FishJobAsks` supplies the length floor.
 
 ### `campaign/fish/jobs/camp`
 
 | File | Owner / connection |
 |---|---|
-| `CampedSpotJob.java` | Two independent completion conditions: camper gone + post-acceptance fish from exact rupture. Creates fleet/claim on acceptance; qualifying proof releases mark; loss restores it; repairs legacy named-species requests. |
+| `CampedSpotJob.java` | Two independent completion conditions: camper gone + post-acceptance fish from exact rupture. Creates fleet/claim on acceptance; qualifying proof releases mark; loss restores it. Receipt requirements are set at creation and timestamped at acceptance. |
 | `CampedSpot.java` | Spawns and holds the camper, forces one warning hail, allows disengagement, removes cut-link without a Continue step, and locks the R.O.D. only while the camp remains. |
 
 ### `campaign/fish/jobs/fleet`
@@ -237,7 +235,7 @@ used by both diagnostics and normal eligibility. Test failures distinguish missi
 dedicated givers from unavailable ones, report coherence and its limit, and retain
 source-market, route, fleet-factory and quest-creation failures. The optional
 failure callbacks are not saved or retained by fleets. `FleetQuestSpawnCheck`
-under `jars/src/catchrelease/tools` checks rejection propagation and legacy callers.
+under `jars/src/catchrelease/tools` checks rejection propagation and the no-diagnostics overload.
 
 `FleetQuest` mirrors the complete deadline sentences into entity memory
 (`$catchreleaseFleetDeadline` / `$catchreleaseFleetDeadlineLeft`) and clears them
@@ -285,15 +283,15 @@ Run from the mod root with the normal compile dependencies.
 | `OuterReaches.java` | Collects real market entities, including connected/hidden/non-economy entities; chooses cleared spawn points and travel legs. Conditions-only planet markets are not settlements. |
 | `FishermanBehavior.java` | Shared visitor/standing route checks and market navigation avoidance; also lamps, staged motes, pacing, visibility, visit duration, and departure. `CoreFisherBehavior` selects standing lifetime and assignment text. |
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
-| `FishermanQuest.java` | Saved chart offer and exact identified catch. Selects species/system/source together; repairs legacy lamp-only pond targets without changing specimen identity. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
+| `FishermanQuest.java` | Saved chart offer and exact identified catch. Selects species/system/source together and checks implement eligibility before offering the request. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
 | `FishermanIdentity.java` | Stores the shared `PersonAPI` and selects one of five coherence portraits immediately before a hail. |
-| `FishRumors.java` | Monthly leads with eight effects and four authored pairs: rarity/bycatch, size/calm, stranger/calm, bycatch/value. Saved `kindId` selects the effect set and complete dialogue/intel passage; old `type` saves retain their single effect. Graduation grants a separate immediate lead. |
+| `FishRumors.java` | Monthly leads with eight effects and four authored pairs: rarity/bycatch, size/calm, stranger/calm, bycatch/value. Saved `kindId` selects the effect set and complete dialogue/intel passage. Graduation grants a separate immediate lead. |
 
 `FishingMinigameDialogPlugin` takes rumor effects from the catch anchor. Size bias joins the specimen roll; `FishingMinigame` snapshots movement, bycatch chance and bycatch rarity for that retrieval. Size and movement boosts exclude legendaries, and their fixed treasure rarity is unchanged. Tuning stays in `FishermanConstants`.
 
 Each `FishRumors.Kind` has one matching `CatchReleaseRumorText` row. Combined leads use their own passages, not appended single-effect text. Intel expands the same saved system/fish values with ordered highlights, including repeated fish names; the dialogue route and its no-lead fallback retain Continue to business.
 
-Rumors last 60 days from their saved `started` timestamp; new leads remain available every 30 days. `ACTIVE_KEY` stores overlapping leads in separate systems, migrating the old single `STATE_KEY` once. `getActive()` selects the newest lead for dialogue; effect getters search all live leads. `RumorIntel.shouldRemoveIntel()` uses the same expiry test and discards old 30-day ending timers without reviving ended entries. Vanilla `IntelManager.removeAllThatShouldBeRemoved()` calls it for queued and visible entries while unpaused; no additional timer script or sector scan is needed.
+Rumors last 60 days from their saved `started` timestamp; new leads remain available every 30 days. `ACTIVE_KEY` stores overlapping leads in separate systems. `getActive()` selects the newest lead for dialogue; effect getters search all live leads. `RumorIntel.shouldRemoveIntel()` uses the same expiry test without reviving ended entries. Vanilla `IntelManager.removeAllThatShouldBeRemoved()` calls it for queued and visible entries while unpaused; no additional timer script or sector scan is needed.
 
 ### `dialogue/rules`
 
@@ -490,17 +488,19 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - `despawn()` reports fleet removal to managers and starts the fleet's own fade. `FleetQuest` replacements additionally clear AI, move the original away, and call `Misc.fadeAndExpire()` so the replacement can occupy the same position immediately. Other retiring fleets must not move their still-rendering token during that fade.
 - A local fleet-job offer adds state and a cyan drawn marker to an existing eligible fleet; see `FleetQuestSpawner` above for fleet types and exceptions. It does not create or rename a fleet; the expedition and prospecting route managers create the only fleets that exist to carry offers. Acceptance creates fresh members in a mission-owned replacement and reports the original despawn.
 - `FleetQuest.ensureMarked()` uses `FleetMarkerRenderer` with `fleet_quest_map_icon`: light cyan for local offers, yellow after acceptance, including accepted distress jobs. The existing encounter/mission callbacks restore transient renderers after loading; release expires them.
-- Fleet jobs use stage-owned `setFlag` for delivery, not `makeImportant`. `markDeliverable()` migrates old saves once by removing this mission's stage-importance record and its two importance reasons, preserving unrelated reasons. Delivery flags still follow `WANTED`; release clears the hand-in flag and both custom markers. `getMapLocation()` continues to target the giver.
+- Fleet jobs use stage-owned `setFlag` for delivery, not `makeImportant`. `markDeliverable()` registers the delivery flag once; no vanilla importance record is added. Delivery flags still follow `WANTED`; release clears the hand-in flag and both custom markers. `getMapLocation()` continues to target the giver.
 
 ### Save data, cargo, and shop state
 
-- Fish encoding is save-critical. The first four fields are always present; origin, method, implement, chart target ID, and target system are positional optional tail fields. Preserve empty placeholders and continue accepting older four- and five-field records.
+Cross-version campaign saves are unsupported during development; see [workflow](../CLAUDE.md#make-and-record-changes). Current saves retain levels, cargo, quest state and equipment ownership. Load hooks restore transient state and current registrations, not old data formats.
+
+- Fish encoding uses four required fields and positional optional tail fields for origin, method, implement and chart provenance. The current encoder trims absent tail fields; preserve interior placeholders and accept its short records.
 - Containers are identified by contents, not stack identity. Spending part of a crate or pile removes it and creates a replacement. Always repack with the original container ID.
 - `FishItems.stow()` is the only landing path and normally creates a crate. Loose fish remain valid for all counting and spending.
 - `FishItems.isContainer()` is the shared crate/pile test. Do not add direct bundle-ID checks.
 - Unpacking a pile restores any singleton species as a loose fish, not a one-fish crate.
 - `Tackle.Fit.BOTH` describes compatibility; it is not a rig. Rig loops use `Fit.isRig()`.
-- Module ownership and module fitting are separate. Charge only when `isOwned()` is false; grants must both own and fit the module. Older saves seed ownership from fitted slots.
+- Module ownership and module fitting are separate. Charge only when `isOwned()` is false; grants must both own and fit the module.
 - Stock is a third state. `TackleManager.getOptions()` contains stocked modules plus owned unstocked modules so purchased gear can be removed and refitted.
 - Explosive Head is unstocked and consumable. A miss keeps it; detonation removes ownership and the fitted slot, which makes Crablobab sell it again.
 - Upgrade tiers and modules granted outside the shop still go through `ShopEntry.grant()` so a running ability is stopped and restarted with its new values.
@@ -523,6 +523,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Ordinary species use one or two adjacent regions unless a stronger star, coherence, or theme gate already provides the range. Every region retains at least two ungated Common species.
 - The non-legendary roster is exactly 100 fish in a 59/23/12/6 Common/Uncommon/Rare/Epic split. The Abyss contributes 7/2/1/1 of those. Zero-weight mechanism rows, such as the Quorum splinter, are outside the hundred.
 - The Abyss uses its own high-difficulty ladder. Rarity controls frequency and value there, but even Abyssal Common rows use at least main-sheet Rare difficulty.
+- Catch bar size comes from `FishConstants`; no catch-stat upgrades exist in the registry or runtime. Progress and escape use species and tackle modifiers. The tuner's bar/gain/loss controls remain what-if inputs, not purchasable equipment.
 - Balance every row for the base kit. `FishShopDialog` sells no catch-stat upgrades, so each species must stay catchable with the `MINIGAME_BAR_SIZE_FALLBACK` bar, neutral gain and loss, and no tackle. Tune `difficulty`, `restlessness`, `motionSpeed`, `progressRateMult`, `escapeRateMult`, `specialChance`, and `mixChance` together and simulate the result.
 - Rarity must read as catch difficulty. The Player angler, fitted to one recorded normal player, is the reference: each rarity has its own band of Player catch rates with a gap to the next, and no fish may fall outside its band (`FishTunerChecks.RARITY_BANDS`, checked over 400 attempts per fish with a 4-point allowance). The bands are Common 84–95%, Uncommon 65–75%, Rare 47–57%, Epic 29–39% and Legendary 13–21%; measured on fresh seeds they are 83–96/63–76/48–58/31–40/14–22%, with means of 90/70/53/35/18%. Within a band, species keep the order they had before the bands were set, so some are harder than others. Abyss species sit at the hard end of their rarity's band instead of a band harder. The bands are set through `progressRateMult` and `escapeRateMult` alone; movement values keep each species' character. Across all species the Skilled angler then averages about 95/80/74/65/49%, and Regular about 49/27/26/19/13%. Later difficulty settings are meant to ease the base game. No species may be caught in more than half of its attempts by holding the button or by never pressing it; `FishTunerChecks` asserts this over the real sheet. Signature and random moves carry most of that: sinkers and floaters also need a steeper gain/loss ratio because their home zone is where a parked bar sits. Both shares apply per target choice, so a style that picks often needs smaller shares; twitchers pick about three times as often. An interrupted twitcher bound turns back through the middle, where a bar held still covers it, which is why the bound always lands. Slow common styles rarely show a tell; faster rarer fish and MIXED ones show one every two to four seconds.
 - `motionSpeed` and `restlessness` also move the campaign mote; see [fish entities](#fish-entities-and-catch-provenance). Restlessness pulls in opposite directions: a restless mote wanders more in the world, but on the line it retargets before finishing a move and is easier to cover.
@@ -588,7 +589,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - The Fisherman is one saved `PersonAPI` shared by every boat. Apply the hailed boat's portrait immediately before vanilla builds the person panel; background boats must not mutate it.
 - Fisherman portraits are registered `graphics.characters` sprite IDs in `settings.json`. Rank and post remain blank so vanilla shows the rankless person card once.
 - All Fishermen use one checked `GO_TO_LOCATION` leg at a time, not `PATROL_SYSTEM`. `OuterReaches` excludes 5,000 units beyond each market entity's radius plus a 1,000-unit route buffer. Deterministic fallback legs are checked too; no valid leg means hold and retry. A boat already inside an exclusion may only take a leg that increases its distance from every enclosing market throughout the escape.
-- `FishermanBehavior.keepWorking()` rechecks destinations, current movement and moving markets every 0.25 campaign seconds, refreshes vanilla navigation avoidance and replaces unsafe/legacy assignments. Battles are not interrupted; the transient check timer starts immediately after loading.
+- `FishermanBehavior.keepWorking()` rechecks destinations, current movement and moving markets every 0.25 campaign seconds, refreshes vanilla navigation avoidance and replaces unsafe assignments. Battles are not interrupted; the transient check timer starts immediately after loading.
 - `FishermanInterception.cutOff()` places an offscreen boat on the viewport boundary plus 50 screen pixels, converted through `ViewportEdge` for zoom and aspect ratio. A boat already onscreen approaches from its current position. Candidates must have a clear approach; blocked edges or an invalid/displaced viewport defer the encounter without moving the boat. Cancellation clears pursuit, never the fleet's relocation latch. Intercept safety checks the player segment, not the previous travel destination.
 - The existing 0.5-second intercept and 0.25-second route checks stay unpaused: public listeners do not report entry into an arbitrary rupture radius or moving-market route clearance. Interception scans only the current system; route checks inspect their owning boat.
 - Fisherman visibility requires both a flat detected-range bonus and a per-frame sensor-fader override.
@@ -599,10 +600,10 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - Tutorial and chart-request return navigation can target a standing marker when its boat is unloaded; local marker autopilot redirects to the fleet after spawning.
 - The visitor shelf restocks from each sale date, not a global monthly tick. Chart-request completion is the only way to increase shelf width.
 - `FishingIntro.point()` is idempotent and can be reached from the wreck, stranded crewman, bar referral, Fisherman interception, or a direct hail. Recovered property takes origin precedence, then rescued crew, then recorded market.
-- `FishingIntro.getAsks()` accepts the first lesson's drone catch from any pond in the assigned system after assignment. One `FishRequirement.anyOf` combines source pond IDs, including the saved marked pond; existing cargo needs no provenance migration. Catch storage, cargo counts and hand-in share this requirement, and a qualifying catch releases the original pond mark. Later lessons keep their own requirements.
+- `FishingIntro.getAsks()` accepts the first lesson's drone catch from any pond in the assigned system after assignment. One `FishRequirement.anyOf` combines source pond IDs, including the saved marked pond. Catch storage, cargo counts and hand-in share this requirement, and a qualifying catch releases the original pond mark. Later lessons keep their own requirements.
 - `CatchReleaseRatingQuestions` offers trawler directions, a fishing question and a return to the bar. Both answers rebuild the menu; the return option is always available.
 - `FishingIntro.giveOutfitter()` grants the Spool Governor schematic with the second tutorial hand-in. `giveOutfitterSchematic()` also supplies the skip path, reuses `FishReward` receipts, and skips known/owned equipment. The schematic exposes the Equipment tab's drone-core shelf; purchasing and fitting remain separate.
-- The returning-player skip is available only before the R.O.D. lesson begins. Manually disabling the new Luna setting stays disabled after the one-time legacy-file migration.
+- The returning-player skip is available only before the R.O.D. lesson begins. The saved Luna setting controls future campaigns and remains disabled when the player turns it off.
 - Tutorial single-target protection advances only when the requested species could naturally spawn at the current location with the required implement. The count carries between valid locations and pauses elsewhere.
 - No bar, local fleet, or distress fleet job may appear before `FishingIntro.isOpenForWork()` or tutorial completion as appropriate. Equipment requirements are limited to gear the player owns.
 
@@ -633,8 +634,6 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 | Component | State |
 |---|---|
 | `campaign/ponds/entities/StenciledFishingPondEntityPlugin` | Dead. Ponds are terrain now. |
-| `campaign/fish/intel/FishMapIntel` | Save-compatibility shell. Old saves remove it after loading. |
-| `campaign/fish/shop/ShopStorage` | Migration only. Returns fish left in the removed storage UI. |
 | `testing/DevShortcut` | Registered, but active only in dev mode. |
 | `testing/TestStencilRenderer` | Not registered. |
 | `rendering/spiral/BlackHoleSpiralWarp` | Deprecated test effect. Not installed by `ModPlugin`; its settings do not enable it. |

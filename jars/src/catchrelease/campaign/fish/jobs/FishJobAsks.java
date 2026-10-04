@@ -47,23 +47,6 @@ public class FishJobAsks {
         return Math.max(0.1f, Math.round(ceilings.get(index) * 6f) / 10f);
     }
 
-    public static float lengthFloorForLegacyWeight(float weight) {
-        int below = 0;
-        int equal = 0;
-        int total = 0;
-        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.tags.contains("abyssal")) continue;
-            float floor = Math.max(1f, Math.round(spec.weightMax * 0.6f));
-            if (floor < weight) below++;
-            else if (floor == weight) equal++;
-            total++;
-        }
-
-        // Recover the old request's percentile, not a kilograms-to-metres conversion.
-        float spread = total == 0 ? 0.525f : (below + equal * 0.5f) / total;
-        return lengthFloor((spread - 0.1f) / 0.85f);
-    }
-
     public static List<String> rollTypes(Random random, int howMany) {
         List<String> pool = new ArrayList<>();
         for (String type : TYPES) {

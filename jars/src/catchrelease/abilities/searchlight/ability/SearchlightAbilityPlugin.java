@@ -49,17 +49,11 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     @Override
     protected Object readResolve() {
         super.readResolve();
-        ensureCollections();
 
         impressionRenderer = null;
         activationLocation = null;
 
         return this;
-    }
-
-    protected void ensureCollections() {
-        if (activeSearchlights == null) activeSearchlights = new ArrayList<>();
-        if (searchlightArcs == null) searchlightArcs = new ArrayList<>();
     }
 
     public static boolean isLit(SectorEntityToken mote) {
@@ -137,8 +131,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             return;
         }
 
-        ensureCollections();
-
         if (level <= 0f || !isActive()) {
             unapplyFleetEffect(fleet);
             return;
@@ -164,7 +156,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             if (addSearchlight()) {
                 lightsToActivate--;
             } else {
-                // A partial/old save can disagree about pending count and arcs. Stop cleanly rather than throwing every frame while already-created renderers remain alive.
+                // Stop this launch sequence if its remaining arcs are unavailable.
                 lightsToActivate = 0;
             }
             timePassed = 0f;
@@ -315,7 +307,6 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     protected void teardownRuntime(boolean withFade) {
-        ensureCollections();
 
         timePassed = 0f;
         lightsToActivate = 0;

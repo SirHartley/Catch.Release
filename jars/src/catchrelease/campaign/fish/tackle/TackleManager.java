@@ -100,10 +100,6 @@ public class TackleManager {
 
         Set<String> owned = new LinkedHashSet<>();
 
-        for (Tackle fitted : getFitted().values()) {
-            if (fitted != null && fitted != Tackle.NONE) owned.add(fitted.name());
-        }
-
         data.put(OWNED_KEY, owned);
 
         return owned;

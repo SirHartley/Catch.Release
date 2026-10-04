@@ -100,8 +100,7 @@ public class LegendaryChases {
     public static boolean wasEncountered(String speciesId) {
         Chase chase = speciesId == null ? null : getLedger().get(speciesId);
 
-        // revealed/caught migrate saves made before the permanent encounter bit existed
-        return chase != null && (chase.encountered || chase.revealed || chase.caught);
+        return chase != null && chase.encountered;
     }
 
     public static boolean isRevealed(String speciesId) {
@@ -130,6 +129,7 @@ public class LegendaryChases {
 
         Chase chase = getLedger().computeIfAbsent(speciesId, k -> new Chase());
         chase.caught = true;
+        chase.encountered = true;
         chase.systemId = null;
     }
 

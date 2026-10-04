@@ -248,14 +248,6 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 FishingIntro.dropFisherProperty();
                 return true;
 
-            // Aliases keep an old rules sheet usable during a hot reload of this update.
-            case "carryHarpoon":
-                FishingIntro.takeFisherProperty();
-                return true;
-            case "dropHarpoon":
-                FishingIntro.dropFisherProperty();
-                return true;
-
             case "rollWork":
                 return rollWork(memoryMap);
             case "takeWork":

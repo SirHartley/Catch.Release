@@ -382,7 +382,6 @@ public class FishermanQuest {
         Object stored = Global.getSector().getPersistentData().get(STATE_KEY);
 
         if (!(stored instanceof Saved quest)) return null;
-        repairSource(quest);
         return quest;
     }
 
@@ -391,7 +390,6 @@ public class FishermanQuest {
 
         if (!(stored instanceof Saved quest)) return null;
         if (hasActiveRumor(quest.systemId)) return null;
-        repairSource(quest);
         return quest;
     }
 
@@ -499,24 +497,6 @@ public class FishermanQuest {
         if (pond != null) return new Target(spec, system, pond);
         return FishRanges.matches(spec, system, CatchImplement.BREACH_LAMP)
                 ? new Target(spec, system, null) : null;
-    }
-
-    protected static void repairSource(Saved quest) {
-        FishSpec spec = FishSpecLoader.getFishSpec(quest.speciesId);
-        if (spec == null || !quest.atPond || spec.canBeReachedBy(CatchImplement.POND)
-                || !spec.canBeReachedBy(CatchImplement.BREACH_LAMP)) return;
-
-        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (!system.getId().equals(quest.systemId)) continue;
-
-            // Keep the accepted specimen identity; only the incompatible search site moves.
-            letGo(quest);
-            Vector2f at = openSearchPoint(system);
-            quest.atPond = false;
-            quest.x = at.x;
-            quest.y = at.y;
-            return;
-        }
     }
 
     protected static Vector2f openSearchPoint(StarSystemAPI system) {

@@ -59,10 +59,7 @@ public class ShopMarks {
             return fresh;
         }
 
-        Set<String> marked = (Set<String>) stored;
-        migrateLegacyUpgradeKeys(marked);
-
-        return marked;
+        return (Set<String>) stored;
     }
 
     public static String getMarkKey(ShopEntry entry) {
@@ -76,30 +73,6 @@ public class ShopMarks {
     public static String getUpgradeMarkKey(String statId, int targetLevel) {
         return statId == null || targetLevel <= 0
                 ? null : "stat:" + statId + ":" + targetLevel;
-    }
-
-    protected static void migrateLegacyUpgradeKeys(Set<String> marked) {
-        if (marked == null || marked.isEmpty() || UpgradeManager.getInstance() == null) return;
-
-        boolean changed = false;
-
-        for (String key : new ArrayList<>(marked)) {
-            if (key == null || !key.startsWith("stat:")) continue;
-
-            String[] parts = key.split(":", 3);
-            if (parts.length != 2) continue;
-
-            UpgradeStat stat = UpgradeManager.getInstance().getAll().get(parts[1]);
-            if (stat == null) continue;
-
-            marked.remove(key);
-            if (!ShopPricing.isMaxed(stat)) {
-                marked.add(getUpgradeMarkKey(stat.id, Math.max(0, stat.level) + 1));
-            }
-            changed = true;
-        }
-
-        if (changed) invalidateWantedCache();
     }
 
     public static boolean isMarked(String entryKey) {

@@ -75,10 +75,6 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
     }
 
     Object readResolve() {
-        if (active == null) active = new ArrayList<>();
-        if (cooldowns == null) cooldowns = new LinkedHashMap<>();
-        if (random == null) random = new Random();
-
         vanilla = null;
         bridgeFailureLogged = false;
         sawElapsed = false;

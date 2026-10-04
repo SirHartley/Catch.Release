@@ -45,7 +45,7 @@ public class FishermanSpawner implements EveryFrameScript {
 
         // the first tick of a load is not an arrival - it is wherever the save was left
         if (!placed) {
-            reconcileLegacyFleets();
+            reconcileFleets();
             FishermanMapIcon.removeOutside(where);
             placed = true;
             lastLocation = where;
@@ -156,7 +156,7 @@ public class FishermanSpawner implements EveryFrameScript {
                 && !fleet.isExpired() && fleet.isAlive();
     }
 
-    public static void reconcileLegacyFleets() {
+    public static void reconcileFleets() {
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
             reconcileSystem(system);
         }
