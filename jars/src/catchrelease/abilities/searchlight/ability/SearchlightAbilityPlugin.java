@@ -375,7 +375,9 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         tooltip.addPara("Increases the range at which your fleet is detected by %s.", pad, highlight,
                 Misc.getRoundedValue(DETECTABILITY_PERCENT) + "%");
-        tooltip.addPara("Cannot be used near an open rupture or in hyperspace.", gray, pad);
+
+        if (!canRunHere(getFleet())) tooltip.addPara("Cannot be used near an open rupture or in hyperspace.", Misc.getNegativeHighlightColor(), pad);
+        else tooltip.addPara("Cannot be used near an open rupture or in hyperspace.", gray, pad);
 
         addIncompatibleToTooltip(tooltip, expanded);
     }

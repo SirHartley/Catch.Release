@@ -189,7 +189,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         addCostLabel(tooltip, opad, transferHandler, stackSource);
 
         FishItemTooltips.addActions(tooltip,
-                "Right-click to unpack: singles come out loose, repeated species in crates.", null);
+                "Right-click to unpack.", null);
     }
 
     protected static int getRarityRank(FishCatch entry) {

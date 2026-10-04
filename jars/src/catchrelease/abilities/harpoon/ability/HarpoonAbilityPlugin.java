@@ -236,7 +236,9 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
             tooltip.addPara("Fleet hits pull the weaker fleet toward the stronger one and can damage relations."
                     + " Activate again to cut a tow line.", pad);
         }
-        tooltip.addPara("Cannot be used in hyperspace.", Misc.getGrayColor(), pad);
+
+        if (getFleet().isInHyperspace()) tooltip.addPara("Cannot be used in hyperspace.", Misc.getNegativeHighlightColor(), pad);
+        else tooltip.addPara("Cannot be used in hyperspace.", Misc.getGrayColor(), pad);
 
         if (!Global.CODEX_TOOLTIP_MODE && !hasCharge()) {
             tooltip.addPara("No harpoons ready.", Misc.getNegativeHighlightColor(), pad);

@@ -20,7 +20,7 @@ final class FishItemTooltips {
 
     static final float PAD = 3f;
     static final float OPAD = 10f;
-    static final float STATS_WIDTH = 240f;
+    static final float STATS_WIDTH = 150f;
 
     private FishItemTooltips() {
     }
@@ -29,8 +29,6 @@ final class FishItemTooltips {
     static void addTitle(TooltipMakerAPI tooltip, String name, FishSpec spec) {
         if (Global.CODEX_TOOLTIP_MODE) {
             tooltip.addSpacer(-OPAD);
-        } else if (spec != null) {
-            tooltip.addTitle(name, spec.rarity.color);
         } else {
             tooltip.addTitle(name);
         }

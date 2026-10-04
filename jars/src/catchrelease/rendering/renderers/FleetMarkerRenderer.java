@@ -82,10 +82,10 @@ public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
         SpriteAPI sprite = Global.getSettings().getSprite(spriteCategory, spriteId);
         if (sprite == null) return;
 
-        float zoom = Math.max(1f, Global.getSector().getCampaignUI().getZoomFactor() *0.9f);
+        float zoom = Math.max(1f, Global.getSector().getCampaignUI().getZoomFactor() * 0.9f);
         float drawn = size * zoom;
 
-        float offset = 8f + (fleet.getRadius() + drawn * 0.5f) / OFFSET_DIVISOR;
+        float offset = 4f + (fleet.getRadius() + drawn * 0.5f) / OFFSET_DIVISOR;
         Vector2f at = fleet.getLocation();
 
         float pulse = 1f - PULSE_DEPTH * (0.5f - 0.5f * (float) Math.cos(elapsed * PULSE_RATE));
