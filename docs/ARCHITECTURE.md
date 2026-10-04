@@ -286,6 +286,11 @@ Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge 
 
 Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchreleaseWorkInstructions` reads a Text-only `CatchReleaseWorkPondInstructions` or `CatchReleaseWorkLampInstructions` row from `rules.csv`, chosen by the saved source before outer Text replacement; these private lookups do not execute scripts or add options.
 
+`CatchReleaseFisherQuestions` keeps answered general questions grey and rereadable,
+sorted after new topics before pagination. Its paired unread/read rows share the
+same option and handler; saved flags select the variant. Tutorial questions remain
+one-time options. See [question routing](RULES.md#project-routing).
+
 ### `campaign/fish/tutorial`
 
 | File | Owner / connection |
