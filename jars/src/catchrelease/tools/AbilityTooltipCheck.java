@@ -169,12 +169,14 @@ public final class AbilityTooltipCheck {
             });
             LocationAPI location = proxy(LocationAPI.class, (self, method, args) -> switch (method.getName()) {
                 case "getEntitiesWithTag", "getCustomEntitiesWithTag" -> List.of();
+                case "isHyperspace" -> false;
                 default -> throw new AssertionError(method);
             });
             CampaignFleetAPI fleet = proxy(CampaignFleetAPI.class, (self, method, args) -> switch (method.getName()) {
                 case "getContainingLocation" -> location;
                 case "getAbility" -> lamps;
                 case "getAbilities" -> Map.of();
+                case "isInHyperspace" -> false;
                 default -> throw new AssertionError(method);
             });
             SectorAPI sector = proxy(SectorAPI.class, (self, method, args) -> switch (method.getName()) {

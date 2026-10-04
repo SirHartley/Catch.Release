@@ -3,10 +3,7 @@ package catchrelease.campaign.fish.jobs;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.FishRequirement;
-import com.fs.starfarer.api.Global;
-import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
-import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
@@ -66,34 +63,6 @@ public class CompanionJob extends FishJob {
         if (spec == null || spec.lengthMax <= spec.lengthMin) return false;
         return offered.length >= spec.lengthMin
                 + (spec.lengthMax - spec.lengthMin) * BONUS_FRACTION;
-    }
-
-    public static void migrateSavedJobs() {
-        for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel(CompanionJob.class)) {
-            ((CompanionJob) intel).migrateLengthRequirement();
-        }
-        for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getCommQueue(CompanionJob.class)) {
-            ((CompanionJob) intel).migrateLengthRequirement();
-        }
-    }
-
-    protected void migrateLengthRequirement() {
-        if (asks == null || isEnding() || isEnded()) return;
-        for (FishRequirement ask : asks) {
-            if (ask == null || ask.minWeight <= 0f) continue;
-            if (ask.minLength <= 0f) {
-                ask.minLength = FishJobAsks.lengthFloorForLegacyWeight(ask.minWeight);
-            }
-            ask.minWeight = 0f;
-            displayedProgress = null;
-        }
-    }
-
-    @Override
-    protected void updateTokens(MemoryAPI mem) {
-        // Unaccepted bar offers are not in the intel manager.
-        migrateLengthRequirement();
-        super.updateTokens(mem);
     }
 
     @Override

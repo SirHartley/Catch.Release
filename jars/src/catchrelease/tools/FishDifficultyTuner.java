@@ -129,10 +129,10 @@ public final class FishDifficultyTuner extends JPanel {
         addRow(controls, "Tackle", tackle, "Uses the actual tackle multipliers. Only tackle affecting catch physics is listed. "
                 + "Changes test conditions, not fish.csv; starts a fresh attempt.");
         addRow(controls, "Bar pixels", barPixels, "Effective player bar size before tackle, in pixels of the game's 360-pixel track. "
-                + "Default 120; enter the upgraded value to test that loadout. The game clamps final size to 8–60%.");
-        addRow(controls, "Player gain", playerGain, "Player upgrade multiplier for progress gain, before tackle. Neutral is 1. "
+                + "Default 120; other values are what-if test conditions. The game clamps final size to 8–60%.");
+        addRow(controls, "Player gain", playerGain, "What-if multiplier for progress gain, before tackle. Neutral is 1. "
                 + "Test condition only; not saved to fish.csv.");
-        addRow(controls, "Player loss", playerLoss, "Player upgrade multiplier for escape loss, before tackle. Lower is easier; neutral is 1. "
+        addRow(controls, "Player loss", playerLoss, "What-if multiplier for escape loss, before tackle. Lower is easier; neutral is 1. "
                 + "Test condition only; not saved to fish.csv.");
         addRow(controls, "Rumor speed", rumorSpeed, "Movement-speed multiplier from a rumor. Neutral is 1; legendaries ignore it as in game. "
                 + "Test condition only; not saved to fish.csv.");

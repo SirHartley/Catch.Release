@@ -29,10 +29,6 @@ public class MafiaJob extends FishJob {
     public static final String NIGHTS_SUPPLIED_KEY = "$catchrelease_fightNightsSupplied";
     public static final String COMMISSIONER_RANK = "catchrelease_fightCommissioner";
     public static final String HOUSE_RANK = "catchrelease_fightHouse";
-    public static final int CURRENT_VERSION = 1;
-
-    protected static final String LEGACY_LEFT_NAME = "Salvatore";
-    protected static final String LEGACY_RIGHT_NAME = "Enzo";
 
     protected String left = "left entry";
     protected String right = "right entry";
@@ -46,8 +42,6 @@ public class MafiaJob extends FishJob {
     protected boolean won = false;
     protected boolean leftWon = false;
     protected boolean nightRecorded = false;
-    protected int fightNightVersion = 0;
-    protected transient boolean identitiesChecked = false;
 
     @Override
     protected boolean create(MarketAPI createdAt, boolean barEvent) {
@@ -64,7 +58,6 @@ public class MafiaJob extends FishJob {
         FishRequirement ask = new FishRequirement();
         ask.count = 2;
         addAsk(ask);
-        fightNightVersion = CURRENT_VERSION;
 
         if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
@@ -113,7 +106,6 @@ public class MafiaJob extends FishJob {
     protected void setUpPeople(MarketAPI market) {
         PersonAPI giver = getPerson();
         if (giver != null) {
-            replaceLegacyIdentity(giver, LEGACY_LEFT_NAME);
             giver.setRankId(COMMISSIONER_RANK);
             giver.setPostId(null);
             giver.setVoice(Voices.OFFICIAL);
@@ -128,46 +120,10 @@ public class MafiaJob extends FishJob {
         }
 
         if (partner != null) {
-            replaceLegacyIdentity(partner, LEGACY_RIGHT_NAME);
             partner.setRankId(HOUSE_RANK);
             partner.setPostId(null);
             partner.setVoice(Voices.BUSINESS);
         }
-    }
-
-    protected void replaceLegacyIdentity(PersonAPI person, String legacyFirstName) {
-        if (person == null || person.getFaction() == null || person.getName() == null
-                || !legacyFirstName.equals(person.getName().getFirst())) return;
-
-        PersonAPI replacement = person.getFaction().createRandomPerson(Gender.ANY, random());
-        if (replacement == null) return;
-
-        person.setName(replacement.getName());
-        person.setGender(replacement.getGender());
-        person.setPortraitSprite(replacement.getPortraitSprite());
-    }
-
-    @Override
-    protected void advanceImpl(float amount) {
-        migrateLegacyJob();
-
-        if (!identitiesChecked) {
-            setUpPeople(getGiverMarket());
-            identitiesChecked = true;
-        }
-
-        super.advanceImpl(amount);
-    }
-
-    protected void migrateLegacyJob() {
-        if (fightNightVersion >= CURRENT_VERSION) return;
-
-        asks.clear();
-        FishRequirement ask = new FishRequirement();
-        ask.count = 2;
-        asks.add(ask);
-        fightNightVersion = CURRENT_VERSION;
-        resetDisplayedProgress();
     }
 
     @Override
@@ -318,7 +274,6 @@ public class MafiaJob extends FishJob {
     protected void setJobTokens(MemoryAPI mem) {
         if (mem == null) return;
 
-        migrateLegacyJob();
         setUpPeople(getGiverMarket());
 
         token(mem, "$catchreleaseLeft", left);

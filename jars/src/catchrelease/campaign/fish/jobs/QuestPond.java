@@ -102,10 +102,7 @@ public class QuestPond {
         Object stored = pond.getMemoryWithoutUpdate().get(CLAIMED_BY_KEY);
         if (stored instanceof Set) return (Set<String>) stored;
 
-        Set<String> claims = new LinkedHashSet<>();
-        if (stored instanceof String) claims.add((String) stored);
-
-        return claims;
+        return new LinkedHashSet<>();
     }
 
     public static boolean isClaimedBy(SectorEntityToken pond, String jobId) {

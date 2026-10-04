@@ -101,14 +101,6 @@ public class FishLog {
         entry.locationDataUnlocked = false;
     }
 
-    /** Repairs saves from before legendary range data stopped existing. */
-    public static void relockLegendaryRangeData() {
-        for (FishSpec spec : catchrelease.helper.loading.FishSpecLoader.getAllFishSpecs()) {
-            if (spec == null || spec.id == null || spec.rarity != FishRarity.LEGENDARY) continue;
-            if (isLocationDataUnlocked(spec.id)) relockLocationData(spec.id);
-        }
-    }
-
     protected static long getTimestamp() {
         if (Global.getSector() == null) return 0L;
 

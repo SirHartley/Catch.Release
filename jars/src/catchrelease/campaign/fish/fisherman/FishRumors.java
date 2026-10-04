@@ -51,12 +51,10 @@ public class FishRumors {
         LOOT_VALUABLE("loot_valuable", TYPE_LOOT, TYPE_VALUABLE_LOOT);
 
         public final String id;
-        public final int primaryType;
         private final int effects;
 
         Kind(String id, int... types) {
             this.id = id;
-            this.primaryType = types[0];
             int mask = 0;
             for (int type : types) mask |= 1 << type;
             this.effects = mask;
@@ -67,7 +65,6 @@ public class FishRumors {
         }
     }
 
-    public static final String STATE_KEY = "$catchrelease_rumor";
     public static final String ACTIVE_KEY = "$catchrelease_rumors_active";
     public static final String LAST_ASKED_KEY = "$catchrelease_rumor_last";
     public static final String TUTORIAL_LEAD_KEY = "$catchrelease_tutorial_rumor";
@@ -88,7 +85,6 @@ public class FishRumors {
         public String systemId;
         public String systemName;
 
-        public int type;
         public String kindId;
         public String strangerId;
         public long started;
@@ -114,8 +110,6 @@ public class FishRumors {
             if (isEnded()) return true;
 
             // IntelManager calls this for queued and visible entries; no separate script is needed.
-            ending = false;
-            endingTimeRemaining = null;
             if (isExpired(rumor)) endImmediately();
             return isEnded();
         }
@@ -276,13 +270,10 @@ public class FishRumors {
             active = (List<Saved>) stored;
         } else {
             active = new ArrayList<>();
-            if (data.get(STATE_KEY) instanceof Saved old) active.add(old);
             data.put(ACTIVE_KEY, active);
         }
 
         active.removeIf(FishRumors::isExpired);
-        if (active.isEmpty()) data.remove(STATE_KEY);
-        else data.put(STATE_KEY, active.get(active.size() - 1));
 
         return List.copyOf(active);
     }
@@ -334,17 +325,7 @@ public class FishRumors {
             if (kind.id.equals(rumor.kindId)) return kind;
         }
 
-        // Older saves stored only one effect.
-        return switch (rumor.type) {
-            case TYPE_LOOT -> Kind.LOOT;
-            case TYPE_STRANGER -> Kind.STRANGER;
-            case TYPE_SIZE -> Kind.SIZE;
-            case TYPE_CALM -> Kind.CALM;
-            case TYPE_VALUABLE_LOOT -> Kind.VALUABLE_LOOT;
-            case TYPE_EXTREME_STABILITY -> Kind.EXTREME_STABILITY;
-            case TYPE_EXTREME_INSTABILITY -> Kind.EXTREME_INSTABILITY;
-            default -> Kind.RARITY;
-        };
+        return null;
     }
 
     public static boolean hasEffect(Saved rumor, int type) {
@@ -426,13 +407,11 @@ public class FishRumors {
             if (rumor.strangerId == null) kind = Kind.RARITY;
         }
 
-        rumor.type = kind.primaryType;
         rumor.kindId = kind.id;
 
         List<Saved> active = new ArrayList<>(getActiveRumors());
         active.add(rumor);
         Global.getSector().getPersistentData().put(ACTIVE_KEY, active);
-        Global.getSector().getPersistentData().put(STATE_KEY, rumor);
         Global.getSector().getPersistentData().put(LAST_ASKED_KEY, rumor.started);
 
         RumorIntel intel = new RumorIntel(rumor);

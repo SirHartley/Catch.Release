@@ -58,9 +58,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
     public static final String PAID_KEY = "$catchreleasePaid";
     public static final String BONUS_KEY = "$catchreleaseBonus";
     public static final String MORE_KEY = "$catchreleaseMore";
-    public static final String DAYS_KEY = "$catchreleaseDays";
-    public static final String DAYS_CAP_KEY = "$catchreleaseDaysCap";
-    public static final String DAYS_LEFT_KEY = "$catchreleaseDaysLeft";
     public static final String DEADLINE_KEY = "$catchreleaseDeadline";
     public static final String DEADLINE_LEFT_KEY = "$catchreleaseDeadlineLeft";
     public static final String OPTIONS_TRIGGER = "JobSpecificOptions";
@@ -90,16 +87,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
     protected void prepareAsk(FishRequirement ask) {
         if (ask == null) return;
-
-        if (!freshCatchModifierRolled && !asks.isEmpty()) {
-            freshCatchModifierRolled = true;
-            for (FishRequirement existing : asks) {
-                if (existing != null && existing.freshCatch) {
-                    freshCatchRequired = true;
-                    break;
-                }
-            }
-        }
 
         if (ask.freshCatch) freshCatchRequired = true;
         if (!freshCatchModifierRolled) {
@@ -229,10 +216,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
     }
 
     protected float getDaysLeft() {
-        // deadline may be unset for a job accepted before it was recorded; fall back to the plain allowance
-        float ends = deadline > 0f ? deadline : days;
-
-        return Math.max(0f, ends - elapsed);
+        return Math.max(0f, deadline - elapsed);
     }
 
     protected void markDeliverable() {
@@ -704,9 +688,6 @@ public abstract class FishJob extends HubMissionWithBarEvent
         token(mem, ASK_CAP_KEY, Misc.ucFirst(ask));
         token(mem, REWARD_KEY, reward);
         token(mem, REWARD_CAP_KEY, Misc.ucFirst(reward));
-        token(mem, DAYS_KEY, describeDays());
-        token(mem, DAYS_CAP_KEY, Misc.ucFirst(describeDays()));
-        token(mem, DAYS_LEFT_KEY, describeDaysLeft());
         token(mem, DEADLINE_KEY, describeDeadline());
         token(mem, DEADLINE_LEFT_KEY, describeDeadlineLeft());
         token(mem, HAS_FISH_KEY, isSatisfied());

@@ -9,8 +9,6 @@ import catchrelease.campaign.fish.treasure.TreasureRoller;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.memory.upgrades.StatIds;
-import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import org.lazywizard.lazylib.MathUtils;
@@ -142,10 +140,7 @@ public class FishingMinigame {
     }
 
     public static float getBarHeight() {
-        float pixels = UpgradeManager.getValue(
-                StatIds.FISHING_BAR_SIZE, FishConstants.MINIGAME_BAR_SIZE_FALLBACK);
-
-        return MathUtils.clamp(pixels / FishConstants.MINIGAME_TRACK_HEIGHT,
+        return MathUtils.clamp(FishConstants.MINIGAME_BAR_SIZE_FALLBACK / FishConstants.MINIGAME_TRACK_HEIGHT,
                 FishConstants.MINIGAME_BAR_MIN_FRACTION, FishConstants.MINIGAME_BAR_MAX_FRACTION);
     }
 
@@ -236,12 +231,10 @@ public class FishingMinigame {
             timeHeld += amount;
             progress += FishConstants.MINIGAME_CATCH_RATE * compressRate(progressRateMult)
                     * amount
-                    * UpgradeManager.getValue(StatIds.MINIGAME_PROGRESS_RATE, 1f)
                     * tackle.progressMult;
         } else {
             progress -= FishConstants.MINIGAME_ESCAPE_RATE * compressRate(escapeRateMult)
                     * amount
-                    * UpgradeManager.getValue(StatIds.MINIGAME_ESCAPE_RESIST, 1f)
                     * tackle.escapeMult;
         }
 

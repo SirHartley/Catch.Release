@@ -5,7 +5,6 @@ import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.ShopPricing;
-import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -331,12 +330,6 @@ public class QuestRewards {
             return schematicValue(ShopPricing.getPrice(
                     ((FishReward.TackleSchematic) reward).tackle));
         }
-        if (reward instanceof FishReward.TackleReward) {
-            ShopPricing.Price price = ShopPricing.getPrice(
-                    ((FishReward.TackleReward) reward).tackle);
-            return price == null ? SCHEMATIC_VALUE_FLOOR : Math.max(SCHEMATIC_VALUE_FLOOR,
-                    price.credits);
-        }
         if (reward instanceof FishReward.BackdropReward) {
             Backdrop backdrop = BackdropLoader.get(
                     ((FishReward.BackdropReward) reward).backdropId);
@@ -345,10 +338,6 @@ public class QuestRewards {
         }
         if (reward instanceof FishReward.Blueprint) {
             return BLUEPRINT_VALUE;
-        }
-        if (reward instanceof FishReward.Commodity) {
-            return FishRewardRoller.creditPayout(
-                    ((FishReward.Commodity) reward).quantity * 120);
         }
 
         return SCHEMATIC_VALUE_FLOOR;

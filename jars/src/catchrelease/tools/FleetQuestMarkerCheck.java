@@ -36,37 +36,35 @@ public final class FleetQuestMarkerCheck {
                     throw new AssertionError(method);
                 }));
         try {
-            for (boolean legacy : new boolean[]{false, true}) {
-                for (Stage end : new Stage[]{Stage.DONE, Stage.FAILED, Stage.ABANDONED}) {
-                    MemoryAPI memory = memory();
-                    CampaignFleetAPI fleet = (CampaignFleetAPI) Proxy.newProxyInstance(
-                            CampaignFleetAPI.class.getClassLoader(), new Class<?>[]{CampaignFleetAPI.class},
-                            (self, method, values) -> {
-                                if (method.getName().equals("getMemoryWithoutUpdate")) return memory;
-                                throw new AssertionError(method);
-                            });
-                    Probe quest = new Probe(fleet, legacy);
-                    Misc.makeImportant(memory, "otherQuest");
-                    quest.migrate();
-                    quest.migrate();
-                    require(quest.flagCount() == 1, "Repeated delivery registration");
-                    require(quest.importanceCount() == 0, "Legacy importance registration retained");
-                    require(!Misc.isImportantForReason(memory, FleetQuest.IMPORTANT_REASON), "Direct reason retained");
-                    require(!Misc.isImportantForReason(memory, quest.getReason()), "Mission reason retained");
-                    require(Misc.isImportantForReason(memory, "otherQuest"), "Foreign reason cleared");
-                    if (!legacy) require(!memory.getBoolean(FleetQuest.DELIVER_FLAG), "Delivery active before acceptance");
+            for (Stage end : new Stage[]{Stage.DONE, Stage.FAILED, Stage.ABANDONED}) {
+                MemoryAPI memory = memory();
+                CampaignFleetAPI fleet = (CampaignFleetAPI) Proxy.newProxyInstance(
+                        CampaignFleetAPI.class.getClassLoader(), new Class<?>[]{CampaignFleetAPI.class},
+                        (self, method, values) -> {
+                            if (method.getName().equals("getMemoryWithoutUpdate")) return memory;
+                            throw new AssertionError(method);
+                        });
+                Probe quest = new Probe(fleet);
+                Misc.makeImportant(memory, "otherQuest");
+                quest.registerDelivery();
+                quest.registerDelivery();
+                require(quest.flagCount() == 1, "Repeated delivery registration");
+                require(quest.importanceCount() == 0, "Vanilla importance registered");
+                require(!Misc.isImportantForReason(memory, FleetQuest.IMPORTANT_REASON), "Direct reason retained");
+                require(!Misc.isImportantForReason(memory, quest.getReason()), "Mission reason retained");
+                require(Misc.isImportantForReason(memory, "otherQuest"), "Foreign reason cleared");
+                require(!memory.getBoolean(FleetQuest.DELIVER_FLAG), "Delivery active before acceptance");
 
-                    quest.enter(Stage.WANTED);
-                    require(memory.getBoolean(FleetQuest.DELIVER_FLAG), "Missing hand-in flag");
-                    quest.enter(end);
-                    require(!memory.getBoolean(FleetQuest.DELIVER_FLAG), "Hand-in flag survived " + end);
-                    require(Misc.isImportantForReason(memory, "otherQuest"), "Stage change cleared foreign reason");
-                    quest.enter(Stage.WANTED);
-                    require(memory.getBoolean(FleetQuest.DELIVER_FLAG), "Stage reentry lost hand-in flag");
-                    require(!Misc.isImportantForReason(memory, quest.getReason()), "Stage reentry restored old icon");
-                }
+                quest.enter(Stage.WANTED);
+                require(memory.getBoolean(FleetQuest.DELIVER_FLAG), "Missing hand-in flag");
+                quest.enter(end);
+                require(!memory.getBoolean(FleetQuest.DELIVER_FLAG), "Hand-in flag survived " + end);
+                require(Misc.isImportantForReason(memory, "otherQuest"), "Stage change cleared foreign reason");
+                quest.enter(Stage.WANTED);
+                require(memory.getBoolean(FleetQuest.DELIVER_FLAG), "Stage reentry lost hand-in flag");
+                require(!Misc.isImportantForReason(memory, quest.getReason()), "Stage reentry restored old icon");
             }
-            System.out.println("Fleet quest markers: new/legacy delivery, stage cleanup and foreign importance passed");
+            System.out.println("Fleet quest markers: delivery registration, stage cleanup and foreign importance passed");
         } finally {
             Global.setFactory(original);
             Global.setSettings(originalSettings);
@@ -75,19 +73,14 @@ public final class FleetQuestMarkerCheck {
 
     private static class Probe extends FleetQuest {
 
-        private Probe(CampaignFleetAPI fleet, boolean legacy) {
+        private Probe(CampaignFleetAPI fleet) {
             giver = fleet;
             takenUp = true;
             missionId = "markerCheck";
             doNotEndMission = true;
-            if (legacy) {
-                currentStage = Stage.WANTED;
-                makeImportant(fleet, getDeliverFlag(), Stage.WANTED);
-                Misc.makeImportant(fleet, IMPORTANT_REASON);
-            }
         }
 
-        private void migrate() {
+        private void registerDelivery() {
             markDeliverable();
         }
 

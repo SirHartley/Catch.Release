@@ -55,7 +55,6 @@ public class FleetQuest extends FishJob {
 
     public static final String QUEST_FLAG = "$catchrelease_fleetQuest";
     public static final String TYPE_KEY = "$catchrelease_fleetQuestType";
-    public static final String PITCH_KEY = "$catchrelease_fleetQuestPitch";
     public static final String ASK_KEY = "$catchrelease_fleetQuestAsk";
     public static final String REWARD_KEY = "$catchrelease_fleetQuestReward";
     public static final String TAKEN_FLAG = "$catchrelease_fleetQuestTaken";
@@ -64,46 +63,13 @@ public class FleetQuest extends FishJob {
     public static final String THANKS_KEY = "$catchrelease_fleetQuestThanks";
     public static final String THANKS_PENDING_FLAG = "$catchrelease_fleetQuestThanksPending";
     public static final String DETAILED_THANKS_FLAG = "$catchrelease_fleetQuestDetailedThanks";
-    public static final String HAIL_KEY = "$catchrelease_fleetQuestHail";
-    public static final String ACCEPT_OPTION_KEY = "$catchrelease_fleetQuestAcceptOption";
-    public static final String NO_PROMISE_OPTION_KEY = "$catchrelease_fleetQuestNoPromiseOption";
-    public static final String ACCEPT_KEY = "$catchrelease_fleetQuestAccept";
-    public static final String ACCEPT_NO_PROMISE_KEY = "$catchrelease_fleetQuestAcceptNoPromise";
-    public static final String DECLINE_OPTION_KEY = "$catchrelease_fleetQuestDeclineOption";
-    public static final String DECLINE_KEY = "$catchrelease_fleetQuestDecline";
-    public static final String WAITING_KEY = "$catchrelease_fleetQuestWaiting";
-    public static final String TURN_IN_KEY = "$catchrelease_fleetQuestTurnIn";
-    public static final String QUESTION_OPTION_KEY = "$catchrelease_fleetQuestQuestionOption";
-    public static final String QUESTION_RESPONSE_KEY = "$catchrelease_fleetQuestQuestionResponse";
-    public static final String EXTRA_QUESTION_OPTION_KEY =
-            "$catchrelease_fleetQuestExtraQuestionOption";
-    public static final String EXTRA_QUESTION_RESPONSE_KEY =
-            "$catchrelease_fleetQuestExtraQuestionResponse";
-    public static final String HAGGLE_OPTION_KEY = "$catchrelease_fleetQuestHaggleOption";
-    public static final String SOUR_OPTION_KEY = "$catchrelease_fleetQuestSourOption";
     public static final String HAGGLED_FLAG = "$catchrelease_fqHaggled";
     public static final String SOURED_FLAG = "$catchrelease_fqSoured";
     public static final String CAN_RECLAIM_FLAG = "$catchrelease_fqCanReclaim";
     public static final String FOLLOWUP_PENDING_FLAG = "$catchrelease_fleetQuestFollowupPending";
-    public static final String FOLLOWUP_PITCH_KEY = "$catchrelease_fleetQuestFollowupPitch";
-    public static final String FOLLOWUP_ACCEPT_OPTION_KEY =
-            "$catchrelease_fleetQuestFollowupAcceptOption";
-    public static final String FOLLOWUP_ACCEPT_KEY = "$catchrelease_fleetQuestFollowupAccept";
-    public static final String FOLLOWUP_DECLINE_OPTION_KEY =
-            "$catchrelease_fleetQuestFollowupDeclineOption";
-    public static final String FOLLOWUP_DECLINE_KEY = "$catchrelease_fleetQuestFollowupDecline";
-    public static final String COUNTER_OPTION_KEY = "$catchrelease_fleetQuestCounterOption";
-    public static final String COUNTER_PITCH_KEY = "$catchrelease_fleetQuestCounterPitch";
     public static final String COUNTER_REWARD_KEY = "$catchrelease_fleetQuestCounterReward";
-    public static final String COUNTER_ACCEPT_OPTION_KEY =
-            "$catchrelease_fleetQuestCounterAcceptOption";
-    public static final String COUNTER_ACCEPT_KEY = "$catchrelease_fleetQuestCounterAccept";
-    public static final String COUNTER_RETURN_OPTION_KEY =
-            "$catchrelease_fleetQuestCounterReturnOption";
-    public static final String COUNTER_RETURN_KEY = "$catchrelease_fleetQuestCounterReturn";
     public static final String POT_CAPTAIN_FLAG = "$catchrelease_potCaptain";
     public static final String ROUND_KEY = "$catchreleaseFleetQuestRound";
-    public static final String DAYS_TEXT_KEY = "$catchreleaseFleetDays";
     public static final String DEADLINE_TEXT_KEY = "$catchreleaseFleetDeadline";
     public static final String DEADLINE_LEFT_TEXT_KEY = "$catchreleaseFleetDeadlineLeft";
     public static final String BOSUN_RANK = "catchrelease_bosun";
@@ -713,7 +679,6 @@ public class FleetQuest extends FishJob {
         memory.set(ASK_KEY, describeAsks());
         memory.set(REWARD_KEY, describeRewards());
         memory.set(ROUND_KEY, round);
-        memory.set(DAYS_TEXT_KEY, describeDays());
         memory.set(DEADLINE_TEXT_KEY, describeDeadline());
         memory.set(DEADLINE_LEFT_TEXT_KEY, describeDeadlineLeft());
 
@@ -947,9 +912,6 @@ public class FleetQuest extends FishJob {
     protected void markDeliverable() {
         if (!takenUp || giver == null || customMarkerReady) return;
 
-        // Old saves stored both a direct reason and stage-owned importance.
-        makeUnimportant(giver, Stage.WANTED);
-        Misc.makeUnimportant(giver, IMPORTANT_REASON);
         setFlag(giver, getDeliverFlag(), false, Stage.WANTED);
         customMarkerReady = true;
     }
@@ -1326,7 +1288,6 @@ public class FleetQuest extends FishJob {
         memory.unset(getDeliverFlag());
         if (!Stage.DONE.equals(currentStage)) memory.unset(REF_KEY);
 
-        clearLegacyDialogueMemory(memory);
         if (!Stage.DONE.equals(currentStage) || declinedFollowup) clearRuleTextMemory();
 
         Misc.setFlagWithReason(memory,
@@ -1336,9 +1297,6 @@ public class FleetQuest extends FishJob {
                 IMPORTANT_REASON, false, HOLD_DAYS);
 
         if (!takenUp) return;
-
-        makeUnimportant(giver, Stage.WANTED);
-        Misc.makeUnimportant(giver, IMPORTANT_REASON);
 
         if (fleetName != null && !fleetName.isEmpty()) {
             giver.setName(fleetName);
@@ -1353,38 +1311,6 @@ public class FleetQuest extends FishJob {
         }
     }
 
-    protected void clearLegacyDialogueMemory(MemoryAPI memory) {
-        if (memory == null) return;
-
-        memory.unset(PITCH_KEY);
-        memory.unset(HAIL_KEY);
-        memory.unset(ACCEPT_OPTION_KEY);
-        memory.unset(NO_PROMISE_OPTION_KEY);
-        memory.unset(ACCEPT_KEY);
-        memory.unset(ACCEPT_NO_PROMISE_KEY);
-        memory.unset(DECLINE_OPTION_KEY);
-        memory.unset(DECLINE_KEY);
-        memory.unset(WAITING_KEY);
-        memory.unset(TURN_IN_KEY);
-        memory.unset(QUESTION_OPTION_KEY);
-        memory.unset(QUESTION_RESPONSE_KEY);
-        memory.unset(EXTRA_QUESTION_OPTION_KEY);
-        memory.unset(EXTRA_QUESTION_RESPONSE_KEY);
-        memory.unset(HAGGLE_OPTION_KEY);
-        memory.unset(SOUR_OPTION_KEY);
-        memory.unset(FOLLOWUP_PITCH_KEY);
-        memory.unset(FOLLOWUP_ACCEPT_OPTION_KEY);
-        memory.unset(FOLLOWUP_ACCEPT_KEY);
-        memory.unset(FOLLOWUP_DECLINE_OPTION_KEY);
-        memory.unset(FOLLOWUP_DECLINE_KEY);
-        memory.unset(COUNTER_OPTION_KEY);
-        memory.unset(COUNTER_PITCH_KEY);
-        memory.unset(COUNTER_ACCEPT_OPTION_KEY);
-        memory.unset(COUNTER_ACCEPT_KEY);
-        memory.unset(COUNTER_RETURN_OPTION_KEY);
-        memory.unset(COUNTER_RETURN_KEY);
-    }
-
     protected void clearRuleTextMemory() {
         if (giver == null) return;
 
@@ -1393,7 +1319,6 @@ public class FleetQuest extends FishJob {
         memory.unset(ASK_KEY);
         memory.unset(REWARD_KEY);
         memory.unset(ROUND_KEY);
-        memory.unset(DAYS_TEXT_KEY);
         memory.unset(DEADLINE_TEXT_KEY);
         memory.unset(DEADLINE_LEFT_TEXT_KEY);
         memory.unset(HAGGLED_FLAG);

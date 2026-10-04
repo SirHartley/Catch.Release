@@ -41,7 +41,6 @@ public abstract class CampedSpotJob extends FishJob {
     public static final float MAX_LY = 14f;
 
     protected CampSize size;
-    protected String speciesId;
     protected String systemName;
     protected CampaignFleetAPI camper;
     protected SectorEntityToken pond;
@@ -67,7 +66,6 @@ public abstract class CampedSpotJob extends FishJob {
         if (pond == null) return false;
 
         size = CampSize.roll(genRandom);
-        speciesId = null;
         systemName = system.getName();
 
         setReceiptAsk();
@@ -128,20 +126,6 @@ public abstract class CampedSpotJob extends FishJob {
     protected void setReceiptAsk() {
         if (pond == null || pond.getId() == null) return;
 
-        if (acceptedAt <= 0L && currentStage != null) {
-            acceptedAt = Global.getSector().getClock().getTimestamp();
-        }
-
-        if (asks.size() == 1) {
-            FishRequirement current = asks.get(0);
-            if (current != null && current.speciesId == null && current.tag == null
-                    && pond.getId().equals(current.sourceId)
-                    && current.freshCatch
-                    && current.minCaughtAt == acceptedAt) {
-                return;
-            }
-        }
-
         FishRequirement receipt = new FishRequirement();
         receipt.count = 1;
         receipt.sourceId = pond.getId();
@@ -150,7 +134,6 @@ public abstract class CampedSpotJob extends FishJob {
 
         asks.clear();
         addAsk(receipt);
-        speciesId = null;
     }
 
     @Override
@@ -160,7 +143,6 @@ public abstract class CampedSpotJob extends FishJob {
 
     @Override
     protected void advanceImpl(float amount) {
-        setReceiptAsk();
         super.advanceImpl(amount);
 
         if (isEnding() || isEnded()) return;

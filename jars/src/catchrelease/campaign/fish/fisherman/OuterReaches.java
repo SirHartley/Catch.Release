@@ -149,7 +149,7 @@ public class OuterReaches {
             if (Misc.getDistance(market, to) < clearance) return false;
 
             if (allowEscape && from != null && Misc.getDistance(market, from) < clearance) {
-                // Old saves and moving markets can start a boat inside the exclusion.
+                // A moving market can enclose a boat.
                 // An escape must move outward throughout, never cut through the market.
                 float outward = (from.x - market.x) * (to.x - from.x)
                         + (from.y - market.y) * (to.y - from.y);

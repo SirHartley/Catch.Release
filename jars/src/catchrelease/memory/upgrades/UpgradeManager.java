@@ -65,16 +65,6 @@ public class UpgradeManager {
         return getValue(statId, 0f) > 0f;
     }
 
-    public java.util.List<UpgradeStat> getByCategory(UpgradeStat.Category category) {
-        java.util.List<UpgradeStat> out = new java.util.ArrayList<>();
-
-        for (UpgradeStat stat : levelMap.values()) {
-            if (stat.category == category) out.add(stat);
-        }
-
-        return out;
-    }
-
     public boolean hasStat(String statId) {
         return levelMap.containsKey(statId);
     }
@@ -110,23 +100,4 @@ public class UpgradeManager {
         for (UpgradeStat stat : UpgradeStatLoader.getUpgradeStatsFromMemory().values()) levelMap.put(stat.id, stat);
     }
 
-    public void updateBaseValues(){
-        for (UpgradeStat loaded : UpgradeStatLoader.getUpgradeStatsFromMemory().values()) {
-            UpgradeStat held = levelMap.get(loaded.id);
-
-            if (held == null) {
-                levelMap.put(loaded.id, loaded);
-                continue;
-            }
-
-            held.baseValue = loaded.baseValue;
-            held.baseType = loaded.baseType;
-            held.increasePerLevel = loaded.increasePerLevel;
-            held.upgradeType = loaded.upgradeType;
-            held.maxLevel = loaded.maxLevel;
-            held.description = loaded.description;
-            held.icon = loaded.icon;
-            held.category = loaded.category;
-        }
-    }
 }

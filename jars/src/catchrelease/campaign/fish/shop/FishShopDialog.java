@@ -153,8 +153,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected void buildEntries() {
             List<UpgradeStat> stats = new ArrayList<>(UpgradeManager.getInstance().getAll().values());
 
-            // "example" is a format-documentation row, not for sale; catch tuning stats aren't equipment
-            stats.removeIf(stat -> stat.id == null || stat.id.equalsIgnoreCase("example"));
             stats.removeIf(stat -> ShopGroup.forStat(stat) == ShopGroup.THE_CATCH);
             stats.sort(Comparator.comparing(stat -> stat.id));
 
@@ -1001,7 +999,6 @@ public class FishShopDialog implements InteractionDialogPlugin {
         reopenPending = false;
 
         // returns anything a save is still holding in shop storage - that button no longer exists
-        ShopStorage.reclaim();
 
         dialog.setPromptText("");
         dialog.hideVisualPanel();

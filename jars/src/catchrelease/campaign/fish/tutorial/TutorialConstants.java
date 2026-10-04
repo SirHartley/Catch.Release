@@ -19,7 +19,6 @@ public class TutorialConstants {
     public static final String WRECK_IMPORTANT = "catchrelease_tutorial";
 
     public static final String FISHER_PROPERTY_KEY = "$catchrelease_fisherProperty";
-    public static final String LEGACY_CARRYING_HARPOON_KEY = "$catchrelease_carryingHarpoon";
     public static final String DEEP_HANDOFF_KEY = "$catchrelease_deepHandoff";
 
     public static final String[] WRECK_HULLS = {

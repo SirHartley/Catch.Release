@@ -12,10 +12,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireBest;
-import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +24,6 @@ public class KidsJob extends FishJob {
     public static final FishGrade BONUS_GRADE = FishGrade.FINE;
 
     protected boolean toLoud = true;
-    protected boolean rewardsChecked;
     protected transient FishHandoffPicker.Selection pendingSelection;
 
     @Override
@@ -54,7 +51,6 @@ public class KidsJob extends FishJob {
         if (!setDurationForAsks(createdAt)) return false;
 
         addRewards(prizes);
-        rewardsChecked = true;
 
         setUpSpine();
 
@@ -161,31 +157,6 @@ public class KidsJob extends FishJob {
         showRewardReceipts(dialog);
     }
 
-    @Override
-    public List<FishReward> getRewards() {
-        ensureNonCreditRewards();
-
-        return super.getRewards();
-    }
-
-    @Override
-    public String describeRewards() {
-        ensureNonCreditRewards();
-
-        return super.describeRewards();
-    }
-
-    @Override
-    public void addDescriptionForNonEndStage(TooltipMakerAPI info, float width, float height) {
-        ensureNonCreditRewards();
-        super.addDescriptionForNonEndStage(info, width, height);
-    }
-
-    @Override
-    protected void beforePayment(FishCatch offered, MemoryAPI mem) {
-        ensureNonCreditRewards();
-    }
-
     // No credits or range data; the tier floor keeps low-score asks eligible for prizes.
     protected QuestRewards.Request prizeRequest(java.util.Random random) {
         return new QuestRewards.Request(asks)
@@ -193,27 +164,6 @@ public class KidsJob extends FishJob {
                 .exclude(QuestRewards.Kind.RANGE_DATA)
                 .tierFloor(DemandScore.Tier.MEDIUM)
                 .random(random);
-    }
-
-    protected void ensureNonCreditRewards() {
-        if (rewardsChecked) return;
-        rewardsChecked = true;
-
-        int replacements = 0;
-        for (FishReward reward : new ArrayList<>(rewards)) {
-            if (!(reward instanceof FishReward.Credits)
-                    && !(reward instanceof FishReward.LocationData)
-                    && !(reward instanceof FishReward.Commodity)) {
-                continue;
-            }
-
-            rewards.remove(reward);
-            replacements++;
-        }
-
-        for (int i = 0; i < replacements; i++) {
-            addRewards(QuestRewards.roll(prizeRequest(random())).rewards);
-        }
     }
 
     @Override
