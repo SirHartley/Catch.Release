@@ -3152,7 +3152,7 @@ catchrelease_introLightQuestion_continue,DialogOptionSelected,$option == catchre
 catchrelease_introHarpoonQuestion,DialogOptionSelected,$option == catchrelease_introHarpoonQuestion,"$catchreleaseIntroHarpoonAsked = true
 FireAll CatchReleaseIntroDeepQuestions","""It's how the display shows the return trace. There's no cable out there. The connection brings the catch across; your crew don't have to haul it in.""",,
 catchrelease_introWeaponQuestion,DialogOptionSelected,$option == catchrelease_introWeaponQuestion,"$catchreleaseIntroWeaponAsked = true
-FireAll CatchReleaseIntroDeepQuestions","""Of course it is. You're throwing several tonnes of machinery at something. Just remember you're the one aiming it when a patrol comes asking about a hole in a freighter.""",,
+FireAll CatchReleaseIntroDeepQuestions","""Of course it is. You're throwing several tonnes of machinery at something.""",,
 catchrelease_introDeepQuestionsLight,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroLightAsked,,,"0:catchrelease_introLightQuestion:""The lights make a rupture?""",
 catchrelease_introDeepQuestionsHarpoon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroHarpoonAsked,,,"10:catchrelease_introHarpoonQuestion:""And the line behind the harpoon?""",
 catchrelease_introDeepQuestionsWeapon,CatchReleaseIntroDeepQuestions,!$catchreleaseIntroWeaponAsked,,,"20:catchrelease_introWeaponQuestion:""This is a weapon.""",
