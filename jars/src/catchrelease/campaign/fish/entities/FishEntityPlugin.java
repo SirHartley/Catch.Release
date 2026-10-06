@@ -163,6 +163,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     // shell game: a decoy is steered by its real mote's controller, never by itself
     private SectorEntityToken decoyAnchor;
+    private transient catchrelease.campaign.fish.legendary.MantaFormationModule mantaFormation;
 
     // the base shell: spent by a deflection, back when this reaches zero
     private float baseShieldRegen;
@@ -281,6 +282,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float y = movementSampled ? lastY : entity.getLocation().y;
         advanceFish(amount);
         if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
+        if (mantaFormation != null) mantaFormation.sync();
         lastX = entity.getLocation().x;
         lastY = entity.getLocation().y;
         movementSampled = true;
@@ -506,6 +508,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public float getVisibility() {
+        FishEntityPlugin source = getMantaVisualSource();
+        if (source != this) return source.getVisibility();
         if (!diving) return 1f;
 
         float elapsed = DIVE_TIME - diveClock;
@@ -551,6 +555,24 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public void setSwimTarget(Vector2f target) {
         this.target = target;
+    }
+
+    public void setMantaFormation(catchrelease.campaign.fish.legendary.MantaFormationModule formation) {
+        mantaFormation = formation;
+    }
+
+    public void shiftMantaPosition(float dx, float dy) {
+        entity.setLocation(entity.getLocation().x + dx, entity.getLocation().y + dy);
+        if (target != null) target.translate(dx, dy);
+        // A slot change is not swimming velocity for the harpoon's lead indicator.
+        lastX += dx;
+        lastY += dy;
+    }
+
+    protected FishEntityPlugin getMantaVisualSource() {
+        if (mantaFormation != null && phantom && decoyAnchor != null
+                && decoyAnchor.getCustomPlugin() instanceof FishEntityPlugin fish) return fish;
+        return this;
     }
 
     public void flashShield() {
@@ -764,7 +786,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void advanceShieldLens() {
-        boolean wanted = lampFade > 0.05f && LegendaryShields.isShielded(this)
+        boolean wanted = lampFade > 0.05f && LegendaryShields.isShielded(getMantaVisualSource())
                 && catchrelease.rendering.distortion.CampaignDistortionRenderer.isSupported();
 
         if (!wanted) {
@@ -965,7 +987,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                     0.08f * alpha, 0f, true);
         }
 
-        if (alpha > 0f && LegendaryShields.isShielded(this)) {
+        if (alpha > 0f && LegendaryShields.isShielded(getMantaVisualSource())) {
             // a soap bubble, not a plate: an all-but-empty middle, a film that thickens
             // toward the rim, a twin rim breathing slightly - the lens does the rest
             float pulse = 0.96f + 0.04f * (float) Math.sin(time * 2.1f);

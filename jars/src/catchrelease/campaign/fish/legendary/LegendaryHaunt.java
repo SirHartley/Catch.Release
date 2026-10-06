@@ -71,6 +71,15 @@ public class LegendaryHaunt implements EveryFrameScript {
         return activeSpeciesId;
     }
 
+    public static float getMantaLampAlpha() {
+        LegendaryHaunt haunt = getInstance();
+        if (haunt == null || haunt.activeSystem != Global.getSector().getCurrentLocation()) return 1f;
+        for (HauntModule module : haunt.modules) {
+            if (module instanceof MantaFormationModule manta) return manta.getLampAlpha();
+        }
+        return 1f;
+    }
+
     public float getIntensity() {
         return intensity;
     }
@@ -250,6 +259,7 @@ public class LegendaryHaunt implements EveryFrameScript {
             case "longliner" -> out.add(new SensorGhostsModule(system, spec));
             // its abyss already runs coherence low; the surge would be lost in the noise
             case "abyssal_ghost_manta" -> {
+                out.add(new MantaFormationModule(system, spec));
                 out.add(new ChromaticAberrationModule(system, spec));
                 out.add(new GhostAsteroidsModule(system, spec));
             }

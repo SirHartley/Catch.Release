@@ -103,6 +103,12 @@ it refuses to run with existing game globals and clears its globals on exit.
 unchanged. No duplicate game classes, source rewriting or separate test tree.
 This covers deterministic catch traces, tells, and the jitter and tell formulas, not treasure or the engine.
 
+`tools/MantaHauntChecks` verifies formation spacing, stationary slots during swaps,
+blackout duration/interval, held-target safety and cleanup. `tools/MantaMinigameChecks`
+compares decoy motion/tells against the real model at 30/60/144 Hz and checks
+real-only scoring, treasure isolation and restart/end behavior. These are standalone
+checks with API proxies; they do not test OpenGL output or engine callback ordering.
+
 The tuner's Balance results tab uses `tools/FishBalance` for immutable run
 snapshots, per-attempt telemetry and bounded parallel batches; its `game` and
 `visibleFish` also build the simulation and drawn position for Record play. `FishBalancePanel`
@@ -339,7 +345,8 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | File | Owner / connection |
 |---|---|
 | `FishingMinigame.java` | Owns in-game bar/fish movement, progress/escape and treasure; advances movement -> treasure -> progress. Each target choice is the species' own move, its movement type's signature move (`specialChance`) or a move borrowed from the MIXED pool (`mixChance`). Any move of any kind that lands at least `MINIGAME_TELL_DISTANCE` from both the fish and its current target, with a speed limit of at least `MINIGAME_TELL_SPEED`, waits out a `MINIGAME_TELL_TIME` tell on the old course (`withTell`); nothing else gets one, and the opening move never does. A twitcher's signature bound lands before its next pick (`isBounding`). Uses runtime `FishConstants`, tackle, campaign inputs and live player-rate lookups. Legendary treasures are Epic. No dependency on the authoring tools. |
-| `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure, including the tell before a telegraphed move; handles input; records bycatch, catch intel, route progress, and legendary completion. |
+| `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure, including the tell before a telegraphed move; handles input; records bycatch, catch intel, route progress, and legendary completion. Manta fights own a panel-bounded `ChromaticAberrationOverlay` instance, disposed by both dialog-dismiss paths; campaign aberration still excludes dialogs. |
+| `MantaMinigame.java` | Manta-only model selected by the dialog. Two independent motion-only decoys call the same `FishingMinigame.advanceFish`; each has its own targets, velocity and tells, but no treasure/progress/rewards. Opening positions are shuffled across all three. The panel renders all with the real target's presentation (including sonar/chicken); only the real model controls green-bar coverage, catch progress and sound hooks. Restart resets all three; ending stops them. |
 | `FishingMinigameDialogPlugin.java` | Hosts the custom visual, preserves source rupture and quest identity for drone and harpoon catches, applies tutorial catch protection, preserves campaign music, and exposes dev reopens that bypass substitution. |
 
 ### `campaign/fish/entities` and `campaign/fish/spawner`
@@ -407,6 +414,8 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 |---|---|
 | `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. |
 | `LegendaryHaunt.java` | Transient coordinator. Starting a Lantern Jack haunt immediately restores its base shield; later deflections retain the normal cooldown. Stored shells are still earned by eating motes. |
+| `MantaBackgroundBlackout.java` | Manta-only 0.3-second background blackout every 15–40 unpaused seconds. First Luna renderer on `TERRAIN_1`, after vanilla background/starfield and before breach windows, motes, fleets and HUD. No saved background changes. `MantaFormationModule` swaps the real mote into a different stationary slot on blackout onset, preserving its target offset and shield/catch identity; swaps wait while held. Renderer expires outside its owning sector/system and is removed on haunt cleanup. |
+| `MantaFormationModule.java` | Abyssal Ghost Manta haunt: one real mote and two haunt-owned phantoms, fixed world-space line at 180-unit spacing. `FishEntityPlugin.advance` synchronizes positions after movement; copies use the real mote's dive visibility and shield display. Only the real mote is catchable. `LegendaryHaunt.getMantaLampAlpha` applies location-scoped visual flicker to spot/fan breach, glow and impression rendering, never detection geometry. Coordinator cleanup removes copies and transient bindings; load-time haunt sweeping prevents duplicate formations. |
 | `FalseDawnOrbit.java` | Keeps surfaced, diving and buried False Dawn movement in an annulus outside the largest non-pulsar star with a usable corona in its system. Uses the actual corona bounds; natural spawns, console spawns and explosive-hit respawns share the constraint. Dives retain their visibility timing but follow the corona instead of a straight chord through the star. |
 | `FalseDawnCorona.java` | Adds short, complementary-hue spikes to the host star's vanilla `FlareManager` queue while the player is in the host system, including before provocation. Only its own flares are removed on departure, capture and before saving; star specs and natural flares are unchanged. A location listener handles departure; the existing haunt advance refills the queue because vanilla exposes no flare-finished callback. No extra frame script or renderer. |
 | `../entities/HauntMineEntityPlugin.java` | Non-damaging False Dawn mines. Push and pull deliver equal, opposite one-shot impulses through the fleet movement module via `setVelocity`; the implosion ripple remains visual only, with no lingering attraction. Interdiction mines cancel interdictable abilities and stop the fleet for two seconds using vanilla's one-frame stop request; no persistent speed modifier. Timers stop while paused. |

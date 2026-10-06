@@ -13,6 +13,8 @@ import catchrelease.rendering.helper.Disc;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.RoundedBorder;
 import catchrelease.rendering.plugins.WarpGrid;
+import catchrelease.rendering.plugins.ChromaticAberrationOverlay;
+import catchrelease.campaign.fish.legendary.MantaFormationModule;
 import catchrelease.rendering.plugins.WarpedRectRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
@@ -32,6 +34,7 @@ import java.util.List;
 public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     protected FishingMinigame minigame;
+    protected final ChromaticAberrationOverlay aberration;
     protected Listener listener;
     protected FishCatch specimen;
     protected SectorEntityToken where;
@@ -69,6 +72,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     public FishingMinigamePanel(FishingMinigame minigame, FishCatch specimen, SectorEntityToken where,
                                FishLogEntry.Method method, Listener listener) {
         this.minigame = minigame;
+        this.aberration = MantaFormationModule.SPECIES.equals(minigame.getFish().id)
+                ? new ChromaticAberrationOverlay() : null;
         this.specimen = specimen;
         this.where = where;
         this.method = method;
@@ -289,6 +294,14 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (result != null) result.render(layout, getFishSprite(), alphaMult);
         if (lootResult != null) lootResult.render(layout, alphaMult);
         if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
+        if (aberration != null && minigame.isRunning()) {
+            aberration.renderRegion(position.getX(), position.getY(),
+                    position.getWidth(), position.getHeight(), alphaMult);
+        }
+    }
+
+    public void dispose() {
+        if (aberration != null) aberration.dispose();
     }
 
     protected void renderFrame(FishingMinigameLayout layout, float alphaMult) {
@@ -392,13 +405,20 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     protected void renderFish(FishingMinigameLayout layout, float alphaMult) {
-        float progress = minigame.getTellProgress();
-        float direction = minigame.getTellDirection();
+        if (minigame instanceof MantaMinigame manta) {
+            for (FishingMinigame decoy : manta.getDecoys()) renderFish(decoy, layout, alphaMult);
+        }
+        renderFish(minigame, layout, alphaMult);
+    }
+
+    protected void renderFish(FishingMinigame motion, FishingMinigameLayout layout, float alphaMult) {
+        float progress = motion.getTellProgress();
+        float direction = motion.getTellDirection();
 
         // jitter and the tell are visual only; the hit position the rules use is unaffected
-        float centerX = layout.getTrackCenterX() + getJitter(0f);
-        float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f)
-                + getTell(progress, direction, minigame.getFish().jitter);
+        float centerX = layout.getTrackCenterX() + getJitter(motion, 0f);
+        float centerY = layout.getTrackY(motion.getFishPosition()) + getJitter(motion, 1.7f)
+                + getTell(progress, direction, motion.getFish().jitter);
 
         renderTellFlare(centerX, centerY, progress, alphaMult);
         renderMarker(centerX, centerY, alphaMult);
@@ -590,7 +610,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 color, 0.8f * alphaMult);
     }
 
-    protected float getJitter(float offset) {
+    protected float getJitter(FishingMinigame minigame, float offset) {
         float time = (jitterTime + offset) * FishConstants.MINIGAME_FISH_JITTER_SPEED;
 
         float wobble = (float) (Math.sin(time) * 0.5f

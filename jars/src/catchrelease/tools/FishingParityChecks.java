@@ -212,7 +212,7 @@ public class FishingParityChecks {
 
     static void jitterFormula() throws Exception {
         String game = methodBody(Path.of("jars/src/catchrelease/campaign/fish/minigame/FishingMinigamePanel.java"),
-                "protected float getJitter(float offset)")
+                "protected float getJitter(FishingMinigame minigame, float offset)")
                 .replace("float time =", "time =").replace("jitterTime", "time")
                 .replace("minigame.getFishVelocity()", "velocity").replace("minigame.getFish().jitter", "jitter")
                 .replace("minigame.getTellProgress()", "tellProgress");

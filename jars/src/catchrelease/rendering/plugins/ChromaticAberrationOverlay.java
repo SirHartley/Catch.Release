@@ -32,6 +32,7 @@ public class ChromaticAberrationOverlay implements CampaignUIRenderingListener {
             if (instance != null) {
                 instance.level = 0f;
                 Global.getSector().getListenerManager().removeListener(instance);
+                instance.dispose();
                 instance = null;
             }
             return;
@@ -65,14 +66,16 @@ public class ChromaticAberrationOverlay implements CampaignUIRenderingListener {
             return;
         }
 
+        float scale = Global.getSettings().getScreenScaleMult();
+        renderRegion(0f, 0f, Global.getSettings().getScreenWidthPixels() / scale,
+                Global.getSettings().getScreenHeightPixels() / scale, level);
+    }
+
+    public void renderRegion(float x, float y, float regionWidth, float regionHeight, float strength) {
+        if (strength <= 0f || regionWidth <= 0f || regionHeight <= 0f) return;
         int width = (int) Global.getSettings().getScreenWidthPixels();
         int height = (int) Global.getSettings().getScreenHeightPixels();
         if (width <= 0 || height <= 0) return;
-
-        ensureTexture(width, height);
-
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
-        GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
 
         // draw in UI units: the framebuffer is real pixels, the ortho is scaled
         float scale = Global.getSettings().getScreenScaleMult();
@@ -81,36 +84,47 @@ public class ChromaticAberrationOverlay implements CampaignUIRenderingListener {
 
         float wobble = 0.8f + 0.2f * (float) Math.sin(
                 (System.currentTimeMillis() % 100000L) * 0.007);
-        float shift = (MIN_SHIFT_PX + (MAX_SHIFT_PX - MIN_SHIFT_PX) * level)
+        float shift = (MIN_SHIFT_PX + (MAX_SHIFT_PX - MIN_SHIFT_PX) * MathUtils.clamp(strength, 0f, 1f))
                 * wobble / scale;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT
                 | GL11.GL_CURRENT_BIT | GL11.GL_TEXTURE_BIT);
+        ensureTexture(width, height);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
+        GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glColor4f(1f, 1f, 1f, 1f);
 
         // red left, blue right; green keeps the original frame between them
         GL11.glColorMask(true, false, false, false);
-        drawScreenQuad(-shift, 0f, w, h);
+        drawRegion(x, y, regionWidth, regionHeight, shift, w, h);
         GL11.glColorMask(false, false, true, false);
-        drawScreenQuad(shift, 0f, w, h);
+        drawRegion(x, y, regionWidth, regionHeight, -shift, w, h);
         GL11.glColorMask(true, true, true, true);
 
         GL11.glPopAttrib();
     }
 
-    protected void drawScreenQuad(float x, float y, float w, float h) {
+    protected void drawRegion(float x, float y, float w, float h, float shift,
+                              float screenWidth, float screenHeight) {
         GL11.glBegin(GL11.GL_QUADS);
-        GL11.glTexCoord2f(0f, 0f);
+        GL11.glTexCoord2f((x + shift) / screenWidth, y / screenHeight);
         GL11.glVertex2f(x, y);
-        GL11.glTexCoord2f(1f, 0f);
+        GL11.glTexCoord2f((x + w + shift) / screenWidth, y / screenHeight);
         GL11.glVertex2f(x + w, y);
-        GL11.glTexCoord2f(1f, 1f);
+        GL11.glTexCoord2f((x + w + shift) / screenWidth, (y + h) / screenHeight);
         GL11.glVertex2f(x + w, y + h);
-        GL11.glTexCoord2f(0f, 1f);
+        GL11.glTexCoord2f((x + shift) / screenWidth, (y + h) / screenHeight);
         GL11.glVertex2f(x, y + h);
         GL11.glEnd();
+    }
+
+    public void dispose() {
+        if (texture != 0) GL11.glDeleteTextures(texture);
+        texture = 0;
+        texWidth = 0;
+        texHeight = 0;
     }
 
     protected void ensureTexture(int width, int height) {
