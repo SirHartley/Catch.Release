@@ -61,16 +61,13 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
     public static final float BLAST_PUSH_SPEED = 700f;
     public static final float BLAST_RADIUS = 320f;
     public static final float INTERCEPT_STUN_SECONDS = 2f;
-    public static final float PULL_SECONDS = 3f;
-    public static final float PULL_SPEED = 700f;
-    public static final float PULL_ACCEL = 1800f;
+    public static final float IMPLOSION_RIPPLE_SECONDS = 3f;
 
     protected Kind kind = Kind.BLAST;
     protected float time;
     protected float blinkOffset;
     protected boolean triggered;
     protected float stunLeft;
-    protected float pullLeft;
     protected boolean fading;
 
     protected transient SpriteAPI sprite;
@@ -122,13 +119,8 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             stopFleet(player);
         }
 
-        if (pullLeft > 0f) {
-            applyPull(player, Math.min(amount, pullLeft));
-            pullLeft = Math.max(0f, pullLeft - amount);
-        }
-
         if (triggered) {
-            if (!fading && stunLeft <= 0f && pullLeft <= 0f) {
+            if (!fading && stunLeft <= 0f) {
                 fading = true;
                 Misc.fadeAndExpire(entity, 0.5f);
             }
@@ -149,14 +141,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             case BLAST -> {
                 explode(kind.color, BLAST_RADIUS);
 
-                Vector2f away = new Vector2f(player.getLocation().x - entity.getLocation().x,
-                        player.getLocation().y - entity.getLocation().y);
-                float length = away.length();
-                if (close && length > 1f) {
-                    Vector2f velocity = player.getVelocityFromMovementModule();
-                    player.setVelocity(velocity.x + away.x / length * BLAST_PUSH_SPEED,
-                            velocity.y + away.y / length * BLAST_PUSH_SPEED);
-                }
+                if (close) applyImpulse(player, BLAST_PUSH_SPEED);
             }
             case INTERCEPT -> {
                 explode(kind.color, BLAST_RADIUS * 0.55f);
@@ -167,20 +152,8 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
                 }
             }
             case IMPLOSION -> {
-                if (close) {
-                    pullLeft = PULL_SECONDS;
-                    applyPull(player, 0.4f);
-                }
-
-                RippleDistortion ripple = new RippleDistortion(
-                        new Vector2f(entity.getLocation()), new Vector2f());
-                ripple.setSize(450f);
-                ripple.setIntensity(90f);
-                ripple.setFrameRate(60f);
-                ripple.flip(true);
-                ripple.setLifetime(PULL_SECONDS);
-                ripple.fadeOutIntensity(PULL_SECONDS);
-                CampaignDistortionRenderer.addDistortion(ripple);
+                if (close) applyImpulse(player, -BLAST_PUSH_SPEED);
+                implode();
             }
         }
     }
@@ -191,18 +164,26 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         player.goSlowOneFrame(true);
     }
 
-    protected void applyPull(CampaignFleetAPI player, float amount) {
-        Vector2f toMine = Vector2f.sub(entity.getLocation(), player.getLocation(), null);
-        float distance = toMine.length();
-        // Slow near the centre instead of repeatedly throwing the fleet through it.
-        float speed = Math.min(PULL_SPEED, distance / 0.25f);
-        if (distance > 0f) toMine.scale(speed / distance);
+    protected void applyImpulse(CampaignFleetAPI player, float speed) {
+        Vector2f away = Vector2f.sub(player.getLocation(), entity.getLocation(), null);
+        float distance = away.length();
+        if (distance <= 1f) return;
         Vector2f velocity = player.getVelocityFromMovementModule();
-        Vector2f change = Vector2f.sub(toMine, velocity, null);
-        float maxChange = Math.max(PULL_ACCEL, player.getAcceleration() * 2f) * amount;
-        if (change.length() > maxChange) change.scale(maxChange / change.length());
         // getVelocity() is a displayed sample; setVelocity writes the movement module used by steering.
-        player.setVelocity(velocity.x + change.x, velocity.y + change.y);
+        player.setVelocity(velocity.x + away.x / distance * speed,
+                velocity.y + away.y / distance * speed);
+    }
+
+    protected void implode() {
+        RippleDistortion ripple = new RippleDistortion(
+                new Vector2f(entity.getLocation()), new Vector2f());
+        ripple.setSize(450f);
+        ripple.setIntensity(90f);
+        ripple.setFrameRate(60f);
+        ripple.flip(true);
+        ripple.setLifetime(IMPLOSION_RIPPLE_SECONDS);
+        ripple.fadeOutIntensity(IMPLOSION_RIPPLE_SECONDS);
+        CampaignDistortionRenderer.addDistortion(ripple);
     }
 
     protected void explode(Color color, float radius) {
