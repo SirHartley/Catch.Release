@@ -108,6 +108,9 @@ blackout duration/interval, held-target safety and cleanup. `tools/MantaMinigame
 compares decoy motion/tells against the real model at 30/60/144 Hz and checks
 real-only scoring, treasure isolation and restart/end behavior. These are standalone
 checks with API proxies; they do not test OpenGL output or engine callback ordering.
+`tools/LegendaryEscapeChecks` exercises failure dispatch, four-turn shell-game
+bursts at 30/60/144 Hz, repeated-loss decoy caps, emergency slipstream duration
+and cleanup, immediate manta swaps, and the Imposter's ordinary-hit recovery shield.
 
 The tuner's Balance results tab uses `tools/FishBalance` for immutable run
 snapshots, per-attempt telemetry and bounded parallel batches; its `game` and
@@ -438,6 +441,10 @@ then advance through the existing coordinator, with no additional frame script.
 Manta failure immediately restores its base shield and invokes the formation's
 existing background-only blackout/slot swap, rebuilding missing copies first and
 resetting the normal blackout timer. It does not wait for the 15–40-second interval.
+Other legendaries immediately restore their base shield without changing movement
+or granting Lantern Jack stored shells. The Imposter keeps `shieldPopped`; its
+saved `recoveryShield` deflects one ordinary harpoon and is then consumed. It uses
+the normal purple shield display, not the red explosive-only hull shield.
 
 `tools/FalseDawnCheck` runs standalone checks for corona bounds, host selection,
 specimen lifetime, flare cleanup, mine forces, stun duration and minefield passages.
