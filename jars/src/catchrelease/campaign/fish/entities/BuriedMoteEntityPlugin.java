@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.entities;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -105,6 +106,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
                 * getWanderMult();
 
         float step = FishConstants.BURIED_SPEED * getSpeedMult() * amount;
+        if (FalseDawnOrbit.advance(entity, fishId, step, time)) return;
 
         Vector2f next = MathUtils.getPointOnCircumference(entity.getLocation(), step, heading + weave);
         entity.setLocation(next.x, next.y);
@@ -127,6 +129,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
                 new FishEntityPlugin.Params(swimTo, fishId));
 
         mote.setLocation(loc.x, loc.y);
+        if (!FalseDawnOrbit.confine(mote, fishId)) mote.setExpired(true);
 
         entity.setExpired(true);
 

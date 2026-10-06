@@ -124,5 +124,6 @@ public class ModPlugin extends BaseModPlugin {
     public void beforeGameSave() {
         super.beforeGameSave();
         SkillshotFramework.reset();
+        catchrelease.campaign.fish.legendary.FalseDawnCorona.beforeSave();
     }
 }
