@@ -65,7 +65,9 @@ public class LegendaryChases {
         Chase chase = getChase(spec);
         if (chase == null || chase.caught || chase.systemId == null) return false;
 
-        return chase.systemId.equals(where.getId());
+        return chase.systemId.equals(where.getId())
+                && (!LegendaryShields.DAWN_SPECIES.equals(spec.id)
+                || where instanceof StarSystemAPI system && FalseDawnOrbit.isEligible(system));
     }
 
     public static boolean isCaught(String speciesId) {
@@ -151,7 +153,8 @@ public class LegendaryChases {
             // a species can never spawn and never haunt - silently, forever
             chase.systemId = pickHost(spec, null);
         } else if (!chase.caught && !isPlayerIn(chase.systemId)
-                && (isDueToMove(chase) || isDoneHiding(spec, chase))) {
+                && (isDueToMove(chase) || isDoneHiding(spec, chase)
+                || LegendaryShields.DAWN_SPECIES.equals(spec.id) && !FalseDawnOrbit.isEligible(chase.systemId))) {
             // the cooldown ran out unseen-side only: it never moves out from under a chase
             chase.systemId = pickHost(spec, chase.systemId);
             chase.seenAt = 0L;
@@ -183,6 +186,7 @@ public class LegendaryChases {
     }
 
     protected static String pickHost(FishSpec spec, String avoid) {
+        if (LegendaryShields.DAWN_SPECIES.equals(spec.id)) return FalseDawnOrbit.pickHost(avoid);
         String host = pickHost(spec, avoid, false);
         if (host != null) return host;
 

@@ -534,6 +534,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
 - A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
+- False Dawn selects the largest-radius usable corona star across chartable systems at `FishRequirement.LOW_COHERENCE` (Unstable or worse). Its coherence and corona requirements never relax, and its old regional sheet preference does not limit this selection. Equal-largest hosts can alternate; a sole largest host is retained. If none qualifies, no natural host is assigned. A host that becomes unsuitable is replaced only while the player is elsewhere; new natural spawns are gated immediately. `SpawnFish` still overrides host/coherence for testing but places the fish in the largest usable local corona.
 
 | Catch | Method | Implement |
 |---|---|---|

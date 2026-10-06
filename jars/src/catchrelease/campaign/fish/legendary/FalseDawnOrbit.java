@@ -1,15 +1,55 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.campaign.fish.data.Aberration;
+import catchrelease.campaign.fish.map.FishPresence;
+import catchrelease.campaign.fish.shop.FishRequirement;
+import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.terrain.StarCoronaTerrainPlugin;
 import org.lwjgl.util.vector.Vector2f;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public final class FalseDawnOrbit {
 
     private FalseDawnOrbit() {
+    }
+
+    public static boolean isEligible(StarSystemAPI system) {
+        return system != null && FishPresence.isChartable(system)
+                && Aberration.baseAt(system.getLocation(), system) >= FishRequirement.LOW_COHERENCE
+                && findCorona(system) != null;
+    }
+
+    public static boolean isEligible(String systemId) {
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (system.getId().equals(systemId)) return isEligible(system);
+        }
+        return false;
+    }
+
+    public static String pickHost(String avoid) {
+        List<String> candidates = new ArrayList<>();
+        float largest = -1f;
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!isEligible(system)) continue;
+            float radius = findCorona(system).getParams().relatedEntity.getRadius();
+            if (radius < largest) continue;
+            if (radius > largest) {
+                candidates.clear();
+                largest = radius;
+            }
+            candidates.add(system.getId());
+        }
+        // Do not trade the only largest suitable star for a smaller one just to relocate.
+        if (candidates.size() > 1) candidates.remove(avoid);
+        return candidates.isEmpty() ? null : candidates.get(new Random().nextInt(candidates.size()));
     }
 
     public static StarCoronaTerrainPlugin findCorona(LocationAPI location) {
