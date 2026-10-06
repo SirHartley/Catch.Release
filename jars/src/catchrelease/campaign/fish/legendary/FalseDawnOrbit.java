@@ -1,10 +1,8 @@
 package catchrelease.campaign.fish.legendary;
 
-import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.map.FishPresence;
-import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -25,7 +23,6 @@ public final class FalseDawnOrbit {
 
     public static boolean isEligible(StarSystemAPI system) {
         return system != null && FishPresence.isChartable(system)
-                && Aberration.baseAt(system.getLocation(), system) >= FishRequirement.LOW_COHERENCE
                 && findCorona(system) != null;
     }
 

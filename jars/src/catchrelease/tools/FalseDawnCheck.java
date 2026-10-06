@@ -227,12 +227,15 @@ public final class FalseDawnCheck {
         Readings.set(system.id, 0.55f);
         Readings.set(largerStable.id, 0.54f);
         Readings.set(smaller.id, 0.9f);
-        require(FalseDawnOrbit.pickHost(null).equals(system.id), "Stable giant must not beat unstable star");
-        require(FalseDawnOrbit.pickHost(system.id).equals(system.id), "Retain sole largest eligible host");
+        require(FalseDawnOrbit.pickHost(null).equals(largerStable.id), "Largest star wins regardless of coherence");
+        require(FalseDawnOrbit.pickHost(largerStable.id).equals(largerStable.id), "Retain sole largest eligible host");
         Readings.set(largerStable.id, 0.55f);
-        require(FalseDawnOrbit.pickHost(null).equals(largerStable.id), "Largest newly eligible star wins");
+        require(FalseDawnOrbit.pickHost(null).equals(largerStable.id), "Coherence changes do not change host selection");
         for (StarSystemAPI entry : environment.systems) Readings.set(entry.getId(), 0f);
-        require(FalseDawnOrbit.pickHost(null) == null, "No stable-space fallback");
+        require(FalseDawnOrbit.pickHost(null).equals(largerStable.id), "Stable systems remain eligible");
+        environment.systems.clear();
+        environment.systems.add(new SystemData("starless").api);
+        require(FalseDawnOrbit.pickHost(null) == null, "Still requires a usable corona");
     }
 
     private static void residency(Environment environment) {
