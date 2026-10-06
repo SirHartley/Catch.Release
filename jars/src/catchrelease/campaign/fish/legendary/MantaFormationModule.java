@@ -35,7 +35,11 @@ public class MantaFormationModule extends BaseHauntModule {
     @Override
     public void advance(float amount) {
         flickerTime += amount;
-        FishEntityPlugin current = findOwnMote();
+        updateFormation(findOwnMote());
+        if (real != null) advanceBlackout(amount);
+    }
+
+    protected void updateFormation(FishEntityPlugin current) {
         if (current != real) {
             clearFormation();
             real = current;
@@ -58,7 +62,12 @@ public class MantaFormationModule extends BaseHauntModule {
             ((FishEntityPlugin) slots[i].getCustomPlugin()).setMantaFormation(this);
         }
         sync();
-        advanceBlackout(amount);
+    }
+
+    @Override
+    public void onFailedCatch(FishEntityPlugin fish) {
+        updateFormation(fish);
+        beginBlackout();
     }
 
     protected float nextBlackout() {
@@ -69,11 +78,16 @@ public class MantaFormationModule extends BaseHauntModule {
         blackoutLeft = Math.max(0f, blackoutLeft - amount);
         blackoutTimer -= amount;
         if (blackoutTimer <= 0f && !real.isHeld()) {
-            swapRealSlot();
-            blackoutLeft = BLACKOUT_SECONDS;
-            blackoutTimer = nextBlackout();
+            beginBlackout();
         }
         showBlackout(blackoutLeft > 0f);
+    }
+
+    protected void beginBlackout() {
+        swapRealSlot();
+        blackoutLeft = BLACKOUT_SECONDS;
+        blackoutTimer = nextBlackout();
+        showBlackout(true);
     }
 
     protected void showBlackout(boolean visible) {

@@ -186,6 +186,10 @@ public class LegendaryShields {
         LegendaryChases.getState(fish.getFishSpec().id).provoked = true;
         if (MOTE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) QuorumShellGame.onFailedCatch(fish);
         if (MORAY_SPECIES.equals(fish.getFishSpec().id)) LegendaryHaunt.onFailedCatch(fish);
+        if (MantaFormationModule.SPECIES.equals(fish.getFishSpec().id)) {
+            fish.restoreBaseShield();
+            LegendaryHaunt.onFailedCatch(fish);
+        }
         return true;
     }
 

@@ -435,6 +435,9 @@ path runs once per resolved minigame, not for a busy UI or a dev fish replacemen
 `LegendaryHaunt.onFailedCatch` starts the matching haunt if necessary, refreshes
 its sighting grace period and dispatches `HauntModule.onFailedCatch`; responses
 then advance through the existing coordinator, with no additional frame script.
+Manta failure immediately restores its base shield and invokes the formation's
+existing background-only blackout/slot swap, rebuilding missing copies first and
+resetting the normal blackout timer. It does not wait for the 15–40-second interval.
 
 `tools/FalseDawnCheck` runs standalone checks for corona bounds, host selection,
 specimen lifetime, flare cleanup, mine forces, stun duration and minefield passages.
