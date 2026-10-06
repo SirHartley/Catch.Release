@@ -334,6 +334,8 @@ options route to `catchrelease_intro_rod`, which owns the `giveRod` grant.
 
 ### `campaign/fish/minigame`
 
+Lantern Jack keeps two Epic treasures active throughout its minigame, immediately replacing collected or expired ones. Other fish retain one active treasure and their finite spawn count and delay. All pickups use the existing win-only reward path; escape loses the loot. `FishingMinigamePanel` draws every active treasure and coalesces simultaneous spawn/pickup sounds.
+
 | File | Owner / connection |
 |---|---|
 | `FishingMinigame.java` | Owns in-game bar/fish movement, progress/escape and treasure; advances movement -> treasure -> progress. Each target choice is the species' own move, its movement type's signature move (`specialChance`) or a move borrowed from the MIXED pool (`mixChance`). Any move of any kind that lands at least `MINIGAME_TELL_DISTANCE` from both the fish and its current target, with a speed limit of at least `MINIGAME_TELL_SPEED`, waits out a `MINIGAME_TELL_TIME` tell on the old course (`withTell`); nothing else gets one, and the opening move never does. A twitcher's signature bound lands before its next pick (`isBounding`). Uses runtime `FishConstants`, tackle, campaign inputs and live player-rate lookups. Hooked legendaries receive at least three Epic rewards. No dependency on the authoring tools. |
