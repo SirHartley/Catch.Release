@@ -115,7 +115,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
         harpoon.addTag(HarpoonConstants.TAG);
         harpoon.setLocation(from.x, from.y);
-        harpoon.setFacing(angleFromFleet);
+        harpoon.setFacing(Misc.getAngleInDegrees(from, worldTarget));
 
         Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_FIRE, 1f, 1f);
     }
@@ -162,25 +162,70 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
         float aimAngle = Misc.getAngleInDegrees(from, worldTarget);
         float distance = Misc.getDistance(from, worldTarget);
+        if (distance <= 0f) return worldTarget;
 
-        SectorEntityToken best = null;
+        float speed = UpgradeManager.getValue(StatIds.HARPOON_SPEED, HarpoonConstants.SPEED);
+
+        Vector2f best = null;
         float bestOff = assist;
+        float bestRange = Float.MAX_VALUE;
 
         for (SectorEntityToken mote : getStrikeableNearby(fleet, from)) {
-            float off = Math.abs(Misc.getAngleDiff(aimAngle,
-                    Misc.getAngleInDegrees(from, mote.getLocation())));
+            Vector2f velocity;
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) velocity = fish.getMovementVelocity();
+            else if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) velocity = buried.getMovementVelocity();
+            else continue;
+            Vector2f intercept = interceptPoint(from, mote.getLocation(), velocity, speed);
+            if (intercept == null) continue;
 
-            if (off > bestOff) continue;
+            float range = Misc.getDistance(from, intercept);
+            if (range <= 0f || range > HarpoonConstants.RANGE) continue;
+
+            float off = Math.abs(Misc.getAngleDiff(aimAngle,
+                    Misc.getAngleInDegrees(from, intercept)));
+
+            if (off > bestOff || (off == bestOff && range >= bestRange)) continue;
 
             bestOff = off;
-            best = mote;
+            bestRange = range;
+            best = intercept;
         }
 
         if (best == null) return worldTarget;
 
-        // aimed at the mote's bearing but kept at the player's own range - assist changes direction only, never how far the shot goes
+        // Only the launch direction changes; the projectile keeps its fixed range.
         return MathUtils.getPointOnCircumference(from, distance,
-                Misc.getAngleInDegrees(from, best.getLocation()));
+                Misc.getAngleInDegrees(from, best));
+    }
+
+    protected static Vector2f interceptPoint(Vector2f from, Vector2f target,
+                                             Vector2f velocity, float speed) {
+        if (!(speed > 0f) || !Float.isFinite(speed)) return null;
+
+        // Solve |target + velocity * t - from| = speed * t.
+        double x = target.x - from.x;
+        double y = target.y - from.y;
+        double a = (double) velocity.x * velocity.x + (double) velocity.y * velocity.y
+                - (double) speed * speed;
+        double b = 2d * (x * velocity.x + y * velocity.y);
+        double c = x * x + y * y;
+        if (c == 0d) return new Vector2f(target);
+
+        double time;
+        if (Math.abs(a) < 0.000001d) {
+            time = b < 0d ? -c / b : -1d;
+        } else {
+            double discriminant = b * b - 4d * a * c;
+            if (discriminant < 0d) return null;
+            double root = Math.sqrt(discriminant);
+            double first = (-b - root) / (2d * a);
+            double second = (-b + root) / (2d * a);
+            time = first > 0d && second > 0d ? Math.min(first, second) : Math.max(first, second);
+        }
+        if (!(time > 0d) || !Double.isFinite(time)) return null;
+
+        return new Vector2f((float) (target.x + velocity.x * time),
+                (float) (target.y + velocity.y * time));
     }
 
     protected List<SectorEntityToken> getStrikeableNearby(CampaignFleetAPI fleet, Vector2f from) {
