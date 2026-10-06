@@ -54,8 +54,8 @@ public final class FalseDawnCheck {
         protected void explode(Color color, float radius) {
         }
 
-        void pull(CampaignFleetAPI fleet, float amount) {
-            applyPull(fleet, amount);
+        @Override
+        protected void implode() {
         }
 
         boolean fired() {
@@ -327,17 +327,42 @@ public final class FalseDawnCheck {
         environment.stopped = false;
         stun.advance(0.1f);
         require(stun.stun() == 0f && !environment.stopped, "Stun releases without a persistent modifier");
-        for (int fps : new int[]{30, 60, 144}) {
-            Mine pull = new Mine();
-            pull.init(token(environment.local, new Vector2f(400f, 0f)), new HauntMineEntityPlugin.Params(HauntMineEntityPlugin.Kind.IMPLOSION));
+        for (Vector2f at : List.of(new Vector2f(100f, 0f), new Vector2f(0f, -200f),
+                new Vector2f(240f, 320f))) {
+            Mine push = new Mine();
+            push.init(token(environment.local, at), new HauntMineEntityPlugin.Params(HauntMineEntityPlugin.Kind.BLAST));
             environment.position.set(0f, 0f);
-            environment.velocity.set(-400f, 0f);
-            for (int i = 0; i < fps; i++) {
-                environment.velocity.x -= 300f / fps;
-                pull.pull(environment.player, 1f / fps);
-                environment.position.translate(environment.velocity.x / fps, environment.velocity.y / fps);
+            Vector2f start = new Vector2f(-400f, 90f);
+            environment.velocity.set(start);
+            push.detonate();
+            Vector2f pushImpulse = Vector2f.sub(environment.velocity, start, null);
+            Mine pull = new Mine();
+            pull.init(token(environment.local, at), new HauntMineEntityPlugin.Params(HauntMineEntityPlugin.Kind.IMPLOSION));
+            environment.velocity.set(start);
+            pull.detonate();
+            Vector2f pullImpulse = Vector2f.sub(environment.velocity, start, null);
+            require(Math.abs(pullImpulse.length() - HauntMineEntityPlugin.BLAST_PUSH_SPEED) < 0.01f,
+                    "Pull delivers full strength in one impulse");
+            require(Vector2f.add(pushImpulse, pullImpulse, null).length() < 0.01f,
+                    "Push and pull impulses are exact opposites");
+            require(Vector2f.dot(pullImpulse, at) > 0f, "Pull points towards the mine");
+            Vector2f after = new Vector2f(environment.velocity);
+            pull.detonate();
+            require(Vector2f.sub(environment.velocity, after, null).length() == 0f, "Cannot pull twice");
+            for (int fps : new int[]{30, 60, 144}) {
+                environment.velocity.set(start);
+                for (int i = 0; i < fps * 4; i++) pull.advance(1f / fps);
+                require(Vector2f.sub(environment.velocity, start, null).length() == 0f,
+                        "No ongoing attraction at " + fps + " Hz");
             }
-            require(environment.position.x > 200f, "Pull overcomes outward steering at " + fps + " Hz");
+        }
+        for (Vector2f at : List.of(new Vector2f(), new Vector2f(701f, 0f))) {
+            Mine pull = new Mine();
+            pull.init(token(environment.local, at), new HauntMineEntityPlugin.Params(HauntMineEntityPlugin.Kind.IMPLOSION));
+            environment.velocity.set(100f, 20f);
+            pull.detonate();
+            require(environment.velocity.x == 100f && environment.velocity.y == 20f,
+                    "No undefined centre impulse or out-of-range pull");
         }
         environment.position.set(0f, 0f);
         Field field = new Field(environment.local.api);
