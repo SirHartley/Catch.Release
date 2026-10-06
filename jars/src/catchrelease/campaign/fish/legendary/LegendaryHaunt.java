@@ -63,6 +63,15 @@ public class LegendaryHaunt implements EveryFrameScript {
         return activeSpeciesId;
     }
 
+    public static float getMantaLampAlpha() {
+        LegendaryHaunt haunt = getInstance();
+        if (haunt == null || haunt.activeSystem != Global.getSector().getCurrentLocation()) return 1f;
+        for (HauntModule module : haunt.modules) {
+            if (module instanceof MantaFormationModule manta) return manta.getLampAlpha();
+        }
+        return 1f;
+    }
+
     public float getIntensity() {
         return intensity;
     }

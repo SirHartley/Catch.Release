@@ -245,6 +245,9 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
     protected void renderImpression(Vector2f at, float alphaMult,
                                     float reveal, float revealMult, Color revealColor) {
+        float lampAlpha = catchrelease.campaign.fish.legendary.LegendaryHaunt.getMantaLampAlpha();
+        alphaMult *= lampAlpha;
+        revealMult *= lampAlpha;
         if (alphaMult <= 0f) return;
 
         float pulse = 1f + FishConstants.IMPRESSION_PULSE

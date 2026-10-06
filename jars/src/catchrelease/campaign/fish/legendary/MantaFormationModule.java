@@ -16,6 +16,7 @@ public class MantaFormationModule extends BaseHauntModule {
     protected final Vector2f step = new Vector2f();
     protected FishEntityPlugin real;
     protected int realSlot;
+    protected float flickerTime;
 
     public MantaFormationModule(StarSystemAPI system, FishSpec spec) {
         super(system, spec);
@@ -25,6 +26,7 @@ public class MantaFormationModule extends BaseHauntModule {
 
     @Override
     public void advance(float amount) {
+        flickerTime += amount;
         FishEntityPlugin current = findOwnMote();
         if (current != real) {
             clearFormation();
@@ -58,6 +60,13 @@ public class MantaFormationModule extends BaseHauntModule {
             slots[i].setLocation(at.x + (i - realSlot) * step.x,
                     at.y + (i - realSlot) * step.y);
         }
+    }
+
+    public float getLampAlpha() {
+        double wave = (Math.sin(flickerTime * 31) + Math.sin(flickerTime * 47.3)
+                + Math.sin(flickerTime * 11.7)) / 3;
+        float pulse = wave < -0.15 ? 0.08f : 0.8f + 0.2f * (float) wave;
+        return 1f - intensity * (1f - pulse);
     }
 
     protected void clearFormation() {
