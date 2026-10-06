@@ -298,6 +298,11 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 
 ### Minigame timing
 
+Manta minigames apply `ChromaticAberrationOverlay.renderRegion` after drawing the
+running panel. It shifts RGB samples only inside that panel, with pixel/UI scaling,
+and never registers a campaign listener. Both custom-dialog dismissal paths dispose
+its framebuffer texture, including dev reopens. Result readouts remain undistorted.
+
 The manta haunt's `MantaBackgroundBlackout` draws an opaque field at the start of
 Luna's `TERRAIN_1` renderer list. Vanilla draws background and stars before campaign
 layers (`CampaignState.render` in 0.98a-RC8); Luna draws plugins in registration order.

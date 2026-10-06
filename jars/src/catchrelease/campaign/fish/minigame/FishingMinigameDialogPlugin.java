@@ -183,11 +183,13 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         }
 
         protected void dismissPanel() {
+            panel.dispose();
             if (callbacks != null) callbacks.dismissDialog();
         }
 
         @Override
         public void reportDismissed(int option) {
+            panel.dispose();
             dismissed = true;
             resolve(minigame != null && minigame.isCaught());
         }

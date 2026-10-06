@@ -13,6 +13,8 @@ import catchrelease.rendering.helper.Disc;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.RoundedBorder;
 import catchrelease.rendering.plugins.WarpGrid;
+import catchrelease.rendering.plugins.ChromaticAberrationOverlay;
+import catchrelease.campaign.fish.legendary.MantaFormationModule;
 import catchrelease.rendering.plugins.WarpedRectRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
@@ -32,6 +34,7 @@ import java.util.List;
 public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     protected FishingMinigame minigame;
+    protected final ChromaticAberrationOverlay aberration;
     protected Listener listener;
     protected FishCatch specimen;
     protected SectorEntityToken where;
@@ -69,6 +72,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     public FishingMinigamePanel(FishingMinigame minigame, FishCatch specimen, SectorEntityToken where,
                                FishLogEntry.Method method, Listener listener) {
         this.minigame = minigame;
+        this.aberration = MantaFormationModule.SPECIES.equals(minigame.getFish().id)
+                ? new ChromaticAberrationOverlay() : null;
         this.specimen = specimen;
         this.where = where;
         this.method = method;
@@ -289,6 +294,14 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (result != null) result.render(layout, getFishSprite(), alphaMult);
         if (lootResult != null) lootResult.render(layout, alphaMult);
         if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
+        if (aberration != null && minigame.isRunning()) {
+            aberration.renderRegion(position.getX(), position.getY(),
+                    position.getWidth(), position.getHeight(), alphaMult);
+        }
+    }
+
+    public void dispose() {
+        if (aberration != null) aberration.dispose();
     }
 
     protected void renderFrame(FishingMinigameLayout layout, float alphaMult) {
