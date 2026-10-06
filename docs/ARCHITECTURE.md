@@ -404,7 +404,7 @@ options route to `catchrelease_intro_rod`, which owns the `giveRod` grant.
 | File | Owner / connection |
 |---|---|
 | `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. |
-| `LegendaryHaunt.java` | Transient coordinator. |
+| `LegendaryHaunt.java` | Transient coordinator. Starting a Lantern Jack haunt immediately restores its base shield; later deflections retain the normal cooldown. Stored shells are still earned by eating motes. |
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
 

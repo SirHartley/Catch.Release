@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.legendary;
 
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -190,6 +191,16 @@ public class LegendaryHaunt implements EveryFrameScript {
         activeSystem = here;
         intensity = 0f;
         sinceSeen = 0f;
+
+        if (LegendaryShields.CHARGE_SHIELD_SPECIES.equals(spec.id)) {
+            for (SectorEntityToken mote : here.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+                if (!mote.isExpired() && mote.getCustomPlugin() instanceof FishEntityPlugin fish
+                        && !fish.isPhantom() && fish.getFishSpec() != null
+                        && spec.id.equals(fish.getFishSpec().id)) {
+                    fish.restoreBaseShield();
+                }
+            }
+        }
 
         modules.addAll(buildModules(spec, here));
     }
