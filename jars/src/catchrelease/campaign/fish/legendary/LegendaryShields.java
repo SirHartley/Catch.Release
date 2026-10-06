@@ -183,7 +183,9 @@ public class LegendaryShields {
         if (fish == null || fish.isDecoy()) return false;
 
         fish.setHeld(false);
+        LegendaryChases.getState(fish.getFishSpec().id).provoked = true;
         if (MOTE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) QuorumShellGame.onFailedCatch(fish);
+        if (MORAY_SPECIES.equals(fish.getFishSpec().id)) LegendaryHaunt.onFailedCatch(fish);
         return true;
     }
 

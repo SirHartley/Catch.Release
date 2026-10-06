@@ -71,6 +71,19 @@ public class LegendaryHaunt implements EveryFrameScript {
         return activeSpeciesId;
     }
 
+    public static void onFailedCatch(FishEntityPlugin fish) {
+        LegendaryHaunt haunt = getInstance();
+        if (haunt == null || !(fish.getMote().getContainingLocation() instanceof StarSystemAPI system)
+                || system != Global.getSector().getCurrentLocation()) return;
+        FishSpec spec = fish.getFishSpec();
+        if (haunt.activeSystem != system || !spec.id.equals(haunt.activeSpeciesId)) {
+            haunt.stop();
+            haunt.start(spec, system);
+        }
+        haunt.sinceSeen = 0f;
+        for (HauntModule module : haunt.modules) module.onFailedCatch(fish);
+    }
+
     public static float getMantaLampAlpha() {
         LegendaryHaunt haunt = getInstance();
         if (haunt == null || haunt.activeSystem != Global.getSector().getCurrentLocation()) return 1f;

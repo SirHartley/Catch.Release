@@ -413,6 +413,7 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | File | Owner / connection |
 |---|---|
 | `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. |
+| `SlipDashModule.java` | Moray slipstream trail and curved travel dash. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Uses the existing trail roll-up and haunt cleanup. |
 | `QuorumShellGame.java` | Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. |
 | `LegendaryHaunt.java` | Transient coordinator. Starting a Lantern Jack haunt immediately restores its base shield; later deflections retain the normal cooldown. Stored shells are still earned by eating motes. |
 | `MantaBackgroundBlackout.java` | Manta-only 0.3-second background blackout every 15–40 unpaused seconds. First Luna renderer on `TERRAIN_1`, after vanilla background/starfield and before breach windows, motes, fleets and HUD. No saved background changes. `MantaFormationModule` swaps the real mote into a different stationary slot on blackout onset, preserving its target offset and shield/catch identity; swaps wait while held. Renderer expires outside its owning sector/system and is removed on haunt cleanup. |
@@ -431,6 +432,9 @@ Harpoon and drone failure callbacks release real legendary motes through
 `LegendaryShields.onFailedCatch` instead of fading them out. Ordinary fish,
 Quorum splinters and phantoms retain their previous failure handling. The callback
 path runs once per resolved minigame, not for a busy UI or a dev fish replacement.
+`LegendaryHaunt.onFailedCatch` starts the matching haunt if necessary, refreshes
+its sighting grace period and dispatches `HauntModule.onFailedCatch`; responses
+then advance through the existing coordinator, with no additional frame script.
 
 `tools/FalseDawnCheck` runs standalone checks for corona bounds, host selection,
 specimen lifetime, flare cleanup, mine forces, stun duration and minefield passages.
