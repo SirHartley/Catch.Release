@@ -102,12 +102,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    protected static class ShieldContact {
+    protected static class MoteContact {
 
         protected final SectorEntityToken mote;
         protected final float fraction;
 
-        protected ShieldContact(SectorEntityToken mote, float fraction) {
+        protected MoteContact(SectorEntityToken mote, float fraction) {
             this.mote = mote;
             this.fraction = fraction;
         }
@@ -171,19 +171,15 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     protected void advanceOutbound(float amount) {
         Vector2f from = new Vector2f(entity.getLocation());
-        float distance = getSpeed() * amount;
+        float distance = Math.min(getSpeed() * amount, Math.max(0f, HarpoonConstants.RANGE - distanceOut));
         move(heading, distance);
         distanceOut += distance;
 
-        ShieldContact contact = findShieldContact(from, entity.getLocation());
-        if (contact != null) {
-            Vector2f to = entity.getLocation();
-            entity.setLocation(from.x + (to.x - from.x) * contact.fraction,
-                    from.y + (to.y - from.y) * contact.fraction);
-            distanceOut -= distance * (1f - contact.fraction);
+        MoteContact shield = findMoteContact(from, entity.getLocation(), true);
+        if (shield != null) {
+            moveToContact(shield, from, entity.getLocation(), distance);
             playMoteHitSound();
-
-            if (handleShieldContact(contact.mote)) return;
+            if (handleShieldContact(shield.mote)) return;
         }
 
         // a mine answers to a thrown head - clearing the field from range is the
@@ -198,7 +194,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        SectorEntityToken hit = findMote();
+        SectorEntityToken hit = findMote(from, entity.getLocation(), distance);
 
         if (hit != null) {
             playMoteHitSound();
@@ -756,34 +752,40 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return TackleManager.get(Tackle.Fit.HARPOON).deepStrike;
     }
 
-    protected SectorEntityToken findMote() {
-        SectorEntityToken mote = findMoteWithTag(FishEntityPlugin.MOTE_TAG);
+    protected SectorEntityToken findMote(Vector2f from, Vector2f to, float distance) {
+        MoteContact contact = findMoteContact(from, to, false);
+        if (contact == null) return null;
 
-        // What the player's lamps exposed is the player's to take. NPC lines only fish ponds.
-        if (mote == null && owner == null) {
-            mote = findMoteWithTag(BuriedMoteEntityPlugin.BURIED_TAG);
-        }
+        moveToContact(contact, from, to, distance);
 
-        if (mote == null) return null;
+        SectorEntityToken mote = contact.mote;
         if (!(mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried)) return mote;
 
         return buried.unearth();
     }
 
-    protected ShieldContact findShieldContact(Vector2f from, Vector2f to) {
-        ShieldContact first = null;
+    protected void moveToContact(MoteContact contact, Vector2f from, Vector2f to, float distance) {
+        entity.setLocation(from.x + (to.x - from.x) * contact.fraction,
+                from.y + (to.y - from.y) * contact.fraction);
+        distanceOut -= distance * (1f - contact.fraction);
+    }
 
-        for (SectorEntityToken mote : entity.getContainingLocation()
-                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (!canTake(mote)) continue;
-            if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
-            if (!LegendaryShields.isShielded(fish)) continue;
+    protected MoteContact findMoteContact(Vector2f from, Vector2f to, boolean shieldsOnly) {
+        MoteContact first = null;
 
-            float fraction = getCircleEntry(from, to, mote.getLocation(),
-                    LegendaryShields.SHIELD_RADIUS);
-            if (fraction < 0f || (first != null && fraction >= first.fraction)) continue;
+        for (String tag : new String[]{FishEntityPlugin.MOTE_TAG, BuriedMoteEntityPlugin.BURIED_TAG}) {
+            if (owner != null && BuriedMoteEntityPlugin.BURIED_TAG.equals(tag)) continue;
+            for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(tag)) {
+                if (!canTake(mote)) continue;
+                boolean shielded = mote.getCustomPlugin() instanceof FishEntityPlugin fish
+                        && LegendaryShields.isShielded(fish);
+                if (shieldsOnly && !shielded) continue;
+                float radius = shielded ? LegendaryShields.SHIELD_RADIUS : HarpoonConstants.CATCH_RADIUS;
+                float fraction = getCircleEntry(from, to, mote.getLocation(), radius);
+                if (fraction < 0f || (first != null && fraction >= first.fraction)) continue;
 
-            first = new ShieldContact(mote, fraction);
+                first = new MoteContact(mote, fraction);
+            }
         }
 
         return first;
@@ -817,19 +819,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             if (Misc.getDistance(entity.getLocation(), mine.getLocation())
                     <= HarpoonConstants.CATCH_RADIUS) {
                 return mine;
-            }
-        }
-
-        return null;
-    }
-
-    protected SectorEntityToken findMoteWithTag(String tag) {
-        for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(tag)) {
-            if (!canTake(mote)) continue;
-
-            if (Misc.getDistance(entity.getLocation(), mote.getLocation())
-                    <= HarpoonConstants.CATCH_RADIUS) {
-                return mote;
             }
         }
 

@@ -127,6 +127,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private boolean held = false;
     private float stunLeft = 0f;
 
+    private transient float velocityX;
+    private transient float velocityY;
+    private transient float lastX;
+    private transient float lastY;
+    private transient boolean movementSampled;
+
     private float slowLeft = 0f;
     private float slowStrength = 0f;
 
@@ -268,6 +274,24 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public void advance(float amount) {
+        if (amount <= 0f) return;
+
+        float x = movementSampled ? lastX : entity.getLocation().x;
+        float y = movementSampled ? lastY : entity.getLocation().y;
+        advanceFish(amount);
+        lastX = entity.getLocation().x;
+        lastY = entity.getLocation().y;
+        movementSampled = true;
+        velocityX = (lastX - x) / amount;
+        velocityY = (lastY - y) / amount;
+    }
+
+    // Sample between callbacks too: shell-game decoys are moved by the real mote.
+    public Vector2f getMovementVelocity() {
+        return held ? new Vector2f() : new Vector2f(velocityX, velocityY);
+    }
+
+    protected void advanceFish(float amount) {
         time += amount;
         flicker.advance(amount);
         if (shieldFlash > 0f) shieldFlash -= amount;
