@@ -639,8 +639,11 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 enter(landed != null ? State.REELING : State.RETURNING);
 
                 if (landed == null) {
-                    if (isHookedValid()) Misc.fadeAndExpire(hooked, 1f);
+                    SectorEntityToken escaped = isHookedValid() ? hooked : null;
                     releaseHooked();
+                    if (escaped != null && !LegendaryShields.onFailedCatch(escaped)) {
+                        Misc.fadeAndExpire(escaped, 1f);
+                    }
                 }
             }
         });

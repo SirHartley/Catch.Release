@@ -34,6 +34,9 @@ public class QuorumShellGame {
     public static final float SWAP_MAX_SECONDS = 3.2f;
     public static final float SWAP_SECONDS = 0.6f;
     public static final float SPLIT_SECONDS = 0.8f;
+    public static final float ESCAPE_SPIN_SECONDS = 1.2f;
+    public static final int ESCAPE_ROTATIONS = 4;
+    public static final int ESCAPE_DECOYS = 12;
 
     protected static class Body {
 
@@ -42,6 +45,7 @@ public class QuorumShellGame {
         float fromAngle, toAngle, swapLeft;
         float radiusBias = 1f;
         float splitLeft;
+        boolean illusion;
     }
 
     protected static class State {
@@ -52,6 +56,7 @@ public class QuorumShellGame {
         float driftHeading;
         float driftPhase;
         float swapTimer = 2f;
+        float escapeSpinLeft;
     }
 
     // session-transient: rebuilt from the decoys' persisted anchors after a load
@@ -78,10 +83,27 @@ public class QuorumShellGame {
                 && (b.token == null || b.token.isExpired()));
 
         replenish(state);
-        shuffle(state, amount);
+        if (state.escapeSpinLeft <= 0f) shuffle(state, amount);
         place(state, amount);
 
         return true;
+    }
+
+    public static void onFailedCatch(FishEntityPlugin fish) {
+        if (!isShellPhase(fish)) return;
+        SectorEntityToken real = fish.getMote();
+        State state = states.computeIfAbsent(real, QuorumShellGame::start);
+        state.bodies.removeIf(b -> b.token != real && b.token.isExpired());
+        replenish(state);
+        for (Body body : state.bodies) {
+            body.swapLeft = 0f;
+            body.radiusBias = 1f;
+        }
+        while (state.bodies.stream().filter(b -> b.illusion).count() < ESCAPE_DECOYS) {
+            addDecoy(state, true);
+        }
+        state.escapeSpinLeft = ESCAPE_SPIN_SECONDS;
+        state.swapTimer = SWAP_MIN_SECONDS;
     }
 
     protected static boolean isShellPhase(FishEntityPlugin fish) {
@@ -118,6 +140,7 @@ public class QuorumShellGame {
 
             Body decoy = new Body();
             decoy.token = other;
+            decoy.illusion = plugin.isPhantom();
             decoy.angle = Misc.getAngleInDegrees(state.center, other.getLocation());
             state.bodies.add(decoy);
         }
@@ -126,26 +149,28 @@ public class QuorumShellGame {
     }
 
     protected static void replenish(State state) {
-        while (state.bodies.size() < DECOYS + 1) {
-            float slot = freeSlotAngle(state);
-
-            // an empty body is a splinter under the hood: same row, same minigame -
-            // the decoy anchor alone makes it glow and present in the real colours
-            FishEntityPlugin.Params params = new FishEntityPlugin.Params(
-                    new Vector2f(state.real.getLocation()),
-                    LegendaryShields.SHARD_SPECIES);
-            params.decoyAnchor = state.real;
-
-            SectorEntityToken token = state.real.getContainingLocation().addCustomEntity(
-                    Misc.genUID(), "Mote", "catchrelease_Mote", null, params);
-            token.setLocation(state.real.getLocation().x, state.real.getLocation().y);
-
-            Body decoy = new Body();
-            decoy.token = token;
-            decoy.angle = slot;
-            decoy.splitLeft = SPLIT_SECONDS;
-            state.bodies.add(decoy);
+        while (state.bodies.stream().filter(b -> !b.illusion).count() < DECOYS + 1) {
+            addDecoy(state, false);
         }
+    }
+
+    protected static void addDecoy(State state, boolean illusion) {
+        float slot = freeSlotAngle(state);
+        FishEntityPlugin.Params params = new FishEntityPlugin.Params(
+                new Vector2f(state.real.getLocation()), LegendaryShields.SHARD_SPECIES);
+        params.decoyAnchor = state.real;
+        params.phantom = illusion;
+
+        SectorEntityToken token = state.real.getContainingLocation().addCustomEntity(
+                Misc.genUID(), "Mote", "catchrelease_Mote", null, params);
+        token.setLocation(state.real.getLocation().x, state.real.getLocation().y);
+
+        Body decoy = new Body();
+        decoy.token = token;
+        decoy.angle = slot;
+        decoy.illusion = illusion;
+        decoy.splitLeft = SPLIT_SECONDS;
+        state.bodies.add(decoy);
     }
 
     protected static float freeSlotAngle(State state) {
@@ -153,12 +178,19 @@ public class QuorumShellGame {
         if (state.bodies.isEmpty()) return random.nextFloat() * 360f;
         if (state.bodies.size() == 1) return state.bodies.get(0).angle + 120f;
 
-        float a = normalize(state.bodies.get(0).angle);
-        float b = normalize(state.bodies.get(1).angle);
-        float low = Math.min(a, b), high = Math.max(a, b);
-        float inner = high - low, outer = 360f - inner;
-
-        return inner >= outer ? low + inner * 0.5f : high + outer * 0.5f;
+        List<Float> angles = new ArrayList<>();
+        for (Body body : state.bodies) angles.add(normalize(body.angle));
+        angles.sort(Float::compare);
+        float widest = -1f, slot = 0f;
+        for (int i = 0; i < angles.size(); i++) {
+            float from = angles.get(i);
+            float to = i + 1 < angles.size() ? angles.get(i + 1) : angles.get(0) + 360f;
+            if (to - from > widest) {
+                widest = to - from;
+                slot = from + widest * 0.5f;
+            }
+        }
+        return normalize(slot);
     }
 
     protected static void shuffle(State state, float amount) {
@@ -210,19 +242,23 @@ public class QuorumShellGame {
     }
 
     protected static void place(State state, float amount) {
+        float burst = Math.min(amount, state.escapeSpinLeft);
+        state.escapeSpinLeft -= burst;
+        float spin = burst * (360f * ESCAPE_ROTATIONS / ESCAPE_SPIN_SECONDS)
+                + (amount - burst) * SPIN_DEG_PER_SECOND;
         for (Body body : state.bodies) {
             if (isHeld(body)) continue;
-            body.angle += SPIN_DEG_PER_SECOND * amount;
+            body.angle += spin;
 
-            float radius = RING_RADIUS;
+            float radius = RING_RADIUS * (body.illusion ? 2.5f : 1f);
 
             if (body.swapLeft > 0f) {
                 body.swapLeft -= amount;
                 float t = 1f - Math.max(0f, body.swapLeft) / SWAP_SECONDS;
                 float eased = t * t * (3f - 2f * t);
 
-                body.fromAngle += SPIN_DEG_PER_SECOND * amount;
-                body.toAngle += SPIN_DEG_PER_SECOND * amount;
+                body.fromAngle += spin;
+                body.toAngle += spin;
                 body.angle = lerpAngle(body.fromAngle, body.toAngle, eased);
                 radius *= 1f + (body.radiusBias - 1f) * (float) Math.sin(Math.PI * t);
                 if (body.swapLeft <= 0f) body.radiusBias = 1f;

@@ -381,11 +381,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
     protected void resolveCatch(SectorEntityToken drone, SectorEntityToken mote, boolean caught) {
         FishingDroneEntityPlugin plugin = getPlugin(drone);
-        if (plugin == null) return;
+        if (plugin != null) plugin.recall(caught ? mote : null);
 
-        plugin.recall(caught ? mote : null);
-
-        if (!caught && !mote.isExpired()) Misc.fadeAndExpire(mote, 1f);
+        if (!caught && !mote.isExpired()
+                && !catchrelease.campaign.fish.legendary.LegendaryShields.onFailedCatch(mote)) {
+            Misc.fadeAndExpire(mote, 1f);
+        }
 
         Global.getLogger(FishingDroneSwarmScript.class).info(caught ? "Landed a catch" : "The fish got away");
     }

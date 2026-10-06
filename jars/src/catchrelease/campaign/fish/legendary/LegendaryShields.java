@@ -177,6 +177,16 @@ public class LegendaryShields {
         }
     }
 
+    public static boolean onFailedCatch(SectorEntityToken mote) {
+        if (mote == null || mote.isExpired() || mote.getContainingLocation() == null) return false;
+        FishEntityPlugin fish = asLegendaryMote(mote);
+        if (fish == null || fish.isDecoy()) return false;
+
+        fish.setHeld(false);
+        if (MOTE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) QuorumShellGame.onFailedCatch(fish);
+        return true;
+    }
+
     /** The unpopped Longliner does not fight back yet - it just shrugs and swims. */
     public static boolean isHauntSuppressed(FishSpec spec) {
         return spec != null && POP_SHIELD_SPECIES.equals(spec.id)
