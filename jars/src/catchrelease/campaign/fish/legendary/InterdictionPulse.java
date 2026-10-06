@@ -32,10 +32,6 @@ public final class InterdictionPulse {
             ability.setCooldownLeft(Math.max(ability.getCooldownLeft(),
                     ABILITY_COOLDOWN_DAYS));
         }
-
-        Global.getSector().getCampaignUI().addMessage(
-                "Interdiction pulse detected. No source appears on the sensor plot.",
-                Misc.getNegativeHighlightColor());
     }
 
     /** The abort-side release: a lingering lockout would be a trace of the haunt. */
