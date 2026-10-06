@@ -23,6 +23,9 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
     protected float time = 0f;
     protected float sineVariance = 1f;
 
+    private transient float velocityX;
+    private transient float velocityY;
+
     public static class Params {
 
         public final String fishId;
@@ -73,6 +76,20 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public void advance(float amount) {
+        if (amount <= 0f) return;
+
+        float x = entity.getLocation().x;
+        float y = entity.getLocation().y;
+        advanceFish(amount);
+        velocityX = (entity.getLocation().x - x) / amount;
+        velocityY = (entity.getLocation().y - y) / amount;
+    }
+
+    public Vector2f getMovementVelocity() {
+        return new Vector2f(velocityX, velocityY);
+    }
+
+    protected void advanceFish(float amount) {
         time += amount;
         headingLeft -= amount;
 
