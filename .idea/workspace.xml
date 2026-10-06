@@ -1,7 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="tooltip formatting updates">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="todos">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/fish.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/fish.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-44-36/attempts.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-44-36/frames.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-44-36/session.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-44-58/attempts.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-44-58/frames.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-44-58/session.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-44-58/summary.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-52-47/attempts.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-52-47/frames.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-52-47/session.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-52-47/summary.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-58-58/attempts.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-58-58/frames.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-58-58/session.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_17-58-58/summary.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_18-07-59/attempts.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_18-07-59/frames.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_18-07-59/session.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/2026-09-26_18-07-59/summary.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fish-recordings/fish-recordings.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/InterdictionPulse.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/InterdictionPulse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -142,7 +165,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fucked it up" />
     <MESSAGE value="concept" />
     <MESSAGE value="harpoon explosive head" />
     <MESSAGE value="shield colour adjustments" />
@@ -167,7 +189,8 @@
     <MESSAGE value="rules work" />
     <MESSAGE value="fleet visibility indicator work" />
     <MESSAGE value="tooltip formatting updates" />
-    <option name="LAST_COMMIT_MESSAGE" value="tooltip formatting updates" />
+    <MESSAGE value="todos" />
+    <option name="LAST_COMMIT_MESSAGE" value="todos" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
