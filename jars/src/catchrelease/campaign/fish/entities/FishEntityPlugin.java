@@ -557,6 +557,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         mantaFormation = formation;
     }
 
+    public void shiftMantaPosition(float dx, float dy) {
+        entity.setLocation(entity.getLocation().x + dx, entity.getLocation().y + dy);
+        if (target != null) target.translate(dx, dy);
+        // A slot change is not swimming velocity for the harpoon's lead indicator.
+        lastX += dx;
+        lastY += dy;
+    }
+
     protected FishEntityPlugin getMantaVisualSource() {
         if (mantaFormation != null && phantom && decoyAnchor != null
                 && decoyAnchor.getCustomPlugin() instanceof FishEntityPlugin fish) return fish;

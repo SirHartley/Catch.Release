@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.legendary;
 
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.rendering.plugins.MantaBackgroundBlackout;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -11,17 +12,24 @@ public class MantaFormationModule extends BaseHauntModule {
 
     public static final String SPECIES = "abyssal_ghost_manta";
     public static final float SPACING = 180f;
+    public static final float BLACKOUT_SECONDS = 0.3f;
+    public static final float BLACKOUT_MIN = 15f;
+    public static final float BLACKOUT_MAX = 40f;
 
     protected final SectorEntityToken[] slots = new SectorEntityToken[3];
     protected final Vector2f step = new Vector2f();
     protected FishEntityPlugin real;
     protected int realSlot;
     protected float flickerTime;
+    protected float blackoutLeft;
+    protected float blackoutTimer;
+    protected MantaBackgroundBlackout blackout;
 
     public MantaFormationModule(StarSystemAPI system, FishSpec spec) {
         super(system, spec);
         double angle = random.nextDouble() * Math.PI * 2;
         step.set((float) Math.cos(angle) * SPACING, (float) Math.sin(angle) * SPACING);
+        blackoutTimer = nextBlackout();
     }
 
     @Override
@@ -50,6 +58,37 @@ public class MantaFormationModule extends BaseHauntModule {
             ((FishEntityPlugin) slots[i].getCustomPlugin()).setMantaFormation(this);
         }
         sync();
+        advanceBlackout(amount);
+    }
+
+    protected float nextBlackout() {
+        return BLACKOUT_MIN + random.nextFloat() * (BLACKOUT_MAX - BLACKOUT_MIN);
+    }
+
+    protected void advanceBlackout(float amount) {
+        blackoutLeft = Math.max(0f, blackoutLeft - amount);
+        blackoutTimer -= amount;
+        if (blackoutTimer <= 0f && !real.isHeld()) {
+            swapRealSlot();
+            blackoutLeft = BLACKOUT_SECONDS;
+            blackoutTimer = nextBlackout();
+        }
+        showBlackout(blackoutLeft > 0f);
+    }
+
+    protected void showBlackout(boolean visible) {
+        if (blackout == null && visible) blackout = new MantaBackgroundBlackout(system);
+        if (blackout != null) blackout.setVisible(visible);
+    }
+
+    protected void swapRealSlot() {
+        int next = (realSlot + 1 + random.nextInt(slots.length - 1)) % slots.length;
+        SectorEntityToken displaced = slots[next];
+        real.shiftMantaPosition((next - realSlot) * step.x, (next - realSlot) * step.y);
+        slots[next] = slots[realSlot];
+        slots[realSlot] = displaced;
+        realSlot = next;
+        sync();
     }
 
     public void sync() {
@@ -70,6 +109,8 @@ public class MantaFormationModule extends BaseHauntModule {
     }
 
     protected void clearFormation() {
+        blackoutLeft = 0f;
+        showBlackout(false);
         if (real != null) real.setMantaFormation(null);
         for (SectorEntityToken token : spawned) {
             if (token.getCustomPlugin() instanceof FishEntityPlugin fish) {
@@ -84,5 +125,7 @@ public class MantaFormationModule extends BaseHauntModule {
     @Override
     public void cleanup() {
         clearFormation();
+        if (blackout != null) blackout.cleanup();
+        blackout = null;
     }
 }
