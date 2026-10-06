@@ -224,6 +224,7 @@ public class LegendaryHaunt implements EveryFrameScript {
             case "lantern_jack" -> {
                 out.add(new FakeWrecksModule(system, spec));
                 out.add(new GhostFleetsModule(system, spec));
+                out.add(new LanternSensorGhostsModule(system, spec));
             }
             case "slipstream_moray" -> {
                 out.add(new MoteDashModule(system, spec));
