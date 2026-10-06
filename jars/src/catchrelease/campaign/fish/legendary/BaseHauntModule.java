@@ -98,7 +98,6 @@ public abstract class BaseHauntModule implements HauntModule {
 
         if (entity instanceof CampaignFleetAPI fleet) {
             fleet.despawn(FleetDespawnReason.OTHER, null);
-            return;
         }
 
         if (entity.getContainingLocation() != null) {

@@ -17,6 +17,7 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.HauntMineEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
+import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.campaign.fish.minigame.FishingMinigameDialogPlugin;
 import catchrelease.helper.loading.SpriteLoader;
@@ -528,6 +529,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     public static boolean isHaulable(CampaignFleetAPI other) {
         if (other.isExpired() || !other.isAlive()) return false;
+        if (other.hasTag(LegendaryHaunt.HAUNT_TAG)) return false;
         if (other.isStationMode() || other.isHidden() || other.isDespawning()) return false;
         if (other.isInHyperspaceTransition()) return false;
 

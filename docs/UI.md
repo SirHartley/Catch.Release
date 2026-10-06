@@ -300,8 +300,12 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 
 - A telegraphed move shows a tell for `MINIGAME_TELL_TIME` before it starts: the drawn marker leans toward the coming move and bobs twice, eased in and out so the path has no corners, peaking at about 5 px. Ordinary jitter calms to 15% over the same envelope (`MINIGAME_TELL_CALM`), the fish's glow flares over the same envelope, and from 35% of the tell a small detached glow mote slips about 34 px toward the move and fades out before the fish follows. The lean and calm are drawn position and are mirrored by the tools' simulation; the flare and mote are overlays, which the tools' `FishPreview` draws in the same colours but the simulation does not model. None of them moves the hit position. `getJitter` also reads `getTellProgress()`, which the parity check maps to the tool's `tellProgress` parameter. `getTell` depends only on its arguments, and `FishingParityChecks` compares its body with `FishingSimulation.tell` as text, so keep the body brace-free. Its size grows with the species' jitter so shaky fish still show it.
 - The line sound uses one continuously refreshed UI loop with changing volume.
+- Lantern Jack has two active treasure icons; each keeps its own timer and capture ring. The panel reads `FishingMinigame.getTreasures()` and plays each kind of treasure sound at most once per frame when several spawn or are taken together.
 - The loot result has a backdrop clock that starts when the panel is created and
   a list clock that starts after the catch tally. Coin rain uses the backdrop clock.
+  Long loot lists are clipped below the chest and title, follow new reward lines,
+  and support mouse-wheel scrolling and a draggable scrollbar without dismissing
+  the result. Manual scrolling stops automatic following; rewards remain uncapped.
 
 ### Fish difficulty tuner
 

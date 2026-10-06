@@ -4,7 +4,6 @@ import catchrelease.campaign.fish.data.FishSpec;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
-import com.fs.starfarer.api.campaign.CampaignEventListener.FleetDespawnReason;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
@@ -24,20 +23,30 @@ import java.util.Map;
 public class GhostFleetsModule extends BaseHauntModule {
 
     public static final int MAX_ALIVE = 2;
-    public static final float FIRST_MIN_SECONDS = 12f;
-    public static final float FIRST_MAX_SECONDS = 25f;
-    public static final float SPAWN_MIN_SECONDS = 40f;
-    public static final float SPAWN_MAX_SECONDS = 80f;
+    public static final float FIRST_MIN_SECONDS = 5f;
+    public static final float FIRST_MAX_SECONDS = 10f;
+    public static final float SPAWN_MIN_SECONDS = 15f;
+    public static final float SPAWN_MAX_SECONDS = 25f;
     public static final float SPAWN_RANGE_MIN = 1000f;
     public static final float SPAWN_RANGE_MAX = 1600f;
-    public static final float VANISH_RANGE = 500f;
-    public static final float MAX_AGE_SECONDS = 120f;
+    public static final float VANISH_RANGE = 250f;
+    public static final float MAX_AGE_SECONDS = 30f;
+    public static final float LINGER_CHANCE = 0.5f;
+    public static final float LINGER_MIN_SECONDS = 3f;
+    public static final float LINGER_MAX_SECONDS = 7f;
 
     public static final String[] VARIANTS = {
             "hound_Standard", "cerberus_Standard", "buffalo_Standard", "wayfarer_Standard"};
 
     protected float spawnTimer;
-    protected final Map<CampaignFleetAPI, Float> ghosts = new LinkedHashMap<>();
+    protected final Map<CampaignFleetAPI, Ghost> ghosts = new LinkedHashMap<>();
+
+    protected static class Ghost {
+
+        float age;
+        float lingerAt = Float.POSITIVE_INFINITY;
+        boolean lingering;
+    }
 
     public GhostFleetsModule(StarSystemAPI system, FishSpec spec) {
         super(system, spec);
@@ -47,7 +56,9 @@ public class GhostFleetsModule extends BaseHauntModule {
 
     @Override
     public void advance(float amount) {
-        ghosts.keySet().removeIf(g -> g == null || g.isExpired() || !g.isAlive());
+        prune();
+        ghosts.keySet().removeIf(g -> g == null || g.isExpired() || !g.isAlive()
+                || g.getContainingLocation() != system);
 
         spawnTimer -= amount;
         if (spawnTimer <= 0f && ghosts.size() < MAX_ALIVE && atFullIntensity()) {
@@ -57,13 +68,16 @@ public class GhostFleetsModule extends BaseHauntModule {
         }
 
         for (CampaignFleetAPI ghost : new ArrayList<>(ghosts.keySet())) {
-            float age = ghosts.get(ghost) + amount;
-            ghosts.put(ghost, age);
+            Ghost state = ghosts.get(ghost);
+            state.age += amount;
 
-            if (age >= MAX_AGE_SECONDS || distanceToPlayer(ghost) < VANISH_RANGE) {
-                // sudden, not faded: it should read as never having been there
-                ghost.despawn(FleetDespawnReason.OTHER, null);
+            if (state.age >= MAX_AGE_SECONDS || distanceToPlayer(ghost) <= VANISH_RANGE) {
+                removeHard(ghost);
                 ghosts.remove(ghost);
+            } else if (!state.lingering && state.age >= state.lingerAt) {
+                ghost.clearAssignments();
+                ghost.addAssignment(FleetAssignment.HOLD, null, 30f);
+                state.lingering = true;
             }
         }
     }
@@ -72,7 +86,7 @@ public class GhostFleetsModule extends BaseHauntModule {
         CampaignFleetAPI fleet = Global.getFactory()
                 .createEmptyFleet(Factions.NEUTRAL, "Unidentified", true);
 
-        int ships = 2 + random.nextInt(3);
+        int ships = 2 + random.nextInt(14);
         for (int i = 0; i < ships; i++) {
             fleet.getFleetData().addFleetMember(Global.getFactory().createFleetMember(
                     FleetMemberType.SHIP, VARIANTS[random.nextInt(VARIANTS.length)]));
@@ -86,11 +100,14 @@ public class GhostFleetsModule extends BaseHauntModule {
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_IGNORE_PLAYER_COMMS, true);
         fleet.getMemoryWithoutUpdate().set(MemFlags.FLEET_NO_MILITARY_RESPONSE, true);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_NO_REP_IMPACT, true);
+        fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_FORCE_TRANSPONDER_OFF, true);
+        // INTERCEPT can override the ignore flags for its explicit target.
+        fleet.setNoEngaging(MAX_AGE_SECONDS + 30f);
 
-        // hand-built fleets need the sync vanilla's CustomFleets recipe does, and a
-        // dark frigate pack is invisible at spawn range without a detection bump -
-        // the whole point is being seen bearing down
+        // Sync before reading burn; transponder-off frigates need a sensor boost.
         fleet.forceSync();
+        float burn = fleet.getFleetData().getMinBurnLevel();
+        if (burn < 8f) fleet.getStats().getFleetwideMaxBurnMod().modifyFlat("catchrelease_ghost", 8f - burn);
         fleet.getStats().getDetectedRangeMod().modifyFlat("catchrelease_ghost", 3000f);
 
         Vector2f at = nearPlayer(SPAWN_RANGE_MIN, SPAWN_RANGE_MAX);
@@ -101,7 +118,11 @@ public class GhostFleetsModule extends BaseHauntModule {
                 Global.getSector().getPlayerFleet(), 30f);
 
         track(fleet);
-        ghosts.put(fleet, 0f);
+        Ghost state = new Ghost();
+        if (random.nextFloat() < LINGER_CHANCE) {
+            state.lingerAt = MathUtils.getRandomNumberInRange(LINGER_MIN_SECONDS, LINGER_MAX_SECONDS);
+        }
+        ghosts.put(fleet, state);
     }
 
     @Override

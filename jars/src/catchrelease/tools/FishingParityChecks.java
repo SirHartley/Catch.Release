@@ -99,9 +99,13 @@ public class FishingParityChecks {
         protected void rollTreasure() {
             // Treasure consumes random draws unrelated to the catch model.
             takenTreasures.clear();
-            treasure = null;
+            treasures.clear();
             treasuresLeft = 0;
             treasureClock = 0f;
+        }
+
+        @Override
+        protected void advanceTreasure(float amount) {
         }
     }
 

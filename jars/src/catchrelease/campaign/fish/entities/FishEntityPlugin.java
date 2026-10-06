@@ -590,6 +590,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return baseShieldRegen <= 0f;
     }
 
+    public void restoreBaseShield() {
+        baseShieldRegen = 0f;
+        flashShield();
+    }
+
     public boolean tryBaseShieldDeflect() {
         if (!isBaseShieldUp()) return false;
 
