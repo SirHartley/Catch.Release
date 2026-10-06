@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.fisherman.FishermanMapIcon;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
+import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.campaign.fish.legendary.LonglinerDecoy;
 import catchrelease.campaign.ponds.constants.PondConstants;
@@ -178,6 +179,10 @@ public class SpawnFish implements BaseCommandWithSuggestion {
                 Misc.genUID(), null, FishConstants.BURIED_ENTITY_ID, null,
                 new BuriedMoteEntityPlugin.Params(spec.id));
         buried.setLocation(at.x, at.y);
+        if (!FalseDawnOrbit.confine(buried, spec.id)) {
+            buried.setExpired(true);
+            return null;
+        }
 
         return buried;
     }

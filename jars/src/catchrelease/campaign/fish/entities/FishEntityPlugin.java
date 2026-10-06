@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
+import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
 import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -280,6 +281,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float x = movementSampled ? lastX : entity.getLocation().x;
         float y = movementSampled ? lastY : entity.getLocation().y;
         advanceFish(amount);
+        if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
         if (mantaFormation != null) mantaFormation.sync();
         lastX = entity.getLocation().x;
         lastY = entity.getLocation().y;
@@ -344,6 +346,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float step = MOVE_SPEED * getSpeedMult() * getSlowMult()
                 * LegendaryShields.getSpeedMult(this) * getLureSpeedMult()
                 * (diving ? 1f : advanceMode(amount)) * amount;
+        // A submerged False Dawn follows the corona too; straight dive headings can cross the star.
+        if (!phantom && FalseDawnOrbit.advance(entity, fishId, step, time)) return;
         float distance = Misc.getDistance(entity.getLocation(), target);
 
         if (step >= distance) {

@@ -34,9 +34,14 @@ public class LegendaryHaunt implements EveryFrameScript {
     protected final List<HauntModule> modules = new ArrayList<>();
     protected float intensity;
     protected float sinceSeen;
+    protected final FalseDawnCorona corona = new FalseDawnCorona();
 
     public static void register() {
-        Global.getSector().addTransientScript(new LegendaryHaunt());
+        LegendaryHaunt haunt = new LegendaryHaunt();
+        FalseDawnCorona.beforeSave();
+        Global.getSector().getListenerManager().removeListenerOfClass(FalseDawnCorona.class);
+        Global.getSector().getListenerManager().addListener(haunt.corona, true);
+        Global.getSector().addTransientScript(haunt);
 
         sweepLeftovers();
     }
@@ -45,7 +50,10 @@ public class LegendaryHaunt implements EveryFrameScript {
         if (Global.getSector() == null) return;
 
         for (EveryFrameScript script : new ArrayList<>(Global.getSector().getTransientScripts())) {
-            if (script instanceof LegendaryHaunt haunt) haunt.stop();
+            if (script instanceof LegendaryHaunt haunt) {
+                haunt.stop();
+                haunt.corona.reportCurrentLocationChanged(null, null);
+            }
         }
     }
 
@@ -112,6 +120,7 @@ public class LegendaryHaunt implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
+        corona.advance();
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         StarSystemAPI here = player != null
                 && player.getContainingLocation() instanceof StarSystemAPI system
