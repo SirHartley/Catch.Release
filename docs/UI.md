@@ -302,6 +302,10 @@ Manta minigames apply `ChromaticAberrationOverlay.renderRegion` after drawing th
 running panel. It shifts RGB samples only inside that panel, with pixel/UI scaling,
 and never registers a campaign listener. Both custom-dialog dismissal paths dispose
 its framebuffer texture, including dev reopens. Result readouts remain undistorted.
+The two minigame decoys reuse the real fish's marker style and the same jitter/tell
+renderer with their own motion state. Only the real model drives the bar colour and
+coverage sounds; decoys do not capture treasure or produce catches. The parity check
+reads the model-parameterized `getJitter` body; keep its math aligned with the tools.
 
 The manta haunt's `MantaBackgroundBlackout` draws an opaque field at the start of
 Luna's `TERRAIN_1` renderer list. Vanilla draws background and stars before campaign

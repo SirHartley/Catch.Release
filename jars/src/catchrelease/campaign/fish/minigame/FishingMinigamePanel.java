@@ -405,13 +405,20 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     protected void renderFish(FishingMinigameLayout layout, float alphaMult) {
-        float progress = minigame.getTellProgress();
-        float direction = minigame.getTellDirection();
+        if (minigame instanceof MantaMinigame manta) {
+            for (FishingMinigame decoy : manta.getDecoys()) renderFish(decoy, layout, alphaMult);
+        }
+        renderFish(minigame, layout, alphaMult);
+    }
+
+    protected void renderFish(FishingMinigame motion, FishingMinigameLayout layout, float alphaMult) {
+        float progress = motion.getTellProgress();
+        float direction = motion.getTellDirection();
 
         // jitter and the tell are visual only; the hit position the rules use is unaffected
-        float centerX = layout.getTrackCenterX() + getJitter(0f);
-        float centerY = layout.getTrackY(minigame.getFishPosition()) + getJitter(1.7f)
-                + getTell(progress, direction, minigame.getFish().jitter);
+        float centerX = layout.getTrackCenterX() + getJitter(motion, 0f);
+        float centerY = layout.getTrackY(motion.getFishPosition()) + getJitter(motion, 1.7f)
+                + getTell(progress, direction, motion.getFish().jitter);
 
         renderTellFlare(centerX, centerY, progress, alphaMult);
         renderMarker(centerX, centerY, alphaMult);
@@ -603,7 +610,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 color, 0.8f * alphaMult);
     }
 
-    protected float getJitter(float offset) {
+    protected float getJitter(FishingMinigame minigame, float offset) {
         float time = (jitterTime + offset) * FishConstants.MINIGAME_FISH_JITTER_SPEED;
 
         float wobble = (float) (Math.sin(time) * 0.5f

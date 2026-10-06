@@ -279,7 +279,8 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         // tackle sizes the window and rolls treasure; read once before anything is rolled
         Tackle tackle = TackleManager.get(method);
         LocationAPI location = anchor == null ? null : anchor.getContainingLocation();
-        this.minigame = new FishingMinigame(fish, tackle, location);
+        this.minigame = catchrelease.campaign.fish.legendary.MantaFormationModule.SPECIES.equals(fish.id)
+                ? new MantaMinigame(fish, tackle, location) : new FishingMinigame(fish, tackle, location);
         this.minigame.setPresentedColor(catchrelease.campaign.fish.legendary
                 .LegendaryShields.getPresentedColor(fish, catchTarget));
 

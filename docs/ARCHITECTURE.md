@@ -103,6 +103,12 @@ it refuses to run with existing game globals and clears its globals on exit.
 unchanged. No duplicate game classes, source rewriting or separate test tree.
 This covers deterministic catch traces, tells, and the jitter and tell formulas, not treasure or the engine.
 
+`tools/MantaHauntChecks` verifies formation spacing, stationary slots during swaps,
+blackout duration/interval, held-target safety and cleanup. `tools/MantaMinigameChecks`
+compares decoy motion/tells against the real model at 30/60/144 Hz and checks
+real-only scoring, treasure isolation and restart/end behavior. These are standalone
+checks with API proxies; they do not test OpenGL output or engine callback ordering.
+
 The tuner's Balance results tab uses `tools/FishBalance` for immutable run
 snapshots, per-attempt telemetry and bounded parallel batches; its `game` and
 `visibleFish` also build the simulation and drawn position for Record play. `FishBalancePanel`
@@ -340,6 +346,7 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 |---|---|
 | `FishingMinigame.java` | Owns in-game bar/fish movement, progress/escape and treasure; advances movement -> treasure -> progress. Each target choice is the species' own move, its movement type's signature move (`specialChance`) or a move borrowed from the MIXED pool (`mixChance`). Any move of any kind that lands at least `MINIGAME_TELL_DISTANCE` from both the fish and its current target, with a speed limit of at least `MINIGAME_TELL_SPEED`, waits out a `MINIGAME_TELL_TIME` tell on the old course (`withTell`); nothing else gets one, and the opening move never does. A twitcher's signature bound lands before its next pick (`isBounding`). Uses runtime `FishConstants`, tackle, campaign inputs and live player-rate lookups. Legendary treasures are Epic. No dependency on the authoring tools. |
 | `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure, including the tell before a telegraphed move; handles input; records bycatch, catch intel, route progress, and legendary completion. Manta fights own a panel-bounded `ChromaticAberrationOverlay` instance, disposed by both dialog-dismiss paths; campaign aberration still excludes dialogs. |
+| `MantaMinigame.java` | Manta-only model selected by the dialog. Two independent motion-only decoys call the same `FishingMinigame.advanceFish`; each has its own targets, velocity and tells, but no treasure/progress/rewards. Opening positions are shuffled across all three. The panel renders all with the real target's presentation (including sonar/chicken); only the real model controls green-bar coverage, catch progress and sound hooks. Restart resets all three; ending stops them. |
 | `FishingMinigameDialogPlugin.java` | Hosts the custom visual, preserves source rupture and quest identity for drone and harpoon catches, applies tutorial catch protection, preserves campaign music, and exposes dev reopens that bypass substitution. |
 
 ### `campaign/fish/entities` and `campaign/fish/spawner`
