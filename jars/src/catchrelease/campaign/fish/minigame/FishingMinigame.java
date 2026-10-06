@@ -13,6 +13,9 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import org.lazywizard.lazylib.MathUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FishingMinigame {
 
     public enum State {
@@ -21,6 +24,8 @@ public class FishingMinigame {
         CAUGHT,
         ESCAPED
     }
+
+    public static final int LANTERN_TREASURE_LIMIT = 2;
 
     protected FishSpec fish;
     protected float difficulty;
@@ -50,8 +55,8 @@ public class FishingMinigame {
     protected float fishVelocity = 0f;
 
     protected float progress = FishConstants.MINIGAME_PROGRESS_START;
-    protected MinigameTreasure treasure;
-    protected final java.util.List<MinigameTreasure> takenTreasures = new java.util.ArrayList<>();
+    protected final List<MinigameTreasure> treasures = new ArrayList<>();
+    protected final List<MinigameTreasure> takenTreasures = new ArrayList<>();
     protected int treasuresLeft = 0;
     protected float treasureClock = 0f;
     protected Tackle tackle = Tackle.NONE;
@@ -100,8 +105,14 @@ public class FishingMinigame {
     }
 
     protected void rollTreasure() {
+        treasures.clear();
         takenTreasures.clear();
         treasureClock = 0f;
+        if (hasEndlessTreasure()) {
+            treasuresLeft = 0;
+            for (int i = 0; i < LANTERN_TREASURE_LIMIT; i++) treasures.add(spawnTreasure());
+            return;
+        }
         treasuresLeft = TreasureRoller.rollCount(
                 tackle.treasureChanceMult * rumorLootMult);
 
@@ -110,13 +121,20 @@ public class FishingMinigame {
             treasuresLeft = Math.max(3, treasuresLeft);
         }
 
-        treasure = spawnTreasure();
+        MinigameTreasure first = spawnTreasure();
+        if (first != null) treasures.add(first);
+    }
+
+    protected boolean hasEndlessTreasure() {
+        return "lantern_jack".equals(fish.id);
     }
 
     protected MinigameTreasure spawnTreasure() {
-        if (treasuresLeft <= 0) return null;
+        if (!hasEndlessTreasure()) {
+            if (treasuresLeft <= 0) return null;
+            treasuresLeft--;
+        }
 
-        treasuresLeft--;
         if (fish.rarity == FishRarity.LEGENDARY) {
             return new MinigameTreasure(TreasureRarity.EPIC);
         }
@@ -271,30 +289,38 @@ public class FishingMinigame {
     }
 
     protected void advanceTreasure(float amount) {
-        if (treasure != null && treasure.isActive()) {
+        boolean removed = false;
+        for (var it = treasures.iterator(); it.hasNext();) {
+            MinigameTreasure treasure = it.next();
             treasure.advance(amount, covers(treasure.position));
-
             if (treasure.isTaken()) takenTreasures.add(treasure);
-            if (!treasure.isActive()) treasureClock = FishConstants.TREASURE_SPAWN_INTERVAL;
-
+            if (!treasure.isActive()) {
+                it.remove();
+                removed = true;
+            }
+        }
+        if (hasEndlessTreasure()) {
+            while (treasures.size() < LANTERN_TREASURE_LIMIT) treasures.add(spawnTreasure());
             return;
         }
-
-        if (treasuresLeft <= 0) return;
-
+        if (removed) {
+            treasureClock = FishConstants.TREASURE_SPAWN_INTERVAL;
+            return;
+        }
+        if (!treasures.isEmpty() || treasuresLeft <= 0) return;
         treasureClock -= amount;
-        if (treasureClock <= 0f) treasure = spawnTreasure();
+        if (treasureClock <= 0f) treasures.add(spawnTreasure());
     }
 
     public Tackle getTackle() {
         return tackle;
     }
 
-    public MinigameTreasure getTreasure() {
-        return treasure;
+    public List<MinigameTreasure> getTreasures() {
+        return treasures;
     }
 
-    public java.util.List<MinigameTreasure> getTakenTreasures() {
+    public List<MinigameTreasure> getTakenTreasures() {
         return takenTreasures;
     }
 
@@ -585,8 +611,10 @@ public class FishingMinigame {
     }
 
     public void devSpawnTreasure() {
-        treasuresLeft++;
-        treasure = spawnTreasure();
+        int limit = hasEndlessTreasure() ? LANTERN_TREASURE_LIMIT : 1;
+        if (treasures.size() >= limit) treasures.remove(0);
+        if (!hasEndlessTreasure()) treasuresLeft++;
+        treasures.add(spawnTreasure());
     }
 
     public float getProgress() {

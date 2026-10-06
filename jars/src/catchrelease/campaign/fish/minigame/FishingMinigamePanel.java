@@ -51,8 +51,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected final List<TreasureAward> lootAwards = new ArrayList<>();
 
     protected boolean treasureResolved = false;
-    protected MinigameTreasure soundTreasure;
-    protected boolean treasureGotSoundPlayed = false;
+    protected final List<MinigameTreasure> soundTreasures = new ArrayList<>();
+    protected int soundedPickups;
     protected float endLingerLeft = FishConstants.MINIGAME_END_LINGER;
     protected float jitterTime = 0f;
     transient protected SpriteAPI backgroundSprite;
@@ -148,23 +148,19 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     protected void advanceTreasureSoundHooks() {
-        MinigameTreasure treasure = minigame.getTreasure();
-
-        if (treasure != soundTreasure) {
-            soundTreasure = treasure;
-            treasureGotSoundPlayed = false;
-
-            if (treasure != null && treasure.isActive()) {
-                CatchCelebration.playHook(FishConstants.SOUND_TREASURE_SPAWN);
-            }
-        }
-
-        if (treasure == null) return;
-
-        if (treasure.isTaken() && !treasureGotSoundPlayed) {
-            treasureGotSoundPlayed = true;
+        int taken = minigame.getTakenTreasures().size();
+        if (taken > soundedPickups) {
             CatchCelebration.playHook(FishConstants.SOUND_TREASURE_GOT);
         }
+        soundedPickups = taken;
+        for (MinigameTreasure treasure : minigame.getTreasures()) {
+            if (!soundTreasures.contains(treasure)) {
+                CatchCelebration.playHook(FishConstants.SOUND_TREASURE_SPAWN);
+                break;
+            }
+        }
+        soundTreasures.clear();
+        soundTreasures.addAll(minigame.getTreasures());
     }
 
     protected void advanceCaught(float amount) {
@@ -247,6 +243,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     protected void processResultInput(InputEventAPI event) {
+        if (lootResult != null && lootResult.processInput(event)) return;
+
         if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE) {
             event.consume();
             end(true);
@@ -534,9 +532,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     }
 
     protected void renderTreasure(FishingMinigameLayout layout, float alphaMult) {
-        MinigameTreasure treasure = minigame.getTreasure();
-        if (treasure == null || !treasure.isActive()) return;
+        for (MinigameTreasure treasure : minigame.getTreasures()) {
+            renderTreasure(treasure, layout, alphaMult);
+        }
+    }
 
+    protected void renderTreasure(MinigameTreasure treasure, FishingMinigameLayout layout, float alphaMult) {
         float centerX = layout.getTrackCenterX();
         float centerY = layout.getTrackY(treasure.position);
 

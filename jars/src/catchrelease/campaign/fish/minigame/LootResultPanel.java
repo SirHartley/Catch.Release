@@ -5,12 +5,15 @@ import catchrelease.campaign.fish.treasure.TreasureAward;
 import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.rendering.helper.Disc;
+import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lazywizard.lazylib.ui.LazyFont;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.Display;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ import java.util.List;
 public class LootResultPanel {
 
     protected static final int COIN_SEGMENTS = 16;
+    protected static final float SCROLLBAR_WIDTH = 6f;
 
     protected final List<TreasureAward> awards;
     protected final List<Row> rows = new ArrayList<>();
@@ -27,6 +31,13 @@ public class LootResultPanel {
     protected int shown = 0;
     protected boolean skipped = false;
     protected boolean chestSoundPlayed = false;
+    protected float scrollOffset;
+    protected float rowsTop;
+    protected float rowsBottom;
+    protected float rowsHeight;
+    protected boolean followReadout = true;
+    protected boolean dragging;
+    protected FishingMinigameLayout lastLayout;
     protected final List<Coin> coins = new ArrayList<>();
     transient protected LazyFont font;
 
@@ -127,7 +138,77 @@ public class LootResultPanel {
         float y = layout.lootBoxY - FishConstants.MINIGAME_RESULT_BOX_GAP;
 
         y = renderTitle(layout, y, alphaMult);
-        renderRows(layout, y, alphaMult);
+        rowsTop = y;
+        rowsBottom = layout.lootPanelY + FishConstants.MINIGAME_RESULT_PAD;
+        rowsHeight = 0f;
+        if (font != null) {
+            for (int i = 0; i < shown; i++) rowsHeight += getRowHeight(rows.get(i));
+        }
+        scrollOffset = followReadout ? maxScroll() : Math.min(scrollOffset, maxScroll());
+        lastLayout = layout;
+
+        if (rowsTop > rowsBottom) {
+            float scale = Global.getSettings().getScreenScaleMult() * Display.getPixelScaleFactor();
+            GL11.glPushAttrib(GL11.GL_SCISSOR_BIT);
+            GL11.glEnable(GL11.GL_SCISSOR_TEST);
+            GL11.glScissor((int) (layout.lootX * scale), (int) (rowsBottom * scale),
+                    (int) (layout.lootWidth * scale), (int) ((rowsTop - rowsBottom) * scale));
+            try {
+                renderRows(layout, y + scrollOffset, alphaMult);
+            } finally {
+                GL11.glPopAttrib();
+            }
+            renderScrollbar(layout, alphaMult);
+        }
+    }
+
+    protected float maxScroll() {
+        return Math.max(0f, rowsHeight - Math.max(0f, rowsTop - rowsBottom));
+    }
+
+    protected void renderScrollbar(FishingMinigameLayout layout, float alpha) {
+        if (maxScroll() <= 0f) return;
+
+        float height = rowsTop - rowsBottom;
+        float thumb = Math.max(16f, height * height / rowsHeight);
+        float x = layout.lootX + layout.lootWidth + 4f;
+        CatchResultPanel.drawQuad(x, rowsBottom, SCROLLBAR_WIDTH, height,
+                Misc.getDarkPlayerColor(), alpha);
+        CatchResultPanel.drawQuad(x, rowsTop - thumb - (height - thumb) * scrollOffset / maxScroll(),
+                SCROLLBAR_WIDTH, thumb, Misc.getBrightPlayerColor(), alpha);
+    }
+
+    public boolean processInput(InputEventAPI event) {
+        if (event.isConsumed() || lastLayout == null) return false;
+        if (dragging && event.isLMBUpEvent()) {
+            dragging = false;
+            event.consume();
+            return true;
+        }
+        if (maxScroll() <= 0f) return false;
+
+        float x = event.getX();
+        float y = event.getY();
+        boolean inside = ShopUi.contains(lastLayout.lootPanelX, rowsBottom,
+                lastLayout.lootPanelWidth, rowsTop - rowsBottom, x, y);
+        if (inside && event.isMouseScrollEvent()) {
+            followReadout = false;
+            scrollOffset = MathUtils.clamp(scrollOffset - Math.signum(event.getEventValue())
+                    * FishConstants.MINIGAME_LOOT_LINE_HEIGHT * 3f, 0f, maxScroll());
+        } else if ((inside && event.isLMBDownEvent()
+                && x >= lastLayout.lootX + lastLayout.lootWidth)
+                || (dragging && event.isMouseMoveEvent())) {
+            dragging = true;
+            followReadout = false;
+            float height = rowsTop - rowsBottom;
+            float thumb = Math.max(16f, height * height / rowsHeight);
+            scrollOffset = MathUtils.clamp((rowsTop - y - thumb * 0.5f)
+                    / Math.max(1f, height - thumb), 0f, 1f) * maxScroll();
+        } else {
+            return false;
+        }
+        event.consume();
+        return true;
     }
 
     protected float getContentWidth() {

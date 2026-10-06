@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.HauntMineEntityPlugin;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
+import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -22,6 +23,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
@@ -160,6 +162,12 @@ public final class HarpoonAimCheck {
         @Override public void detonate() { detonations++; }
     }
 
+    private static final class Haunt extends LegendaryHaunt {
+
+        void begin(FishSpec fish, StarSystemAPI system) { start(fish, system); }
+        void end() { stop(); }
+    }
+
     private static final class Fixture implements AutoCloseable {
 
         final Map<String, Object> data = new HashMap<>();
@@ -238,6 +246,7 @@ public final class HarpoonAimCheck {
             checkEligibility(f);
             checkFlights(f);
             checkContacts(f);
+            checkHauntShield(f);
         }
         System.out.println("Harpoon aim: " + checks + " checks passed");
     }
@@ -417,6 +426,25 @@ public final class HarpoonAimCheck {
         shot = new Shot(head, atAngle(0f));
         shot.step(0.1f);
         require(minePlugin.detonations == 1 && shot.sounds == 1, "Unshielded mine still detonates once");
+    }
+
+    private static void checkHauntShield(Fixture f) {
+        f.motes.clear();
+        Token token = f.token(FishEntityPlugin.MOTE_TAG, 600f, 0f);
+        Mote jack = new Mote(token);
+        jack.spec.id = LegendaryShields.CHARGE_SHIELD_SPECIES;
+        jack.spec.rarity = FishRarity.LEGENDARY;
+        require(jack.tryBaseShieldDeflect() && !jack.isBaseShieldUp(), "Spent shield before haunt");
+        StarSystemAPI system = proxy(StarSystemAPI.class, (self, method, args) -> switch (method.getName()) {
+            case "getEntitiesWithTag" -> f.motes.getOrDefault((String) args[0], List.of());
+            default -> throw new AssertionError(method);
+        });
+        Haunt haunt = new Haunt();
+        haunt.begin(jack.spec, system);
+        require(jack.isBaseShieldUp(), "Jack shield restored at haunt start without a frame delay");
+        require(jack.tryBaseShieldDeflect() && !jack.isBaseShieldUp(), "Later hits keep normal shield cooldown");
+        haunt.end();
+        f.motes.clear();
     }
 
     private static Vector2f atAngle(float degrees) {
