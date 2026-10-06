@@ -67,6 +67,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
     protected Kind kind = Kind.BLAST;
     protected float time;
+    protected float blinkOffset;
     protected boolean triggered;
     protected float stunLeft;
     protected float pullLeft;
@@ -79,7 +80,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         super.init(entity, pluginParams);
 
         if (pluginParams instanceof Params params) kind = params.kind;
-        time = (float) (Math.random() * 10f);
+        blinkOffset = (float) (Math.random() * 10f);
         entity.addTag(MINE_TAG);
     }
 
@@ -232,7 +233,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
                 entity.getLocation()) < TRIGGER_RANGE * 2.5f) {
             rate *= 3f;
         }
-        float blink = 0.15f + 0.85f * (0.5f + 0.5f * (float) Math.sin(time * rate));
+        float blink = 0.15f + 0.85f * (0.5f + 0.5f * (float) Math.sin((time + blinkOffset) * rate));
 
         Vector2f loc = entity.getLocation();
         sprite.setColor(kind.color);
