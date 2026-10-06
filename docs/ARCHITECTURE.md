@@ -407,6 +407,7 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 |---|---|
 | `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. |
 | `LegendaryHaunt.java` | Transient coordinator. Starting a Lantern Jack haunt immediately restores its base shield; later deflections retain the normal cooldown. Stored shells are still earned by eating motes. |
+| `GhostFleetsModule.java` | Lantern Jack's harmless fleets: first at 5–10 seconds, then every 15–25, at most two. Spawn 1000–1600 units away with 2–15 ships and at least 8 burn; intercept, with half switching to HOLD after 3–7 seconds. Hard-remove at 250 units or 30 seconds. Transponders stay off; flags prevent clicks, comms and other-fleet attention, and `setNoEngaging` prevents INTERCEPT battles. Harpoons ignore haunt fleets. |
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
 
