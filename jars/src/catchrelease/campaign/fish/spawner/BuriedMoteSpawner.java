@@ -118,6 +118,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
 
         Vector2f loc = MathUtils.getPointOnCircumference(around, distance, angle);
         if (LegendaryShields.DAWN_SPECIES.equals(fishId)) {
+            if (FalseDawnOrbit.hasMote(location)) return;
             var corona = FalseDawnOrbit.findCorona(location);
             if (corona == null) return;
             loc = FalseDawnOrbit.confine(corona, loc);

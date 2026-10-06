@@ -46,7 +46,7 @@ Technical routing for the current implementation. Java paths below are relative 
 |---|---|
 | `ModPlugin.onCodexDataGenerated()` | `FishCodex`, only while Codex data is generated |
 | `ModPlugin.onGameLoad()` | Idempotent script/listener registration and current-state cleanup; order below |
-| `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting |
+| `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting; remove False Dawn's owned coronal flares before serialization |
 | `data/campaign/fish.csv` | Species; `FishSpecLoader` |
 | `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon |
 | `data/config/settings.json` | `catchrelease.dialogue.rules` command package and sprites; black-hole warp settings belong to the deprecated test below |
@@ -407,10 +407,13 @@ options route to `catchrelease_intro_rod`, which owns the `giveRod` grant.
 | `LegendaryHaunt.java` | Transient coordinator. |
 | `FalseDawnOrbit.java` | Keeps surfaced, diving and buried False Dawn movement in an annulus outside the largest non-pulsar star with a usable corona in its system. Uses the actual corona bounds; natural spawns, console spawns and explosive-hit respawns share the constraint. Dives retain their visibility timing but follow the corona instead of a straight chord through the star. |
 | `FalseDawnCorona.java` | Adds short, complementary-hue spikes to the host star's vanilla `FlareManager` queue while the player is in the host system, including before provocation. Only its own flares are removed on departure, capture and before saving; star specs and natural flares are unchanged. A location listener handles departure; the existing haunt advance refills the queue because vanilla exposes no flare-finished callback. No extra frame script or renderer. |
-| `entities/HauntMineEntityPlugin.java` | Non-damaging False Dawn mines. Push and pull use the fleet movement module via `setVelocity`; pull delivers an immediate tug, then steers inward for three seconds with braking near the centre. Interdiction mines cancel interdictable abilities and stop the fleet for two seconds using vanilla's one-frame stop request; no persistent speed modifier. Timers stop while paused. |
+| `../entities/HauntMineEntityPlugin.java` | Non-damaging False Dawn mines. Push and pull use the fleet movement module via `setVelocity`; pull delivers an immediate tug, then steers inward for three seconds with braking near the centre. Interdiction mines cancel interdictable abilities and stop the fleet for two seconds using vanilla's one-frame stop request; no persistent speed modifier. Timers stop while paused. |
 | `MinefieldModule.java` | Keeps the 3–6-mine waves and 22-mine cap but rejects overlapping trigger zones, leaving at least 300 units of passage (more for a large player fleet). Placement checks earlier waves as well as the current one, keeps clear of the player and stellar surfaces, and skips crowded spawns after bounded attempts. Every new mine gets the full two-second arming delay; blink phase is separate. |
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
+
+`tools/FalseDawnCheck` runs standalone checks for corona bounds, host selection,
+specimen lifetime, flare cleanup, mine forces, stun duration and minefield passages.
 
 ### `campaign/fish/constants` and `campaign/fish/intel`
 
@@ -538,6 +541,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
 - False Dawn selects the largest-radius usable corona star across chartable systems at `FishRequirement.LOW_COHERENCE` (Unstable or worse). Its coherence and corona requirements never relax, and its old regional sheet preference does not limit this selection. Equal-largest hosts can alternate; a sole largest host is retained. If none qualifies, no natural host is assigned. A host that becomes unsuitable is replaced only while the player is elsewhere; new natural spawns are gated immediately. `SpawnFish` still overrides host/coherence for testing but places the fish in the largest usable local corona.
+- False Dawn's repeating orbit cannot finish a generic swim crossing. The buried spawner therefore refuses a second live specimen in that system; existing specimens expire when their ledger marks capture or a different host.
 
 | Catch | Method | Implement |
 |---|---|---|

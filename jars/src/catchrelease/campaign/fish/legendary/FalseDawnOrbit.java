@@ -1,6 +1,8 @@
 package catchrelease.campaign.fish.legendary;
 
 import catchrelease.campaign.fish.data.Aberration;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
@@ -119,6 +121,12 @@ public final class FalseDawnOrbit {
 
     public static boolean advance(SectorEntityToken mote, String speciesId, float distance, float time) {
         if (!LegendaryShields.DAWN_SPECIES.equals(speciesId)) return false;
+        var state = LegendaryChases.getLedger().get(speciesId);
+        if (state != null && (state.caught || mote.getContainingLocation() == null
+                || !mote.getContainingLocation().getId().equals(state.systemId))) {
+            mote.setExpired(true);
+            return true;
+        }
         StarCoronaTerrainPlugin corona = findCorona(mote.getContainingLocation());
         if (corona == null) {
             mote.setExpired(true);
@@ -128,5 +136,17 @@ public final class FalseDawnOrbit {
         Vector2f next = step(corona, mote.getLocation(), distance, time, direction);
         mote.setLocation(next.x, next.y);
         return true;
+    }
+
+    public static boolean hasMote(LocationAPI location) {
+        for (SectorEntityToken mote : location.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+            if (!mote.isExpired() && mote.getCustomPlugin() instanceof FishEntityPlugin fish
+                    && !fish.isPhantom() && LegendaryShields.DAWN_SPECIES.equals(fish.getFishId())) return true;
+        }
+        for (SectorEntityToken mote : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
+            if (!mote.isExpired() && mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin fish
+                    && LegendaryShields.DAWN_SPECIES.equals(fish.getFishId())) return true;
+        }
+        return false;
     }
 }
