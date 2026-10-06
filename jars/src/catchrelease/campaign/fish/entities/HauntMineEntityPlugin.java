@@ -60,7 +60,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
     public static final float BLAST_PUSH_SPEED = 700f;
     public static final float BLAST_RADIUS = 320f;
-    public static final float INTERCEPT_SLOW_SECONDS = 5f;
+    public static final float INTERCEPT_STUN_SECONDS = 2f;
     public static final float PULL_SECONDS = 3f;
     public static final float PULL_SPEED = 700f;
     public static final float PULL_ACCEL = 1800f;
@@ -68,7 +68,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
     protected Kind kind = Kind.BLAST;
     protected float time;
     protected boolean triggered;
-    protected float slowLeft;
+    protected float stunLeft;
     protected float pullLeft;
     protected boolean fading;
 
@@ -108,6 +108,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public void advance(float amount) {
+        if (amount <= 0f || Global.getSector().isPaused()) return;
         time += amount;
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -115,9 +116,9 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        if (slowLeft > 0f) {
-            slowLeft -= amount;
-            player.goSlowOneFrame();
+        if (stunLeft > 0f) {
+            stunLeft = Math.max(0f, stunLeft - amount);
+            stopFleet(player);
         }
 
         if (pullLeft > 0f) {
@@ -126,7 +127,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         if (triggered) {
-            if (!fading && slowLeft <= 0f && pullLeft <= 0f) {
+            if (!fading && stunLeft <= 0f && pullLeft <= 0f) {
                 fading = true;
                 Misc.fadeAndExpire(entity, 0.5f);
             }
@@ -160,7 +161,8 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
                 explode(kind.color, BLAST_RADIUS * 0.55f);
                 if (close) {
                     catchrelease.campaign.fish.legendary.InterdictionPulse.fire(player);
-                    slowLeft = INTERCEPT_SLOW_SECONDS;
+                    stunLeft = INTERCEPT_STUN_SECONDS;
+                    stopFleet(player);
                 }
             }
             case IMPLOSION -> {
@@ -180,6 +182,12 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
                 CampaignDistortionRenderer.addDistortion(ripple);
             }
         }
+    }
+
+    protected void stopFleet(CampaignFleetAPI player) {
+        player.setVelocity(0f, 0f);
+        player.setMoveDestination(player.getLocation().x, player.getLocation().y);
+        player.goSlowOneFrame(true);
     }
 
     protected void applyPull(CampaignFleetAPI player, float amount) {
