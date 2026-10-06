@@ -241,6 +241,7 @@ public class LegendaryHaunt implements EveryFrameScript {
             case "longliner" -> out.add(new SensorGhostsModule(system, spec));
             // its abyss already runs coherence low; the surge would be lost in the noise
             case "abyssal_ghost_manta" -> {
+                out.add(new MantaFormationModule(system, spec));
                 out.add(new ChromaticAberrationModule(system, spec));
                 out.add(new GhostAsteroidsModule(system, spec));
             }
