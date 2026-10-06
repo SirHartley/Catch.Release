@@ -5,6 +5,8 @@ import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
+import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -115,6 +117,12 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         float distance = MathUtils.getRandomNumberInRange(getSpawnMinRange(), getSpawnMaxRange());
 
         Vector2f loc = MathUtils.getPointOnCircumference(around, distance, angle);
+        if (LegendaryShields.DAWN_SPECIES.equals(fishId)) {
+            var corona = FalseDawnOrbit.findCorona(location);
+            if (corona == null) return;
+            loc = FalseDawnOrbit.confine(corona, loc);
+            if (Misc.getDistance(around, loc) > getSpawnMaxRange()) return;
+        }
 
         SectorEntityToken buried = location.addCustomEntity(
                 Misc.genUID(), null, FishConstants.BURIED_ENTITY_ID, null,
