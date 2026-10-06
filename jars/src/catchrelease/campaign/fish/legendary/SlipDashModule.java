@@ -35,6 +35,7 @@ public class SlipDashModule extends BaseHauntModule {
     public static final float DASH_SPEED = 900f;
     public static final float DASH_MIN_SECONDS = 2.4f;
     public static final float DASH_MAX_SECONDS = 6.5f;
+    public static final float ESCAPE_DASH_SECONDS = DASH_MAX_SECONDS * 1.5f;
     public static final float FLEE_FUZZ_DEG = 60f;
     public static final float CURVE_MAX_DEG_PER_SECOND = 55f;
     public static final float CURVE_WAVE_MIN_RATE = 0.6f;
@@ -131,6 +132,18 @@ public class SlipDashModule extends BaseHauntModule {
 
         addSegment(trail, at);
         trails.add(trail);
+    }
+
+    @Override
+    public void onFailedCatch(FishEntityPlugin fish) {
+        CampaignFleetAPI player = player();
+        if (player == null || fish.getMote().getContainingLocation() != system) return;
+        endDash(fish, getGrowingTrail());
+        fish.keepSurfaced(ESCAPE_DASH_SECONDS);
+        begin(fish, player);
+        dashLeft = ESCAPE_DASH_SECONDS;
+        cooldown = COOLDOWN_MAX_SECONDS;
+        steer(fish, 0f);
     }
 
     protected void steer(FishEntityPlugin fish, float amount) {

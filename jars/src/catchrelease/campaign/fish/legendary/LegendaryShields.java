@@ -18,7 +18,8 @@ import java.awt.Color;
  *
  * - The Longliner wears a hull shield that only an Explosive Head can pop. Until then it
  *   deflects every throw and raises no haunt; once popped it stays popped forever -
- *   abandoning the chase does not re-armour it. Out of the water it is a boat
+ *   abandoning the chase does not re-armour it. Failed catches grant a separate,
+ *   one-hit recovery shield that does not need explosives. Out of the water it is a boat
  *   ({@link LonglinerDecoy}); in it, it runs.
  * - The Quorum's shield is held up by three fast-orbiting splinter motes. Each is a
  *   harpoonable rare-band catch of its own; the shield stands while any orbit, and lost
@@ -83,7 +84,12 @@ public class LegendaryShields {
 
         switch (id) {
             case POP_SHIELD_SPECIES -> {
-                if (state.shieldPopped) return HitResult.NONE;
+                if (state.shieldPopped) {
+                    if (!state.recoveryShield) return HitResult.NONE;
+                    state.recoveryShield = false;
+                    fish.flashShield();
+                    return HitResult.DEFLECTED;
+                }
                 fish.flashShield();
                 if (!explosive) {
                     say(fish.getMote(), "Deflected");
@@ -177,6 +183,30 @@ public class LegendaryShields {
         }
     }
 
+    public static boolean onFailedCatch(SectorEntityToken mote) {
+        if (mote == null || mote.isExpired() || mote.getContainingLocation() == null) return false;
+        FishEntityPlugin fish = asLegendaryMote(mote);
+        if (fish == null || fish.isDecoy()) return false;
+
+        fish.setHeld(false);
+        String id = fish.getFishSpec().id;
+        LegendaryChases.Chase state = LegendaryChases.getState(id);
+        state.provoked = true;
+        switch (id) {
+            case MOTE_SHIELD_SPECIES -> QuorumShellGame.onFailedCatch(fish);
+            case MORAY_SPECIES -> LegendaryHaunt.onFailedCatch(fish);
+            case MantaFormationModule.SPECIES -> {
+                fish.restoreBaseShield();
+                LegendaryHaunt.onFailedCatch(fish);
+            }
+            default -> {
+                fish.restoreBaseShield();
+                if (POP_SHIELD_SPECIES.equals(id)) state.recoveryShield = true;
+            }
+        }
+        return true;
+    }
+
     /** The unpopped Longliner does not fight back yet - it just shrugs and swims. */
     public static boolean isHauntSuppressed(FishSpec spec) {
         return spec != null && POP_SHIELD_SPECIES.equals(spec.id)
@@ -190,7 +220,7 @@ public class LegendaryShields {
         LegendaryChases.Chase state = LegendaryChases.getState(id);
 
         return switch (id) {
-            case POP_SHIELD_SPECIES -> !state.shieldPopped;
+            case POP_SHIELD_SPECIES -> !state.shieldPopped || state.recoveryShield;
             case MOTE_SHIELD_SPECIES -> getShieldUnits(state, MOTE_SHIELD_COUNT) > 0;
             case CHARGE_SHIELD_SPECIES -> getJackStack(state) > 0 || fish.isBaseShieldUp();
             default -> fish.isBaseShieldUp();
@@ -213,7 +243,8 @@ public class LegendaryShields {
         // the Lantern Jack's base shell is the common green one; only its stacked
         // rings tell it apart
         return switch (id) {
-            case POP_SHIELD_SPECIES -> SHIELD_RED;
+            case POP_SHIELD_SPECIES -> LegendaryChases.getState(id).shieldPopped
+                    ? SHIELD_PURPLE : SHIELD_RED;
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
             default -> SHIELD_PURPLE;
         };

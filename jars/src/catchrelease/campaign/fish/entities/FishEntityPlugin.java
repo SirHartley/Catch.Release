@@ -592,6 +592,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         dashExpires = false;
     }
 
+    public void keepSurfaced(float seconds) {
+        diving = false;
+        diveScheduled = true;
+        diveClock = Math.max(seconds, getDiveInterval());
+    }
+
     public void stopDash() {
         dashLeft = 0f;
         dashVelocity = null;
