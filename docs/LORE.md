@@ -183,6 +183,12 @@ Rarity means frequency of encounter. It does not inherently establish:
 
 Any such property must belong to that particular pattern, not follow from its rarity.
 
+### Legendary tales
+
+Rumor dialogue treats the legendaries as the subjects of sailors' yarns. These are stories told about the creatures, not reliable accounts of their biology or behavior. Bar tellers exaggerate, repeat fables, disagree over details and sometimes do not know a creature's name. Their stories may include impossible voyages, dead crews or invented kingdoms. Narration must not confirm those events, and later writing must not treat them as established history or new setting physics.
+
+The Fisherman knows the tales and can offer a useful lead without explaining exactly what the player will find. His versions are more restrained than the spacer's. Do not turn either speaker's story into a list of the creature's abilities or the equipment needed to defeat it. Keep factual requirements and navigation clear in their appropriate UI; the yarn itself need not provide a reliable explanation.
+
 ### Buried patterns
 
 Some patterns are harder to reach because they lie further into the fabric. “Buried,” “deep” and “hiding” are trade descriptions, not a literal water column.

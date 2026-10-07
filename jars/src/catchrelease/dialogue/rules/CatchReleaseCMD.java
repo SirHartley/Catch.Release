@@ -99,6 +99,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String RUMOR = "$catchreleaseRumor";
     public static final String RUMOR_KIND = "$catchreleaseRumorKind";
     public static final String RUMOR_LEGENDARY = "$catchreleaseRumorLegendary";
+    public static final String RUMOR_LEGENDARY_COLOR = "$catchreleaseRumorLegendaryColor";
     public static final String RUMOR_SYSTEM = "$catchreleaseRumorSystem";
     public static final String RUMOR_STRANGER = "$catchreleaseRumorStranger";
     public static final String RUMOR_RARITY = "$catchreleaseRumorRarity";
@@ -785,6 +786,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     protected void setRumorTokens(MemoryAPI local, FishRumors.Saved rumor) {
         local.set(RUMOR_KIND, FishRumors.getKindId(rumor), 0);
         local.set(RUMOR_LEGENDARY, rumor == null || rumor.legendaryId == null ? "" : rumor.legendaryId, 0);
+        local.set(RUMOR_LEGENDARY_COLOR, FishRarity.LEGENDARY.color, 0);
         local.set(RUMOR_SYSTEM, rumor == null ? "" : rumor.systemName, 0);
         local.set(RUMOR_STRANGER, FishRumors.getStrangerDisplayName(rumor), 0);
         local.set(RUMOR_RARITY, FishRumors.hasEffect(rumor, FishRumors.TYPE_RARITY), 0);
