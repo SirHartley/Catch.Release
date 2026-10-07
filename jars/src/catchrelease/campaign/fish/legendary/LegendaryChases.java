@@ -33,6 +33,7 @@ public class LegendaryChases {
     public static class Chase implements Serializable {
 
         public String systemId;
+        public int residency;
         public long seenAt;
         public boolean caught;
 
@@ -83,6 +84,13 @@ public class LegendaryChases {
         Chase chase = getChase(spec);
 
         return chase == null || chase.caught ? null : chase.systemId;
+    }
+
+    public static boolean isCurrentResidency(String speciesId, String systemId, int residency) {
+        // Rumor expiry is also read during habitat selection; do not assign or move hosts here.
+        Chase chase = getLedger().get(speciesId);
+        return chase != null && !chase.caught && systemId != null
+                && systemId.equals(chase.systemId) && residency == chase.residency;
     }
 
     public static void noteSeen(FishSpec spec) {
@@ -158,6 +166,7 @@ public class LegendaryChases {
                 || LegendaryShields.DAWN_SPECIES.equals(spec.id) && !FalseDawnOrbit.isEligible(chase.systemId))) {
             // the cooldown ran out unseen-side only: it never moves out from under a chase
             chase.systemId = pickHost(spec, chase.systemId);
+            chase.residency++;
             chase.seenAt = 0L;
             chase.revealed = false;
             chase.provoked = false;

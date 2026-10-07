@@ -9,6 +9,10 @@ import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.items.FishItemPlugin;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
+import catchrelease.campaign.fish.data.CatchImplement;
+import catchrelease.campaign.fish.intel.FishIntelIcon;
+import catchrelease.campaign.fish.legendary.LegendaryChases;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -18,6 +22,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.comm.IntelManagerAPI;
+import com.fs.starfarer.api.campaign.rules.RuleAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.SectorMapAPI;
@@ -48,7 +53,8 @@ public class FishRumors {
         RARITY_LOOT("rarity_loot", TYPE_RARITY, TYPE_LOOT),
         SIZE_CALM("size_calm", TYPE_SIZE, TYPE_CALM),
         STRANGER_CALM("stranger_calm", TYPE_STRANGER, TYPE_CALM),
-        LOOT_VALUABLE("loot_valuable", TYPE_LOOT, TYPE_VALUABLE_LOOT);
+        LOOT_VALUABLE("loot_valuable", TYPE_LOOT, TYPE_VALUABLE_LOOT),
+        LEGENDARY("legendary");
 
         public final String id;
         private final int effects;
@@ -87,6 +93,8 @@ public class FishRumors {
 
         public String kindId;
         public String strangerId;
+        public String legendaryId;
+        public int residency;
         public long started;
     }
 
@@ -102,7 +110,8 @@ public class FishRumors {
 
         protected boolean matches(Saved other) {
             return other != null && rumor.started == other.started
-                    && java.util.Objects.equals(rumor.systemId, other.systemId);
+                    && java.util.Objects.equals(rumor.systemId, other.systemId)
+                    && java.util.Objects.equals(rumor.legendaryId, other.legendaryId);
         }
 
         @Override
@@ -116,6 +125,10 @@ public class FishRumors {
 
         @Override
         public String getName() {
+            if (getKind(rumor) == Kind.LEGENDARY) {
+                return replaceTokens(ruleText(getListInfoParam() == EXPIRED_UPDATE
+                        ? "CatchReleaseLegendaryRumorExpired" : "CatchReleaseLegendaryRumorTitle"), rumor);
+            }
             if (getListInfoParam() == EXPIRED_UPDATE) {
                 return "Fisherman's rumor expired: " + rumor.systemName;
             }
@@ -178,10 +191,11 @@ public class FishRumors {
         public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
             String description = describe(rumor);
             LabelAPI paragraph = info.addPara(description, 10f);
-            String[] highlights = DESCRIPTION_TOKEN.matcher(descriptionTemplate(getKind(rumor)))
+            String[] highlights = DESCRIPTION_TOKEN.matcher(descriptionTemplate(rumor))
                     .results().map(match -> "System".equals(match.group(1))
                             ? rumor.systemName : getStrangerDisplayName(rumor)).toArray(String[]::new);
-            FishRequirement.highlight(paragraph, List.of(), null, highlights);
+            FishRequirement.highlight(paragraph, getKind(rumor) == Kind.LEGENDARY
+                    ? FishIntelMapButton.forSpecies(rumor.legendaryId) : List.of(), null, highlights);
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
             if (getMapAsks() == null) {
@@ -198,6 +212,7 @@ public class FishRumors {
 
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
+            if (isExpired(rumor)) return;
             List<catchrelease.campaign.fish.shop.FishRequirement> mapAsks = getMapAsks();
             if (mapAsks == null
                     && FishIntelMapButton.handleSetAutopilot(buttonId, getMapLocation(null))) return;
@@ -214,6 +229,7 @@ public class FishRumors {
 
         @Override
         public String getIcon() {
+            if (getKind(rumor) == Kind.LEGENDARY) return FishIntelIcon.get(CatchImplement.BREACH_LAMP);
             return FishermanIdentity.getPortrait(0f);
         }
 
@@ -239,16 +255,8 @@ public class FishRumors {
 
         @Override
         public com.fs.starfarer.api.campaign.SectorEntityToken getMapLocation(SectorMapAPI map) {
-            StarSystemAPI system = Global.getSector().getStarSystem(rumor.systemName);
-
-            if (system == null) {
-                for (StarSystemAPI candidate : Global.getSector().getStarSystems()) {
-                    if (candidate.getId().equals(rumor.systemId)) {
-                        system = candidate;
-                        break;
-                    }
-                }
-            }
+            if (isExpired(rumor)) return null;
+            StarSystemAPI system = findSystem(rumor.systemId);
 
             return system == null ? null : system.getHyperspaceAnchor();
         }
@@ -278,13 +286,20 @@ public class FishRumors {
         return List.copyOf(active);
     }
 
-    protected static boolean isExpired(Saved rumor) {
-        return Global.getSector().getClock().getElapsedDaysSince(rumor.started)
-                >= FishermanConstants.RUMOR_DURATION_DAYS;
+    public static boolean isExpired(Saved rumor) {
+        return rumor == null || Global.getSector() == null
+                || Global.getSector().getClock().getElapsedDaysSince(rumor.started)
+                >= FishermanConstants.RUMOR_DURATION_DAYS
+                || getKind(rumor) == Kind.LEGENDARY
+                && (!LegendaryChases.isCurrentResidency(rumor.legendaryId, rumor.systemId, rumor.residency)
+                || findSystem(rumor.systemId) == null);
     }
 
     public static boolean showCurrentIntel(TextPanelAPI text) {
-        Saved active = getActive();
+        return showIntel(getActive(), text);
+    }
+
+    public static boolean showIntel(Saved active, TextPanelAPI text) {
         if (text == null || active == null) return false;
 
         IntelManagerAPI manager = Global.getSector().getIntelManager();
@@ -387,8 +402,15 @@ public class FishRumors {
     }
 
     public static Saved create() {
-        Kind[] kinds = Kind.values();
-        Kind kind = kinds[(int) MathUtils.getRandomNumberInRange(0f, kinds.length - 0.01f)];
+        List<Kind> kinds = new ArrayList<>(List.of(Kind.values()));
+        if (!areLegendaryReportsUnlocked()) kinds.remove(Kind.LEGENDARY);
+        Kind kind = kinds.get((int) MathUtils.getRandomNumberInRange(0f, kinds.size() - 0.01f));
+        if (kind == Kind.LEGENDARY) {
+            Saved legendary = rollLegendary();
+            if (legendary != null) return publish(legendary);
+            kinds.remove(Kind.LEGENDARY);
+            kind = kinds.get((int) MathUtils.getRandomNumberInRange(0f, kinds.size() - 0.01f));
+        }
         StarSystemAPI system = pickSystem(kind);
         if (system == null && (kind == Kind.EXTREME_STABILITY || kind == Kind.EXTREME_INSTABILITY)) {
             kind = Kind.RARITY;
@@ -409,6 +431,45 @@ public class FishRumors {
 
         rumor.kindId = kind.id;
 
+        return publish(rumor);
+    }
+
+    public static boolean areLegendaryReportsUnlocked() {
+        return FishingIntro.isComplete() && FishermanQuest.getRound() > 0;
+    }
+
+    public static Saved rollLegendary() {
+        if (!areLegendaryReportsUnlocked()) return null;
+
+        List<Saved> active = getActiveRumors();
+        List<FishSpec> candidates = new ArrayList<>();
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec.rarity != FishRarity.LEGENDARY || spec.spawnWeight <= 0f
+                    || LegendaryChases.isCaught(spec.id)) continue;
+            if (active.stream().anyMatch(r -> spec.id.equals(r.legendaryId))) continue;
+            candidates.add(spec);
+        }
+        java.util.Collections.shuffle(candidates);
+        for (FishSpec spec : candidates) {
+            String host = LegendaryChases.getHostSystemId(spec);
+            StarSystemAPI system = findSystem(host);
+            if (system == null || system.getHyperspaceAnchor() == null) continue;
+
+            Saved rumor = new Saved();
+            rumor.kindId = Kind.LEGENDARY.id;
+            rumor.legendaryId = spec.id;
+            rumor.residency = LegendaryChases.getState(spec.id).residency;
+            rumor.systemId = host;
+            rumor.systemName = system.getNameWithNoType();
+            rumor.started = Global.getSector().getClock().getTimestamp();
+            return rumor;
+        }
+        return null;
+    }
+
+    public static Saved publish(Saved rumor) {
+        if (isExpired(rumor)) return null;
+
         List<Saved> active = new ArrayList<>(getActiveRumors());
         active.add(rumor);
         Global.getSector().getPersistentData().put(ACTIVE_KEY, active);
@@ -418,6 +479,14 @@ public class FishRumors {
         FishIntelNotifications.queue(intel);
 
         return rumor;
+    }
+
+    public static StarSystemAPI findSystem(String id) {
+        if (id == null || Global.getSector() == null) return null;
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (id.equals(system.getId())) return system;
+        }
+        return null;
     }
 
     public static Saved ensureTutorialLead() {
@@ -490,6 +559,10 @@ public class FishRumors {
     }
 
     public static String getStrangerDisplayName(Saved rumor) {
+        if (getKind(rumor) == Kind.LEGENDARY) {
+            FishSpec spec = FishSpecLoader.getFishSpec(rumor.legendaryId);
+            return spec == null ? "" : spec.getDisplayName();
+        }
         if (!hasEffect(rumor, TYPE_STRANGER)) return "";
 
         FishSpec stranger = FishSpecLoader.getFishSpec(rumor.strangerId);
@@ -499,12 +572,22 @@ public class FishRumors {
     public static String describe(Saved rumor) {
         if (rumor == null) return "";
 
-        return descriptionTemplate(getKind(rumor)).replace("$catchreleaseRumorSystem", rumor.systemName)
+        return replaceTokens(descriptionTemplate(rumor), rumor);
+    }
+
+    protected static String replaceTokens(String template, Saved rumor) {
+        return template.replace("$catchreleaseRumorSystem", rumor.systemName)
                 .replace("$catchreleaseRumorStranger", getStrangerDisplayName(rumor));
     }
 
-    protected static String descriptionTemplate(Kind kind) {
-        return switch (kind) {
+    protected static String ruleText(String trigger) {
+        RuleAPI rule = Global.getSector().getRules().getBestMatching(null, trigger, null, java.util.Map.of());
+        return rule == null ? "" : rule.pickText();
+    }
+
+    protected static String descriptionTemplate(Saved rumor) {
+        return switch (getKind(rumor)) {
+            case LEGENDARY -> ruleText("CatchReleaseLegendaryRumorIntel_" + rumor.legendaryId);
             case RARITY -> "Rarer species are turning up more often in $catchreleaseRumorSystem.";
             case LOOT -> "Retrievals in $catchreleaseRumorSystem are producing bycatch opportunities more often than usual.";
             case STRANGER -> "$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem, outside its charted range. "

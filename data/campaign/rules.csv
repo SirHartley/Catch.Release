@@ -2541,6 +2541,38 @@ CatchReleaseCMD showRumorIntel","""If you're bound for $catchreleaseRumorSystem,
 The coherence report puts it at failing, well below its usual condition.
 
 ""You can fish it. Get what you came for and move on. Don't leave your crew sitting there while you work out where to go next.""",,
+catchrelease_rumorLegendary_lantern_jack,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == legendary
+$catchreleaseRumorLegendary == lantern_jack score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""Lantern Jack's been heard in $catchreleaseRumorSystem. A hauler picked up the distress call and spent half a watch trying to answer it."" The Fisherman passes you the recorded bearing. ""There's a very large fish on the other end. Use your breach lights to find it, and leave the comms alone. Nobody there needs rescuing.""",,
+catchrelease_rumorLegendaryIntel_lantern_jack,CatchReleaseLegendaryRumorIntel_lantern_jack,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Search open space with Breach Lights; the reported distress signal is its lure. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
+catchrelease_rumorLegendary_quorum,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == legendary
+$catchreleaseRumorLegendary == quorum score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem $catchreleaseRumorStranger
+CatchReleaseCMD showRumorIntel","The Fisherman opens a catch report from $catchreleaseRumorSystem. Its tally has been crossed out several times. ""The Quorum. You'll want to keep an eye on where the whole school goes, not just the bit nearest your harpoon. Put your breach lights on it before you get close."" He sends the report across. ""Nobody's brought it aboard yet. You could have a go.""",,
+catchrelease_rumorLegendaryIntel_quorum,CatchReleaseLegendaryRumorIntel_quorum,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Look for the school in open space using Breach Lights. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
+catchrelease_rumorLegendary_slipstream_moray,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == legendary
+$catchreleaseRumorLegendary == slipstream_moray score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""A pilot I know nearly put a freighter through a Slipstream Moray in $catchreleaseRumorSystem. He sent me the course recording with a claim for damaged cargo."" The Fisherman brings up the plot. ""You can use this. Take your breach lights and give yourself room to turn. If it gets away from you, watch where it goes before you burn after it.""",,
+catchrelease_rumorLegendaryIntel_slipstream_moray,CatchReleaseLegendaryRumorIntel_slipstream_moray,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Search open space with Breach Lights and allow room for a fast pursuit. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
+catchrelease_rumorLegendary_false_dawn,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == legendary
+$catchreleaseRumorLegendary == false_dawn score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""There's a False Dawn in $catchreleaseRumorSystem. Close to the star, where you could fly past it all day and blame the glare."" The Fisherman marks the system on your chart. ""Breach lights will pick it out. Mind the corona while you're lining up a shot; it's an expensive catch if you cook the ship getting it.""",,
+catchrelease_rumorLegendaryIntel_false_dawn,CatchReleaseLegendaryRumorIntel_false_dawn,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Search the stellar corona with Breach Lights. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
+catchrelease_rumorLegendary_longliner,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == legendary
+$catchreleaseRumorLegendary == longliner score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem $catchreleaseRumorStranger
+CatchReleaseCMD showRumorIntel","The Fisherman studies a traffic report from $catchreleaseRumorSystem. ""Apparently I've had a boat working there. Couldn't tell you who was crewing it."" He sends you the transponder record. ""The Imposter, most likely. Put your breach lights across the hull. You'll need an explosive head to get through what comes out of it, so check your gear before you leave.""",,
+catchrelease_rumorLegendaryIntel_longliner,CatchReleaseLegendaryRumorIntel_longliner,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Look for a fishing boat and expose it with Breach Lights. Bring an Explosive Head for its hull shield. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
+catchrelease_rumorLegendary_abyssal_ghost_manta,CatchReleaseRumorText,"CatchReleaseCMD tokens
+$catchreleaseRumorKind == legendary
+$catchreleaseRumorLegendary == abyssal_ghost_manta score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
+CatchReleaseCMD showRumorIntel","""An Abyssal Ghost Manta's been seen in $catchreleaseRumorSystem. The crew who sent this weren't equipped for it."" The Fisherman turns the report so you can read it. ""They made it back, which was sensible of them. Take your breach lights if you're going. Keep your navigator on duty while you fish; it's a long way to go without a route home.""",,
+catchrelease_rumorLegendaryIntel_abyssal_ghost_manta,CatchReleaseLegendaryRumorIntel_abyssal_ghost_manta,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Search the Abyssal system with Breach Lights. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
+catchrelease_rumorLegendaryTitle,CatchReleaseLegendaryRumorTitle,,,Legendary sighting: $catchreleaseRumorStranger in $catchreleaseRumorSystem,,
+catchrelease_rumorLegendaryExpired,CatchReleaseLegendaryRumorExpired,,,Legendary sighting expired: $catchreleaseRumorSystem,,
 catchrelease_rumorUnavailable,CatchReleaseRumorText,CatchReleaseCMD tokens,,"""Nothing worth sending you after.""",,fallback for a missing or unknown rumor kind
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
@@ -2603,7 +2635,7 @@ catchrelease_fisherBycatch,DialogOptionSelected,$option == catchrelease_fisherBy
 catchrelease_fisherOptAsk_howLong,CatchReleaseFisherQuestions,"$catchreleaseStage >= 1
 !$global.catchrelease_fisherAsked_howLong
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_howLong:""How long have you been out here?""",
-catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,$global.catchrelease_fisherAsked_howLong = true,"""Fishing?"" He gives the question some thought. ""Since the ROD was supposed to move cargo."" Another moment. ""Been fishing longer.""",0:catchrelease_fisherAskBack:Something else,
+catchrelease_ask_howLong,DialogOptionSelected,$option == catchrelease_ask_howLong,$global.catchrelease_fisherAsked_howLong = true,"""Fishing?"" He gives the question some thought. ""Since the ROD was supposed to move cargo. Been fishing longer.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_whyOut,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_whyOut
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_whyOut:""Why are you always so far out?""",
