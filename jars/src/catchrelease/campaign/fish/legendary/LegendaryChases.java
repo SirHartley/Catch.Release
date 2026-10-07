@@ -165,8 +165,9 @@ public class LegendaryChases {
                 && (isDueToMove(chase) || isDoneHiding(spec, chase)
                 || LegendaryShields.DAWN_SPECIES.equals(spec.id) && !FalseDawnOrbit.isEligible(chase.systemId))) {
             // the cooldown ran out unseen-side only: it never moves out from under a chase
-            chase.systemId = pickHost(spec, chase.systemId);
-            chase.residency++;
+            String previousHost = chase.systemId;
+            chase.systemId = pickHost(spec, previousHost);
+            if (!java.util.Objects.equals(previousHost, chase.systemId)) chase.residency++;
             chase.seenAt = 0L;
             chase.revealed = false;
             chase.provoked = false;

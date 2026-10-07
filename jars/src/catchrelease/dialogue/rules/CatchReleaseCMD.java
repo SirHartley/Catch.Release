@@ -28,6 +28,7 @@ import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
 import catchrelease.campaign.fish.tutorial.Castaway;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.campaign.fish.tutorial.RatingBarEvent;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
 import com.fs.starfarer.api.Global;
@@ -103,6 +104,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     public static final String RUMOR_RARITY = "$catchreleaseRumorRarity";
     public static final String RUMOR_LOOT = "$catchreleaseRumorLoot";
     public static final String RUMOR_OUTSIDER = "$catchreleaseRumorOutsider";
+    public static final String BAR_REPORT = "$catchreleaseBarReport";
+    public static final String BAR_REPORT_READY = "$catchreleaseBarReportReady";
     public static final String BYCATCH_PENDING = "$catchreleaseBycatchPending";
 
     public static final String SELL_COMMON_COLOR = "$catchreleaseSellCommonColor";
@@ -261,6 +264,20 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                         && FishRumors.isAvailable() && FishRumors.create() != null;
             case "showRumorIntel":
                 return FishRumors.showCurrentIntel(text(dialog));
+            case "hasRatingReport":
+                return RatingBarEvent.getReport() != null;
+            case "hearRatingReport":
+                FishRumors.Saved report = RatingBarEvent.hearReport();
+                MemoryAPI reportMemory = memoryMap.get(MemKeys.LOCAL);
+                reportMemory.set(BAR_REPORT_READY, report != null, 0);
+                reportMemory.set(BAR_REPORT, report, 0);
+                setRumorTokens(reportMemory, report);
+                return report != null;
+            case "showRatingReportIntel":
+                return FishRumors.showIntel((FishRumors.Saved) memoryMap.get(MemKeys.LOCAL)
+                        .get(BAR_REPORT), text(dialog));
+            case "showRatingReportMap":
+                return showRatingReportMap(dialog, memoryMap);
 
             case "ackBycatch":
                 FishermanBycatch.markExplained();
@@ -689,14 +706,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         local.set(RUMOR, FishingIntro.isAtLeast(FishingIntro.DONE)
                 && FishRumors.isAvailable(), 0);
 
-        FishRumors.Saved rumor = FishRumors.getActive();
-        local.set(RUMOR_KIND, FishRumors.getKindId(rumor), 0);
-        local.set(RUMOR_LEGENDARY, rumor == null || rumor.legendaryId == null ? "" : rumor.legendaryId, 0);
-        local.set(RUMOR_SYSTEM, rumor == null ? "" : rumor.systemName, 0);
-        local.set(RUMOR_STRANGER, FishRumors.getStrangerDisplayName(rumor), 0);
-        local.set(RUMOR_RARITY, FishRumors.hasEffect(rumor, FishRumors.TYPE_RARITY), 0);
-        local.set(RUMOR_LOOT, FishRumors.hasEffect(rumor, FishRumors.TYPE_LOOT), 0);
-        local.set(RUMOR_OUTSIDER, FishRumors.hasEffect(rumor, FishRumors.TYPE_STRANGER), 0);
+        setRumorTokens(local, FishRumors.getActive());
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
@@ -770,6 +780,25 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         Castaway.rescue(dialog.getInteractionTarget());
 
         return true;
+    }
+
+    protected void setRumorTokens(MemoryAPI local, FishRumors.Saved rumor) {
+        local.set(RUMOR_KIND, FishRumors.getKindId(rumor), 0);
+        local.set(RUMOR_LEGENDARY, rumor == null || rumor.legendaryId == null ? "" : rumor.legendaryId, 0);
+        local.set(RUMOR_SYSTEM, rumor == null ? "" : rumor.systemName, 0);
+        local.set(RUMOR_STRANGER, FishRumors.getStrangerDisplayName(rumor), 0);
+        local.set(RUMOR_RARITY, FishRumors.hasEffect(rumor, FishRumors.TYPE_RARITY), 0);
+        local.set(RUMOR_LOOT, FishRumors.hasEffect(rumor, FishRumors.TYPE_LOOT), 0);
+        local.set(RUMOR_OUTSIDER, FishRumors.hasEffect(rumor, FishRumors.TYPE_STRANGER), 0);
+    }
+
+    protected boolean showRatingReportMap(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
+        FishRumors.Saved report = (FishRumors.Saved) memoryMap.get(MemKeys.LOCAL).get(BAR_REPORT);
+        if (FishRumors.isExpired(report)) return QuestDialogMap.hide(dialog);
+
+        FishRumors.RumorIntel intel = new FishRumors.RumorIntel(report);
+        return QuestDialogMap.show(dialog, intel.getMapLocation(null), intel.getName(),
+                intel.getFactionForUIColors(), intel.getIcon(), intel.getIntelTags(null));
     }
 
     protected boolean rememberRatingPlanet(InteractionDialogAPI dialog) {

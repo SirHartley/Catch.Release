@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.campaign.fish.tutorial.RatingBarEvent;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.TransientMemory;
@@ -159,7 +160,53 @@ public final class LegendaryRumorChecks {
             env.systems.clear();
             check(FishRumors.isExpired(fresh), "removed system invalidates lead");
         }
+        barReports();
         System.out.println("Legendary rumor checks passed: " + checks);
+    }
+
+    private static void barReports() throws Exception {
+        try (Environment env = new Environment()) {
+            env.addFish("lantern_jack");
+            env.addFish("quorum");
+            RatingBarEvent.prepareReport();
+            check(RatingBarEvent.getReport() == null, "no early bar reports");
+            env.memory.put(TutorialConstants.STAGE_KEY, FishingIntro.DONE);
+            RatingBarEvent.prepareReport();
+            check(RatingBarEvent.getReport() == null, "graduation alone does not unlock bar");
+            env.memory.put(FishermanQuest.ROUND_KEY, 1);
+            RatingBarEvent.VisitCounter listener = new RatingBarEvent.VisitCounter();
+            listener.reportPlayerOpenedMarket(null);
+            FishRumors.Saved offer = RatingBarEvent.getReport();
+            check(offer != null && env.intel.isEmpty(), "market visit prepares, does not publish");
+            for (int visit = 0; visit < 8; visit++) {
+                listener.reportPlayerOpenedMarket(null);
+                check(RatingBarEvent.getReport() == offer, "reopening cannot reroll " + visit);
+            }
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            try (ObjectOutputStream out = new ObjectOutputStream(bytes)) { out.writeObject(offer); }
+            try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+                env.data.put(RatingBarEvent.REPORT_KEY, in.readObject());
+            }
+            check(RatingBarEvent.getReport().legendaryId.equals(offer.legendaryId), "pending report survives save/load");
+            LegendaryChases.Chase state = LegendaryChases.getState(offer.legendaryId);
+            state.residency++;
+            check(RatingBarEvent.getReport() == null, "stale bar menu cannot publish old residency");
+            check(RatingBarEvent.hearReport() == null && env.intel.isEmpty(), "stale selection grants nothing");
+            listener.reportPlayerOpenedMarket(null);
+            offer = RatingBarEvent.getReport();
+            check(offer != null, "next visit refreshes invalid report");
+            env.day += 40f;
+            check(RatingBarEvent.hearReport() == offer && env.intel.size() == 1, "hear grants one intel entry");
+            check(RatingBarEvent.hearReport() == null && env.intel.size() == 1, "no duplicate publication");
+            check(!FishRumors.isAvailable(), "publication, not offer creation, starts shared rumor cooldown");
+            env.day += 30f;
+            LegendaryChases.noteCaught(offer.legendaryId);
+            listener.reportPlayerOpenedMarket(null);
+            FishRumors.Saved next = RatingBarEvent.getReport();
+            check(next != null && !next.legendaryId.equals(offer.legendaryId), "next report excludes caught species");
+            LegendaryChases.noteCaught(next.legendaryId);
+            check(RatingBarEvent.getReport() == null, "caught pending target disappears");
+        }
     }
 
     static <T> T api(Class<T> type, InvocationHandler handler) {

@@ -203,6 +203,9 @@ public class FishRumors {
             } else {
                 FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
             }
+            if (getKind(rumor) == Kind.LEGENDARY && !isExpired(rumor)) {
+                FishIntelMapButton.add(info, width, null);
+            }
         }
 
         protected List<catchrelease.campaign.fish.shop.FishRequirement> getMapAsks() {
@@ -473,7 +476,8 @@ public class FishRumors {
         List<Saved> active = new ArrayList<>(getActiveRumors());
         active.add(rumor);
         Global.getSector().getPersistentData().put(ACTIVE_KEY, active);
-        Global.getSector().getPersistentData().put(LAST_ASKED_KEY, rumor.started);
+        Global.getSector().getPersistentData().put(LAST_ASKED_KEY,
+                Global.getSector().getClock().getTimestamp());
 
         RumorIntel intel = new RumorIntel(rumor);
         FishIntelNotifications.queue(intel);

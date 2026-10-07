@@ -2564,8 +2564,8 @@ catchrelease_rumorLegendaryIntel_false_dawn,CatchReleaseLegendaryRumorIntel_fals
 catchrelease_rumorLegendary_longliner,CatchReleaseRumorText,"CatchReleaseCMD tokens
 $catchreleaseRumorKind == legendary
 $catchreleaseRumorLegendary == longliner score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem $catchreleaseRumorStranger
-CatchReleaseCMD showRumorIntel","The Fisherman studies a traffic report from $catchreleaseRumorSystem. ""Apparently I've had a boat working there. Couldn't tell you who was crewing it."" He sends you the transponder record. ""The Imposter, most likely. Put your breach lights across the hull. You'll need an explosive head to get through what comes out of it, so check your gear before you leave.""",,
-catchrelease_rumorLegendaryIntel_longliner,CatchReleaseLegendaryRumorIntel_longliner,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Look for a fishing boat and expose it with Breach Lights. Bring an Explosive Head for its hull shield. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
+CatchReleaseCMD showRumorIntel","The Fisherman studies a traffic report from $catchreleaseRumorSystem. ""Apparently I've had a boat working there. Couldn't tell you who was crewing it."" He sends you the transponder record. ""The Imposter, most likely. Put your breach lights across the hull. Take an explosive head if you haven't broken its hull before. Check your gear before you leave.""",,
+catchrelease_rumorLegendaryIntel_longliner,CatchReleaseLegendaryRumorIntel_longliner,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Look for a fishing boat and expose it with Breach Lights. Bring an Explosive Head if its hull shield is still intact. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
 catchrelease_rumorLegendary_abyssal_ghost_manta,CatchReleaseRumorText,"CatchReleaseCMD tokens
 $catchreleaseRumorKind == legendary
 $catchreleaseRumorLegendary == abyssal_ghost_manta score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
@@ -2776,6 +2776,58 @@ FireAll CatchReleaseRatingQuestions","""Out past the settled orbits. Look for th
 
 The spacer gives you a nav reference. ""If he says I still owe him a wrench, he's got two of mine.""",,
 catchrelease_ratingBarBack,DialogOptionSelected,$option == catchrelease_ratingBarBack,BarCMD returnFromEvent false,,,
+catchrelease_ratingLegendaryAdd,AddBarEvents,"CatchReleaseCMD hasRatingReport
+CatchReleaseCMD tokens
+$catchreleaseFishWelcome","AddBarEvent catchrelease_ratingLegendary ""Ask the spacer in faded deck coveralls about unusual catches"" ""A spacer in faded deck coveralls is comparing traffic logs with a fishing crew. One of the crew is describing something with both hands, to the amusement of the others."" highlight",,,
+catchrelease_ratingLegendaryTalk,DialogOptionSelected,$option == catchrelease_ratingLegendary,"CatchReleaseCMD hearRatingReport
+$global.catchrelease_metRating = true
+FireBest CatchReleaseRatingLegendaryReport",,,
+catchrelease_ratingLegendary_lantern_jack,CatchReleaseRatingLegendaryReport,"$catchreleaseBarReportReady
+$catchreleaseRumorLegendary == lantern_jack score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem $catchreleaseRumorStranger
+CatchReleaseCMD showRatingReportIntel
+CatchReleaseCMD showRatingReportMap
+FireAll CatchReleaseRatingLegendaryQuestions","""You still taking a rig out? There's a distress call going round in $catchreleaseRumorSystem. Salvage crew followed it in and got a light coming towards them, big as their tug."" The spacer pushes a battered recorder across the table. ""Listen to the date on the call. I told them that before they burned out there. Anyway, the fishing crews reckon it's Lantern Jack.""",,
+catchrelease_ratingLegendary_quorum,CatchReleaseRatingLegendaryReport,"$catchreleaseBarReportReady
+$catchreleaseRumorLegendary == quorum score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem $catchreleaseRumorStranger
+CatchReleaseCMD showRatingReportIntel
+CatchReleaseCMD showRatingReportMap
+FireAll CatchReleaseRatingLegendaryQuestions","The spacer has a cargo manifest spread beside the drink. ""Have a look at that. One specimen, and they hired a second hold for it. Never did bring anything aboard."" The destination is $catchreleaseRumorSystem. ""The Quorum, they called it. Whole school turns together. They got close enough to count a few thousand before they decided they'd brought the wrong rig.""",,
+catchrelease_ratingLegendary_slipstream_moray,CatchReleaseRatingLegendaryReport,"$catchreleaseBarReportReady
+$catchreleaseRumorLegendary == slipstream_moray score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem $catchreleaseRumorStranger
+CatchReleaseCMD showRatingReportIntel
+CatchReleaseCMD showRatingReportMap
+FireAll CatchReleaseRatingLegendaryQuestions","""Ship came in from $catchreleaseRumorSystem with every unsecured thing piled against the aft bulkhead. Cook had to climb over the freezer to get out."" The spacer seems rather pleased with this detail. ""Pilot swears a Slipstream Moray crossed ahead of them. Long as the convoy, apparently. He had a recording, but he stopped showing it after people started asking about his flying.""",,
+catchrelease_ratingLegendary_false_dawn,CatchReleaseRatingLegendaryReport,"$catchreleaseBarReportReady
+$catchreleaseRumorLegendary == false_dawn score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem $catchreleaseRumorStranger
+CatchReleaseCMD showRatingReportIntel
+CatchReleaseCMD showRatingReportMap
+FireAll CatchReleaseRatingLegendaryQuestions","""A survey crew in $catchreleaseRumorSystem logged another star. Small one. They were writing up the claim when somebody noticed it was going round the first."" The spacer draws a little circle in a spilled drink. ""Fishing boat put breach lights on it. False Dawn. They broke off when their vents started glowing, so it ought to still be out by the corona.""",,
+catchrelease_ratingLegendary_longliner,CatchReleaseRatingLegendaryReport,"$catchreleaseBarReportReady
+$catchreleaseRumorLegendary == longliner score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem $catchreleaseRumorStranger
+CatchReleaseCMD showRatingReportIntel
+CatchReleaseCMD showRatingReportMap
+FireAll CatchReleaseRatingLegendaryQuestions","The spacer waves you over before you've ordered. ""You know those boats the Fisherman runs? One turned up in $catchreleaseRumorSystem. Wouldn't answer a hail, though the transponder was clear as anything."" A traffic log slides across the table. ""The Imposter, one of the rig crews reckons. I've put cargo aboard enough of the proper boats. I'd want a very good look before I went alongside that one.""",,
+catchrelease_ratingLegendary_abyssal_ghost_manta,CatchReleaseRatingLegendaryReport,"$catchreleaseBarReportReady
+$catchreleaseRumorLegendary == abyssal_ghost_manta score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorStranger $catchreleaseRumorSystem
+CatchReleaseCMD showRatingReportIntel
+CatchReleaseCMD showRatingReportMap
+FireAll CatchReleaseRatingLegendaryQuestions","""Abyssal Ghost Manta,"" the spacer says, turning a slate towards you. ""That's what they wrote on the report. $catchreleaseRumorSystem. Big flat thing under the lights, wider than the ship."" Most of the recording is a crew arguing about fuel. ""They spent all that getting out there and nobody had checked the retrieval gear. I used to work for a captain like that.""",,
+catchrelease_ratingLegendaryGone,CatchReleaseRatingLegendaryReport,,"HideMapMarker
+SetShortcut catchrelease_ratingLegendaryBack ESCAPE","""That one's out of date,"" the spacer says, checking the log. ""I'd ask the fishing crews again before you went all that way.""",100:catchrelease_ratingLegendaryBack:Go back to the bar,
+catchrelease_ratingLegendaryWhereOption,CatchReleaseRatingLegendaryQuestions,,,,"0:catchrelease_ratingLegendaryWhere:""Where should I look?""",
+catchrelease_ratingLegendaryGearOption,CatchReleaseRatingLegendaryQuestions,,,,"20:catchrelease_ratingLegendaryGear:""What would I need to catch it?""",
+catchrelease_ratingLegendaryBackOption,CatchReleaseRatingLegendaryQuestions,,SetShortcut catchrelease_ratingLegendaryBack ESCAPE,,100:catchrelease_ratingLegendaryBack:Go back to the bar,
+catchrelease_ratingLegendaryWhere,DialogOptionSelected,$option == catchrelease_ratingLegendaryWhere,"CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+CatchReleaseCMD showRatingReportMap
+FireAll CatchReleaseRatingLegendaryQuestions","""I've got $catchreleaseRumorSystem, Captain, not a berth number. Start with what's in the report."" The spacer taps the dated entry. ""These things don't stay put forever. If you leave it sitting on your chart for a couple of months, you might make the trip for nothing.""",,
+catchrelease_ratingLegendaryGear,DialogOptionSelected,$option == catchrelease_ratingLegendaryGear,"HideMapMarker
+FireBest CatchReleaseRatingLegendaryGear",,,
+catchrelease_ratingLegendaryGearHull,CatchReleaseRatingLegendaryGear,$catchreleaseRumorLegendary == longliner score:10,FireAll CatchReleaseRatingLegendaryQuestions,"""Breach lights to get a look at it, and an explosive head for that hull if nobody's broken it open yet. I wouldn't waste ordinary harpoons on the plating."" The spacer leans back to let a waiter pass. ""And check that everything's fitted before you set off. Buying the schematic doesn't put it on your rig.""",,
+catchrelease_ratingLegendaryGearDefault,CatchReleaseRatingLegendaryGear,,FireAll CatchReleaseRatingLegendaryQuestions,"""Breach lights and a harpoon rig, for a start. Then whatever you can afford to fit to them. These crews all had plans until they saw what they were chasing."" The spacer pushes the report back towards you. ""I worked the loading decks. If you want advice on landing it, ask the Fisherman.""",,
+catchrelease_ratingLegendaryBack,DialogOptionSelected,$option == catchrelease_ratingLegendaryBack,"HideMapMarker
+unset $catchreleaseBarReport
+unset $catchreleaseBarReportReady
+BarCMD returnFromEvent false",,,
 ,,,,,,
 # crablobab,,,,,,
 catchrelease_crabBarAdd,AddBarEvents,CatchReleaseCMD crabBarAvailable,"AddBarEvent catchrelease_crabBar ""Ask the man with the crabs how business is going"" ""A cheerful man in a heavy coat is attempting to sell live crabs to people who came here to drink. The coat has a remarkable number of pockets. The crabs appear to be doing most of the negotiating.""",,,
