@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.spawner;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishHabitat;
 import catchrelease.campaign.fish.data.FishRanges;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
@@ -30,16 +31,12 @@ public class PondFishSpawner {
     }
 
     public static FishSpec pickFish(LocationAPI location, CatchImplement how, float extraRarityBias) {
-        FishHabitat where = FishHabitat.of(location);
-
         extraRarityBias += FishRumors.getRarityBias(location);
 
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
-            if (spec.spawnWeight <= 0f) continue;
-            // the Longliner enters the water as a boat, never through the spawner
-            if (catchrelease.campaign.fish.legendary.LonglinerDecoy.spawnsAsBoat(spec)) continue;
+            if (spec.spawnWeight <= 0f || spec.rarity == FishRarity.LEGENDARY) continue;
             if (!FishRanges.matches(spec, location, how)) continue;
 
             picker.add(spec, spec.spawnWeight * getRarityWeight(spec, extraRarityBias));
@@ -49,13 +46,13 @@ public class PondFishSpawner {
         String strangerId = FishRumors.getStrangerId(location);
         if (strangerId != null) {
             FishSpec stranger = FishSpecLoader.getFishSpec(strangerId);
-            if (stranger != null && stranger.canBeReachedBy(how)) {
+            if (stranger != null && stranger.rarity != FishRarity.LEGENDARY && stranger.canBeReachedBy(how)) {
                 picker.add(stranger, FishermanConstants.RUMOR_STRANGER_WEIGHT);
             }
         }
 
         if (picker.isEmpty()) {
-            Global.getLogger(PondFishSpawner.class).warn("Nothing lives in " + describe(where)
+            Global.getLogger(PondFishSpawner.class).warn("Nothing lives in " + describe(FishHabitat.of(location))
                     + " on " + how + " - check " + FishSpecLoader.PATH);
             return null;
         }

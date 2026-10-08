@@ -65,6 +65,14 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         return Math.max(getMarkStrength(mote), nearestBeamShadow(mote.getLocation()));
     }
 
+    public float getRevealStrength(SectorEntityToken mote) {
+        if (isExpired() || mote == null || mote.isExpired() || mote.getContainingLocation() != home) return 0f;
+        float reveal = Math.max(getMarkStrength(mote), revealStrength(mote.getLocation()));
+        float fade = fading ? Math.max(0f, 1f - fadeElapsed / fadeDuration) : 1f;
+        return reveal * fade * getLampAlphaAt(mote.getLocation(), UpgradeManager.getValue(
+                StatIds.SEARCHLIGHT_DETECT_RADIUS, FishConstants.IMPRESSION_DETECT_FALLBACK));
+    }
+
     @Override
     public boolean isExpired() {
         return expired || owner == null || home == null
@@ -201,7 +209,7 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
             if (dent <= 0f && reveal <= 0f) continue;
 
             renderImpression(buried.getLocation(), dent * alpha,
-                    reveal, reveal * fadeMult, revealColor(buried));
+                    reveal, getRevealStrength(buried), revealColor(buried));
         }
     }
 
@@ -248,7 +256,6 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
         float lampAlpha = getLampAlphaAt(at, UpgradeManager.getValue(StatIds.SEARCHLIGHT_DETECT_RADIUS,
                 FishConstants.IMPRESSION_DETECT_FALLBACK));
         alphaMult *= lampAlpha;
-        revealMult *= lampAlpha;
         if (alphaMult <= 0f) return;
 
         float pulse = 1f + FishConstants.IMPRESSION_PULSE

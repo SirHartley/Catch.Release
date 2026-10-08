@@ -1,10 +1,14 @@
 package catchrelease.campaign.fish.legendary;
 
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.reflection.ReflectionUtils;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -13,6 +17,7 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,6 +55,9 @@ public class LegendaryShields {
     public static final float EAT_RANGE = 80f;
     public static final float FLARE_PULL_RANGE = 3000f;
     public static final float LURE_SECONDS = 20f;
+    public static final int LURE_SPAWN_COUNT = 3;
+    public static final float LURE_SPAWN_MIN = 800f;
+    public static final float LURE_SPAWN_MAX = 1400f;
     public static final float SHIELD_RADIUS = 52f;
 
     private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
@@ -352,13 +360,12 @@ public class LegendaryShields {
         }
     }
 
-    /** The Lantern Jack hunts: it stalks lamp-exposed motes and swallows them to layer
-     *  stored shells over its base shell, up to the stack cap. */
     public static void advanceEater(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return;
         if (!CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return;
 
         fish.setHunting(false);
+        if (fish.isEvading()) return;
 
         LegendaryChases.Chase state = LegendaryChases.getState(CHARGE_SHIELD_SPECIES);
         if (getJackStack(state) >= JACK_STACK_MAX) return;
@@ -368,11 +375,10 @@ public class LegendaryShields {
 
         SectorEntityToken prey = null;
         float best = EAT_SEEK_RANGE;
-        for (SectorEntityToken other : self.getContainingLocation()
-                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (other == self || other.isExpired()) continue;
-            if (!(other.getCustomPlugin() instanceof FishEntityPlugin meal)) continue;
-            if (!isEdible(other, meal)) continue;
+        for (SectorEntityToken other : preyMotes(self)) {
+            if (!isEdible(other)) continue;
+            if (other.getCustomPlugin() instanceof BuriedMoteEntityPlugin
+                    && SearchlightAbilityPlugin.getRevealStrength(other) <= 0f) continue;
 
             float distance = Misc.getDistance(self.getLocation(), other.getLocation());
             if (distance < best) {
@@ -383,41 +389,71 @@ public class LegendaryShields {
 
         if (prey == null) return;
 
+        if (prey.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) prey = buried.unearth();
+        if (prey == null || prey.isExpired()) return;
+
         fish.setHunting(true);
         fish.setSwimTarget(new Vector2f(prey.getLocation()));
 
         if (best <= EAT_RANGE) {
-            Misc.fadeAndExpire(prey, 0.3f);
+            // A fading mote is still edible on the next frame. Consume it once.
+            prey.setExpired(true);
             state.shieldUnits = Math.min(JACK_STACK_MAX, getJackStack(state) + 1);
             fish.flashShield();
             say(self, "Mote consumed. Another shell layers on.");
         }
     }
 
-    /** The flare call: low on shells, the Jack rings the water and every edible mote
-     *  in the pull radius turns and runs at it - prey delivering itself. */
     public static void lureFlare(FishEntityPlugin jack) {
         SectorEntityToken self = jack.getMote();
         if (self == null || self.getContainingLocation() == null) return;
 
-        for (SectorEntityToken other : self.getContainingLocation()
-                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (other == self || other.isExpired()) continue;
-            if (!(other.getCustomPlugin() instanceof FishEntityPlugin meal)) continue;
-            if (!isEdible(other, meal)) continue;
+        for (SectorEntityToken other : preyMotes(self)) {
+            if (!isEdible(other)) continue;
             if (Misc.getDistance(self.getLocation(), other.getLocation())
                     > FLARE_PULL_RANGE) {
                 continue;
             }
 
-            meal.startLure(self, LURE_SECONDS);
+            if (other.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) other = buried.unearth();
+            if (other != null && other.getCustomPlugin() instanceof FishEntityPlugin meal) {
+                meal.startLure(self, LURE_SECONDS);
+            }
+        }
+
+        for (int i = 0; i < LURE_SPAWN_COUNT; i++) {
+            String id = PondFishSpawner.pickFishId(self.getContainingLocation(), CatchImplement.BREACH_LAMP);
+            if (id == null) break;
+            Vector2f at = MathUtils.getPointOnCircumference(self.getLocation(),
+                    MathUtils.getRandomNumberInRange(LURE_SPAWN_MIN, LURE_SPAWN_MAX),
+                    MathUtils.getRandomNumberInRange(0f, 360f));
+            SectorEntityToken mote = self.getContainingLocation().addCustomEntity(
+                    Misc.genUID(), "Mote", "catchrelease_Mote", null,
+                    new FishEntityPlugin.Params(new Vector2f(self.getLocation()), id));
+            mote.setLocation(at.x, at.y);
+            ((FishEntityPlugin) mote.getCustomPlugin()).startLure(self, LURE_SECONDS);
         }
 
         say(self, "The lantern flares. Nearby motes turn toward it.");
     }
 
-    /** Only what the lamps exposed: pond stock, phantoms and anything hidden are not
-     *  on the menu, and neither is a legendary or somebody's orbiting shield. */
+    protected static List<SectorEntityToken> preyMotes(SectorEntityToken self) {
+        List<SectorEntityToken> motes = new ArrayList<>(self.getContainingLocation()
+                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG));
+        motes.addAll(self.getContainingLocation().getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG));
+        return motes;
+    }
+
+    protected static boolean isEdible(SectorEntityToken mote) {
+        if (mote == null || mote.isExpired() || QuestPond.isQuestMote(mote)) return false;
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) return isEdible(mote, fish);
+        if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) {
+            FishSpec spec = buried.getFishSpec();
+            return spec != null && spec.rarity != FishRarity.LEGENDARY;
+        }
+        return false;
+    }
+
     protected static boolean isEdible(SectorEntityToken mote, FishEntityPlugin meal) {
         if (meal.isFromPond() || meal.isPhantom() || meal.isHeld() || meal.isDiving()) {
             return false;
@@ -467,9 +503,23 @@ public class LegendaryShields {
     /** Chase feedback floats at the thing it happened to, never the message feed. */
     public static void say(SectorEntityToken at, String text) {
         if (at == null || at.isExpired()) at = Global.getSector().getPlayerFleet();
-        if (at == null) return;
+        if (at == null || !at.isVisibleToPlayerFleet()) return;
 
         at.addFloatingText(text, Misc.getHighlightColor(), 1f);
+        List<?> labels = (List<?>) ReflectionUtils.invoke(at, "getFloatingText");
+        if (labels == null || labels.size() < 2) return;
+        Object newest = labels.get(labels.size() - 1);
+        Vector2f offset = (Vector2f) ReflectionUtils.get(newest, "offset");
+        Object label = ReflectionUtils.get(newest, "label");
+        float height = ((Number) ReflectionUtils.invoke(label, "getHeight")).floatValue();
+        float gap = Global.getSector().getViewport().convertScreenHeightToWorldHeight(height + 4f);
+        float top = offset.y;
+        // Older labels drift up first; keep them above newer notices.
+        for (int i = labels.size() - 2; i >= 0; i--) {
+            Vector2f older = (Vector2f) ReflectionUtils.get(labels.get(i), "offset");
+            older.y = Math.max(older.y, top + gap);
+            top = older.y;
+        }
     }
 
     protected static int getShieldUnits(LegendaryChases.Chase state, int cap) {

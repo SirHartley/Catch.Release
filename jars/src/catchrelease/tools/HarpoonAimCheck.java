@@ -59,6 +59,7 @@ public final class HarpoonAimCheck {
                 case "getContainingLocation" -> location;
                 case "isExpired" -> expired;
                 case "isAlive" -> !expired;
+                case "isVisibleToPlayerFleet" -> false;
                 case "setFacing", "addFloatingText" -> null;
                 default -> throw new AssertionError(method);
             });
@@ -72,6 +73,7 @@ public final class HarpoonAimCheck {
         boolean visible = true;
         boolean phantom;
         boolean diving;
+        int calls;
 
         Mote(Token token) {
             entity = token.api;
@@ -89,6 +91,7 @@ public final class HarpoonAimCheck {
         @Override protected boolean isLampVisible() { return visible; }
         @Override public boolean isPhantom() { return phantom; }
         @Override public boolean isDiving() { return diving; }
+        @Override public void tryLureFlare() { calls++; }
     }
 
     private static final class Buried extends BuriedMoteEntityPlugin {
@@ -421,6 +424,7 @@ public final class HarpoonAimCheck {
         shot = new Shot(head, atAngle(0f));
         shot.step(0.1f);
         require(minePlugin.detonations == 0 && shot.sounds == 1, "Shield stops shot before mine");
+        require(legendary.calls == 1, "Awake shield contact requests Lantern Jack's lure");
         f.motes.remove(FishEntityPlugin.MOTE_TAG);
         head = f.token(null, 0f, 0f);
         shot = new Shot(head, atAngle(0f));

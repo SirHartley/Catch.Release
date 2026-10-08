@@ -8,11 +8,11 @@ import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
+import catchrelease.campaign.fish.legendary.LegendaryTrail;
 import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
-import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -24,7 +24,6 @@ import com.fs.starfarer.api.util.FlickerUtilV2;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
-import org.magiclib.plugins.MagicCampaignTrailPlugin;
 
 import java.awt.Color;
 
@@ -34,11 +33,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float GLOW_SIZE = 25f;
     private static final float MOVE_SPEED = 90f;
     private static final float MAX_SINE_VARIANCE = 90f;
-
-    private static final Color TRAIL_COLOR = new Color(255, 45, 45);
-    private static final float TRAIL_WIDTH = 2f;
-    private static final float TRAIL_SECONDS = 0.3f;
-    private static final float TRAIL_MAX_STEP = 90f;
 
     private static final float ORBIT_RADIUS = 70f;
     private static final float ORBIT_DEG_PER_SECOND = 140f;
@@ -133,9 +127,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private final FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
     private transient SpriteAPI sprite;
 
-    private transient SpriteAPI trailSprite;
-    private transient float trailId;
-    private transient Vector2f trailPosition;
+    private transient LegendaryTrail trail;
 
     private boolean held = false;
     private float stunLeft = 0f;
@@ -358,11 +350,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (LegendaryShields.isFleeing(this)) advanceFleeMode();
         if (QuorumShellGame.advance(this, amount)) return;
         if (advanceLure(amount)) return;
+        boolean pursuing = hunting && evasiveLeft <= 0f;
+        if (pursuing) keepSurfaced(1f);
 
         // under the fabric a mote holds a straight course at cruise speed, so where it went down tells where it surfaces
         float step = MOVE_SPEED * getSpeedMult() * getSlowMult()
                 * LegendaryShields.getSpeedMult(this) * getLureSpeedMult()
-                * (diving ? 1f : advanceMode(amount)) * amount;
+                * (diving || pursuing ? 1f : advanceMode(amount)) * amount;
         // A submerged False Dawn follows the corona too; straight dive headings can cross the star.
         if (!phantom && FalseDawnOrbit.advance(entity, fishId, step, time)) return;
         float distance = Misc.getDistance(entity.getLocation(), target);
@@ -380,7 +374,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         float angle = diving ? diveHeading
-                : Misc.getAngleInDegrees(entity.getLocation(), target) + getWander();
+                : Misc.getAngleInDegrees(entity.getLocation(), target) + (pursuing ? 0f : getWander());
 
         Vector2f next = MathUtils.getPointOnCircumference(
                 entity.getLocation(),
@@ -708,6 +702,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.hunting = hunting;
     }
 
+    public boolean isEvading() {
+        return evasiveLeft > 0f;
+    }
+
     public void startEvasive() {
         evasiveLeft = Math.max(evasiveLeft, EVADE_SECONDS);
         jinkLeft = 0f;
@@ -725,14 +723,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     public void startLure(SectorEntityToken at, float seconds) {
         lureTarget = at;
         lureLeft = seconds;
+        keepSurfaced(seconds);
     }
 
     public float getLureSpeedMult() {
         return lureLeft > 0f ? LURE_SPEED_MULT : 1f;
     }
 
-    /** A called mote runs at the caller and holds just off its jaws - close enough
-     *  for the eater, short of the arrival that would expire a pondless mote. */
     protected boolean advanceLure(float amount) {
         if (lureLeft <= 0f) return false;
 
@@ -744,13 +741,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             return false;
         }
 
-        if (Misc.getDistance(entity.getLocation(), lureTarget.getLocation())
-                <= LegendaryShields.EAT_RANGE * 0.7f) {
-            return true;
-        }
-
         setSwimTarget(new Vector2f(lureTarget.getLocation()));
-        return false;
+        float distance = Misc.getDistance(entity.getLocation(), target);
+        float step = Math.min(Math.max(0f, distance - LegendaryShields.EAT_RANGE * 0.7f),
+                MOVE_SPEED * getSpeedMult() * getSlowMult() * LURE_SPEED_MULT * amount);
+        if (step > 0f) {
+            moveTo(MathUtils.getPointOnCircumference(entity.getLocation(), step,
+                    Misc.getAngleInDegrees(entity.getLocation(), target)));
+        }
+        return true;
     }
 
     /** Sweeping patrol legs while idle; hard alternating jinks while a throw is likely
@@ -987,40 +986,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     protected void advanceTrail() {
         if (getRarity() != FishRarity.LEGENDARY && !isDecoy()) return;
-        float alpha = held || entity.isExpired() || !entity.isInCurrentLocation()
-                ? 0f : getMoteAlpha();
-        if (alpha <= 0.01f) {
-            if (trailPosition != null) cutTrail();
-            trailPosition = null;
-            return;
-        }
-
-        Vector2f at = entity.getLocation();
-        if (trailPosition == null) {
-            trailPosition = new Vector2f(at);
-            return;
-        }
-        float dx = at.x - trailPosition.x;
-        float dy = at.y - trailPosition.y;
-        trailPosition.set(at);
-        // Slot swaps and teleports must not draw a line to the old position.
-        if (dx * dx + dy * dy > TRAIL_MAX_STEP * TRAIL_MAX_STEP) {
-            cutTrail();
-        } else if (dx * dx + dy * dy > 0.001f) {
-            emitTrail((float) Math.toDegrees(Math.atan2(dy, dx)), alpha);
-        }
-    }
-
-    protected void emitTrail(float angle, float alpha) {
-        if (trailId == 0f) trailId = MagicCampaignTrailPlugin.getUniqueID();
-        if (trailSprite == null) trailSprite = SpriteLoader.getSprite("trail_foggy");
-        MagicCampaignTrailPlugin.addTrailMemberSimple(entity, trailId, trailSprite,
-                entity.getLocation(), 0f, angle, TRAIL_WIDTH, 0.4f,
-                TRAIL_COLOR, 0.65f * alpha, TRAIL_SECONDS, true, new Vector2f());
-    }
-
-    protected void cutTrail() {
-        if (trailId != 0f) MagicCampaignTrailPlugin.cutTrailsOnEntity(entity);
+        if (trail == null) trail = new LegendaryTrail();
+        trail.advance(entity, held ? 0f : getMoteAlpha());
     }
 
     public void externalRender(ViewportAPI viewport){

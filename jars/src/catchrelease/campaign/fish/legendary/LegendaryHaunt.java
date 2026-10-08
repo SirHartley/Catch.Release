@@ -49,6 +49,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         Global.getSector().addTransientScript(haunt);
 
         sweepLeftovers();
+        LegendarySpawns.populate(Global.getSector().getCurrentLocation());
     }
 
     public static void resetForTesting() {
@@ -146,9 +147,12 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
 
     @Override
     public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
-        if (prev == null || prev == curr) return;
-        if (activeSystem == prev) stop();
-        removeLegendaryMotes(prev);
+        if (prev == curr) return;
+        if (prev != null) {
+            if (activeSystem == prev) stop();
+            removeLegendaryMotes(prev);
+        }
+        LegendarySpawns.populate(curr);
     }
 
     protected static void removeLegendaryMotes(LocationAPI location) {

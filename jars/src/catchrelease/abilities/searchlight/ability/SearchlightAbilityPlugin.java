@@ -68,6 +68,11 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         return renderer != null && mote != null && renderer.getDentStrength(mote) > 0f;
     }
 
+    public static float getRevealStrength(SectorEntityToken mote) {
+        SearchlightImpressionRenderer renderer = getImpressions();
+        return renderer == null ? 0f : renderer.getRevealStrength(mote);
+    }
+
     /** Strongest player beam at a raw position - a pure geometry test, any target. */
     public static float getBeamStrengthAt(Vector2f at) {
         CampaignFleetAPI fleet = Global.getSector() == null

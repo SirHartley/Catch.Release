@@ -425,6 +425,7 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | File | Owner / connection |
 |---|---|
 | `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. |
+| `LegendarySpawns.java` | Spawns each uncaught resident on system entry and load through `LegendaryHaunt`'s location listener, after tutorial graduation. One buried or surfaced mote per species; no random-population rolls or distance culling. Placement is within 6000 units of the primary sun, otherwise the largest planet, otherwise 0/0, and clears stellar hazards. False Dawn uses its corona's star; Longliner retains its boat spawn. |
 | `LegendaryStarAvoidance.java` | All non-False-Dawn legendaries avoid each local star's surface and nominal corona plus 150 units. Natural buried spawns, surfacing, console placement, explosive respawns and Imposter reveal use the same boundary. Swimming, submerged runs, travel dashes and reveal drift test complete movement segments; positions already inside are corrected. Quorum steering reserves its escort radius; shell-game centers reserve the largest decoy ring. Manta steering moves its line center with one-slot clearance, preserving spacing and blackout swaps. Held catches remain attached to their retrieval gear. Uses existing movement callbacks, with no new script, saved state or sector-wide scan. |
 | `SlipDashModule.java` | Moray slipstream trail and curved travel dash. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Uses the existing trail roll-up and haunt cleanup. |
 | `QuorumShellGame.java` | Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. |
@@ -436,10 +437,19 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | `../entities/HauntMineEntityPlugin.java` | Non-damaging False Dawn mines. Push and pull deliver equal, opposite one-shot impulses through the fleet movement module via `setVelocity`; the implosion ripple remains visual only, with no lingering attraction. Interdiction mines cancel interdictable abilities and stop the fleet for two seconds using vanilla's one-frame stop request; no persistent speed modifier. Timers stop while paused. |
 | `MinefieldModule.java` | Keeps the 3–6-mine waves and 22-mine cap but rejects overlapping trigger zones, leaving at least 300 units of passage (more for a large player fleet). Placement checks earlier waves as well as the current one, keeps clear of the player and stellar surfaces, and skips crowded spawns after bounded attempts. Every new mine gets the full two-second arming delay; blink phase is separate. |
 | `GhostFleetsModule.java` | Lantern Jack's harmless fleets: first at 5–10 seconds, then every 15–25, at most two. Spawn 1000–1600 units away with 2–15 ships and at least 8 burn; intercept, with half switching to HOLD after 3–7 seconds. Hard-remove at 250 units or 30 seconds. Transponders stay off; flags prevent clicks, comms and other-fleet attention, and `setNoEngaging` prevents INTERCEPT battles. Harpoons ignore haunt fleets. |
-| `FakeWrecksModule.java` | Lantern Jack wrecks: first at 10 seconds, then every 15–35; at most 25 including fades. Spawn 600–1100 units away, expire after 120–240 seconds, and use registered ship variants except fighters/stations/modules. Click-to-approach stays enabled while interaction/salvage tags are withheld. At 100 units the first wreck approached becomes real; later wrecks have a 10% chance, otherwise fade over 0.5 seconds. Real wrecks restore vanilla interaction tags and retain default derelict salvage. All remain haunt-owned. |
+| `FakeWrecksModule.java` | Lantern Jack wrecks: groups of three, first at 5 seconds then every 10–18; at most 25 including fades, with smaller groups when nearly full. Spawn 600–1100 units away, expire after 120–240 seconds, and use registered ship variants except fighters/stations/modules. Click-to-approach stays enabled while interaction/salvage tags are withheld. At 100 units the first wreck approached becomes real; later wrecks have a 10% chance, otherwise fade over 0.5 seconds. Real wrecks restore vanilla interaction tags and retain default derelict salvage. All remain haunt-owned. |
 | `LanternSensorGhostsModule.java` | Jack-only vanilla `BaseSensorGhost` contacts: echo player movement, intercept then depart, or pass by. First and repeat spawns take 5–10 seconds, cap four including fades. Uses the haunt's existing advance and cleanup, not the hyperspace manager or a new sector script. Behavior durations convert seconds to campaign days; original tokens remain tracked after vanilla starts fading. No fleet spawning or drive drain. `SensorGhostsModule` remains the Imposter's separate implementation. |
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
+
+Lantern Jack hunts surfaced prey and lamp-revealed buried prey, surfacing the latter
+before pursuit. Pursuit uses a direct heading after hit evasion ends. Each swallowed
+mote expires immediately and supplies one stored shell, up to three; pond stock,
+quest targets, held fish, legendaries and shield/phantom bodies are excluded.
+Its call also surfaces eligible buried prey within 3000 units and adds three fish
+from the normal local lamp pool, 800–1400 units away. Called fish stay surfaced and
+swim directly toward Jack for 20 seconds, stopping within bite range instead of
+expiring at their destination. The existing 30-second call cooldown limits new fish.
 
 `LegendaryHaunt.getMantaLampAlpha(lamp)` gives each lamp an independent visual
 flicker phase using the identity of its stable aim vector, not its coordinates.
@@ -453,9 +463,9 @@ Real legendary motes continue swimming after reaching a destination and do not e
 when a dash ends or they leave a pond boundary. `LegendaryHaunt` also registers a
 transient `CurrentLocationChangedListener`: departure removes surfaced and buried
 legendaries, their attached Quorum bodies and active haunt modules. The existing
-load sweep removes off-system legendary motes but preserves those in the current
-location. This cleanup does not change `LegendaryChases`, host selection, spawn
-eligibility or relocation timing. With lamps on, unseen haunt effects linger for
+load sweep removes off-system legendary motes, preserves current residents, and fills
+missing residents through `LegendarySpawns`. Departure cleanup does not change
+`LegendaryChases`, host selection or relocation timing. With lamps on, unseen haunt effects linger for
 60 seconds, then fade over 12 seconds. Turning the player's lamps off starts that
 fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
@@ -486,6 +496,7 @@ but uses `ReflectionUtils` to set each new label's stable `entity` field to a fi
 location token. The token is not added to the system; the mote still owns the label's
 lifetime and visibility. This follows `CampaignFloatingText` in 0.98a-RC8, which
 reads its entity's location every render. Other species retain entity-following text.
+All legendary notices share the overlap spacing in [UI.md](UI.md#drawing-gotchas).
 Every manta slot switch shares the 0.3-second blackout clock for invulnerability
 and jitter. `FishEntityPlugin.isAvailable` rejects it for harpoons and drones;
 direct shield/explosive contacts and blast effects also respect this window.
@@ -629,7 +640,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
 - False Dawn selects the largest-radius usable corona star across chartable systems, regardless of coherence; its haunt supplies the coherence change. Its old regional sheet preference does not limit this selection. Equal-largest hosts can alternate; a sole largest host is retained. If no usable corona exists, no natural host is assigned. A host that becomes unsuitable is replaced only while the player is elsewhere; new natural spawns are gated immediately. `SpawnFish` still overrides the host for testing but places the fish in the largest usable local corona.
-- False Dawn's repeating orbit cannot finish a generic swim crossing. The buried spawner therefore refuses a second live specimen in that system; existing specimens expire when their ledger marks capture or a different host.
+- `LegendarySpawns` excludes resident legendaries from the ordinary population. False Dawn's existing specimens expire when their ledger marks capture or a different host; other legendary lifetimes and departure cleanup are described above.
 
 | Catch | Method | Implement |
 |---|---|---|
@@ -678,7 +689,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 
 - Fan light and fan breach window share `STEPS_ACROSS`, `STEPS_ALONG`, and both alpha curves. Change their geometry together.
 - Glow, fan, and impression renderers share the same resting alpha formula. Module changes should affect light shape, not total intensity.
-- Legendary campaign motes use the harpoon's MagicLib foggy trail: red, 2 units wide, fading over 0.3 seconds. Shell-game decoys and legendary phantoms share it; ordinary Quorum escorts do not. The existing mote advance callback emits after movement, using the glow's lamp/dive/sensor alpha. Held, expired and off-location motes stop emitting; old segments fade out. Teleports cut the strip. Trail IDs, textures and position samples are transient; cargo, Codex and aquarium sprites are unchanged.
+- `LegendaryTrail` gives buried and surfaced legendary motes the same red, 2-unit MagicLib foggy trail, fading over 0.3 seconds. It does not require provocation or an active haunt. Buried motes use the impression renderer's reveal/retention/fade alpha; surfaced motes use their lamp/dive/sensor alpha. Shell-game decoys and legendary phantoms share it; ordinary Quorum escorts do not. Existing mote callbacks emit after movement. Held, expired and off-location motes stop emitting; old segments fade out. Teleports cut the strip. Trail instances are transient; cargo, Codex and aquarium sprites are unchanged.
 - Camera-centered objects have no camera parallax term. Account for this in effects such as `PondDepthField`.
 - `ReflectionUtils` uses `MethodHandle` because the Starsector script classloader rejects direct references to `java.lang.reflect.Field` and `Method`.
 - Sound IDs are unchecked strings until playback. Validate them against merged sound data. Starsector JSON supports `#` comments and trailing commas, and sound entries may be arrays or objects.

@@ -7,6 +7,10 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.legendary.*;
+import catchrelease.campaign.fish.tutorial.TutorialConstants;
+import catchrelease.memory.TransientMemory;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -31,12 +35,19 @@ public final class LegendaryEscapeChecks {
     static class Notice {
 
         private SectorEntityToken entity;
+        final Vector2f offset = new Vector2f(0f, 25f);
+        final TextSize label = new TextSize();
         final String text;
 
         Notice(SectorEntityToken entity, String text) {
             this.entity = entity;
             this.text = text;
         }
+    }
+
+    public static class TextSize {
+
+        public float getHeight() { return 16f; }
     }
 
     static class Fish extends FishEntityPlugin {
@@ -52,13 +63,22 @@ public final class LegendaryEscapeChecks {
         final List<Notice> notices = new ArrayList<>();
         boolean visible = true;
         boolean expired;
+        boolean removed;
+        boolean quest;
+        boolean pond;
 
         Fish(Environment env, String id, boolean phantom, SectorEntityToken anchor) {
             spec.id = id;
-            spec.rarity = "quorum_shard".equals(id) ? FishRarity.RARE : FishRarity.LEGENDARY;
+            spec.rarity = env.specs.containsKey(id) ? env.specs.get(id).rarity
+                    : "quorum_shard".equals(id) ? FishRarity.RARE : FishRarity.LEGENDARY;
             this.phantom = phantom;
             this.anchor = anchor;
+            MemoryAPI moteMemory = api(MemoryAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getBoolean" -> quest && catchrelease.campaign.fish.jobs.QuestPond.QUEST_MOTE_FLAG.equals(a[0]);
+                default -> throw new AssertionError(m);
+            });
             entity = api(TextMote.class, (p, m, a) -> switch (m.getName()) {
+                case "getMemoryWithoutUpdate" -> moteMemory;
                 case "getLocation" -> at;
                 case "setLocation" -> { at.set((float) a[0], (float) a[1]); yield null; }
                 case "getCustomPlugin" -> plugin;
@@ -80,11 +100,13 @@ public final class LegendaryEscapeChecks {
         }
 
         @Override public FishSpec getFishSpec() { return spec; }
+        @Override public String getFishId() { return spec.id; }
         @Override public boolean isPhantom() { return phantom; }
         @Override public boolean isDecoy() { return anchor != null; }
         @Override public SectorEntityToken getDecoyAnchor() { return anchor; }
         @Override public SectorEntityToken getOrbitAnchor() { return orbit; }
         @Override public boolean holdsStation() { return false; }
+        @Override public boolean isFromPond() { return pond; }
         @Override public boolean isLampVisible() { return true; }
         @Override protected void advanceLampFade(float amount) { }
         @Override protected void advanceShieldLens() { }
@@ -105,6 +127,7 @@ public final class LegendaryEscapeChecks {
         }
         @Override public FishSpec getFishSpec() { return spec; }
         @Override protected float getWanderMult() { return 0f; }
+        @Override protected void advanceTrail() { }
     }
 
     static class Corona extends StarCoronaTerrainPlugin {
@@ -188,6 +211,10 @@ public final class LegendaryEscapeChecks {
         final List<PlanetAPI> stars = new ArrayList<>();
         final List<CampaignTerrainAPI> coronas = new ArrayList<>();
         final Map<String, Object> persistent = new HashMap<>();
+        final Map<String, FishSpec> specs = new LinkedHashMap<>();
+        final TransientMemory memory = new TransientMemory();
+        int tutorialStage;
+        float zoom = 1f;
         final List<EveryFrameScript> scripts = new ArrayList<>();
         final StarSystemAPI system;
         final Haunt haunt = new Haunt();
@@ -216,6 +243,7 @@ public final class LegendaryEscapeChecks {
             system = api(StarSystemAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getId" -> "escape-system";
                 case "getPlanets" -> stars;
+                case "getStar" -> stars.stream().filter(PlanetAPI::isStar).findFirst().orElse(null);
                 case "getTerrainCopy" -> coronas;
                 case "createToken" -> {
                     Vector2f at = new Vector2f((float) a[0], (float) a[1]);
@@ -227,8 +255,16 @@ public final class LegendaryEscapeChecks {
                 case "getEntitiesWithTag" -> fish.stream()
                         .filter(f -> !f.expired && f.tags.contains(a[0])).map(Fish::getMote).toList();
                 case "addCustomEntity" -> {
+                    if (a[4] instanceof BuriedMoteEntityPlugin.Params params) {
+                        Fish created = new Fish(this, params.fishId, false, null);
+                        created.plugin = new Buried(created);
+                        created.tags.clear();
+                        created.tags.add(BuriedMoteEntityPlugin.BURIED_TAG);
+                        yield created.getMote();
+                    }
                     FishEntityPlugin.Params params = (FishEntityPlugin.Params) a[4];
                     Fish created = new Fish(this, params.fishId, params.phantom, params.decoyAnchor);
+                    created.setSwimTarget(params.target);
                     created.orbit = params.orbitAnchor;
                     yield created.getMote();
                 }
@@ -238,6 +274,7 @@ public final class LegendaryEscapeChecks {
                     yield stream.token;
                 }
                 case "removeEntity" -> {
+                    for (Fish f : fish) if (f.getMote() == a[0]) f.removed = true;
                     for (Terrain t : terrain) if (t.token == a[0]) t.removed = true;
                     yield null;
                 }
@@ -255,7 +292,23 @@ public final class LegendaryEscapeChecks {
                 default -> throw new AssertionError(m);
             });
             scripts.add(haunt);
+            memory.set("$catchrelease_data/campaign/fish.csv", specs);
+            MemoryAPI sectorMemory = api(MemoryAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getInt" -> TutorialConstants.STAGE_KEY.equals(a[0]) ? tutorialStage : 0;
+                default -> throw new AssertionError(m);
+            });
+            GenericPluginManagerAPI plugins = api(GenericPluginManagerAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "hasPlugin" -> true;
+                case "getPluginsOfClass" -> List.of(memory);
+                default -> throw new AssertionError(m);
+            });
             Global.setSector(api(SectorAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getViewport" -> api(ViewportAPI.class, (vp, vm, va) -> switch (vm.getName()) {
+                    case "convertScreenHeightToWorldHeight" -> (float) va[0] * zoom;
+                    default -> throw new AssertionError(vm);
+                });
+                case "getMemoryWithoutUpdate" -> sectorMemory;
+                case "getGenericPlugins" -> plugins;
                 case "getPersistentData" -> persistent;
                 case "getTransientScripts" -> scripts;
                 case "getCurrentLocation" -> system;
@@ -307,6 +360,7 @@ public final class LegendaryEscapeChecks {
         manta();
         mantaShieldPop();
         deflectionLabels();
+        labelSpacing();
         starGeometry();
         starMovement();
         starFormations();
@@ -551,6 +605,30 @@ public final class LegendaryEscapeChecks {
             check(!LegendaryShields.onFailedCatch(ordinary.getMote()), "ordinary failure stays ordinary");
             Fish phantom = new Fish(env, "quorum", true, null);
             check(!LegendaryShields.onFailedCatch(phantom.getMote()), "phantom cannot trigger response");
+        }
+    }
+
+    private static void labelSpacing() {
+        for (float zoom : new float[]{0.5f, 1f, 3f}) try (Environment env = new Environment()) {
+            env.zoom = zoom;
+            Fish jack = env.real("lantern_jack");
+            for (String message : List.of("Deflected", "The lantern flares. Nearby motes turn toward it.",
+                    "Mote consumed. Another shell layers on.", "Shell burned")) {
+                LegendaryShields.say(jack.getMote(), message);
+            }
+            for (int i = 1; i < jack.notices.size(); i++) {
+                check((jack.notices.get(i - 1).offset.y - jack.notices.get(i).offset.y) / zoom >= 20f,
+                        "same-frame call, shield and feeding labels have a screen-space gap");
+            }
+            jack.notices.get(3).offset.y += 15f;
+            LegendaryShields.say(jack.getMote(), "Deflected");
+            for (int i = 1; i < jack.notices.size(); i++) {
+                check((jack.notices.get(i - 1).offset.y - jack.notices.get(i).offset.y) / zoom >= 20f,
+                        "older labels drift away from newer labels");
+            }
+            jack.visible = false;
+            LegendaryShields.say(jack.getMote(), "Deflected");
+            check(jack.notices.size() == 5, "hidden entities do not gain a label");
         }
     }
 

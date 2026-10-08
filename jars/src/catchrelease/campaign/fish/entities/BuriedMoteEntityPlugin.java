@@ -1,10 +1,12 @@
 package catchrelease.campaign.fish.entities;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
+import catchrelease.campaign.fish.legendary.LegendaryTrail;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -27,6 +29,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
     private transient float velocityX;
     private transient float velocityY;
+    private transient LegendaryTrail trail;
 
     public static class Params {
 
@@ -85,6 +88,13 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         advanceFish(amount);
         velocityX = (entity.getLocation().x - x) / amount;
         velocityY = (entity.getLocation().y - y) / amount;
+        advanceTrail();
+    }
+
+    protected void advanceTrail() {
+        if (getRarity() != FishRarity.LEGENDARY) return;
+        if (trail == null) trail = new LegendaryTrail();
+        trail.advance(entity, SearchlightAbilityPlugin.getRevealStrength(entity));
     }
 
     public Vector2f getMovementVelocity() {
