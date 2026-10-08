@@ -111,7 +111,8 @@ real-only scoring, treasure isolation and restart/end behavior. These are standa
 checks with API proxies; they do not test OpenGL output or engine callback ordering.
 `tools/LegendaryEscapeChecks` exercises failure dispatch, four-turn shell-game
 bursts at 30/60/144 Hz, repeated-loss decoy caps, emergency slipstream duration
-and cleanup, immediate manta swaps, and the Imposter's ordinary-hit recovery shield.
+and cleanup, immediate manta swaps, fixed hit-position labels, and the Imposter's
+ordinary-hit recovery shield.
 It also checks corona-safe movement segments, invalid-position recovery, overlapping
 and companion stars, long-frame dashes, buried movement, formation clearance, and
 the False Dawn/ordinary-fish exclusions.
@@ -479,6 +480,12 @@ Manta base-shield breaks call `LegendaryHaunt.onMantaShieldPopped` synchronously
 start its haunt if needed, rebuild missing copies and switch stationary slots
 through `MantaFormationModule.switchPosition`. The initial wake-up deflection
 does not spend the base shield and does not trigger a switch.
+Manta deflection labels are created before the swap and stay at the hit position.
+`LegendaryShields.sayDeflection` keeps vanilla floating-text timing and rendering,
+but uses `ReflectionUtils` to set each new label's stable `entity` field to a fixed
+location token. The token is not added to the system; the mote still owns the label's
+lifetime and visibility. This follows `CampaignFloatingText` in 0.98a-RC8, which
+reads its entity's location every render. Other species retain entity-following text.
 Every manta slot switch shares the 0.3-second blackout clock for invulnerability
 and jitter. `FishEntityPlugin.isAvailable` rejects it for harpoons and drones;
 direct shield/explosive contacts and blast effects also respect this window.

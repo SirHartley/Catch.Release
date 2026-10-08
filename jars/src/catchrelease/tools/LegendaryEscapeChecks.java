@@ -23,6 +23,22 @@ public final class LegendaryEscapeChecks {
 
     private static int checks;
 
+    public interface TextMote extends CustomCampaignEntityAPI {
+
+        List<Notice> getFloatingText();
+    }
+
+    static class Notice {
+
+        private SectorEntityToken entity;
+        final String text;
+
+        Notice(SectorEntityToken entity, String text) {
+            this.entity = entity;
+            this.text = text;
+        }
+    }
+
     static class Fish extends FishEntityPlugin {
 
         final FishSpec spec = new FishSpec();
@@ -33,6 +49,8 @@ public final class LegendaryEscapeChecks {
         Object plugin = this;
         final Set<String> tags = new HashSet<>(Set.of(MOTE_TAG));
         final List<EveryFrameScript> entityScripts = new ArrayList<>();
+        final List<Notice> notices = new ArrayList<>();
+        boolean visible = true;
         boolean expired;
 
         Fish(Environment env, String id, boolean phantom, SectorEntityToken anchor) {
@@ -40,7 +58,7 @@ public final class LegendaryEscapeChecks {
             spec.rarity = "quorum_shard".equals(id) ? FishRarity.RARE : FishRarity.LEGENDARY;
             this.phantom = phantom;
             this.anchor = anchor;
-            entity = api(CustomCampaignEntityAPI.class, (p, m, a) -> switch (m.getName()) {
+            entity = api(TextMote.class, (p, m, a) -> switch (m.getName()) {
                 case "getLocation" -> at;
                 case "setLocation" -> { at.set((float) a[0], (float) a[1]); yield null; }
                 case "getCustomPlugin" -> plugin;
@@ -50,7 +68,12 @@ public final class LegendaryEscapeChecks {
                 case "addTag" -> { tags.add((String) a[0]); yield null; }
                 case "hasTag" -> tags.contains(a[0]);
                 case "addScript" -> { entityScripts.add((EveryFrameScript) a[0]); yield null; }
-                case "addFloatingText" -> null;
+                case "isVisibleToPlayerFleet" -> visible;
+                case "getFloatingText" -> notices.isEmpty() ? null : notices;
+                case "addFloatingText" -> {
+                    if (visible) notices.add(new Notice((SectorEntityToken) p, (String) a[0]));
+                    yield null;
+                }
                 default -> throw new AssertionError(m);
             });
             env.fish.add(this);
@@ -194,6 +217,13 @@ public final class LegendaryEscapeChecks {
                 case "getId" -> "escape-system";
                 case "getPlanets" -> stars;
                 case "getTerrainCopy" -> coronas;
+                case "createToken" -> {
+                    Vector2f at = new Vector2f((float) a[0], (float) a[1]);
+                    yield api(SectorEntityToken.class, (token, method, args) -> switch (method.getName()) {
+                        case "getLocation" -> at;
+                        default -> throw new AssertionError(method);
+                    });
+                }
                 case "getEntitiesWithTag" -> fish.stream()
                         .filter(f -> !f.expired && f.tags.contains(a[0])).map(Fish::getMote).toList();
                 case "addCustomEntity" -> {
@@ -276,6 +306,7 @@ public final class LegendaryEscapeChecks {
         moray();
         manta();
         mantaShieldPop();
+        deflectionLabels();
         starGeometry();
         starMovement();
         starFormations();
@@ -412,12 +443,19 @@ public final class LegendaryEscapeChecks {
             check(fish.isBaseShieldUp() && env.haunt.module == null,
                     "wake-up does not pop the shell or switch");
             Vector2f at = new Vector2f(fish.at);
+            Notice wake = fish.notices.get(0);
+            check(wake.text.equals("Deflected - Now awake") && wake.entity != fish.getMote()
+                    && wake.entity.getLocation().equals(at), "wake-up label anchors at the hit");
             check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
                     == LegendaryShields.HitResult.DEFLECTED, "shield pop deflects the shot");
             Manta formation = (Manta) env.haunt.module;
             check(!fish.isBaseShieldUp() && formation.black, "shield pop starts blackout immediately");
             check(!fish.at.equals(at) && env.fish.size() == 3,
                     "first shield pop creates formation and moves real manta");
+            Notice pop = fish.notices.get(1);
+            check(pop.text.equals("Deflected") && pop.entity != fish.getMote()
+                    && pop.entity.getLocation().equals(at), "shield label stays at the pre-swap hit");
+            check(wake.entity.getLocation().equals(at), "existing wake-up label does not follow the swap");
             List<Vector2f> before = formation.positions();
             int previous = formation.index();
             check(fish.isMantaSwitching() && !FishEntityPlugin.isAvailable(fish.getMote(), true),
@@ -428,6 +466,7 @@ public final class LegendaryEscapeChecks {
                     "direct explosive callback cannot destroy or relocate a switching manta");
             check(previous == formation.index() && env.fish.size() == 3 && !fish.expired,
                     "extra hits neither switch again nor spawn another manta");
+            check(fish.notices.size() == 2, "switch protection does not add another label");
             formation.tick(0.29f);
             check(fish.isMantaSwitching(), "switch protection lasts 0.3 seconds");
             formation.tick(0.02f);
@@ -435,11 +474,16 @@ public final class LegendaryEscapeChecks {
                     "manta becomes available after switch");
             check(Vector2f.sub(before.get(0), formation.positions().get(0), null).length() > 1f,
                     "shield-break jitter reorients the line when it ends");
+            check(pop.entity.getLocation().equals(at) && wake.entity.getLocation().equals(at),
+                    "labels stay at the hit through jitter-end reorientation");
             before = formation.positions();
             check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
                     == LegendaryShields.HitResult.NONE, "unshielded follow-up can catch after switch");
             fish.restoreBaseShield();
+            Vector2f nextHit = new Vector2f(fish.at);
             LegendaryShields.onHarpoonContact(fish.getMote(), true);
+            check(fish.notices.get(2).entity.getLocation().equals(nextHit)
+                    && pop.entity.getLocation().equals(at), "repeated hits keep separate fixed anchors");
             check(previous != formation.index() && !fish.isBaseShieldUp(),
                     "regrown shield switches again with an explosive head");
             List<Vector2f> after = formation.positions();
@@ -448,6 +492,25 @@ public final class LegendaryEscapeChecks {
                         "shield switch preserves formation slots");
             }
             check(env.fish.size() == 3, "shield switch reuses copies");
+        }
+    }
+
+    private static void deflectionLabels() {
+        try (Environment env = new Environment()) {
+            Fish manta = env.real(MantaFormationModule.SPECIES);
+            manta.visible = false;
+            LegendaryShields.onHarpoonContact(manta.getMote(), false);
+            LegendaryShields.onHarpoonContact(manta.getMote(), false);
+            check(manta.notices.isEmpty() && manta.isMantaSwitching(),
+                    "hidden contacts still switch without creating labels");
+        }
+        try (Environment env = new Environment()) {
+            Fish fish = env.real(LegendaryShields.MORAY_SPECIES);
+            LegendaryShields.onHarpoonContact(fish.getMote(), false);
+            LegendaryShields.onHarpoonContact(fish.getMote(), false);
+            fish.at.set(700f, 900f);
+            check(fish.notices.size() == 2 && fish.notices.stream().allMatch(n -> n.entity == fish.getMote()),
+                    "other legendary labels retain vanilla entity following");
         }
     }
 

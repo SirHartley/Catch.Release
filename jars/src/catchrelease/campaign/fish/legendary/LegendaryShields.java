@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.reflection.ReflectionUtils;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.util.Misc;
@@ -12,6 +13,7 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.List;
 
 /**
  * The legendary defences, one kind per species, answered at the shield boundary:
@@ -78,7 +80,7 @@ public class LegendaryShields {
             state.provoked = true;
             if (!POP_SHIELD_SPECIES.equals(id)) {
                 fish.flashShield();
-                say(fish.getMote(), "Deflected - Now awake");
+                sayDeflection(fish, "Deflected - Now awake");
                 return HitResult.DEFLECTED;
             }
         }
@@ -127,8 +129,8 @@ public class LegendaryShields {
             default -> {
                 // the base shell every unarmoured legendary wears
                 if (fish.tryBaseShieldDeflect()) {
+                    sayDeflection(fish, "Deflected");
                     LegendaryHaunt.onMantaShieldPopped(fish);
-                    say(fish.getMote(), "Deflected");
                     return HitResult.DEFLECTED;
                 }
                 return HitResult.NONE;
@@ -444,6 +446,22 @@ public class LegendaryShields {
         }
 
         return spec == null ? Color.WHITE : spec.rarity.color;
+    }
+
+    private static void sayDeflection(FishEntityPlugin fish, String text) {
+        SectorEntityToken mote = fish.getMote();
+        if (!MantaFormationModule.SPECIES.equals(fish.getFishSpec().id)) {
+            say(mote, text);
+            return;
+        }
+        if (!mote.isVisibleToPlayerFleet()) return;
+        say(mote, text);
+        // Vanilla text follows its entity every render; detach before the manta swaps slots.
+        List<?> labels = (List<?>) ReflectionUtils.invoke(mote, "getFloatingText");
+        if (labels == null || labels.isEmpty()) return;
+        Vector2f at = mote.getLocation();
+        SectorEntityToken anchor = mote.getContainingLocation().createToken(at.x, at.y);
+        ReflectionUtils.set(labels.get(labels.size() - 1), "entity", anchor);
     }
 
     /** Chase feedback floats at the thing it happened to, never the message feed. */
