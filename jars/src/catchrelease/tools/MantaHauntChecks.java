@@ -96,21 +96,29 @@ public final class MantaHauntChecks {
             return null;
         });
         bodies[1].at.set(930f, -611f);
+        Vector2f swimTarget = new Vector2f(1500f, -200f);
+        bodies[1].setSwimTarget(swimTarget);
         formation.sync();
         Vector2f[] before = formation.positions();
         check(Vector2f.sub(before[1], before[0], null).equals(new Vector2f(108f, 144f)), "first gap");
         check(Vector2f.sub(before[2], before[1], null).equals(new Vector2f(108f, 144f)), "second gap");
 
         for (int n = 0; n < 200; n++) {
+            before = formation.positions();
+            Vector2f targetOffset = Vector2f.sub(swimTarget, bodies[1].at, null);
             int previous = formation.index();
-            formation.due();
-            formation.tick(0.01f);
+            if (n % 2 == 0) {
+                formation.due();
+                formation.tick(0.01f);
+            } else {
+                formation.onFailedCatch(bodies[1]);
+            }
             check(formation.index() != previous, "blackout must change real slot");
             check(formation.dark, "blackout begins with swap");
             for (Body body : bodies) check(body.isMantaSwitching(), "all three motes share switch state");
             check(formation.interval() >= 15f && formation.interval() <= 40f, "interval bounds");
             Vector2f[] after = formation.positions();
-            for (int i = 0; i < 3; i++) check(before[i].equals(after[i]), "formation cannot jump on swap");
+            samePositions(before, after, "line orientation stays unchanged at jitter onset");
             if (n == 0) {
                 formation.renderSwitchJitter(sprite, bodies[1].at);
                 check(draws.size() == 32, "heavy jitter draws 32 copies");
@@ -132,8 +140,26 @@ public final class MantaHauntChecks {
             formation.tick(0.29f);
             check(formation.dark, "blackout lasts 0.3 seconds");
             check(bodies[1].isMantaSwitching(), "invulnerability lasts through 0.29 seconds");
+            samePositions(before, formation.positions(), "line does not rotate during jitter");
+            formation.tick(0f);
+            samePositions(before, formation.positions(), "paused jitter cannot reorient the line");
             formation.tick(0.02f);
             check(!formation.dark, "blackout ends");
+            Vector2f[] rotated = formation.positions();
+            Vector2f oldStep = Vector2f.sub(before[1], before[0], null);
+            Vector2f newStep = Vector2f.sub(rotated[1], rotated[0], null);
+            check(Math.abs(Vector2f.dot(oldStep, newStep) / (oldStep.length() * newStep.length())) < 0.867f,
+                    "jitter ends in a visibly different line orientation, not a half-turn");
+            check(Vector2f.sub(before[1], rotated[1], null).length() < 0.001f,
+                    "reorientation preserves the formation center");
+            check(Math.abs(newStep.length() - MantaFormationModule.SPACING) < 0.001f,
+                    "reorientation preserves first gap");
+            check(Vector2f.sub(newStep, Vector2f.sub(rotated[2], rotated[1], null), null).length() < 0.001f,
+                    "reorientation preserves second gap and collinearity");
+            check(Vector2f.sub(targetOffset, Vector2f.sub(swimTarget, bodies[1].at, null), null).length() < 0.001f,
+                    "real fish keeps its swim-target offset through both teleports");
+            formation.tick(0.1f);
+            samePositions(rotated, formation.positions(), "each jitter end rotates only once");
             for (Body body : bodies) check(!body.isMantaSwitching(), "switch state expires for every mote");
             formation.renderSwitchJitter(sprite, bodies[1].at);
             check(draws.isEmpty(), "no jitter drawing after expiry");
@@ -146,11 +172,32 @@ public final class MantaHauntChecks {
         bodies[1].setHeld(false);
         formation.tick(0.01f);
         check(previous != formation.index(), "swap resumes after release");
+        before = formation.positions();
+        bodies[1].setHeld(true);
+        formation.tick(0.31f);
+        samePositions(before, formation.positions(), "a fish held before jitter ends cannot teleport");
+        bodies[1].setHeld(false);
+        formation.onFailedCatch(bodies[1]);
+        formation.tick(0.2f);
+        formation.onFailedCatch(bodies[1]);
+        before = formation.positions();
+        formation.tick(0.2f);
+        samePositions(before, formation.positions(), "restarted jitter waits for its own end");
+        formation.tick(0.2f);
+        check(Vector2f.sub(before[0], formation.positions()[0], null).length() > 1f,
+                "restarted jitter rotates on completion");
+        formation.onFailedCatch(bodies[1]);
         formation.cleanup();
         check(bodies[0].expired && bodies[2].expired && !bodies[1].expired, "cleanup removes only copies");
         check(!formation.dark, "cleanup clears blackout");
         for (Body body : bodies) check(!body.isMantaSwitching(), "cleanup clears switch bindings");
         System.out.println("Manta haunt checks passed: " + checks);
+    }
+
+    private static void samePositions(Vector2f[] expected, Vector2f[] actual, String description) {
+        for (int i = 0; i < expected.length; i++) {
+            check(Vector2f.sub(expected[i], actual[i], null).length() < 0.001f, description);
+        }
     }
 
     private static void check(boolean valid, String description) {
