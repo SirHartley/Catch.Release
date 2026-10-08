@@ -4,10 +4,13 @@ import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.campaign.fish.colony.Backdrops;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.shop.ShopEntry;
 import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.helper.loading.BackdropLoader;
+import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.listeners.CampaignInputListener;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -61,6 +64,11 @@ public class DevShortcut implements CampaignInputListener {
                 mem.set(key, 3);
             }
 
+            if (amt == 3) {
+                addUpgrades();
+                mem.set(key, 4);
+            }
+
             return;
         }
     }
@@ -100,5 +108,17 @@ public class DevShortcut implements CampaignInputListener {
         Global.getSector().getCampaignUI().addMessage(
                 "Dev shortcut: fishing gear granted, tutorial skipped, charts issued.",
                 Misc.getHighlightColor());
+    }
+
+    protected void addUpgrades() {
+        for (UpgradeStat stat : UpgradeManager.getInstance().getAll().values()) {
+            if (stat == null || stat.id == null || stat.id.equalsIgnoreCase("example")) continue;
+
+            ShopEntry entry = ShopEntry.of(stat);
+            for (int rung = entry.getLevel() + 1; rung <= stat.maxLevel; rung++) {
+                ShopSchematics.unlock(stat.id, rung);
+                entry.grant();
+            }
+        }
     }
 }
