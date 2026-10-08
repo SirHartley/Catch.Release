@@ -23,8 +23,9 @@ import java.util.Map;
 public class FakeWrecksModule extends BaseHauntModule {
 
     public static final int MAX_ALIVE = 25;
-    public static final float SPAWN_MIN_SECONDS = 15f;
-    public static final float SPAWN_MAX_SECONDS = 35f;
+    public static final int SPAWN_COUNT = 3;
+    public static final float SPAWN_MIN_SECONDS = 10f;
+    public static final float SPAWN_MAX_SECONDS = 18f;
     public static final float SPAWN_RANGE_MIN = 600f;
     public static final float SPAWN_RANGE_MAX = 1100f;
     public static final float VANISH_RANGE = 100f;
@@ -32,7 +33,7 @@ public class FakeWrecksModule extends BaseHauntModule {
     public static final float LIFE_MIN_SECONDS = 120f;
     public static final float LIFE_MAX_SECONDS = 240f;
 
-    protected float spawnTimer = 10f;
+    protected float spawnTimer = 5f;
     protected boolean firstApproached;
     protected final List<String> variants = new ArrayList<>();
     protected final Map<SectorEntityToken, Float> life = new LinkedHashMap<>();
@@ -52,7 +53,8 @@ public class FakeWrecksModule extends BaseHauntModule {
         if (spawnTimer <= 0f && spawned.size() < MAX_ALIVE && atFullIntensity()) {
             spawnTimer = MathUtils.getRandomNumberInRange(
                     SPAWN_MIN_SECONDS, SPAWN_MAX_SECONDS);
-            spawnWreck();
+            int count = Math.min(SPAWN_COUNT, MAX_ALIVE - spawned.size());
+            for (int i = 0; i < count; i++) spawnWreck();
         }
 
         List<SectorEntityToken> wrecks = new ArrayList<>(life.keySet());

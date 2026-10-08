@@ -186,10 +186,10 @@ public final class HauntWreckChecks {
     public static void main(String[] args) throws Exception {
         try (Environment env = new Environment()) {
             Wrecks module = new Wrecks(env.system);
-            module.advance(9.99f);
+            module.advance(4.99f);
             require(env.entities.isEmpty(), "No early wreck");
             module.advance(0.02f);
-            require(env.entities.size() == 1 && module.timer() >= 15f && module.timer() <= 35f, "Initial and repeat timing");
+            require(env.entities.size() == 3 && module.timer() >= 10f && module.timer() <= 18f, "Initial group and repeat timing");
             require(module.pool().equals(List.of("combat", "freighter")), "Any ship type, no fighters or station modules");
             Entity firstSpawned = env.entities.get(0);
             require(firstSpawned.position.length() >= 599f && firstSpawned.position.length() <= 1101f, "Spawn range");
@@ -200,7 +200,7 @@ public final class HauntWreckChecks {
                     && !firstSpawned.tags.contains(Tags.HAS_INTERACTION_DIALOG)
                     && !firstSpawned.tags.contains(Tags.SALVAGEABLE), "Selectable but no early salvage");
             module.spawn();
-            Entity approached = env.entities.get(1);
+            Entity approached = env.entities.get(env.entities.size() - 1);
             approached.position.set(100f, 0f);
             module.advance(0f);
             require(approached.tags.contains(Tags.SALVAGEABLE), "First approached is real even if spawned later");
@@ -234,6 +234,16 @@ public final class HauntWreckChecks {
             module.advance(30f);
             require(env.entities.size() == before && module.tracked() == 25, "Active cap");
             module.cleanup();
+            module = new Wrecks(env.system);
+            for (int i = 0; i < FakeWrecksModule.MAX_ALIVE - 1; i++) module.spawn();
+            module.advance(5f);
+            require(module.tracked() == FakeWrecksModule.MAX_ALIVE, "Last group respects remaining capacity");
+            module.cleanup();
+            module = new Wrecks(env.system);
+            module.setIntensity(0.5f);
+            before = env.entities.size();
+            module.advance(20f);
+            require(env.entities.size() == before, "Fading haunt cannot add a group");
         }
         System.out.println("Haunt wrecks: " + checks + " checks passed");
     }
