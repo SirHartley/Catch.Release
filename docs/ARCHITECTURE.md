@@ -442,6 +442,11 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
 
+Lantern Jack hunts surfaced prey and lamp-revealed buried prey, surfacing the latter
+before pursuit. Pursuit uses a direct heading after hit evasion ends. Each swallowed
+mote expires immediately and supplies one stored shell, up to three; pond stock,
+quest targets, held fish, legendaries and shield/phantom bodies are excluded.
+
 `LegendaryHaunt.getMantaLampAlpha(lamp)` gives each lamp an independent visual
 flicker phase using the identity of its stable aim vector, not its coordinates.
 Spot/fan glow and breach renderers share that vector, so each lamp's layers agree

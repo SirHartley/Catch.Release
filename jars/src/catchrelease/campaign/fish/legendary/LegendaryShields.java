@@ -4,6 +4,8 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.reflection.ReflectionUtils;
 import com.fs.starfarer.api.Global;
@@ -13,6 +15,7 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -352,13 +355,12 @@ public class LegendaryShields {
         }
     }
 
-    /** The Lantern Jack hunts: it stalks lamp-exposed motes and swallows them to layer
-     *  stored shells over its base shell, up to the stack cap. */
     public static void advanceEater(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return;
         if (!CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return;
 
         fish.setHunting(false);
+        if (fish.isEvading()) return;
 
         LegendaryChases.Chase state = LegendaryChases.getState(CHARGE_SHIELD_SPECIES);
         if (getJackStack(state) >= JACK_STACK_MAX) return;
@@ -368,11 +370,10 @@ public class LegendaryShields {
 
         SectorEntityToken prey = null;
         float best = EAT_SEEK_RANGE;
-        for (SectorEntityToken other : self.getContainingLocation()
-                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (other == self || other.isExpired()) continue;
-            if (!(other.getCustomPlugin() instanceof FishEntityPlugin meal)) continue;
-            if (!isEdible(other, meal)) continue;
+        for (SectorEntityToken other : preyMotes(self)) {
+            if (!isEdible(other)) continue;
+            if (other.getCustomPlugin() instanceof BuriedMoteEntityPlugin
+                    && SearchlightAbilityPlugin.getRevealStrength(other) <= 0f) continue;
 
             float distance = Misc.getDistance(self.getLocation(), other.getLocation());
             if (distance < best) {
@@ -383,11 +384,15 @@ public class LegendaryShields {
 
         if (prey == null) return;
 
+        if (prey.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) prey = buried.unearth();
+        if (prey == null || prey.isExpired()) return;
+
         fish.setHunting(true);
         fish.setSwimTarget(new Vector2f(prey.getLocation()));
 
         if (best <= EAT_RANGE) {
-            Misc.fadeAndExpire(prey, 0.3f);
+            // A fading mote is still edible on the next frame. Consume it once.
+            prey.setExpired(true);
             state.shieldUnits = Math.min(JACK_STACK_MAX, getJackStack(state) + 1);
             fish.flashShield();
             say(self, "Mote consumed. Another shell layers on.");
@@ -416,8 +421,23 @@ public class LegendaryShields {
         say(self, "The lantern flares. Nearby motes turn toward it.");
     }
 
-    /** Only what the lamps exposed: pond stock, phantoms and anything hidden are not
-     *  on the menu, and neither is a legendary or somebody's orbiting shield. */
+    protected static List<SectorEntityToken> preyMotes(SectorEntityToken self) {
+        List<SectorEntityToken> motes = new ArrayList<>(self.getContainingLocation()
+                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG));
+        motes.addAll(self.getContainingLocation().getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG));
+        return motes;
+    }
+
+    protected static boolean isEdible(SectorEntityToken mote) {
+        if (mote == null || mote.isExpired() || QuestPond.isQuestMote(mote)) return false;
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) return isEdible(mote, fish);
+        if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) {
+            FishSpec spec = buried.getFishSpec();
+            return spec != null && spec.rarity != FishRarity.LEGENDARY;
+        }
+        return false;
+    }
+
     protected static boolean isEdible(SectorEntityToken mote, FishEntityPlugin meal) {
         if (meal.isFromPond() || meal.isPhantom() || meal.isHeld() || meal.isDiving()) {
             return false;

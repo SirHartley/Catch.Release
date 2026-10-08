@@ -56,13 +56,21 @@ public final class LegendaryEscapeChecks {
         boolean visible = true;
         boolean expired;
         boolean removed;
+        boolean quest;
+        boolean pond;
 
         Fish(Environment env, String id, boolean phantom, SectorEntityToken anchor) {
             spec.id = id;
-            spec.rarity = "quorum_shard".equals(id) ? FishRarity.RARE : FishRarity.LEGENDARY;
+            spec.rarity = env.specs.containsKey(id) ? env.specs.get(id).rarity
+                    : "quorum_shard".equals(id) ? FishRarity.RARE : FishRarity.LEGENDARY;
             this.phantom = phantom;
             this.anchor = anchor;
+            MemoryAPI moteMemory = api(MemoryAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getBoolean" -> quest && catchrelease.campaign.fish.jobs.QuestPond.QUEST_MOTE_FLAG.equals(a[0]);
+                default -> throw new AssertionError(m);
+            });
             entity = api(TextMote.class, (p, m, a) -> switch (m.getName()) {
+                case "getMemoryWithoutUpdate" -> moteMemory;
                 case "getLocation" -> at;
                 case "setLocation" -> { at.set((float) a[0], (float) a[1]); yield null; }
                 case "getCustomPlugin" -> plugin;
@@ -90,6 +98,7 @@ public final class LegendaryEscapeChecks {
         @Override public SectorEntityToken getDecoyAnchor() { return anchor; }
         @Override public SectorEntityToken getOrbitAnchor() { return orbit; }
         @Override public boolean holdsStation() { return false; }
+        @Override public boolean isFromPond() { return pond; }
         @Override public boolean isLampVisible() { return true; }
         @Override protected void advanceLampFade(float amount) { }
         @Override protected void advanceShieldLens() { }
@@ -246,6 +255,7 @@ public final class LegendaryEscapeChecks {
                     }
                     FishEntityPlugin.Params params = (FishEntityPlugin.Params) a[4];
                     Fish created = new Fish(this, params.fishId, params.phantom, params.decoyAnchor);
+                    created.setSwimTarget(params.target);
                     created.orbit = params.orbitAnchor;
                     yield created.getMote();
                 }

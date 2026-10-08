@@ -350,11 +350,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (LegendaryShields.isFleeing(this)) advanceFleeMode();
         if (QuorumShellGame.advance(this, amount)) return;
         if (advanceLure(amount)) return;
+        boolean pursuing = hunting && evasiveLeft <= 0f;
+        if (pursuing) keepSurfaced(1f);
 
         // under the fabric a mote holds a straight course at cruise speed, so where it went down tells where it surfaces
         float step = MOVE_SPEED * getSpeedMult() * getSlowMult()
                 * LegendaryShields.getSpeedMult(this) * getLureSpeedMult()
-                * (diving ? 1f : advanceMode(amount)) * amount;
+                * (diving || pursuing ? 1f : advanceMode(amount)) * amount;
         // A submerged False Dawn follows the corona too; straight dive headings can cross the star.
         if (!phantom && FalseDawnOrbit.advance(entity, fishId, step, time)) return;
         float distance = Misc.getDistance(entity.getLocation(), target);
@@ -372,7 +374,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         float angle = diving ? diveHeading
-                : Misc.getAngleInDegrees(entity.getLocation(), target) + getWander();
+                : Misc.getAngleInDegrees(entity.getLocation(), target) + (pursuing ? 0f : getWander());
 
         Vector2f next = MathUtils.getPointOnCircumference(
                 entity.getLocation(),
@@ -698,6 +700,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public void setHunting(boolean hunting) {
         this.hunting = hunting;
+    }
+
+    public boolean isEvading() {
+        return evasiveLeft > 0f;
     }
 
     public void startEvasive() {
