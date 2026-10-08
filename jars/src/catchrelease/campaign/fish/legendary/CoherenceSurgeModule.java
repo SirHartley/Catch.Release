@@ -4,15 +4,10 @@ import catchrelease.campaign.fish.coherence.CoherenceOverlayScript;
 import catchrelease.campaign.fish.data.FishSpec;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 
-/**
- * The low-coherence overlay at full force for as long as the chase runs. The floor eases
- * in so entering the system reads as the water going bad, and cleanup drops it to nothing
- * in the same frame.
- */
 public class CoherenceSurgeModule extends BaseHauntModule {
 
     public static final float RAMP_SECONDS = 6f;
-    // a live haunt never whispers: the floor enters at a visible level, not from zero
+    // The coordinator fades the whole effect, including this starting strength.
     public static final float FLOOR = 0.35f;
 
     protected float level = 0f;
@@ -25,9 +20,7 @@ public class CoherenceSurgeModule extends BaseHauntModule {
     public void advance(float amount) {
         level = Math.min(1f, level + amount / RAMP_SECONDS);
 
-        float value = Math.min(level, intensity);
-        CoherenceOverlayScript.setHauntFloor(value <= 0f
-                ? 0f : FLOOR + (1f - FLOOR) * value);
+        CoherenceOverlayScript.setHauntFloor((FLOOR + (1f - FLOOR) * level) * intensity);
     }
 
     @Override

@@ -454,9 +454,19 @@ transient `CurrentLocationChangedListener`: departure removes surfaced and burie
 legendaries, their attached Quorum bodies and active haunt modules. The existing
 load sweep removes off-system legendary motes but preserves those in the current
 location. This cleanup does not change `LegendaryChases`, host selection, spawn
-eligibility or relocation timing. Unseen haunt effects still linger for 60 seconds,
-then fade over 12 seconds; that timer does not remove the real fish. Ordinary fish,
-phantoms and splinters retain their movement expiry.
+eligibility or relocation timing. With lamps on, unseen haunt effects linger for
+60 seconds, then fade over 12 seconds. Turning the player's lamps off starts that
+fade immediately and blocks new haunts, including shield-break and failed-catch
+activation. Switching them back on only reverses a fade after a fresh sighting.
+Existing module callbacks handle the fade and cleanup; no new polling script.
+Spawners and timed Manta blackouts stop escalating below full intensity. Screen
+effects scale all the way to zero, including their minimum-strength component.
+The full-screen chromatic pass also fades its pixel displacement to zero; the
+minigame's region-only pass keeps its existing displacement range.
+False Dawn's ambient host-star flares remain independent of haunt intensity.
+The fade does not remove the real fish. Ordinary fish, phantoms and splinters retain
+their movement expiry. `tools/HauntWindDownChecks` covers lamp toggles, dark activation,
+the lost-fish grace period, effect strength and cleanup without removing the fish.
 
 Harpoon and drone failure callbacks release real legendary motes through
 `LegendaryShields.onFailedCatch` instead of fading them out. Ordinary fish,

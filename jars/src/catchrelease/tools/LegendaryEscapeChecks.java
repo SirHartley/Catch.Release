@@ -1,5 +1,6 @@
 package catchrelease.tools;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -167,6 +168,11 @@ public final class LegendaryEscapeChecks {
         final List<EveryFrameScript> scripts = new ArrayList<>();
         final StarSystemAPI system;
         final Haunt haunt = new Haunt();
+        boolean lampsOn = true;
+        final SearchlightAbilityPlugin lamps = new SearchlightAbilityPlugin() {
+
+            @Override public boolean isActive() { return lampsOn; }
+        };
 
         Environment() {
             if (Global.getSector() != null) throw new IllegalStateException("Run outside Starsector.");
@@ -210,6 +216,7 @@ public final class LegendaryEscapeChecks {
             CampaignFleetAPI player = api(CampaignFleetAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getLocation" -> new Vector2f();
                 case "getContainingLocation" -> system;
+                case "getAbility" -> SearchlightAbilityPlugin.ABILITY_ID.equals(a[0]) ? lamps : null;
                 default -> throw new AssertionError(m);
             });
             CampaignClockAPI clock = api(CampaignClockAPI.class, (p, m, a) -> switch (m.getName()) {

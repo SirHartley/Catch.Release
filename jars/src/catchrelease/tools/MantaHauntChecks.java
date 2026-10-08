@@ -263,6 +263,14 @@ public final class MantaHauntChecks {
         formation.tick(0.2f);
         check(Vector2f.sub(before[0], formation.positions()[0], null).length() > 1f,
                 "restarted jitter rotates on completion");
+        previous = formation.index();
+        formation.setIntensity(0.5f);
+        formation.due();
+        formation.tick(1f);
+        check(previous == formation.index() && !formation.dark, "fading haunt cannot start a blackout");
+        formation.setIntensity(1f);
+        formation.tick(0.01f);
+        check(previous != formation.index() && formation.dark, "blackouts resume at full intensity");
         formation.onFailedCatch(bodies[1]);
         formation.cleanup();
         check(bodies[0].expired && bodies[2].expired && !bodies[1].expired, "cleanup removes only copies");
