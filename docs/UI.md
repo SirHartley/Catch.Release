@@ -291,6 +291,13 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   covers shield hits, the Lantern call, feeding, Quorum feedback and the Imposter alert.
   The stable `CampaignFloatingText.offset` and `label` fields are accessed through
   `ReflectionUtils`; Manta notices still detach before a slot swap.
+- Needle Sensor reuses `RippleRingRenderer`: a fixed emission point, 100-unit outer
+  radius, 1.5-unit starting width, 3.5-second growth/fade and pale blue-grey at 55/255
+  colour alpha. It shows no species icon or rarity colour. Render-time checks retire
+  rings immediately on lamp activation, refitting, departure, capture or provocation;
+  retained lamp reveals suppress them too. Pause freezes both cadence and rings.
+  Each ring respects viewport alpha and culling. Load restores the passive controller
+  through the lamp ability's existing advance; it does not save timers or renderers.
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short
