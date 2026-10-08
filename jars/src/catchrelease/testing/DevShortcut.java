@@ -120,5 +120,9 @@ public class DevShortcut implements CampaignInputListener {
                 entry.grant();
             }
         }
+
+        Global.getSector().getCampaignUI().addMessage(
+                "Dev shortcut: all upgrade tiers unlocked and applied.",
+                Misc.getHighlightColor());
     }
 }

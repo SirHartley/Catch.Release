@@ -734,7 +734,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 | Component | State |
 |---|---|
 | `campaign/ponds/entities/StenciledFishingPondEntityPlugin` | Dead. Ponds are terrain now. |
-| `testing/DevShortcut` | Dev-mode J presses: skip tutorial and grant gear/charts; unlock backdrops; unlock schematics; then unlock and apply every remaining upgrade rung for free. The fourth press uses `ShopEntry.grant()` for mark cleanup and ability refresh, without changing fitted modules. Progress is saved in sector memory; later presses do nothing. |
+| `testing/DevShortcut` | Dev-mode J presses: skip tutorial and grant gear/charts; unlock backdrops; unlock schematics; then unlock and apply every remaining upgrade rung for free. The fourth press uses `ShopEntry.grant()` for mark cleanup and ability refresh, without changing fitted modules, then posts a campaign confirmation. Progress is saved in sector memory; later presses do nothing. |
 | `testing/TestStencilRenderer` | Not registered. |
 | `rendering/spiral/BlackHoleSpiralWarp` | Deprecated test effect. Not installed by `ModPlugin`; its settings do not enable it. |
 | `campaign/ponds/renderer/PondHoleRenderer` | Dormant while `PondConstants.POND_HOLE_LOOK` selects the shader version. |
