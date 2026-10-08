@@ -329,7 +329,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             dashLeft -= amount;
             moveTo(new Vector2f(entity.getLocation().x + dashVelocity.x * amount,
                     entity.getLocation().y + dashVelocity.y * amount));
-            if (dashLeft <= 0f && dashExpires) Misc.fadeAndExpire(entity, 1f);
+            if (dashLeft <= 0f && dashExpires && !isRealLegendary()) Misc.fadeAndExpire(entity, 1f);
             return;
         }
 
@@ -356,7 +356,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float distance = Misc.getDistance(entity.getLocation(), target);
 
         if (step >= distance) {
-            // a holding mote has nowhere to be going, so arriving is just a reason to pick somewhere else in the same water. Anything else has finished its crossing
+            if (isRealLegendary()) {
+                float heading = Misc.getAngleInDegrees(entity.getLocation(), target);
+                target = MathUtils.getPointOnCircumference(entity.getLocation(), FLEE_LEG, heading);
+                return;
+            }
             if (holdsStation() && pickNewTargetInPond()) return;
 
             Misc.fadeAndExpire(entity);
@@ -375,9 +379,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         moveTo(next);
 
         // a holding mote that has been pushed past the mask - by a pond closing around it rather than by its own course - is turned back rather than lost
-        if (hasLeftThePond() && !(holdsStation() && pickNewTargetInPond())) {
+        if (!isRealLegendary() && hasLeftThePond() && !(holdsStation() && pickNewTargetInPond())) {
             Misc.fadeAndExpire(entity);
         }
+    }
+
+    public boolean isRealLegendary() {
+        FishSpec spec = getFishSpec();
+        return spec != null && spec.rarity == FishRarity.LEGENDARY
+                && !isPhantom() && getDecoyAnchor() == null && getOrbitAnchor() == null;
     }
 
     protected boolean pickNewTargetInPond() {
@@ -757,7 +767,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (hunting) return;
 
         prowlLeft -= amount;
-        // retarget before arrival: a pondless mote that reaches its target expires
         if (prowlLeft > 0f && Misc.getDistance(entity.getLocation(), target)
                 > PROWL_ARRIVE_RANGE) {
             return;
