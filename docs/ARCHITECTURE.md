@@ -114,6 +114,8 @@ and cleanup, immediate manta swaps, and the Imposter's ordinary-hit recovery shi
 It also checks corona-safe movement segments, invalid-position recovery, overlapping
 and companion stars, long-frame dashes, buried movement, formation clearance, and
 the False Dawn/ordinary-fish exclusions.
+`tools/LegendaryLifetimeChecks` checks repeated swim arrivals, dash expiry exclusions,
+distance-based sightings, departure cleanup and preservation of the host/relocation ledger.
 
 The tuner's Balance results tab uses `tools/FishBalance` for immutable run
 snapshots, per-attempt telemetry and bounded parallel batches; its `game` and
@@ -436,6 +438,16 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | `LanternSensorGhostsModule.java` | Jack-only vanilla `BaseSensorGhost` contacts: echo player movement, intercept then depart, or pass by. First and repeat spawns take 5–10 seconds, cap four including fades. Uses the haunt's existing advance and cleanup, not the hyperspace manager or a new sector script. Behavior durations convert seconds to campaign days; original tokens remain tracked after vanilla starts fading. No fleet spawning or drive drain. `SensorGhostsModule` remains the Imposter's separate implementation. |
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
+
+Real legendary motes continue swimming after reaching a destination and do not expire
+when a dash ends or they leave a pond boundary. `LegendaryHaunt` also registers a
+transient `CurrentLocationChangedListener`: departure removes surfaced and buried
+legendaries, their attached Quorum bodies and active haunt modules. The existing
+load sweep removes off-system legendary motes but preserves those in the current
+location. This cleanup does not change `LegendaryChases`, host selection, spawn
+eligibility or relocation timing. Unseen haunt effects still linger for 60 seconds,
+then fade over 12 seconds; that timer does not remove the real fish. Ordinary fish,
+phantoms and splinters retain their movement expiry.
 
 Harpoon and drone failure callbacks release real legendary motes through
 `LegendaryShields.onFailedCatch` instead of fading them out. Ordinary fish,

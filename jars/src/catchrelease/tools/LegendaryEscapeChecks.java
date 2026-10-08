@@ -28,6 +28,10 @@ public final class LegendaryEscapeChecks {
         final Vector2f at = new Vector2f(500f, 500f);
         final boolean phantom;
         final SectorEntityToken anchor;
+        SectorEntityToken orbit;
+        Object plugin = this;
+        final Set<String> tags = new HashSet<>(Set.of(MOTE_TAG));
+        final List<EveryFrameScript> entityScripts = new ArrayList<>();
         boolean expired;
 
         Fish(Environment env, String id, boolean phantom, SectorEntityToken anchor) {
@@ -38,11 +42,14 @@ public final class LegendaryEscapeChecks {
             entity = api(CustomCampaignEntityAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getLocation" -> at;
                 case "setLocation" -> { at.set((float) a[0], (float) a[1]); yield null; }
-                case "getCustomPlugin" -> this;
+                case "getCustomPlugin" -> plugin;
                 case "getContainingLocation" -> env.system;
                 case "isExpired" -> expired;
                 case "setExpired" -> { expired = (boolean) a[0]; yield null; }
-                case "addTag", "addFloatingText" -> null;
+                case "addTag" -> { tags.add((String) a[0]); yield null; }
+                case "hasTag" -> tags.contains(a[0]);
+                case "addScript" -> { entityScripts.add((EveryFrameScript) a[0]); yield null; }
+                case "addFloatingText" -> null;
                 default -> throw new AssertionError(m);
             });
             env.fish.add(this);
@@ -52,6 +59,8 @@ public final class LegendaryEscapeChecks {
         @Override public boolean isPhantom() { return phantom; }
         @Override public boolean isDecoy() { return anchor != null; }
         @Override public SectorEntityToken getDecoyAnchor() { return anchor; }
+        @Override public SectorEntityToken getOrbitAnchor() { return orbit; }
+        @Override public boolean holdsStation() { return false; }
         @Override public boolean isLampVisible() { return true; }
         @Override protected void advanceLampFade(float amount) { }
         @Override protected void advanceShieldLens() { }
@@ -179,10 +188,13 @@ public final class LegendaryEscapeChecks {
                 case "getId" -> "escape-system";
                 case "getPlanets" -> stars;
                 case "getTerrainCopy" -> coronas;
-                case "getEntitiesWithTag" -> fish.stream().filter(f -> !f.expired).map(Fish::getMote).toList();
+                case "getEntitiesWithTag" -> fish.stream()
+                        .filter(f -> !f.expired && f.tags.contains(a[0])).map(Fish::getMote).toList();
                 case "addCustomEntity" -> {
                     FishEntityPlugin.Params params = (FishEntityPlugin.Params) a[4];
-                    yield new Fish(this, params.fishId, params.phantom, params.decoyAnchor).getMote();
+                    Fish created = new Fish(this, params.fishId, params.phantom, params.decoyAnchor);
+                    created.orbit = params.orbitAnchor;
+                    yield created.getMote();
                 }
                 case "addTerrain" -> {
                     Terrain stream = new Terrain(this, (SlipstreamTerrainPlugin2.SlipstreamParams2) a[1]);

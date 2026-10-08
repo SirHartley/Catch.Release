@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.legendary;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -10,6 +11,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ import java.util.List;
  * the fish moves on, every module is torn down at once. Modules and their spawn are
  * session-transient - the tag sweep at register() clears anything a hard exit left behind.
  */
-public class LegendaryHaunt implements EveryFrameScript {
+public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedListener {
 
     public static final String HAUNT_TAG = "catchrelease_haunt";
 
@@ -41,6 +43,8 @@ public class LegendaryHaunt implements EveryFrameScript {
         FalseDawnCorona.beforeSave();
         Global.getSector().getListenerManager().removeListenerOfClass(FalseDawnCorona.class);
         Global.getSector().getListenerManager().addListener(haunt.corona, true);
+        Global.getSector().getListenerManager().removeListenerOfClass(LegendaryHaunt.class);
+        Global.getSector().getListenerManager().addListener(haunt, true);
         Global.getSector().addTransientScript(haunt);
 
         sweepLeftovers();
@@ -129,11 +133,42 @@ public class LegendaryHaunt implements EveryFrameScript {
         locations.add(Global.getSector().getHyperspace());
 
         for (LocationAPI location : locations) {
+            if (location != Global.getSector().getCurrentLocation()) removeLegendaryMotes(location);
             for (SectorEntityToken leftover
                     : new ArrayList<>(location.getEntitiesWithTag(HAUNT_TAG))) {
                 BaseHauntModule.removeHard(leftover);
             }
         }
+    }
+
+    @Override
+    public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
+        if (prev == null || prev == curr) return;
+        if (activeSystem == prev) stop();
+        removeLegendaryMotes(prev);
+    }
+
+    protected static void removeLegendaryMotes(LocationAPI location) {
+        for (SectorEntityToken mote : new ArrayList<>(location.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG))) {
+            if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
+            if (fish.isRealLegendary()) {
+                QuorumShellGame.end(mote);
+                BaseHauntModule.removeHard(mote);
+            } else if (isLegendaryAnchor(fish.getOrbitAnchor()) || isLegendaryAnchor(fish.getDecoyAnchor())) {
+                BaseHauntModule.removeHard(mote);
+            }
+        }
+        for (SectorEntityToken mote : new ArrayList<>(location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG))) {
+            if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin fish
+                    && fish.getFishSpec() != null && fish.getFishSpec().rarity == FishRarity.LEGENDARY) {
+                BaseHauntModule.removeHard(mote);
+            }
+        }
+    }
+
+    private static boolean isLegendaryAnchor(SectorEntityToken anchor) {
+        return anchor != null && anchor.getCustomPlugin() instanceof FishEntityPlugin fish
+                && fish.isRealLegendary();
     }
 
     @Override
