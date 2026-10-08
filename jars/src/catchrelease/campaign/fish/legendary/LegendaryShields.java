@@ -1,12 +1,14 @@
 package catchrelease.campaign.fish.legendary;
 
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.spawner.PondFishSpawner;
 import catchrelease.reflection.ReflectionUtils;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -53,6 +55,9 @@ public class LegendaryShields {
     public static final float EAT_RANGE = 80f;
     public static final float FLARE_PULL_RANGE = 3000f;
     public static final float LURE_SECONDS = 20f;
+    public static final int LURE_SPAWN_COUNT = 3;
+    public static final float LURE_SPAWN_MIN = 800f;
+    public static final float LURE_SPAWN_MAX = 1400f;
     public static final float SHIELD_RADIUS = 52f;
 
     private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
@@ -399,23 +404,34 @@ public class LegendaryShields {
         }
     }
 
-    /** The flare call: low on shells, the Jack rings the water and every edible mote
-     *  in the pull radius turns and runs at it - prey delivering itself. */
     public static void lureFlare(FishEntityPlugin jack) {
         SectorEntityToken self = jack.getMote();
         if (self == null || self.getContainingLocation() == null) return;
 
-        for (SectorEntityToken other : self.getContainingLocation()
-                .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (other == self || other.isExpired()) continue;
-            if (!(other.getCustomPlugin() instanceof FishEntityPlugin meal)) continue;
-            if (!isEdible(other, meal)) continue;
+        for (SectorEntityToken other : preyMotes(self)) {
+            if (!isEdible(other)) continue;
             if (Misc.getDistance(self.getLocation(), other.getLocation())
                     > FLARE_PULL_RANGE) {
                 continue;
             }
 
-            meal.startLure(self, LURE_SECONDS);
+            if (other.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) other = buried.unearth();
+            if (other != null && other.getCustomPlugin() instanceof FishEntityPlugin meal) {
+                meal.startLure(self, LURE_SECONDS);
+            }
+        }
+
+        for (int i = 0; i < LURE_SPAWN_COUNT; i++) {
+            String id = PondFishSpawner.pickFishId(self.getContainingLocation(), CatchImplement.BREACH_LAMP);
+            if (id == null) break;
+            Vector2f at = MathUtils.getPointOnCircumference(self.getLocation(),
+                    MathUtils.getRandomNumberInRange(LURE_SPAWN_MIN, LURE_SPAWN_MAX),
+                    MathUtils.getRandomNumberInRange(0f, 360f));
+            SectorEntityToken mote = self.getContainingLocation().addCustomEntity(
+                    Misc.genUID(), "Mote", "catchrelease_Mote", null,
+                    new FishEntityPlugin.Params(new Vector2f(self.getLocation()), id));
+            mote.setLocation(at.x, at.y);
+            ((FishEntityPlugin) mote.getCustomPlugin()).startLure(self, LURE_SECONDS);
         }
 
         say(self, "The lantern flares. Nearby motes turn toward it.");

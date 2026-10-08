@@ -723,14 +723,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     public void startLure(SectorEntityToken at, float seconds) {
         lureTarget = at;
         lureLeft = seconds;
+        keepSurfaced(seconds);
     }
 
     public float getLureSpeedMult() {
         return lureLeft > 0f ? LURE_SPEED_MULT : 1f;
     }
 
-    /** A called mote runs at the caller and holds just off its jaws - close enough
-     *  for the eater, short of the arrival that would expire a pondless mote. */
     protected boolean advanceLure(float amount) {
         if (lureLeft <= 0f) return false;
 
@@ -742,13 +741,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             return false;
         }
 
-        if (Misc.getDistance(entity.getLocation(), lureTarget.getLocation())
-                <= LegendaryShields.EAT_RANGE * 0.7f) {
-            return true;
-        }
-
         setSwimTarget(new Vector2f(lureTarget.getLocation()));
-        return false;
+        float distance = Misc.getDistance(entity.getLocation(), target);
+        float step = Math.min(Math.max(0f, distance - LegendaryShields.EAT_RANGE * 0.7f),
+                MOVE_SPEED * getSpeedMult() * getSlowMult() * LURE_SPEED_MULT * amount);
+        if (step > 0f) {
+            moveTo(MathUtils.getPointOnCircumference(entity.getLocation(), step,
+                    Misc.getAngleInDegrees(entity.getLocation(), target)));
+        }
+        return true;
     }
 
     /** Sweeping patrol legs while idle; hard alternating jinks while a throw is likely

@@ -31,8 +31,6 @@ public class PondFishSpawner {
     }
 
     public static FishSpec pickFish(LocationAPI location, CatchImplement how, float extraRarityBias) {
-        FishHabitat where = FishHabitat.of(location);
-
         extraRarityBias += FishRumors.getRarityBias(location);
 
         WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
@@ -54,7 +52,7 @@ public class PondFishSpawner {
         }
 
         if (picker.isEmpty()) {
-            Global.getLogger(PondFishSpawner.class).warn("Nothing lives in " + describe(where)
+            Global.getLogger(PondFishSpawner.class).warn("Nothing lives in " + describe(FishHabitat.of(location))
                     + " on " + how + " - check " + FishSpecLoader.PATH);
             return null;
         }

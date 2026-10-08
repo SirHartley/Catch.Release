@@ -446,6 +446,10 @@ Lantern Jack hunts surfaced prey and lamp-revealed buried prey, surfacing the la
 before pursuit. Pursuit uses a direct heading after hit evasion ends. Each swallowed
 mote expires immediately and supplies one stored shell, up to three; pond stock,
 quest targets, held fish, legendaries and shield/phantom bodies are excluded.
+Its call also surfaces eligible buried prey within 3000 units and adds three fish
+from the normal local lamp pool, 800–1400 units away. Called fish stay surfaced and
+swim directly toward Jack for 20 seconds, stopping within bite range instead of
+expiring at their destination. The existing 30-second call cooldown limits new fish.
 
 `LegendaryHaunt.getMantaLampAlpha(lamp)` gives each lamp an independent visual
 flicker phase using the identity of its stable aim vector, not its coordinates.
