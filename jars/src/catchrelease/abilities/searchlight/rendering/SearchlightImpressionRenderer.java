@@ -245,7 +245,8 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
 
     protected void renderImpression(Vector2f at, float alphaMult,
                                     float reveal, float revealMult, Color revealColor) {
-        float lampAlpha = catchrelease.campaign.fish.legendary.LegendaryHaunt.getMantaLampAlpha();
+        float lampAlpha = getLampAlphaAt(at, UpgradeManager.getValue(StatIds.SEARCHLIGHT_DETECT_RADIUS,
+                FishConstants.IMPRESSION_DETECT_FALLBACK));
         alphaMult *= lampAlpha;
         revealMult *= lampAlpha;
         if (alphaMult <= 0f) return;
@@ -293,6 +294,24 @@ public class SearchlightImpressionRenderer implements LunaCampaignRenderingPlugi
                 coreSize * FishConstants.IMPRESSION_RING_SIZE);
         sprite.setAlphaMult(alphaMult * FishConstants.IMPRESSION_RING_ALPHA);
         sprite.renderAtCenter(at.x, at.y);
+    }
+
+    protected float getLampAlphaAt(Vector2f at, float detectRadius) {
+        float strongest = 0f;
+        float visible = 0f;
+        for (Searchlight light : lights) {
+            if (light.isDone()) continue;
+            float near = detectRadius > 0f
+                    ? Math.max(0f, 1f - Misc.getDistance(light.getRenderLoc(), at) / detectRadius) : 0f;
+            float weight = Math.max(light.getLitStrength(at), near * near * FishConstants.IMPRESSION_NEAR_DENT_MAX);
+            if (weight <= 0f) continue;
+            float lampAlpha = catchrelease.campaign.fish.legendary.LegendaryHaunt
+                    .getMantaLampAlpha(light.getRenderLoc());
+            strongest = Math.max(strongest, weight);
+            visible = Math.max(visible, weight * lampAlpha);
+        }
+        // Overlapping lit beams can sustain the impression; marks outside all lamps do not flicker.
+        return strongest > 0f ? visible / strongest : 1f;
     }
 
     public void loadSpritesIfNeeded() {

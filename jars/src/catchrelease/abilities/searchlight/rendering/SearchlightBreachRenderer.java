@@ -86,7 +86,7 @@ public class SearchlightBreachRenderer implements LunaCampaignRenderingPlugin {
         if (fill == null) return;
 
         float alpha = viewport.getAlphaMult() * open;
-        alpha *= catchrelease.campaign.fish.legendary.LegendaryHaunt.getMantaLampAlpha();
+        alpha *= catchrelease.campaign.fish.legendary.LegendaryHaunt.getMantaLampAlpha(loc);
 
         if (fading) {
             float fadeT = fadeDuration > 0f ? 1f - (fadeElapsed / fadeDuration) : 0f;

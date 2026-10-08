@@ -169,9 +169,11 @@ public class MantaFormationModule extends BaseHauntModule {
         return new Vector2f(at.x + (1 - realSlot) * step.x, at.y + (1 - realSlot) * step.y);
     }
 
-    public float getLampAlpha() {
-        double wave = (Math.sin(flickerTime * 31) + Math.sin(flickerTime * 47.3)
-                + Math.sin(flickerTime * 11.7)) / 3;
+    public float getLampAlpha(Vector2f lamp) {
+        // A lamp's renderers share its aim vector. Use its identity, not its moving coordinates.
+        double time = flickerTime + (System.identityHashCode(lamp) & 0x7fffffff) * 0.001;
+        double wave = (Math.sin(time * 31) + Math.sin(time * 47.3)
+                + Math.sin(time * 11.7)) / 3;
         float pulse = wave < -0.15 ? 0.08f : 0.8f + 0.2f * (float) wave;
         return 1f - intensity * (1f - pulse);
     }
