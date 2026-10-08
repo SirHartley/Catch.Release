@@ -126,6 +126,7 @@ public class LegendaryShields {
             default -> {
                 // the base shell every unarmoured legendary wears
                 if (fish.tryBaseShieldDeflect()) {
+                    LegendaryHaunt.onMantaShieldPopped(fish);
                     say(fish.getMote(), "Deflected");
                     return HitResult.DEFLECTED;
                 }

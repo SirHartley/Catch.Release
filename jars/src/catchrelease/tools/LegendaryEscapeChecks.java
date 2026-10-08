@@ -42,7 +42,7 @@ public final class LegendaryEscapeChecks {
                 case "getContainingLocation" -> env.system;
                 case "isExpired" -> expired;
                 case "setExpired" -> { expired = (boolean) a[0]; yield null; }
-                case "addTag" -> null;
+                case "addTag", "addFloatingText" -> null;
                 default -> throw new AssertionError(m);
             });
             env.fish.add(this);
@@ -253,6 +253,7 @@ public final class LegendaryEscapeChecks {
         quorum();
         moray();
         manta();
+        mantaShieldPop();
         starGeometry();
         starMovement();
         starFormations();
@@ -374,6 +375,35 @@ public final class LegendaryEscapeChecks {
                 check(Vector2f.sub(before.get(i), after.get(i), null).length() < 0.01f,
                         "blackout still swaps occupants without moving safe formation slots");
             }
+        }
+    }
+
+    private static void mantaShieldPop() {
+        try (Environment env = new Environment()) {
+            Fish fish = env.real(MantaFormationModule.SPECIES);
+            check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
+                    == LegendaryShields.HitResult.DEFLECTED, "first hit wakes manta");
+            check(fish.isBaseShieldUp() && env.haunt.module == null,
+                    "wake-up does not pop the shell or switch");
+            Vector2f at = new Vector2f(fish.at);
+            check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
+                    == LegendaryShields.HitResult.DEFLECTED, "shield pop deflects the shot");
+            Manta formation = (Manta) env.haunt.module;
+            check(!fish.isBaseShieldUp() && formation.black, "shield pop starts blackout immediately");
+            check(!fish.at.equals(at) && env.fish.size() == 3,
+                    "first shield pop creates formation and moves real manta");
+            List<Vector2f> before = formation.positions();
+            int previous = formation.index();
+            fish.restoreBaseShield();
+            LegendaryShields.onHarpoonContact(fish.getMote(), true);
+            check(previous != formation.index() && !fish.isBaseShieldUp(),
+                    "regrown shield switches again with an explosive head");
+            List<Vector2f> after = formation.positions();
+            for (int i = 0; i < before.size(); i++) {
+                check(Vector2f.sub(before.get(i), after.get(i), null).length() < 0.001f,
+                        "shield switch preserves formation slots");
+            }
+            check(env.fish.size() == 3, "shield switch reuses copies");
         }
     }
 

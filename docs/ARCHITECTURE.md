@@ -444,6 +444,10 @@ path runs once per resolved minigame, not for a busy UI or a dev fish replacemen
 `LegendaryHaunt.onFailedCatch` starts the matching haunt if necessary, refreshes
 its sighting grace period and dispatches `HauntModule.onFailedCatch`; responses
 then advance through the existing coordinator, with no additional frame script.
+Manta base-shield breaks call `LegendaryHaunt.onMantaShieldPopped` synchronously:
+start its haunt if needed, rebuild missing copies and switch stationary slots
+through `MantaFormationModule.switchPosition`. The initial wake-up deflection
+does not spend the base shield and does not trigger a switch.
 Manta failure immediately restores its base shield and invokes the formation's
 existing background-only blackout/slot swap, rebuilding missing copies first and
 resetting the normal blackout timer. It does not wait for the 15–40-second interval.

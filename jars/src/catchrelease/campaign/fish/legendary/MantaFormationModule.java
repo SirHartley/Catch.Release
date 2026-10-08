@@ -66,8 +66,12 @@ public class MantaFormationModule extends BaseHauntModule {
 
     @Override
     public void onFailedCatch(FishEntityPlugin fish) {
+        switchPosition(fish);
+    }
+
+    public void switchPosition(FishEntityPlugin fish) {
         updateFormation(fish);
-        beginBlackout();
+        if (!real.isHeld()) beginBlackout();
     }
 
     protected float nextBlackout() {
