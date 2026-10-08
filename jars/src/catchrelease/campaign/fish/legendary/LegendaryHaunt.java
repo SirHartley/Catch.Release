@@ -274,7 +274,6 @@ public class LegendaryHaunt implements EveryFrameScript {
             case "abyssal_ghost_manta" -> {
                 out.add(new MantaFormationModule(system, spec));
                 out.add(new ChromaticAberrationModule(system, spec));
-                out.add(new GhostAsteroidsModule(system, spec));
             }
             default -> out.add(new SensorGhostsModule(system, spec));
         }
