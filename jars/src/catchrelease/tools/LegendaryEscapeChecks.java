@@ -7,6 +7,9 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.legendary.*;
+import catchrelease.campaign.fish.tutorial.TutorialConstants;
+import catchrelease.memory.TransientMemory;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -52,6 +55,7 @@ public final class LegendaryEscapeChecks {
         final List<Notice> notices = new ArrayList<>();
         boolean visible = true;
         boolean expired;
+        boolean removed;
 
         Fish(Environment env, String id, boolean phantom, SectorEntityToken anchor) {
             spec.id = id;
@@ -80,6 +84,7 @@ public final class LegendaryEscapeChecks {
         }
 
         @Override public FishSpec getFishSpec() { return spec; }
+        @Override public String getFishId() { return spec.id; }
         @Override public boolean isPhantom() { return phantom; }
         @Override public boolean isDecoy() { return anchor != null; }
         @Override public SectorEntityToken getDecoyAnchor() { return anchor; }
@@ -188,6 +193,9 @@ public final class LegendaryEscapeChecks {
         final List<PlanetAPI> stars = new ArrayList<>();
         final List<CampaignTerrainAPI> coronas = new ArrayList<>();
         final Map<String, Object> persistent = new HashMap<>();
+        final Map<String, FishSpec> specs = new LinkedHashMap<>();
+        final TransientMemory memory = new TransientMemory();
+        int tutorialStage;
         final List<EveryFrameScript> scripts = new ArrayList<>();
         final StarSystemAPI system;
         final Haunt haunt = new Haunt();
@@ -216,6 +224,7 @@ public final class LegendaryEscapeChecks {
             system = api(StarSystemAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getId" -> "escape-system";
                 case "getPlanets" -> stars;
+                case "getStar" -> stars.stream().filter(PlanetAPI::isStar).findFirst().orElse(null);
                 case "getTerrainCopy" -> coronas;
                 case "createToken" -> {
                     Vector2f at = new Vector2f((float) a[0], (float) a[1]);
@@ -227,6 +236,13 @@ public final class LegendaryEscapeChecks {
                 case "getEntitiesWithTag" -> fish.stream()
                         .filter(f -> !f.expired && f.tags.contains(a[0])).map(Fish::getMote).toList();
                 case "addCustomEntity" -> {
+                    if (a[4] instanceof BuriedMoteEntityPlugin.Params params) {
+                        Fish created = new Fish(this, params.fishId, false, null);
+                        created.plugin = new Buried(created);
+                        created.tags.clear();
+                        created.tags.add(BuriedMoteEntityPlugin.BURIED_TAG);
+                        yield created.getMote();
+                    }
                     FishEntityPlugin.Params params = (FishEntityPlugin.Params) a[4];
                     Fish created = new Fish(this, params.fishId, params.phantom, params.decoyAnchor);
                     created.orbit = params.orbitAnchor;
@@ -238,6 +254,7 @@ public final class LegendaryEscapeChecks {
                     yield stream.token;
                 }
                 case "removeEntity" -> {
+                    for (Fish f : fish) if (f.getMote() == a[0]) f.removed = true;
                     for (Terrain t : terrain) if (t.token == a[0]) t.removed = true;
                     yield null;
                 }
@@ -255,7 +272,19 @@ public final class LegendaryEscapeChecks {
                 default -> throw new AssertionError(m);
             });
             scripts.add(haunt);
+            memory.set("$catchrelease_data/campaign/fish.csv", specs);
+            MemoryAPI sectorMemory = api(MemoryAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getInt" -> TutorialConstants.STAGE_KEY.equals(a[0]) ? tutorialStage : 0;
+                default -> throw new AssertionError(m);
+            });
+            GenericPluginManagerAPI plugins = api(GenericPluginManagerAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "hasPlugin" -> true;
+                case "getPluginsOfClass" -> List.of(memory);
+                default -> throw new AssertionError(m);
+            });
             Global.setSector(api(SectorAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getMemoryWithoutUpdate" -> sectorMemory;
+                case "getGenericPlugins" -> plugins;
                 case "getPersistentData" -> persistent;
                 case "getTransientScripts" -> scripts;
                 case "getCurrentLocation" -> system;

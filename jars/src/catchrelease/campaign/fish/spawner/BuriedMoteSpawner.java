@@ -1,14 +1,10 @@
 package catchrelease.campaign.fish.spawner;
 
 import catchrelease.campaign.fish.data.CatchImplement;
-import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
-import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
-import catchrelease.campaign.fish.legendary.LegendaryShields;
-import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
-import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -85,7 +81,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         List<SectorEntityToken> nearby = new ArrayList<>();
 
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-            if (buried.isExpired()) continue;
+            if (buried.isExpired() || isLegendary(buried)) continue;
 
             if (Misc.getDistance(around, buried.getLocation()) <= getPopulationRange()) {
                 nearby.add(buried);
@@ -97,7 +93,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
 
     protected void cullDistant(LocationAPI location, Vector2f around) {
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-            if (buried.isExpired()) continue;
+            if (buried.isExpired() || isLegendary(buried)) continue;
 
             if (Misc.getDistance(around, buried.getLocation()) > FishConstants.BURIED_CULL_RANGE) {
                 buried.getContainingLocation().removeEntity(buried);
@@ -107,6 +103,11 @@ public class BuriedMoteSpawner implements EveryFrameScript {
 
     protected static float getRareChance() {
         return UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
+    }
+
+    private static boolean isLegendary(SectorEntityToken mote) {
+        return mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin fish
+                && fish.getRarity() == FishRarity.LEGENDARY;
     }
 
     protected void spawn(LocationAPI location, Vector2f around) {
@@ -119,18 +120,6 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         float distance = MathUtils.getRandomNumberInRange(getSpawnMinRange(), getSpawnMaxRange());
 
         Vector2f loc = MathUtils.getPointOnCircumference(around, distance, angle);
-        if (LegendaryShields.DAWN_SPECIES.equals(fishId)) {
-            if (FalseDawnOrbit.hasMote(location)) return;
-            var corona = FalseDawnOrbit.findCorona(location);
-            if (corona == null) return;
-            loc = FalseDawnOrbit.confine(corona, loc);
-            if (Misc.getDistance(around, loc) > getSpawnMaxRange()) return;
-        }
-        if (LegendaryStarAvoidance.applies(FishSpecLoader.getFishSpec(fishId))) {
-            loc = LegendaryStarAvoidance.place(location, loc, 0f);
-            float range = Misc.getDistance(around, loc);
-            if (range < getSpawnMinRange() || range > getSpawnMaxRange()) return;
-        }
 
         SectorEntityToken buried = location.addCustomEntity(
                 Misc.genUID(), null, FishConstants.BURIED_ENTITY_ID, null,

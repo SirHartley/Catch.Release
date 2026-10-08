@@ -425,6 +425,7 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | File | Owner / connection |
 |---|---|
 | `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. |
+| `LegendarySpawns.java` | Spawns each uncaught resident on system entry and load through `LegendaryHaunt`'s location listener, after tutorial graduation. One buried or surfaced mote per species; no random-population rolls or distance culling. Placement is within 6000 units of the primary sun, otherwise the largest planet, otherwise 0/0, and clears stellar hazards. False Dawn uses its corona's star; Longliner retains its boat spawn. |
 | `LegendaryStarAvoidance.java` | All non-False-Dawn legendaries avoid each local star's surface and nominal corona plus 150 units. Natural buried spawns, surfacing, console placement, explosive respawns and Imposter reveal use the same boundary. Swimming, submerged runs, travel dashes and reveal drift test complete movement segments; positions already inside are corrected. Quorum steering reserves its escort radius; shell-game centers reserve the largest decoy ring. Manta steering moves its line center with one-slot clearance, preserving spacing and blackout swaps. Held catches remain attached to their retrieval gear. Uses existing movement callbacks, with no new script, saved state or sector-wide scan. |
 | `SlipDashModule.java` | Moray slipstream trail and curved travel dash. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Uses the existing trail roll-up and haunt cleanup. |
 | `QuorumShellGame.java` | Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. |
@@ -453,9 +454,9 @@ Real legendary motes continue swimming after reaching a destination and do not e
 when a dash ends or they leave a pond boundary. `LegendaryHaunt` also registers a
 transient `CurrentLocationChangedListener`: departure removes surfaced and buried
 legendaries, their attached Quorum bodies and active haunt modules. The existing
-load sweep removes off-system legendary motes but preserves those in the current
-location. This cleanup does not change `LegendaryChases`, host selection, spawn
-eligibility or relocation timing. With lamps on, unseen haunt effects linger for
+load sweep removes off-system legendary motes, preserves current residents, and fills
+missing residents through `LegendarySpawns`. Departure cleanup does not change
+`LegendaryChases`, host selection or relocation timing. With lamps on, unseen haunt effects linger for
 60 seconds, then fade over 12 seconds. Turning the player's lamps off starts that
 fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
@@ -629,7 +630,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
 - False Dawn selects the largest-radius usable corona star across chartable systems, regardless of coherence; its haunt supplies the coherence change. Its old regional sheet preference does not limit this selection. Equal-largest hosts can alternate; a sole largest host is retained. If no usable corona exists, no natural host is assigned. A host that becomes unsuitable is replaced only while the player is elsewhere; new natural spawns are gated immediately. `SpawnFish` still overrides the host for testing but places the fish in the largest usable local corona.
-- False Dawn's repeating orbit cannot finish a generic swim crossing. The buried spawner therefore refuses a second live specimen in that system; existing specimens expire when their ledger marks capture or a different host.
+- `LegendarySpawns` excludes resident legendaries from the ordinary population. False Dawn's existing specimens expire when their ledger marks capture or a different host; other legendary lifetimes and departure cleanup are described above.
 
 | Catch | Method | Implement |
 |---|---|---|
