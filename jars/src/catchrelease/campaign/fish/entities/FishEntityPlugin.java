@@ -12,6 +12,7 @@ import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
+import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -23,6 +24,7 @@ import com.fs.starfarer.api.util.FlickerUtilV2;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
+import org.magiclib.plugins.MagicCampaignTrailPlugin;
 
 import java.awt.Color;
 
@@ -32,6 +34,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float GLOW_SIZE = 25f;
     private static final float MOVE_SPEED = 90f;
     private static final float MAX_SINE_VARIANCE = 90f;
+
+    private static final Color TRAIL_COLOR = new Color(255, 45, 45);
+    private static final float TRAIL_WIDTH = 2f;
+    private static final float TRAIL_SECONDS = 0.3f;
+    private static final float TRAIL_MAX_STEP = 90f;
 
     private static final float ORBIT_RADIUS = 70f;
     private static final float ORBIT_DEG_PER_SECOND = 140f;
@@ -125,6 +132,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private String fishId;
     private final FlickerUtilV2 flicker = new FlickerUtilV2(0.4f);
     private transient SpriteAPI sprite;
+
+    private transient SpriteAPI trailSprite;
+    private transient float trailId;
+    private transient Vector2f trailPosition;
 
     private boolean held = false;
     private float stunLeft = 0f;
@@ -293,6 +304,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         movementSampled = true;
         velocityX = (lastX - x) / amount;
         velocityY = (lastY - y) / amount;
+        advanceTrail();
     }
 
     // Sample between callbacks too: shell-game decoys are moved by the real mote.
@@ -956,16 +968,56 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return spec == null ? FishRarity.COMMON.wanderMult : spec.getCampaignWanderMult();
     }
 
+    protected float getMoteAlpha() {
+        float alpha = entity.getSensorFaderBrightness()
+                * entity.getSensorContactFaderBrightness() * getVisibility();
+        // lamp-only patterns and their legendary constructs disappear with the beam
+        if (isLampBound()) alpha *= lampFade;
+        return alpha;
+    }
+
+    protected void advanceTrail() {
+        if (getRarity() != FishRarity.LEGENDARY && !isDecoy()) return;
+        float alpha = held || entity.isExpired() || !entity.isInCurrentLocation()
+                ? 0f : getMoteAlpha();
+        if (alpha <= 0.01f) {
+            if (trailPosition != null) cutTrail();
+            trailPosition = null;
+            return;
+        }
+
+        Vector2f at = entity.getLocation();
+        if (trailPosition == null) {
+            trailPosition = new Vector2f(at);
+            return;
+        }
+        float dx = at.x - trailPosition.x;
+        float dy = at.y - trailPosition.y;
+        trailPosition.set(at);
+        // Slot swaps and teleports must not draw a line to the old position.
+        if (dx * dx + dy * dy > TRAIL_MAX_STEP * TRAIL_MAX_STEP) {
+            cutTrail();
+        } else if (dx * dx + dy * dy > 0.001f) {
+            emitTrail((float) Math.toDegrees(Math.atan2(dy, dx)), alpha);
+        }
+    }
+
+    protected void emitTrail(float angle, float alpha) {
+        if (trailId == 0f) trailId = MagicCampaignTrailPlugin.getUniqueID();
+        if (trailSprite == null) trailSprite = SpriteLoader.getSprite("trail_foggy");
+        MagicCampaignTrailPlugin.addTrailMemberSimple(entity, trailId, trailSprite,
+                entity.getLocation(), 0f, angle, TRAIL_WIDTH, 0.4f,
+                TRAIL_COLOR, 0.65f * alpha, TRAIL_SECONDS, true, new Vector2f());
+    }
+
+    protected void cutTrail() {
+        if (trailId != 0f) MagicCampaignTrailPlugin.cutTrailsOnEntity(entity);
+    }
+
     public void externalRender(ViewportAPI viewport){
         if (sprite == null) sprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
 
-        float alpha = viewport.getAlphaMult() *
-                entity.getSensorFaderBrightness() *
-                entity.getSensorContactFaderBrightness();
-
-        alpha *= getVisibility();
-        // lamp-only patterns and their legendary constructs disappear with the beam
-        if (isLampBound()) alpha *= lampFade;
+        float alpha = viewport.getAlphaMult() * getMoteAlpha();
         if (alpha <= 0f) return;
 
         float spriteAlpha = alpha * (1f - 0.5f * flicker.getBrightness());
