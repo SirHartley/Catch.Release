@@ -640,6 +640,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 
 - Fan light and fan breach window share `STEPS_ACROSS`, `STEPS_ALONG`, and both alpha curves. Change their geometry together.
 - Glow, fan, and impression renderers share the same resting alpha formula. Module changes should affect light shape, not total intensity.
+- Legendary campaign motes use the harpoon's MagicLib foggy trail: red, 2 units wide, fading over 0.3 seconds. Shell-game decoys and legendary phantoms share it; ordinary Quorum escorts do not. The existing mote advance callback emits after movement, using the glow's lamp/dive/sensor alpha. Held, expired and off-location motes stop emitting; old segments fade out. Teleports cut the strip. Trail IDs, textures and position samples are transient; cargo, Codex and aquarium sprites are unchanged.
 - Camera-centered objects have no camera parallax term. Account for this in effects such as `PondDepthField`.
 - `ReflectionUtils` uses `MethodHandle` because the Starsector script classloader rejects direct references to `java.lang.reflect.Field` and `Method`.
 - Sound IDs are unchecked strings until playback. Validate them against merged sound data. Starsector JSON supports `#` comments and trailing commas, and sound entries may be arrays or objects.

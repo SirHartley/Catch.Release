@@ -55,6 +55,7 @@ public final class LegendaryEscapeChecks {
         @Override public boolean isLampVisible() { return true; }
         @Override protected void advanceLampFade(float amount) { }
         @Override protected void advanceShieldLens() { }
+        @Override protected void advanceTrail() { }
         void diveTime(float amount) { advanceDive(amount); }
         void swim(Vector2f next) { moveTo(next); }
     }
