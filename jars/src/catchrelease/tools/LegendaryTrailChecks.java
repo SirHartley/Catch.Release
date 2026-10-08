@@ -3,10 +3,16 @@ package catchrelease.tools;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.legendary.LegendaryTrail;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.abilities.searchlight.rendering.SearchlightImpressionRenderer;
+import catchrelease.reflection.ReflectionUtils;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.lang.invoke.MethodHandles;
+import java.util.List;
 
 import static catchrelease.tools.FishingParityChecks.proxy;
 
@@ -39,17 +45,19 @@ public final class LegendaryTrailChecks {
                 default -> throw new AssertionError(m);
             });
             field("lampFade", float.class, 1f);
+            field("trail", LegendaryTrail.class, new LegendaryTrail() {
+                @Override protected void emit(SectorEntityToken mote, float heading, float opacity) {
+                    segments++;
+                    angle = heading;
+                    alpha = opacity;
+                }
+                @Override protected void cut(SectorEntityToken mote) { cuts++; }
+            });
         }
 
         @Override public FishSpec getFishSpec() { return spec; }
         @Override public float getVisibility() { return visibility; }
         @Override protected boolean isLampBound() { return true; }
-        @Override protected void emitTrail(float heading, float opacity) {
-            segments++;
-            angle = heading;
-            alpha = opacity;
-        }
-        @Override protected void cutTrail() { cuts++; }
 
         void tick(float dx, float dy) {
             at.translate(dx, dy);
@@ -67,6 +75,7 @@ public final class LegendaryTrailChecks {
     }
 
     public static void main(String[] args) {
+        buried();
         for (FishRarity rarity : FishRarity.values()) {
             Mote fish = new Mote(rarity);
             fish.tick(0f, 0f);
@@ -134,6 +143,46 @@ public final class LegendaryTrailChecks {
             check(moray.cuts == 0 && moray.segments == fps, "Moray dash at " + fps + " fps");
         }
         System.out.println("Legendary trail checks passed: " + checks);
+    }
+
+    private static void buried() {
+        try (var env = new LegendaryEscapeChecks.Environment()) {
+            Mote token = new Mote(FishRarity.LEGENDARY);
+            float[] reveal = {0.7f};
+            int[] segments = {0};
+            var impressions = new SearchlightImpressionRenderer(List.of(), env.lamps, env.system) {
+                @Override public float getRevealStrength(SectorEntityToken mote) { return reveal[0]; }
+            };
+            ReflectionUtils.set(env.lamps, "impressionRenderer", impressions, true);
+            class Buried extends BuriedMoteEntityPlugin {
+
+                Buried() { entity = token.getMote(); }
+                @Override public FishSpec getFishSpec() { return token.spec; }
+                void tick() { advanceTrail(); }
+            }
+            Buried buried = new Buried();
+            ReflectionUtils.set(buried, "trail", new LegendaryTrail() {
+                @Override protected void emit(SectorEntityToken mote, float angle, float alpha) {
+                    check(alpha == reveal[0], "buried trail uses impression visibility");
+                    segments[0]++;
+                }
+                @Override protected void cut(SectorEntityToken mote) { }
+            }, true);
+            buried.tick();
+            token.at.translate(10f, 0f);
+            buried.tick();
+            check(segments[0] == 1 && env.haunt.getActiveSpeciesId() == null,
+                    "buried legendary trail exists before any haunt");
+            reveal[0] = 0f;
+            token.at.translate(10f, 0f);
+            buried.tick();
+            check(segments[0] == 1, "unrevealed buried fish do not leak a trail");
+            token.spec.rarity = FishRarity.COMMON;
+            reveal[0] = 1f;
+            token.at.translate(10f, 0f);
+            buried.tick();
+            check(segments[0] == 1, "ordinary buried fish do not gain legendary trails");
+        }
     }
 
     private static void check(boolean valid, String description) {

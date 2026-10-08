@@ -110,6 +110,7 @@ public final class LegendaryEscapeChecks {
         }
         @Override public FishSpec getFishSpec() { return spec; }
         @Override protected float getWanderMult() { return 0f; }
+        @Override protected void advanceTrail() { }
     }
 
     static class Corona extends StarCoronaTerrainPlugin {
