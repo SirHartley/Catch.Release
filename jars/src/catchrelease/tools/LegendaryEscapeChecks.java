@@ -52,6 +52,7 @@ public final class LegendaryEscapeChecks {
         @Override public boolean isPhantom() { return phantom; }
         @Override public boolean isDecoy() { return anchor != null; }
         @Override public SectorEntityToken getDecoyAnchor() { return anchor; }
+        @Override public boolean isLampVisible() { return true; }
         @Override protected void advanceLampFade(float amount) { }
         @Override protected void advanceShieldLens() { }
         void diveTime(float amount) { advanceDive(amount); }
@@ -123,6 +124,7 @@ public final class LegendaryEscapeChecks {
         @Override protected void showBlackout(boolean visible) { black = visible; }
         int index() { return realSlot; }
         float remaining() { return blackoutLeft; }
+        void tick(float amount) { advanceBlackout(amount); }
         List<Vector2f> positions() {
             List<Vector2f> positions = new ArrayList<>();
             for (SectorEntityToken token : slots) positions.add(new Vector2f(token.getLocation()));
@@ -394,6 +396,21 @@ public final class LegendaryEscapeChecks {
                     "first shield pop creates formation and moves real manta");
             List<Vector2f> before = formation.positions();
             int previous = formation.index();
+            check(fish.isMantaSwitching() && !FishEntityPlugin.isAvailable(fish.getMote(), true),
+                    "switch blocks even deep-strike targeting");
+            check(LegendaryShields.onHarpoonContact(fish.getMote(), true)
+                    == LegendaryShields.HitResult.DEFLECTED, "switch rejects immediate explosive hit");
+            check(LegendaryShields.onExplosiveStrike(fish.getMote()),
+                    "direct explosive callback cannot destroy or relocate a switching manta");
+            check(previous == formation.index() && env.fish.size() == 3 && !fish.expired,
+                    "extra hits neither switch again nor spawn another manta");
+            formation.tick(0.29f);
+            check(fish.isMantaSwitching(), "switch protection lasts 0.3 seconds");
+            formation.tick(0.02f);
+            check(!fish.isMantaSwitching() && FishEntityPlugin.isAvailable(fish.getMote()),
+                    "manta becomes available after switch");
+            check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
+                    == LegendaryShields.HitResult.NONE, "unshielded follow-up can catch after switch");
             fish.restoreBaseShield();
             LegendaryShields.onHarpoonContact(fish.getMote(), true);
             check(previous != formation.index() && !fish.isBaseShieldUp(),

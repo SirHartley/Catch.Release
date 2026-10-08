@@ -537,6 +537,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         if (fish.isPhantom()) return false;
         if (fish.isHeld()) return false;
+        if (fish.isMantaSwitching()) return false;
         if (!fish.isLampVisible()) return false;
 
         return reachesUnder || !fish.isDiving();
@@ -573,6 +574,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public void setMantaFormation(catchrelease.campaign.fish.legendary.MantaFormationModule formation) {
         mantaFormation = formation;
+    }
+
+    public boolean isMantaSwitching() {
+        return mantaFormation != null && mantaFormation.isSwitching();
     }
 
     public void shiftMantaPosition(float dx, float dy) {
@@ -917,7 +922,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public void applyBlast(float stunSeconds, float slowStrength, float slowSeconds) {
-        if (phantom) return;
+        if (phantom || isMantaSwitching()) return;
 
         if (stunSeconds > 0f) stunLeft = Math.max(stunLeft, stunSeconds);
 
@@ -968,6 +973,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         sprite.setColor(color);
         sprite.setAdditiveBlend();
+
+        if (isMantaSwitching()) {
+            sprite.setSize(GLOW_SIZE * 1.6f, GLOW_SIZE * 1.6f);
+            sprite.setAlphaMult(spriteAlpha * 0.75f);
+            mantaFormation.renderSwitchJitter(sprite, loc);
+        }
 
         float size = GLOW_SIZE;
         for (int i = 0; i < 6; i++) {

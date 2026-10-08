@@ -61,6 +61,7 @@ public class LegendaryShields {
     public static HitResult onHarpoonContact(SectorEntityToken mote, boolean explosive) {
         FishEntityPlugin fish = asLegendaryMote(mote);
         if (fish == null) return HitResult.NONE;
+        if (fish.isMantaSwitching()) return HitResult.DEFLECTED;
 
         String id = fish.getFishSpec().id;
         LegendaryChases.Chase state = LegendaryChases.getState(id);
@@ -139,6 +140,7 @@ public class LegendaryShields {
     public static boolean onExplosiveStrike(SectorEntityToken mote) {
         FishEntityPlugin fish = asLegendaryMote(mote);
         if (fish == null || mote.getContainingLocation() == null) return false;
+        if (fish.isMantaSwitching()) return true;
 
         Misc.fadeAndExpire(mote, 0.2f);
 

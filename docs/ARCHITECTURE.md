@@ -448,6 +448,12 @@ Manta base-shield breaks call `LegendaryHaunt.onMantaShieldPopped` synchronously
 start its haunt if needed, rebuild missing copies and switch stationary slots
 through `MantaFormationModule.switchPosition`. The initial wake-up deflection
 does not spend the base shield and does not trigger a switch.
+Every manta slot switch shares the 0.3-second blackout clock for invulnerability
+and jitter. `FishEntityPlugin.isAvailable` rejects it for harpoons and drones;
+direct shield/explosive contacts and blast effects also respect this window.
+All three motes draw 32 jittered glow copies over a 160-unit spread using vanilla
+`JitterUtil`, without moving collision positions. The module refreshes the seed
+only during unpaused advance; expiry and cleanup end both protection and jitter.
 Manta failure immediately restores its base shield and invokes the formation's
 existing background-only blackout/slot swap, rebuilding missing copies first and
 resetting the normal blackout timer. It does not wait for the 15–40-second interval.
