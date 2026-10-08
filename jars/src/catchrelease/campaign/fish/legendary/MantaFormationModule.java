@@ -107,12 +107,31 @@ public class MantaFormationModule extends BaseHauntModule {
 
     public void sync() {
         if (real == null || real.getMote().isExpired()) return;
+        if (!real.isHeld()) {
+            Vector2f center = center();
+            Vector2f safe = LegendaryStarAvoidance.place(system, center, SPACING);
+            real.shiftMantaPosition(safe.x - center.x, safe.y - center.y);
+        }
         Vector2f at = real.getMote().getLocation();
         for (int i = 0; i < slots.length; i++) {
             if (i == realSlot || slots[i] == null || slots[i].isExpired()) continue;
             slots[i].setLocation(at.x + (i - realSlot) * step.x,
                     at.y + (i - realSlot) * step.y);
         }
+    }
+
+    public void move(Vector2f destination) {
+        Vector2f from = real.getMote().getLocation();
+        Vector2f center = center();
+        Vector2f next = LegendaryStarAvoidance.step(system, center,
+                new Vector2f(center.x + destination.x - from.x, center.y + destination.y - from.y), SPACING);
+        real.getMote().setLocation(next.x + (realSlot - 1) * step.x,
+                next.y + (realSlot - 1) * step.y);
+    }
+
+    protected Vector2f center() {
+        Vector2f at = real.getMote().getLocation();
+        return new Vector2f(at.x + (1 - realSlot) * step.x, at.y + (1 - realSlot) * step.y);
     }
 
     public float getLampAlpha() {

@@ -76,7 +76,9 @@ public class LonglinerDecoy implements EveryFrameScript {
                     - Math.min(before, REVEAL_DRIFT_SECONDS);
             if (drift > 0f) {
                 Vector2f at = mote.getLocation();
-                mote.setLocation(at.x + velocity.x * drift, at.y + velocity.y * drift);
+                LegendaryStarAvoidance.move(mote,
+                        FishSpecLoader.getFishSpec(LegendaryShields.POP_SHIELD_SPECIES),
+                        new Vector2f(at.x + velocity.x * drift, at.y + velocity.y * drift), 0f);
             }
 
             if (!alerted && elapsed >= REVEAL_DRIFT_SECONDS) alert();
@@ -241,6 +243,7 @@ public class LonglinerDecoy implements EveryFrameScript {
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
                 params);
         mote.setLocation(loc.x, loc.y);
+        LegendaryStarAvoidance.confine(mote, FishSpecLoader.getFishSpec(LegendaryShields.POP_SHIELD_SPECIES));
         mote.addScript(new RevealDrift(mote, driftVelocity));
 
         LegendaryChases.noteRevealed(LegendaryShields.POP_SHIELD_SPECIES);

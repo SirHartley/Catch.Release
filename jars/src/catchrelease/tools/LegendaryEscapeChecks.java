@@ -3,12 +3,15 @@ package catchrelease.tools;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.legendary.*;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.impl.campaign.velfield.SlipstreamTerrainPlugin2;
+import com.fs.starfarer.api.impl.campaign.terrain.StarCoronaTerrainPlugin;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.io.*;
@@ -52,6 +55,29 @@ public final class LegendaryEscapeChecks {
         @Override protected void advanceLampFade(float amount) { }
         @Override protected void advanceShieldLens() { }
         void diveTime(float amount) { advanceDive(amount); }
+        void swim(Vector2f next) { moveTo(next); }
+    }
+
+    static class Buried extends BuriedMoteEntityPlugin {
+
+        final FishSpec spec;
+        Buried(Fish fish) {
+            entity = (CustomCampaignEntityAPI) fish.getMote();
+            spec = fish.spec;
+            fishId = spec.id;
+            heading = 0f;
+            headingLeft = Float.MAX_VALUE;
+        }
+        @Override public FishSpec getFishSpec() { return spec; }
+        @Override protected float getWanderMult() { return 0f; }
+    }
+
+    static class Corona extends StarCoronaTerrainPlugin {
+
+        Corona(PlanetAPI star, float outer) {
+            params = new CoronaParams(outer - star.getRadius(),
+                    (outer + star.getRadius()) * 0.5f, star, 0f, 0f, 0f);
+        }
     }
 
     static class Stream extends SlipstreamTerrainPlugin2 {
@@ -123,6 +149,8 @@ public final class LegendaryEscapeChecks {
 
         final List<Fish> fish = new ArrayList<>();
         final List<Terrain> terrain = new ArrayList<>();
+        final List<PlanetAPI> stars = new ArrayList<>();
+        final List<CampaignTerrainAPI> coronas = new ArrayList<>();
         final Map<String, Object> persistent = new HashMap<>();
         final List<EveryFrameScript> scripts = new ArrayList<>();
         final StarSystemAPI system;
@@ -146,6 +174,8 @@ public final class LegendaryEscapeChecks {
             }));
             system = api(StarSystemAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getId" -> "escape-system";
+                case "getPlanets" -> stars;
+                case "getTerrainCopy" -> coronas;
                 case "getEntitiesWithTag" -> fish.stream().filter(f -> !f.expired).map(Fish::getMote).toList();
                 case "addCustomEntity" -> {
                     FishEntityPlugin.Params params = (FishEntityPlugin.Params) a[4];
@@ -184,6 +214,32 @@ public final class LegendaryEscapeChecks {
         }
 
         Fish real(String id) { return new Fish(this, id, false, null); }
+
+        PlanetAPI star(float x, float y, float radius, float coronaRadius) {
+            Vector2f at = new Vector2f(x, y);
+            PlanetSpecAPI spec = api(PlanetSpecAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "isPulsar" -> false;
+                default -> throw new AssertionError(m);
+            });
+            PlanetAPI star = api(PlanetAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getLocation" -> at;
+                case "getRadius" -> radius;
+                case "isStar" -> true;
+                case "isExpired", "isBlackHole" -> false;
+                case "getSpec" -> spec;
+                default -> throw new AssertionError(m);
+            });
+            stars.add(star);
+            if (coronaRadius > 0f) {
+                Corona corona = new Corona(star, coronaRadius);
+                coronas.add(api(CampaignTerrainAPI.class, (p, m, a) -> switch (m.getName()) {
+                    case "isExpired" -> false;
+                    case "getPlugin" -> corona;
+                    default -> throw new AssertionError(m);
+                }));
+            }
+            return star;
+        }
         @Override public void close() {
             haunt.close();
             Shell.reset();
@@ -197,7 +253,128 @@ public final class LegendaryEscapeChecks {
         quorum();
         moray();
         manta();
+        starGeometry();
+        starMovement();
+        starFormations();
         System.out.println("Legendary escape checks passed: " + checks);
+    }
+
+    private static void starGeometry() {
+        try (Environment env = new Environment()) {
+            Vector2f from = new Vector2f(-2000f, 0f);
+            Vector2f to = new Vector2f(2000f, 0f);
+            check(LegendaryStarAvoidance.step(env.system, from, to, 0f).equals(to),
+                    "starless systems preserve movement");
+            env.star(0f, 0f, 500f, 1500f);
+            float radius = 1500f + LegendaryStarAvoidance.CLEARANCE;
+            Vector2f next = LegendaryStarAvoidance.step(env.system, from, to, 0f);
+            check(OuterReaches.distanceToSegment(new Vector2f(), from, next) >= radius,
+                    "dash cannot cross corona with both endpoints outside");
+            check(Math.abs(Vector2f.sub(next, from, null).length() - 4000f) < 0.01f,
+                    "avoidance steers without stopping the escape dash");
+            check(LegendaryStarAvoidance.place(env.system, new Vector2f(), 0f).length() > radius,
+                    "spawn at exact star center recovers to a finite safe point");
+            check(LegendaryStarAvoidance.place(env.system, new Vector2f(1600f, 0f), 0f).length() > radius,
+                    "corona rather than stellar surface sets the boundary");
+            env.star(2000f, 0f, 400f, 1200f);
+            env.star(-4000f, 900f, 700f, 0f);
+            Random random = new Random(9268L);
+            for (int i = 0; i < 500; i++) {
+                Vector2f start = LegendaryStarAvoidance.place(env.system,
+                        new Vector2f(random.nextFloat() * 10000f - 5000f,
+                                random.nextFloat() * 10000f - 5000f), 300f);
+                Vector2f target = new Vector2f(random.nextFloat() * 20000f - 10000f,
+                        random.nextFloat() * 20000f - 10000f);
+                Vector2f end = LegendaryStarAvoidance.step(env.system, start, target, 300f);
+                float[] boundaries = {1500f, 1200f, 700f};
+                for (int j = 0; j < env.stars.size(); j++) {
+                    check(OuterReaches.distanceToSegment(env.stars.get(j).getLocation(), start, end)
+                                    >= boundaries[j] + LegendaryStarAvoidance.CLEARANCE + 300f - 0.01f,
+                            "segment clears every overlapping/companion star, including one without corona");
+                }
+            }
+        }
+    }
+
+    private static void starMovement() {
+        try (Environment env = new Environment()) {
+            env.star(0f, 0f, 500f, 1500f);
+            for (String id : List.of("lantern_jack", "quorum", "slipstream_moray", "longliner", "abyssal_ghost_manta")) {
+                Fish fish = env.real(id);
+                fish.at.set(-2000f, 0f);
+                Vector2f from = new Vector2f(fish.at);
+                fish.swim(new Vector2f(2000f, 0f));
+                check(OuterReaches.distanceToSegment(new Vector2f(), from, fish.at) >= 1650f,
+                        id + " swimming steers around the corona");
+                fish.at.set(0f, 0f);
+                LegendaryStarAvoidance.confine(fish.getMote(), fish.spec);
+                check(fish.at.length() > 1650f, id + " spawn/reload correction");
+            }
+            Fish dash = env.real("slipstream_moray");
+            dash.at.set(-2000f, 0f);
+            dash.setSwimTarget(new Vector2f(5000f, 0f));
+            dash.keepSurfaced(10f);
+            dash.startTravelDash(new Vector2f(1000f, 0f), 10f);
+            dash.advance(4f);
+            check(OuterReaches.distanceToSegment(new Vector2f(), new Vector2f(-2000f, 0f), dash.at) >= 1650f,
+                    "actual dash branch cannot tunnel through the corona on a long frame");
+            Fish buriedFish = env.real("lantern_jack");
+            buriedFish.at.set(-1660f, 0f);
+            new Buried(buriedFish).advance(2f);
+            check(buriedFish.at.length() >= 1650f, "buried swimming uses star avoidance");
+            Fish ordinary = env.real("ordinary");
+            ordinary.spec.rarity = FishRarity.COMMON;
+            ordinary.at.set(-2000f, 0f);
+            ordinary.swim(new Vector2f());
+            check(ordinary.at.length() == 0f, "ordinary fish movement unchanged");
+            Fish dawn = env.real("false_dawn");
+            check(!LegendaryStarAvoidance.applies(dawn.spec), "False Dawn is exempt from corona exclusion");
+            dawn.at.set(0f, 0f);
+            check(LegendaryStarAvoidance.confine(dawn.getMote(), dawn.spec), "False Dawn retains valid corona");
+            check(dawn.at.length() > 500f && dawn.at.length() < 1500f,
+                    "False Dawn still confined outside stellar surface inside corona");
+        }
+    }
+
+    private static void starFormations() {
+        try (Environment env = new Environment()) {
+            env.star(0f, 0f, 500f, 1500f);
+            Fish real = env.real("quorum");
+            real.at.set(-1660f, 0f);
+            LegendaryChases.getState("quorum").shieldUnits = 0;
+            QuorumShellGame.onFailedCatch(real);
+            for (int i = 0; i < 180; i++) {
+                QuorumShellGame.advance(real, 1f / 60f);
+                for (Fish body : env.fish) check(body.at.length() >= 1650f - 0.01f,
+                        "Quorum body at " + body.at + " entered corona on frame " + i);
+            }
+        }
+        try (Environment env = new Environment()) {
+            env.star(0f, 0f, 500f, 1500f);
+            Fish real = env.real("abyssal_ghost_manta");
+            real.at.set(-1660f, 0f);
+            LegendaryShields.onFailedCatch(real.getMote());
+            Manta formation = (Manta) env.haunt.module;
+            for (int i = 0; i < 120; i++) {
+                formation.move(new Vector2f(real.at.x + 30f, real.at.y));
+                formation.sync();
+                List<Vector2f> positions = formation.positions();
+                for (Vector2f at : positions) check(at.length() >= 1650f - 0.01f,
+                        "all manta slots stay clear of the corona");
+                for (int j = 1; j < positions.size(); j++) {
+                    check(Math.abs(Vector2f.sub(positions.get(j), positions.get(j - 1), null).length()
+                                    - MantaFormationModule.SPACING) < 0.01f,
+                            "star avoidance preserves manta spacing");
+                }
+            }
+            List<Vector2f> before = formation.positions();
+            LegendaryShields.onFailedCatch(real.getMote());
+            List<Vector2f> after = formation.positions();
+            for (int i = 0; i < before.size(); i++) {
+                check(Vector2f.sub(before.get(i), after.get(i), null).length() < 0.01f,
+                        "blackout still swaps occupants without moving safe formation slots");
+            }
+        }
     }
 
     private static void defaults() throws Exception {

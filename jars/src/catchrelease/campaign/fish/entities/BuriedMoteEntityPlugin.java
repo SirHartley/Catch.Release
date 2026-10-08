@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
+import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -109,7 +110,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         if (FalseDawnOrbit.advance(entity, fishId, step, time)) return;
 
         Vector2f next = MathUtils.getPointOnCircumference(entity.getLocation(), step, heading + weave);
-        entity.setLocation(next.x, next.y);
+        LegendaryStarAvoidance.move(entity, getFishSpec(), next, 0f);
     }
 
     protected void pickHeadingTime() {
@@ -129,7 +130,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
                 new FishEntityPlugin.Params(swimTo, fishId));
 
         mote.setLocation(loc.x, loc.y);
-        if (!FalseDawnOrbit.confine(mote, fishId)) mote.setExpired(true);
+        if (!LegendaryStarAvoidance.confine(mote, getFishSpec())) mote.setExpired(true);
 
         entity.setExpired(true);
 

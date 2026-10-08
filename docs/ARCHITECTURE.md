@@ -111,6 +111,9 @@ checks with API proxies; they do not test OpenGL output or engine callback order
 `tools/LegendaryEscapeChecks` exercises failure dispatch, four-turn shell-game
 bursts at 30/60/144 Hz, repeated-loss decoy caps, emergency slipstream duration
 and cleanup, immediate manta swaps, and the Imposter's ordinary-hit recovery shield.
+It also checks corona-safe movement segments, invalid-position recovery, overlapping
+and companion stars, long-frame dashes, buried movement, formation clearance, and
+the False Dawn/ordinary-fish exclusions.
 
 The tuner's Balance results tab uses `tools/FishBalance` for immutable run
 snapshots, per-attempt telemetry and bounded parallel batches; its `game` and
@@ -418,6 +421,7 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | File | Owner / connection |
 |---|---|
 | `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. |
+| `LegendaryStarAvoidance.java` | All non-False-Dawn legendaries avoid each local star's surface and nominal corona plus 150 units. Natural buried spawns, surfacing, console placement, explosive respawns and Imposter reveal use the same boundary. Swimming, submerged runs, travel dashes and reveal drift test complete movement segments; positions already inside are corrected. Quorum steering reserves its escort radius; shell-game centers reserve the largest decoy ring. Manta steering moves its line center with one-slot clearance, preserving spacing and blackout swaps. Held catches remain attached to their retrieval gear. Uses existing movement callbacks, with no new script, saved state or sector-wide scan. |
 | `SlipDashModule.java` | Moray slipstream trail and curved travel dash. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Uses the existing trail roll-up and haunt cleanup. |
 | `QuorumShellGame.java` | Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. |
 | `LegendaryHaunt.java` | Transient coordinator. Starting a Lantern Jack haunt immediately restores its base shield; later deflections retain the normal cooldown. Stored shells are still earned by eating motes. |
