@@ -10,11 +10,13 @@ import catchrelease.testing.DevShortcut;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.input.InputEventAPI;
 
+import java.awt.Color;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -58,6 +60,7 @@ public final class DevShortcutChecks {
         final Map<String, Object> memory = new HashMap<>();
         final Map<String, Object> data = new HashMap<>();
         final Map<String, Boolean> active = new HashMap<>();
+        final List<String> messages = new ArrayList<>();
         int stops;
         boolean dev = true;
 
@@ -95,14 +98,29 @@ public final class DevShortcutChecks {
                 case "getAbility" -> abilities.get(a[0]);
                 default -> throw new AssertionError(m);
             });
+            CampaignUIAPI ui = proxy(CampaignUIAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "addMessage" -> {
+                    check(upgrades.getAll().values().stream().allMatch(stat -> stat.level == stat.maxLevel),
+                            "confirmation follows the upgrade grants");
+                    check(Color.YELLOW.equals(a[1]), "confirmation uses the campaign highlight color");
+                    messages.add((String) a[0]);
+                    yield null;
+                }
+                default -> throw new AssertionError(m);
+            });
             Global.setSector(proxy(SectorAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getMemoryWithoutUpdate" -> mem;
                 case "getPersistentData" -> data;
                 case "getPlayerFleet" -> fleet;
+                case "getCampaignUI" -> ui;
                 default -> throw new AssertionError(m);
             }));
             Global.setSettings(proxy(SettingsAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "isDevMode" -> dev;
+                case "getColor" -> Color.YELLOW;
+                case "getFloat" -> 0f;
+                case "getInt" -> 0;
+                case "getBoolean" -> false;
                 default -> throw new AssertionError(m);
             }));
         }
@@ -134,6 +152,7 @@ public final class DevShortcutChecks {
                     "one stage per press: " + step);
         }
         f.upgrades.getAll().forEach((id, stat) -> check(stat.level == before.get(id), "no early tier grant"));
+        check(f.messages.isEmpty(), "no early upgrade confirmation");
         for (UpgradeStat stat : f.upgrades.getAll().values()) {
             for (int rung = stat.level + 1; rung <= stat.maxLevel; rung++) {
                 ShopMarks.mark(ShopMarks.getUpgradeMarkKey(stat.id, rung));
@@ -147,6 +166,8 @@ public final class DevShortcutChecks {
         reloaded.processCampaignInputPreCore(List.of(fourth.event, extra.event));
         check(fourth.consumed && !extra.consumed && reloaded.grants == 1, "saved third stage resumes at fourth");
         check((int) f.memory.get(STEP_KEY) == 4, "fourth stage persists");
+        check(f.messages.equals(List.of("Dev shortcut: all upgrade tiers unlocked and applied.")),
+                "fourth press confirms the applied upgrades");
         for (UpgradeStat stat : f.upgrades.getAll().values()) {
             check(stat.level == stat.maxLevel, "maxed " + stat.id);
             check(ShopSchematics.has(stat, stat.maxLevel), "unlocked " + stat.id);
@@ -163,6 +184,7 @@ public final class DevShortcutChecks {
         check(f.data.get(TackleManager.KEY) == fitted, "fitted modules unchanged");
         reloaded.processCampaignInputPreCore(List.of(extra.event));
         check(reloaded.grants == 1 && f.stops == 3, "later presses do not repeat grants");
+        check(f.messages.size() == 1, "later presses do not repeat the confirmation");
         System.out.println("Dev shortcut checks passed: " + checks);
     }
 
