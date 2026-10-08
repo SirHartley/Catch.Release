@@ -151,7 +151,7 @@ public class LegendaryShields {
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
                 new FishEntityPlugin.Params(swimTo, fish.getFishSpec().id));
         reborn.setLocation(at.x, at.y);
-        if (!FalseDawnOrbit.confine(reborn, fish.getFishSpec().id)) reborn.setExpired(true);
+        if (!LegendaryStarAvoidance.confine(reborn, fish.getFishSpec())) reborn.setExpired(true);
 
         // the fish is gone in a blink; the word floats where the strike happened
         say(Global.getSector().getPlayerFleet(),

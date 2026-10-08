@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
+import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -280,6 +281,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         float x = movementSampled ? lastX : entity.getLocation().x;
         float y = movementSampled ? lastY : entity.getLocation().y;
+        if (!held && !phantom && decoyAnchor == null && orbitAnchor == null
+                && LegendaryStarAvoidance.applies(getFishSpec())) {
+            LegendaryStarAvoidance.confine(entity, getFishSpec());
+        }
         advanceFish(amount);
         if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
         if (mantaFormation != null) mantaFormation.sync();
@@ -322,8 +327,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         if (dashLeft > 0f) {
             dashLeft -= amount;
-            entity.setLocation(entity.getLocation().x + dashVelocity.x * amount,
-                    entity.getLocation().y + dashVelocity.y * amount);
+            moveTo(new Vector2f(entity.getLocation().x + dashVelocity.x * amount,
+                    entity.getLocation().y + dashVelocity.y * amount));
             if (dashLeft <= 0f && dashExpires) Misc.fadeAndExpire(entity, 1f);
             return;
         }
@@ -367,7 +372,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 angle
         );
 
-        entity.setLocation(next.x, next.y);
+        moveTo(next);
 
         // a holding mote that has been pushed past the mask - by a pond closing around it rather than by its own course - is turned back rather than lost
         if (hasLeftThePond() && !(holdsStation() && pickNewTargetInPond())) {
@@ -555,6 +560,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public void setSwimTarget(Vector2f target) {
         this.target = target;
+    }
+
+    protected void moveTo(Vector2f next) {
+        if (mantaFormation != null && !phantom) {
+            mantaFormation.move(next);
+            return;
+        }
+        float escort = LegendaryShields.MOTE_SHIELD_SPECIES.equals(fishId) ? ORBIT_RADIUS : 0f;
+        LegendaryStarAvoidance.move(entity, getFishSpec(), next, escort);
     }
 
     public void setMantaFormation(catchrelease.campaign.fish.legendary.MantaFormationModule formation) {

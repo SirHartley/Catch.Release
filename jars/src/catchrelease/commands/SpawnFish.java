@@ -11,7 +11,7 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.fisherman.FishermanMapIcon;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
-import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
+import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.campaign.fish.legendary.LonglinerDecoy;
 import catchrelease.campaign.ponds.constants.PondConstants;
@@ -168,6 +168,7 @@ public class SpawnFish implements BaseCommandWithSuggestion {
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
                 new FishEntityPlugin.Params(to, spec.id, pond));
         mote.setLocation(at.x, at.y);
+        if (!LegendaryStarAvoidance.confine(mote, spec)) mote.setExpired(true);
         mote.getMemoryWithoutUpdate().set(FishEntityPlugin.HOLDS_KEY, true);
 
         return mote;
@@ -179,7 +180,7 @@ public class SpawnFish implements BaseCommandWithSuggestion {
                 Misc.genUID(), null, FishConstants.BURIED_ENTITY_ID, null,
                 new BuriedMoteEntityPlugin.Params(spec.id));
         buried.setLocation(at.x, at.y);
-        if (!FalseDawnOrbit.confine(buried, spec.id)) {
+        if (!LegendaryStarAvoidance.confine(buried, spec)) {
             buried.setExpired(true);
             return null;
         }

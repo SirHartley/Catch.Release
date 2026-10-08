@@ -37,6 +37,8 @@ public class QuorumShellGame {
     public static final float ESCAPE_SPIN_SECONDS = 1.2f;
     public static final int ESCAPE_ROTATIONS = 4;
     public static final int ESCAPE_DECOYS = 12;
+    // Outer-ring illusions participate in the outward half of a swap too.
+    private static final float CLEARANCE_RADIUS = RING_RADIUS * 2.5f * 1.55f;
 
     protected static class Body {
 
@@ -198,7 +200,8 @@ public class QuorumShellGame {
         state.driftHeading += (float) Math.sin(state.driftPhase * 0.35f) * 20f * amount;
         Vector2f drift = MathUtils.getPointOnCircumference(null,
                 DRIFT_SPEED * amount, state.driftHeading);
-        state.center.set(state.center.x + drift.x, state.center.y + drift.y);
+        state.center.set(LegendaryStarAvoidance.step(state.real.getContainingLocation(), state.center,
+                new Vector2f(state.center.x + drift.x, state.center.y + drift.y), CLEARANCE_RADIUS));
 
         boolean swapping = false;
         for (Body body : state.bodies) {
@@ -242,6 +245,8 @@ public class QuorumShellGame {
     }
 
     protected static void place(State state, float amount) {
+        state.center.set(LegendaryStarAvoidance.place(
+                state.real.getContainingLocation(), state.center, CLEARANCE_RADIUS));
         float burst = Math.min(amount, state.escapeSpinLeft);
         state.escapeSpinLeft -= burst;
         float spin = burst * (360f * ESCAPE_ROTATIONS / ESCAPE_SPIN_SECONDS)
