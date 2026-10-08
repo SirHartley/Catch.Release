@@ -90,7 +90,7 @@ public class SearchlightGlowRenderer implements LunaCampaignRenderingPlugin {
         float alpha;
         if (extraAlphaMult > 0) alpha = extraAlphaMult;
         else alpha = 0.12f - 0.04f * flicker.getBrightness();
-        alpha *= catchrelease.campaign.fish.legendary.LegendaryHaunt.getMantaLampAlpha();
+        alpha *= catchrelease.campaign.fish.legendary.LegendaryHaunt.getMantaLampAlpha(loc);
 
         if (fading) {
             float fadeT = MathUtils.clamp(1f - (fadeElapsed / fadeDuration), 0f, 1f);

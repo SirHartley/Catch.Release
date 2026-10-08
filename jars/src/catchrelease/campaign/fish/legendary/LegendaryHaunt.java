@@ -12,6 +12,7 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
+import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,11 +104,11 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         return haunt;
     }
 
-    public static float getMantaLampAlpha() {
+    public static float getMantaLampAlpha(Vector2f lamp) {
         LegendaryHaunt haunt = getInstance();
         if (haunt == null || haunt.activeSystem != Global.getSector().getCurrentLocation()) return 1f;
         for (HauntModule module : haunt.modules) {
-            if (module instanceof MantaFormationModule manta) return manta.getLampAlpha();
+            if (module instanceof MantaFormationModule manta) return manta.getLampAlpha(lamp);
         }
         return 1f;
     }

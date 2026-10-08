@@ -104,8 +104,8 @@ unchanged. No duplicate game classes, source rewriting or separate test tree.
 This covers deterministic catch traces, tells, and the jitter and tell formulas, not treasure or the engine.
 
 `tools/MantaHauntChecks` verifies formation spacing, stationary slots at jitter onset,
-instant reorientation at jitter end, blackout duration/interval, held-target safety
-and cleanup. `tools/MantaMinigameChecks`
+instant reorientation at jitter end, blackout duration/interval, held-target safety,
+per-lamp flicker, overlapping impressions and cleanup. `tools/MantaMinigameChecks`
 compares decoy motion/tells against the real model at 30/60/144 Hz and checks
 real-only scoring, treasure isolation and restart/end behavior. These are standalone
 checks with API proxies; they do not test OpenGL output or engine callback ordering.
@@ -429,7 +429,7 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | `QuorumShellGame.java` | Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. |
 | `LegendaryHaunt.java` | Transient coordinator. The manta runs only its formation and chromatic aberration modules. Starting a Lantern Jack haunt immediately restores its base shield; later deflections retain the normal cooldown. Stored shells are still earned by eating motes. |
 | `MantaBackgroundBlackout.java` | Manta-only 0.3-second background blackout every 15–40 unpaused seconds. First Luna renderer on `TERRAIN_1`, after vanilla background/starfield and before breach windows, motes, fleets and HUD. No saved background changes. `MantaFormationModule` swaps the real mote into a different stationary slot on blackout onset, preserving its target offset and shield/catch identity; swaps wait while held. Renderer expires outside its owning sector/system and is removed on haunt cleanup. |
-| `MantaFormationModule.java` | Abyssal Ghost Manta haunt: one real mote and two haunt-owned phantoms in a straight line at 180-unit spacing. When timed, shield-break or failed-catch jitter ends, the line teleports to a new orientation about its center; no animated rotation. The real fish keeps its slot identity and target offset. Held catches cannot be teleported. `FishEntityPlugin.advance` synchronizes positions after movement; copies use the real mote's dive visibility and shield display. Only the real mote is catchable. `LegendaryHaunt.getMantaLampAlpha` applies location-scoped visual flicker to spot/fan breach, glow and impression rendering, never detection geometry. Coordinator cleanup removes copies and transient bindings; load-time haunt sweeping prevents duplicate formations. |
+| `MantaFormationModule.java` | Abyssal Ghost Manta haunt: one real mote and two haunt-owned phantoms in a straight line at 180-unit spacing. When timed, shield-break or failed-catch jitter ends, the line teleports to a new orientation about its center; no animated rotation. The real fish keeps its slot identity and target offset. Held catches cannot be teleported. `FishEntityPlugin.advance` synchronizes positions after movement; copies use the real mote's dive visibility and shield display. Only the real mote is catchable. Coordinator cleanup removes copies and transient bindings; load-time haunt sweeping prevents duplicate formations. |
 | `FalseDawnOrbit.java` | Keeps surfaced, diving and buried False Dawn movement in an annulus outside the largest non-pulsar star with a usable corona in its system. Uses the actual corona bounds; natural spawns, console spawns and explosive-hit respawns share the constraint. Dives retain their visibility timing but follow the corona instead of a straight chord through the star. |
 | `FalseDawnCorona.java` | Adds short, complementary-hue spikes to the host star's vanilla `FlareManager` queue while the player is in the host system, including before provocation. Only its own flares are removed on departure, capture and before saving; star specs and natural flares are unchanged. A location listener handles departure; the existing haunt advance refills the queue because vanilla exposes no flare-finished callback. No extra frame script or renderer. |
 | `../entities/HauntMineEntityPlugin.java` | Non-damaging False Dawn mines. Push and pull deliver equal, opposite one-shot impulses through the fleet movement module via `setVelocity`; the implosion ripple remains visual only, with no lingering attraction. Interdiction mines cancel interdictable abilities and stop the fleet for two seconds using vanilla's one-frame stop request; no persistent speed modifier. Timers stop while paused. |
@@ -439,6 +439,14 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | `LanternSensorGhostsModule.java` | Jack-only vanilla `BaseSensorGhost` contacts: echo player movement, intercept then depart, or pass by. First and repeat spawns take 5–10 seconds, cap four including fades. Uses the haunt's existing advance and cleanup, not the hyperspace manager or a new sector script. Behavior durations convert seconds to campaign days; original tokens remain tracked after vanilla starts fading. No fleet spawning or drive drain. `SensorGhostsModule` remains the Imposter's separate implementation. |
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
+
+`LegendaryHaunt.getMantaLampAlpha(lamp)` gives each lamp an independent visual
+flicker phase using the identity of its stable aim vector, not its coordinates.
+Spot/fan glow and breach renderers share that vector, so each lamp's layers agree
+even when it moves or changes beam shape. Impressions combine the visible
+contributions of overlapping lamps; marks outside all lamps remain unaffected.
+The effect is location-scoped and follows the haunt's unpaused clock and intensity.
+Detection, tracking marks and targeting do not use the visual flicker.
 
 Real legendary motes continue swimming after reaching a destination and do not expire
 when a dash ends or they leave a pond boundary. `LegendaryHaunt` also registers a
