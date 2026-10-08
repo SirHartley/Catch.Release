@@ -72,16 +72,31 @@ public class LegendaryHaunt implements EveryFrameScript {
     }
 
     public static void onFailedCatch(FishEntityPlugin fish) {
+        LegendaryHaunt haunt = activateFor(fish);
+        if (haunt == null) return;
+        for (HauntModule module : haunt.modules) module.onFailedCatch(fish);
+    }
+
+    public static void onMantaShieldPopped(FishEntityPlugin fish) {
+        if (!MantaFormationModule.SPECIES.equals(fish.getFishSpec().id)) return;
+        LegendaryHaunt haunt = activateFor(fish);
+        if (haunt == null) return;
+        for (HauntModule module : haunt.modules) {
+            if (module instanceof MantaFormationModule manta) manta.switchPosition(fish);
+        }
+    }
+
+    private static LegendaryHaunt activateFor(FishEntityPlugin fish) {
         LegendaryHaunt haunt = getInstance();
         if (haunt == null || !(fish.getMote().getContainingLocation() instanceof StarSystemAPI system)
-                || system != Global.getSector().getCurrentLocation()) return;
+                || system != Global.getSector().getCurrentLocation()) return null;
         FishSpec spec = fish.getFishSpec();
         if (haunt.activeSystem != system || !spec.id.equals(haunt.activeSpeciesId)) {
             haunt.stop();
             haunt.start(spec, system);
         }
         haunt.sinceSeen = 0f;
-        for (HauntModule module : haunt.modules) module.onFailedCatch(fish);
+        return haunt;
     }
 
     public static float getMantaLampAlpha() {
@@ -274,7 +289,6 @@ public class LegendaryHaunt implements EveryFrameScript {
             case "abyssal_ghost_manta" -> {
                 out.add(new MantaFormationModule(system, spec));
                 out.add(new ChromaticAberrationModule(system, spec));
-                out.add(new GhostAsteroidsModule(system, spec));
             }
             default -> out.add(new SensorGhostsModule(system, spec));
         }

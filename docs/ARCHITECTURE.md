@@ -424,7 +424,7 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | `LegendaryStarAvoidance.java` | All non-False-Dawn legendaries avoid each local star's surface and nominal corona plus 150 units. Natural buried spawns, surfacing, console placement, explosive respawns and Imposter reveal use the same boundary. Swimming, submerged runs, travel dashes and reveal drift test complete movement segments; positions already inside are corrected. Quorum steering reserves its escort radius; shell-game centers reserve the largest decoy ring. Manta steering moves its line center with one-slot clearance, preserving spacing and blackout swaps. Held catches remain attached to their retrieval gear. Uses existing movement callbacks, with no new script, saved state or sector-wide scan. |
 | `SlipDashModule.java` | Moray slipstream trail and curved travel dash. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Uses the existing trail roll-up and haunt cleanup. |
 | `QuorumShellGame.java` | Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. |
-| `LegendaryHaunt.java` | Transient coordinator. Starting a Lantern Jack haunt immediately restores its base shield; later deflections retain the normal cooldown. Stored shells are still earned by eating motes. |
+| `LegendaryHaunt.java` | Transient coordinator. The manta runs only its formation and chromatic aberration modules. Starting a Lantern Jack haunt immediately restores its base shield; later deflections retain the normal cooldown. Stored shells are still earned by eating motes. |
 | `MantaBackgroundBlackout.java` | Manta-only 0.3-second background blackout every 15–40 unpaused seconds. First Luna renderer on `TERRAIN_1`, after vanilla background/starfield and before breach windows, motes, fleets and HUD. No saved background changes. `MantaFormationModule` swaps the real mote into a different stationary slot on blackout onset, preserving its target offset and shield/catch identity; swaps wait while held. Renderer expires outside its owning sector/system and is removed on haunt cleanup. |
 | `MantaFormationModule.java` | Abyssal Ghost Manta haunt: one real mote and two haunt-owned phantoms, fixed world-space line at 180-unit spacing. `FishEntityPlugin.advance` synchronizes positions after movement; copies use the real mote's dive visibility and shield display. Only the real mote is catchable. `LegendaryHaunt.getMantaLampAlpha` applies location-scoped visual flicker to spot/fan breach, glow and impression rendering, never detection geometry. Coordinator cleanup removes copies and transient bindings; load-time haunt sweeping prevents duplicate formations. |
 | `FalseDawnOrbit.java` | Keeps surfaced, diving and buried False Dawn movement in an annulus outside the largest non-pulsar star with a usable corona in its system. Uses the actual corona bounds; natural spawns, console spawns and explosive-hit respawns share the constraint. Dives retain their visibility timing but follow the corona instead of a straight chord through the star. |
@@ -444,6 +444,16 @@ path runs once per resolved minigame, not for a busy UI or a dev fish replacemen
 `LegendaryHaunt.onFailedCatch` starts the matching haunt if necessary, refreshes
 its sighting grace period and dispatches `HauntModule.onFailedCatch`; responses
 then advance through the existing coordinator, with no additional frame script.
+Manta base-shield breaks call `LegendaryHaunt.onMantaShieldPopped` synchronously:
+start its haunt if needed, rebuild missing copies and switch stationary slots
+through `MantaFormationModule.switchPosition`. The initial wake-up deflection
+does not spend the base shield and does not trigger a switch.
+Every manta slot switch shares the 0.3-second blackout clock for invulnerability
+and jitter. `FishEntityPlugin.isAvailable` rejects it for harpoons and drones;
+direct shield/explosive contacts and blast effects also respect this window.
+All three motes draw 32 jittered glow copies over a 160-unit spread using vanilla
+`JitterUtil`, without moving collision positions. The module refreshes the seed
+only during unpaused advance; expiry and cleanup end both protection and jitter.
 Manta failure immediately restores its base shield and invokes the formation's
 existing background-only blackout/slot swap, rebuilding missing copies first and
 resetting the normal blackout timer. It does not wait for the 15–40-second interval.

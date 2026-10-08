@@ -5,6 +5,8 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.rendering.plugins.MantaBackgroundBlackout;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.util.JitterUtil;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -15,6 +17,8 @@ public class MantaFormationModule extends BaseHauntModule {
     public static final float BLACKOUT_SECONDS = 0.3f;
     public static final float BLACKOUT_MIN = 15f;
     public static final float BLACKOUT_MAX = 40f;
+    public static final int SWITCH_JITTER_COPIES = 32;
+    public static final float SWITCH_JITTER_SPREAD = 160f;
 
     protected final SectorEntityToken[] slots = new SectorEntityToken[3];
     protected final Vector2f step = new Vector2f();
@@ -24,6 +28,7 @@ public class MantaFormationModule extends BaseHauntModule {
     protected float blackoutLeft;
     protected float blackoutTimer;
     protected MantaBackgroundBlackout blackout;
+    private final JitterUtil switchJitter = new JitterUtil();
 
     public MantaFormationModule(StarSystemAPI system, FishSpec spec) {
         super(system, spec);
@@ -66,8 +71,12 @@ public class MantaFormationModule extends BaseHauntModule {
 
     @Override
     public void onFailedCatch(FishEntityPlugin fish) {
+        switchPosition(fish);
+    }
+
+    public void switchPosition(FishEntityPlugin fish) {
         updateFormation(fish);
-        beginBlackout();
+        if (!real.isHeld()) beginBlackout();
     }
 
     protected float nextBlackout() {
@@ -75,6 +84,8 @@ public class MantaFormationModule extends BaseHauntModule {
     }
 
     protected void advanceBlackout(float amount) {
+        if (amount <= 0f) return;
+        switchJitter.updateSeed();
         blackoutLeft = Math.max(0f, blackoutLeft - amount);
         blackoutTimer -= amount;
         if (blackoutTimer <= 0f && !real.isHeld()) {
@@ -88,6 +99,15 @@ public class MantaFormationModule extends BaseHauntModule {
         blackoutLeft = BLACKOUT_SECONDS;
         blackoutTimer = nextBlackout();
         showBlackout(true);
+    }
+
+    public boolean isSwitching() {
+        return blackoutLeft > 0f;
+    }
+
+    public void renderSwitchJitter(SpriteAPI sprite, Vector2f at) {
+        if (!isSwitching()) return;
+        switchJitter.render(sprite, at.x, at.y, SWITCH_JITTER_SPREAD, SWITCH_JITTER_COPIES);
     }
 
     protected void showBlackout(boolean visible) {

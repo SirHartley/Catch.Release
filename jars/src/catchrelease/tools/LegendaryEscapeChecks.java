@@ -42,7 +42,7 @@ public final class LegendaryEscapeChecks {
                 case "getContainingLocation" -> env.system;
                 case "isExpired" -> expired;
                 case "setExpired" -> { expired = (boolean) a[0]; yield null; }
-                case "addTag" -> null;
+                case "addTag", "addFloatingText" -> null;
                 default -> throw new AssertionError(m);
             });
             env.fish.add(this);
@@ -52,6 +52,7 @@ public final class LegendaryEscapeChecks {
         @Override public boolean isPhantom() { return phantom; }
         @Override public boolean isDecoy() { return anchor != null; }
         @Override public SectorEntityToken getDecoyAnchor() { return anchor; }
+        @Override public boolean isLampVisible() { return true; }
         @Override protected void advanceLampFade(float amount) { }
         @Override protected void advanceShieldLens() { }
         void diveTime(float amount) { advanceDive(amount); }
@@ -123,6 +124,7 @@ public final class LegendaryEscapeChecks {
         @Override protected void showBlackout(boolean visible) { black = visible; }
         int index() { return realSlot; }
         float remaining() { return blackoutLeft; }
+        void tick(float amount) { advanceBlackout(amount); }
         List<Vector2f> positions() {
             List<Vector2f> positions = new ArrayList<>();
             for (SectorEntityToken token : slots) positions.add(new Vector2f(token.getLocation()));
@@ -253,6 +255,7 @@ public final class LegendaryEscapeChecks {
         quorum();
         moray();
         manta();
+        mantaShieldPop();
         starGeometry();
         starMovement();
         starFormations();
@@ -374,6 +377,50 @@ public final class LegendaryEscapeChecks {
                 check(Vector2f.sub(before.get(i), after.get(i), null).length() < 0.01f,
                         "blackout still swaps occupants without moving safe formation slots");
             }
+        }
+    }
+
+    private static void mantaShieldPop() {
+        try (Environment env = new Environment()) {
+            Fish fish = env.real(MantaFormationModule.SPECIES);
+            check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
+                    == LegendaryShields.HitResult.DEFLECTED, "first hit wakes manta");
+            check(fish.isBaseShieldUp() && env.haunt.module == null,
+                    "wake-up does not pop the shell or switch");
+            Vector2f at = new Vector2f(fish.at);
+            check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
+                    == LegendaryShields.HitResult.DEFLECTED, "shield pop deflects the shot");
+            Manta formation = (Manta) env.haunt.module;
+            check(!fish.isBaseShieldUp() && formation.black, "shield pop starts blackout immediately");
+            check(!fish.at.equals(at) && env.fish.size() == 3,
+                    "first shield pop creates formation and moves real manta");
+            List<Vector2f> before = formation.positions();
+            int previous = formation.index();
+            check(fish.isMantaSwitching() && !FishEntityPlugin.isAvailable(fish.getMote(), true),
+                    "switch blocks even deep-strike targeting");
+            check(LegendaryShields.onHarpoonContact(fish.getMote(), true)
+                    == LegendaryShields.HitResult.DEFLECTED, "switch rejects immediate explosive hit");
+            check(LegendaryShields.onExplosiveStrike(fish.getMote()),
+                    "direct explosive callback cannot destroy or relocate a switching manta");
+            check(previous == formation.index() && env.fish.size() == 3 && !fish.expired,
+                    "extra hits neither switch again nor spawn another manta");
+            formation.tick(0.29f);
+            check(fish.isMantaSwitching(), "switch protection lasts 0.3 seconds");
+            formation.tick(0.02f);
+            check(!fish.isMantaSwitching() && FishEntityPlugin.isAvailable(fish.getMote()),
+                    "manta becomes available after switch");
+            check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
+                    == LegendaryShields.HitResult.NONE, "unshielded follow-up can catch after switch");
+            fish.restoreBaseShield();
+            LegendaryShields.onHarpoonContact(fish.getMote(), true);
+            check(previous != formation.index() && !fish.isBaseShieldUp(),
+                    "regrown shield switches again with an explosive head");
+            List<Vector2f> after = formation.positions();
+            for (int i = 0; i < before.size(); i++) {
+                check(Vector2f.sub(before.get(i), after.get(i), null).length() < 0.001f,
+                        "shield switch preserves formation slots");
+            }
+            check(env.fish.size() == 3, "shield switch reuses copies");
         }
     }
 
