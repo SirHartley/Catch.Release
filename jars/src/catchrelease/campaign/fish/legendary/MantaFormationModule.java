@@ -19,6 +19,7 @@ public class MantaFormationModule extends BaseHauntModule {
     public static final float BLACKOUT_MAX = 40f;
     public static final int SWITCH_JITTER_COPIES = 32;
     public static final float SWITCH_JITTER_SPREAD = 160f;
+    private static final float MIN_LINE_TURN = 30f;
 
     protected final SectorEntityToken[] slots = new SectorEntityToken[3];
     protected final Vector2f step = new Vector2f();
@@ -86,7 +87,9 @@ public class MantaFormationModule extends BaseHauntModule {
     protected void advanceBlackout(float amount) {
         if (amount <= 0f) return;
         switchJitter.updateSeed();
+        boolean wasSwitching = isSwitching();
         blackoutLeft = Math.max(0f, blackoutLeft - amount);
+        if (wasSwitching && !isSwitching() && !real.isHeld()) reorientFormation();
         blackoutTimer -= amount;
         if (blackoutTimer <= 0f && !real.isHeld()) {
             beginBlackout();
@@ -122,6 +125,18 @@ public class MantaFormationModule extends BaseHauntModule {
         slots[next] = slots[realSlot];
         slots[realSlot] = displaced;
         realSlot = next;
+        sync();
+    }
+
+    protected void reorientFormation() {
+        Vector2f center = center();
+        // A half-turn gives the same line; keep the new orientation visibly distinct.
+        float turn = MIN_LINE_TURN + random.nextFloat() * (180f - 2f * MIN_LINE_TURN);
+        double angle = Math.atan2(step.y, step.x) + Math.toRadians(turn);
+        step.set((float) Math.cos(angle) * SPACING, (float) Math.sin(angle) * SPACING);
+        Vector2f at = real.getMote().getLocation();
+        real.shiftMantaPosition(center.x + (realSlot - 1) * step.x - at.x,
+                center.y + (realSlot - 1) * step.y - at.y);
         sync();
     }
 

@@ -374,6 +374,10 @@ public final class LegendaryEscapeChecks {
             for (int i = 0; i < 120; i++) {
                 formation.move(new Vector2f(real.at.x + 30f, real.at.y));
                 formation.sync();
+                if (i % 10 == 0) {
+                    LegendaryShields.onFailedCatch(real.getMote());
+                    formation.tick(0.31f);
+                }
                 List<Vector2f> positions = formation.positions();
                 for (Vector2f at : positions) check(at.length() >= 1650f - 0.01f,
                         "all manta slots stay clear of the corona");
@@ -422,6 +426,9 @@ public final class LegendaryEscapeChecks {
             formation.tick(0.02f);
             check(!fish.isMantaSwitching() && FishEntityPlugin.isAvailable(fish.getMote()),
                     "manta becomes available after switch");
+            check(Vector2f.sub(before.get(0), formation.positions().get(0), null).length() > 1f,
+                    "shield-break jitter reorients the line when it ends");
+            before = formation.positions();
             check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
                     == LegendaryShields.HitResult.NONE, "unshielded follow-up can catch after switch");
             fish.restoreBaseShield();
