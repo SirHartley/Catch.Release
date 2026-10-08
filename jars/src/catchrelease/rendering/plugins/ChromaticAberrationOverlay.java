@@ -68,10 +68,15 @@ public class ChromaticAberrationOverlay implements CampaignUIRenderingListener {
 
         float scale = Global.getSettings().getScreenScaleMult();
         renderRegion(0f, 0f, Global.getSettings().getScreenWidthPixels() / scale,
-                Global.getSettings().getScreenHeightPixels() / scale, level);
+                Global.getSettings().getScreenHeightPixels() / scale, level, 0f);
     }
 
     public void renderRegion(float x, float y, float regionWidth, float regionHeight, float strength) {
+        renderRegion(x, y, regionWidth, regionHeight, strength, MIN_SHIFT_PX);
+    }
+
+    private void renderRegion(float x, float y, float regionWidth, float regionHeight, float strength,
+                              float minShift) {
         if (strength <= 0f || regionWidth <= 0f || regionHeight <= 0f) return;
         int width = (int) Global.getSettings().getScreenWidthPixels();
         int height = (int) Global.getSettings().getScreenHeightPixels();
@@ -84,7 +89,7 @@ public class ChromaticAberrationOverlay implements CampaignUIRenderingListener {
 
         float wobble = 0.8f + 0.2f * (float) Math.sin(
                 (System.currentTimeMillis() % 100000L) * 0.007);
-        float shift = (MIN_SHIFT_PX + (MAX_SHIFT_PX - MIN_SHIFT_PX) * MathUtils.clamp(strength, 0f, 1f))
+        float shift = (minShift + (MAX_SHIFT_PX - minShift) * MathUtils.clamp(strength, 0f, 1f))
                 * wobble / scale;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT

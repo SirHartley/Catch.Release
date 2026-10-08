@@ -91,7 +91,7 @@ public class MantaFormationModule extends BaseHauntModule {
         blackoutLeft = Math.max(0f, blackoutLeft - amount);
         if (wasSwitching && !isSwitching() && !real.isHeld()) reorientFormation();
         blackoutTimer -= amount;
-        if (blackoutTimer <= 0f && !real.isHeld()) {
+        if (blackoutTimer <= 0f && !real.isHeld() && atFullIntensity()) {
             beginBlackout();
         }
         showBlackout(blackoutLeft > 0f);

@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -18,10 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The whaling chase's stage manager. While the player sits in a living legendary's host
- * system, that species' haunt modules run; the moment they leave, the fish is landed, or
- * the fish moves on, every module is torn down at once. Modules and their spawn are
- * session-transient - the tag sweep at register() clears anything a hard exit left behind.
+ * Modules are session-transient. The registration sweep removes leftovers from hard exits;
+ * leaving the system or catching the fish bypasses the normal fade and cleans up at once.
  */
 public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedListener {
 
@@ -37,6 +36,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
     protected final List<HauntModule> modules = new ArrayList<>();
     protected float intensity;
     protected float sinceSeen;
+    protected boolean fading;
     protected final FalseDawnCorona corona = new FalseDawnCorona();
 
     public static void register() {
@@ -92,6 +92,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
     }
 
     private static LegendaryHaunt activateFor(FishEntityPlugin fish) {
+        if (!SearchlightAbilityPlugin.isBreaching()) return null;
         LegendaryHaunt haunt = getInstance();
         if (haunt == null || !(fish.getMote().getContainingLocation() instanceof StarSystemAPI system)
                 || system != Global.getSector().getCurrentLocation()) return null;
@@ -101,6 +102,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             haunt.start(spec, system);
         }
         haunt.sinceSeen = 0f;
+        haunt.fading = false;
         return haunt;
     }
 
@@ -184,15 +186,17 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
 
     @Override
     public void advance(float amount) {
+        if (amount <= 0f) return;
         corona.advance();
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         StarSystemAPI here = player != null
                 && player.getContainingLocation() instanceof StarSystemAPI system
                 ? system : null;
+        boolean lampsOn = SearchlightAbilityPlugin.isBreaching();
 
         // a haunt begins only when the fish itself has been laid eyes on
         if (modules.isEmpty()) {
-            FishSpec sighted = here == null ? null : findSightedSpecies(here);
+            FishSpec sighted = here == null || !lampsOn ? null : findSightedSpecies(here);
             if (sighted != null) start(sighted, here);
             if (modules.isEmpty()) return;
         }
@@ -206,14 +210,16 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             return;
         }
 
-        if (isSighted(active, here)) {
+        if (lampsOn && isSighted(active, here)) {
             sinceSeen = 0f;
+            fading = false;
         } else {
             sinceSeen += amount;
+            if (!lampsOn || sinceSeen > LINGER_SECONDS) fading = true;
         }
 
-        // lost fish: hold on for a while, then fade; a fresh sighting resets the clock
-        if (sinceSeen <= LINGER_SECONDS) {
+        // Lamp-off skips the lost-fish grace period; only a fresh sighting ends the fade.
+        if (!fading) {
             intensity = Math.min(1f, intensity + amount / RAMP_SECONDS);
         } else {
             intensity = Math.max(0f, intensity - amount / FADE_SECONDS);
@@ -246,7 +252,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
 
     protected boolean isSighted(FishSpec spec, StarSystemAPI here) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null) return false;
+        if (player == null || !SearchlightAbilityPlugin.isBreaching()) return false;
 
         for (SectorEntityToken mote
                 : here.getEntitiesWithTag(catchrelease.campaign.fish.entities
@@ -273,6 +279,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         activeSystem = here;
         intensity = 0f;
         sinceSeen = 0f;
+        fading = false;
 
         if (LegendaryShields.CHARGE_SHIELD_SPECIES.equals(spec.id)) {
             for (SectorEntityToken mote : here.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
@@ -296,6 +303,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         activeSystem = null;
         intensity = 0f;
         sinceSeen = 0f;
+        fading = false;
     }
 
     /** A few haunts each, not the whole pool - the chase should press, not bury. */
