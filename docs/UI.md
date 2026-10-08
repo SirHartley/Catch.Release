@@ -284,6 +284,13 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
+- Legendary floating notices use `LegendaryShields.say`. It keeps vanilla's renderer
+  and lifetime, but stacks older labels above newer ones by the font height plus four
+  screen units, converted through the current viewport. Older labels drift upward
+  first, away from new notices. This
+  covers shield hits, the Lantern call, feeding, Quorum feedback and the Imposter alert.
+  The stable `CampaignFloatingText.offset` and `label` fields are accessed through
+  `ReflectionUtils`; Manta notices still detach before a slot swap.
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short

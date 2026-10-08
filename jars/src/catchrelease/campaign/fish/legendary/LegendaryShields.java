@@ -503,9 +503,23 @@ public class LegendaryShields {
     /** Chase feedback floats at the thing it happened to, never the message feed. */
     public static void say(SectorEntityToken at, String text) {
         if (at == null || at.isExpired()) at = Global.getSector().getPlayerFleet();
-        if (at == null) return;
+        if (at == null || !at.isVisibleToPlayerFleet()) return;
 
         at.addFloatingText(text, Misc.getHighlightColor(), 1f);
+        List<?> labels = (List<?>) ReflectionUtils.invoke(at, "getFloatingText");
+        if (labels == null || labels.size() < 2) return;
+        Object newest = labels.get(labels.size() - 1);
+        Vector2f offset = (Vector2f) ReflectionUtils.get(newest, "offset");
+        Object label = ReflectionUtils.get(newest, "label");
+        float height = ((Number) ReflectionUtils.invoke(label, "getHeight")).floatValue();
+        float gap = Global.getSector().getViewport().convertScreenHeightToWorldHeight(height + 4f);
+        float top = offset.y;
+        // Older labels drift up first; keep them above newer notices.
+        for (int i = labels.size() - 2; i >= 0; i--) {
+            Vector2f older = (Vector2f) ReflectionUtils.get(labels.get(i), "offset");
+            older.y = Math.max(older.y, top + gap);
+            top = older.y;
+        }
     }
 
     protected static int getShieldUnits(LegendaryChases.Chase state, int cap) {

@@ -496,6 +496,7 @@ but uses `ReflectionUtils` to set each new label's stable `entity` field to a fi
 location token. The token is not added to the system; the mote still owns the label's
 lifetime and visibility. This follows `CampaignFloatingText` in 0.98a-RC8, which
 reads its entity's location every render. Other species retain entity-following text.
+All legendary notices share the overlap spacing in [UI.md](UI.md#drawing-gotchas).
 Every manta slot switch shares the 0.3-second blackout clock for invulnerability
 and jitter. `FishEntityPlugin.isAvailable` rejects it for harpoons and drones;
 direct shield/explosive contacts and blast effects also respect this window.

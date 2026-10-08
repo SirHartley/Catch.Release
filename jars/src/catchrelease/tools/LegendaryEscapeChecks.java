@@ -10,6 +10,7 @@ import catchrelease.campaign.fish.legendary.*;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.memory.TransientMemory;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
@@ -34,12 +35,19 @@ public final class LegendaryEscapeChecks {
     static class Notice {
 
         private SectorEntityToken entity;
+        final Vector2f offset = new Vector2f(0f, 25f);
+        final TextSize label = new TextSize();
         final String text;
 
         Notice(SectorEntityToken entity, String text) {
             this.entity = entity;
             this.text = text;
         }
+    }
+
+    public static class TextSize {
+
+        public float getHeight() { return 16f; }
     }
 
     static class Fish extends FishEntityPlugin {
@@ -206,6 +214,7 @@ public final class LegendaryEscapeChecks {
         final Map<String, FishSpec> specs = new LinkedHashMap<>();
         final TransientMemory memory = new TransientMemory();
         int tutorialStage;
+        float zoom = 1f;
         final List<EveryFrameScript> scripts = new ArrayList<>();
         final StarSystemAPI system;
         final Haunt haunt = new Haunt();
@@ -294,6 +303,10 @@ public final class LegendaryEscapeChecks {
                 default -> throw new AssertionError(m);
             });
             Global.setSector(api(SectorAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getViewport" -> api(ViewportAPI.class, (vp, vm, va) -> switch (vm.getName()) {
+                    case "convertScreenHeightToWorldHeight" -> (float) va[0] * zoom;
+                    default -> throw new AssertionError(vm);
+                });
                 case "getMemoryWithoutUpdate" -> sectorMemory;
                 case "getGenericPlugins" -> plugins;
                 case "getPersistentData" -> persistent;
@@ -347,6 +360,7 @@ public final class LegendaryEscapeChecks {
         manta();
         mantaShieldPop();
         deflectionLabels();
+        labelSpacing();
         starGeometry();
         starMovement();
         starFormations();
@@ -591,6 +605,30 @@ public final class LegendaryEscapeChecks {
             check(!LegendaryShields.onFailedCatch(ordinary.getMote()), "ordinary failure stays ordinary");
             Fish phantom = new Fish(env, "quorum", true, null);
             check(!LegendaryShields.onFailedCatch(phantom.getMote()), "phantom cannot trigger response");
+        }
+    }
+
+    private static void labelSpacing() {
+        for (float zoom : new float[]{0.5f, 1f, 3f}) try (Environment env = new Environment()) {
+            env.zoom = zoom;
+            Fish jack = env.real("lantern_jack");
+            for (String message : List.of("Deflected", "The lantern flares. Nearby motes turn toward it.",
+                    "Mote consumed. Another shell layers on.", "Shell burned")) {
+                LegendaryShields.say(jack.getMote(), message);
+            }
+            for (int i = 1; i < jack.notices.size(); i++) {
+                check((jack.notices.get(i - 1).offset.y - jack.notices.get(i).offset.y) / zoom >= 20f,
+                        "same-frame call, shield and feeding labels have a screen-space gap");
+            }
+            jack.notices.get(3).offset.y += 15f;
+            LegendaryShields.say(jack.getMote(), "Deflected");
+            for (int i = 1; i < jack.notices.size(); i++) {
+                check((jack.notices.get(i - 1).offset.y - jack.notices.get(i).offset.y) / zoom >= 20f,
+                        "older labels drift away from newer labels");
+            }
+            jack.visible = false;
+            LegendaryShields.say(jack.getMote(), "Deflected");
+            check(jack.notices.size() == 5, "hidden entities do not gain a label");
         }
     }
 

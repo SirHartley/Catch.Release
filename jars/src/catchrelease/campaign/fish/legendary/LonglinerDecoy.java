@@ -89,7 +89,7 @@ public class LonglinerDecoy implements EveryFrameScript {
             if (mote.isInCurrentLocation()) {
                 Global.getSoundPlayer().playSound(
                         SOUND_FOUND, 1f, 1f, mote.getLocation(), Misc.ZERO);
-                mote.addFloatingText("!", Misc.getHighlightColor(), 1f);
+                LegendaryShields.say(mote, "!");
             }
             alerted = true;
         }
