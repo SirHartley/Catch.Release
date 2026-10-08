@@ -9,6 +9,7 @@ import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.abilities.searchlight.rendering.SearchlightImpressionRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
+import catchrelease.abilities.searchlight.scripts.NeedleSensor;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
@@ -45,6 +46,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
     private transient SearchlightImpressionRenderer impressionRenderer;
     private transient LocationAPI activationLocation;
+    private transient NeedleSensor needleSensor;
 
     @Override
     protected Object readResolve() {
@@ -52,6 +54,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         impressionRenderer = null;
         activationLocation = null;
+        needleSensor = null;
 
         return this;
     }
@@ -102,6 +105,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
     @Override
     protected void activateImpl() {
+        if (needleSensor != null) needleSensor.clear();
         teardownRuntime(false);
 
         CampaignFleetAPI fleet = getFleet();
@@ -126,6 +130,16 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             searchlightArcs.add(new CircularArc(fleet.getLocation(), radius,
                     minAngle, minAngle + areaPerLight));
         }
+    }
+
+    @Override
+    public void advance(float amount) {
+        super.advance(amount);
+        if (needleSensor == null && getFleet() == Global.getSector().getPlayerFleet()
+                && TackleManager.get(Tackle.Fit.SEARCHLIGHT) == Tackle.NEEDLE_SENSOR) {
+            needleSensor = new NeedleSensor(this);
+        }
+        if (needleSensor != null) needleSensor.advance(amount);
     }
 
     @Override
@@ -306,6 +320,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
     @Override
     protected void cleanupImpl() {
+        if (needleSensor != null) needleSensor.clear();
         CampaignFleetAPI fleet = getFleet();
         teardownRuntime(false);
         unapplyFleetEffect(fleet);
@@ -430,6 +445,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                     Misc.getRoundedValueOneAfterDecimalIfNotWhole(Searchlight.LOCK_COOLDOWN) + " seconds");
         } else if (fitted.fanBeam) {
             tooltip.addPara("Fan beams weaken toward their edges and tips.", 3f);
+        } else if (fitted == Tackle.NEEDLE_SENSOR) {
+            tooltip.addPara("Passive sensor: occasional ripples while lamps are off.", 3f);
         }
     }
 

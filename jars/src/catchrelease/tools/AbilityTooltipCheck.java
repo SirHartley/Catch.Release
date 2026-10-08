@@ -101,6 +101,8 @@ public final class AbilityTooltipCheck {
         excludes(f.lamps(), "Beam radius");
         TackleManager.fit(Tackle.Fit.SEARCHLIGHT, Tackle.TRACKING_GIMBAL);
         includes(f.lamps(), "4 seconds; 4 seconds between locks");
+        TackleManager.fit(Tackle.Fit.SEARCHLIGHT, Tackle.NEEDLE_SENSOR);
+        includes(f.lamps(), "Fitted: Needle Sensor", "Passive sensor: occasional ripples while lamps are off.");
         TackleManager.fit(Tackle.Fit.DRONE, Tackle.BAITED_RESONATOR);
         includes(f.lamps(), "x1.80");
 

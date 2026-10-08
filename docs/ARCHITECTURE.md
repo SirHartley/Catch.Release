@@ -553,6 +553,7 @@ specimen lifetime, flare cleanup, mine forces, stun duration and minefield passa
 | `harpoon/entities/HarpoonEntityPlugin.java` | Flight, collision, shields, mines, hauling, fleet contact, rope, catch, and return. |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | Breach Lights activation, spool, slow, detection penalty, and all beam renderers. |
 | `searchlight/scripts/Searchlight.java` | Beam sweep, lock-on, distortion, and ripples. |
+| `searchlight/scripts/NeedleSensor.java` | Passive Lens Array module. The existing lamp ability's `advance` checks local buried/surfaced mote tags every 0.5 seconds while fitted and switched off. Eligible rare/epic fish and unprovoked, uncaught legendaries emit position-only hints every 6–12 seconds; Longliner, pond stock, held catches and illusion/shield bodies are excluded. No sightings, targeting permissions or fish state changes. `tools/NeedleSensorChecks` covers equipment, eligibility, cadence and teardown. |
 
 The three ability plugins own their tooltips and read current upgrades and fitted
 modules when opened. Display contracts are in [UI.md](UI.md#ability-tooltips).
@@ -613,6 +614,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - A curio is a switch, not a purchase. Its shop price is null, it never becomes “done,” and the button toggles it.
 - Celebration Charges are purchased from Crablobab and switched in the outfitter. They are not a LunaLib setting.
 - Abilities read tuning values when activated. Any code that changes their upgrade or module inputs must restart the affected running ability.
+- Needle Sensor is a stocked, schematic-gated Lens Array in the same price tier as Tracking Gimbal and Fanned Array. It uses the normal module reward, fitting and category-icon paths. Its controller and rings are transient. Vanilla registers abilities as entity scripts even when off; the existing callback supplies the passive timer, with no new campaign script or sector scan.
 - `StatIds.getAbilityId()` uses an explicit map. Do not infer the ability from a stat-name prefix.
 - ROD chase duration and rarity priority are progressive stats: every purchased tier must affect runtime behavior.
 - `drone_acceleration` is a steering response time in seconds: upgrades reduce it. `tools/DroneSteeringCheck` checks acceleration, turning and return approach across every tier at 30/60/144 Hz.
