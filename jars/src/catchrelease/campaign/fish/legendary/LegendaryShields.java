@@ -33,6 +33,7 @@ import java.util.List;
  *   splinters regrow at one a month.
  * - The Lantern Jack starts with three stored shells; the wake-up hit leaves two.
  *   Eating motes replenishes them, up to three. It has no regenerating base shell.
+ * - False Dawn starts with one charge. Green mines can refill it up to two.
  * - The Moray's shell stays broken after its first shield-breaking deflection.
  * - Everything else wears the base shell: one deflection, regrown ten seconds later,
  *   so landing a throw means following the first with a second inside the window.
@@ -53,6 +54,9 @@ public class LegendaryShields {
     public static final float BASE_SHIELD_REGEN_SECONDS = 10f;
     public static final float LAZY_SPEED_MULT = 0.4f;
 
+    public static final int DAWN_CHARGES_INITIAL = 1;
+    public static final int DAWN_CHARGES_MAX = 2;
+
     public static final float EAT_SEEK_RANGE = 3500f;
     public static final float EAT_RANGE = 80f;
     public static final float FLARE_PULL_RANGE = 3000f;
@@ -67,7 +71,7 @@ public class LegendaryShields {
     private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
-    private static final Color SHIELD_GREEN = new Color(70, 255, 120);
+    public static final Color SHIELD_GREEN = new Color(70, 255, 120);
 
     public enum HitResult {
         NONE, DEFLECTED, POPPED
@@ -83,10 +87,11 @@ public class LegendaryShields {
 
         if (CHARGE_SHIELD_SPECIES.equals(id)) fish.startEvasive();
 
-        // Jack spends a stored shell on waking; the Longliner uses its hull shield.
+        // Stored charges and the Longliner's hull absorb the wake-up hit themselves.
         if (!state.provoked) {
             state.provoked = true;
-            if (!POP_SHIELD_SPECIES.equals(id) && !CHARGE_SHIELD_SPECIES.equals(id)) {
+            if (!POP_SHIELD_SPECIES.equals(id) && !CHARGE_SHIELD_SPECIES.equals(id)
+                    && !DAWN_SPECIES.equals(id)) {
                 fish.flashShield();
                 sayDeflection(fish, "Deflected - Now awake");
                 return HitResult.DEFLECTED;
@@ -134,6 +139,14 @@ public class LegendaryShields {
                 state.shieldPopped = true;
                 fish.flashShield();
                 sayDeflection(fish, "Deflected");
+                return HitResult.DEFLECTED;
+            }
+            case DAWN_SPECIES -> {
+                int charges = getDawnCharges();
+                if (charges == 0) return HitResult.NONE;
+                state.shieldUnits = charges - 1;
+                fish.flashShield();
+                say(fish.getMote(), "Deflected");
                 return HitResult.DEFLECTED;
             }
             default -> {
@@ -208,7 +221,7 @@ public class LegendaryShields {
         LegendaryChases.Chase state = LegendaryChases.getState(id);
         state.provoked = true;
         switch (id) {
-            case CHARGE_SHIELD_SPECIES -> { } // Stored shells only refill by feeding.
+            case CHARGE_SHIELD_SPECIES, DAWN_SPECIES -> { } // Stored charges never refill on escape.
             case MOTE_SHIELD_SPECIES -> QuorumShellGame.onFailedCatch(fish);
             case MORAY_SPECIES -> LegendaryHaunt.onFailedCatch(fish);
             case MantaFormationModule.SPECIES -> {
@@ -239,14 +252,15 @@ public class LegendaryShields {
             case POP_SHIELD_SPECIES -> !state.shieldPopped || state.recoveryShield;
             case MOTE_SHIELD_SPECIES -> getShieldUnits(state, MOTE_SHIELD_COUNT) > 0;
             case CHARGE_SHIELD_SPECIES -> getJackStack(state) > 0;
+            case DAWN_SPECIES -> getDawnCharges() > 0;
             case MORAY_SPECIES -> !state.shieldPopped;
             default -> fish.isBaseShieldUp();
         };
     }
 
-    /** Stored shells drawn as extra circles - the Lantern Jack's larder, worn openly. */
     public static int getStackedRings(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return 0;
+        if (DAWN_SPECIES.equals(fish.getFishSpec().id)) return getDawnCharges();
         if (!CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return 0;
 
         return getJackStack(LegendaryChases.getState(CHARGE_SHIELD_SPECIES));
@@ -261,7 +275,7 @@ public class LegendaryShields {
             case POP_SHIELD_SPECIES -> LegendaryChases.getState(id).shieldPopped
                     ? SHIELD_PURPLE : SHIELD_RED;
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
-            case MORAY_SPECIES, CHARGE_SHIELD_SPECIES -> SHIELD_GREEN;
+            case DAWN_SPECIES, MORAY_SPECIES, CHARGE_SHIELD_SPECIES -> SHIELD_GREEN;
             default -> SHIELD_PURPLE;
         };
     }
@@ -480,6 +494,23 @@ public class LegendaryShields {
         if (state.shieldUnits < 0) state.shieldUnits = JACK_STACK_INITIAL;
 
         return state.shieldUnits;
+    }
+
+    public static int getDawnCharges() {
+        LegendaryChases.Chase state = LegendaryChases.getState(DAWN_SPECIES);
+        if (state.shieldUnits < 0) state.shieldUnits = DAWN_CHARGES_INITIAL;
+        return state.shieldUnits;
+    }
+
+    public static boolean addDawnCharge(FishEntityPlugin fish) {
+        if (asLegendaryMote(fish) == null || fish.isDecoy()
+                || !DAWN_SPECIES.equals(fish.getFishSpec().id)) return false;
+        LegendaryChases.Chase state = LegendaryChases.getState(DAWN_SPECIES);
+        int charges = getDawnCharges();
+        if (state.caught || charges >= DAWN_CHARGES_MAX) return false;
+        state.shieldUnits = charges + 1;
+        fish.flashShield();
+        return true;
     }
 
     /** A shell-game body wears the real one's colour everywhere until the deck tells -

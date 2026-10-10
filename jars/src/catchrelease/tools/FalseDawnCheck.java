@@ -1,6 +1,8 @@
 package catchrelease.tools;
 
 import catchrelease.campaign.fish.data.Aberration;
+import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.HauntMineEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
@@ -8,6 +10,8 @@ import catchrelease.campaign.fish.legendary.FalseDawnCorona;
 import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
 import catchrelease.campaign.fish.legendary.MinefieldModule;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
+import catchrelease.campaign.fish.legendary.LegendaryShields;
+import catchrelease.campaign.fish.legendary.DawnShieldTransfer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.*;
@@ -16,6 +20,7 @@ import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.terrain.FlareManager;
 import com.fs.starfarer.api.impl.campaign.terrain.StarCoronaTerrainPlugin;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
@@ -66,8 +71,8 @@ public final class FalseDawnCheck {
             return triggered;
         }
 
-        float stun() {
-            return stunLeft;
+        DawnShieldTransfer transfer() {
+            return transfer;
         }
     }
 
@@ -78,12 +83,77 @@ public final class FalseDawnCheck {
         }
 
         void wave() {
-            for (int i = 0; i < WAVE_MAX && spawned.size() < MAX_ALIVE; i++) spawnMine();
+            for (int i = 0; i < WAVE_MAX && liveMines() < MAX_ALIVE; i++) spawnMine();
         }
 
         boolean clearAt(Vector2f at) {
             return isClear(at);
         }
+
+        void own(SectorEntityToken token) {
+            track(token);
+        }
+
+        int count() {
+            return liveMines();
+        }
+    }
+
+    public interface TextToken extends CustomCampaignEntityAPI {
+
+        List<?> getFloatingText();
+    }
+
+    private static class Token {
+
+        final Vector2f at;
+        final Set<String> tags = new HashSet<>();
+        final List<String> notices = new ArrayList<>();
+        final CustomCampaignEntityAPI api;
+        Object plugin;
+        boolean expired;
+        boolean removed;
+
+        Token(SystemData system, Vector2f at) {
+            this.at = new Vector2f(at);
+            api = proxy(TextToken.class, (p, m, a) -> switch (m.getName()) {
+                case "getLocation" -> this.at;
+                case "getContainingLocation" -> system.api;
+                case "setLocation" -> { this.at.set((float) a[0], (float) a[1]); yield null; }
+                case "getCustomPlugin" -> plugin;
+                case "isExpired" -> expired;
+                case "setExpired" -> { expired = (boolean) a[0]; yield null; }
+                case "isAlive" -> !expired && !removed;
+                case "hasTag" -> tags.contains(a[0]);
+                case "addTag" -> { tags.add((String) a[0]); yield null; }
+                case "removeTag" -> { tags.remove(a[0]); yield null; }
+                case "isVisibleToPlayerFleet" -> true;
+                case "addFloatingText" -> { notices.add((String) a[0]); yield null; }
+                case "getFloatingText" -> null;
+                default -> DEFAULT;
+            });
+        }
+    }
+
+    private static class Fish extends FishEntityPlugin {
+
+        final FishSpec spec = new FishSpec();
+        final Token token;
+        boolean phantom;
+
+        Fish(SystemData system) {
+            spec.id = LegendaryShields.DAWN_SPECIES;
+            spec.rarity = FishRarity.LEGENDARY;
+            token = new Token(system, new Vector2f(6000f, 0f));
+            token.plugin = this;
+            token.tags.add(MOTE_TAG);
+            entity = token.api;
+            system.mines.add(entity);
+        }
+
+        @Override public FishSpec getFishSpec() { return spec; }
+        @Override public String getFishId() { return spec.id; }
+        @Override public boolean isPhantom() { return phantom; }
     }
 
     private static class SystemData {
@@ -101,7 +171,8 @@ public final class FalseDawnCheck {
                 case "getLocation" -> new Vector2f();
                 case "getTerrainCopy" -> terrain;
                 case "getPlanets" -> stars;
-                case "getEntitiesWithTag" -> mines;
+                case "getEntitiesWithTag" -> mines.stream().filter(e -> e.hasTag((String) a[0])).toList();
+                case "removeEntity" -> { mines.remove(a[0]); yield null; }
                 case "addCustomEntity" -> {
                     SectorEntityToken token = token(this, new Vector2f());
                     mines.add(token);
@@ -144,6 +215,7 @@ public final class FalseDawnCheck {
         final List<FalseDawnCorona> effects = new ArrayList<>();
         boolean paused;
         boolean stopped;
+        LocationAPI current = local.api;
         final CampaignFleetAPI player;
 
         Environment() {
@@ -157,7 +229,7 @@ public final class FalseDawnCheck {
                 case "getVelocityFromMovementModule" -> velocity;
                 case "setVelocity" -> { velocity.set((float) a[0], (float) a[1]); yield null; }
                 case "goSlowOneFrame" -> { stopped = a != null && a.length == 1 && (boolean) a[0]; yield null; }
-                case "getContainingLocation" -> local.api;
+                case "getContainingLocation" -> current;
                 case "getCargo" -> cargo;
                 default -> DEFAULT;
             });
@@ -174,7 +246,7 @@ public final class FalseDawnCheck {
                 case "getEconomy" -> economy;
                 case "getMemoryWithoutUpdate" -> memory;
                 case "getPlayerFleet" -> player;
-                case "getCurrentLocation" -> local.api;
+                case "getCurrentLocation" -> current;
                 case "getListenerManager" -> listeners;
                 case "isPaused" -> paused;
                 default -> DEFAULT;
@@ -190,6 +262,7 @@ public final class FalseDawnCheck {
             residency(environment);
             flares(environment);
             mines(environment);
+            shieldMines(environment);
             System.out.println("False Dawn: " + checks + " orbit, host, flare, mine and lifecycle checks passed");
         } finally {
             Global.setSector(null);
@@ -258,6 +331,8 @@ public final class FalseDawnCheck {
                 case "getLocation" -> location;
                 case "getContainingLocation" -> system.api;
                 case "getCustomPlugin" -> plugin;
+                case "hasTag" -> (plugin instanceof FishEntityPlugin ? FishEntityPlugin.MOTE_TAG
+                        : BuriedMoteEntityPlugin.BURIED_TAG).equals(a[0]);
                 case "setLocation" -> { location.set((float) a[0], (float) a[1]); yield null; }
                 case "isExpired" -> expired[0];
                 case "setExpired" -> { expired[0] = (boolean) a[0]; yield null; }
@@ -332,23 +407,6 @@ public final class FalseDawnCheck {
         require(!blast.fired(), "Full arming delay despite randomized blink");
         blast.advance(0.02f);
         require(blast.fired() && environment.velocity.x < -650f, "Armed push reaches actual movement velocity");
-        Mine stun = new Mine();
-        stun.init(token(environment.local, new Vector2f(100f, 0f)), new HauntMineEntityPlugin.Params(HauntMineEntityPlugin.Kind.INTERCEPT));
-        stun.detonate();
-        require(environment.velocity.length() == 0f && environment.stopped, "Immediate stun");
-        environment.paused = true;
-        stun.advance(100f);
-        require(stun.stun() == HauntMineEntityPlugin.INTERCEPT_STUN_SECONDS, "Paused stun timer");
-        environment.paused = false;
-        for (int i = 0; i < 21; i++) {
-            environment.velocity.set(300f, 20f);
-            environment.stopped = false;
-            stun.advance(0.1f);
-            if (i < 19) require(environment.stopped && environment.velocity.length() == 0f, "Stun holds against steering");
-        }
-        environment.stopped = false;
-        stun.advance(0.1f);
-        require(stun.stun() == 0f && !environment.stopped, "Stun releases without a persistent modifier");
         for (Vector2f at : List.of(new Vector2f(100f, 0f), new Vector2f(0f, -200f),
                 new Vector2f(240f, 320f))) {
             Mine push = new Mine();
@@ -391,6 +449,7 @@ public final class FalseDawnCheck {
         require(!field.clearAt(new Vector2f(450f, 0f)), "Player spawn clearance");
         for (int wave = 0; wave < 8; wave++) field.wave();
         require(!environment.local.mines.isEmpty(), "Field still produces mines");
+        require(field.count() <= MinefieldModule.MAX_ALIVE, "Live mine cap");
         for (int i = 0; i < environment.local.mines.size(); i++) {
             for (int j = i + 1; j < environment.local.mines.size(); j++) {
                 float gap = Vector2f.sub(environment.local.mines.get(i).getLocation(),
@@ -398,15 +457,150 @@ public final class FalseDawnCheck {
                 require(gap >= 350f - 0.01f, "Passage remains between waves");
             }
         }
+        field.cleanup();
+    }
+
+    private static void shieldMines(Environment env) {
+        env.position.set(0f, 0f);
+        Fish fish = new Fish(env.local);
+        LegendaryChases.Chase state = LegendaryChases.getState("false_dawn");
+        state.caught = false;
+        state.provoked = false;
+        state.shieldUnits = -1;
+        require(LegendaryShields.getDawnCharges() == 1 && LegendaryShields.isShielded(fish),
+                "False Dawn starts with one stored charge");
+        require(LegendaryShields.getShieldColor(fish).equals(HauntMineEntityPlugin.Kind.SHIELD.color),
+                "Shield and mines share green");
+        require(LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.DEFLECTED
+                        && state.provoked && state.shieldUnits == 0,
+                "Wake-up hit spends the only starting charge");
+        fish.restoreBaseShield();
+        require(!LegendaryShields.isShielded(fish)
+                        && LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.NONE,
+                "Base shield cannot grant another deflection");
+        fish.setHeld(true);
+        require(LegendaryShields.onFailedCatch(fish.getMote()) && !fish.isHeld() && state.shieldUnits == 0,
+                "Failed catch releases fish without recharging");
+        Fish respawned = new Fish(env.local);
+        require(!LegendaryShields.isShielded(respawned), "A fresh mote keeps spent charges");
+        env.local.mines.remove(respawned.getMote());
+        fish.token.notices.clear();
+
+        for (int fps : new int[]{30, 60, 144}) {
+            state.shieldUnits = 0;
+            fish.token.at.set(6000f, 0f);
+            Token origin = new Token(env.local, new Vector2f(100f, 0f));
+            Mine mine = shieldMine(origin);
+            env.velocity.set(300f, 25f);
+            env.stopped = false;
+            mine.advance(HauntMineEntityPlugin.ARM_SECONDS);
+            require(mine.fired() && mine.transfer() != null && state.shieldUnits == 0,
+                    "Collision launches a courier, not an instant charge");
+            require(env.velocity.x == 300f && env.velocity.y == 25f && !env.stopped,
+                    "Green mines do not interdict or slow the fleet");
+            require(!origin.tags.contains(HauntMineEntityPlugin.MINE_TAG), "Spent mine is no longer harpoonable");
+            env.paused = true;
+            mine.advance(100f);
+            require(state.shieldUnits == 0 && !origin.expired, "Pause freezes the courier");
+            env.paused = false;
+            for (int frame = 0; frame < fps * 2; frame++) {
+                fish.token.at.y += 300f / fps;
+                mine.advance(1f / fps);
+                if (state.shieldUnits > 0) break;
+            }
+            require(state.shieldUnits == 1 && LegendaryShields.getStackedRings(fish) == 1,
+                    "Courier catches a moving, unlit fish at " + fps + " Hz");
+            require(origin.notices.equals(List.of("The False Dawn brightens")) && fish.token.notices.isEmpty(),
+                    "Gain notice stays at the mine, never at the fish");
+            require(origin.at.equals(new Vector2f(100f, 0f)) && !origin.expired,
+                    "Notice anchor survives the arrival");
+            require(mine.getRenderRange() > 5500f, "Courier stays in render range away from its origin");
+            mine.detonate();
+            mine.advance(3f);
+            require(state.shieldUnits == 1 && origin.expired && mine.bursts == 1,
+                    "Courier awards once and releases its spent mine");
+        }
+
+        state.shieldUnits = 1;
+        Mine first = shieldMine(new Token(env.local, new Vector2f(100f, 0f)));
+        Token excessOrigin = new Token(env.local, new Vector2f(100f, 0f));
+        Mine second = shieldMine(excessOrigin);
+        first.advance(2f);
+        second.advance(2f);
+        first.advance(2f);
+        second.advance(2f);
+        require(state.shieldUnits == 2 && LegendaryShields.getStackedRings(fish) == 2,
+                "Overlapping arrivals cannot exceed two charges");
+        require(excessOrigin.notices.isEmpty(), "No gain notice at cap");
+        require(LegendaryShields.onHarpoonContact(fish.getMote(), true) == LegendaryShields.HitResult.DEFLECTED
+                        && state.shieldUnits == 1, "Explosive hit also spends just one charge");
+        LegendaryShields.onHarpoonContact(fish.getMote(), false);
+        require(!LegendaryShields.isShielded(fish) && LegendaryShields.getStackedRings(fish) == 0,
+                "Empty charge ledger removes collision shield and rings");
+
+        for (boolean expiry : new boolean[]{false, true}) {
+            Token origin = new Token(env.local, new Vector2f(expiry ? 1500f : 100f, 0f));
+            Mine mine = shieldMine(origin);
+            if (expiry) mine.advance(10f); else mine.detonate();
+            mine.advance(3f);
+            require(state.shieldUnits == 0 && mine.transfer() == null && origin.notices.isEmpty()
+                            && mine.bursts == 1, "Harpoons and natural expiry never recharge");
+        }
+        Token relocationOrigin = new Token(env.local, new Vector2f(100f, 0f));
+        Mine relocating = shieldMine(relocationOrigin);
+        relocating.advance(2f);
+        relocating.advance(0.1f);
+        fish.token.tags.add(Tags.FADING_OUT_AND_EXPIRING);
+        Fish relocated = new Fish(env.local);
+        relocated.token.at.set(3000f, 1000f);
+        relocating.advance(1f);
+        require(state.shieldUnits == 1 && relocationOrigin.notices.size() == 1,
+                "Courier follows explosive relocation instead of the fading old mote");
+        require(relocating.getRenderRange() < 4500f, "Arrival is at the replacement's position");
+        env.local.mines.remove(relocated.getMote());
+        fish.token.tags.remove(Tags.FADING_OUT_AND_EXPIRING);
+        for (String invalid : List.of("caught", "expired", "removed", "phantom", "other species", "departure", "cleanup")) {
+            state.shieldUnits = 0;
+            Token origin = new Token(env.local, new Vector2f(100f, 0f));
+            Mine mine = shieldMine(origin);
+            mine.advance(2f);
+            mine.advance(0.1f);
+            Field field = new Field(env.local.api);
+            field.own(origin.api);
+            require(field.count() == 0, "Couriers and notice anchors do not fill the live mine cap");
+            switch (invalid) {
+                case "caught" -> state.caught = true;
+                case "expired" -> fish.token.expired = true;
+                case "removed" -> fish.token.removed = true;
+                case "phantom" -> fish.phantom = true;
+                case "other species" -> fish.spec.id = "lantern_jack";
+                case "departure" -> env.current = new SystemData("elsewhere").api;
+                case "cleanup" -> field.cleanup();
+            }
+            mine.advance(3f);
+            require(state.shieldUnits == 0 && origin.notices.isEmpty(), "No late charge after " + invalid);
+            state.caught = false;
+            fish.token.expired = false;
+            fish.token.removed = false;
+            fish.phantom = false;
+            fish.spec.id = "false_dawn";
+            env.current = env.local.api;
+            field.cleanup();
+        }
+        env.local.mines.clear();
+    }
+
+    private static Mine shieldMine(Token origin) {
+        Mine mine = new Mine();
+        origin.plugin = mine;
+        mine.init(origin.api, new HauntMineEntityPlugin.Params(HauntMineEntityPlugin.Kind.SHIELD));
+        return mine;
     }
 
     private static SectorEntityToken token(SystemData system, Vector2f location) {
-        return proxy(CustomCampaignEntityAPI.class, (p, m, a) -> switch (m.getName()) {
-            case "getLocation" -> location;
-            case "getContainingLocation" -> system.api;
-            case "setLocation" -> { location.set((float) a[0], (float) a[1]); yield null; }
-            default -> DEFAULT;
-        });
+        Token token = new Token(system, location);
+        token.tags.add(HauntMineEntityPlugin.MINE_TAG);
+        return token.api;
     }
 
     private static <T> T proxy(Class<T> type, InvocationHandler handler) {

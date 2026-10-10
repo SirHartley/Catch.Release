@@ -596,8 +596,8 @@ public final class LegendaryEscapeChecks {
                 state.shieldUnits = 0;
                 check(LegendaryShields.onFailedCatch(fish.getMote()), "preserve real legendary");
                 check(!fish.isHeld() && !fish.expired, "released alive");
-                check(LegendaryShields.isShielded(fish) == !id.equals("lantern_jack"),
-                        "failure restores other shields, but not Jack's hunt shells");
+                check(LegendaryShields.isShielded(fish) == id.equals("longliner"),
+                        "failure restores the Imposter's recovery shield, not stored charges");
                 check(state.shieldUnits == 0, "no free escort or stored shells");
                 if (id.equals("longliner")) {
                     check(state.shieldPopped && state.recoveryShield, "hull remains broken");

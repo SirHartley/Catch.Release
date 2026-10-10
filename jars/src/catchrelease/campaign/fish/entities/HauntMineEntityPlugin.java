@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.entities;
 
+import catchrelease.campaign.fish.legendary.DawnShieldTransfer;
+import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.rendering.distortion.CampaignDistortionRenderer;
 import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
@@ -18,17 +20,12 @@ import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
 
-/**
- * The False Dawn's mines: blinking lights with three tempers. Red bursts and shoves the
- * fleet away, blue delivers an interdiction pulse, yellow implodes - no damage, just an
- * inward ripple and a pull toward where it was. None of them harm the hull.
- */
 public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
     public enum Kind {
 
         BLAST(new Color(255, 90, 60), 10f),
-        INTERCEPT(new Color(90, 150, 255), 8f),
+        SHIELD(LegendaryShields.SHIELD_GREEN, 8f),
         IMPLOSION(new Color(255, 210, 90), 6.5f);
 
         public final Color color;
@@ -37,15 +34,6 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         Kind(Color color, float blinkRate) {
             this.color = color;
             this.blinkRate = blinkRate;
-        }
-    }
-
-    public static class Params {
-
-        public final Kind kind;
-
-        public Params(Kind kind) {
-            this.kind = kind;
         }
     }
 
@@ -61,17 +49,26 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
     public static final float BLAST_PUSH_SPEED = 700f;
     public static final float BLAST_RADIUS = 320f;
-    public static final float INTERCEPT_STUN_SECONDS = 2f;
     public static final float IMPLOSION_RIPPLE_SECONDS = 3f;
+    private static final float NOTICE_SECONDS = 2f;
 
     protected Kind kind = Kind.BLAST;
     protected float time;
     protected float blinkOffset;
     protected boolean triggered;
-    protected float stunLeft;
-    protected boolean fading;
+    protected DawnShieldTransfer transfer;
+    protected float noticeLeft;
 
     protected transient SpriteAPI sprite;
+
+    public static class Params {
+
+        public final Kind kind;
+
+        public Params(Kind kind) {
+            this.kind = kind;
+        }
+    }
 
     @Override
     public void init(SectorEntityToken entity, Object pluginParams) {
@@ -82,17 +79,17 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         entity.addTag(MINE_TAG);
     }
 
-    // the pulse ring reaches the trigger radius; without this the base render range
-    // clips it whenever the mine itself sits just off-screen
     @Override
     public float getRenderRange() {
-        return TRIGGER_RANGE + 500f;
+        return Math.max(TRIGGER_RANGE + 500f, transfer == null ? 0f : transfer.getRenderRange());
     }
 
-    /** A harpoon strike sets it off from range: the full show, but the shove, the
-     *  interdict and the pull only land on a fleet close enough to deserve them. */
     public void detonate() {
-        if (triggered) return;
+        trigger(false);
+    }
+
+    protected void trigger(boolean collision) {
+        if (triggered || entity.isExpired()) return;
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null
@@ -103,12 +100,12 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         triggered = true;
         entity.removeTag(MINE_TAG);
         fire(player, Misc.getDistance(player.getLocation(), entity.getLocation())
-                <= EFFECT_RANGE);
+                <= EFFECT_RANGE, collision);
     }
 
     @Override
     public void advance(float amount) {
-        if (amount <= 0f || Global.getSector().isPaused()) return;
+        if (amount <= 0f || Global.getSector().isPaused() || entity.isExpired()) return;
         time += amount;
 
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
@@ -116,16 +113,14 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        if (stunLeft > 0f) {
-            stunLeft = Math.max(0f, stunLeft - amount);
-            stopFleet(player);
-        }
-
         if (triggered) {
-            if (!fading && stunLeft <= 0f) {
-                fading = true;
-                Misc.fadeAndExpire(entity, 0.5f);
+            noticeLeft = Math.max(0f, noticeLeft - amount);
+            if (transfer != null && transfer.advance(amount)) {
+                LegendaryShields.say(entity, "The False Dawn brightens");
+                // Vanilla keeps this notice for one second, then fades it for half a second.
+                noticeLeft = NOTICE_SECONDS;
             }
+            if ((transfer == null || transfer.isDone()) && noticeLeft <= 0f) entity.setExpired(true);
             return;
         }
 
@@ -138,37 +133,25 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        triggered = true;
-        entity.removeTag(MINE_TAG);
-        fire(player, true);
+        trigger(true);
     }
 
-    protected void fire(CampaignFleetAPI player, boolean close) {
+    protected void fire(CampaignFleetAPI player, boolean close, boolean collision) {
         switch (kind) {
             case BLAST -> {
                 explode(kind.color, BLAST_RADIUS);
 
                 if (close) applyImpulse(player, BLAST_PUSH_SPEED);
             }
-            case INTERCEPT -> {
+            case SHIELD -> {
                 explode(kind.color, BLAST_RADIUS * 0.55f);
-                if (close) {
-                    catchrelease.campaign.fish.legendary.InterdictionPulse.fire(player);
-                    stunLeft = INTERCEPT_STUN_SECONDS;
-                    stopFleet(player);
-                }
+                if (collision) transfer = new DawnShieldTransfer(entity);
             }
             case IMPLOSION -> {
                 if (close) applyImpulse(player, -BLAST_PUSH_SPEED);
                 implode();
             }
         }
-    }
-
-    protected void stopFleet(CampaignFleetAPI player) {
-        player.setVelocity(0f, 0f);
-        player.setMoveDestination(player.getLocation().x, player.getLocation().y);
-        player.goSlowOneFrame(true);
     }
 
     protected void applyImpulse(CampaignFleetAPI player, float speed) {
@@ -206,15 +189,19 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
+        if (entity.isExpired()) return;
+        if (triggered) {
+            if (transfer != null) transfer.render(viewport);
+            return;
+        }
         float alpha = viewport.getAlphaMult() * entity.getSensorFaderBrightness();
-        if (alpha <= 0f || triggered) return;
+        if (alpha <= 0f) return;
 
         if (sprite == null) {
             sprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
             if (sprite == null) return;
         }
 
-        // hard strobing, harder still once the fleet is close enough to matter
         float rate = kind.blinkRate;
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player != null && Misc.getDistance(player.getLocation(),
@@ -235,8 +222,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             size *= 0.45f;
         }
 
-        // the position pulse: a ring breathing out to the trigger radius on a cycle,
-        // so an armed mine's location and reach read from across the field
+        // The pulse shows the trigger radius.
         float cycle = time % PULSE_PERIOD;
         if (time >= ARM_SECONDS && cycle < PULSE_SECONDS) {
             float p = cycle / PULSE_SECONDS;
