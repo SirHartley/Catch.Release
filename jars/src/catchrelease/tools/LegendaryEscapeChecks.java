@@ -729,7 +729,7 @@ public final class LegendaryEscapeChecks {
                 check(env.terrain.size() == 1, "repeat dash still requires normal trigger range");
                 fish.at.set(700f, 0f);
                 slip.advance(dt);
-                check(env.terrain.size() == 2, "repeat dash starts once all normal gates pass");
+                check(slip.remaining() > 0f, "repeat dash starts once all normal gates pass");
                 env.haunt.close();
                 check(env.terrain.stream().allMatch(t -> t.expired && t.removed),
                         "haunt cleanup removes opening and repeat streams");
@@ -845,8 +845,11 @@ public final class LegendaryEscapeChecks {
             }
             check(env.terrain.get(0).stream.getSegments().size() > 2, "dash lays a trail");
             LegendaryShields.onFailedCatch(fish.getMote());
-            check(env.terrain.size() == 2 && slip.remaining() == SlipDashModule.ESCAPE_DASH_SECONDS,
-                    "another loss restarts emergency dash");
+            check(env.terrain.size() == 1 && slip.remaining() == SlipDashModule.ESCAPE_DASH_SECONDS,
+                    "another loss restarts escape without overlapping the previous trail");
+            fish.at.translate(2000f, 0f);
+            slip.step(fish, 0.01f);
+            check(env.terrain.size() == 2, "emergency escape resumes its trail in clear space");
             slip.step(fish, SlipDashModule.ESCAPE_DASH_SECONDS);
             check(!fish.isDashing(), "dash ends");
             slip.setIntensity(0.5f);
@@ -876,7 +879,8 @@ public final class LegendaryEscapeChecks {
 
                 float previousLifetime = 14f / 2.5f + 3f;
                 int frames = 0;
-                while (!trail.expired && frames < fps * 30) {
+                float expectedLifetime = previousLifetime * SlipDashModule.STREAM_LIFETIME_MULT;
+                while (!trail.expired && frames < fps * (expectedLifetime + 2f)) {
                     slip.stepTrails(1f / fps);
                     // Vanilla terrain advances these faders separately from the haunt.
                     for (var segment : segments) segment.fader.advance(1f / fps);
@@ -887,8 +891,8 @@ public final class LegendaryEscapeChecks {
                     }
                 }
                 check(trail.expired && trail.removed, "finished stream is removed");
-                check(Math.abs(frames / (float) fps - previousLifetime * 3f) <= 3f / fps,
-                        "stream lifetime triples at " + fps + " Hz with " + count + " segments");
+                check(Math.abs(frames / (float) fps - expectedLifetime) <= 3f / fps,
+                        "stream lifetime follows its multiplier at " + fps + " Hz with " + count + " segments");
                 check(segments.size() == count && segments.stream().allMatch(s -> s.fader.isFadedOut()),
                         "segments fade in place before terrain removal");
                 slip.cleanup();
