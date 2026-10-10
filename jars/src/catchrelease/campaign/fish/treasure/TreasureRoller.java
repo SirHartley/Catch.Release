@@ -43,9 +43,14 @@ public class TreasureRoller {
     }
 
     public static TreasureRarity rollRarity(float rarityBias) {
+        return rollRarity(rarityBias, TreasureRarity.COMMON);
+    }
+
+    public static TreasureRarity rollRarity(float rarityBias, TreasureRarity minimum) {
         WeightedRandomPicker<TreasureRarity> picker = new WeightedRandomPicker<>();
 
         for (TreasureRarity rarity : TreasureRarity.values()) {
+            if (rarity.rank < minimum.rank) continue;
             picker.add(rarity, rarity.weight * (float) Math.pow(rarityBias, rarity.rank));
         }
 
