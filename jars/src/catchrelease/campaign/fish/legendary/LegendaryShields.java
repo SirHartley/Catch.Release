@@ -31,8 +31,8 @@ import java.util.List;
  * - The Quorum's shield is held up by three fast-orbiting splinter motes. Each is a
  *   harpoonable rare-band catch of its own; the shield stands while any orbit, and lost
  *   splinters regrow at one a month.
- * - The Lantern Jack wears the base shell too, and layers stored shells on top of it -
- *   up to three - by hunting down and swallowing motes the breach lamps have exposed.
+ * - The Lantern Jack starts with the base shell and two stored shells. Eating motes
+ *   replenishes the stored shells, up to three.
  * - Everything else wears the base shell: one deflection, regrown ten seconds later,
  *   so landing a throw means following the first with a second inside the window.
  */
@@ -46,6 +46,7 @@ public class LegendaryShields {
     public static final String DAWN_SPECIES = "false_dawn";
 
     public static final int MOTE_SHIELD_COUNT = 3;
+    public static final int JACK_STACK_INITIAL = 2;
     public static final int JACK_STACK_MAX = 3;
     public static final float MOTE_REGEN_DAYS = 30f;
     public static final float BASE_SHIELD_REGEN_SECONDS = 10f;
@@ -55,7 +56,9 @@ public class LegendaryShields {
     public static final float EAT_RANGE = 80f;
     public static final float FLARE_PULL_RANGE = 3000f;
     public static final float LURE_SECONDS = 20f;
-    public static final int LURE_SPAWN_COUNT = 3;
+    public static final int LURE_COUNT_MIN = 1;
+    public static final int LURE_COUNT_MAX = 3;
+    public static final float LURE_RELEASE_RANGE = 50f;
     public static final float LURE_SPAWN_MIN = 800f;
     public static final float LURE_SPAWN_MAX = 1400f;
     public static final float SHIELD_RADIUS = 52f;
@@ -399,16 +402,22 @@ public class LegendaryShields {
             // A fading mote is still edible on the next frame. Consume it once.
             prey.setExpired(true);
             state.shieldUnits = Math.min(JACK_STACK_MAX, getJackStack(state) + 1);
+            if (state.shieldUnits == JACK_STACK_MAX) fish.setHunting(false);
             fish.flashShield();
             say(self, "Mote consumed. Another shell layers on.");
         }
     }
 
     public static void lureFlare(FishEntityPlugin jack) {
+        if (getStackedRings(jack) >= JACK_STACK_MAX) return;
         SectorEntityToken self = jack.getMote();
         if (self == null || self.getContainingLocation() == null) return;
 
-        for (SectorEntityToken other : preyMotes(self)) {
+        int remaining = MathUtils.getRandomNumberInRange(LURE_COUNT_MIN, LURE_COUNT_MAX);
+        List<SectorEntityToken> nearby = preyMotes(self);
+        java.util.Collections.shuffle(nearby, MathUtils.getRandom());
+        for (SectorEntityToken other : nearby) {
+            if (remaining == 0) break;
             if (!isEdible(other)) continue;
             if (Misc.getDistance(self.getLocation(), other.getLocation())
                     > FLARE_PULL_RANGE) {
@@ -418,18 +427,22 @@ public class LegendaryShields {
             if (other.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) other = buried.unearth();
             if (other != null && other.getCustomPlugin() instanceof FishEntityPlugin meal) {
                 meal.startLure(self, LURE_SECONDS);
+                remaining--;
             }
         }
 
-        for (int i = 0; i < LURE_SPAWN_COUNT; i++) {
+        for (int i = 0; i < remaining; i++) {
             String id = PondFishSpawner.pickFishId(self.getContainingLocation(), CatchImplement.BREACH_LAMP);
             if (id == null) break;
             Vector2f at = MathUtils.getPointOnCircumference(self.getLocation(),
                     MathUtils.getRandomNumberInRange(LURE_SPAWN_MIN, LURE_SPAWN_MAX),
                     MathUtils.getRandomNumberInRange(0f, 360f));
+            // Survivors need a normal route beyond Jack when the lure releases them.
+            Vector2f swimTo = new Vector2f(2f * self.getLocation().x - at.x,
+                    2f * self.getLocation().y - at.y);
             SectorEntityToken mote = self.getContainingLocation().addCustomEntity(
                     Misc.genUID(), "Mote", "catchrelease_Mote", null,
-                    new FishEntityPlugin.Params(new Vector2f(self.getLocation()), id));
+                    new FishEntityPlugin.Params(swimTo, id));
             mote.setLocation(at.x, at.y);
             ((FishEntityPlugin) mote.getCustomPlugin()).startLure(self, LURE_SECONDS);
         }
@@ -465,9 +478,8 @@ public class LegendaryShields {
         return spec != null && spec.rarity != FishRarity.LEGENDARY;
     }
 
-    // the stack starts empty: stored shells are earned by eating, never granted
     protected static int getJackStack(LegendaryChases.Chase state) {
-        if (state.shieldUnits < 0) state.shieldUnits = 0;
+        if (state.shieldUnits < 0) state.shieldUnits = JACK_STACK_INITIAL;
 
         return state.shieldUnits;
     }

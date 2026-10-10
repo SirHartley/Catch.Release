@@ -424,7 +424,8 @@ public final class HarpoonAimCheck {
         shot = new Shot(head, atAngle(0f));
         shot.step(0.1f);
         require(minePlugin.detonations == 0 && shot.sounds == 1, "Shield stops shot before mine");
-        require(legendary.calls == 1, "Awake shield contact requests Lantern Jack's lure");
+        require(legendary.calls == 0 && LegendaryShields.getStackedRings(legendary) == 1,
+                "Awake contact spends the first starting shell without calling for more");
         f.motes.remove(FishEntityPlugin.MOTE_TAG);
         head = f.token(null, 0f, 0f);
         shot = new Shot(head, atAngle(0f));
