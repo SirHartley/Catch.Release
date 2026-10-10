@@ -1076,6 +1076,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         Vector2f loc = entity.getLocation();
         Color shieldColor = LegendaryShields.getShieldColor(this);
+        boolean explosiveShield = LegendaryShields.hasExplosiveShield(this);
+        Color outerColor = explosiveShield ? LegendaryShields.getExplosiveShieldColor(time) : shieldColor;
 
         // the tether that says the shield is the escort's doing, not the fish's own
         if (alpha > 0f && orbitAnchor != null && !orbitAnchor.isExpired()) {
@@ -1111,10 +1113,18 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             }
         }
 
+        if (alpha > 0f && explosiveShield) {
+            float radius = LegendaryShields.EXPLOSIVE_SHIELD_RADIUS;
+            Disc.draw(loc.x, loc.y, radius, outerColor, 0f, 0.15f * alpha, true);
+            Disc.drawOutline(loc.x, loc.y, radius, outerColor, 0.85f * alpha, 3f);
+            Disc.drawOutline(loc.x, loc.y, radius - 4f, outerColor, 0.4f * alpha, 1.5f);
+        }
+
         if (alpha > 0f && shieldFlash > 0f) {
             float f = shieldFlash / SHIELD_FLASH_SECONDS;
-            float ring = LegendaryShields.SHIELD_RADIUS * (1f + 1.2f * (1f - f));
-            Disc.drawOutline(loc.x, loc.y, ring, shieldColor, f * alpha, 3f);
+            float radius = explosiveShield ? LegendaryShields.EXPLOSIVE_SHIELD_RADIUS : LegendaryShields.SHIELD_RADIUS;
+            float ring = radius * (1f + 1.2f * (1f - f));
+            Disc.drawOutline(loc.x, loc.y, ring, outerColor, f * alpha, 3f);
         }
 
         // the flare call: a shockwave ring run out to the full pull radius, so the

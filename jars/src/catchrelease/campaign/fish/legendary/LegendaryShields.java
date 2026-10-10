@@ -24,8 +24,8 @@ import java.util.List;
  * The legendary defences, one kind per species, answered at the shield boundary:
  *
  * - The Longliner wears a hull shield that only an Explosive Head can pop. Until then it
- *   deflects every throw and raises no haunt. A failed haunt restores it. Failed catches grant a separate,
- *   one-hit recovery shield that does not need explosives. Out of the water it is a boat
+ *   deflects every throw and raises no haunt. A failed haunt restores it. Beneath it is the
+ *   normal timed base shield. Out of the water it is a boat
  *   ({@link LonglinerDecoy}); in it, it runs.
  * - The Quorum's shield is held up by three fast-orbiting splinter motes. Each is a
  *   harpoonable rare-band catch of its own; the shield stands while any orbit, and lost
@@ -66,10 +66,12 @@ public class LegendaryShields {
     public static final float LURE_SPAWN_MIN = 800f;
     public static final float LURE_SPAWN_MAX = 1400f;
     public static final float SHIELD_RADIUS = 52f;
+    public static final float EXPLOSIVE_SHIELD_RADIUS = SHIELD_RADIUS + 12f;
+    public static final float EXPLOSIVE_SHIELD_PULSE_HZ = 3f;
 
-    private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
+    private static final Color SHIELD_GOLD = new Color(255, 200, 60);
     public static final Color SHIELD_GREEN = new Color(70, 255, 120);
 
     public enum HitResult {
@@ -99,19 +101,15 @@ public class LegendaryShields {
 
         switch (id) {
             case POP_SHIELD_SPECIES -> {
-                if (state.shieldPopped) {
-                    if (!state.recoveryShield) return HitResult.NONE;
-                    state.recoveryShield = false;
-                    fish.flashShield();
-                    return HitResult.DEFLECTED;
-                }
+                if (state.shieldPopped) return deflectBaseShield(fish);
                 fish.flashShield();
                 if (!explosive) {
-                    say(fish.getMote(), "Deflected");
+                    say(fish.getMote(), "Immune (Kinetic)");
                     return HitResult.DEFLECTED;
                 }
 
                 state.shieldPopped = true;
+                fish.restoreBaseShield();
                 say(fish.getMote(), "The shell cracks");
                 return HitResult.POPPED;
             }
@@ -149,15 +147,16 @@ public class LegendaryShields {
                 return HitResult.DEFLECTED;
             }
             default -> {
-                // the base shell every unarmoured legendary wears
-                if (fish.tryBaseShieldDeflect()) {
-                    sayDeflection(fish, "Deflected");
-                    LegendaryHaunt.onMantaShieldPopped(fish);
-                    return HitResult.DEFLECTED;
-                }
-                return HitResult.NONE;
+                return deflectBaseShield(fish);
             }
         }
+    }
+
+    private static HitResult deflectBaseShield(FishEntityPlugin fish) {
+        if (!fish.tryBaseShieldDeflect()) return HitResult.NONE;
+        sayDeflection(fish, "Deflected");
+        LegendaryHaunt.onMantaShieldPopped(fish);
+        return HitResult.DEFLECTED;
     }
 
     /** A blast never kills the one fish: it dives on the spot and resurfaces far away. */
@@ -230,10 +229,7 @@ public class LegendaryShields {
                 fish.restoreBaseShield();
                 LegendaryHaunt.onFailedCatch(fish);
             }
-            default -> {
-                fish.restoreBaseShield();
-                if (POP_SHIELD_SPECIES.equals(id)) state.recoveryShield = true;
-            }
+            default -> fish.restoreBaseShield();
         }
         return true;
     }
@@ -251,7 +247,7 @@ public class LegendaryShields {
         LegendaryChases.Chase state = LegendaryChases.getState(id);
 
         return switch (id) {
-            case POP_SHIELD_SPECIES -> !state.shieldPopped || state.recoveryShield;
+            case POP_SHIELD_SPECIES -> !state.shieldPopped || fish.isBaseShieldUp();
             case MOTE_SHIELD_SPECIES -> getShieldUnits(state, MOTE_SHIELD_COUNT) > 0;
             case CHARGE_SHIELD_SPECIES -> getJackStack(state) > 0;
             case DAWN_SPECIES -> getDawnCharges() > 0;
@@ -269,17 +265,27 @@ public class LegendaryShields {
     }
 
     public static Color getShieldColor(FishEntityPlugin fish) {
-        if (fish == null) return SHIELD_PURPLE;
+        if (fish == null) return SHIELD_RED;
 
         String id = fish.getFishSpec().id;
 
         return switch (id) {
-            case POP_SHIELD_SPECIES -> LegendaryChases.getState(id).shieldPopped
-                    ? SHIELD_PURPLE : SHIELD_RED;
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
             case DAWN_SPECIES, MORAY_SPECIES, CHARGE_SHIELD_SPECIES -> SHIELD_GREEN;
-            default -> SHIELD_PURPLE;
+            default -> SHIELD_RED;
         };
+    }
+
+    public static boolean hasExplosiveShield(FishEntityPlugin fish) {
+        return asLegendaryMote(fish) != null && POP_SHIELD_SPECIES.equals(fish.getFishSpec().id)
+                && !LegendaryChases.getState(POP_SHIELD_SPECIES).shieldPopped;
+    }
+
+    public static Color getExplosiveShieldColor(float seconds) {
+        float gold = 0.5f + 0.5f * (float) Math.cos(seconds * Math.PI * 2 * EXPLOSIVE_SHIELD_PULSE_HZ);
+        return new Color(SHIELD_RED.getRed(),
+                Math.round(SHIELD_RED.getGreen() + (SHIELD_GOLD.getGreen() - SHIELD_RED.getGreen()) * gold),
+                Math.round(SHIELD_RED.getBlue() + (SHIELD_GOLD.getBlue() - SHIELD_RED.getBlue()) * gold));
     }
 
     /** Placid and easy to hit until provoked, then the flight envelope takes over.

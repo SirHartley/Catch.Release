@@ -50,7 +50,6 @@ public class LegendaryChases {
         // shield bookkeeping, semantics per species in LegendaryShields:
         // units = orbit motes or deflection charges, -1 until first initialised
         public boolean shieldPopped;
-        public boolean recoveryShield;
         public int shieldUnits = -1;
         public long shieldStampAt;
 
@@ -59,7 +58,6 @@ public class LegendaryChases {
             provoked = false;
             roaming = false;
             shieldPopped = false;
-            recoveryShield = false;
             shieldUnits = -1;
             shieldStampAt = 0L;
         }
