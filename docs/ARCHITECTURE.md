@@ -116,7 +116,7 @@ ordinary-fish movement isolation, failure dispatch,
 four-turn shell-game bursts at 30/60/144 Hz,
 repeated-loss decoy caps, emergency dash duration,
 slipstream roll-up/fade lifetime and cleanup, immediate manta swaps, fixed hit-position
-labels, and the Imposter's ordinary-hit recovery shield.
+labels, and the Imposter's explosive-only outer layer and regenerating base shield.
 It also checks corona-safe movement segments, invalid-position recovery, overlapping
 and companion stars, long-frame dashes, buried movement, formation clearance, and
 the False Dawn/ordinary-fish exclusions.
@@ -568,10 +568,14 @@ The Moray's shield uses the existing saved `Chase.shieldPopped` flag instead of
 the timed base shield. Once broken, it stays down through failed catches, elapsed
 time and mote recreation within a hunt. Abandoning the haunt restores it. Its failed-catch slipstream dash is unchanged.
 The remaining legendaries restore their base shield without changing movement.
-The Imposter keeps `shieldPopped`; its
-saved `recoveryShield` deflects one ordinary harpoon and is then consumed. Full haunt
-abandonment restores its explosive-only hull instead. The recovery shield uses
-the normal purple shield display, not the red explosive-only hull shield.
+The Imposter's outer layer rejects ordinary harpoons with "Immune (Kinetic)".
+An explosive hit sets `shieldPopped`, enables its haunt and leaves the normal base
+shield intact. Subsequent hits use the same ten-second base-shield timer as the
+Manta. Failed catches restore that base shield without restoring the outer layer;
+full haunt abandonment restores both. The chase ledger preserves the broken
+outer layer across mote replacement and save/load; the base timer belongs to the
+saved `FishEntityPlugin`. Shield colours and layering are defined in
+[UI.md](UI.md#drawing-gotchas).
 
 The Moray keeps its mixed campaign movement and fleeing weave. `FishEntityPlugin`
 caps its movement-mode multiplier at 1.25; the 12-second escape cycle uses 0.5 for

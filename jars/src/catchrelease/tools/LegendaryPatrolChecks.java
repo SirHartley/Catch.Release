@@ -126,7 +126,7 @@ public final class LegendaryPatrolChecks {
             fish.at.set(20000f, -15000f);
             fish.startTravelDash(new Vector2f(900f, 0f), 100f);
             check(haunt.abandon(), "free real fish returns immediately");
-            check(!state.shieldPopped && !state.recoveryShield && fish.isBaseShieldUp()
+            check(!state.shieldPopped && fish.isBaseShieldUp()
                     && LegendaryShields.isShielded(fish), "return restores persistent and timed shields");
             check(state.residency == 9 && env.system.getId().equals(state.systemId),
                     "encounter reset does not change the host ledger");
@@ -175,7 +175,7 @@ public final class LegendaryPatrolChecks {
             check(longliner.at.x == 14100f, "Longliner has no patrol radius limit");
             var state = LegendaryChases.getState(longliner.spec.id);
             state.provoked = true;
-            state.revealed = state.encountered = state.shieldPopped = state.recoveryShield = true;
+            state.revealed = state.encountered = state.shieldPopped = true;
             state.systemId = env.system.getId();
             Haunt haunt = new Haunt();
             haunt.begin(longliner, env);
@@ -185,7 +185,7 @@ public final class LegendaryPatrolChecks {
             longliner.setHeld(false);
             haunt.abandon();
             check(longliner.expired && longliner.removed && !state.provoked && !state.roaming
-                    && !state.revealed && !state.shieldPopped && !state.recoveryShield && state.encountered,
+                    && !state.revealed && !state.shieldPopped && state.encountered,
                     "Longliner abandons its mote and resets hull and disguise, not recognition");
             env.tutorialStage = catchrelease.campaign.fish.tutorial.FishingIntro.DONE;
             Decoy decoy = new Decoy();

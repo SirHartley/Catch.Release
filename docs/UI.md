@@ -284,9 +284,18 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
-- The Moray's shield, Lantern Jack's stored shells and False Dawn's charges are green: none regenerates
-  with time during a hunt. `LegendaryShields.getShieldColor` supplies their bubble,
-  outline, stored rings and deflection flash through the shared mote renderer.
+- Shields use red for timed regeneration, green for charges restored by actions
+  rather than time (Moray, Lantern Jack and False Dawn), and blue for Quorum's
+  escort-dependent immunity. Moray's shield returns only on encounter reset.
+  `LegendaryShields.getShieldColor` supplies the bubble, outline, stored rings and
+  deflection flash through the shared mote renderer; there is no purple shield.
+  The Imposter also draws an explosive-only outer layer, 12 units beyond the red
+  base shield, pulsing smoothly between gold and red three times per second.
+  `hasExplosiveShield` controls its presence and `getExplosiveShieldColor` supplies
+  its colour. It uses the mote's existing unpaused clock, lamp fade and viewport
+  alpha, with the existing `Disc` renderer. No separate script or sprite is added.
+  The engine advances custom entities through the unpaused location update
+  (`CampaignEngine.advance` / `CustomCampaignEntity.advance`, 0.98a-RC8).
   Full encounter resets are covered in [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishlegendary).
 - False Dawn's shield mines and couriers share `LegendaryShields.SHIELD_GREEN`.
   `DawnShieldTransfer` draws a white-centred glow, a bounded green trail and an
