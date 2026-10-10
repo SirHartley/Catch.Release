@@ -54,6 +54,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
     public static final float TRIGGER_RANGE = 400f;
     public static final float EFFECT_RANGE = 700f;
     public static final float ARM_SECONDS = 2f;
+    public static final float LIFETIME_SECONDS = 10f;
     public static final float GLOW_SIZE = 34f;
     public static final float PULSE_PERIOD = 2.2f;
     public static final float PULSE_SECONDS = 1.1f;
@@ -100,6 +101,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         triggered = true;
+        entity.removeTag(MINE_TAG);
         fire(player, Misc.getDistance(player.getLocation(), entity.getLocation())
                 <= EFFECT_RANGE);
     }
@@ -127,12 +129,17 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
+        if (time >= LIFETIME_SECONDS) {
+            detonate();
+            return;
+        }
         if (time < ARM_SECONDS) return;
         if (Misc.getDistance(player.getLocation(), entity.getLocation()) > TRIGGER_RANGE) {
             return;
         }
 
         triggered = true;
+        entity.removeTag(MINE_TAG);
         fire(player, true);
     }
 

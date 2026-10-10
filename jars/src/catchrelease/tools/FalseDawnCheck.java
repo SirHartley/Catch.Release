@@ -50,12 +50,16 @@ public final class FalseDawnCheck {
 
     private static class Mine extends HauntMineEntityPlugin {
 
+        int bursts;
+
         @Override
         protected void explode(Color color, float radius) {
+            bursts++;
         }
 
         @Override
         protected void implode() {
+            bursts++;
         }
 
         boolean fired() {
@@ -304,6 +308,24 @@ public final class FalseDawnCheck {
     }
 
     private static void mines(Environment environment) {
+        for (HauntMineEntityPlugin.Kind kind : HauntMineEntityPlugin.Kind.values()) {
+            for (int fps : new int[]{30, 60, 144}) {
+                Mine timed = new Mine();
+                timed.init(token(environment.local, new Vector2f(1500f, 0f)),
+                        new HauntMineEntityPlugin.Params(kind));
+                environment.paused = true;
+                timed.advance(100f);
+                require(!timed.fired(), "Pause does not age " + kind);
+                environment.paused = false;
+                for (int frame = 0; frame < fps * 10 - 1; frame++) timed.advance(1f / fps);
+                require(!timed.fired(), "Mine survives until ten seconds at " + fps + " Hz");
+                timed.advance(2f / fps);
+                require(timed.fired() && timed.bursts == 1, "Mine expires with one burst: " + kind);
+                timed.detonate();
+                timed.advance(20f);
+                require(timed.bursts == 1, "Expiry cannot detonate twice");
+            }
+        }
         Mine blast = new Mine();
         blast.init(token(environment.local, new Vector2f(100f, 0f)), new HauntMineEntityPlugin.Params(HauntMineEntityPlugin.Kind.BLAST));
         blast.advance(1.99f);
