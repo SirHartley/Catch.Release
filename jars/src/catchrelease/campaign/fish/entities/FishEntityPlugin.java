@@ -57,8 +57,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     private static final float DAWN_RUN_PERIOD = 6f;
     private static final float DAWN_SPRINT_SECONDS = 2.5f;
-    private static final float DAWN_SPRINT_MULT = 3.2f;
-    private static final float DAWN_CRUISE_MULT = 2.2f;
+    private static final float DAWN_SPRINT_MULT = 2.2f;
+    private static final float DAWN_CRUISE_MULT = 1.5f;
+    private static final float DAWN_MOTION_SPEED_CAP = 1.2f;
 
     private static final float PROWL_MULT = 1.6f;
     private static final float PROWL_LEG_MIN = 1200f;
@@ -354,6 +355,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float motionMult = diving || pursuing ? 1f : advanceMode(amount);
         if (LegendaryShields.MORAY_SPECIES.equals(getFishId())) {
             motionMult = Math.min(motionMult, MORAY_MOTION_SPEED_CAP);
+        } else if (LegendaryShields.DAWN_SPECIES.equals(getFishId()) && LegendaryShields.isFleeing(this)) {
+            motionMult = Math.min(motionMult, DAWN_MOTION_SPEED_CAP);
         }
 
         // Submerged fish keep a straight course at cruise speed.
@@ -707,8 +710,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return MORAY_RUN_MULT;
     }
 
-    /** The False Dawn never stops at all: a hard runner whose minefield only matters
-     *  while the fleet is actually chasing it through the field. */
     public float getDawnRunSpeedMult() {
         return time % DAWN_RUN_PERIOD < DAWN_SPRINT_SECONDS
                 ? DAWN_SPRINT_MULT : DAWN_CRUISE_MULT;
