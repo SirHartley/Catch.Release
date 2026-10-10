@@ -464,6 +464,7 @@ public final class LegendaryEscapeChecks {
             Fish real = env.real("quorum");
             real.at.set(-1660f, 0f);
             LegendaryChases.getState("quorum").shieldUnits = 0;
+            LegendaryChases.getState("quorum").provoked = true;
             QuorumShellGame.onFailedCatch(real);
             for (int i = 0; i < 180; i++) {
                 QuorumShellGame.advance(real, 1f / 60f);
@@ -653,6 +654,7 @@ public final class LegendaryEscapeChecks {
             Fish fish = env.real("quorum");
             LegendaryChases.Chase state = LegendaryChases.getState("quorum");
             state.shieldUnits = 0;
+            state.provoked = true;
             QuorumShellGame.advance(fish, 0.8f);
             Vector2f center = new Vector2f();
             for (Fish body : env.fish) Vector2f.add(center, body.at, center);

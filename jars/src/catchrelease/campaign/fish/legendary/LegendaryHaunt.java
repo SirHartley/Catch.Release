@@ -50,6 +50,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
 
         sweepLeftovers();
         LegendarySpawns.populate(Global.getSector().getCurrentLocation());
+        haunt.restoreHunt();
     }
 
     public static void resetForTesting() {
@@ -99,7 +100,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
                 || system != Global.getSector().getCurrentLocation()) return null;
         FishSpec spec = fish.getFishSpec();
         if (haunt.activeSystem != system || !spec.id.equals(haunt.activeSpeciesId)) {
-            haunt.stop();
+            if (!haunt.fail()) return null;
             haunt.start(spec, system);
         }
         haunt.sinceSeen = 0f;
@@ -159,6 +160,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         for (SectorEntityToken mote : new ArrayList<>(location.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG))) {
             if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
             if (fish.isRealLegendary()) {
+                LegendaryChases.getState(fish.getFishId()).roaming = false;
                 QuorumShellGame.end(mote);
                 BaseHauntModule.removeHard(mote);
             } else if (isLegendaryAnchor(fish.getOrbitAnchor()) || isLegendaryAnchor(fish.getDecoyAnchor())) {
@@ -228,7 +230,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         } else {
             intensity = Math.max(0f, intensity - amount / FADE_SECONDS);
             if (intensity <= 0f) {
-                stop();
+                fail();
                 return;
             }
         }
@@ -284,8 +286,62 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         intensity = 0f;
         sinceSeen = 0f;
         fading = false;
+        LegendaryChases.getState(spec.id).roaming = true;
 
         modules.addAll(buildModules(spec, here));
+    }
+
+    protected void restoreHunt() {
+        if (!(Global.getSector().getCurrentLocation() instanceof StarSystemAPI here)) return;
+        for (SectorEntityToken mote : here.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+            if (mote.isExpired() || !(mote.getCustomPlugin() instanceof FishEntityPlugin fish)
+                    || !fish.isRealLegendary()) continue;
+            FishSpec spec = fish.getFishSpec();
+            LegendaryChases.Chase chase = LegendaryChases.getState(spec.id);
+            if (!chase.roaming || chase.caught || !here.getId().equals(chase.systemId)) continue;
+            start(spec, here);
+            intensity = 1f;
+            return;
+        }
+    }
+
+    protected boolean fail() {
+        if (activeSpeciesId == null || activeSystem == null
+                || LegendaryShields.POP_SHIELD_SPECIES.equals(activeSpeciesId)) {
+            stop();
+            return true;
+        }
+        FishEntityPlugin real = null;
+        for (SectorEntityToken mote : activeSystem.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+            if (mote.isExpired() || !(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
+            if (fish.isRealLegendary() && activeSpeciesId.equals(fish.getFishId())) real = fish;
+        }
+        if (real != null) {
+            if (real.isHeld()) return false;
+            for (SectorEntityToken mote : activeSystem.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+                if (!mote.isExpired() && mote.getCustomPlugin() instanceof FishEntityPlugin fish
+                        && fish.isHeld() && (fish.getDecoyAnchor() == real.getMote()
+                        || fish.getOrbitAnchor() == real.getMote())) return false;
+            }
+        }
+        FishSpec spec = FishSpecLoader.getFishSpec(activeSpeciesId);
+        Vector2f at = real == null || spec == null ? null : LegendarySpawns.position(activeSystem, spec);
+        if (real != null && at == null) return false;
+        LegendaryChases.Chase chase = LegendaryChases.getState(activeSpeciesId);
+        stop(); // Detach formations before moving their real fish.
+        chase.roaming = false;
+        chase.provoked = false;
+        if (real != null) {
+            QuorumShellGame.end(real.getMote(), true);
+            for (SectorEntityToken mote : new ArrayList<>(real.getMote().getContainingLocation()
+                    .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG))) {
+                if (mote.isExpired() || !(mote.getCustomPlugin() instanceof FishEntityPlugin fish)) continue;
+                if (fish.getDecoyAnchor() == real.getMote()) BaseHauntModule.removeHard(mote);
+                else if (fish.getOrbitAnchor() == real.getMote()) fish.resumePatrol(at);
+            }
+            real.resumePatrol(at);
+        }
+        return true;
     }
 
     protected void stop() {
@@ -293,6 +349,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             module.cleanup();
         }
         modules.clear();
+        if (activeSpeciesId != null) LegendaryChases.getState(activeSpeciesId).roaming = false;
         activeSpeciesId = null;
         activeSystem = null;
         intensity = 0f;

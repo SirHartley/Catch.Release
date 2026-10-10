@@ -43,8 +43,9 @@ public class LegendaryChases {
         // the Longliner's disguise is spent for this residency once the lamp finds it
         public boolean revealed;
 
-        // a harpoon has touched it this residency: the chase is on, the haunt may start
+        // Cleared when an abandoned haunt returns the fish to patrol.
         public boolean provoked;
+        public boolean roaming;
 
         // shield bookkeeping, semantics per species in LegendaryShields:
         // units = orbit motes or deflection charges, -1 until first initialised
@@ -171,6 +172,7 @@ public class LegendaryChases {
             chase.seenAt = 0L;
             chase.revealed = false;
             chase.provoked = false;
+            chase.roaming = false;
         }
 
         return chase;

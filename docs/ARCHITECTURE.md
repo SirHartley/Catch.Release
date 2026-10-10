@@ -478,8 +478,8 @@ when a dash ends or they leave a pond boundary. `LegendaryHaunt` also registers 
 transient `CurrentLocationChangedListener`: departure removes surfaced and buried
 legendaries, their attached Quorum bodies and active haunt modules. The existing
 load sweep removes off-system legendary motes, preserves current residents, and fills
-missing residents through `LegendarySpawns`. Departure cleanup does not change
-`LegendaryChases`, host selection or relocation timing. With lamps on, unseen haunt effects linger for
+missing residents through `LegendarySpawns`. Departure clears the hunt's `roaming`
+flag without changing host selection or relocation timing. With lamps on, unseen haunt effects linger for
 60 seconds, then fade over 12 seconds. Turning the player's lamps off starts that
 fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
@@ -490,9 +490,17 @@ to zero, including their minimum-strength component.
 The full-screen chromatic pass also fades its pixel displacement to zero; the
 minigame's region-only pass keeps its existing displacement range.
 False Dawn's ambient host-star flares remain independent of haunt intensity.
-The fade does not remove the real fish. Ordinary fish, phantoms and splinters retain
-their movement expiry. `tools/HauntWindDownChecks` covers lamp toggles, dark activation,
-the lost-fish grace period, effect strength and cleanup without removing the fish.
+When the fade finishes, the real fish teleports to a safe `LegendarySpawns.position`
+and resumes patrol. The return clears provocation, dash/lure/evasion movement and
+velocity sampling, removes Quorum decoys and moves surviving escorts with the fish.
+It waits for any held fish or attached body to be released. Shields, spent layers,
+host/residency and sighting history are preserved. Longliner keeps its existing
+movement and provocation. Catching the fish or leaving the system still uses immediate
+cleanup, not a return. The saved `Chase.roaming` flag restores an unfinished haunt
+at full intensity with a fresh sighting grace period on load, even with lamps off;
+normal fading then applies. Ordinary fish, phantoms and splinters retain their
+movement expiry. `tools/HauntWindDownChecks` covers lamp toggles, dark activation,
+lost contact, held catches, return placement, defense preservation and load restoration.
 
 Harpoon and drone failure callbacks release real legendary motes through
 `LegendaryShields.onFailedCatch` instead of fading them out. Ordinary fish,

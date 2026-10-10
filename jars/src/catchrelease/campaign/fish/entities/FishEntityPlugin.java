@@ -627,6 +627,24 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         dashVelocity = null;
     }
 
+    public void resumePatrol(Vector2f at) {
+        stopDash();
+        stunLeft = slowLeft = slowStrength = 0f;
+        evasiveLeft = jinkLeft = prowlLeft = 0f;
+        hunting = false;
+        stopLure();
+        diving = false;
+        diveScheduled = false;
+        entity.setLocation(at.x, at.y);
+        target = MathUtils.getPointOnCircumference(at, FLEE_LEG,
+                MathUtils.getRandomNumberInRange(0f, 360f));
+        lastX = at.x;
+        lastY = at.y;
+        velocityX = velocityY = 0f;
+        movementSampled = true;
+        if (trail != null) trail.sample(entity, false);
+    }
+
     public boolean isDecoy() {
         return decoyAnchor != null;
     }
