@@ -44,6 +44,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
     public static final String TERRAIN_ID = "catchrelease_StaticPond";
     public static final String NAME = "Unstable Substrate";
 
+    private static long stateVersion;
+
     public UnstableFabricRippleTerrainRenderer rippleRenderer;
     public IntervalUtil moteSpawnInterval = new IntervalUtil(1f, 5f);
     public boolean isActive = false;
@@ -122,6 +124,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     protected Object readResolve() {
         layers = createLayers();
+        if (!visualOnly) stateVersion++;
         return this;
     }
 
@@ -271,6 +274,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         initRippleRenderer();
 
         isActive = true;
+        if (!visualOnly) stateVersion++;
         rippleRenderer.fadeAndExpire(1);
 
         throwOpeningDistortion();
@@ -297,6 +301,7 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         if (!isActive) return;
 
         isActive = false;
+        if (!visualOnly) stateVersion++;
 
         // expired, not just dropped - it's an entity script; an unexpired reference keeps running
         if (rippleRenderer != null) rippleRenderer.fadeAndExpire(1f);
@@ -305,6 +310,11 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
 
     public boolean isActive(){
         return isActive;
+    }
+
+    // Invalidates lamp proximity between ability updates, including paused actions.
+    public static long getStateVersion() {
+        return stateVersion;
     }
 
     @Override

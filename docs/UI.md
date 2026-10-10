@@ -292,6 +292,9 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   retained contact marks. Lamps off means no visible trail. Viewport alpha and
   culling still apply. Pause freezes sampling and ageing; GL and shared sprite
   state are preserved. No MagicLib trail registration remains for these motes.
+  Beam validity reuses the lamp ability's cached pond proximity; vertex sampling
+  must not rescan terrain. Cache lifetime is documented under
+  [abilities](ARCHITECTURE.md#abilities).
 - Legendary floating notices use `LegendaryShields.say`. It keeps vanilla's renderer
   and lifetime, but stacks older labels above newer ones by the font height plus four
   screen units, converted through the current viewport. Older labels drift upward

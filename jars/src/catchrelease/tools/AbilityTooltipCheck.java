@@ -175,7 +175,7 @@ public final class AbilityTooltipCheck {
                 default -> throw new AssertionError(method);
             });
             LocationAPI location = proxy(LocationAPI.class, (self, method, args) -> switch (method.getName()) {
-                case "getEntitiesWithTag", "getCustomEntitiesWithTag" -> List.of();
+                case "getEntitiesWithTag", "getCustomEntitiesWithTag", "getTerrainCopy" -> List.of();
                 case "isHyperspace" -> false;
                 default -> throw new AssertionError(method);
             });
