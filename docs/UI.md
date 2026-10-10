@@ -284,9 +284,19 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
-- The Moray's non-regenerating shield and Lantern Jack's feeding-only shells are
+- The Moray's non-regenerating shield, Lantern Jack's feeding-only shells and
+  False Dawn's mine-fed charges are
   green. `LegendaryShields.getShieldColor` supplies their bubble, outline, stored
   rings and deflection flash through the shared mote renderer.
+- False Dawn's shield mines and couriers share `LegendaryShields.SHIELD_GREEN`.
+  `DawnShieldTransfer` draws a white-centred glow, a bounded green trail and an
+  arrival ring using `Disc`, which preserves GL state. It remains visible outside
+  lamp beams; the expanding render range follows it away from the stationary mine.
+  Viewport alpha/culling still apply, and pause freezes movement and arrival fade.
+  Successful recharge prints "The False Dawn brightens" at the mine, never at the
+  fish. Keep that otherwise invisible mine for two seconds after the grant so
+  vanilla's one-second notice plus half-second fade can finish. Full shields do
+  not print a gain notice. Spent anchors are not harpoon targets.
 - Legendary trails retain the red foggy texture, 10-to-1-unit taper, 0.85 opacity,
   normal blending and five-second fade. Their transient Luna renderer runs independently of the mote's render
   callback, so a hidden or offscreen head does not hide its illuminated tail.

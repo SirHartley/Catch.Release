@@ -8,11 +8,6 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
-/**
- * The minelayer's work: waves of blinking mines seeded across the player's course -
- * red shoves, blue interdicts, yellow implodes and pulls. All of it non-lethal, all of
- * it gone without a trace when the chase ends.
- */
 public class MinefieldModule extends BaseHauntModule {
 
     public static final int MAX_ALIVE = 22;
@@ -36,15 +31,24 @@ public class MinefieldModule extends BaseHauntModule {
         prune();
 
         spawnTimer -= amount;
-        if (spawnTimer <= 0f && spawned.size() < MAX_ALIVE && atFullIntensity()) {
+        int active = liveMines();
+        if (spawnTimer <= 0f && active < MAX_ALIVE && atFullIntensity()) {
             spawnTimer = MathUtils.getRandomNumberInRange(
                     SPAWN_MIN_SECONDS, SPAWN_MAX_SECONDS);
 
             int wave = WAVE_MIN + random.nextInt(WAVE_MAX - WAVE_MIN + 1);
-            for (int i = 0; i < wave && spawned.size() < MAX_ALIVE; i++) {
+            for (int i = 0; i < Math.min(wave, MAX_ALIVE - active); i++) {
                 spawnMine();
             }
         }
+    }
+
+    protected int liveMines() {
+        int count = 0;
+        for (SectorEntityToken mine : spawned) {
+            if (!mine.isExpired() && mine.hasTag(HauntMineEntityPlugin.MINE_TAG)) count++;
+        }
+        return count;
     }
 
     protected void spawnMine() {
@@ -86,15 +90,8 @@ public class MinefieldModule extends BaseHauntModule {
     protected HauntMineEntityPlugin.Kind rollKind() {
         float roll = random.nextFloat();
         if (roll < 0.4f) return HauntMineEntityPlugin.Kind.BLAST;
-        if (roll < 0.7f) return HauntMineEntityPlugin.Kind.INTERCEPT;
+        if (roll < 0.7f) return HauntMineEntityPlugin.Kind.SHIELD;
 
         return HauntMineEntityPlugin.Kind.IMPLOSION;
-    }
-
-    @Override
-    public void cleanup() {
-        InterdictionPulse.release(player());
-
-        super.cleanup();
     }
 }

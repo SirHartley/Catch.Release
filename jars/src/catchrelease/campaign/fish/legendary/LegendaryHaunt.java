@@ -370,7 +370,6 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             case "slipstream_moray" -> out.add(new SlipDashModule(system, spec));
             // the escort shield is the Quorum's real defence; the haunt stays gentle
             case "quorum" -> out.add(new DistractionMotesModule(system, spec));
-            // no shield of its own: the False Dawn is the minelayer
             case "false_dawn" -> {
                 out.add(new MinefieldModule(system, spec));
                 out.add(new CoherenceSurgeModule(system, spec));
