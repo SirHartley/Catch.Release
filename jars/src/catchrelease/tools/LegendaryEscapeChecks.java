@@ -1,6 +1,7 @@
 package catchrelease.tools;
 
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -368,6 +369,7 @@ public final class LegendaryEscapeChecks {
         quorum();
         morayHauntStart();
         morayDiveLock();
+        moraySwimSpeed();
         morayChaseOnly();
         morayShield();
         moray();
@@ -821,6 +823,52 @@ public final class LegendaryEscapeChecks {
                 }
                 check(dived, "cleanup does not leave the fish surfaced permanently");
             }
+        }
+    }
+
+    private static void moraySwimSpeed() {
+        for (int fps : new int[]{30, 60, 144}) for (FishMotion motion : FishMotion.values()) {
+            try (Environment env = new Environment()) {
+                Fish fish = env.real(LegendaryShields.MORAY_SPECIES);
+                fish.spec.motion = motion;
+                fish.keepSurfaced(30f);
+                LegendaryChases.getState(fish.spec.id).provoked = true;
+                float dt = 1f / fps;
+                float min = Float.MAX_VALUE;
+                float max = 0f;
+                for (int frame = 0; frame < 24 * fps; frame++) {
+                    fish.at.set(700f, 0f);
+                    Vector2f before = new Vector2f(fish.at);
+                    fish.advance(dt);
+                    float speed = Vector2f.sub(fish.at, before, null).length() / dt;
+                    check(speed < 400f, "Moray's mixed bursts stay below its slipstream speed");
+                    min = Math.min(min, speed);
+                    max = Math.max(max, speed);
+                }
+                check(min < 110f, "Moray retains its breathing room");
+                if (motion == FishMotion.DARTER || motion == FishMotion.LUNGER) {
+                    check(max > 350f, "Moray retains a smaller mixed-movement burst");
+                }
+                fish.at.set(700f, 0f);
+                fish.startTravelDash(new Vector2f(SlipDashModule.DASH_SPEED, 0f), 1f);
+                fish.advance(dt);
+                check(Math.abs((fish.at.x - 700f) / dt - 900f) < 0.1f,
+                        "swim speed cap does not affect travel dashes");
+            }
+        }
+        try (Environment env = new Environment()) {
+            Fish fish = env.real("ordinary");
+            fish.spec.rarity = FishRarity.RARE;
+            fish.spec.motion = FishMotion.LUNGER;
+            fish.setSwimTarget(new Vector2f(20000f, 0f));
+            fish.keepSurfaced(30f);
+            float max = 0f;
+            for (int frame = 0; frame < 600; frame++) {
+                Vector2f before = new Vector2f(fish.at);
+                fish.advance(1f / 60f);
+                max = Math.max(max, Vector2f.sub(fish.at, before, null).length() * 60f);
+            }
+            check(max > 440f, "ordinary fish keep their existing lunge speed");
         }
     }
 
