@@ -11,8 +11,8 @@ import java.awt.Color;
 public class LegendaryTrail {
 
     private static final Color COLOR = new Color(255, 45, 45);
-    private static final float WIDTH = 2f;
-    private static final float SECONDS = 0.3f;
+    private static final float WIDTH = 10f;
+    private static final float SECONDS = 5f;
     private static final float MAX_STEP = 90f;
 
     private SpriteAPI sprite;
@@ -45,8 +45,8 @@ public class LegendaryTrail {
         if (id == 0f) id = MagicCampaignTrailPlugin.getUniqueID();
         if (sprite == null) sprite = SpriteLoader.getSprite("trail_foggy");
         MagicCampaignTrailPlugin.addTrailMemberSimple(mote, id, sprite,
-                mote.getLocation(), 0f, angle, WIDTH, 0.4f,
-                COLOR, 0.65f * alpha, SECONDS, true, new Vector2f());
+                mote.getLocation(), 0f, angle, WIDTH, 1f,
+                COLOR, 0.85f * alpha, SECONDS, false, new Vector2f());
     }
 
     protected void cut(SectorEntityToken mote) {
