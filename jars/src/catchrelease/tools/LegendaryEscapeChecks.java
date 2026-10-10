@@ -367,6 +367,7 @@ public final class LegendaryEscapeChecks {
         defaults();
         quorum();
         morayHauntStart();
+        morayDiveLock();
         morayChaseOnly();
         morayShield();
         moray();
@@ -755,6 +756,71 @@ public final class LegendaryEscapeChecks {
             slip.advance(0.1f);
             check(env.terrain.size() == 1 && fish.isDashing(), "released fish can start its opening escape");
             slip.cleanup();
+        }
+    }
+
+    private static void morayDiveLock() {
+        for (int fps : new int[]{30, 60, 144}) for (boolean moduleFirst : new boolean[]{false, true}) {
+            try (Environment env = new Environment()) {
+                Fish fish = env.real("slipstream_moray");
+                fish.setSwimTarget(new Vector2f(20000f, 0f));
+                Slip slip = new Slip(env.system, fish.spec);
+                float dt = 1f / fps;
+                for (int dash = 0; dash < 3; dash++) {
+                    fish.at.set(700f, 0f);
+                    if (dash == 2) {
+                        fish.keepSurfaced(0f);
+                        for (int frame = 0; frame < 20 * fps && !fish.isDiving(); frame++) {
+                            fish.diveTime(dt);
+                        }
+                        check(fish.isDiving(), "emergency dash begins with a submerged fish");
+                        slip.onFailedCatch(fish);
+                    } else {
+                        // Start during a dive fade, before the fish becomes untargetable.
+                        fish.keepSurfaced(0f);
+                        for (int frame = 0; frame < 20 * fps && fish.getVisibility() == 1f; frame++) {
+                            fish.diveTime(dt);
+                        }
+                        check(fish.getVisibility() < 1f && !fish.isDiving(), "dive fade is in progress");
+                        slip.setIntensity(1f);
+                        slip.advance(SlipDashModule.COOLDOWN_MAX_SECONDS + 1f);
+                    }
+                    check(fish.isDashing() && fish.getVisibility() == 1f,
+                            "opening, repeat and emergency dashes surface immediately");
+                    float duration = slip.remaining();
+                    int frames = 0;
+                    while (slip.remaining() > dt) {
+                        if (moduleFirst) slip.step(fish, dt);
+                        fish.advance(dt);
+                        if (!moduleFirst) slip.step(fish, dt);
+                        check(fish.getVisibility() == 1f, "dash cannot fade or dive in either callback order");
+                        frames++;
+                    }
+                    check(frames * dt >= duration - 2f * dt, "diving cannot shorten a dash");
+                    slip.step(fish, dt);
+                    check(!fish.isDashing(), "dash expires normally");
+                    boolean dived = false;
+                    for (int frame = 0; frame < 20 * fps; frame++) {
+                        fish.diveTime(dt);
+                        dived |= fish.isDiving();
+                    }
+                    check(dived, "diving resumes after the dash");
+                }
+                slip.onFailedCatch(fish);
+                fish.setHeld(true);
+                slip.step(fish, dt);
+                check(!fish.isDashing(), "retrieval cancels the dash");
+                fish.setHeld(false);
+                slip.onFailedCatch(fish);
+                slip.cleanup();
+                check(!fish.isDashing(), "cleanup releases the dive lock");
+                boolean dived = false;
+                for (int frame = 0; frame < 20 * fps; frame++) {
+                    fish.diveTime(dt);
+                    dived |= fish.isDiving();
+                }
+                check(dived, "cleanup does not leave the fish surfaced permanently");
+            }
         }
     }
 

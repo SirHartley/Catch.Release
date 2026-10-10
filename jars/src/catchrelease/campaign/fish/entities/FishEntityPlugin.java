@@ -500,6 +500,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
+        if (isDashing()) return;
+
         // diveClock is transient, so a fresh or reloaded mote would otherwise vanish on its first frame
         if (!diveScheduled) {
             diveScheduled = true;
@@ -612,6 +614,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public void startTravelDash(Vector2f velocity, float seconds) {
+        if (!isDashing()) keepSurfaced(0f);
         dashVelocity = velocity;
         dashLeft = seconds;
     }

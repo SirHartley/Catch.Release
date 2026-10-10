@@ -111,7 +111,8 @@ real-only scoring, treasure isolation and restart/end behavior. These are standa
 checks with API proxies; they do not test OpenGL output or engine callback ordering.
 `tools/LegendaryEscapeChecks` exercises the production Moray haunt without projectile
 spawns or player ability changes, immediate haunt-start escapes,
-repeat-dash gates, failure dispatch, four-turn shell-game bursts at 30/60/144 Hz,
+repeat-dash gates, dive lock/release in both callback orders, failure dispatch,
+four-turn shell-game bursts at 30/60/144 Hz,
 repeated-loss decoy caps, emergency dash duration,
 slipstream roll-up/fade lifetime and cleanup, immediate manta swaps, fixed hit-position
 labels, and the Imposter's ordinary-hit recovery shield.
@@ -529,6 +530,11 @@ The remaining legendaries restore their base shield without changing movement.
 The Imposter keeps `shieldPopped`; its
 saved `recoveryShield` deflects one ordinary harpoon and is then consumed. It uses
 the normal purple shield display, not the red explosive-only hull shield.
+
+Every Moray slipstream dash starts movement immediately. `FishEntityPlugin.startTravelDash`
+surfaces the fish on entry; `advanceDive` pauses its dive timer while the dash is active.
+Expiry, interception and haunt cleanup release the lock through the existing dash state.
+The normal dive interval resumes afterward; no separate lock or timer needs cleanup.
 
 `SlipDashModule` checks entire new trail segments against its existing ribbons,
 reserving their width and vanilla's 5% edge wobble until both ends have rolled
