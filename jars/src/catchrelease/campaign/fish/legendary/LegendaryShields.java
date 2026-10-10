@@ -31,8 +31,8 @@ import java.util.List;
  * - The Quorum's shield is held up by three fast-orbiting splinter motes. Each is a
  *   harpoonable rare-band catch of its own; the shield stands while any orbit, and lost
  *   splinters regrow at one a month.
- * - The Lantern Jack starts with the base shell and two stored shells. Eating motes
- *   replenishes the stored shells, up to three.
+ * - The Lantern Jack starts with two stored shells. Eating motes replenishes them,
+ *   up to three. It has no regenerating base shell or free wake-up deflection.
  * - Everything else wears the base shell: one deflection, regrown ten seconds later,
  *   so landing a throw means following the first with a second inside the window.
  */
@@ -79,17 +79,12 @@ public class LegendaryShields {
         String id = fish.getFishSpec().id;
         LegendaryChases.Chase state = LegendaryChases.getState(id);
 
-        // any contact sends the Lantern Jack into hard jinks - the follow-up throw
-        // that beats its reknitting shell has to be earned
         if (CHARGE_SHIELD_SPECIES.equals(id)) fish.startEvasive();
 
-        // the first throw of a residency never lands, whatever the head: it wakes the
-        // fish - the chase, the speed and the haunt all start here. The Longliner is
-        // the exception: it is already running, and its shell answers every throw
-        // itself, so a first explosive hit pops it on the spot
+        // Jack spends a stored shell on waking; the Longliner uses its hull shield.
         if (!state.provoked) {
             state.provoked = true;
-            if (!POP_SHIELD_SPECIES.equals(id)) {
+            if (!POP_SHIELD_SPECIES.equals(id) && !CHARGE_SHIELD_SPECIES.equals(id)) {
                 fish.flashShield();
                 sayDeflection(fish, "Deflected - Now awake");
                 return HitResult.DEFLECTED;
@@ -128,11 +123,6 @@ public class LegendaryShields {
                     say(fish.getMote(), "Shell burned");
                     // the larder just emptied: ring the water for refills
                     if (state.shieldUnits == 0) fish.tryLureFlare();
-                    return HitResult.DEFLECTED;
-                }
-                if (fish.tryBaseShieldDeflect()) {
-                    say(fish.getMote(), "Deflected");
-                    fish.tryLureFlare();
                     return HitResult.DEFLECTED;
                 }
                 return HitResult.NONE;
@@ -209,6 +199,7 @@ public class LegendaryShields {
         LegendaryChases.Chase state = LegendaryChases.getState(id);
         state.provoked = true;
         switch (id) {
+            case CHARGE_SHIELD_SPECIES -> { } // Stored shells only refill by feeding.
             case MOTE_SHIELD_SPECIES -> QuorumShellGame.onFailedCatch(fish);
             case MORAY_SPECIES -> LegendaryHaunt.onFailedCatch(fish);
             case MantaFormationModule.SPECIES -> {
@@ -238,7 +229,7 @@ public class LegendaryShields {
         return switch (id) {
             case POP_SHIELD_SPECIES -> !state.shieldPopped || state.recoveryShield;
             case MOTE_SHIELD_SPECIES -> getShieldUnits(state, MOTE_SHIELD_COUNT) > 0;
-            case CHARGE_SHIELD_SPECIES -> getJackStack(state) > 0 || fish.isBaseShieldUp();
+            case CHARGE_SHIELD_SPECIES -> getJackStack(state) > 0;
             default -> fish.isBaseShieldUp();
         };
     }
@@ -256,8 +247,6 @@ public class LegendaryShields {
 
         String id = fish.getFishSpec().id;
 
-        // the Lantern Jack's base shell is the common green one; only its stacked
-        // rings tell it apart
         return switch (id) {
             case POP_SHIELD_SPECIES -> LegendaryChases.getState(id).shieldPopped
                     ? SHIELD_PURPLE : SHIELD_RED;

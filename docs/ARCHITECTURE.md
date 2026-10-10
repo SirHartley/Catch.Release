@@ -429,7 +429,7 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | `LegendaryStarAvoidance.java` | All non-False-Dawn legendaries avoid each local star's surface and nominal corona plus 150 units. Natural buried spawns, surfacing, console placement, explosive respawns and Imposter reveal use the same boundary. Swimming, submerged runs, travel dashes and reveal drift test complete movement segments; positions already inside are corrected. Quorum steering reserves its escort radius; shell-game centers reserve the largest decoy ring. Manta steering moves its line center with one-slot clearance, preserving spacing and blackout swaps. Held catches remain attached to their retrieval gear. Uses existing movement callbacks, with no new script, saved state or sector-wide scan. |
 | `SlipDashModule.java` | Moray slipstream trail and curved travel dash. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Uses the existing trail roll-up and haunt cleanup. |
 | `QuorumShellGame.java` | Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. |
-| `LegendaryHaunt.java` | Transient coordinator. The manta runs only its formation and chromatic aberration modules. Starting a Lantern Jack haunt immediately restores its base shield; later deflections retain the normal cooldown. Stored shells remain in the chase ledger and are not reset by haunt activation. |
+| `LegendaryHaunt.java` | Transient coordinator. The manta runs only its formation and chromatic aberration modules. Lantern Jack's stored shells remain in the chase ledger and are not reset by haunt activation. |
 | `MantaBackgroundBlackout.java` | Manta-only 0.3-second background blackout every 15–40 unpaused seconds. First Luna renderer on `TERRAIN_1`, after vanilla background/starfield and before breach windows, motes, fleets and HUD. No saved background changes. `MantaFormationModule` swaps the real mote into a different stationary slot on blackout onset, preserving its target offset and shield/catch identity; swaps wait while held. Renderer expires outside its owning sector/system and is removed on haunt cleanup. |
 | `MantaFormationModule.java` | Abyssal Ghost Manta haunt: one real mote and two haunt-owned phantoms in a straight line at 180-unit spacing. When timed, shield-break or failed-catch jitter ends, the line teleports to a new orientation about its center; no animated rotation. The real fish keeps its slot identity and target offset. Held catches cannot be teleported. `FishEntityPlugin.advance` synchronizes positions after movement; copies use the real mote's dive visibility and shield display. Only the real mote is catchable. Coordinator cleanup removes copies and transient bindings; load-time haunt sweeping prevents duplicate formations. |
 | `FalseDawnOrbit.java` | Keeps surfaced, diving and buried False Dawn movement in an annulus outside the largest non-pulsar star with a usable corona in its system. Uses the actual corona bounds; natural spawns, console spawns and explosive-hit respawns share the constraint. Dives retain their visibility timing but follow the corona instead of a straight chord through the star. |
@@ -442,7 +442,10 @@ Lantern Jack keeps two Epic treasures active throughout its minigame, immediatel
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
 
-Lantern Jack starts with its base shield and two stored shells. It hunts surfaced
+Lantern Jack has only stored hunt shells: two initially, up to three from feeding.
+Every deflection spends one, including the first hit. Empty shells do not regenerate
+with time, haunt activation or a failed catch; collision and display both use the
+stored count in `LegendaryShields.isShielded`. It hunts surfaced
 prey and lamp-revealed buried prey, surfacing the latter before pursuit. Pursuit
 uses a direct heading after hit evasion ends. Each swallowed mote expires immediately
 and supplies one stored shell, up to three. At three it stops hunting, eating and
@@ -512,8 +515,9 @@ only during unpaused advance; expiry and cleanup end both protection and jitter.
 Manta failure immediately restores its base shield and invokes the formation's
 existing background-only blackout/slot swap, rebuilding missing copies first and
 resetting the normal blackout timer. It does not wait for the 15–40-second interval.
-Other legendaries immediately restore their base shield without changing movement
-or granting Lantern Jack stored shells. The Imposter keeps `shieldPopped`; its
+Lantern Jack escapes without restoring shields or changing its stored shell count.
+The remaining legendaries restore their base shield without changing movement.
+The Imposter keeps `shieldPopped`; its
 saved `recoveryShield` deflects one ordinary harpoon and is then consumed. It uses
 the normal purple shield display, not the red explosive-only hull shield.
 

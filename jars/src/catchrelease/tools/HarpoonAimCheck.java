@@ -12,6 +12,7 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.HauntMineEntityPlugin;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
+import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.shop.ShopEntry;
 import catchrelease.campaign.fish.shop.ShopGroup;
 import catchrelease.campaign.fish.shop.ShopSchematics;
@@ -78,6 +79,7 @@ public final class HarpoonAimCheck {
         boolean phantom;
         boolean diving;
         int calls;
+        int flashes;
 
         Mote(Token token) {
             entity = token.api;
@@ -96,6 +98,7 @@ public final class HarpoonAimCheck {
         @Override public boolean isPhantom() { return phantom; }
         @Override public boolean isDiving() { return diving; }
         @Override public void tryLureFlare() { calls++; }
+        @Override public void flashShield() { flashes++; super.flashShield(); }
     }
 
     private static final class Buried extends BuriedMoteEntityPlugin {
@@ -492,8 +495,14 @@ public final class HarpoonAimCheck {
         shot = new Shot(head, atAngle(0f));
         shot.step(0.1f);
         require(minePlugin.detonations == 0 && shot.sounds == 1, "Shield stops shot before mine");
-        require(legendary.calls == 0 && LegendaryShields.getStackedRings(legendary) == 1,
-                "Awake contact spends the first starting shell without calling for more");
+        require(legendary.calls == 1 && LegendaryShields.getStackedRings(legendary) == 0,
+                "Two hits spend both starting shells and call for more");
+        head = f.token(null, 0f, 0f);
+        shot = new Shot(head, atAngle(0f));
+        shot.step(0.2f);
+        require(legendary.isHeld() && minePlugin.detonations == 0, "Empty hunt shields allow the next hook");
+        same(head.at, new Vector2f(100f - HarpoonConstants.CATCH_RADIUS, 0f),
+                "Empty hunt shields use the fish catch radius");
         f.motes.remove(FishEntityPlugin.MOTE_TAG);
         head = f.token(null, 0f, 0f);
         shot = new Shot(head, atAngle(0f));
@@ -507,15 +516,21 @@ public final class HarpoonAimCheck {
         Mote jack = new Mote(token);
         jack.spec.id = LegendaryShields.CHARGE_SHIELD_SPECIES;
         jack.spec.rarity = FishRarity.LEGENDARY;
-        require(jack.tryBaseShieldDeflect() && !jack.isBaseShieldUp(), "Spent shield before haunt");
+        LegendaryChases.Chase state = LegendaryChases.getState(jack.spec.id);
+        state.shieldUnits = 0;
         StarSystemAPI system = proxy(StarSystemAPI.class, (self, method, args) -> switch (method.getName()) {
             case "getEntitiesWithTag" -> f.motes.getOrDefault((String) args[0], List.of());
             default -> throw new AssertionError(method);
         });
         Haunt haunt = new Haunt();
         haunt.begin(jack.spec, system);
-        require(jack.isBaseShieldUp(), "Jack shield restored at haunt start without a frame delay");
-        require(jack.tryBaseShieldDeflect() && !jack.isBaseShieldUp(), "Later hits keep normal shield cooldown");
+        require(!LegendaryShields.isShielded(jack), "Haunt start leaves empty hunt shields empty");
+        require(jack.flashes == 0, "Haunt start does not flash a restored base shield");
+        haunt.end();
+        state.shieldUnits = 1;
+        haunt.begin(jack.spec, system);
+        require(LegendaryShields.isShielded(jack) && LegendaryShields.getStackedRings(jack) == 1,
+                "Haunt restart preserves remaining hunt shells");
         haunt.end();
         f.motes.clear();
     }
