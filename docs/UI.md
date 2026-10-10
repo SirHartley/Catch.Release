@@ -284,6 +284,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
+- The Moray's non-regenerating shield is green. `LegendaryShields.getShieldColor`
+  supplies its bubble, outline and deflection flash through the shared mote renderer.
 - Legendary trails retain the red foggy texture, 10-to-1-unit taper, 0.85 opacity,
   normal blending and five-second fade. Their transient Luna renderer runs independently of the mote's render
   callback, so a hidden or offscreen head does not hide its illuminated tail.
