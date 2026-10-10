@@ -10,6 +10,7 @@ import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureRarity;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 
+import java.util.EnumMap;
 import java.util.List;
 
 public final class LanternTreasureChecks {
@@ -35,8 +36,6 @@ public final class LanternTreasureChecks {
                 jack.stepLoot(FishConstants.TREASURE_HOLD_TIME + 0.01f);
                 require(jack.getTakenTreasures().size() == i * 2, "Each treasure collected once");
                 require(jack.getTreasures().size() == 2, "Immediate replacement after pickup");
-                require(jack.getTreasures().stream().allMatch(t -> t.rarity == TreasureRarity.EPIC),
-                        "Legendary treasure rarity");
             }
             List<MinigameTreasure> old = List.copyOf(jack.getTreasures());
             jack.covered = false;
@@ -59,11 +58,14 @@ public final class LanternTreasureChecks {
             jack.restart();
             jack.devSpawnTreasure();
             require(jack.getTreasures().size() == 2, "Dev spawn keeps the cap");
+            rarityPool(env.system);
 
             Game other = new Game(spec("quorum"), env.system);
             other.covered = true;
             for (int i = 0; i < 3; i++) {
                 require(other.getTreasures().size() == 1, "Other legendaries keep one active treasure");
+                require(other.getTreasures().get(0).rarity == TreasureRarity.EPIC,
+                        "Other legendaries still guarantee Epic treasure");
                 other.stepLoot(FishConstants.TREASURE_HOLD_TIME + 0.01f);
                 require(other.getTreasures().isEmpty(), "Ordinary replacement waits");
                 other.stepLoot(FishConstants.TREASURE_SPAWN_INTERVAL - 0.1f);
@@ -74,6 +76,27 @@ public final class LanternTreasureChecks {
                     "Other legendaries keep finite treasure budget");
         }
         System.out.println("Lantern treasure: " + checks + " checks passed");
+    }
+
+    private static void rarityPool(StarSystemAPI system) {
+        Game jack = new Game(spec("lantern_jack"), system);
+        jack.covered = true;
+        EnumMap<TreasureRarity, Integer> counts = new EnumMap<>(TreasureRarity.class);
+        for (int i = 0; i < 2048; i++) {
+            for (MinigameTreasure treasure : jack.getTreasures()) {
+                counts.merge(treasure.rarity, 1, Integer::sum);
+            }
+            jack.stepLoot(FishConstants.TREASURE_HOLD_TIME + 0.01f);
+            require(jack.getTreasures().size() == 2, "Rarity rolls retain two replenishing treasures");
+        }
+        float totalWeight = 0f;
+        for (TreasureRarity rarity : TreasureRarity.values()) totalWeight += rarity.weight;
+        for (TreasureRarity rarity : TreasureRarity.values()) {
+            require(counts.getOrDefault(rarity, 0) > 0, "Jack spawns " + rarity);
+            require(Math.abs(counts.get(rarity) / 4096f - rarity.weight / totalWeight) < 0.05f,
+                    "Jack uses the normal rarity weights: " + rarity);
+        }
+        require(jack.getTakenTreasures().size() == 4096, "All rarity rolls remain collectible");
     }
 
     private static FishSpec spec(String id) {

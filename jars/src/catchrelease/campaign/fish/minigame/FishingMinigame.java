@@ -116,7 +116,6 @@ public class FishingMinigame {
         treasuresLeft = TreasureRoller.rollCount(
                 tackle.treasureChanceMult * rumorLootMult);
 
-        // a legendary always carries a full hold of the best there is
         if (fish.rarity == FishRarity.LEGENDARY) {
             treasuresLeft = Math.max(3, treasuresLeft);
         }
@@ -135,7 +134,7 @@ public class FishingMinigame {
             treasuresLeft--;
         }
 
-        if (fish.rarity == FishRarity.LEGENDARY) {
+        if (fish.rarity == FishRarity.LEGENDARY && !hasEndlessTreasure()) {
             return new MinigameTreasure(TreasureRarity.EPIC);
         }
 
