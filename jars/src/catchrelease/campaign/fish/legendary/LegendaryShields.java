@@ -31,8 +31,8 @@ import java.util.List;
  * - The Quorum's shield is held up by three fast-orbiting splinter motes. Each is a
  *   harpoonable rare-band catch of its own; the shield stands while any orbit, and lost
  *   splinters regrow at one a month.
- * - The Lantern Jack starts with two stored shells. Eating motes replenishes them,
- *   up to three. It has no regenerating base shell or free wake-up deflection.
+ * - The Lantern Jack starts with three stored shells; the wake-up hit leaves two.
+ *   Eating motes replenishes them, up to three. It has no regenerating base shell.
  * - Everything else wears the base shell: one deflection, regrown ten seconds later,
  *   so landing a throw means following the first with a second inside the window.
  */
@@ -46,7 +46,7 @@ public class LegendaryShields {
     public static final String DAWN_SPECIES = "false_dawn";
 
     public static final int MOTE_SHIELD_COUNT = 3;
-    public static final int JACK_STACK_INITIAL = 2;
+    public static final int JACK_STACK_INITIAL = 3;
     public static final int JACK_STACK_MAX = 3;
     public static final float MOTE_REGEN_DAYS = 30f;
     public static final float BASE_SHIELD_REGEN_SECONDS = 10f;

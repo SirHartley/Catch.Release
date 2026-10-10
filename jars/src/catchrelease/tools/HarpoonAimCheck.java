@@ -489,14 +489,19 @@ public final class HarpoonAimCheck {
                 "Shield contact still deflects once");
         same(head.at, new Vector2f(100f - LegendaryShields.SHIELD_RADIUS, 0f), "Shield boundary");
         require(!legendary.isHeld(), "Shield does not hook fish");
+        require(LegendaryShields.getStackedRings(legendary) == 2 && LegendaryChases.isProvoked("lantern_jack"),
+                "Wake-up shot leaves two hunt shields");
         Token mine = f.token(HauntMineEntityPlugin.MINE_TAG, 133.2f, 0f);
         Mine minePlugin = new Mine(mine);
-        head = f.token(null, 0f, 0f);
-        shot = new Shot(head, atAngle(0f));
-        shot.step(0.1f);
-        require(minePlugin.detonations == 0 && shot.sounds == 1, "Shield stops shot before mine");
+        for (int remaining : new int[]{1, 0}) {
+            head = f.token(null, 0f, 0f);
+            shot = new Shot(head, atAngle(0f));
+            shot.step(0.1f);
+            require(minePlugin.detonations == 0 && shot.sounds == 1, "Shield stops shot before mine");
+            require(LegendaryShields.getStackedRings(legendary) == remaining, "Follow-up hit spends one charge");
+        }
         require(legendary.calls == 1 && LegendaryShields.getStackedRings(legendary) == 0,
-                "Two hits spend both starting shells and call for more");
+                "Wake-up and two follow-up hits empty the shields and call for more");
         head = f.token(null, 0f, 0f);
         shot = new Shot(head, atAngle(0f));
         shot.step(0.2f);
@@ -517,15 +522,22 @@ public final class HarpoonAimCheck {
         jack.spec.id = LegendaryShields.CHARGE_SHIELD_SPECIES;
         jack.spec.rarity = FishRarity.LEGENDARY;
         LegendaryChases.Chase state = LegendaryChases.getState(jack.spec.id);
-        state.shieldUnits = 0;
+        state.shieldUnits = -1;
+        state.provoked = false;
         StarSystemAPI system = proxy(StarSystemAPI.class, (self, method, args) -> switch (method.getName()) {
             case "getEntitiesWithTag" -> f.motes.getOrDefault((String) args[0], List.of());
             default -> throw new AssertionError(method);
         });
         Haunt haunt = new Haunt();
+        LegendaryShields.onHarpoonContact(jack.getMote(), false);
+        haunt.begin(jack.spec, system);
+        require(state.provoked && LegendaryShields.getStackedRings(jack) == 2,
+                "First haunt begins with two hunt shields after the triggering hit");
+        haunt.end();
+        state.shieldUnits = 0;
         haunt.begin(jack.spec, system);
         require(!LegendaryShields.isShielded(jack), "Haunt start leaves empty hunt shields empty");
-        require(jack.flashes == 0, "Haunt start does not flash a restored base shield");
+        require(jack.flashes == 1, "Only the hit flashes a shield, not haunt activation");
         haunt.end();
         state.shieldUnits = 1;
         haunt.begin(jack.spec, system);

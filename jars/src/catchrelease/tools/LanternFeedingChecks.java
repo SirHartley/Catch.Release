@@ -38,17 +38,17 @@ public final class LanternFeedingChecks {
         try (var env = new LegendaryEscapeChecks.Environment()) {
             callPool(env);
             var jack = env.real("lantern_jack");
-            check(LegendaryShields.isShielded(jack) && LegendaryShields.getStackedRings(jack) == 2,
-                    "Jack starts with two hunt shields");
-            for (int remaining : new int[]{1, 0}) {
+            check(LegendaryShields.isShielded(jack) && LegendaryShields.getStackedRings(jack) == 3,
+                    "Jack has three hunt shields before the wake-up hit");
+            for (int remaining : new int[]{2, 1, 0}) {
                 check(LegendaryShields.onHarpoonContact(jack.getMote(), false)
                         == LegendaryShields.HitResult.DEFLECTED, "each hunt shell deflects once");
                 check(LegendaryShields.getStackedRings(jack) == remaining,
                         "each hit spends a shell, including the wake-up hit");
                 check(LegendaryShields.isShielded(jack) == (remaining > 0),
                         "collision and display lose the shield with the last shell");
+                check(LegendaryChases.isProvoked("lantern_jack"), "shield hits keep the chase provoked");
             }
-            check(LegendaryChases.isProvoked("lantern_jack"), "shield hits still wake the haunt");
             check(jack.notices.stream().anyMatch(n -> n.text.startsWith("The lantern flares")),
                     "spending the last shell still calls prey");
             check(LegendaryShields.onHarpoonContact(jack.getMote(), false) == LegendaryShields.HitResult.NONE,
@@ -98,6 +98,7 @@ public final class LanternFeedingChecks {
     private static void pursuit() {
         for (int fps : new int[]{30, 60, 144}) try (var env = new LegendaryEscapeChecks.Environment()) {
             var jack = env.real("lantern_jack");
+            LegendaryChases.getState("lantern_jack").shieldUnits = 2;
             jack.at.set(0f, 0f);
             jack.setSwimTarget(new Vector2f(0f, 2000f));
             var meal = env.real("meal");
@@ -120,6 +121,7 @@ public final class LanternFeedingChecks {
     private static void buried() {
         try (var env = new LegendaryEscapeChecks.Environment()) {
             var jack = env.real("lantern_jack");
+            LegendaryChases.getState("lantern_jack").shieldUnits = 2;
             jack.setSwimTarget(new Vector2f(2000f, 2000f));
             var meal = env.real("meal");
             meal.spec.rarity = FishRarity.COMMON;
@@ -147,6 +149,7 @@ public final class LanternFeedingChecks {
     private static void exclusions() {
         try (var env = new LegendaryEscapeChecks.Environment()) {
             var jack = env.real("lantern_jack");
+            LegendaryChases.getState("lantern_jack").shieldUnits = 2;
             var meal = env.real("meal");
             meal.spec.rarity = FishRarity.COMMON;
             meal.quest = true;
@@ -181,6 +184,7 @@ public final class LanternFeedingChecks {
         for (int available : new int[]{0, 2, 8}) for (int seed = 0; seed < 40; seed++)
                 try (var env = new LegendaryEscapeChecks.Environment()) {
             var jack = env.real("lantern_jack");
+            LegendaryChases.getState("lantern_jack").shieldUnits = 2;
             callPool(env);
             List<LegendaryEscapeChecks.Fish> existing = new ArrayList<>();
             for (int i = 0; i < available; i++) {

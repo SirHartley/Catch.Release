@@ -442,9 +442,10 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
 
-Lantern Jack has only stored hunt shells: two initially, up to three from feeding.
-Every deflection spends one, including the first hit. Empty shells do not regenerate
-with time, haunt activation or a failed catch; collision and display both use the
+Lantern Jack has only stored hunt shells: three initially, leaving two after the
+wake-up hit starts the chase. Feeding can refill up to three. Every deflection
+spends one. Empty shells do not regenerate with time, haunt activation or a failed
+catch; collision and display both use the
 stored count in `LegendaryShields.isShielded`. It hunts surfaced
 prey and lamp-revealed buried prey, surfacing the latter before pursuit. Pursuit
 uses a direct heading after hit evasion ends. Each swallowed mote expires immediately
