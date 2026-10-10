@@ -284,8 +284,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
-- Legendary trails retain the red foggy texture, 2-to-0.4-unit taper and 0.3-second
-  fade. Their transient Luna renderer runs independently of the mote's render
+- Legendary trails retain the red foggy texture, 10-to-1-unit taper, 0.85 opacity,
+  normal blending and five-second fade. Their transient Luna renderer runs independently of the mote's render
   callback, so a hidden or offscreen head does not hide its illuminated tail.
   Quads are subdivided at most four world units apart; each vertex uses current
   spot/fan coverage and that lamp's Manta flicker, not stored mote visibility or

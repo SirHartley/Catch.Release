@@ -182,7 +182,7 @@ public final class LegendaryTrailChecks {
             check(token.recorded.paint(f) > 0f && f.env.haunt.getActiveSpeciesId() == null,
                     "unrevealed buried history appears under lamps without a haunt");
             token.spec.rarity = FishRarity.COMMON;
-            token.recorded.advance(0.4f);
+            token.recorded.advance(5.1f);
             token.at.set(20f, 0f);
             buried.tick();
             check(token.recorded.paint(f) == 0f, "ordinary buried fish have no trails");
@@ -217,9 +217,9 @@ public final class LegendaryTrailChecks {
             fish.tick(20f, 0f);
             check(Math.abs(fish.recorded.paint(f) - lit * 0.5f) < 0.00001f, "pause freezes history and lifetime");
             f.paused = false;
-            fish.recorded.advance(0.15f);
+            fish.recorded.advance(2.5f);
             check(fish.recorded.paint(f) > 0f && fish.recorded.paint(f) < lit * 0.5f, "history fades with age");
-            fish.recorded.advance(0.16f);
+            fish.recorded.advance(2.6f);
             check(fish.recorded.paint(f) == 0f, "short trail expires even without mote callbacks");
             check(fish.recorded.registrations == 1, "one transient renderer per live trail");
         }
@@ -282,7 +282,7 @@ public final class LegendaryTrailChecks {
             fish.tick(220f, 0f);
             fish.recorded.paint(f);
             check(fish.recorded.vertices.size() == vertices, "held fish stop emitting, old history remains");
-            fish.recorded.advance(0.4f);
+            fish.recorded.advance(5.1f);
             fish.setHeld(false);
             fish.tick(0f, 0f);
             check(fish.recorded.paint(f) == 0f, "release starts a fresh strip");
@@ -290,7 +290,7 @@ public final class LegendaryTrailChecks {
             check(fish.recorded.paint(f) > 0f, "release resumes trail");
             fish.expired = true;
             fish.tick(20f, 0f);
-            fish.recorded.advance(0.4f);
+            fish.recorded.advance(5.1f);
             check(fish.recorded.isExpired(), "removed mote retires after remaining history fades");
 
             Mote departed = new Mote(f, FishRarity.LEGENDARY);
@@ -304,13 +304,13 @@ public final class LegendaryTrailChecks {
         for (int fps : new int[]{30, 60, 144}) {
             try (Fixture f = new Fixture()) {
                 Mote fish = new Mote(f, FishRarity.LEGENDARY);
-                for (int i = 0; i <= fps; i++) {
+                for (int i = 0; i <= fps * 6; i++) {
                     fish.recorded.advance(1f / fps);
                     fish.tick(900f * i / fps, 0f);
                 }
-                f.lights.get(0).updateRenderLoc(new Vector2f(750f, 0f));
+                f.lights.get(0).updateRenderLoc(new Vector2f(5250f, 0f));
                 check(fish.recorded.paint(f) > 0f, "continuous Moray dash at " + fps + " fps");
-                check(fish.recorded.vertices.stream().allMatch(v -> v.x() >= 600f), "expired history pruned at " + fps + " fps");
+                check(fish.recorded.vertices.stream().allMatch(v -> v.x() >= 880f), "expired history pruned at " + fps + " fps");
             }
         }
     }

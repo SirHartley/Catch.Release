@@ -23,8 +23,8 @@ import static org.lwjgl.opengl.GL11.*;
 public class LegendaryTrail implements LunaCampaignRenderingPlugin {
 
     private static final Color COLOR = new Color(255, 45, 45);
-    private static final float WIDTH = 2f;
-    private static final float SECONDS = 0.3f;
+    private static final float WIDTH = 10f;
+    private static final float SECONDS = 5f;
     private static final float MAX_STEP = 90f;
     private static final float LIGHT_SAMPLE_SPACING = 4f;
 
@@ -111,7 +111,7 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
             glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, sprite.getTextureId());
             glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glBegin(GL_QUADS);
             try {
                 renderTrail(viewport);
@@ -151,12 +151,12 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
     private void edge(Point from, Point to, float fraction, float nx, float ny, float side, float alpha) {
         float born = from.born + (to.born - from.born) * fraction;
         float age = Math.max(0f, Math.min(1f, (time - born) / SECONDS));
-        float radius = (WIDTH + (0.4f - WIDTH) * age) * 0.5f;
+        float radius = (WIDTH + (1f - WIDTH) * age) * 0.5f;
         vertexPosition.set(from.at.x + (to.at.x - from.at.x) * fraction + nx * side * radius,
                 from.at.y + (to.at.y - from.at.y) * fraction + ny * side * radius);
         float lit = SearchlightAbilityPlugin.getBeamVisibilityAt(vertexPosition);
         drawVertex(vertexPosition.x, vertexPosition.y, (side + 1f) * 0.5f, age,
-                0.65f * (1f - age) * alpha * lit);
+                0.85f * (1f - age) * alpha * lit);
     }
 
     protected void drawVertex(float x, float y, float u, float v, float alpha) {

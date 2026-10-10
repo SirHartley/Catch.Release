@@ -699,6 +699,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public void setHunting(boolean hunting) {
+        if (this.hunting && !hunting) prowlLeft = 0f;
         this.hunting = hunting;
     }
 
@@ -713,7 +714,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     /** Low on shells, the Jack rings the water: one call, then a long reload. */
     public void tryLureFlare() {
-        if (flareCooldown > 0f) return;
+        if (flareCooldown > 0f || LegendaryShields.getStackedRings(this) >= LegendaryShields.JACK_STACK_MAX) return;
 
         flareCooldown = FLARE_COOLDOWN_SECONDS;
         flareRing = FLARE_RING_SECONDS;
@@ -734,22 +735,34 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (lureLeft <= 0f) return false;
 
         lureLeft -= amount;
-        if (lureTarget == null || lureTarget.isExpired()
+        if (lureLeft <= 0f || lureTarget == null || lureTarget.isExpired()
                 || lureTarget.getContainingLocation() != entity.getContainingLocation()) {
-            lureLeft = 0f;
-            lureTarget = null;
+            stopLure();
             return false;
         }
 
-        setSwimTarget(new Vector2f(lureTarget.getLocation()));
-        float distance = Misc.getDistance(entity.getLocation(), target);
-        float step = Math.min(Math.max(0f, distance - LegendaryShields.EAT_RANGE * 0.7f),
+        // Leave the ordinary destination intact so release resumes its original course.
+        Vector2f at = lureTarget.getLocation();
+        float distance = Misc.getDistance(entity.getLocation(), at);
+        if (distance <= LegendaryShields.LURE_RELEASE_RANGE) {
+            stopLure();
+            return false;
+        }
+        float remaining = distance - LegendaryShields.LURE_RELEASE_RANGE;
+        float step = Math.min(remaining,
                 MOVE_SPEED * getSpeedMult() * getSlowMult() * LURE_SPEED_MULT * amount);
         if (step > 0f) {
             moveTo(MathUtils.getPointOnCircumference(entity.getLocation(), step,
-                    Misc.getAngleInDegrees(entity.getLocation(), target)));
+                    Misc.getAngleInDegrees(entity.getLocation(), at)));
         }
+        if (step >= remaining) stopLure();
         return true;
+    }
+
+    private void stopLure() {
+        lureLeft = 0f;
+        lureTarget = null;
+        diveScheduled = false;
     }
 
     /** Sweeping patrol legs while idle; hard alternating jinks while a throw is likely
