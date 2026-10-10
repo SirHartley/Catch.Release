@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -60,7 +61,8 @@ public class SlipDashModule extends BaseHauntModule {
         boolean growing = true;
     }
 
-    protected float cooldown = 8f;
+    protected boolean firstDash = true;
+    protected float cooldown;
 
     protected float dashLeft;
     protected float bearing;
@@ -87,16 +89,25 @@ public class SlipDashModule extends BaseHauntModule {
         }
 
         cooldown -= amount;
-        if (cooldown > 0f || !atFullIntensity()) return;
+        if (firstDash) {
+            if (!SearchlightAbilityPlugin.isBreaching()) return;
+        } else if (cooldown > 0f || !atFullIntensity()) {
+            return;
+        }
 
         CampaignFleetAPI player = player();
         if (player == null) return;
         if (fish == null || fish.isDashing() || fish.isHeld() || fish.isDiving()) return;
-        if (distanceToPlayer(fish.getMote()) > TRIGGER_RANGE) return;
+        if (!firstDash && distanceToPlayer(fish.getMote()) > TRIGGER_RANGE) return;
 
+        boolean opening = firstDash;
         cooldown = MathUtils.getRandomNumberInRange(
                 COOLDOWN_MIN_SECONDS, COOLDOWN_MAX_SECONDS);
         begin(fish, player);
+        if (opening) {
+            fish.keepSurfaced(dashLeft);
+            steer(fish, 0f);
+        }
     }
 
     protected void begin(FishEntityPlugin fish, CampaignFleetAPI player) {
@@ -133,6 +144,7 @@ public class SlipDashModule extends BaseHauntModule {
 
         addSegment(trail, at);
         trails.add(trail);
+        firstDash = false;
     }
 
     @Override
