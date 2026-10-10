@@ -170,9 +170,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         return UpgradeManager.getValue(StatIds.HARPOON_SPEED, HarpoonConstants.SPEED);
     }
 
+    protected float getRange() {
+        return owner == null ? HarpoonAbilityPlugin.getReach() : HarpoonConstants.RANGE;
+    }
+
     protected void advanceOutbound(float amount) {
         Vector2f from = new Vector2f(entity.getLocation());
-        float distance = Math.min(getSpeed() * amount, Math.max(0f, HarpoonConstants.RANGE - distanceOut));
+        float range = getRange();
+        float distance = Math.min(getSpeed() * amount, Math.max(0f, range - distanceOut));
         move(heading, distance);
         distanceOut += distance;
 
@@ -237,7 +242,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        if (distanceOut >= HarpoonConstants.RANGE) enter(State.RETURNING);
+        if (distanceOut >= range) enter(State.RETURNING);
     }
 
     protected void playMoteHitSound() {
@@ -868,7 +873,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     @Override
     public float getRenderRange() {
-        return HarpoonConstants.RANGE + entity.getRadius() + 100f;
+        return getRange() + entity.getRadius() + 100f;
     }
 
     @Override

@@ -12,6 +12,9 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.HauntMineEntityPlugin;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
+import catchrelease.campaign.fish.shop.ShopEntry;
+import catchrelease.campaign.fish.shop.ShopGroup;
+import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -54,6 +57,7 @@ public final class HarpoonAimCheck {
             at.set(x, y);
             api = proxy(SectorEntityToken.class, (self, method, args) -> switch (method.getName()) {
                 case "getLocation" -> at;
+                case "getRadius" -> 0f;
                 case "setLocation" -> { at.set((float) args[0], (float) args[1]); yield null; }
                 case "getCustomPlugin" -> plugin;
                 case "getContainingLocation" -> location;
@@ -248,6 +252,7 @@ public final class HarpoonAimCheck {
             checkMotion(f);
             checkEligibility(f);
             checkFlights(f);
+            checkReach(f);
             checkContacts(f);
             checkHauntShield(f);
         }
@@ -390,6 +395,69 @@ public final class HarpoonAimCheck {
         require(!distant.isHeld() && shot.getState() == HarpoonEntityPlugin.State.RETURNING,
                 "No contact beyond final range");
         f.motes.clear();
+    }
+
+    private static void checkReach(Fixture f) {
+        UpgradeStat reach = f.upgrades.levelMap.get(StatIds.HARPOON_REACH);
+        require(reach != null && reach.maxLevel == 3, "Reach has three tiers");
+        ShopEntry entry = ShopEntry.of(reach);
+        require(entry.group == ShopGroup.HARPOON && entry.getListName().equals("Reach"), "Reach is on the harpoon shelf");
+        require(StatIds.HARPOON_ABILITY.equals(StatIds.getAbilityId(reach.id)), "Purchases refresh the harpoon ability");
+        require(!ShopSchematics.requires(reach, 1) && ShopSchematics.requires(reach, 2)
+                && ShopSchematics.requires(reach, 3), "Only tiers two and three need schematics");
+        f.upgrades.setLevel(reach.id, 99);
+        require(HarpoonAbilityPlugin.getReach() == 1560f, "Reach caps at thirty percent, without compounding");
+        f.upgrades.setLevel(reach.id, -1);
+        require(HarpoonAbilityPlugin.getReach() == 1200f, "Reach cannot fall below base");
+        f.level(StatIds.HARPOON_AIM_ASSIST, 3);
+        f.level(StatIds.HARPOON_SPEED, 0);
+
+        for (int tier = 0; tier <= 3; tier++) {
+            f.level(reach.id, tier);
+            float range = 1200f + tier * 120f;
+            require(HarpoonAbilityPlugin.getReach() == range, "Exact reach at tier " + tier);
+            Token target = f.token(FishEntityPlugin.MOTE_TAG, range - 1f, 0f);
+            Mote mote = new Mote(target);
+            Vector2f manual = atAngle(1f);
+            same(f.ability.aim(manual), atAngle(0f), "Assist includes upgraded range");
+            target.at.x = range + 30f;
+            same(f.ability.aim(manual), manual, "Assist excludes targets beyond upgraded range");
+            target.at.x = range - 1f;
+            mote.swim.set(100f, 0f);
+            mote.advance(0.01f);
+            target.at.x = range - 1f;
+            same(f.ability.aim(manual), manual, "Moving intercept beyond upgraded range is rejected");
+            f.motes.clear();
+
+            for (int fps : new int[]{15, 30, 60, 144}) {
+                Token head = f.token(null, 0f, 0f);
+                Shot shot = new Shot(head, atAngle(0f));
+                for (int i = 0; i < fps * 3 && shot.getState() == HarpoonEntityPlugin.State.OUTBOUND; i++) {
+                    shot.step(1f / fps);
+                }
+                same(head.at, new Vector2f(range, 0f), "Flight limit at tier " + tier + ", " + fps + "Hz");
+                require(shot.getState() == HarpoonEntityPlugin.State.RETURNING, "Returns at upgraded reach");
+                require(shot.getRenderRange() == range + 100f, "Render range includes upgraded reach");
+            }
+            target = f.token(FishEntityPlugin.MOTE_TAG, range - 1f, 0f);
+            mote = new Mote(target);
+            new Shot(f.token(null, 0f, 0f), atAngle(0f)).step(3f);
+            require(mote.isHeld(), "Fish at upgraded edge can be hooked");
+            f.motes.clear();
+            target = f.token(FishEntityPlugin.MOTE_TAG, range + 30f, 0f);
+            mote = new Mote(target);
+            new Shot(f.token(null, 0f, 0f), atAngle(0f)).step(3f);
+            require(!mote.isHeld(), "Final step cannot hook beyond upgraded reach");
+            f.motes.clear();
+
+            Token npcHead = f.token(null, 0f, 0f);
+            Shot npc = new Shot(npcHead, atAngle(0f));
+            npc.npc(f.fleet);
+            npc.step(3f);
+            same(npcHead.at, new Vector2f(1200f, 0f), "Player reach upgrades do not affect NPC harpoons");
+        }
+        f.level(reach.id, 0);
+        f.level(StatIds.HARPOON_SPEED, 4);
     }
 
     private static void checkContacts(Fixture f) {

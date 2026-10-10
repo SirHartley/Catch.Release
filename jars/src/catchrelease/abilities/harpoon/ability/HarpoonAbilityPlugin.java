@@ -95,7 +95,12 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
     public SkillshotRenderer createReticule() {
         return (SkillshotRenderer) new DirectionReticuleRenderer()
                 .withTrajectory()
+                .withLength(getReach())
                 .withLineStyle(GuideLineStyle.DASHED);
+    }
+
+    public static float getReach() {
+        return UpgradeManager.getValue(StatIds.HARPOON_REACH, HarpoonConstants.RANGE);
     }
 
     @Override
@@ -165,6 +170,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         if (distance <= 0f) return worldTarget;
 
         float speed = UpgradeManager.getValue(StatIds.HARPOON_SPEED, HarpoonConstants.SPEED);
+        float maxRange = getReach();
 
         Vector2f best = null;
         float bestOff = assist;
@@ -179,7 +185,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
             if (intercept == null) continue;
 
             float range = Misc.getDistance(from, intercept);
-            if (range <= 0f || range > HarpoonConstants.RANGE) continue;
+            if (range <= 0f || range > maxRange) continue;
 
             float off = Math.abs(Misc.getAngleDiff(aimAngle,
                     Misc.getAngleInDegrees(from, intercept)));
@@ -230,11 +236,12 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
     protected List<SectorEntityToken> getStrikeableNearby(CampaignFleetAPI fleet, Vector2f from) {
         List<SectorEntityToken> out = new ArrayList<>();
+        float maxRange = getReach();
 
         for (String tag : new String[] {FishEntityPlugin.MOTE_TAG, BuriedMoteEntityPlugin.BURIED_TAG}) {
             for (SectorEntityToken mote : fleet.getContainingLocation().getEntitiesWithTag(tag)) {
                 if (!HarpoonEntityPlugin.canTake(mote)) continue;
-                if (Misc.getDistance(from, mote.getLocation()) > HarpoonConstants.RANGE) continue;
+                if (Misc.getDistance(from, mote.getLocation()) > maxRange) continue;
 
                 out.add(mote);
             }
@@ -258,7 +265,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
                 Misc.getRoundedValueOneAfterDecimalIfNotWhole(Math.max(0.1f, UpgradeManager.getValue(
                         StatIds.HARPOON_RECHARGE_TIME, HarpoonConstants.RECHARGE_FALLBACK))) + " seconds");
         tooltip.addPara("Range: %s    Shot speed: %s", 3f, highlight,
-                Misc.getRoundedValue(HarpoonConstants.RANGE) + " units",
+                Misc.getRoundedValue(getReach()) + " units",
                 Misc.getRoundedValue(UpgradeManager.getValue(StatIds.HARPOON_SPEED, HarpoonConstants.SPEED)) + " units/s");
 
         float assist = UpgradeManager.getValue(StatIds.HARPOON_AIM_ASSIST, 0f);
