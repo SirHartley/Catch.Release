@@ -85,7 +85,7 @@ public class TreasureRoller {
     protected static void awardCommon(TreasureAward award, CargoAPI cargo) {
         float roll = MathUtils.getRandomNumberInRange(0f, 1f);
 
-        if (roll < 0.5f) awardCommodity(award, cargo);
+        if (roll < 0.6f) awardCommodity(award, cargo);
         else if (roll < 0.8f) awardWeapon(award, cargo);
         else awardFighter(award, cargo);
     }
