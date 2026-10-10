@@ -174,6 +174,11 @@ public final class LegendaryEscapeChecks {
         float remaining() { return dashLeft; }
         void step(FishEntityPlugin fish, float amount) { steer(fish, amount); }
         void stepTrails(float amount) { advanceTrails(amount); }
+        void straight(float direction) { bearing = dashStartBearing = direction; curveRate = 0f; }
+        void moveForward(Fish fish, float distance) {
+            fish.at.translate((float) Math.cos(Math.toRadians(bearing)) * distance,
+                    (float) Math.sin(Math.toRadians(bearing)) * distance);
+        }
     }
 
     static class Manta extends MantaFormationModule {
@@ -707,6 +712,7 @@ public final class LegendaryEscapeChecks {
                 Vector2f before = new Vector2f(fish.at);
                 fish.advance(dt);
                 check(fish.at.length() > before.length(), "first movement frame flees from the player");
+                env.haunt.advance(dt);
                 for (int i = 0; i < fps / 2; i++) {
                     fish.advance(dt);
                     env.haunt.advance(dt);
@@ -834,6 +840,7 @@ public final class LegendaryEscapeChecks {
             fish.setHeld(true);
             LegendaryShields.onFailedCatch(fish.getMote());
             Slip slip = (Slip) env.haunt.module;
+            slip.straight((float) Math.toDegrees(Math.atan2(30, 70)));
             check(slip.remaining() > SlipDashModule.DASH_MAX_SECONDS && fish.isDashing(), "immediate longer dash");
             check(env.terrain.size() == 1 && !LegendaryShields.isShielded(fish),
                     "slipstream response does not refill shield");
@@ -847,7 +854,7 @@ public final class LegendaryEscapeChecks {
             LegendaryShields.onFailedCatch(fish.getMote());
             check(env.terrain.size() == 1 && slip.remaining() == SlipDashModule.ESCAPE_DASH_SECONDS,
                     "another loss restarts escape without overlapping the previous trail");
-            fish.at.translate(2000f, 0f);
+            slip.moveForward(fish, 2000f);
             slip.step(fish, 0.01f);
             check(env.terrain.size() == 2, "emergency escape resumes its trail in clear space");
             slip.step(fish, SlipDashModule.ESCAPE_DASH_SECONDS);
@@ -866,9 +873,10 @@ public final class LegendaryEscapeChecks {
                 Fish fish = env.real("slipstream_moray");
                 Slip slip = new Slip(env.system, fish.spec);
                 slip.onFailedCatch(fish);
+                slip.straight(0f);
                 for (int i = 1; i < count; i++) {
                     fish.at.translate(SlipDashModule.SEGMENT_SPACING + 1f, 0f);
-                    slip.step(fish, 0.01f);
+                    slip.step(fish, (SlipDashModule.SEGMENT_SPACING + 1f) / SlipDashModule.DASH_SPEED);
                 }
                 slip.step(fish, SlipDashModule.ESCAPE_DASH_SECONDS);
                 check(!fish.isDashing(), "longer stream lifetime does not extend the dash");

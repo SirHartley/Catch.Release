@@ -525,6 +525,11 @@ Lantern Jack escapes without restoring shields or changing its stored shell coun
 The Moray's shield uses the existing saved `Chase.shieldPopped` flag instead of
 the timed base shield. Once broken, it stays down through failed catches, elapsed
 time and mote recreation. Its failed-catch slipstream dash is unchanged.
+The remaining legendaries restore their base shield without changing movement.
+The Imposter keeps `shieldPopped`; its
+saved `recoveryShield` deflects one ordinary harpoon and is then consumed. It uses
+the normal purple shield display, not the red explosive-only hull shield.
+
 `SlipDashModule` checks entire new trail segments against its existing ribbons,
 reserving their width and vanilla's 5% edge wobble until both ends have rolled
 up and fully faded. Pending invisible segments also reserve space. A blocked
@@ -532,10 +537,14 @@ section or sharp fold ends that ribbon; the fish keeps escaping and starts a
 separate ribbon once clear. It never connects across the blocked gap. Nearby
 cross-sections of the same ribbon stay joined. `tools/MoraySlipstreamChecks`
 covers crossings, parallel clearance, endpoint clearance, fades and sharp folds.
-The remaining legendaries restore their base shield without changing movement.
-The Imposter keeps `shieldPopped`; its
-saved `recoveryShield` deflects one ordinary harpoon and is then consumed. It uses
-the normal purple shield display, not the red explosive-only hull shield.
+Each new dash stays within 80 degrees of the previous dash's actual exit heading;
+its curve also stays within 80 degrees of its own starting heading. This prevents
+both an immediate return and a mid-dash U-turn. Held retrieval does not update the
+heading; position jumps beyond the dash's frame distance break the trail without
+changing its remembered direction. Corona avoidance retains movement control;
+an out-of-cone detour cannot lay a backwards ribbon. The direction survives trail
+fading for the life of the haunt. The same checks cover consecutive escapes at
+30/60/144 Hz, angle wrap, cooldowns and corona detours, including long frames.
 
 `tools/FalseDawnCheck` runs standalone checks for corona bounds, host selection,
 specimen lifetime, flare cleanup, mine forces, stun duration and minefield passages.

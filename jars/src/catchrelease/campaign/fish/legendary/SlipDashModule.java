@@ -41,6 +41,7 @@ public class SlipDashModule extends BaseHauntModule {
     public static final float CURVE_MAX_DEG_PER_SECOND = 55f;
     public static final float CURVE_WAVE_MIN_RATE = 0.6f;
     public static final float CURVE_WAVE_MAX_RATE = 1.7f;
+    private static final float MAX_FORWARD_TURN = 80f;
 
     public static final float STREAM_WIDTH = 620f;
     public static final int STREAM_BURN = 50;
@@ -72,6 +73,10 @@ public class SlipDashModule extends BaseHauntModule {
     protected float curvePhase;
     protected float curveRate;
     protected float curveWaveRate;
+    protected float previousExitBearing = Float.NaN;
+    protected float dashStartBearing = Float.NaN;
+    protected float lastTravelBearing = Float.NaN;
+    protected Vector2f lastDashPosition;
 
     protected final List<Trail> trails = new ArrayList<>();
 
@@ -116,8 +121,15 @@ public class SlipDashModule extends BaseHauntModule {
     protected void begin(FishEntityPlugin fish, CampaignFleetAPI player) {
         Vector2f at = fish.getMote().getLocation();
 
-        bearing = Misc.getAngleInDegrees(player.getLocation(), at)
+        previousExitBearing = lastTravelBearing;
+        float away = Misc.getAngleInDegrees(player.getLocation(), at)
                 + MathUtils.getRandomNumberInRange(-FLEE_FUZZ_DEG, FLEE_FUZZ_DEG);
+        dashStartBearing = Float.isNaN(previousExitBearing) ? away : previousExitBearing
+                + Math.max(-MAX_FORWARD_TURN, Math.min(MAX_FORWARD_TURN,
+                signedTurn(previousExitBearing, away)));
+        bearing = dashStartBearing;
+        lastTravelBearing = bearing;
+        lastDashPosition = new Vector2f(at);
         dashLeft = MathUtils.getRandomNumberInRange(DASH_MIN_SECONDS, DASH_MAX_SECONDS);
         curvePhase = MathUtils.getRandomNumberInRange(0f, 6.28f);
         curveRate = CURVE_MAX_DEG_PER_SECOND
@@ -175,9 +187,20 @@ public class SlipDashModule extends BaseHauntModule {
             return;
         }
 
+        Vector2f at = fish.getMote().getLocation();
+        float moved = Misc.getDistance(at, lastDashPosition);
+        // Retrieval/teleports are not the previous slipstream's direction of travel.
+        if (moved > 0.01f && moved <= DASH_SPEED * amount + 1f) {
+            lastTravelBearing = Misc.getAngleInDegrees(lastDashPosition, at);
+        } else if (amount > 0f && moved > DASH_SPEED * amount + 1f && trail != null) {
+            trail.growing = false;
+        }
+        lastDashPosition.set(at);
+
         dashLeft -= amount;
         curvePhase += amount;
-        bearing += curveRate * (float) Math.sin(curvePhase * curveWaveRate) * amount;
+        bearing = forwardBearing(bearing
+                + curveRate * (float) Math.sin(curvePhase * curveWaveRate) * amount);
 
         if (dashLeft <= 0f) {
             endDash(fish, trail);
@@ -200,6 +223,10 @@ public class SlipDashModule extends BaseHauntModule {
             boolean sharpTurn = segments.size() > 1 && Misc.getAngleDiff(
                     Misc.getAngleInDegrees(segments.get(segments.size() - 2).loc, trail.prev),
                     Misc.getAngleInDegrees(trail.prev, at)) > MAX_SEGMENT_TURN;
+            if (!forwardSegment(trail.prev, at)) {
+                trail.growing = false;
+                return;
+            }
             if (sharpTurn || !clearOfTrails(trail.prev, at, trail)) {
                 trail.growing = false;
                 trail = null;
@@ -208,6 +235,26 @@ public class SlipDashModule extends BaseHauntModule {
 
         if (trail != null) addSegment(trail, at);
         else if (clearOfTrails(at, at, null)) beginTrail(at);
+    }
+
+    protected float forwardBearing(float wanted) {
+        float axis = Float.isNaN(previousExitBearing) ? dashStartBearing : previousExitBearing;
+        float start = signedTurn(axis, dashStartBearing);
+        float min = Math.max(-MAX_FORWARD_TURN, start - MAX_FORWARD_TURN);
+        float max = Math.min(MAX_FORWARD_TURN, start + MAX_FORWARD_TURN);
+        return axis + Math.max(min, Math.min(max, signedTurn(axis, wanted)));
+    }
+
+    private static float signedTurn(float from, float to) {
+        return Misc.normalizeAngle(to - from + 180f) - 180f;
+    }
+
+    protected boolean forwardSegment(Vector2f from, Vector2f to) {
+        if (Float.isNaN(dashStartBearing)) return true;
+        float direction = Misc.getAngleInDegrees(from, to);
+        return Misc.getAngleDiff(dashStartBearing, direction) <= MAX_FORWARD_TURN + 0.1f
+                && (Float.isNaN(previousExitBearing)
+                || Misc.getAngleDiff(previousExitBearing, direction) <= MAX_FORWARD_TURN + 0.1f);
     }
 
     protected boolean clearOfTrails(Vector2f from, Vector2f to, Trail growing) {
