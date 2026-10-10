@@ -24,6 +24,7 @@ public final class LanternFeedingChecks {
 
     public static void main(String[] args) {
         startingShields();
+        emptyShields();
         pursuit();
         buried();
         exclusions();
@@ -35,24 +36,62 @@ public final class LanternFeedingChecks {
 
     private static void startingShields() {
         try (var env = new LegendaryEscapeChecks.Environment()) {
+            callPool(env);
             var jack = env.real("lantern_jack");
-            check(jack.isBaseShieldUp() && LegendaryShields.getStackedRings(jack) == 2,
-                    "Jack starts with its base shield and two extra layers");
-            LegendaryShields.onHarpoonContact(jack.getMote(), false);
-            check(LegendaryShields.getStackedRings(jack) == 2, "wake-up retains starting layers");
-            LegendaryShields.onHarpoonContact(jack.getMote(), false);
-            check(LegendaryShields.getStackedRings(jack) == 1 && jack.isBaseShieldUp(),
-                    "next hit spends one extra layer, not the base shield");
-            LegendaryChases.getState("lantern_jack").shieldUnits = 0;
+            check(LegendaryShields.isShielded(jack) && LegendaryShields.getStackedRings(jack) == 2,
+                    "Jack starts with two hunt shields");
+            for (int remaining : new int[]{1, 0}) {
+                check(LegendaryShields.onHarpoonContact(jack.getMote(), false)
+                        == LegendaryShields.HitResult.DEFLECTED, "each hunt shell deflects once");
+                check(LegendaryShields.getStackedRings(jack) == remaining,
+                        "each hit spends a shell, including the wake-up hit");
+                check(LegendaryShields.isShielded(jack) == (remaining > 0),
+                        "collision and display lose the shield with the last shell");
+            }
+            check(LegendaryChases.isProvoked("lantern_jack"), "shield hits still wake the haunt");
+            check(jack.notices.stream().anyMatch(n -> n.text.startsWith("The lantern flares")),
+                    "spending the last shell still calls prey");
+            check(LegendaryShields.onHarpoonContact(jack.getMote(), false) == LegendaryShields.HitResult.NONE,
+                    "no base shield beneath the hunt shells");
             check(LegendaryShields.getStackedRings(jack) == 0, "empty saved stack is not initialized again");
             LegendaryChases.getState("lantern_jack").shieldUnits = 3;
             var prey = meal(env, 500f, 500f);
+            int population = env.fish.size();
+            int notices = jack.notices.size();
+            float cooldown = (float) ReflectionUtils.get(jack, "flareCooldown", null, true);
             jack.tryLureFlare();
             LegendaryShields.lureFlare(jack);
-            check(env.fish.size() == 2 && prey.getLureSpeedMult() == 1f && jack.notices.size() == 2,
+            check(env.fish.size() == population && prey.getLureSpeedMult() == 1f && jack.notices.size() == notices,
                     "full shields ignore prey and suppress both call entry points");
-            check((float) ReflectionUtils.get(jack, "flareCooldown", null, true) == 0f,
+            check((float) ReflectionUtils.get(jack, "flareCooldown", null, true) == cooldown,
                     "suppressed call does not spend cooldown");
+        }
+    }
+
+    private static void emptyShields() {
+        for (boolean explosive : new boolean[]{false, true}) {
+            try (var env = new LegendaryEscapeChecks.Environment()) {
+                callPool(env);
+                var jack = env.real("lantern_jack");
+                var state = LegendaryChases.getState("lantern_jack");
+                state.shieldUnits = 0;
+                check(LegendaryShields.onHarpoonContact(jack.getMote(), explosive)
+                        == LegendaryShields.HitResult.NONE, "empty hunt shields give no free wake-up deflection");
+                check(state.provoked, "an unshielded contact still provokes Jack");
+                for (int i = 0; i < 30 * 60; i++) jack.advance(1f / 60f);
+                check(!LegendaryShields.isShielded(jack) && state.shieldUnits == 0,
+                        "waiting beyond the base shield cooldown does not regrow hunt shells");
+                check(LegendaryShields.onHarpoonContact(jack.getMote(), explosive)
+                        == LegendaryShields.HitResult.NONE, "Jack stays catchable without prey");
+                for (int i = 0; i < 10 * 60; i++) jack.advance(1f / 60f);
+                var prey = meal(env, jack.at.x, jack.at.y);
+                LegendaryShields.advanceEater(jack);
+                check(prey.expired && state.shieldUnits == 1 && LegendaryShields.isShielded(jack),
+                        "eating restores a hunt shield after the stack empties");
+                check(LegendaryShields.onHarpoonContact(jack.getMote(), explosive)
+                        == LegendaryShields.HitResult.DEFLECTED && state.shieldUnits == 0,
+                        "a replenished hunt shield blocks either harpoon head once");
+            }
         }
     }
 
@@ -142,11 +181,7 @@ public final class LanternFeedingChecks {
         for (int available : new int[]{0, 2, 8}) for (int seed = 0; seed < 40; seed++)
                 try (var env = new LegendaryEscapeChecks.Environment()) {
             var jack = env.real("lantern_jack");
-            FishSpec spec = new FishSpec();
-            spec.id = "meal";
-            spec.rarity = FishRarity.COMMON;
-            env.specs.put("meal", spec);
-            env.persistent.put(FishRanges.PIN_KEY, Map.of("meal", Set.of(env.system.getId())));
+            callPool(env);
             List<LegendaryEscapeChecks.Fish> existing = new ArrayList<>();
             for (int i = 0; i < available; i++) {
                 var fish = meal(env, 900f + i * 50f, 500f);
@@ -232,6 +267,14 @@ public final class LanternFeedingChecks {
         fish.at.set(x, y);
         fish.setSwimTarget(new Vector2f(-3000f, 1500f));
         return fish;
+    }
+
+    private static void callPool(LegendaryEscapeChecks.Environment env) {
+        FishSpec spec = new FishSpec();
+        spec.id = "meal";
+        spec.rarity = FishRarity.COMMON;
+        env.specs.put("meal", spec);
+        env.persistent.put(FishRanges.PIN_KEY, Map.of("meal", Set.of(env.system.getId())));
     }
 
     private static void releaseEdges() {

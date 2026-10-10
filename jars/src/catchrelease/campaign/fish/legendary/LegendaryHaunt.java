@@ -285,16 +285,6 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         sinceSeen = 0f;
         fading = false;
 
-        if (LegendaryShields.CHARGE_SHIELD_SPECIES.equals(spec.id)) {
-            for (SectorEntityToken mote : here.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-                if (!mote.isExpired() && mote.getCustomPlugin() instanceof FishEntityPlugin fish
-                        && !fish.isPhantom() && fish.getFishSpec() != null
-                        && spec.id.equals(fish.getFishSpec().id)) {
-                    fish.restoreBaseShield();
-                }
-            }
-        }
-
         modules.addAll(buildModules(spec, here));
     }
 
