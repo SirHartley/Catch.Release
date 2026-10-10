@@ -284,10 +284,10 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
-- The Moray's non-regenerating shield, Lantern Jack's feeding-only shells and
-  False Dawn's mine-fed charges are
-  green. `LegendaryShields.getShieldColor` supplies their bubble, outline, stored
-  rings and deflection flash through the shared mote renderer.
+- The Moray's shield, Lantern Jack's stored shells and False Dawn's charges are green: none regenerates
+  with time during a hunt. `LegendaryShields.getShieldColor` supplies their bubble,
+  outline, stored rings and deflection flash through the shared mote renderer.
+  Full encounter resets are covered in [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishlegendary).
 - False Dawn's shield mines and couriers share `LegendaryShields.SHIELD_GREEN`.
   `DawnShieldTransfer` draws a white-centred glow, a bounded green trail and an
   arrival ring using `Disc`, which preserves GL state. It remains visible outside

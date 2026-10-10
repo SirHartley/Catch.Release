@@ -111,9 +111,9 @@ public final class LegendaryLifetimeChecks {
             for (String id : SPECIES) {
                 LegendaryChases.Chase state = LegendaryChases.getState(id);
                 check("original-host".equals(state.systemId) && state.residency == 7
-                                && state.seenAt == 12345L && state.revealed && state.provoked
-                                && state.shieldUnits == 2 && !state.caught,
-                        id + " departure preserves host, relocation clock, reveal, provocation and shield state");
+                                && state.seenAt == 12345L && state.revealed && !state.provoked
+                                && state.shieldUnits == -1 && !state.caught,
+                        id + " departure resets the encounter but preserves host, clock and relocation signal");
             }
         }
     }

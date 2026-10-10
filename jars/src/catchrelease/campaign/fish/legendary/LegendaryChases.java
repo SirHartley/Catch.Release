@@ -40,7 +40,7 @@ public class LegendaryChases {
         // permanent memory that the player saw through this particular disguise
         public boolean encountered;
 
-        // the Longliner's disguise is spent for this residency once the lamp finds it
+        // Cleared by re-disguising in-system; retained on departure for Longliner relocation.
         public boolean revealed;
 
         // Cleared when an abandoned haunt returns the fish to patrol.
@@ -53,6 +53,16 @@ public class LegendaryChases {
         public boolean recoveryShield;
         public int shieldUnits = -1;
         public long shieldStampAt;
+
+        public void resetEncounter() {
+            if (caught) return;
+            provoked = false;
+            roaming = false;
+            shieldPopped = false;
+            recoveryShield = false;
+            shieldUnits = -1;
+            shieldStampAt = 0L;
+        }
     }
 
     /** Ledger row without host assignment - shield state may be read before a host exists. */

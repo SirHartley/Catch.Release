@@ -24,8 +24,7 @@ import java.util.List;
  * The legendary defences, one kind per species, answered at the shield boundary:
  *
  * - The Longliner wears a hull shield that only an Explosive Head can pop. Until then it
- *   deflects every throw and raises no haunt; once popped it stays popped forever -
- *   abandoning the chase does not re-armour it. Failed catches grant a separate,
+ *   deflects every throw and raises no haunt. A failed haunt restores it. Failed catches grant a separate,
  *   one-hit recovery shield that does not need explosives. Out of the water it is a boat
  *   ({@link LonglinerDecoy}); in it, it runs.
  * - The Quorum's shield is held up by three fast-orbiting splinter motes. Each is a
@@ -34,7 +33,7 @@ import java.util.List;
  * - The Lantern Jack starts with three stored shells; the wake-up hit leaves two.
  *   Eating motes replenishes them, up to three. It has no regenerating base shell.
  * - False Dawn starts with one charge. Green mines can refill it up to two.
- * - The Moray's shell stays broken after its first shield-breaking deflection.
+ * - The Moray's shell stays broken until the haunt is abandoned.
  * - Everything else wears the base shell: one deflection, regrown ten seconds later,
  *   so landing a throw means following the first with a second inside the window.
  */
@@ -360,7 +359,7 @@ public class LegendaryShields {
         int alive = 0;
         for (SectorEntityToken other : fish.getMote().getContainingLocation()
                 .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
-            if (other.getCustomPlugin() instanceof FishEntityPlugin satellite
+            if (!other.isExpired() && other.getCustomPlugin() instanceof FishEntityPlugin satellite
                     && satellite.getOrbitAnchor() == fish.getMote()) {
                 alive++;
             }

@@ -327,6 +327,7 @@ public final class LegendaryEscapeChecks {
                 case "getPersistentData" -> persistent;
                 case "getTransientScripts" -> scripts;
                 case "getCurrentLocation" -> system;
+                case "getStarSystems" -> List.of(system);
                 case "getPlayerFleet" -> player;
                 case "getClock" -> clock;
                 default -> throw new AssertionError(m);

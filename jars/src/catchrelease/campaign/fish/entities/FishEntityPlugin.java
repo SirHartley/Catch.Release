@@ -641,12 +641,20 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public void resumePatrol(Vector2f at) {
         stopDash();
+        time = 0f;
+        activeMode = null;
+        phaseLeft = rerollLeft = curveFlipLeft = 0f;
+        dashing = false;
+        curveSign = jinkSign = 1f;
+        baseShieldRegen = shieldFlash = 0f;
+        flareCooldown = flareRing = 0f;
         stunLeft = slowLeft = slowStrength = 0f;
         evasiveLeft = jinkLeft = prowlLeft = 0f;
         hunting = false;
         stopLure();
         diving = false;
         diveScheduled = false;
+        diveClock = diveHeading = 0f;
         entity.setLocation(at.x, at.y);
         target = MathUtils.getPointOnCircumference(at, FLEE_LEG,
                 MathUtils.getRandomNumberInRange(0f, 360f));
@@ -780,6 +788,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         lureLeft = 0f;
         lureTarget = null;
         diveScheduled = false;
+    }
+
+    public void releaseLureFrom(SectorEntityToken source) {
+        if (lureTarget == source) stopLure();
     }
 
     /** Sweeping patrol legs while idle; hard alternating jinks while a throw is likely

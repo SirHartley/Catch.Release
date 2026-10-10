@@ -1,6 +1,7 @@
 package catchrelease.tools;
 
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.legendary.*;
 import catchrelease.tools.LegendaryEscapeChecks.Buried;
 import catchrelease.tools.LegendaryEscapeChecks.Environment;
@@ -8,6 +9,7 @@ import catchrelease.tools.LegendaryEscapeChecks.Fish;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.util.List;
+import java.io.*;
 
 public final class LegendaryPatrolChecks {
 
@@ -21,13 +23,22 @@ public final class LegendaryPatrolChecks {
         boolean abandon() { return fail(); }
     }
 
-    public static void main(String[] args) {
+    private static class Decoy extends LonglinerDecoy {
+
+        int boats;
+        void reconcile() { reconcile(null); }
+        @Override protected void spawnBoat(com.fs.starfarer.api.campaign.StarSystemAPI system) { boats++; }
+    }
+
+    public static void main(String[] args) throws Exception {
         passiveMovement();
         activeMovement();
         returnProgress();
         quorumReturn();
         attachedFish();
         exceptions();
+        resetTimers();
+        completedCatch();
         System.out.println("Legendary patrol checks passed: " + checks);
     }
 
@@ -109,14 +120,18 @@ public final class LegendaryPatrolChecks {
             state.shieldPopped = true;
             state.shieldStampAt = 42L;
             state.residency = 9;
+            fish.tryBaseShieldDeflect();
             Haunt haunt = new Haunt();
             haunt.begin(fish, env);
             fish.at.set(20000f, -15000f);
             fish.startTravelDash(new Vector2f(900f, 0f), 100f);
             check(haunt.abandon(), "free real fish returns immediately");
-            check(state.shieldUnits == 0 && state.shieldPopped && state.shieldStampAt == 42L
-                    && state.residency == 9 && env.system.getId().equals(state.systemId),
-                    "return does not restore shields or change the host ledger");
+            check(!state.shieldPopped && !state.recoveryShield && fish.isBaseShieldUp()
+                    && LegendaryShields.isShielded(fish), "return restores persistent and timed shields");
+            check(state.residency == 9 && env.system.getId().equals(state.systemId),
+                    "encounter reset does not change the host ledger");
+            if (id.equals("lantern_jack")) check(LegendaryShields.getStackedRings(fish) == 3,
+                    "Jack gets its fresh-encounter shell count");
             check(!fish.isDashing() && !state.provoked && !state.roaming, "return ends escape behavior");
         }
     }
@@ -135,11 +150,15 @@ public final class LegendaryPatrolChecks {
             check(env.fish.size() == 15, "bare Quorum has shell bodies and escape illusions");
             fish.at.set(14000f, 0f);
             haunt.abandon();
-            check(env.fish.stream().filter(f -> !f.expired).count() == 1, "return removes every shell-game body");
-            check(!QuorumShellGame.advance(fish, 1f), "bare Quorum patrol does not recreate the shell game");
+            check(env.fish.stream().filter(f -> !f.expired).count() == 4 && state.shieldUnits == 3,
+                    "return removes shell bodies and restores all three escorts");
+            check(!QuorumShellGame.advance(fish, 1f), "restored Quorum patrol has no shell game");
             state.provoked = true;
             check(!QuorumShellGame.advance(fish, 1f), "shell game waits for actual haunt start");
             haunt.begin(fish, env);
+            check(!QuorumShellGame.advance(fish, 0.1f), "new hunt must defeat the restored escorts first");
+            state.shieldUnits = 0;
+            for (Fish escort : env.fish) if (escort.orbit == fish.getMote()) escort.expired = true;
             check(QuorumShellGame.advance(fish, 0.1f)
                     && env.fish.stream().filter(f -> !f.expired).count() == 3,
                     "new haunt reconstructs only the two ordinary shell bodies");
@@ -156,11 +175,22 @@ public final class LegendaryPatrolChecks {
             check(longliner.at.x == 14100f, "Longliner has no patrol radius limit");
             var state = LegendaryChases.getState(longliner.spec.id);
             state.provoked = true;
+            state.revealed = state.encountered = state.shieldPopped = state.recoveryShield = true;
+            state.systemId = env.system.getId();
             Haunt haunt = new Haunt();
             haunt.begin(longliner, env);
+            longliner.setHeld(true);
+            check(!haunt.abandon() && !longliner.expired && state.shieldPopped && state.revealed,
+                    "held Longliner cannot be replaced by its disguise");
+            longliner.setHeld(false);
             haunt.abandon();
-            check(longliner.at.x == 14100f && state.provoked && !state.roaming,
-                    "Longliner movement and provocation survive haunt cleanup");
+            check(longliner.expired && longliner.removed && !state.provoked && !state.roaming
+                    && !state.revealed && !state.shieldPopped && !state.recoveryShield && state.encountered,
+                    "Longliner abandons its mote and resets hull and disguise, not recognition");
+            env.tutorialStage = catchrelease.campaign.fish.tutorial.FishingIntro.DONE;
+            Decoy decoy = new Decoy();
+            decoy.reconcile();
+            check(decoy.boats == 1, "existing Longliner reconciliation offers a fresh boat after reset");
             Fish ordinary = env.real("ordinary");
             ordinary.spec.rarity = FishRarity.COMMON;
             ordinary.swim(new Vector2f(20000f, 0f));
@@ -174,9 +204,16 @@ public final class LegendaryPatrolChecks {
             Vector2f at = LegendarySpawns.position(env.system, dawn.spec);
             check(at != null, "large False Dawn coronas are not rejected by the 6000-unit rule");
             dawn.at.set(50000f, 40000f);
+            LegendaryChases.getState(dawn.spec.id).shieldUnits = 0;
             Haunt haunt = new Haunt();
             haunt.begin(dawn, env);
             check(haunt.abandon(), "False Dawn can return to a large corona");
+            check(LegendaryShields.isShielded(dawn) && LegendaryShields.getDawnCharges() == 1,
+                    "False Dawn regains its single starting charge");
+            LegendaryChases.getState(dawn.spec.id).shieldUnits = 2;
+            haunt.begin(dawn, env);
+            haunt.abandon();
+            check(LegendaryShields.getDawnCharges() == 1, "reset also discards False Dawn's extra mine-fed charge");
             float distance = Vector2f.sub(dawn.at, corona.getParams().relatedEntity.getLocation(), null).length();
             check(distance >= FalseDawnOrbit.innerRadius(corona) - 0.01f
                     && distance <= FalseDawnOrbit.outerRadius(corona) + 0.01f && distance > 6000f,
@@ -195,8 +232,8 @@ public final class LegendaryPatrolChecks {
             haunt.begin(fish, env);
             fish.at.set(14000f, 0f);
             haunt.abandon();
-            check(env.fish.size() == 3 && state.shieldUnits == 2,
-                    "return does not replace missing escorts or duplicate surviving ones");
+            check(env.fish.size() == 4 && state.shieldUnits == 3,
+                    "return fills missing escorts without duplicating surviving ones");
             for (Fish escort : env.fish) {
                 check(!escort.expired && Vector2f.sub(escort.at, fish.at, null).length() < 1f,
                         "surviving escorts return with the Quorum");
@@ -219,6 +256,73 @@ public final class LegendaryPatrolChecks {
             fish.advance(0.1f);
             check(fish.at.length() <= 6000.01f && !state.roaming,
                     "old manta formation cannot move the returned fish back out");
+        }
+    }
+
+    private static void resetTimers() throws Exception {
+        try (Environment env = new Environment()) {
+            Fish jack = env.real("lantern_jack");
+            env.specs.put(jack.spec.id, jack.spec);
+            var state = LegendaryChases.getState(jack.spec.id);
+            state.systemId = env.system.getId();
+            state.shieldUnits = 0;
+            jack.tryBaseShieldDeflect();
+            jack.startEvasive();
+            jack.setHunting(true);
+            jack.applyBlast(100f, 0.9f, 100f);
+            for (String name : List.of("flareCooldown", "flareRing", "phaseLeft", "rerollLeft")) {
+                var field = FishEntityPlugin.class.getDeclaredField(name);
+                field.setAccessible(true);
+                field.setFloat(jack, 20f);
+            }
+            Fish called = env.real("prey");
+            called.spec.rarity = FishRarity.COMMON;
+            called.startLure(jack.getMote(), 20f);
+            Fish unrelated = env.real("other-prey");
+            unrelated.spec.rarity = FishRarity.COMMON;
+            unrelated.startLure(called.getMote(), 20f);
+            Haunt haunt = new Haunt();
+            haunt.begin(jack, env);
+            haunt.abandon();
+            check(called.getLureSpeedMult() == 1f && unrelated.getLureSpeedMult() > 1f,
+                    "reset releases only this Jack's called prey");
+            check(!jack.isEvading() && jack.isBaseShieldUp(), "combat evasion and timed shield reset");
+            for (String name : List.of("flareCooldown", "flareRing", "phaseLeft", "rerollLeft")) {
+                var field = FishEntityPlugin.class.getDeclaredField(name);
+                field.setAccessible(true);
+                check(field.getFloat(jack) == 0f, "fresh encounter clears " + name);
+            }
+            Vector2f before = new Vector2f(jack.at);
+            jack.advance(0.1f);
+            check(Vector2f.sub(jack.at, before, null).length() > 1f,
+                    "old stun and slowdown do not hold the reset patrol");
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            try (ObjectOutputStream out = new ObjectOutputStream(bytes)) { out.writeObject(state); }
+            try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
+                var saved = (LegendaryChases.Chase) in.readObject();
+                check(saved.shieldUnits == 3 && !saved.shieldPopped && !saved.provoked && !saved.roaming,
+                        "fresh defenses and inactive hunt state survive save/load");
+            }
+        }
+    }
+
+    private static void completedCatch() {
+        try (Environment env = new Environment()) {
+            Fish fish = env.real("longliner");
+            env.specs.put(fish.spec.id, fish.spec);
+            var state = LegendaryChases.getState(fish.spec.id);
+            state.revealed = state.shieldPopped = true;
+            Haunt haunt = new Haunt();
+            haunt.begin(fish, env);
+            LegendaryChases.noteCaught(fish.spec.id);
+            haunt.abandon();
+            state.resetEncounter();
+            check(state.caught && state.encountered && state.systemId == null
+                    && state.shieldPopped && state.revealed,
+                    "cleanup cannot reset a completed catch or restore its disguise");
+            Decoy decoy = new Decoy();
+            decoy.reconcile();
+            check(decoy.boats == 0, "caught Longliner cannot respawn as a boat");
         }
     }
 

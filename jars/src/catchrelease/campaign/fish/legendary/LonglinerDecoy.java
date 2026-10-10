@@ -22,8 +22,8 @@ import org.lwjgl.util.vector.Vector2f;
  * instrument and every hail, built through the same fittings as the real ones and
  * flagged so the spawner's bookkeeping never counts it. The one test it cannot pass
  * is the player's own breach lamp: lit directly, the boat is gone and the fish is
- * there. A blown disguise stays blown until the fish moves to fresh water, which it
- * does as soon as the player leaves the system.
+ * there. An abandoned haunt restores the disguise. Leaving while revealed still
+ * moves the fish to a new host through LegendaryChases.
  */
 public class LonglinerDecoy implements EveryFrameScript {
 
