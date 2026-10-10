@@ -1101,7 +1101,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                     shieldColor,
                     0.12f * alpha, 1f);
 
-            // the Lantern Jack's larder, worn openly: one extra circle per stored shell
+            // One extra ring per stored charge.
             int rings = LegendaryShields.getStackedRings(this);
             for (int i = 1; i <= rings; i++) {
                 Disc.drawOutline(loc.x, loc.y,

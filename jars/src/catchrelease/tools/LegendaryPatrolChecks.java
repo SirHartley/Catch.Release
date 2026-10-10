@@ -204,11 +204,16 @@ public final class LegendaryPatrolChecks {
             Vector2f at = LegendarySpawns.position(env.system, dawn.spec);
             check(at != null, "large False Dawn coronas are not rejected by the 6000-unit rule");
             dawn.at.set(50000f, 40000f);
-            dawn.tryBaseShieldDeflect();
+            LegendaryChases.getState(dawn.spec.id).shieldUnits = 0;
             Haunt haunt = new Haunt();
             haunt.begin(dawn, env);
             check(haunt.abandon(), "False Dawn can return to a large corona");
-            check(dawn.isBaseShieldUp(), "False Dawn's timed shield resets too");
+            check(LegendaryShields.isShielded(dawn) && LegendaryShields.getDawnCharges() == 1,
+                    "False Dawn regains its single starting charge");
+            LegendaryChases.getState(dawn.spec.id).shieldUnits = 2;
+            haunt.begin(dawn, env);
+            haunt.abandon();
+            check(LegendaryShields.getDawnCharges() == 1, "reset also discards False Dawn's extra mine-fed charge");
             float distance = Vector2f.sub(dawn.at, corona.getParams().relatedEntity.getLocation(), null).length();
             check(distance >= FalseDawnOrbit.innerRadius(corona) - 0.01f
                     && distance <= FalseDawnOrbit.outerRadius(corona) + 0.01f && distance > 6000f,

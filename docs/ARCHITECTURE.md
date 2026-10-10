@@ -440,13 +440,21 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `MantaFormationModule.java` | Abyssal Ghost Manta haunt: one real mote and two haunt-owned phantoms in a straight line at 180-unit spacing. When timed, shield-break or failed-catch jitter ends, the line teleports to a new orientation about its center; no animated rotation. The real fish keeps its slot identity and target offset. Held catches cannot be teleported. `FishEntityPlugin.advance` synchronizes positions after movement; copies use the real mote's dive visibility and shield display. Only the real mote is catchable. Coordinator cleanup removes copies and transient bindings; load-time haunt sweeping prevents duplicate formations. |
 | `FalseDawnOrbit.java` | Keeps surfaced, diving and buried False Dawn movement in an annulus outside the largest non-pulsar star with a usable corona in its system. Uses the actual corona bounds; natural spawns, console spawns and explosive-hit respawns share the constraint. Dives retain their visibility timing but follow the corona instead of a straight chord through the star. |
 | `FalseDawnCorona.java` | Adds short, complementary-hue spikes to the host star's vanilla `FlareManager` queue while the player is in the host system, including before provocation. Only its own flares are removed on departure, capture and before saving; star specs and natural flares are unchanged. A location listener handles departure; the existing haunt advance refills the queue because vanilla exposes no flare-finished callback. No extra frame script or renderer. |
-| `../entities/HauntMineEntityPlugin.java` | Non-damaging False Dawn mines. Push and pull deliver equal, opposite one-shot impulses through the fleet movement module via `setVelocity`; the implosion ripple remains visual only, with no lingering attraction. Interdiction mines cancel interdictable abilities and stop the fleet for two seconds using vanilla's one-frame stop request; no persistent speed modifier. Timers stop while paused. |
-| `MinefieldModule.java` | Keeps the 3–6-mine waves and 22-mine cap but rejects overlapping trigger zones, leaving at least 300 units of passage (more for a large player fleet). Placement checks earlier waves as well as the current one, keeps clear of the player and stellar surfaces, and skips crowded spawns after bounded attempts. Every new mine gets the full two-second arming delay; blink phase is separate. |
+| `../entities/HauntMineEntityPlugin.java` | Non-damaging False Dawn mines. Red push and yellow pull deliver equal, opposite one-shot impulses through the fleet movement module via `setVelocity`; the implosion ripple remains visual only. Green mines launch `DawnShieldTransfer` only on player collision, not natural expiry or harpoon hits. They do not interdict or slow the fleet. The spent mine advances/renders its courier and stays at the gain-notice origin until the notice finishes. |
+| `DawnShieldTransfer.java` | Mine-owned green courier: homes on the live False Dawn at 4000 units/second, adds one stored charge on arrival, and expires after eight seconds if it cannot arrive. Ignores lamp visibility, rejects phantoms and vanished/caught targets, and follows a replacement real mote after an explosive relocation. No fish entity, loot, collision target or separate frame script. Minefield cleanup removes its owner; load-time haunt sweeping removes saved effects. |
+| `MinefieldModule.java` | Keeps the 3–6-mine waves and 22-mine cap but rejects overlapping trigger zones, leaving at least 300 units of passage (more for a large player fleet). Placement checks earlier waves as well as the current one, keeps clear of the player and stellar surfaces, and skips crowded spawns after bounded attempts. Mines arm after two seconds and detonate at ten seconds from spawn; both timers pause with the campaign. Blink phase is separate. Spent mines lose their harpoon/placement tag immediately. |
 | `GhostFleetsModule.java` | Lantern Jack's harmless fleets: first at 5–10 seconds, then every 15–25, at most two. Spawn 1000–1600 units away with 2–15 ships and at least 8 burn; intercept, with half switching to HOLD after 3–7 seconds. Hard-remove at 250 units or 30 seconds. Transponders stay off; flags prevent clicks, comms and other-fleet attention, and `setNoEngaging` prevents INTERCEPT battles. Harpoons ignore haunt fleets. |
 | `FakeWrecksModule.java` | Lantern Jack wrecks: groups of three, first at 5 seconds then every 10–18; at most 25 including fades, with smaller groups when nearly full. Spawn 600–1100 units away, expire after 120–240 seconds, and use registered ship variants except fighters/stations/modules. Click-to-approach stays enabled while interaction/salvage tags are withheld. At 100 units the first wreck approached becomes real; later wrecks have a 10% chance, otherwise fade over 0.5 seconds. Real wrecks restore vanilla interaction tags and retain default derelict salvage. All remain haunt-owned. |
 | `LanternSensorGhostsModule.java` | Jack-only vanilla `BaseSensorGhost` contacts: echo player movement, intercept then depart, or pass by. First and repeat spawns take 5–10 seconds, cap four including fades. Uses the haunt's existing advance and cleanup, not the hyperspace manager or a new sector script. Behavior durations convert seconds to campaign days; original tokens remain tracked after vanilla starts fading. No fleet spawning or drive drain. `SensorGhostsModule` remains the Imposter's separate implementation. |
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
-| `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, regrowing shells and provocation. |
+| `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. |
+
+False Dawn starts with one stored shield charge; the wake-up hit consumes it.
+Green mine couriers add one on arrival, capped at two. Every deflection consumes
+one; elapsed time, failed catches and mote replacement within a hunt never refill
+the ledger. Abandoning the haunt restores the single starting charge, even if two
+were stored before the reset. Shield collision, green rendering and charge rings use the same count.
+Minefield's 22-mine cap counts only live mines, not spent notice/courier anchors.
 
 Lantern Jack has only stored hunt shells: three initially, leaving two after the
 wake-up hit starts the chase. Feeding can refill up to three. Every deflection
@@ -508,7 +516,7 @@ and clears combat/movement timers, flare cooldown, stun, slowdown and velocity
 sampling. Jack's called prey are released. Quorum decoys are removed; surviving
 escorts return with the fish and missing escorts are immediately replaced.
 The reset waits for any held fish or attached body to be released. Moray's shield,
-Jack's three starting shells and Longliner's explosive-only hull all return.
+Jack's three starting shells, False Dawn's starting charge and Longliner's explosive-only hull all return.
 Longliner removes its revealed mote and clears `revealed`, allowing its existing
 boat reconciler to restore the disguise; its boat/reveal/flee movement is unchanged.
 Host/residency, sighting history, recognition and completed catches are preserved.
@@ -547,7 +555,7 @@ only during unpaused advance; expiry and cleanup end both protection and jitter.
 Manta failure immediately restores its base shield and invokes the formation's
 existing background-only blackout/slot swap, rebuilding missing copies first and
 resetting the normal blackout timer. It does not wait for the 15–40-second interval.
-Lantern Jack escapes without restoring shields or changing its stored shell count.
+Lantern Jack and False Dawn escape without restoring shields or changing stored charges.
 The Moray's shield uses the existing saved `Chase.shieldPopped` flag instead of
 the timed base shield. Once broken, it stays down through failed catches, elapsed
 time and mote recreation within a hunt. Abandoning the haunt restores it. Its failed-catch slipstream dash is unchanged.
@@ -585,7 +593,8 @@ fading for the life of the haunt. The same checks cover consecutive escapes at
 30/60/144 Hz, angle wrap, cooldowns and corona detours, including long frames.
 
 `tools/FalseDawnCheck` runs standalone checks for corona bounds, host selection,
-specimen lifetime, flare cleanup, mine forces, stun duration and minefield passages.
+specimen lifetime, flare cleanup, mine forces/expiry, minefield passages, shield
+charges, moving couriers, notice placement, pause and cleanup.
 
 ### `campaign/fish/constants` and `campaign/fish/intel`
 
