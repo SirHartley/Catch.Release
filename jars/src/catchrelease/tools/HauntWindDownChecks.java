@@ -16,6 +16,7 @@ import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import org.lwjgl.util.vector.Vector2f;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public final class HauntWindDownChecks {
             return List.of(module);
         }
         void close() { stop(); }
+        void restore() { restoreHunt(); }
     }
 
     static class Fixture implements AutoCloseable {
@@ -104,6 +106,8 @@ public final class HauntWindDownChecks {
         fadeAndRestart();
         lampToggle();
         lostFish();
+        returnToPatrol();
+        restoreHunt();
         overlays();
         System.out.println("Haunt wind-down checks passed: " + checks);
     }
@@ -134,13 +138,79 @@ public final class HauntWindDownChecks {
             check(f.haunt.module.failures == 0, "failed catch cannot retaliate while lamps are off");
             f.haunt.advance(9f);
             check(f.haunt.getModuleCount() == 0 && f.haunt.module.cleanups == 1, "fade cleans up after twelve seconds");
-            check(!f.fish.expired && !f.chase.caught && f.chase.provoked
-                    && f.env.system.getId().equals(f.chase.systemId), "wind-down preserves the fish and chase state");
+            check(!f.fish.expired && !f.chase.caught && !f.chase.provoked && !f.chase.roaming
+                    && f.env.system.getId().equals(f.chase.systemId), "wind-down preserves the resident but ends the hunt");
             f.haunt.advance(100f);
             check(f.haunt.module.cleanups == 1 && f.haunt.getActiveSpeciesId() == null, "darkness cannot restart the haunt");
             f.env.lampsOn = true;
+            f.fish.at.set(500f, 500f);
             f.haunt.advance(1f);
-            near(0.25f, f.haunt.getIntensity(), "a new sighting restarts the haunt from zero");
+            near(0f, f.haunt.getIntensity(), "sighting alone cannot restart the abandoned hunt");
+            f.chase.provoked = true;
+            f.haunt.advance(1f);
+            near(0.25f, f.haunt.getIntensity(), "a new provocation can restart the haunt");
+        }
+    }
+
+    private static void returnToPatrol() {
+        for (boolean held : new boolean[]{false, true}) try (Fixture f = new Fixture()) {
+            f.chase.shieldPopped = true;
+            f.chase.shieldUnits = 0;
+            f.chase.residency = 7;
+            f.chase.seenAt = 1234L;
+            f.chase.encountered = true;
+            f.haunt.advance(4f);
+            f.env.star(0f, 0f, 900f, 2400f);
+            f.fish.at.set(14000f, 0f);
+            f.fish.startTravelDash(new Vector2f(900f, 0f), 100f);
+            f.fish.setHeld(held);
+            f.haunt.advance(60f);
+            near(14000f, f.fish.at.x, "lost-contact grace does not teleport the fish");
+            f.haunt.advance(12f);
+            if (held) {
+                near(14000f, f.fish.at.x, "held fish cannot be teleported");
+                check(f.chase.roaming, "deferred return retains the hunt state");
+                f.fish.setHeld(false);
+                f.haunt.advance(0.1f);
+            }
+            check(f.fish.at.length() <= LegendarySpawns.RADIUS && f.fish.at.length() >= 2550f,
+                    "failed haunt returns inside the spawn area but outside the corona");
+            check(!f.fish.isDashing() && !f.chase.provoked && !f.chase.roaming,
+                    "return clears escape movement and provocation");
+            check(f.fish.getMovementVelocity().length() == 0f, "teleport is not harpoon lead velocity");
+            check(f.chase.shieldPopped && f.chase.shieldUnits == 0 && f.chase.residency == 7
+                            && f.chase.seenAt == 1234L && f.chase.encountered,
+                    "return preserves defense progress, residency and sightings");
+            Vector2f at = new Vector2f(f.fish.at);
+            f.fish.advance(0.1f);
+            check(Vector2f.sub(at, f.fish.at, null).length() > 0f, "returned fish resumes swimming");
+        }
+        try (Fixture f = new Fixture()) {
+            f.haunt.advance(4f);
+            f.fish.at.set(14000f, 0f);
+            f.env.lampsOn = false;
+            LegendaryEscapeChecks.Fish copy = new LegendaryEscapeChecks.Fish(f.env,
+                    f.fish.spec.id, true, f.fish.getMote());
+            copy.setHeld(true);
+            f.haunt.advance(12f);
+            near(14000f, f.fish.at.x, "held attached fish also defers the return");
+            copy.setHeld(false);
+            f.haunt.advance(0.1f);
+            check(copy.expired && copy.removed && !f.fish.expired, "return removes attached decoys, not the real fish");
+        }
+    }
+
+    private static void restoreHunt() {
+        try (Fixture f = new Fixture()) {
+            f.chase.roaming = true;
+            f.fish.at.set(14000f, 0f);
+            f.env.lampsOn = false;
+            f.haunt.restore();
+            check(f.haunt.getModuleCount() == 1 && f.chase.roaming,
+                    "saved hunt restores even outside sight range with lamps off");
+            f.haunt.advance(12f);
+            check(!f.chase.roaming && f.fish.at.length() <= LegendarySpawns.RADIUS,
+                    "restored dark haunt fades and returns the fish");
         }
     }
 

@@ -481,6 +481,9 @@ public final class FalseDawnCheck {
         fish.setHeld(true);
         require(LegendaryShields.onFailedCatch(fish.getMote()) && !fish.isHeld() && state.shieldUnits == 0,
                 "Failed catch releases fish without recharging");
+        state.provoked = false;
+        require(LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.NONE,
+                "Returning to patrol cannot grant another wake-up shield");
         Fish respawned = new Fish(env.local);
         require(!LegendaryShields.isShielded(respawned), "A fresh mote keeps spent charges");
         env.local.mines.remove(respawned.getMote());
