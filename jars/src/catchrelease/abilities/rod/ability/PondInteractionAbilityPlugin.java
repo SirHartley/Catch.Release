@@ -22,6 +22,7 @@ import catchrelease.skillshot.render.ValidatedAreaReticuleRenderer;
 import catchrelease.skillshot.render.validators.PondProximityValidator;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -250,10 +251,12 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     protected SectorEntityToken getPond() {
         CampaignFleetAPI fleet = getFleet();
-        if (fleet == null) return null;
+        if (fleet == null || fleet.getContainingLocation() == null) return null;
 
         SectorEntityToken pond = null;
-        for (SectorEntityToken t : fleet.getContainingLocation().getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)) {
+        for (CampaignTerrainAPI t : fleet.getContainingLocation().getTerrainCopy()) {
+            if (!t.hasTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)
+                    || !(t.getPlugin() instanceof MaskedFishingPondTerrainPlugin)) continue;
             float distance = Misc.getDistance(t, fleet);
             if (distance < t.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT) pond = t;
         }

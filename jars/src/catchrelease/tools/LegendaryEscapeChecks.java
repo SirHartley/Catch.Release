@@ -242,6 +242,7 @@ public final class LegendaryEscapeChecks {
             }));
             system = api(StarSystemAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getId" -> "escape-system";
+                case "isHyperspace" -> false;
                 case "getPlanets" -> stars;
                 case "getStar" -> stars.stream().filter(PlanetAPI::isStar).findFirst().orElse(null);
                 case "getTerrainCopy" -> coronas;

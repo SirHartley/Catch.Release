@@ -16,6 +16,7 @@ import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.characters.AbilityPlugin;
@@ -48,6 +49,10 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private transient LocationAPI activationLocation;
     private transient NeedleSensor needleSensor;
 
+    private transient LocationAPI proximityLocation;
+    private transient long pondStateVersion;
+    private transient boolean nearActivePond;
+
     @Override
     protected Object readResolve() {
         super.readResolve();
@@ -55,6 +60,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         impressionRenderer = null;
         activationLocation = null;
         needleSensor = null;
+        proximityLocation = null;
 
         return this;
     }
@@ -149,6 +155,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
     @Override
     public void advance(float amount) {
+        refreshPondProximity(getFleet());
         super.advance(amount);
         if (needleSensor == null && getFleet() == Global.getSector().getPlayerFleet()
                 && TackleManager.get(Tackle.Fit.SEARCHLIGHT) == Tackle.NEEDLE_SENSOR) {
@@ -174,7 +181,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         bindActiveLights(fleet);
         ensureImpressionRenderer();
 
-        if (!isRuntimeCurrent() || !canRunHere(fleet)) {
+        if (!isRuntimeCurrent()) {
             deactivate();
             return;
         }
@@ -263,16 +270,32 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         if (fleet == null || fleet.getContainingLocation() == null) return false;
         if (fleet.getContainingLocation().isHyperspace()) return false;
 
+        if (fleet.getAbility(ABILITY_ID) instanceof SearchlightAbilityPlugin lamps
+                && lamps.getFleet() == fleet) {
+            if (lamps.proximityLocation != fleet.getContainingLocation()
+                    || lamps.pondStateVersion != MaskedFishingPondTerrainPlugin.getStateVersion()) {
+                lamps.refreshPondProximity(fleet);
+            }
+            return !lamps.nearActivePond;
+        }
+
         return !isNearActivePond(fleet);
+    }
+
+    private void refreshPondProximity(CampaignFleetAPI fleet) {
+        proximityLocation = fleet == null ? null : fleet.getContainingLocation();
+        nearActivePond = proximityLocation != null && !proximityLocation.isHyperspace()
+                && isNearActivePond(fleet);
+        pondStateVersion = MaskedFishingPondTerrainPlugin.getStateVersion();
     }
 
     public static boolean isNearActivePond(CampaignFleetAPI fleet) {
         if (fleet == null || fleet.getContainingLocation() == null) return false;
 
-        for (SectorEntityToken pond : fleet.getContainingLocation()
-                .getEntitiesWithTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)) {
-            MaskedFishingPondTerrainPlugin plugin = MaskedFishingPondTerrainPlugin.getPondPlugin(pond);
-            if (plugin == null || !plugin.isActive()) continue;
+        for (CampaignTerrainAPI pond : fleet.getContainingLocation().getTerrainCopy()) {
+            if (!pond.hasTag(MaskedFishingPondTerrainPlugin.TERRAIN_ID)
+                    || !(pond.getPlugin() instanceof MaskedFishingPondTerrainPlugin plugin)
+                    || !plugin.isActive()) continue;
 
             if (Misc.getDistance(pond, fleet)
                     < pond.getRadius() * PondConstants.POND_INTERACT_RANGE_MULT) {

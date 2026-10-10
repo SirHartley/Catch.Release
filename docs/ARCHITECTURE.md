@@ -565,6 +565,16 @@ specimen lifetime, flare cleanup, mine forces, stun duration and minefield passa
 | `searchlight/scripts/Searchlight.java` | Beam sweep, lock-on, distortion, and ripples. |
 | `searchlight/scripts/NeedleSensor.java` | Passive Lens Array module. The existing lamp ability's `advance` checks local buried/surfaced mote tags every 0.5 seconds while fitted and switched off. Eligible rare/epic fish and unprovoked, uncaught legendaries emit position-only hints every 6–12 seconds; Longliner, pond stock, held catches and illusion/shield bodies are excluded. No sightings, targeting permissions or fish state changes. `tools/NeedleSensorChecks` covers equipment, eligibility, cadence and teardown. |
 
+Lamp and ROD pond lookups use `LocationAPI.getTerrainCopy()` and terrain `getPlugin()`;
+the pond tag excludes visual-only ruptures. `SearchlightAbilityPlugin.advance()`
+refreshes a transient proximity result before applying effects. Availability,
+beam validity and trail vertices reuse it. Location changes, first use after load,
+and `MaskedFishingPondTerrainPlugin.getStateVersion()` changes force a refresh;
+pond creation/load and opening/closing bump that version, including while paused.
+Fleet movement has no proximity callback in 0.98a-RC8, so the existing ability update
+handles distance changes; no new polling script or pond registry is used.
+`tools/PondProximityChecks` covers scan counts, boundaries and invalidation.
+
 The three ability plugins own their tooltips and read current upgrades and fitted
 modules when opened. Display contracts are in [UI.md](UI.md#ability-tooltips).
 `tools/AbilityTooltipCheck.java` checks their text, highlights, upgraded values,
