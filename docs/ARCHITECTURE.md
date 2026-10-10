@@ -431,7 +431,7 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. |
 | `LegendarySpawns.java` | Spawns each uncaught resident on system entry and load through `LegendaryHaunt`'s location listener, after tutorial graduation. One buried or surfaced mote per species; no random-population rolls or distance culling. Placement is within 6000 units of the primary sun, otherwise the largest planet, otherwise 0/0, and clears stellar hazards. False Dawn uses its corona's star; Longliner retains its boat spawn. |
 | `LegendaryStarAvoidance.java` | All non-False-Dawn legendaries avoid each local star's surface and nominal corona plus 150 units. Natural buried spawns, surfacing, console placement, explosive respawns and Imposter reveal use the same boundary. Swimming, submerged runs, travel dashes and reveal drift test complete movement segments; positions already inside are corrected. Quorum steering reserves its escort radius; shell-game centers reserve the largest decoy ring. Manta steering moves its line center with one-slot clearance, preserving spacing and blackout swaps. Held catches remain attached to their retrieval gear. Uses existing movement callbacks, with no new script, saved state or sector-wide scan. |
-| `SlipDashModule.java` | Moray slipstream trail and curved travel dash. The first haunt update starts a surfaced escape and stream without waiting for cooldown, full intensity or the repeat-dash range; held/diving fish wait, and lamps must remain on. Later dashes retain their normal gates. A failed-catch escape consumes the opening so it cannot spawn twice. `STREAM_LIFETIME_MULT` is 3: tail roll-up is 2.5 / 3 segments per second and segment fade-out is 9 seconds, independent of dash timing. With the 14-segment standing window, fully lit trails finish fading about 25.8 seconds after a dash ends. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Haunt cleanup removes all owned terrain immediately. |
+| `SlipDashModule.java` | Moray slipstream trail and curved travel dash. The first haunt update starts a surfaced escape and stream without waiting for cooldown, full intensity or the repeat-dash range; held/diving fish wait, and lamps must remain on. Repeat dashes wait 11–18 unpaused seconds after the previous dash ends and retain their range/intensity gates. A failed-catch escape consumes the opening so it cannot spawn twice. Streams are 620 units wide. `STREAM_LIFETIME_MULT` is 5: tail roll-up is 0.5 segments per second and segment fade-out is 15 seconds, independent of dash timing. With the 14-segment standing window, fully lit trails finish fading about 43 seconds after a dash ends. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Haunt cleanup removes all owned terrain immediately. |
 | `QuorumShellGame.java` | Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. |
 | `LegendaryHaunt.java` | Transient coordinator. The Moray runs only `SlipDashModule`: escape dashes and slipstreams, with no projectile motes, player slowdown or ability lockout. The manta runs only its formation and chromatic aberration modules. Lantern Jack's stored shells remain in the chase ledger and are not reset by haunt activation. |
 | `MantaBackgroundBlackout.java` | Manta-only 0.3-second background blackout every 15–40 unpaused seconds. First Luna renderer on `TERRAIN_1`, after vanilla background/starfield and before breach windows, motes, fleets and HUD. No saved background changes. `MantaFormationModule` swaps the real mote into a different stationary slot on blackout onset, preserving its target offset and shield/catch identity; swaps wait while held. Renderer expires outside its owning sector/system and is removed on haunt cleanup. |
@@ -529,6 +529,22 @@ The remaining legendaries restore their base shield without changing movement.
 The Imposter keeps `shieldPopped`; its
 saved `recoveryShield` deflects one ordinary harpoon and is then consumed. It uses
 the normal purple shield display, not the red explosive-only hull shield.
+
+`SlipDashModule` checks entire new trail segments against its existing ribbons,
+reserving their width and vanilla's 5% edge wobble until both ends have rolled
+up and fully faded. Pending invisible segments also reserve space. A blocked
+section or sharp fold ends that ribbon; the fish keeps escaping and starts a
+separate ribbon once clear. It never connects across the blocked gap. Nearby
+cross-sections of the same ribbon stay joined. `tools/MoraySlipstreamChecks`
+covers crossings, parallel clearance, endpoint clearance, fades and sharp folds.
+Each new dash stays within 80 degrees of the previous dash's actual exit heading;
+its curve also stays within 80 degrees of its own starting heading. This prevents
+both an immediate return and a mid-dash U-turn. Held retrieval does not update the
+heading; position jumps beyond the dash's frame distance break the trail without
+changing its remembered direction. Corona avoidance retains movement control;
+an out-of-cone detour cannot lay a backwards ribbon. The direction survives trail
+fading for the life of the haunt. The same checks cover consecutive escapes at
+30/60/144 Hz, angle wrap, cooldowns and corona detours, including long frames.
 
 `tools/FalseDawnCheck` runs standalone checks for corona bounds, host selection,
 specimen lifetime, flare cleanup, mine forces, stun duration and minefield passages.

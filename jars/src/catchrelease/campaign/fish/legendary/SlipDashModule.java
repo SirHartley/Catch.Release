@@ -5,7 +5,6 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
-import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Terrain;
 import com.fs.starfarer.api.impl.campaign.velfield.SlipstreamTerrainPlugin2;
@@ -15,6 +14,7 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -30,8 +30,8 @@ import java.util.List;
 public class SlipDashModule extends BaseHauntModule {
 
     public static final float TRIGGER_RANGE = 2000f;
-    public static final float COOLDOWN_MIN_SECONDS = 9f;
-    public static final float COOLDOWN_MAX_SECONDS = 16f;
+    public static final float COOLDOWN_MIN_SECONDS = 11f;
+    public static final float COOLDOWN_MAX_SECONDS = 18f;
 
     public static final float DASH_SPEED = 900f;
     public static final float DASH_MIN_SECONDS = 2.4f;
@@ -41,14 +41,18 @@ public class SlipDashModule extends BaseHauntModule {
     public static final float CURVE_MAX_DEG_PER_SECOND = 55f;
     public static final float CURVE_WAVE_MIN_RATE = 0.6f;
     public static final float CURVE_WAVE_MAX_RATE = 1.7f;
+    private static final float MAX_FORWARD_TURN = 80f;
 
-    public static final float STREAM_WIDTH = 620;
+    public static final float STREAM_WIDTH = 620f;
     public static final int STREAM_BURN = 50;
     public static final float SEGMENT_SPACING = 200f;
     public static final int MAX_STANDING_SEGMENTS = 14;
     public static final float STREAM_LIFETIME_MULT = 5f;
     public static final float ROLLUP_PER_SECOND = 2.5f / STREAM_LIFETIME_MULT;
     public static final float ROLLUP_FADE_SECONDS = 3f * STREAM_LIFETIME_MULT;
+    // Vanilla's ribbon extends half its width from the center, plus 5% vertex wobble.
+    private static final float STREAM_CLEARANCE = STREAM_WIDTH * 1.1f + 1f;
+    private static final float MAX_SEGMENT_TURN = 45f;
 
     protected static class Trail {
 
@@ -69,6 +73,10 @@ public class SlipDashModule extends BaseHauntModule {
     protected float curvePhase;
     protected float curveRate;
     protected float curveWaveRate;
+    protected float previousExitBearing = Float.NaN;
+    protected float dashStartBearing = Float.NaN;
+    protected float lastTravelBearing = Float.NaN;
+    protected Vector2f lastDashPosition;
 
     protected final List<Trail> trails = new ArrayList<>();
 
@@ -113,8 +121,15 @@ public class SlipDashModule extends BaseHauntModule {
     protected void begin(FishEntityPlugin fish, CampaignFleetAPI player) {
         Vector2f at = fish.getMote().getLocation();
 
-        bearing = Misc.getAngleInDegrees(player.getLocation(), at)
+        previousExitBearing = lastTravelBearing;
+        float away = Misc.getAngleInDegrees(player.getLocation(), at)
                 + MathUtils.getRandomNumberInRange(-FLEE_FUZZ_DEG, FLEE_FUZZ_DEG);
+        dashStartBearing = Float.isNaN(previousExitBearing) ? away : previousExitBearing
+                + Math.max(-MAX_FORWARD_TURN, Math.min(MAX_FORWARD_TURN,
+                signedTurn(previousExitBearing, away)));
+        bearing = dashStartBearing;
+        lastTravelBearing = bearing;
+        lastDashPosition = new Vector2f(at);
         dashLeft = MathUtils.getRandomNumberInRange(DASH_MIN_SECONDS, DASH_MAX_SECONDS);
         curvePhase = MathUtils.getRandomNumberInRange(0f, 6.28f);
         curveRate = CURVE_MAX_DEG_PER_SECOND
@@ -123,6 +138,11 @@ public class SlipDashModule extends BaseHauntModule {
         curveWaveRate = MathUtils.getRandomNumberInRange(
                 CURVE_WAVE_MIN_RATE, CURVE_WAVE_MAX_RATE);
 
+        firstDash = false;
+        recordTrail(at);
+    }
+
+    protected void beginTrail(Vector2f at) {
         Trail trail = new Trail();
 
         SlipstreamParams2 params = new SlipstreamParams2();
@@ -144,7 +164,6 @@ public class SlipDashModule extends BaseHauntModule {
 
         addSegment(trail, at);
         trails.add(trail);
-        firstDash = false;
     }
 
     @Override
@@ -168,9 +187,20 @@ public class SlipDashModule extends BaseHauntModule {
             return;
         }
 
+        Vector2f at = fish.getMote().getLocation();
+        float moved = Misc.getDistance(at, lastDashPosition);
+        // Retrieval/teleports are not the previous slipstream's direction of travel.
+        if (moved > 0.01f && moved <= DASH_SPEED * amount + 1f) {
+            lastTravelBearing = Misc.getAngleInDegrees(lastDashPosition, at);
+        } else if (amount > 0f && moved > DASH_SPEED * amount + 1f && trail != null) {
+            trail.growing = false;
+        }
+        lastDashPosition.set(at);
+
         dashLeft -= amount;
         curvePhase += amount;
-        bearing += curveRate * (float) Math.sin(curvePhase * curveWaveRate) * amount;
+        bearing = forwardBearing(bearing
+                + curveRate * (float) Math.sin(curvePhase * curveWaveRate) * amount);
 
         if (dashLeft <= 0f) {
             endDash(fish, trail);
@@ -180,13 +210,82 @@ public class SlipDashModule extends BaseHauntModule {
         fish.startTravelDash(
                 MathUtils.getPointOnCircumference(null, DASH_SPEED, bearing), dashLeft);
 
-        if (trail == null) return;
-        Vector2f at = fish.getMote().getLocation();
-        trail.head.set(at);
+        recordTrail(fish.getMote().getLocation());
+    }
 
-        if (Misc.getDistance(at, trail.prev) >= SEGMENT_SPACING) {
-            addSegment(trail, at);
+    protected void recordTrail(Vector2f at) {
+        Trail trail = getGrowingTrail();
+        if (trail != null) {
+            trail.head.set(at);
+            if (Misc.getDistance(at, trail.prev) < SEGMENT_SPACING) return;
+
+            List<SlipstreamSegment> segments = trail.plugin.getSegments();
+            boolean sharpTurn = segments.size() > 1 && Misc.getAngleDiff(
+                    Misc.getAngleInDegrees(segments.get(segments.size() - 2).loc, trail.prev),
+                    Misc.getAngleInDegrees(trail.prev, at)) > MAX_SEGMENT_TURN;
+            if (!forwardSegment(trail.prev, at)) {
+                trail.growing = false;
+                return;
+            }
+            if (sharpTurn || !clearOfTrails(trail.prev, at, trail)) {
+                trail.growing = false;
+                trail = null;
+            }
         }
+
+        if (trail != null) addSegment(trail, at);
+        else if (clearOfTrails(at, at, null)) beginTrail(at);
+    }
+
+    protected float forwardBearing(float wanted) {
+        float axis = Float.isNaN(previousExitBearing) ? dashStartBearing : previousExitBearing;
+        float start = signedTurn(axis, dashStartBearing);
+        float min = Math.max(-MAX_FORWARD_TURN, start - MAX_FORWARD_TURN);
+        float max = Math.min(MAX_FORWARD_TURN, start + MAX_FORWARD_TURN);
+        return axis + Math.max(min, Math.min(max, signedTurn(axis, wanted)));
+    }
+
+    private static float signedTurn(float from, float to) {
+        return Misc.normalizeAngle(to - from + 180f) - 180f;
+    }
+
+    protected boolean forwardSegment(Vector2f from, Vector2f to) {
+        if (Float.isNaN(dashStartBearing)) return true;
+        float direction = Misc.getAngleInDegrees(from, to);
+        return Misc.getAngleDiff(dashStartBearing, direction) <= MAX_FORWARD_TURN + 0.1f
+                && (Float.isNaN(previousExitBearing)
+                || Misc.getAngleDiff(previousExitBearing, direction) <= MAX_FORWARD_TURN + 0.1f);
+    }
+
+    protected boolean clearOfTrails(Vector2f from, Vector2f to, Trail growing) {
+        for (Trail trail : trails) {
+            if (trail.terrain.isExpired()) continue;
+            List<SlipstreamSegment> segments = trail.plugin.getSegments();
+            float distanceBack = 0f;
+            for (int i = segments.size() - 1; i >= 0; i--) {
+                SlipstreamSegment end = segments.get(i);
+                SlipstreamSegment start = segments.get(Math.max(0, i - 1));
+                // Neighbouring cross-sections form one continuous ribbon, not two streams.
+                boolean neighbour = trail == growing && distanceBack < STREAM_CLEARANCE * 2f;
+                distanceBack += Misc.getDistance(start.loc, end.loc);
+                if (neighbour) continue;
+                // New sections start invisible. Only rolled, fully faded sections are free.
+                if (i < trail.rolled && start.fader.isFadedOut() && end.fader.isFadedOut()) continue;
+                if (segmentDistanceSquared(from, to, start.loc, end.loc)
+                        < STREAM_CLEARANCE * STREAM_CLEARANCE) return false;
+            }
+        }
+        return true;
+    }
+
+    protected static double segmentDistanceSquared(Vector2f a, Vector2f b, Vector2f c, Vector2f d) {
+        if ((a.x != b.x || a.y != b.y) && (c.x != d.x || c.y != d.y)
+                && Line2D.linesIntersect(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y)) return 0;
+        return Math.min(Math.min(
+                        Line2D.ptSegDistSq(a.x, a.y, b.x, b.y, c.x, c.y),
+                        Line2D.ptSegDistSq(a.x, a.y, b.x, b.y, d.x, d.y)),
+                Math.min(Line2D.ptSegDistSq(c.x, c.y, d.x, d.y, a.x, a.y),
+                        Line2D.ptSegDistSq(c.x, c.y, d.x, d.y, b.x, b.y)));
     }
 
     protected void endDash(FishEntityPlugin fish, Trail trail) {
