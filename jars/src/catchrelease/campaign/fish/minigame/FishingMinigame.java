@@ -135,7 +135,7 @@ public class FishingMinigame {
         }
 
         if (fish.rarity == FishRarity.LEGENDARY && !hasEndlessTreasure()) {
-            return new MinigameTreasure(TreasureRarity.EPIC);
+            return new MinigameTreasure(TreasureRoller.rollRarity(1f, TreasureRarity.UNCOMMON));
         }
 
         return new MinigameTreasure(TreasureRoller.rollRarity(rumorLootRarityBias));

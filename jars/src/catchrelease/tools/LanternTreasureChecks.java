@@ -59,13 +59,14 @@ public final class LanternTreasureChecks {
             jack.devSpawnTreasure();
             require(jack.getTreasures().size() == 2, "Dev spawn keeps the cap");
             rarityPool(env.system);
+            legendaryRarityPool(env.system);
 
             Game other = new Game(spec("quorum"), env.system);
             other.covered = true;
             for (int i = 0; i < 3; i++) {
                 require(other.getTreasures().size() == 1, "Other legendaries keep one active treasure");
-                require(other.getTreasures().get(0).rarity == TreasureRarity.EPIC,
-                        "Other legendaries still guarantee Epic treasure");
+                require(other.getTreasures().get(0).rarity.rank >= TreasureRarity.UNCOMMON.rank,
+                        "Other legendaries guarantee Uncommon or better treasure");
                 other.stepLoot(FishConstants.TREASURE_HOLD_TIME + 0.01f);
                 require(other.getTreasures().isEmpty(), "Ordinary replacement waits");
                 other.stepLoot(FishConstants.TREASURE_SPAWN_INTERVAL - 0.1f);
@@ -97,6 +98,31 @@ public final class LanternTreasureChecks {
                     "Jack uses the normal rarity weights: " + rarity);
         }
         require(jack.getTakenTreasures().size() == 4096, "All rarity rolls remain collectible");
+    }
+
+    private static void legendaryRarityPool(StarSystemAPI system) {
+        Game game = new Game(spec("quorum"), system);
+        game.covered = true;
+        EnumMap<TreasureRarity, Integer> counts = new EnumMap<>(TreasureRarity.class);
+        for (int i = 0; i < 2048; i++) {
+            game.restart();
+            for (int chest = 0; chest < 3; chest++) {
+                require(game.getTreasures().size() == 1, "Each legendary roll spawns one treasure");
+                TreasureRarity rarity = game.getTreasures().get(0).rarity;
+                require(rarity != TreasureRarity.COMMON, "Legendary rolls exclude Common treasure");
+                counts.merge(rarity, 1, Integer::sum);
+                game.stepLoot(FishConstants.TREASURE_HOLD_TIME + 0.01f);
+                game.stepLoot(FishConstants.TREASURE_SPAWN_INTERVAL + 0.01f);
+            }
+            require(game.getTreasures().isEmpty() && game.getTakenTreasures().size() == 3,
+                    "Every legendary encounter keeps exactly three collectible rolls");
+        }
+        float totalWeight = TreasureRarity.UNCOMMON.weight + TreasureRarity.RARE.weight + TreasureRarity.EPIC.weight;
+        for (TreasureRarity rarity : List.of(TreasureRarity.UNCOMMON, TreasureRarity.RARE, TreasureRarity.EPIC)) {
+            require(counts.getOrDefault(rarity, 0) > 0, "Legendaries can roll " + rarity);
+            require(Math.abs(counts.get(rarity) / 6144f - rarity.weight / totalWeight) < 0.03f,
+                    "Legendary rolls retain relative rarity weights: " + rarity);
+        }
     }
 
     private static FishSpec spec(String id) {

@@ -354,7 +354,9 @@ options route to `catchrelease_intro_rod`, which owns the `giveRod` grant.
 
 ### `campaign/fish/minigame`
 
-Lantern Jack keeps two treasures active throughout its minigame, immediately replacing collected or expired ones. Each uses `TreasureRoller`'s normal Common–Epic rarity weights, without rumor rarity boosts. Other fish retain one active treasure and their finite spawn count and delay; other legendaries still guarantee Epic treasure. All pickups use the existing win-only reward path; escape loses the loot. `FishingMinigamePanel` draws every active treasure and coalesces simultaneous spawn/pickup sounds. `tools/LanternTreasureChecks` covers rarity sampling, collection, replenishment and restart/end behavior.
+Lantern Jack keeps two treasures active throughout its minigame, immediately replacing collected or expired ones. Each uses `TreasureRoller`'s normal Common–Epic rarity weights, without rumor rarity boosts. Other fish retain one active treasure and their finite spawn count and delay; other legendaries get three Uncommon–Epic rolls, retaining those tiers' relative weights without rumor rarity boosts. All pickups use the existing win-only reward path; escape loses the loot. `FishingMinigamePanel` draws every active treasure and coalesces simultaneous spawn/pickup sounds. `tools/LanternTreasureChecks` covers rarity sampling, collection, replenishment and restart/end behavior.
+
+`TreasureRoller.awardCommon` selects commodities, weapons or fighter LPCs at 60/20/20. Uncommon treasure without a Lifting Rig and empty vanilla drop-group results use the same pool. `tools/TreasureLootChecks` samples actual cargo awards to check the split and quantities.
 
 | File | Owner / connection |
 |---|---|

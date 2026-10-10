@@ -43,9 +43,14 @@ public class TreasureRoller {
     }
 
     public static TreasureRarity rollRarity(float rarityBias) {
+        return rollRarity(rarityBias, TreasureRarity.COMMON);
+    }
+
+    public static TreasureRarity rollRarity(float rarityBias, TreasureRarity minimum) {
         WeightedRandomPicker<TreasureRarity> picker = new WeightedRandomPicker<>();
 
         for (TreasureRarity rarity : TreasureRarity.values()) {
+            if (rarity.rank < minimum.rank) continue;
             picker.add(rarity, rarity.weight * (float) Math.pow(rarityBias, rarity.rank));
         }
 
@@ -80,7 +85,7 @@ public class TreasureRoller {
     protected static void awardCommon(TreasureAward award, CargoAPI cargo) {
         float roll = MathUtils.getRandomNumberInRange(0f, 1f);
 
-        if (roll < 0.5f) awardCommodity(award, cargo);
+        if (roll < 0.6f) awardCommodity(award, cargo);
         else if (roll < 0.8f) awardWeapon(award, cargo);
         else awardFighter(award, cargo);
     }
