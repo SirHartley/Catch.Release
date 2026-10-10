@@ -80,6 +80,7 @@ public final class LegendaryEscapeChecks {
                 default -> throw new AssertionError(m);
             });
             entity = api(TextMote.class, (p, m, a) -> switch (m.getName()) {
+                case "getId" -> spec.id;
                 case "getMemoryWithoutUpdate" -> moteMemory;
                 case "getLocation" -> at;
                 case "setLocation" -> { at.set((float) a[0], (float) a[1]); yield null; }
@@ -247,6 +248,7 @@ public final class LegendaryEscapeChecks {
                 case "getInt" -> 1;
                 case "getBoolean", "isDevMode", "isInGame" -> false;
                 case "getColor" -> java.awt.Color.WHITE;
+                case "getSprite" -> null;
                 case "getAngleInDegreesFast" -> {
                     Vector2f from = a.length == 1 ? new Vector2f() : (Vector2f) a[0];
                     Vector2f to = (Vector2f) a[a.length - 1];
@@ -375,6 +377,7 @@ public final class LegendaryEscapeChecks {
         morayHauntStart();
         morayDiveLock();
         moraySwimSpeed();
+        dawnSwimSpeed();
         morayChaseOnly();
         morayShield();
         moray();
@@ -878,6 +881,54 @@ public final class LegendaryEscapeChecks {
                 max = Math.max(max, Vector2f.sub(fish.at, before, null).length() * 60f);
             }
             check(max > 440f, "ordinary fish keep their existing lunge speed");
+        }
+    }
+
+    private static void dawnSwimSpeed() {
+        for (int fps : new int[]{30, 60, 144}) for (FishMotion motion : FishMotion.values()) {
+            try (Environment env = new Environment()) {
+                env.star(0f, 0f, 1000f, 4000f);
+                Fish fish = env.real(LegendaryShields.DAWN_SPECIES);
+                fish.spec.motion = motion;
+                fish.spec.campaignPace = FishSpec.CAMPAIGN_PACE_MAX;
+                fish.spec.campaignWander = FishSpec.CAMPAIGN_WANDER_MAX;
+                env.specs.put(fish.spec.id, fish.spec);
+                var state = LegendaryChases.getState(fish.spec.id);
+                state.systemId = env.system.getId();
+                state.provoked = true;
+                fish.init(fish.getMote(), new FishEntityPlugin.Params(new Vector2f(4000f, 0f), fish.spec.id));
+                fish.at.set(2500f, 0f);
+                fish.keepSurfaced(30f);
+                float min = Float.MAX_VALUE;
+                float max = 0f;
+                for (int frame = 0; frame < 24 * fps; frame++) {
+                    Vector2f before = new Vector2f(fish.at);
+                    fish.advance(1f / fps);
+                    float speed = Vector2f.sub(fish.at, before, null).length() * fps;
+                    check(speed < 565f, "False Dawn's mixed bursts stay within the chase speed cap");
+                    check(fish.at.length() > 1150f && fish.at.length() < 3900f && !fish.expired,
+                            "Slower False Dawn keeps its corona orbit");
+                    min = Math.min(min, speed);
+                    max = Math.max(max, speed);
+                }
+                if (motion == FishMotion.SMOOTH) {
+                    check(min > 320f && min < 322f && max > 469f && max < 471f,
+                            "Smooth chase retains the slower cruise and sprint phases");
+                }
+                if (motion == FishMotion.DARTER || motion == FishMotion.LUNGER) {
+                    check(max > 560f, "Mixed movement still has a small burst");
+                }
+                state.provoked = false;
+                max = 0f;
+                for (int frame = 0; frame < 3 * fps; frame++) {
+                    Vector2f before = new Vector2f(fish.at);
+                    fish.advance(1f / fps);
+                    max = Math.max(max, Vector2f.sub(fish.at, before, null).length() * fps);
+                }
+                if (motion == FishMotion.LUNGER) {
+                    check(max > 285f, "Passive False Dawn keeps its uncapped movement modes");
+                }
+            }
         }
     }
 

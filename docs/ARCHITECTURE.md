@@ -456,6 +456,14 @@ the ledger. Abandoning the haunt restores the single starting charge, even if tw
 were stored before the reset. Shield collision, green rendering and charge rings use the same count.
 Minefield's 22-mine cap counts only live mines, not spent notice/courier anchors.
 
+False Dawn's chase alternates 2.5 seconds at 2.2 times base pace with 3.5 seconds
+at 1.5 times base pace. `FishEntityPlugin` caps the additional movement-mode
+multiplier at 1.2 while provoked, so mixed-mode lunges cannot multiply the sprint
+into a second large burst. Speed tops out at 564.3 units/second at the maximum
+normalized species pace. Passive movement, corona paths, dive timing and minigame stats
+are unchanged. `tools/LegendaryEscapeChecks` checks the chase across movement
+modes and 30/60/144 Hz.
+
 Lantern Jack has only stored hunt shells: three initially, leaving two after the
 wake-up hit starts the chase. Feeding can refill up to three. Every deflection
 spends one. Empty shells do not regenerate with time, haunt activation or a failed
