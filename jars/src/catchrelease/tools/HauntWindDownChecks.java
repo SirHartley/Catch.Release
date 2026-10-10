@@ -170,6 +170,7 @@ public final class HauntWindDownChecks {
             if (held) {
                 near(14000f, f.fish.at.x, "held fish cannot be teleported");
                 check(f.chase.roaming, "deferred return retains the hunt state");
+                check(f.chase.shieldPopped, "held catch cannot have its defense reset underneath it");
                 f.fish.setHeld(false);
                 f.haunt.advance(0.1f);
             }
@@ -178,9 +179,9 @@ public final class HauntWindDownChecks {
             check(!f.fish.isDashing() && !f.chase.provoked && !f.chase.roaming,
                     "return clears escape movement and provocation");
             check(f.fish.getMovementVelocity().length() == 0f, "teleport is not harpoon lead velocity");
-            check(f.chase.shieldPopped && f.chase.shieldUnits == 0 && f.chase.residency == 7
+            check(!f.chase.shieldPopped && f.chase.shieldUnits == -1 && f.chase.residency == 7
                             && f.chase.seenAt == 1234L && f.chase.encountered,
-                    "return preserves defense progress, residency and sightings");
+                    "return resets defenses but preserves residency and sightings");
             Vector2f at = new Vector2f(f.fish.at);
             f.fish.advance(0.1f);
             check(Vector2f.sub(at, f.fish.at, null).length() > 0f, "returned fish resumes swimming");
@@ -203,13 +204,15 @@ public final class HauntWindDownChecks {
     private static void restoreHunt() {
         try (Fixture f = new Fixture()) {
             f.chase.roaming = true;
+            f.chase.shieldPopped = true;
             f.fish.at.set(14000f, 0f);
             f.env.lampsOn = false;
             f.haunt.restore();
             check(f.haunt.getModuleCount() == 1 && f.chase.roaming,
                     "saved hunt restores even outside sight range with lamps off");
+            check(f.chase.shieldPopped, "loading an unfinished hunt does not reset its shield");
             f.haunt.advance(12f);
-            check(!f.chase.roaming && f.fish.at.length() <= LegendarySpawns.RADIUS,
+            check(!f.chase.roaming && !f.chase.shieldPopped && f.fish.at.length() <= LegendarySpawns.RADIUS,
                     "restored dark haunt fades and returns the fish");
         }
     }

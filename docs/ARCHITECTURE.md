@@ -434,7 +434,7 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `LegendarySpawns.java` | Spawns each uncaught resident on system entry and load through `LegendaryHaunt`'s location listener, after tutorial graduation. One buried or surfaced mote per species; no random-population rolls or distance culling. Placement and inactive patrols stay within 6000 units of the primary sun, otherwise the largest planet, otherwise 0/0, and clear stellar hazards. False Dawn uses its corona without the 6000-unit limit; Longliner retains its boat spawn and movement. |
 | `LegendaryStarAvoidance.java` | All non-False-Dawn legendaries avoid each local star's surface and nominal corona plus 150 units. Natural buried spawns, surfacing, console placement, explosive respawns and Imposter reveal use the same stellar boundary. Swimming, submerged runs, travel dashes and reveal drift test complete movement segments; positions already inside are corrected. Quorum steering reserves its escort radius; shell-game centers reserve the largest decoy ring. Manta steering moves its line center with one-slot clearance, preserving spacing and blackout swaps. Held catches remain attached to their retrieval gear. Uses existing movement callbacks, with no new script or sector-wide scan. |
 | `SlipDashModule.java` | Moray slipstream trail and curved travel dash. The first haunt update starts a surfaced escape and stream without waiting for cooldown, full intensity or the repeat-dash range; held/diving fish wait, and lamps must remain on. Repeat dashes wait 11–18 unpaused seconds after the previous dash ends and retain their range/intensity gates. A failed-catch escape consumes the opening so it cannot spawn twice. Streams are 620 units wide. `STREAM_LIFETIME_MULT` is 5: tail roll-up is 0.5 segments per second and segment fade-out is 15 seconds, independent of dash timing. With the 14-segment standing window, fully lit trails finish fading about 43 seconds after a dash ends. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Haunt cleanup removes all owned terrain immediately. |
-| `QuorumShellGame.java` | Active-haunt movement for a Quorum with no escorts. Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. An abandoned Quorum patrols normally until another haunt starts; its missing escorts stay missing. |
+| `QuorumShellGame.java` | Active-haunt movement for a Quorum with no escorts. Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. Abandoning the haunt removes shell-game bodies and restores all three escorts. |
 | `LegendaryHaunt.java` | Transient coordinator. The Moray runs only `SlipDashModule`: escape dashes and slipstreams, with no projectile motes, player slowdown or ability lockout. The manta runs only its formation and chromatic aberration modules. Lantern Jack's stored shells remain in the chase ledger and are not reset by haunt activation. |
 | `MantaBackgroundBlackout.java` | Manta-only 0.3-second background blackout every 15–40 unpaused seconds. First Luna renderer on `TERRAIN_1`, after vanilla background/starfield and before breach windows, motes, fleets and HUD. No saved background changes. `MantaFormationModule` swaps the real mote into a different stationary slot on blackout onset, preserving its target offset and shield/catch identity; swaps wait while held. Renderer expires outside its owning sector/system and is removed on haunt cleanup. |
 | `MantaFormationModule.java` | Abyssal Ghost Manta haunt: one real mote and two haunt-owned phantoms in a straight line at 180-unit spacing. When timed, shield-break or failed-catch jitter ends, the line teleports to a new orientation about its center; no animated rotation. The real fish keeps its slot identity and target offset. Held catches cannot be teleported. `FishEntityPlugin.advance` synchronizes positions after movement; copies use the real mote's dive visibility and shield display. Only the real mote is catchable. Coordinator cleanup removes copies and transient bindings; load-time haunt sweeping prevents duplicate formations. |
@@ -451,7 +451,7 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 Lantern Jack has only stored hunt shells: three initially, leaving two after the
 wake-up hit starts the chase. Feeding can refill up to three. Every deflection
 spends one. Empty shells do not regenerate with time, haunt activation or a failed
-catch; collision and display both use the
+catch. Abandoning the haunt restores the initial count; collision and display both use the
 stored count in `LegendaryShields.isShielded`. It hunts surfaced
 prey and lamp-revealed buried prey, surfacing the latter before pursuit. Pursuit
 uses a direct heading after hit evasion ends. Each swallowed mote expires immediately
@@ -482,13 +482,15 @@ checking that outer boundary alongside stellar clearance. Actual haunt start set
 `Chase.roaming` and releases the outer limit, including through the fade; provocation
 alone does not. False Dawn stays in its corona throughout, and Longliner movement is
 unchanged. `tools/LegendaryPatrolChecks` covers both movement paths, encounter
-transitions, attached bodies, preserved defenses and these exceptions.
+transitions, attached bodies, full encounter resets and these exceptions.
 `LegendaryHaunt` also registers a
 transient `CurrentLocationChangedListener`: departure removes surfaced and buried
 legendaries, their attached Quorum bodies and active haunt modules. The existing
 load sweep removes off-system legendary motes, preserves current residents, and fills
-missing residents through `LegendarySpawns`. Departure clears the hunt's `roaming`
-flag without changing host selection or relocation timing. With lamps on, unseen haunt effects linger for
+missing residents through `LegendarySpawns`. Departure resets uncaught residents'
+encounter state without changing host selection or relocation timing. Longliner's
+reveal flag remains set on departure so its existing relocation still runs.
+With lamps on, unseen haunt effects linger for
 60 seconds, then fade over 12 seconds. Turning the player's lamps off starts that
 fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
@@ -500,16 +502,23 @@ The full-screen chromatic pass also fades its pixel displacement to zero; the
 minigame's region-only pass keeps its existing displacement range.
 False Dawn's ambient host-star flares remain independent of haunt intensity.
 When the fade finishes, the real fish teleports to a safe `LegendarySpawns.position`
-and resumes patrol. The return clears provocation, dash/lure/evasion movement and
-velocity sampling, removes Quorum decoys and moves surviving escorts with the fish.
-It waits for any held fish or attached body to be released. Shields, spent layers,
-host/residency and sighting history are preserved. Longliner keeps its existing
-movement and provocation. Catching the fish or leaving the system still uses immediate
-cleanup, not a return. The saved `Chase.roaming` flag restores an unfinished haunt
+and resumes patrol. `Chase.resetEncounter()` clears provocation, roaming and saved
+defense progress. `FishEntityPlugin.resumePatrol()` restores the timed base shield
+and clears combat/movement timers, flare cooldown, stun, slowdown and velocity
+sampling. Jack's called prey are released. Quorum decoys are removed; surviving
+escorts return with the fish and missing escorts are immediately replaced.
+The reset waits for any held fish or attached body to be released. Moray's shield,
+Jack's three starting shells and Longliner's explosive-only hull all return.
+Longliner removes its revealed mote and clears `revealed`, allowing its existing
+boat reconciler to restore the disguise; its boat/reveal/flee movement is unchanged.
+Host/residency, sighting history, recognition and completed catches are preserved.
+Leaving the system resets defenses but removes motes instead of teleporting them.
+Catching the fish uses cleanup only and cannot reset or respawn it.
+The saved `Chase.roaming` flag restores an unfinished haunt
 at full intensity with a fresh sighting grace period on load, even with lamps off;
 normal fading then applies. Ordinary fish, phantoms and splinters retain their
 movement expiry. `tools/HauntWindDownChecks` covers lamp toggles, dark activation,
-lost contact, held catches, return placement, defense preservation and load restoration.
+lost contact, held catches, return placement, shield resets and load restoration.
 
 Harpoon and drone failure callbacks release real legendary motes through
 `LegendaryShields.onFailedCatch` instead of fading them out. Ordinary fish,
@@ -541,10 +550,11 @@ resetting the normal blackout timer. It does not wait for the 15–40-second int
 Lantern Jack escapes without restoring shields or changing its stored shell count.
 The Moray's shield uses the existing saved `Chase.shieldPopped` flag instead of
 the timed base shield. Once broken, it stays down through failed catches, elapsed
-time and mote recreation. Its failed-catch slipstream dash is unchanged.
+time and mote recreation within a hunt. Abandoning the haunt restores it. Its failed-catch slipstream dash is unchanged.
 The remaining legendaries restore their base shield without changing movement.
 The Imposter keeps `shieldPopped`; its
-saved `recoveryShield` deflects one ordinary harpoon and is then consumed. It uses
+saved `recoveryShield` deflects one ordinary harpoon and is then consumed. Full haunt
+abandonment restores its explosive-only hull instead. The recovery shield uses
 the normal purple shield display, not the red explosive-only hull shield.
 
 The Moray keeps its mixed campaign movement and fleeing weave. `FishEntityPlugin`
