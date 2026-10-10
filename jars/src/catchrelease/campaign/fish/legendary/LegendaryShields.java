@@ -33,6 +33,7 @@ import java.util.List;
  *   splinters regrow at one a month.
  * - The Lantern Jack starts with three stored shells; the wake-up hit leaves two.
  *   Eating motes replenishes them, up to three. It has no regenerating base shell.
+ * - The Moray's shell stays broken after its first shield-breaking deflection.
  * - Everything else wears the base shell: one deflection, regrown ten seconds later,
  *   so landing a throw means following the first with a second inside the window.
  */
@@ -66,6 +67,7 @@ public class LegendaryShields {
     private static final Color SHIELD_PURPLE = new Color(203, 70, 255);
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
+    private static final Color SHIELD_GREEN = new Color(70, 255, 120);
 
     public enum HitResult {
         NONE, DEFLECTED, POPPED
@@ -126,6 +128,13 @@ public class LegendaryShields {
                     return HitResult.DEFLECTED;
                 }
                 return HitResult.NONE;
+            }
+            case MORAY_SPECIES -> {
+                if (state.shieldPopped) return HitResult.NONE;
+                state.shieldPopped = true;
+                fish.flashShield();
+                sayDeflection(fish, "Deflected");
+                return HitResult.DEFLECTED;
             }
             default -> {
                 // the base shell every unarmoured legendary wears
@@ -230,6 +239,7 @@ public class LegendaryShields {
             case POP_SHIELD_SPECIES -> !state.shieldPopped || state.recoveryShield;
             case MOTE_SHIELD_SPECIES -> getShieldUnits(state, MOTE_SHIELD_COUNT) > 0;
             case CHARGE_SHIELD_SPECIES -> getJackStack(state) > 0;
+            case MORAY_SPECIES -> !state.shieldPopped;
             default -> fish.isBaseShieldUp();
         };
     }
@@ -251,6 +261,7 @@ public class LegendaryShields {
             case POP_SHIELD_SPECIES -> LegendaryChases.getState(id).shieldPopped
                     ? SHIELD_PURPLE : SHIELD_RED;
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
+            case MORAY_SPECIES, CHARGE_SHIELD_SPECIES -> SHIELD_GREEN;
             default -> SHIELD_PURPLE;
         };
     }

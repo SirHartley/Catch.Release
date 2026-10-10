@@ -38,6 +38,9 @@ public final class LanternFeedingChecks {
         try (var env = new LegendaryEscapeChecks.Environment()) {
             callPool(env);
             var jack = env.real("lantern_jack");
+            var color = LegendaryShields.getShieldColor(jack);
+            check(color.getGreen() > color.getRed() && color.getGreen() > color.getBlue(),
+                    "Jack's shield, stored rings and hit flash share green");
             check(LegendaryShields.isShielded(jack) && LegendaryShields.getStackedRings(jack) == 3,
                     "Jack has three hunt shields before the wake-up hit");
             for (int remaining : new int[]{2, 1, 0}) {

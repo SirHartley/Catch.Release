@@ -522,6 +522,9 @@ Manta failure immediately restores its base shield and invokes the formation's
 existing background-only blackout/slot swap, rebuilding missing copies first and
 resetting the normal blackout timer. It does not wait for the 15–40-second interval.
 Lantern Jack escapes without restoring shields or changing its stored shell count.
+The Moray's shield uses the existing saved `Chase.shieldPopped` flag instead of
+the timed base shield. Once broken, it stays down through failed catches, elapsed
+time and mote recreation. Its failed-catch slipstream dash is unchanged.
 The remaining legendaries restore their base shield without changing movement.
 The Imposter keeps `shieldPopped`; its
 saved `recoveryShield` deflects one ordinary harpoon and is then consumed. It uses

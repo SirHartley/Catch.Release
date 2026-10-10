@@ -284,6 +284,9 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
+- The Moray's non-regenerating shield and Lantern Jack's feeding-only shells are
+  green. `LegendaryShields.getShieldColor` supplies their bubble, outline, stored
+  rings and deflection flash through the shared mote renderer.
 - Legendary trails retain the red foggy texture, 10-to-1-unit taper, 0.85 opacity,
   normal blending and five-second fade. Their transient Luna renderer runs independently of the mote's render
   callback, so a hidden or offscreen head does not hide its illuminated tail.

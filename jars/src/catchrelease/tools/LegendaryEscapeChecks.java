@@ -363,6 +363,7 @@ public final class LegendaryEscapeChecks {
         quorum();
         morayHauntStart();
         morayChaseOnly();
+        morayShield();
         moray();
         morayTrailLifetime();
         manta();
@@ -782,15 +783,60 @@ public final class LegendaryEscapeChecks {
         }
     }
 
+    private static void morayShield() throws Exception {
+        for (int fps : new int[]{30, 60, 144}) for (boolean explosive : new boolean[]{false, true}) {
+            try (Environment env = new Environment()) {
+                Fish fish = env.real(LegendaryShields.MORAY_SPECIES);
+                fish.setSwimTarget(new Vector2f(10000f, 10000f));
+                java.awt.Color color = LegendaryShields.getShieldColor(fish);
+                check(color.getGreen() > color.getRed() && color.getGreen() > color.getBlue(),
+                        "Moray shield and deflection flash are green");
+                check(LegendaryShields.isShielded(fish), "Moray starts shielded");
+                check(LegendaryShields.onHarpoonContact(fish.getMote(), explosive)
+                        == LegendaryShields.HitResult.DEFLECTED && LegendaryShields.isShielded(fish),
+                        "wake-up contact retains the existing shield");
+                check(LegendaryShields.onHarpoonContact(fish.getMote(), explosive)
+                        == LegendaryShields.HitResult.DEFLECTED && !LegendaryShields.isShielded(fish),
+                        "next hit breaks Moray shield");
+                for (int loss = 0; loss < 3; loss++) {
+                    fish.setHeld(true);
+                    check(LegendaryShields.onFailedCatch(fish.getMote()) && !fish.isHeld()
+                            && fish.isDashing(), "loss releases Moray into its escape dash");
+                    for (int frame = 0; frame < fps * 12; frame++) {
+                        fish.advance(1f / fps);
+                        check(!LegendaryShields.isShielded(fish), "Moray shield cannot regrow over time");
+                    }
+                    check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
+                            == LegendaryShields.HitResult.NONE, "next catch attempt is not deflected");
+                }
+                ByteArrayOutputStream saved = new ByteArrayOutputStream();
+                try (ObjectOutputStream out = new ObjectOutputStream(saved)) {
+                    out.writeObject(LegendaryChases.getState(fish.spec.id));
+                }
+                try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(saved.toByteArray()))) {
+                    LegendaryChases.Chase loaded = (LegendaryChases.Chase) in.readObject();
+                    env.persistent.put(LegendaryChases.KEY, new LinkedHashMap<>(Map.of(fish.spec.id, loaded)));
+                }
+                fish.expired = true;
+                Fish recreated = env.real(LegendaryShields.MORAY_SPECIES);
+                check(!LegendaryShields.isShielded(recreated)
+                        && LegendaryShields.onHarpoonContact(recreated.getMote(), false)
+                        == LegendaryShields.HitResult.NONE, "saved shield break survives mote recreation");
+            }
+        }
+    }
+
     private static void moray() {
         try (Environment env = new Environment()) {
             Fish fish = env.real("slipstream_moray");
-            fish.tryBaseShieldDeflect();
+            LegendaryShields.onHarpoonContact(fish.getMote(), false);
+            LegendaryShields.onHarpoonContact(fish.getMote(), false);
             fish.setHeld(true);
             LegendaryShields.onFailedCatch(fish.getMote());
             Slip slip = (Slip) env.haunt.module;
             check(slip.remaining() > SlipDashModule.DASH_MAX_SECONDS && fish.isDashing(), "immediate longer dash");
-            check(env.terrain.size() == 1 && !fish.isBaseShieldUp(), "slipstream response does not refill shield");
+            check(env.terrain.size() == 1 && !LegendaryShields.isShielded(fish),
+                    "slipstream response does not refill shield");
             for (int i = 0; i < 90; i++) {
                 fish.diveTime(0.1f);
                 fish.at.translate(70f, 30f);
