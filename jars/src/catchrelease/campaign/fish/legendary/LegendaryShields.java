@@ -284,8 +284,6 @@ public class LegendaryShields {
         if (CHARGE_SHIELD_SPECIES.equals(id)) return fish.getJackSpeedMult();
 
         if (isFleeing(fish)) {
-            // the moray does not pulse - it runs, and its slip-dashes ride on top;
-            // the False Dawn runs flat out so its minefield is crossed at speed
             if (MORAY_SPECIES.equals(id)) return fish.getWildRunSpeedMult();
             if (DAWN_SPECIES.equals(id)) return fish.getDawnRunSpeedMult();
 
