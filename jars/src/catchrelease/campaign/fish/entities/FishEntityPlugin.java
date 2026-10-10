@@ -999,8 +999,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     protected void advanceTrail() {
         if (getRarity() != FishRarity.LEGENDARY && !isDecoy()) return;
-        if (trail == null) trail = new LegendaryTrail();
-        trail.advance(entity, held ? 0f : getMoteAlpha());
+        if (trail == null || trail.isExpired()) trail = new LegendaryTrail();
+        trail.sample(entity, !held);
     }
 
     public void externalRender(ViewportAPI viewport){

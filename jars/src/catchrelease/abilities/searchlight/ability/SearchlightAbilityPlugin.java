@@ -103,6 +103,21 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         return ((SearchlightAbilityPlugin) ability).impressionRenderer;
     }
 
+    public static float getBeamVisibilityAt(Vector2f at) {
+        CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
+        if (fleet == null || at == null
+                || !(fleet.getAbility(ABILITY_ID) instanceof SearchlightAbilityPlugin lamps)
+                || !lamps.isRuntimeCurrent()) return 0f;
+        float best = 0f;
+        for (Searchlight light : lamps.activeSearchlights) {
+            if (!light.isRuntimeCurrent()) continue;
+            float reveal = Math.min(1f, light.getLitStrength(at) * 3f);
+            float visible = catchrelease.campaign.fish.legendary.LegendaryHaunt.getMantaLampAlpha(light.getRenderLoc());
+            best = Math.max(best, reveal * visible);
+        }
+        return best;
+    }
+
     @Override
     protected void activateImpl() {
         if (needleSensor != null) needleSensor.clear();
