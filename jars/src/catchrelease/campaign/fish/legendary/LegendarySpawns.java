@@ -57,16 +57,29 @@ public final class LegendarySpawns {
     }
 
     public static Vector2f position(StarSystemAPI system, FishSpec spec) {
+        return position(system, spec, 0f);
+    }
+
+    public static boolean isPatrolling(FishSpec spec) {
+        return spec != null && spec.rarity == FishRarity.LEGENDARY
+                && !LegendaryShields.DAWN_SPECIES.equals(spec.id)
+                && !LonglinerDecoy.spawnsAsBoat(spec)
+                && !LegendaryChases.getState(spec.id).roaming;
+    }
+
+    static Vector2f position(StarSystemAPI system, FishSpec spec, float extra) {
         Vector2f center = center(system);
         var corona = LegendaryShields.DAWN_SPECIES.equals(spec.id) ? FalseDawnOrbit.findCorona(system) : null;
+        if (LegendaryShields.DAWN_SPECIES.equals(spec.id) && corona == null) return null;
         if (corona != null) center = new Vector2f(corona.getParams().relatedEntity.getLocation());
+        float limit = RADIUS - extra;
         for (int i = 0; i < 200; i++) {
-            float radius = i < 128 ? RADIUS * (float) Math.sqrt(Math.random()) : RADIUS;
+            float radius = i < 128 ? limit * (float) Math.sqrt(Math.random()) : limit;
             float angle = i < 128 ? (float) Math.random() * 360f : (i - 128) * 5f;
             Vector2f at = MathUtils.getPointOnCircumference(center, radius, angle);
             at = corona != null ? FalseDawnOrbit.confine(corona, at)
-                    : LegendaryStarAvoidance.place(system, at, 0f);
-            if (Misc.getDistance(center, at) <= RADIUS) return at;
+                    : LegendaryStarAvoidance.place(system, at, extra);
+            if (corona != null || Misc.getDistance(center, at) <= limit) return at;
         }
         return null;
     }

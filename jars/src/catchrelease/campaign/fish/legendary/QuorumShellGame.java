@@ -116,7 +116,7 @@ public class QuorumShellGame {
             return false;
         }
 
-        return LegendaryChases.isProvoked(spec.id) && !LegendaryShields.isShielded(fish);
+        return LegendaryChases.getState(spec.id).roaming && !LegendaryShields.isShielded(fish);
     }
 
     protected static State start(SectorEntityToken real) {

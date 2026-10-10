@@ -18,6 +18,7 @@ public final class MoraySlipstreamChecks {
 
         Slip(LegendaryEscapeChecks.Environment env) {
             super(env.system, env.real("slipstream_moray").spec);
+            catchrelease.campaign.fish.legendary.LegendaryChases.getState(spec.id).roaming = true;
         }
 
         void sample(float x, float y) { recordTrail(new Vector2f(x, y)); }

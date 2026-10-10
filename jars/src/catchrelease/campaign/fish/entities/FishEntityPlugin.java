@@ -284,7 +284,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float y = movementSampled ? lastY : entity.getLocation().y;
         if (!held && !phantom && decoyAnchor == null && orbitAnchor == null
                 && LegendaryStarAvoidance.applies(getFishSpec())) {
-            LegendaryStarAvoidance.confine(entity, getFishSpec());
+            LegendaryStarAvoidance.confine(entity, getFishSpec(), patrolClearance());
         }
         advanceFish(amount);
         if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
@@ -581,8 +581,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             mantaFormation.move(next);
             return;
         }
-        float escort = LegendaryShields.MOTE_SHIELD_SPECIES.equals(fishId) ? ORBIT_RADIUS : 0f;
-        LegendaryStarAvoidance.move(entity, getFishSpec(), next, escort);
+        LegendaryStarAvoidance.move(entity, getFishSpec(), next, patrolClearance());
+    }
+
+    private float patrolClearance() {
+        return LegendaryShields.MOTE_SHIELD_SPECIES.equals(getFishId()) ? ORBIT_RADIUS : 0f;
     }
 
     public void setMantaFormation(catchrelease.campaign.fish.legendary.MantaFormationModule formation) {

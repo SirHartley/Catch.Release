@@ -202,7 +202,11 @@ public final class LegendaryEscapeChecks {
         HauntModule module;
         @Override protected List<HauntModule> buildModules(FishSpec spec, StarSystemAPI system) {
             if (productionModules) return super.buildModules(spec, system);
-            module = "slipstream_moray".equals(spec.id) ? new Slip(system, spec) : new Manta(system, spec);
+            module = switch (spec.id) {
+                case "slipstream_moray" -> new Slip(system, spec);
+                case "quorum" -> new DistractionMotesModule(system, spec);
+                default -> new Manta(system, spec);
+            };
             return List.of(module);
         }
         void close() { stop(); }
@@ -465,6 +469,7 @@ public final class LegendaryEscapeChecks {
             real.at.set(-1660f, 0f);
             LegendaryChases.getState("quorum").shieldUnits = 0;
             LegendaryChases.getState("quorum").provoked = true;
+            LegendaryChases.getState("quorum").roaming = true;
             QuorumShellGame.onFailedCatch(real);
             for (int i = 0; i < 180; i++) {
                 QuorumShellGame.advance(real, 1f / 60f);
@@ -655,6 +660,7 @@ public final class LegendaryEscapeChecks {
             LegendaryChases.Chase state = LegendaryChases.getState("quorum");
             state.shieldUnits = 0;
             state.provoked = true;
+            state.roaming = true;
             QuorumShellGame.advance(fish, 0.8f);
             Vector2f center = new Vector2f();
             for (Fish body : env.fish) Vector2f.add(center, body.at, center);

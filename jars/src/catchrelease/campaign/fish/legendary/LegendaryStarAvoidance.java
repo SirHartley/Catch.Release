@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.terrain.StarCoronaTerrainPlugin;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -29,18 +30,42 @@ public final class LegendaryStarAvoidance {
     }
 
     public static boolean confine(SectorEntityToken mote, FishSpec spec) {
+        return confine(mote, spec, 0f);
+    }
+
+    public static boolean confine(SectorEntityToken mote, FishSpec spec, float extra) {
         if (spec == null) return true;
         if (!applies(spec)) return FalseDawnOrbit.confine(mote, spec.id);
-        Vector2f safe = place(mote.getContainingLocation(), mote.getLocation(), 0f);
+        Vector2f safe = patrolStart(mote, spec, extra, patrolCenter(mote, spec),
+                stars(mote.getContainingLocation(), extra));
         mote.setLocation(safe.x, safe.y);
         return true;
     }
 
     public static void move(SectorEntityToken mote, FishSpec spec, Vector2f destination, float extra) {
-        Vector2f next = applies(spec)
-                ? step(mote.getContainingLocation(), mote.getLocation(), destination, extra)
-                : destination;
+        if (!applies(spec)) {
+            mote.setLocation(destination.x, destination.y);
+            return;
+        }
+        List<Star> stars = stars(mote.getContainingLocation(), extra);
+        Vector2f center = patrolCenter(mote, spec);
+        Vector2f from = mote.getLocation();
+        Vector2f start = patrolStart(mote, spec, extra, center, stars);
+        Vector2f next = step(stars, start, destination.x - from.x, destination.y - from.y, extra, center);
         mote.setLocation(next.x, next.y);
+    }
+
+    private static Vector2f patrolCenter(SectorEntityToken mote, FishSpec spec) {
+        return mote.getContainingLocation() instanceof StarSystemAPI system && LegendarySpawns.isPatrolling(spec)
+                ? LegendarySpawns.center(system) : null;
+    }
+
+    private static Vector2f patrolStart(SectorEntityToken mote, FishSpec spec, float extra,
+                                      Vector2f center, List<Star> stars) {
+        Vector2f safe = outside(stars, mote.getLocation());
+        if (inside(center, safe, extra)) return safe;
+        Vector2f replacement = LegendarySpawns.position((StarSystemAPI) mote.getContainingLocation(), spec, extra);
+        return replacement == null ? safe : replacement;
     }
 
     public static Vector2f place(LocationAPI location, Vector2f point, float extra) {
@@ -49,12 +74,13 @@ public final class LegendaryStarAvoidance {
 
     public static Vector2f step(LocationAPI location, Vector2f from, Vector2f to, float extra) {
         List<Star> stars = stars(location, extra);
-        if (stars.isEmpty()) return new Vector2f(to);
-        Vector2f start = outside(stars, from);
-        float dx = to.x - from.x;
-        float dy = to.y - from.y;
+        return step(stars, outside(stars, from), to.x - from.x, to.y - from.y, extra, null);
+    }
+
+    private static Vector2f step(List<Star> stars, Vector2f start, float dx, float dy,
+                                 float extra, Vector2f center) {
         Vector2f wanted = new Vector2f(start.x + dx, start.y + dy);
-        if (clear(stars, start, wanted)) return wanted;
+        if (inside(center, wanted, extra) && clear(stars, start, wanted)) return wanted;
 
         // Test the whole segment: a long dash can cross a star with both endpoints outside it.
         double heading = Math.atan2(dy, dx);
@@ -64,10 +90,18 @@ public final class LegendaryStarAvoidance {
                 double angle = heading + side * Math.toRadians(degrees);
                 Vector2f next = new Vector2f(start.x + (float) (Math.cos(angle) * length),
                         start.y + (float) (Math.sin(angle) * length));
-                if (clear(stars, start, next)) return next;
+                if (inside(center, next, extra) && clear(stars, start, next)) return next;
             }
         }
         return start;
+    }
+
+    private static boolean inside(Vector2f center, Vector2f point, float extra) {
+        if (center == null) return true;
+        double dx = point.x - center.x;
+        double dy = point.y - center.y;
+        double radius = LegendarySpawns.RADIUS - extra;
+        return dx * dx + dy * dy <= radius * radius;
     }
 
     private static List<Star> stars(LocationAPI location, float extra) {
