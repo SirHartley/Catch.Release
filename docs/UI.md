@@ -284,6 +284,14 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
+- Legendary trails retain the red foggy texture, 2-to-0.4-unit taper and 0.3-second
+  fade. Their transient Luna renderer runs independently of the mote's render
+  callback, so a hidden or offscreen head does not hide its illuminated tail.
+  Quads are subdivided at most four world units apart; each vertex uses current
+  spot/fan coverage and that lamp's Manta flicker, not stored mote visibility or
+  retained contact marks. Lamps off means no visible trail. Viewport alpha and
+  culling still apply. Pause freezes sampling and ageing; GL and shared sprite
+  state are preserved. No MagicLib trail registration remains for these motes.
 - Legendary floating notices use `LegendaryShields.say`. It keeps vanilla's renderer
   and lifetime, but stacks older labels above newer ones by the font height plus four
   screen units, converted through the current viewport. Older labels drift upward

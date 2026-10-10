@@ -1,6 +1,5 @@
 package catchrelease.campaign.fish.entities;
 
-import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -93,8 +92,8 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
     protected void advanceTrail() {
         if (getRarity() != FishRarity.LEGENDARY) return;
-        if (trail == null) trail = new LegendaryTrail();
-        trail.advance(entity, SearchlightAbilityPlugin.getRevealStrength(entity));
+        if (trail == null || trail.isExpired()) trail = new LegendaryTrail();
+        trail.sample(entity, true);
     }
 
     public Vector2f getMovementVelocity() {
