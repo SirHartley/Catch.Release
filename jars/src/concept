@@ -16,7 +16,9 @@ qa_
 
 Haunts
 quorum done
-lantern jack lined up for improvements, double check
+ghost manta done
+lantern jack in progress
+
 
 General todos before release
 Settings (+disable sidequest icon!)
@@ -33,9 +35,19 @@ Placeholder art
 industry
 item box
 
+New quest type that can show up whenever fitting: Treasure hauling.
+- Requirement: Fish until you find a specific treasure (assign spawn chance, quest yellow bg on treasure)
+- treasure contains a "treasure" placeholder icon (rig in settings)
+- bring that back for reward
+
+
+
 ---------------------
 
 Impactful Upgrades
+
+The Needle Sensor
+- Quest? bar guy that tells fables?
 
 The Radial Rig
 - Should probably feature a questline to get - scientist?
