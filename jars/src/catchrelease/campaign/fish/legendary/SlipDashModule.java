@@ -30,8 +30,8 @@ import java.util.List;
 public class SlipDashModule extends BaseHauntModule {
 
     public static final float TRIGGER_RANGE = 2000f;
-    public static final float COOLDOWN_MIN_SECONDS = 9f;
-    public static final float COOLDOWN_MAX_SECONDS = 16f;
+    public static final float COOLDOWN_MIN_SECONDS = 11f;
+    public static final float COOLDOWN_MAX_SECONDS = 18f;
 
     public static final float DASH_SPEED = 900f;
     public static final float DASH_MIN_SECONDS = 2.4f;
