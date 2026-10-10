@@ -193,8 +193,10 @@ public final class LegendaryEscapeChecks {
 
     static class Haunt extends LegendaryHaunt {
 
+        boolean productionModules;
         HauntModule module;
         @Override protected List<HauntModule> buildModules(FishSpec spec, StarSystemAPI system) {
+            if (productionModules) return super.buildModules(spec, system);
             module = "slipstream_moray".equals(spec.id) ? new Slip(system, spec) : new Manta(system, spec);
             return List.of(module);
         }
@@ -360,6 +362,7 @@ public final class LegendaryEscapeChecks {
         defaults();
         quorum();
         morayHauntStart();
+        morayChaseOnly();
         moray();
         morayTrailLifetime();
         manta();
@@ -745,6 +748,37 @@ public final class LegendaryEscapeChecks {
             slip.advance(0.1f);
             check(env.terrain.size() == 1 && fish.isDashing(), "released fish can start its opening escape");
             slip.cleanup();
+        }
+    }
+
+    private static void morayChaseOnly() {
+        try (Environment env = new Environment()) {
+            env.tutorialStage = FishingIntro.DONE;
+            env.haunt.productionModules = true;
+            Fish fish = env.real("slipstream_moray");
+            fish.setSwimTarget(new Vector2f(20000f, 0f));
+            Fish ordinary = env.real("ordinary");
+            ordinary.spec.rarity = FishRarity.COMMON;
+            ordinary.at.set(50f, 0f);
+            env.specs.put(fish.spec.id, fish.spec);
+            env.specs.put(ordinary.spec.id, ordinary.spec);
+            LegendaryChases.Chase chase = LegendaryChases.getState(fish.spec.id);
+            chase.systemId = env.system.getId();
+            chase.provoked = true;
+
+            env.haunt.advance(1f / 60f);
+            check(fish.isDashing() && env.terrain.size() == 1, "production haunt retains its opening escape");
+            // The fleet proxy rejects ability/cooldown access and movement writes.
+            for (int frame = 0; frame < 40 * 60; frame++) {
+                fish.advance(1f / 60f);
+                env.haunt.advance(1f / 60f);
+                check(!ordinary.isDashing() && ordinary.entityScripts.isEmpty(),
+                        "Moray leaves nearby ordinary fish alone");
+            }
+            check(env.fish.size() == 2, "Moray does not conjure projectile fish");
+            env.haunt.close();
+            check(env.terrain.stream().allMatch(t -> t.expired && t.removed),
+                    "production haunt cleans up streams without changing player abilities");
         }
     }
 

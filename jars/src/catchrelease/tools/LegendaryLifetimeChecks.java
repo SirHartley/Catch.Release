@@ -59,7 +59,7 @@ public final class LegendaryLifetimeChecks {
                 fish.advance(0.1f);
                 fish.advance(0.1f);
                 check(fish.entityScripts.isEmpty() && !fish.expired, id + " survives swim arrival");
-                fish.startDash(new Vector2f(100f, 0f), 0.1f);
+                fish.startTravelDash(new Vector2f(100f, 0f), 0.1f);
                 fish.advance(0.2f);
                 check(fish.entityScripts.isEmpty() && !fish.expired, id + " survives dash completion");
             }
@@ -78,11 +78,6 @@ public final class LegendaryLifetimeChecks {
                 check(!fish.isRealLegendary() && fish.entityScripts.size() == 1,
                         "ordinary fish, phantoms and shards retain arrival expiry");
             }
-            Fish dasher = env.real("ordinary");
-            dasher.spec.rarity = FishRarity.COMMON;
-            dasher.startDash(new Vector2f(100f, 0f), 0.1f);
-            dasher.advance(0.2f);
-            check(dasher.entityScripts.size() == 1, "ordinary flung fish retains dash expiry");
         }
     }
 
