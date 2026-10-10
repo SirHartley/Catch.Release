@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.legendary.*;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
 import catchrelease.memory.TransientMemory;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
@@ -358,6 +359,7 @@ public final class LegendaryEscapeChecks {
     public static void main(String[] args) throws Exception {
         defaults();
         quorum();
+        morayHauntStart();
         moray();
         morayTrailLifetime();
         manta();
@@ -670,6 +672,82 @@ public final class LegendaryEscapeChecks {
         }
     }
 
+    private static void morayHauntStart() {
+        for (int fps : new int[]{30, 60, 144}) for (float range : new float[]{700f, 2100f}) {
+            try (Environment env = new Environment()) {
+                env.tutorialStage = FishingIntro.DONE;
+                Fish fish = env.real("slipstream_moray");
+                fish.at.set(range, 0f);
+                env.specs.put(fish.spec.id, fish.spec);
+                LegendaryChases.Chase chase = LegendaryChases.getState(fish.spec.id);
+                chase.systemId = env.system.getId();
+                float dt = 1f / fps;
+
+                env.haunt.advance(dt);
+                check(env.terrain.isEmpty(), "unprovoked Moray does not start a stream");
+                chase.provoked = true;
+                env.lampsOn = false;
+                env.haunt.advance(dt);
+                check(env.terrain.isEmpty(), "lamps must be on to start the haunt");
+                env.lampsOn = true;
+                env.haunt.advance(0f);
+                check(env.terrain.isEmpty(), "zero time does not start the haunt");
+
+                env.haunt.advance(dt);
+                Slip slip = (Slip) env.haunt.module;
+                check(env.haunt.getIntensity() < 1f && env.terrain.size() == 1,
+                        "first haunt update creates the stream before full intensity");
+                check(fish.isDashing() && slip.remaining() >= SlipDashModule.DASH_MIN_SECONDS
+                                && slip.remaining() <= SlipDashModule.DASH_MAX_SECONDS,
+                        "opening escape uses the normal dash duration");
+                Vector2f before = new Vector2f(fish.at);
+                fish.advance(dt);
+                check(fish.at.length() > before.length(), "first movement frame flees from the player");
+                for (int i = 0; i < fps / 2; i++) {
+                    fish.advance(dt);
+                    env.haunt.advance(dt);
+                    check(!fish.isDiving(), "opening dash stays surfaced");
+                }
+                check(env.terrain.size() == 1 && env.terrain.get(0).stream.getSegments().size() > 1,
+                        "opening escape grows one stream at " + fps + " Hz");
+
+                slip.step(fish, SlipDashModule.DASH_MAX_SECONDS);
+                fish.at.set(700f, 0f);
+                slip.setIntensity(1f);
+                slip.advance(SlipDashModule.COOLDOWN_MIN_SECONDS - dt);
+                check(env.terrain.size() == 1, "repeat dash keeps its cooldown");
+                slip.setIntensity(0.5f);
+                slip.advance(SlipDashModule.COOLDOWN_MAX_SECONDS);
+                check(env.terrain.size() == 1, "repeat dash still requires full intensity");
+                slip.setIntensity(1f);
+                fish.at.set(2100f, 0f);
+                slip.advance(dt);
+                check(env.terrain.size() == 1, "repeat dash still requires normal trigger range");
+                fish.at.set(700f, 0f);
+                slip.advance(dt);
+                check(env.terrain.size() == 2, "repeat dash starts once all normal gates pass");
+                env.haunt.close();
+                check(env.terrain.stream().allMatch(t -> t.expired && t.removed),
+                        "haunt cleanup removes opening and repeat streams");
+            }
+        }
+        try (Environment env = new Environment()) {
+            Fish fish = env.real("slipstream_moray");
+            Slip slip = new Slip(env.system, fish.spec);
+            fish.setHeld(true);
+            slip.advance(0.1f);
+            check(env.terrain.isEmpty() && !fish.isDashing(), "opening dash cannot pull a held fish away");
+            fish.setHeld(false);
+            env.lampsOn = false;
+            slip.advance(0.1f);
+            check(env.terrain.isEmpty(), "delayed opening cannot start with lamps off");
+            env.lampsOn = true;
+            slip.advance(0.1f);
+            check(env.terrain.size() == 1 && fish.isDashing(), "released fish can start its opening escape");
+            slip.cleanup();
+        }
+    }
+
     private static void moray() {
         try (Environment env = new Environment()) {
             Fish fish = env.real("slipstream_moray");
@@ -691,6 +769,9 @@ public final class LegendaryEscapeChecks {
                     "another loss restarts emergency dash");
             slip.step(fish, SlipDashModule.ESCAPE_DASH_SECONDS);
             check(!fish.isDashing(), "dash ends");
+            slip.setIntensity(0.5f);
+            slip.advance(SlipDashModule.COOLDOWN_MAX_SECONDS + 1f);
+            check(env.terrain.size() == 2, "failed catch consumes the opening dash without a second stream");
             env.haunt.close();
             check(env.terrain.stream().allMatch(t -> t.expired && t.removed), "cleanup removes both trails");
         }

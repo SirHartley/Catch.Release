@@ -109,8 +109,9 @@ per-lamp flicker, overlapping impressions and cleanup. `tools/MantaMinigameCheck
 compares decoy motion/tells against the real model at 30/60/144 Hz and checks
 real-only scoring, treasure isolation and restart/end behavior. These are standalone
 checks with API proxies; they do not test OpenGL output or engine callback ordering.
-`tools/LegendaryEscapeChecks` exercises failure dispatch, four-turn shell-game
-bursts at 30/60/144 Hz, repeated-loss decoy caps, emergency dash duration,
+`tools/LegendaryEscapeChecks` exercises immediate Moray haunt-start escapes,
+repeat-dash gates, failure dispatch, four-turn shell-game bursts at 30/60/144 Hz,
+repeated-loss decoy caps, emergency dash duration,
 slipstream roll-up/fade lifetime and cleanup, immediate manta swaps, fixed hit-position
 labels, and the Imposter's ordinary-hit recovery shield.
 It also checks corona-safe movement segments, invalid-position recovery, overlapping
@@ -427,7 +428,7 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `LegendaryChases.java` | Persistent host, sighting, provocation, Imposter reveal, completion, and defense state for each legendary. |
 | `LegendarySpawns.java` | Spawns each uncaught resident on system entry and load through `LegendaryHaunt`'s location listener, after tutorial graduation. One buried or surfaced mote per species; no random-population rolls or distance culling. Placement is within 6000 units of the primary sun, otherwise the largest planet, otherwise 0/0, and clears stellar hazards. False Dawn uses its corona's star; Longliner retains its boat spawn. |
 | `LegendaryStarAvoidance.java` | All non-False-Dawn legendaries avoid each local star's surface and nominal corona plus 150 units. Natural buried spawns, surfacing, console placement, explosive respawns and Imposter reveal use the same boundary. Swimming, submerged runs, travel dashes and reveal drift test complete movement segments; positions already inside are corrected. Quorum steering reserves its escort radius; shell-game centers reserve the largest decoy ring. Manta steering moves its line center with one-slot clearance, preserving spacing and blackout swaps. Held catches remain attached to their retrieval gear. Uses existing movement callbacks, with no new script, saved state or sector-wide scan. |
-| `SlipDashModule.java` | Moray slipstream trail and curved travel dash. `STREAM_LIFETIME_MULT` is 3: tail roll-up is 2.5 / 3 segments per second and segment fade-out is 9 seconds, independent of dash timing. With the 14-segment standing window, fully lit trails finish fading about 25.8 seconds after a dash ends. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Haunt cleanup removes all owned terrain immediately. |
+| `SlipDashModule.java` | Moray slipstream trail and curved travel dash. The first haunt update starts a surfaced escape and stream without waiting for cooldown, full intensity or the repeat-dash range; held/diving fish wait, and lamps must remain on. Later dashes retain their normal gates. A failed-catch escape consumes the opening so it cannot spawn twice. `STREAM_LIFETIME_MULT` is 3: tail roll-up is 2.5 / 3 segments per second and segment fade-out is 9 seconds, independent of dash timing. With the 14-segment standing window, fully lit trails finish fading about 25.8 seconds after a dash ends. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Haunt cleanup removes all owned terrain immediately. |
 | `QuorumShellGame.java` | Real Quorum failures spin the shell game four turns in 1.2 seconds and add up to 12 outer-ring phantoms. They share the existing decoy anchor/cleanup, cannot award catches, and repeated failures reuse them. The two ordinary shell-game decoys remain catchable and replenish separately. |
 | `LegendaryHaunt.java` | Transient coordinator. The manta runs only its formation and chromatic aberration modules. Lantern Jack's stored shells remain in the chase ledger and are not reset by haunt activation. |
 | `MantaBackgroundBlackout.java` | Manta-only 0.3-second background blackout every 15–40 unpaused seconds. First Luna renderer on `TERRAIN_1`, after vanilla background/starfield and before breach windows, motes, fleets and HUD. No saved background changes. `MantaFormationModule` swaps the real mote into a different stationary slot on blackout onset, preserving its target offset and shield/catch identity; swaps wait while held. Renderer expires outside its owning sector/system and is removed on haunt cleanup. |
@@ -480,8 +481,9 @@ missing residents through `LegendarySpawns`. Departure cleanup does not change
 fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
 Existing module callbacks handle the fade and cleanup; no new polling script.
-Spawners and timed Manta blackouts stop escalating below full intensity. Screen
-effects scale all the way to zero, including their minimum-strength component.
+Spawners and timed Manta blackouts stop escalating below full intensity, except
+for the Moray's opening escape during ramp-up. Screen effects scale all the way
+to zero, including their minimum-strength component.
 The full-screen chromatic pass also fades its pixel displacement to zero; the
 minigame's region-only pass keeps its existing displacement range.
 False Dawn's ambient host-star flares remain independent of haunt intensity.
