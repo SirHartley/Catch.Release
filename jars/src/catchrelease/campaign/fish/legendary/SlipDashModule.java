@@ -45,8 +45,9 @@ public class SlipDashModule extends BaseHauntModule {
     public static final int STREAM_BURN = 50;
     public static final float SEGMENT_SPACING = 200f;
     public static final int MAX_STANDING_SEGMENTS = 14;
-    public static final float ROLLUP_PER_SECOND = 2.5f;
-    public static final float ROLLUP_FADE_SECONDS = 3f;
+    public static final float STREAM_LIFETIME_MULT = 3f;
+    public static final float ROLLUP_PER_SECOND = 2.5f / STREAM_LIFETIME_MULT;
+    public static final float ROLLUP_FADE_SECONDS = 3f * STREAM_LIFETIME_MULT;
 
     protected static class Trail {
 

@@ -172,6 +172,7 @@ public final class LegendaryEscapeChecks {
         Slip(StarSystemAPI system, FishSpec spec) { super(system, spec); }
         float remaining() { return dashLeft; }
         void step(FishEntityPlugin fish, float amount) { steer(fish, amount); }
+        void stepTrails(float amount) { advanceTrails(amount); }
     }
 
     static class Manta extends MantaFormationModule {
@@ -358,6 +359,7 @@ public final class LegendaryEscapeChecks {
         defaults();
         quorum();
         moray();
+        morayTrailLifetime();
         manta();
         mantaShieldPop();
         deflectionLabels();
@@ -691,6 +693,45 @@ public final class LegendaryEscapeChecks {
             check(!fish.isDashing(), "dash ends");
             env.haunt.close();
             check(env.terrain.stream().allMatch(t -> t.expired && t.removed), "cleanup removes both trails");
+        }
+    }
+
+    private static void morayTrailLifetime() {
+        for (int fps : new int[]{30, 60, 144}) for (int count : new int[]{3, 14, 28}) {
+            try (Environment env = new Environment()) {
+                Fish fish = env.real("slipstream_moray");
+                Slip slip = new Slip(env.system, fish.spec);
+                slip.onFailedCatch(fish);
+                for (int i = 1; i < count; i++) {
+                    fish.at.translate(SlipDashModule.SEGMENT_SPACING + 1f, 0f);
+                    slip.step(fish, 0.01f);
+                }
+                slip.step(fish, SlipDashModule.ESCAPE_DASH_SECONDS);
+                check(!fish.isDashing(), "longer stream lifetime does not extend the dash");
+                Terrain trail = env.terrain.get(0);
+                var segments = trail.stream.getSegments();
+                check(segments.size() == count, "trail retains its segment count");
+                for (var segment : segments) segment.fader.forceIn();
+
+                float previousLifetime = 14f / 2.5f + 3f;
+                int frames = 0;
+                while (!trail.expired && frames < fps * 30) {
+                    slip.stepTrails(1f / fps);
+                    // Vanilla terrain advances these faders separately from the haunt.
+                    for (var segment : segments) segment.fader.advance(1f / fps);
+                    frames++;
+                    if (frames == (int) (previousLifetime * fps)) {
+                        check(!trail.expired && segments.stream().anyMatch(s -> !s.fader.isFadedOut()),
+                                "stream is still present at the old expiry time");
+                    }
+                }
+                check(trail.expired && trail.removed, "finished stream is removed");
+                check(Math.abs(frames / (float) fps - previousLifetime * 3f) <= 3f / fps,
+                        "stream lifetime triples at " + fps + " Hz with " + count + " segments");
+                check(segments.size() == count && segments.stream().allMatch(s -> s.fader.isFadedOut()),
+                        "segments fade in place before terrain removal");
+                slip.cleanup();
+            }
         }
     }
 
