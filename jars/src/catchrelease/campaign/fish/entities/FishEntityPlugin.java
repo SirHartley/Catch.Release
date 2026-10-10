@@ -156,13 +156,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private SectorEntityToken pond;
     private boolean phantom;
 
-    // legendary defences: escort orbit, flung dash, deflection flash
+    // Legendary movement and shields
     private SectorEntityToken orbitAnchor;
     private transient float orbitAngle = (float) (Math.random() * 360f);
     private float dashLeft;
     private Vector2f dashVelocity;
-    // flung motes burn out at the end of a dash; a travelling fish does not
-    private boolean dashExpires = true;
     private transient float shieldFlash;
 
     // shell game: a decoy is steered by its real mote's controller, never by itself
@@ -333,7 +331,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             dashLeft -= amount;
             moveTo(new Vector2f(entity.getLocation().x + dashVelocity.x * amount,
                     entity.getLocation().y + dashVelocity.y * amount));
-            if (dashLeft <= 0f && dashExpires && !isRealLegendary()) Misc.fadeAndExpire(entity, 1f);
             return;
         }
 
@@ -614,17 +611,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         shieldFlash = SHIELD_FLASH_SECONDS;
     }
 
-    public void startDash(Vector2f velocity, float seconds) {
-        dashVelocity = velocity;
-        dashLeft = seconds;
-        dashExpires = true;
-    }
-
-    /** A dash the fish survives: it arrives instead of burning out. */
     public void startTravelDash(Vector2f velocity, float seconds) {
         dashVelocity = velocity;
         dashLeft = seconds;
-        dashExpires = false;
     }
 
     public void keepSurfaced(float seconds) {
@@ -636,7 +625,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     public void stopDash() {
         dashLeft = 0f;
         dashVelocity = null;
-        dashExpires = true;
     }
 
     public boolean isDecoy() {

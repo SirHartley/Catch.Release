@@ -1,16 +1,10 @@
 package catchrelease.campaign.fish.legendary;
 
-import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Abilities;
-import com.fs.starfarer.api.util.Misc;
 
-/**
- * Vanilla-style interdiction with no source on the plot: burn abilities knocked onto
- * cooldown. Delivered only by things that touched the fleet - the moray's flung motes
- * and the False Dawn's blue mines - never on a random timer.
- */
+/** Ability lockout from False Dawn's blue mines. */
 public final class InterdictionPulse {
 
     public static final float ABILITY_COOLDOWN_DAYS = 1f;
