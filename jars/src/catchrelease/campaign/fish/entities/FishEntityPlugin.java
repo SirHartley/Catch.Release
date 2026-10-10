@@ -47,12 +47,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float FLEE_SPRINT_MULT = 2.6f;
     private static final float FLEE_CRUISE_MULT = 1.5f;
 
-    private static final float RUN_PERIOD = 12f;
-    private static final float RUN_BREATHER_SECONDS = 2f;
-    private static final float RUN_BREATHER_MULT = 0.5f;
-    private static final float RUN_MULT = 2.2f;
-    private static final float RUN_SURGE_SECONDS = 4f;
-    private static final float RUN_SURGE_MULT = 3f;
+    private static final float MORAY_RUN_PERIOD = 12f;
+    private static final float MORAY_BREATHER_SECONDS = 2f;
+    private static final float MORAY_BREATHER_MULT = 0.5f;
+    private static final float MORAY_RUN_MULT = 1.4f;
+    private static final float MORAY_SURGE_SECONDS = 4f;
+    private static final float MORAY_SURGE_MULT = 1.8f;
+    private static final float MORAY_MOTION_SPEED_CAP = 1.25f;
 
     private static final float DAWN_RUN_PERIOD = 6f;
     private static final float DAWN_SPRINT_SECONDS = 2.5f;
@@ -350,10 +351,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         boolean pursuing = hunting && evasiveLeft <= 0f;
         if (pursuing) keepSurfaced(1f);
 
-        // under the fabric a mote holds a straight course at cruise speed, so where it went down tells where it surfaces
+        float motionMult = diving || pursuing ? 1f : advanceMode(amount);
+        if (LegendaryShields.MORAY_SPECIES.equals(getFishId())) {
+            motionMult = Math.min(motionMult, MORAY_MOTION_SPEED_CAP);
+        }
+
+        // Submerged fish keep a straight course at cruise speed.
         float step = MOVE_SPEED * getSpeedMult() * getSlowMult()
                 * LegendaryShields.getSpeedMult(this) * getLureSpeedMult()
-                * (diving || pursuing ? 1f : advanceMode(amount)) * amount;
+                * motionMult * amount;
         // A submerged False Dawn follows the corona too; straight dive headings can cross the star.
         if (!phantom && FalseDawnOrbit.advance(entity, fishId, step, time)) return;
         float distance = Misc.getDistance(entity.getLocation(), target);
@@ -500,6 +506,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
+        if (isDashing()) return;
+
         // diveClock is transient, so a fresh or reloaded mote would otherwise vanish on its first frame
         if (!diveScheduled) {
             diveScheduled = true;
@@ -612,6 +620,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public void startTravelDash(Vector2f velocity, float seconds) {
+        if (!isDashing()) keepSurfaced(0f);
         dashVelocity = velocity;
         dashLeft = seconds;
     }
@@ -661,13 +670,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 ? FLEE_SPRINT_MULT : FLEE_CRUISE_MULT;
     }
 
-    /** The moray's chase instead: it runs, then runs harder, and only stops to breathe. */
     public float getWildRunSpeedMult() {
-        float cycle = time % RUN_PERIOD;
-        if (cycle < RUN_BREATHER_SECONDS) return RUN_BREATHER_MULT;
-        if (cycle > RUN_PERIOD - RUN_SURGE_SECONDS) return RUN_SURGE_MULT;
+        float cycle = time % MORAY_RUN_PERIOD;
+        if (cycle < MORAY_BREATHER_SECONDS) return MORAY_BREATHER_MULT;
+        if (cycle > MORAY_RUN_PERIOD - MORAY_SURGE_SECONDS) return MORAY_SURGE_MULT;
 
-        return RUN_MULT;
+        return MORAY_RUN_MULT;
     }
 
     /** The False Dawn never stops at all: a hard runner whose minefield only matters

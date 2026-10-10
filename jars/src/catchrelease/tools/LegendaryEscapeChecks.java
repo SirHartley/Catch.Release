@@ -1,6 +1,7 @@
 package catchrelease.tools;
 
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -367,6 +368,8 @@ public final class LegendaryEscapeChecks {
         defaults();
         quorum();
         morayHauntStart();
+        morayDiveLock();
+        moraySwimSpeed();
         morayChaseOnly();
         morayShield();
         moray();
@@ -755,6 +758,117 @@ public final class LegendaryEscapeChecks {
             slip.advance(0.1f);
             check(env.terrain.size() == 1 && fish.isDashing(), "released fish can start its opening escape");
             slip.cleanup();
+        }
+    }
+
+    private static void morayDiveLock() {
+        for (int fps : new int[]{30, 60, 144}) for (boolean moduleFirst : new boolean[]{false, true}) {
+            try (Environment env = new Environment()) {
+                Fish fish = env.real("slipstream_moray");
+                fish.setSwimTarget(new Vector2f(20000f, 0f));
+                Slip slip = new Slip(env.system, fish.spec);
+                float dt = 1f / fps;
+                for (int dash = 0; dash < 3; dash++) {
+                    fish.at.set(700f, 0f);
+                    if (dash == 2) {
+                        fish.keepSurfaced(0f);
+                        for (int frame = 0; frame < 20 * fps && !fish.isDiving(); frame++) {
+                            fish.diveTime(dt);
+                        }
+                        check(fish.isDiving(), "emergency dash begins with a submerged fish");
+                        slip.onFailedCatch(fish);
+                    } else {
+                        // Start during a dive fade, before the fish becomes untargetable.
+                        fish.keepSurfaced(0f);
+                        for (int frame = 0; frame < 20 * fps && fish.getVisibility() == 1f; frame++) {
+                            fish.diveTime(dt);
+                        }
+                        check(fish.getVisibility() < 1f && !fish.isDiving(), "dive fade is in progress");
+                        slip.setIntensity(1f);
+                        slip.advance(SlipDashModule.COOLDOWN_MAX_SECONDS + 1f);
+                    }
+                    check(fish.isDashing() && fish.getVisibility() == 1f,
+                            "opening, repeat and emergency dashes surface immediately");
+                    float duration = slip.remaining();
+                    int frames = 0;
+                    while (slip.remaining() > dt) {
+                        if (moduleFirst) slip.step(fish, dt);
+                        fish.advance(dt);
+                        if (!moduleFirst) slip.step(fish, dt);
+                        check(fish.getVisibility() == 1f, "dash cannot fade or dive in either callback order");
+                        frames++;
+                    }
+                    check(frames * dt >= duration - 2f * dt, "diving cannot shorten a dash");
+                    slip.step(fish, dt);
+                    check(!fish.isDashing(), "dash expires normally");
+                    boolean dived = false;
+                    for (int frame = 0; frame < 20 * fps; frame++) {
+                        fish.diveTime(dt);
+                        dived |= fish.isDiving();
+                    }
+                    check(dived, "diving resumes after the dash");
+                }
+                slip.onFailedCatch(fish);
+                fish.setHeld(true);
+                slip.step(fish, dt);
+                check(!fish.isDashing(), "retrieval cancels the dash");
+                fish.setHeld(false);
+                slip.onFailedCatch(fish);
+                slip.cleanup();
+                check(!fish.isDashing(), "cleanup releases the dive lock");
+                boolean dived = false;
+                for (int frame = 0; frame < 20 * fps; frame++) {
+                    fish.diveTime(dt);
+                    dived |= fish.isDiving();
+                }
+                check(dived, "cleanup does not leave the fish surfaced permanently");
+            }
+        }
+    }
+
+    private static void moraySwimSpeed() {
+        for (int fps : new int[]{30, 60, 144}) for (FishMotion motion : FishMotion.values()) {
+            try (Environment env = new Environment()) {
+                Fish fish = env.real(LegendaryShields.MORAY_SPECIES);
+                fish.spec.motion = motion;
+                fish.keepSurfaced(30f);
+                LegendaryChases.getState(fish.spec.id).provoked = true;
+                float dt = 1f / fps;
+                float min = Float.MAX_VALUE;
+                float max = 0f;
+                for (int frame = 0; frame < 24 * fps; frame++) {
+                    fish.at.set(700f, 0f);
+                    Vector2f before = new Vector2f(fish.at);
+                    fish.advance(dt);
+                    float speed = Vector2f.sub(fish.at, before, null).length() / dt;
+                    check(speed < 400f, "Moray's mixed bursts stay below its slipstream speed");
+                    min = Math.min(min, speed);
+                    max = Math.max(max, speed);
+                }
+                check(min < 110f, "Moray retains its breathing room");
+                if (motion == FishMotion.DARTER || motion == FishMotion.LUNGER) {
+                    check(max > 350f, "Moray retains a smaller mixed-movement burst");
+                }
+                fish.at.set(700f, 0f);
+                fish.startTravelDash(new Vector2f(SlipDashModule.DASH_SPEED, 0f), 1f);
+                fish.advance(dt);
+                check(Math.abs((fish.at.x - 700f) / dt - 900f) < 0.1f,
+                        "swim speed cap does not affect travel dashes");
+            }
+        }
+        try (Environment env = new Environment()) {
+            Fish fish = env.real("ordinary");
+            fish.spec.rarity = FishRarity.RARE;
+            fish.spec.motion = FishMotion.LUNGER;
+            fish.setSwimTarget(new Vector2f(20000f, 0f));
+            fish.keepSurfaced(30f);
+            float max = 0f;
+            for (int frame = 0; frame < 600; frame++) {
+                Vector2f before = new Vector2f(fish.at);
+                fish.advance(1f / 60f);
+                max = Math.max(max, Vector2f.sub(fish.at, before, null).length() * 60f);
+            }
+            check(max > 440f, "ordinary fish keep their existing lunge speed");
         }
     }
 

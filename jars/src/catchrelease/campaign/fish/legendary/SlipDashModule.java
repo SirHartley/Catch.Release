@@ -108,14 +108,10 @@ public class SlipDashModule extends BaseHauntModule {
         if (fish == null || fish.isDashing() || fish.isHeld() || fish.isDiving()) return;
         if (!firstDash && distanceToPlayer(fish.getMote()) > TRIGGER_RANGE) return;
 
-        boolean opening = firstDash;
         cooldown = MathUtils.getRandomNumberInRange(
                 COOLDOWN_MIN_SECONDS, COOLDOWN_MAX_SECONDS);
         begin(fish, player);
-        if (opening) {
-            fish.keepSurfaced(dashLeft);
-            steer(fish, 0f);
-        }
+        steer(fish, 0f);
     }
 
     protected void begin(FishEntityPlugin fish, CampaignFleetAPI player) {
@@ -171,7 +167,7 @@ public class SlipDashModule extends BaseHauntModule {
         CampaignFleetAPI player = player();
         if (player == null || fish.getMote().getContainingLocation() != system) return;
         endDash(fish, getGrowingTrail());
-        fish.keepSurfaced(ESCAPE_DASH_SECONDS);
+        fish.keepSurfaced(0f);
         begin(fish, player);
         dashLeft = ESCAPE_DASH_SECONDS;
         cooldown = COOLDOWN_MAX_SECONDS;
