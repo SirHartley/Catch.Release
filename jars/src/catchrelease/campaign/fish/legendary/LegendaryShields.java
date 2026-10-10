@@ -209,7 +209,10 @@ public class LegendaryShields {
         state.provoked = true;
         switch (id) {
             case CHARGE_SHIELD_SPECIES -> { } // Stored shells only refill by feeding.
-            case MOTE_SHIELD_SPECIES -> QuorumShellGame.onFailedCatch(fish);
+            case MOTE_SHIELD_SPECIES -> {
+                LegendaryHaunt.onFailedCatch(fish);
+                QuorumShellGame.onFailedCatch(fish);
+            }
             case MORAY_SPECIES -> LegendaryHaunt.onFailedCatch(fish);
             case MantaFormationModule.SPECIES -> {
                 fish.restoreBaseShield();

@@ -35,6 +35,7 @@ public final class LegendaryLifetimeChecks {
     private static void swimming() {
         for (int fps : new int[]{30, 60, 144}) try (Environment env = new Environment()) {
             Fish quorum = env.real("quorum");
+            LegendaryChases.getState("quorum").roaming = true;
             quorum.at.set(10000f, 10000f);
             quorum.setSwimTarget(new Vector2f(quorum.at));
             quorum.keepSurfaced(600f);
@@ -122,6 +123,7 @@ public final class LegendaryLifetimeChecks {
             Fish fish = env.real("quorum");
             LegendaryShields.maintainSatellites(fish);
             LegendaryChases.getState("quorum").shieldUnits = 0;
+            LegendaryChases.getState("quorum").roaming = true;
             QuorumShellGame.onFailedCatch(fish);
             check(Shell.size() == 1 && env.fish.size() == 18,
                     "fixture includes real Quorum, escorts, shell decoys and escape illusions");

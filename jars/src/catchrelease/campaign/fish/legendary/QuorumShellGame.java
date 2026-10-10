@@ -116,7 +116,7 @@ public class QuorumShellGame {
             return false;
         }
 
-        return !LegendaryShields.isShielded(fish);
+        return LegendaryChases.getState(spec.id).roaming && !LegendaryShields.isShielded(fish);
     }
 
     protected static State start(SectorEntityToken real) {
@@ -315,12 +315,17 @@ public class QuorumShellGame {
     }
 
     protected static void end(SectorEntityToken real) {
+        end(real, false);
+    }
+
+    static void end(SectorEntityToken real, boolean immediate) {
         State state = states.remove(real);
         if (state == null) return;
 
         for (Body body : state.bodies) {
             if (body.token == real || body.token == null || body.token.isExpired()) continue;
-            Misc.fadeAndExpire(body.token, 0.6f);
+            if (immediate) BaseHauntModule.removeHard(body.token);
+            else Misc.fadeAndExpire(body.token, 0.6f);
         }
     }
 }
