@@ -261,7 +261,7 @@ public class LegendaryShields {
             case POP_SHIELD_SPECIES -> LegendaryChases.getState(id).shieldPopped
                     ? SHIELD_PURPLE : SHIELD_RED;
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
-            case MORAY_SPECIES -> SHIELD_GREEN;
+            case MORAY_SPECIES, CHARGE_SHIELD_SPECIES -> SHIELD_GREEN;
             default -> SHIELD_PURPLE;
         };
     }
