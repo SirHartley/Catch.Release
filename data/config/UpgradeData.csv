@@ -16,4 +16,5 @@ drone_rare_priority,0,DOUBLE,0.25,FLAT,4,Increases the chance that idle drones c
 harpoon_charges,2,INT,1,FLAT,4,Increases the number of ready harpoon shots the rig can hold.,
 harpoon_recharge_time,12,DOUBLE,-0.15,MULT,4,Restores spent harpoon charges faster.,
 harpoon_speed,900,INT,0.12,MULT,4,Increases harpoon projectile speed.,
+harpoon_reach,1200,INT,0.1,MULT,3,Increases maximum harpoon range by 10% per tier.,
 harpoon_aim_assist,0,DOUBLE,2.5,FLAT,3,Widens the angle within which a harpoon shot snaps toward a valid pattern. It changes direction only and does not alter the chosen range.,

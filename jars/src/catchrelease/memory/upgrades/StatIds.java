@@ -22,6 +22,7 @@ public class StatIds {
             HARPOON_CHARGES = "harpoon_charges",
             HARPOON_RECHARGE_TIME = "harpoon_recharge_time",
             HARPOON_SPEED = "harpoon_speed",
+            HARPOON_REACH = "harpoon_reach",
             HARPOON_AIM_ASSIST = "harpoon_aim_assist";
 
     public static final String
@@ -39,7 +40,7 @@ public class StatIds {
             DRONE_CHASE_TIME, DRONE_CHASE_MARGIN, DRONE_RARE_PRIORITY,
     };
     protected static final String[] HARPOON = {
-            HARPOON_CHARGES, HARPOON_RECHARGE_TIME, HARPOON_SPEED, HARPOON_AIM_ASSIST,
+            HARPOON_CHARGES, HARPOON_RECHARGE_TIME, HARPOON_SPEED, HARPOON_REACH, HARPOON_AIM_ASSIST,
     };
 
     public static String getAbilityId(String statId) {
