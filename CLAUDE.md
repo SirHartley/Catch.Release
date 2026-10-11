@@ -33,6 +33,7 @@ After reading this file, use the task to choose the next document. Read the rele
 | Implement Java custom panels, widgets, renderers, tooltips, layout or input | [UI.md](docs/UI.md) and the owner in `ARCHITECTURE.md`. Add `DIALOGUE.md` for text work and the rules route for rules-hosted interaction changes. `UI.md` is not a second rules-dialogue standard. |
 | Integrate or change a reusable framework | The relevant [Distress README](jars/src/catchrelease/distress/README.md) or [Skillshot README](jars/src/catchrelease/skillshot/README.md) before changing its hooks, registration or lifecycle; also apply the rules, UI and text routes where involved. |
 | Edit a guide or add documentation | [Documentation upkeep](#documentation-upkeep), the owning guide and its inbound links. Documentation editing and technical-only routing changes without prose changes do not require an Editor pass. |
+| Change the build, rebuild the release jar, or prepare a release | [RELEASE.md](docs/RELEASE.md) for version numbers, release contents, jar freshness and publishing. |
 | Resume the deferred Fisherman / Scientist quest discussion after the three fishing ships are finished | [NEEDLE_QUEST_CONCEPT.md](docs/NEEDLE_QUEST_CONCEPT.md) preserves the narrative decisions and open options. It does not govern current canon or authorize implementation; `LORE.md` remains the lore authority. |
 
 ### Technical references and conflicts
@@ -49,6 +50,7 @@ The dictionaries distinguish checked recipes from extracted names, expressions a
 - Make one commit per requested change. If one message contains several changes, commit them separately in the requested order.
 - Keep each commit message to one short, plain-English summary. Do not include testing notes, agent or model names, co-author trailers, session metadata, links, formatting, or session URLs.
 - Update the affected documentation in the same commit, following [Documentation upkeep](#documentation-upkeep). Do this without a separate user request.
+- Rebuild and commit `jars/release/catchrelease.jar` when runtime Java, the release builder or bundled compile dependencies change; follow [RELEASE.md](docs/RELEASE.md). Never replace it with the IDE artifact.
 - Work only in the current task checkout. A live mod installation, including `C:\Modding\mods\Catch.Release`, and every unrelated checkout are read-only unless the user explicitly asks you to change them.
 - Do not deploy or synchronize the mod after merge unless the user explicitly requests it.
 - Until release, cross-version campaign saves are unsupported. Remove obsolete upgrades, saved payloads and migrations instead of retaining compatibility scaffolding. Preserve normal save/load within the current version, transient-state restoration and live runtime safeguards.
@@ -81,6 +83,7 @@ Update documents automatically as part of each relevant change, not by a backgro
 |---|---|---|
 | `AGENTS.md` | Codex discovery | Keep it a short pointer to this file. Do not copy workflow policy into it. |
 | `CLAUDE.md` | Task scope, subagent instructions, tools, commits, PRs, builds, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
+| `docs/RELEASE.md` | Version numbers, release builds, package contents and publishing | Keep the workflow, builder and release instructions aligned. Do not publish tags without a release request. |
 | `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No lore, writing advice, release history, or duplicate policy. |
 | `docs/UI.md` | Java-bound custom UI: panels, widgets, renderers, sprites, tooltips, lifetime, layout and input | Update implementation contracts and source evidence. Link to `DIALOGUE.md` for shared text guidelines; do not put rules-dialogue guidance here. |
 | `docs/DIALOGUE.md` | All player-facing text, including rules and Java: Editor procedure, prose review, shared text presentation and dialogue usability | Keep shared guidelines content-agnostic and label subject-specific additions. Link to lore, Java UI implementation and technical rules instead of copying their explanations. |
@@ -225,9 +228,9 @@ Subagents perform research and scoping, not shipped code. The UI assignment take
 
 ## Version names
 
-`1.0.1` is the development/alpha version used in `mod_info.json`. `1.0.a` is the public
-release version used in the release metadata and changelog. They are different version
-names on purpose; do not change one merely to make it match the other.
+Versions use major.minor.patch-letter, starting at `1.0.a`. The release tag sets
+both packaged version files. See [RELEASE.md](docs/RELEASE.md#versions); do not
+bump versions or publish tags as part of ordinary task work.
 
 ## Building
 

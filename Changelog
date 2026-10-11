@@ -11,3 +11,6 @@ None
 
 1.0.a
 Added - Initial Mod Release
+
+General
+Adjusted - Release downloads leave out development tools, libraries and source files

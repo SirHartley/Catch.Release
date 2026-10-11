@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.package.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Check release tooling
+        run: |
+          mkdir -p out/release-tools
+          javac --release 17 -encoding UTF-8 -d out/release-tools \
+            jars/src/catchrelease/tools/ReleaseBuild.java \
+            jars/src/catchrelease/tools/ReleaseBuildChecks.java
+          java -cp out/release-tools catchrelease.tools.ReleaseBuildChecks
+      - name: Package
+        id: package
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          args=()
+          if [ "$REF_TYPE" = tag ]; then args+=("$REF_NAME"); fi
+          java -cp out/release-tools catchrelease.tools.ReleaseBuild package "${args[@]}"
+          echo "version=$(cat out/release/version.txt)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Catch.Release-${{ steps.package.outputs.version }}
+          path: |
+            out/release/Catch.Release-*.zip
+            out/release/release-notes.md
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Download checked package and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          VERSION: ${{ needs.package.outputs.version }}
+        run: |
+          gh run download "$RUN_ID" --repo "$GH_REPO" --name "Catch.Release-$VERSION" --dir release
+          if gh release view "$VERSION" --repo "$GH_REPO" >/dev/null 2>&1; then
+            echo "::error::Release $VERSION already exists; published releases are never overwritten."
+            exit 1
+          fi
+          gh release create "$VERSION" "release/Catch.Release-$VERSION.zip" \
+            --repo "$GH_REPO" --verify-tag --title "Catch.Release $VERSION" \
+            --notes-file release/release-notes.md
