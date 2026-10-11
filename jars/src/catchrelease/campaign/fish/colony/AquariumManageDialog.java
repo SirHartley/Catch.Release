@@ -38,8 +38,8 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         this.dialog = dialog;
 
         dialog.setPromptText("");
-        dialog.getTextPanel().addPara("The conservatory's back office smells of brine and"
-                + " filtration. The tank hums through the wall.");
+        dialog.getTextPanel().addPara("The conservatory's back office smells of brine."
+                + " The tank hums through the wall.");
 
         showMain();
     }
@@ -81,8 +81,8 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         int first = backdropPage * BACKDROPS_PER_PAGE;
         int last = Math.min(first + BACKDROPS_PER_PAGE, owned.size());
 
-        dialog.getTextPanel().addPara("Rolled scenery in a rack along the back wall, most of it"
-                + " painted by somebody who has never been near the water it is of.",
+        dialog.getTextPanel().addPara("Rolled scenery fills a rack along the back wall, most of it"
+                + " painted by somebody who has never been near the water.",
                 Misc.getGrayColor());
 
         for (Backdrop backdrop : owned.subList(first, last)) {
@@ -120,7 +120,7 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         if (optionData instanceof Backdrop backdrop) {
             if (Backdrops.hang(conservatory, backdrop)) {
                 dialog.getTextPanel().addPara(Backdrops.isBare(backdrop)
-                                ? "The rack goes back on the wall. Bare glass from here."
+                                ? "The scenery goes back on the rack. Bare glass from here."
                                 : "It goes up behind the glass.",
                         Misc.getPositiveHighlightColor());
             }

@@ -42,8 +42,8 @@ public class ConservatoryOptionProvider extends BaseIndustryOptionProvider {
     @Override
     public void createTooltip(IndustryOptionData opt, TooltipMakerAPI tooltip, float width) {
         if (opt.id == SHOP) {
-            tooltip.addPara("Upgrade tiers and rig modules, paid for in fish - the same counter the"
-                    + " shop rig raises, without raising the rig.", 0f);
+            tooltip.addPara("Upgrade tiers and rig modules, paid for in credits and fish at the"
+                    + " conservatory's outfitter.", 0f);
         } else if (opt.id == AQUARIUM) {
             tooltip.addPara("Stock the display tank from your hold, take specimens back"
                     + " out, or shut the display off entirely.", 0f);

@@ -258,7 +258,7 @@ public class MafiaJob extends FishJob {
     protected String getIntelSpecialTerms() {
         return "You may take the fixed supplier fee of " + describeRewards()
                 + " or stake the entire fee on either fish. A winning stake replaces the fee "
-                + "with a newly rolled, larger purse; a loss pays nothing and leaves no debt. "
+                + "with a larger purse; a loss pays nothing and leaves no debt. "
                 + "The house keeps the share not assigned to either fighter.";
     }
 

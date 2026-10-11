@@ -270,9 +270,9 @@ public class FishermanQuest {
                     faction.getDisplayNameWithArticleWithoutArticle());
 
             info.addPara("This request is for one identified anomalous specimen, not an ordinary "
-                    + "representative of the pattern or a search for an unstable system. Its own "
+                    + "catch of the same pattern or a search for an unstable system. Its own "
                     + "coherence reading is unusually poor, and the target is identified at the "
-                    + "saved search point by a bright cyan mote. Only that specimen qualifies. "
+                    + "marked search point by a bright cyan mote. Only that specimen qualifies. "
                     + "Completing the request also increases the range-data listings the "
                     + "Fisherman keeps available for purchase.", opad);
 
