@@ -449,8 +449,9 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. |
 
-False Dawn starts with one stored shield charge; the wake-up hit consumes it.
-Green mine couriers add one on arrival, capped at two. Every deflection consumes
+False Dawn starts with one stored shield charge. The wake-up hit provokes it
+without spending that charge, so the haunt begins with one. Green mine couriers
+add one on arrival, capped at two. Each subsequent deflection consumes
 one; elapsed time, failed catches and mote replacement within a hunt never refill
 the ledger. Abandoning the haunt restores the single starting charge, even if two
 were stored before the reset. Shield collision, green rendering and charge rings use the same count.

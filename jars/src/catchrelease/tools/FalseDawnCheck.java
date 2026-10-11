@@ -472,8 +472,11 @@ public final class FalseDawnCheck {
         require(LegendaryShields.getShieldColor(fish).equals(HauntMineEntityPlugin.Kind.SHIELD.color),
                 "Shield and mines share green");
         require(LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.DEFLECTED
-                        && state.provoked && state.shieldUnits == 0,
-                "Wake-up hit spends the only starting charge");
+                        && state.provoked && state.shieldUnits == 1,
+                "Wake-up hit leaves one starting charge for the haunt");
+        require(LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.DEFLECTED
+                        && state.shieldUnits == 0,
+                "First hit during the haunt spends the starting charge");
         fish.restoreBaseShield();
         require(!LegendaryShields.isShielded(fish)
                         && LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.NONE,
@@ -481,11 +484,13 @@ public final class FalseDawnCheck {
         fish.setHeld(true);
         require(LegendaryShields.onFailedCatch(fish.getMote()) && !fish.isHeld() && state.shieldUnits == 0,
                 "Failed catch releases fish without recharging");
-        state.provoked = false;
-        require(LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.NONE,
-                "Returning to patrol cannot grant another wake-up shield");
         Fish respawned = new Fish(env.local);
         require(!LegendaryShields.isShielded(respawned), "A fresh mote keeps spent charges");
+        state.resetEncounter();
+        require(LegendaryShields.onHarpoonContact(fish.getMote(), true) == LegendaryShields.HitResult.DEFLECTED
+                        && state.provoked && LegendaryShields.getDawnCharges() == 1,
+                "New encounter also retains its charge after an explosive wake-up hit");
+        LegendaryShields.onHarpoonContact(fish.getMote(), false);
         env.local.mines.remove(respawned.getMote());
         fish.token.notices.clear();
 

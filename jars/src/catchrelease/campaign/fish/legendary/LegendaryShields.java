@@ -88,11 +88,10 @@ public class LegendaryShields {
 
         if (CHARGE_SHIELD_SPECIES.equals(id)) fish.startEvasive();
 
-        // Stored charges and the Longliner's hull absorb the wake-up hit themselves.
+        // Jack's stored shells and the Longliner's hull absorb the wake-up hit themselves.
         if (!state.provoked) {
             state.provoked = true;
-            if (!POP_SHIELD_SPECIES.equals(id) && !CHARGE_SHIELD_SPECIES.equals(id)
-                    && !DAWN_SPECIES.equals(id)) {
+            if (!POP_SHIELD_SPECIES.equals(id) && !CHARGE_SHIELD_SPECIES.equals(id)) {
                 fish.flashShield();
                 sayDeflection(fish, "Deflected - Now awake");
                 return HitResult.DEFLECTED;
