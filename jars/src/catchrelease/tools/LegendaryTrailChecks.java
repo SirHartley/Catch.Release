@@ -144,6 +144,8 @@ public final class LegendaryTrailChecks {
         hiddenTrail();
         mask();
         lifecycle();
+        straightGeometry();
+        lensFollowsMovement();
         System.out.println("Legendary trail checks passed: " + checks);
     }
 
@@ -311,6 +313,44 @@ public final class LegendaryTrailChecks {
                 f.lights.get(0).updateRenderLoc(new Vector2f(5250f, 0f));
                 check(fish.recorded.paint(f) > 0f, "continuous Moray dash at " + fps + " fps");
                 check(fish.recorded.vertices.stream().allMatch(v -> v.x() >= 880f), "expired history pruned at " + fps + " fps");
+            }
+        }
+    }
+
+    private static void straightGeometry() {
+        try (Fixture f = new Fixture()) {
+            Mote fish = new Mote(f, FishRarity.LEGENDARY);
+            for (int i = 0; i <= 20; i++) {
+                fish.recorded.advance(.02f);
+                fish.tick(i * 8f, i * 6f);
+            }
+            fish.recorded.paint(f);
+            check(!fish.recorded.vertices.isEmpty(), "straight diagonal trail produces geometry");
+            for (int i = 0; i < fish.recorded.vertices.size(); i += 2) {
+                Vertex a = fish.recorded.vertices.get(i);
+                Vertex b = fish.recorded.vertices.get(i + 1);
+                check(Math.abs((a.y + b.y) * 4f - (a.x + b.x) * 3f) < .001f,
+                        "taper and subdivision keep the trail center on its sampled path");
+            }
+        }
+    }
+
+    private static void lensFollowsMovement() {
+        for (int fps : new int[]{30, 60, 144}) try (var env = new LegendaryEscapeChecks.Environment()) {
+            class Fish extends LegendaryEscapeChecks.Fish {
+
+                Vector2f lensAt;
+                Fish() { super(env, "lantern_jack", false, null); }
+                @Override protected void advanceShieldLens() { lensAt = new Vector2f(at); }
+            }
+            Fish fish = new Fish();
+            fish.setSwimTarget(new Vector2f(2000f, 500f));
+            fish.keepSurfaced(10f);
+            for (int i = 0; i < fps; i++) {
+                Vector2f before = new Vector2f(fish.at);
+                fish.advance(1f / fps);
+                check(!fish.at.equals(before) && fish.at.equals(fish.lensAt),
+                        "shield lens uses the current position after movement at " + fps + " Hz");
             }
         }
     }

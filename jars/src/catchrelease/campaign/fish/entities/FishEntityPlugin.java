@@ -297,6 +297,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         LonglinerShield.advance(this, amount);
         if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
         if (mantaFormation != null) mantaFormation.sync();
+        advanceShieldLens();
         lastX = entity.getLocation().x;
         lastY = entity.getLocation().y;
         movementSampled = true;
@@ -319,7 +320,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (flareRing > 0f) flareRing -= amount;
 
         advanceLampFade(amount);
-        advanceShieldLens();
 
         advanceDive(amount);
 
@@ -910,7 +910,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (shieldLens == null) {
             shieldLens = new org.dark.shaders.distortion.WaveDistortion(
                     entity.getLocation(), new Vector2f());
-            shieldLens.setSize(LegendaryShields.SHIELD_RADIUS * 2.2f);
+            // WaveDistortion's size is a radius, not the sprite diameter.
+            shieldLens.setSize(LegendaryShields.SHIELD_RADIUS);
             catchrelease.rendering.distortion.CampaignDistortionRenderer
                     .addDistortion(shieldLens);
         }
