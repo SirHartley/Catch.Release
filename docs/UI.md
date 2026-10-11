@@ -359,9 +359,11 @@ plus an eight-unit gap above the dialog. Hover regions follow each circle; the
 explanation sits to the right of the newly added, rightmost icon. It uses the existing
 `shop_harpoon` sprite and `Disc` primitives after the Manta distortion pass. There
 are no labels or hover regions during play. The circles, rims and harpoons use
-neutral greys at 35% of their result opacity while playing. Failure restores
-their player/text colours and result opacity immediately, including at the scar
-cap. The dialog stays open: each new icon fades in and shrinks over 0.6 seconds,
+neutral greys at 35% of their result opacity while playing. Failure immediately
+uses vanilla's negative-highlight colour for the rims, harpoons and explanation
+border, with darker tile fills and normal result opacity, including at the scar
+cap. This is red by default and follows vanilla's colourblind setting.
+The dialog stays open: each new icon fades in and shrinks over 0.6 seconds,
 then plays vanilla's `ui_cargo_supplies_drop`. Only the first scar of a hunt shows
 the automatic boxed explanation; after five seconds it becomes a hover tooltip.
 Later scars enable hover tooltips for every icon as soon as the stamp finishes,

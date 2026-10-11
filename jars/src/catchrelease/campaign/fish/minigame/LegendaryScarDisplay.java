@@ -97,7 +97,7 @@ public final class LegendaryScarDisplay {
         TooltipMakerAPI text = frame.createUIElement(240f, 0f, false);
         explain(text);
         frame.updateUIElementSizeAndMakeItProcessInput(text);
-        notice = frame.wrapTooltipWithBox(text, Misc.getBasePlayerColor());
+        notice = frame.wrapTooltipWithBox(text, Misc.getNegativeHighlightColor());
         FishingMinigameLayout layout = new FishingMinigameLayout(frame.getPosition());
         frame.addComponent(notice).inTL(x(layout, count - 1, count) - frame.getPosition().getX() + DIAMETER,
                 frame.getPosition().getY() + frame.getPosition().getHeight() - y(layout)
@@ -142,9 +142,10 @@ public final class LegendaryScarDisplay {
     public void render(FishingMinigameLayout layout, float alphaMult) {
         if (disposed || count == 0) return;
         if (icon == null) icon = SpriteLoader.getSprite("shop_harpoon");
-        Color fill = failed ? Misc.getDarkPlayerColor() : Color.DARK_GRAY;
-        Color rim = failed ? Misc.getBasePlayerColor() : Color.GRAY;
-        Color ink = failed ? Misc.getTextColor() : Color.LIGHT_GRAY;
+        Color warning = failed ? Misc.getNegativeHighlightColor() : Color.GRAY;
+        Color fill = failed ? warning.darker().darker() : Color.DARK_GRAY;
+        Color rim = warning;
+        Color ink = failed ? warning : Color.LIGHT_GRAY;
         float visibility = failed ? 1f : 0.35f;
         for (int i = 0; i < count; i++) {
             float phase = added && i == count - 1 ? Math.min(1f, elapsed / STAMP_TIME) : 1f;
