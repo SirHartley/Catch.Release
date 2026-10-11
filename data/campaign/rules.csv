@@ -3028,9 +3028,7 @@ He turns the chip over. ""Build one and your colony can keep catch on display an
 He wants $catchreleaseCrabConservatoryPrice for it, and $catchreleaseCrabConservatoryCrabs crabs.
 
 You are short. ""No trouble,"" he says, and the chip goes into a pocket already occupied by his left hand.","10:catchrelease_crabStall:""Another time.""",
-catchrelease_crabBuyConservatory,DialogOptionSelected,$option == catchrelease_crabBuyConservatory,CatchReleaseCMD crabBuy CONSERVATORY,"The blueprint chip changes hands. Your ops chief signs it into inventory under 'Colony infrastructure'.
-
-The category was already present.",0:catchrelease_crabStall:Continue,
+catchrelease_crabBuyConservatory,DialogOptionSelected,$option == catchrelease_crabBuyConservatory,CatchReleaseCMD crabBuy CONSERVATORY,The blueprint chip changes hands. Your ops chief signs it into inventory under 'Colony infrastructure'.,0:catchrelease_crabStall:Continue,
 catchrelease_crabOptionCelebration,CatchReleaseCrabStallOptions,!$catchreleaseCrabCelebrationOwned,CatchReleaseCMD crabTooltip catchrelease_crabWareCelebration CELEBRATION,,catchrelease_crabWareCelebration:Celebration Charges,
 catchrelease_crabOptionEarmuffs,CatchReleaseCrabStallOptions,!$catchreleaseCrabEarmuffsOwned,CatchReleaseCMD crabTooltip catchrelease_crabWareEarmuffs EARMUFFS,,catchrelease_crabWareEarmuffs:Earmuffs,
 catchrelease_crabOptionChickenProfile,CatchReleaseCrabStallOptions,!$catchreleaseCrabChicken_profileOwned,CatchReleaseCMD crabTooltip catchrelease_crabWareChicken_profile CHICKEN_PROFILE,,catchrelease_crabWareChicken_profile:Chicken Profile,
