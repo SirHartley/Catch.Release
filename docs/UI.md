@@ -231,6 +231,10 @@ in `sources-api/util.java`.
 
 ## LunaLib settings
 
+`data/config/LunaSettingsConfig.json` registers this mod's existing 40×40 hook icon
+under `catchrelease.iconPath`. LunaSettingsConfigLoader reads the merged file;
+LunaSettingsUIModsPanel loads that texture for the mod list. No extra preload is needed.
+
 `LunaSettings.csv` and `config/Setting` must agree on IDs, types, defaults and bounds.
 Preset radios are one-shot actions, reset to Keep current after Save. The difficulty Text row
 describes saved values, and is rebuilt when its tab is reopened.

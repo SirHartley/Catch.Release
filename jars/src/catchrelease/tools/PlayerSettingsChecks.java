@@ -13,7 +13,9 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import lunalib.backend.ui.settings.ChangedSetting;
 import lunalib.backend.ui.settings.LunaSettingsUISettingsPanel;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -68,6 +70,7 @@ public final class PlayerSettingsChecks {
         check(!RuntimeException.class.isAssignableFrom(JSONException.class),
                 "use Starsector's json.jar; newer JSON jars hide checked-exception build errors");
         csv();
+        lunaIcon();
         presets();
         retainedLunaValues();
         try (FishingParityChecks.Environment env = new FishingParityChecks.Environment()) {
@@ -171,6 +174,16 @@ public final class PlayerSettingsChecks {
         } catch (IllegalFormatException ex) {
             throw new AssertionError("Invalid Luna paragraph format: " + field, ex);
         }
+    }
+
+    private static void lunaIcon() throws Exception {
+        String modId = new JSONObject(Files.readString(Path.of("mod_info.json"))).getString("id");
+        JSONObject configs = new JSONObject(Files.readString(Path.of("data/config/LunaSettingsConfig.json")));
+        Path icon = Path.of(configs.getJSONObject(modId).getString("iconPath"));
+        check(Files.isRegularFile(icon), "registered Luna mod icon exists");
+        var image = ImageIO.read(icon.toFile());
+        check(image != null && image.getWidth() == image.getHeight(),
+                "Luna mod icon is a readable square image");
     }
 
     private static void presets() {
