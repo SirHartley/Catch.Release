@@ -1,6 +1,8 @@
 package catchrelease.tools;
 
 import catchrelease.campaign.fish.colony.AquariumFishShader;
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
@@ -73,10 +75,9 @@ public final class AquariumShaderCheck {
             // GraphicsLib normally sets this after checking the game's GL context.
             allowed.set(true);
             byte[] stable = render(sprite, 0f, 0.7f, 0f, 1f, false);
-            byte[] unsettled = render(sprite, 0.3f, 0.7f, 0f, 1f, false);
             byte[] broken = render(sprite, 1f, 0.7f, 0f, 1f, false);
             require(chromatic(stable) == 0, "stable fish has colour fringes");
-            require(chromatic(broken) > chromatic(unsettled), "chromatic distortion did not increase");
+            checkDigitalDistortion(sprite, stable);
             require(!Arrays.equals(broken, render(sprite, 1f, 1.8f, 0f, 1f, false)), "frozen artefacts");
             require(!Arrays.equals(broken, render(sprite, 1f, 0.7f, 2f, 1f, false)), "synchronised fish");
             require(coverage(broken) > coverage(stable) / 2, "fish lost its silhouette");
@@ -93,16 +94,17 @@ public final class AquariumShaderCheck {
             for (int y = 0; y < SIZE; y++) {
                 for (int x = 0; x < SIZE; x++) {
                     int i = (y * SIZE + x) * 4;
-                    if (x < 35 || x >= 93 || y < 51 || y >= 77) {
+                    if (x < 32 || x >= 96 || y < 48 || y >= 80) {
                         require(broken[i + 3] == 0, "transparent border or atlas bleed");
                     }
                 }
             }
             require(Arrays.equals(stable, render(sprite, 0f, 0.7f, 0f, 1f, false)),
                     "filter leaked into the next unfiltered draw");
+            checkSettings(sprite, stable, broken);
             checkProgramRestore(sprite);
             require(GL11.glGetError() == GL11.GL_NO_ERROR, "OpenGL error");
-            System.out.println("Passed: GLSL compile/link, fallback, progression, animation, alpha, UV bounds, mirroring, program restore");
+            System.out.println("Passed: GLSL compile/link, fallback, digital progression, no colour split, settings, animation, alpha, UV bounds, mirroring, isolation, program restore");
         } finally {
             allowed.set(wasAllowed);
             Global.setSettings(original);
@@ -124,7 +126,6 @@ public final class AquariumShaderCheck {
         GL11.glDisable(GL11.GL_DITHER);
         GL11.glDisable(GL11.GL_CULL_FACE);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        GL20.glUseProgram(0);
         GL11.glClearColor(0f, 0f, 0f, 0f);
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
         sprite.bindTexture();
@@ -146,6 +147,48 @@ public final class AquariumShaderCheck {
         byte[] bytes = new byte[pixels.remaining()];
         pixels.get(bytes);
         return bytes;
+    }
+
+    private static void checkDigitalDistortion(SpriteAPI sprite, byte[] stable) {
+        long unsettledDifference = 0;
+        long brokenDifference = 0;
+        for (int i = 0; i < 48; i++) {
+            float time = i / 6f;
+            float phase = i % 2 == 0 ? 0f : 2f;
+            byte[] unsettled = render(sprite, 0.3f, time, phase, 1f, false);
+            byte[] broken = render(sprite, 1f, time, phase, 1f, false);
+            require(chromatic(unsettled) == 0 && chromatic(broken) == 0,
+                    "digital distortion separated colour channels or sampled outside the fish texture region");
+            require(coverage(broken) > coverage(stable) / 2, "digital burst erased the fish");
+            unsettledDifference += difference(stable, unsettled);
+            brokenDifference += difference(stable, broken);
+        }
+        require(unsettledDifference > 0, "unsettled fish has no digital distortion");
+        require(brokenDifference > unsettledDifference, "digital distortion did not increase");
+    }
+
+    private static void checkSettings(SpriteAPI sprite, byte[] stable, byte[] broken) throws Exception {
+        var original = PlayerSettings.snapshot();
+        var settings = PlayerSettings.defaults();
+        try {
+            settings.put(Setting.AQUARIUM_DIGITAL, false);
+            PlayerSettingsChecks.use(settings);
+            require(AquariumFishShader.begin(sprite, 1f, 0f, 0f, 64f, 32f) == -1,
+                    "digital toggle did not disable the filter");
+            settings.put(Setting.AQUARIUM_DIGITAL, true);
+            settings.put(Setting.AQUARIUM_DISTORTION, 0d);
+            PlayerSettingsChecks.use(settings);
+            require(AquariumFishShader.begin(sprite, 1f, 0f, 0f, 64f, 32f) == -1,
+                    "zero distortion still uses the filter");
+            settings.put(Setting.AQUARIUM_DISTORTION, 100d);
+            settings.put(Setting.REDUCED_EFFECTS, true);
+            PlayerSettingsChecks.use(settings);
+            byte[] reduced = render(sprite, 1f, 0.7f, 0f, 1f, false);
+            require(difference(stable, reduced) < difference(stable, broken),
+                    "reduced effects did not reduce digital distortion");
+        } finally {
+            PlayerSettingsChecks.use(original);
+        }
     }
 
     private static void checkProgramRestore(SpriteAPI sprite) {
@@ -201,7 +244,23 @@ public final class AquariumShaderCheck {
     private static long chromatic(byte[] pixels) {
         long sum = 0;
         for (int i = 0; i < pixels.length; i += 4) {
-            if ((pixels[i + 3] & 255) > 32) sum += Math.abs((pixels[i] & 255) - (pixels[i + 2] & 255));
+            if ((pixels[i + 3] & 255) > 32) {
+                sum += Math.abs((pixels[i] & 255) - (pixels[i + 1] & 255));
+                sum += Math.abs((pixels[i + 1] & 255) - (pixels[i + 2] & 255));
+            }
+        }
+        return sum;
+    }
+
+    private static long difference(byte[] first, byte[] second) {
+        long sum = 0;
+        for (int i = 0; i < first.length; i += 4) {
+            int a = first[i + 3] & 255;
+            int b = second[i + 3] & 255;
+            sum += Math.abs(a - b) * 255L;
+            for (int channel = 0; channel < 3; channel++) {
+                sum += Math.abs((first[i + channel] & 255) * a - (second[i + channel] & 255) * b);
+            }
         }
         return sum;
     }

@@ -100,7 +100,6 @@ public enum Setting {
 
     // Aquarium
     AQUARIUM_DISTORTION("catchrelease_aquarium_distortion", 100d, 0d, 200d),
-    AQUARIUM_RGB("catchrelease_aquarium_rgb", true),
     AQUARIUM_DIGITAL("catchrelease_aquarium_digital", true),
     AQUARIUM_SPEED("catchrelease_aquarium_speed", 100d, 25d, 200d),
     AQUARIUM_BRIGHTNESS("catchrelease_aquarium_brightness", 100d, 10d, 100d),
