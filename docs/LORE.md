@@ -189,6 +189,14 @@ Rumor dialogue treats the legendaries as the subjects of sailors' yarns. These a
 
 The Fisherman knows the tales and can offer a useful lead without explaining exactly what the player will find. His versions are more restrained than the spacer's. Do not turn either speaker's story into a list of the creature's abilities or the equipment needed to defeat it. Keep factual requirements and navigation clear in their appropriate UI; the yarn itself need not provide a reliable explanation.
 
+### Fish descriptions
+
+Species descriptions are short, quoted sailors' yarns. Keep each fish recognizable: its distinctive appearance, movement, material or handling peculiarity should matter to the story. Preserve those traits when revising a yarn; do not replace them with a generic haunted fish. These descriptions appear in cargo tooltips and the Codex, so keep them compact.
+
+The teller may boast, misremember, repeat a fable or dispute another version. As with the legendary tales, impossible events are claims within the story, not established history, biology or new mechanics. They do not explain the fabric or give ordinary people the Fisherman's knowledge. Practical gameplay requirements remain in the factual UI.
+
+Vary the stories, tellers and endings. A catch can feature in a joke, a kindness, a disaster, a superstition or a gruesome or psychological horror story. Not every fish needs to be dangerous, and not every ending needs a punchline or an ominous reveal. Do not impose one sequence of description, incident and warning on the whole roster, or append a handling lesson to every yarn.
+
 ### Buried patterns
 
 Some patterns are harder to reach because they lie further into the fabric. “Buried,” “deep” and “hiding” are trade descriptions, not a literal water column.

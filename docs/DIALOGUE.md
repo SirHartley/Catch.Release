@@ -75,7 +75,7 @@ Subject-specific additions:
 
 | Subject | Required information |
 |---|---|
-| Fish description | Observable form, precise deviations, and a useful handling or culinary consequence. Do not invent evolutionary history or explain every pattern. |
+| Fish description | A short sailor's yarn retaining the fish's defining traits. See [Fish descriptions](LORE.md#fish-descriptions) for the distinction between a teller's story and setting facts. |
 | Colony description | A functioning facility: visitors, staff, tanks, access and maintenance. Follow the lore's setting constraints. |
 
 Use the terminology in [LORE.md](LORE.md#terminology) and the labels supplied by the owning UI/data definitions. Do not expose internal names such as `Tackle` or maintain a second vocabulary table here.
