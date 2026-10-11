@@ -469,6 +469,16 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | `LonglinerSchoolModule.java` | The real fish and eighteen phantoms circle a drifting center with individual velocities, changing radii and neighbour avoidance. Movement runs from the real mote's callback, as Quorum's shell game does; the haunt callback owns replenishment. Shared dive visibility, reversed shield rotation and shared section damage remain. Cleanup removes copies on replacement, failure, capture or departure. |
 | `LegendaryShields.java` | Defense dispatch and render state: Longliner sections, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. |
 
+Quorum shield escorts use a 70-unit orbit with at least 60 units between centers.
+`LegendaryShields.maintainSatellites` samples the available angular arcs randomly,
+weighted by their length, and places new/regrown splinters directly on the orbit.
+Survivors keep their angles. The real mote's post-movement callback advances all
+escort angles together; satellite callbacks only synchronize positions. Held
+escorts reserve their moving slots without being pulled off the line. Angles
+are saved on `FishEntityPlugin`; no transient reroll on load. Shell-game decoys
+are separate. `tools/QuorumEscortChecks` covers placement, replenishment, wraparound,
+callback order, held release and random gap variation.
+
 False Dawn starts with one stored shield charge. The wake-up hit provokes it
 without spending that charge, so the haunt begins with one. Green mine couriers
 add one on arrival, capped at three. Each subsequent deflection consumes

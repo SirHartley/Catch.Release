@@ -34,6 +34,10 @@ public class LegendaryShields {
     public static final String DAWN_SPECIES = "false_dawn";
 
     public static final int MOTE_SHIELD_COUNT = 3;
+    public static final float MOTE_ORBIT_RADIUS = 70f;
+    public static final float MOTE_MIN_DISTANCE = 60f;
+    private static final float MOTE_MIN_ANGLE =
+            (float) Math.toDegrees(2d * Math.asin(MOTE_MIN_DISTANCE / (2d * MOTE_ORBIT_RADIUS)));
     public static final int JACK_STACK_INITIAL = 3;
     public static final int JACK_STACK_MAX = 3;
     public static final float MOTE_REGEN_DAYS = 30f;
@@ -316,6 +320,10 @@ public class LegendaryShields {
 
     /** Keeps the Quorum's splinter escort matched to the ledger while its mote is up. */
     public static void maintainSatellites(FishEntityPlugin fish) {
+        maintainSatellites(fish, 0f);
+    }
+
+    public static void maintainSatellites(FishEntityPlugin fish, float amount) {
         if (asLegendaryMote(fish) == null) return;
         if (!MOTE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return;
         if (fish.getMote() == null || fish.getMote().getContainingLocation() == null) return;
@@ -323,25 +331,53 @@ public class LegendaryShields {
         int wanted = getShieldUnits(
                 LegendaryChases.getState(MOTE_SHIELD_SPECIES), MOTE_SHIELD_COUNT);
 
-        int alive = 0;
+        List<FishEntityPlugin> escorts = new ArrayList<>();
         for (SectorEntityToken other : fish.getMote().getContainingLocation()
                 .getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
             if (!other.isExpired() && other.getCustomPlugin() instanceof FishEntityPlugin satellite
                     && satellite.getOrbitAnchor() == fish.getMote()) {
-                alive++;
+                satellite.advanceOrbit(amount);
+                escorts.add(satellite);
             }
         }
 
-        for (int i = alive; i < wanted; i++) {
+        for (int i = escorts.size(); i < wanted; i++) {
+            float angle = pickEscortAngle(escorts);
             FishEntityPlugin.Params params = new FishEntityPlugin.Params(
                     new Vector2f(fish.getMote().getLocation()), SHARD_SPECIES);
             params.orbitAnchor = fish.getMote();
 
             SectorEntityToken satellite = fish.getMote().getContainingLocation()
                     .addCustomEntity(Misc.genUID(), "Mote", "catchrelease_Mote", null, params);
-            satellite.setLocation(fish.getMote().getLocation().x,
-                    fish.getMote().getLocation().y);
+            FishEntityPlugin plugin = (FishEntityPlugin) satellite.getCustomPlugin();
+            plugin.setOrbitAngle(angle);
+            escorts.add(plugin);
         }
+    }
+
+    protected static float pickEscortAngle(List<FishEntityPlugin> escorts) {
+        if (escorts.isEmpty()) return MathUtils.getRandomNumberInRange(0f, 360f);
+
+        List<Float> angles = new ArrayList<>();
+        for (FishEntityPlugin escort : escorts) angles.add(escort.getOrbitAngle());
+        angles.sort(Float::compare);
+        double available = 0d;
+        for (int i = 0; i < angles.size(); i++) {
+            double next = i + 1 < angles.size() ? angles.get(i + 1) : angles.get(0) + 360d;
+            available += Math.max(0d, next - angles.get(i) - 2d * MOTE_MIN_ANGLE);
+        }
+        // With at most two survivors, their exclusion arcs cannot cover this orbit.
+        double offset = MathUtils.getRandom().nextDouble() * available;
+        float selected = 0f;
+        for (int i = 0; i < angles.size(); i++) {
+            double next = i + 1 < angles.size() ? angles.get(i + 1) : angles.get(0) + 360d;
+            double free = next - angles.get(i) - 2d * MOTE_MIN_ANGLE;
+            if (free <= 0d) continue;
+            selected = (float) ((angles.get(i) + MOTE_MIN_ANGLE + Math.min(offset, free)) % 360d);
+            if (offset <= free) return selected;
+            offset -= free;
+        }
+        return selected;
     }
 
     public static void advanceEater(FishEntityPlugin fish) {
