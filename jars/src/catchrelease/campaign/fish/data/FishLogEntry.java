@@ -29,6 +29,7 @@ public class FishLogEntry implements Serializable {
     public float recordLength = 0f;
     public float recordWeight = 0f;
     public float recordAberration = 0f;
+    public int recordScars;
 
     public String firstSystemName;
     public Vector2f firstLocationInHyper;
@@ -49,5 +50,11 @@ public class FishLogEntry implements Serializable {
 
     public boolean isRecord(FishCatch entry) {
         return entry != null && entry.length > recordLength;
+    }
+
+    public FishGrade getRecordGrade() {
+        FishCatch record = new FishCatch(speciesId, recordLength, recordWeight, recordAberration);
+        record.scars = recordScars;
+        return record.getGrade();
     }
 }

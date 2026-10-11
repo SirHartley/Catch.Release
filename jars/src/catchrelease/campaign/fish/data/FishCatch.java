@@ -20,6 +20,7 @@ public class FishCatch {
     public long caughtAt;
     public String caughtSystemId;
     public String questTargetId;
+    public int scars;
 
     public FishCatch() {
     }
@@ -85,6 +86,12 @@ public class FishCatch {
     }
 
     public FishGrade getGrade() {
+        FishSpec spec = getSpec();
+        if (spec != null && spec.rarity == FishRarity.LEGENDARY) {
+            int rank = Math.max(FishGrade.TERRIBLE.rank,
+                    FishGrade.EXCEPTIONAL.rank - Math.max(0, scars));
+            return FishGrade.values()[rank];
+        }
         return FishGrade.of(getSizeFraction());
     }
 
@@ -120,6 +127,7 @@ public class FishCatch {
                 caughtAt <= 0L ? "" : String.valueOf(caughtAt),
                 caughtSystemId == null ? "" : caughtSystemId,
                 questTargetId == null ? "" : questTargetId,
+                scars <= 0 ? "" : String.valueOf(scars),
         };
 
         int last = -1;
@@ -150,6 +158,8 @@ public class FishCatch {
             entry.caughtAt = parseLong(field(parts, 8));
             entry.caughtSystemId = field(parts, 9);
             entry.questTargetId = field(parts, 10);
+            String scars = field(parts, 11);
+            entry.scars = scars == null ? 0 : Math.max(0, Integer.parseInt(scars));
 
             return entry;
         } catch (NumberFormatException e) {

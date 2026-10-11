@@ -14,8 +14,8 @@ public class MantaMinigame extends FishingMinigame {
 
     private static class Decoy extends FishingMinigame {
 
-        Decoy(FishSpec fish, Tackle tackle, LocationAPI location) {
-            super(fish, tackle, location);
+        Decoy(FishSpec fish, Tackle tackle, LocationAPI location, int scars) {
+            super(fish, tackle, location, scars);
         }
 
         @Override
@@ -30,8 +30,13 @@ public class MantaMinigame extends FishingMinigame {
     }
 
     public MantaMinigame(FishSpec fish, Tackle tackle, LocationAPI location) {
-        super(fish, tackle, location);
-        decoys = List.of(new Decoy(fish, tackle, location), new Decoy(fish, tackle, location));
+        this(fish, tackle, location, 0);
+    }
+
+    public MantaMinigame(FishSpec fish, Tackle tackle, LocationAPI location, int scars) {
+        super(fish, tackle, location, scars);
+        decoys = List.of(new Decoy(fish, tackle, location, scars),
+                new Decoy(fish, tackle, location, scars));
         placeOpeningMarkers();
     }
 

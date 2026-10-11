@@ -348,6 +348,21 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 
 ### Minigame timing
 
+`LegendaryScarDisplay` draws up to four quiet 24-unit harpoon circles, spaced 32
+units vertically to the right of the progress meter. It uses the existing
+`shop_harpoon` sprite and `Disc` primitives after the Manta distortion pass. There
+are no labels or hover regions during play. On a failed legendary minigame the
+dialog stays open: the new icon fades in and shrinks over 0.6 seconds, then plays
+vanilla's `ui_cargo_supplies_drop` and shows the explanation in a boxed tooltip
+beside it. After five seconds the box is replaced by postgame-only hover tooltips.
+A fresh click or keypress can close the result after 0.8 seconds, with the existing
+"Press any key" prompt beneath the track; the Escape release
+from abandoning play cannot dismiss it. At four scars no further stamp, sound or
+quality-loss notice is added. Ordinary failures retain their short automatic
+close. Both dialog-dismiss paths dispose all owned tooltip components.
+Scar persistence and quality are covered in
+[ARCHITECTURE.md](ARCHITECTURE.md#campaignfishlegendary).
+
 Manta minigames apply `ChromaticAberrationOverlay.renderRegion` after drawing the
 running panel. It shifts RGB samples only inside that panel, with pixel/UI scaling,
 and never registers a campaign listener. Both custom-dialog dismissal paths dispose

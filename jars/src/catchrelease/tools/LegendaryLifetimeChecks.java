@@ -96,6 +96,7 @@ public final class LegendaryLifetimeChecks {
                 state.revealed = true;
                 state.provoked = true;
                 state.shieldUnits = 2;
+                state.scars = 4;
             }
             Fish buried = env.real("quorum");
             buried.plugin = new Buried(buried);
@@ -112,7 +113,7 @@ public final class LegendaryLifetimeChecks {
                 LegendaryChases.Chase state = LegendaryChases.getState(id);
                 check("original-host".equals(state.systemId) && state.residency == 7
                                 && state.seenAt == 12345L && state.revealed && !state.provoked
-                                && state.shieldUnits == -1 && !state.caught,
+                                && state.shieldUnits == -1 && state.scars == 0 && !state.caught,
                         id + " departure resets the encounter but preserves host, clock and relocation signal");
             }
         }

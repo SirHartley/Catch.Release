@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -52,6 +53,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     protected Delegate delegate;
 
     protected boolean resolved = false;
+    protected boolean failureRecorded;
     transient protected boolean dismissed = false;
 
     transient protected float previousCampaignMusicVolume;
@@ -85,6 +87,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
             this.callbacks = callbacks;
             this.framePanel = panel;
+            this.panel.attachFrame(panel);
 
             addFramingElements(panel);
         }
@@ -138,6 +141,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         @Override
         public void buttonPressed(Object buttonId) {
+            if (!minigame.isRunning()) return;
             if (buttonId == devWinId) {
                 minigame.setCaught();
             } else if (buttonId == devWinTreasureId) {
@@ -197,6 +201,11 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         @Override
         public void onMinigameEnded(boolean caught) {
             resolve(caught);
+        }
+
+        @Override
+        public int onMinigameFailed() {
+            return recordFailure();
         }
     }
 
@@ -279,8 +288,10 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         // tackle sizes the window and rolls treasure; read once before anything is rolled
         Tackle tackle = TackleManager.get(method);
         LocationAPI location = anchor == null ? null : anchor.getContainingLocation();
+        int scars = isLegendaryAttempt() ? LegendaryChases.getState(fish.id).scars : 0;
         this.minigame = catchrelease.campaign.fish.legendary.MantaFormationModule.SPECIES.equals(fish.id)
-                ? new MantaMinigame(fish, tackle, location) : new FishingMinigame(fish, tackle, location);
+                ? new MantaMinigame(fish, tackle, location, scars)
+                : new FishingMinigame(fish, tackle, location, scars);
         this.minigame.setPresentedColor(catchrelease.campaign.fish.legendary
                 .LegendaryShields.getPresentedColor(fish, catchTarget));
 
@@ -303,6 +314,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         this.specimen = FishCatch.roll(fish, aberration, quality,
                 anchor == null ? null : SectorRegion.of(anchor.getContainingLocation()));
+        this.specimen.scars = minigame.getScars();
 
         // must read off anchor before the catch resolves - the mote is gone afterward
         this.specimen.method = method;
@@ -393,8 +405,25 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         });
     }
 
+    protected boolean isLegendaryAttempt() {
+        return fish != null && fish.rarity == FishRarity.LEGENDARY && catchTarget != null
+                && catchTarget.getCustomPlugin() instanceof FishEntityPlugin target
+                && !target.isDecoy() && !target.isPhantom() && fish.id.equals(target.getFishId());
+    }
+
+    protected int recordFailure() {
+        if (minigame == null || !isLegendaryAttempt()) return 0;
+        LegendaryChases.Chase chase = LegendaryChases.getState(fish.id);
+        if (!failureRecorded) {
+            failureRecorded = true;
+            chase.addScar();
+        }
+        return chase.scars;
+    }
+
     protected void resolve(boolean caught) {
         if (resolved) return;
+        if (!caught) recordFailure();
         resolved = true;
         restoreCampaignMusicVolume();
 

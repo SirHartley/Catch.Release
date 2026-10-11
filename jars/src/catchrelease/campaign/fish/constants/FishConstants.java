@@ -24,6 +24,7 @@ public class FishConstants {
     public static final float MINIGAME_RESULT_TEXT_SIZE = 15f;
     public static final float MINIGAME_RESULT_TITLE_SIZE = 20f;
     public static final float MINIGAME_RESULT_PROMPT_ALPHA = 0.55f;
+    public static final String MINIGAME_RESULT_PROMPT = "Press any key";
     public static final Color MINIGAME_RESULT_PROMPT_DIM = new Color(125, 125, 125);
     public static final Color MINIGAME_RESULT_PROMPT_LIT = new Color(200, 200, 200);
     public static final float MINIGAME_RESULT_PROMPT_PERIOD = 1f;
@@ -131,6 +132,12 @@ public class FishConstants {
     public static final Color MINIGAME_LOOT_COIN_COLOR = new Color(212, 172, 64);
 
     public static final float MINIGAME_BAR_SIZE_FALLBACK = 120f;
+    public static final float SCAR_POOR_DIFFICULTY = 50f;
+    public static final float SCAR_POOR_SPEED = 1.1f;
+    public static final float SCAR_POOR_RESTLESSNESS = 1.05f;
+    public static final float SCAR_POOR_PROGRESS = 1f;
+    public static final float SCAR_POOR_ESCAPE = 1.3f;
+    public static final float SCAR_TERRIBLE_EASE = 0.85f;
     public static final float MINIGAME_BAR_MIN_FRACTION = 0.08f;
     public static final float MINIGAME_BAR_MAX_FRACTION = 0.6f;
     public static final float MINIGAME_BAR_LIFT = 2.8f;

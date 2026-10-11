@@ -164,6 +164,7 @@ public final class HauntWindDownChecks {
         for (boolean held : new boolean[]{false, true}) try (Fixture f = new Fixture()) {
             f.chase.shieldPopped = true;
             f.chase.shieldUnits = 0;
+            f.chase.scars = 3;
             f.chase.residency = 7;
             f.chase.seenAt = 1234L;
             f.chase.encountered = true;
@@ -178,7 +179,8 @@ public final class HauntWindDownChecks {
             if (held) {
                 near(14000f, f.fish.at.x, "held fish cannot be teleported");
                 check(f.chase.roaming, "deferred return retains the hunt state");
-                check(f.chase.shieldPopped, "held catch cannot have its defense reset underneath it");
+                check(f.chase.shieldPopped && f.chase.scars == 3,
+                        "held catch cannot have defenses or scars reset underneath it");
                 f.fish.setHeld(false);
                 f.haunt.advance(0.1f);
             }
@@ -187,9 +189,9 @@ public final class HauntWindDownChecks {
             check(!f.fish.isDashing() && !f.chase.provoked && !f.chase.roaming,
                     "return clears escape movement and provocation");
             check(f.fish.getMovementVelocity().length() == 0f, "teleport is not harpoon lead velocity");
-            check(!f.chase.shieldPopped && f.chase.shieldUnits == -1 && f.chase.residency == 7
+            check(!f.chase.shieldPopped && f.chase.shieldUnits == -1 && f.chase.scars == 0 && f.chase.residency == 7
                             && f.chase.seenAt == 1234L && f.chase.encountered,
-                    "return resets defenses but preserves residency and sightings");
+                    "return resets defenses and scars but preserves residency and sightings");
             Vector2f at = new Vector2f(f.fish.at);
             f.fish.advance(0.1f);
             check(Vector2f.sub(at, f.fish.at, null).length() > 0f, "returned fish resumes swimming");

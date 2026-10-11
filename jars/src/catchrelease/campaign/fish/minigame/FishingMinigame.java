@@ -7,8 +7,10 @@ import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
 import catchrelease.campaign.fish.data.FishMotion;
+import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.legendary.LegendaryChases;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import org.lazywizard.lazylib.MathUtils;
@@ -28,6 +30,7 @@ public class FishingMinigame {
     public static final int LANTERN_TREASURE_LIMIT = 2;
 
     protected FishSpec fish;
+    protected final int scars;
     protected float difficulty;
     protected float motionSpeed;
     protected float restlessness;
@@ -79,10 +82,15 @@ public class FishingMinigame {
     }
 
     public FishingMinigame(FishSpec fish, Tackle tackle, LocationAPI location) {
+        this(fish, tackle, location, 0);
+    }
+
+    public FishingMinigame(FishSpec fish, Tackle tackle, LocationAPI location, int scars) {
         this.fish = fish;
         this.tackle = tackle == null ? Tackle.NONE : tackle;
 
         boolean legendary = fish.rarity == FishRarity.LEGENDARY;
+        this.scars = legendary ? Math.max(0, Math.min(LegendaryChases.MAX_SCARS, scars)) : 0;
         this.rumorLootMult = FishRumors.getLootMult(location);
         this.rumorLootRarityBias = legendary ? 1f : FishRumors.getLootRarityBias(location);
 
@@ -94,6 +102,7 @@ public class FishingMinigame {
         this.specialChance = fish.specialChance;
         this.mixChance = fish.mixChance;
         this.motion = fish.motion;
+        applyScars();
 
         // clamped after the tackle has had its say, so a wide window is still a window
         this.barHeight = MathUtils.clamp(getBarHeight() * this.tackle.barSizeMult,
@@ -102,6 +111,29 @@ public class FishingMinigame {
         this.cannotLose = Global.getSettings().isDevMode();
 
         rollTreasure();
+    }
+
+    protected void applyScars() {
+        if (scars == 0) return;
+
+        // Three scars reach Poor: approximate an ordinary mixed-motion Common catch.
+        float blend = Math.min(1f, scars / (float) (FishGrade.EXCEPTIONAL.rank - FishGrade.POOR.rank));
+        difficulty += (Math.min(difficulty, FishConstants.SCAR_POOR_DIFFICULTY) - difficulty) * blend;
+        motionSpeed += (Math.min(motionSpeed, FishConstants.SCAR_POOR_SPEED) - motionSpeed) * blend;
+        restlessness += (Math.min(restlessness, FishConstants.SCAR_POOR_RESTLESSNESS) - restlessness) * blend;
+        progressRateMult += (Math.max(progressRateMult, FishConstants.SCAR_POOR_PROGRESS) - progressRateMult) * blend;
+        escapeRateMult += (Math.min(escapeRateMult, FishConstants.SCAR_POOR_ESCAPE) - escapeRateMult) * blend;
+
+        if (scars == LegendaryChases.MAX_SCARS) {
+            motionSpeed *= FishConstants.SCAR_TERRIBLE_EASE;
+            restlessness *= FishConstants.SCAR_TERRIBLE_EASE;
+            progressRateMult /= FishConstants.SCAR_TERRIBLE_EASE;
+            escapeRateMult *= FishConstants.SCAR_TERRIBLE_EASE;
+        }
+    }
+
+    public int getScars() {
+        return scars;
     }
 
     protected void rollTreasure() {
