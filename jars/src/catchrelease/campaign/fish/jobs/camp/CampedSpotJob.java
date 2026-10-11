@@ -285,8 +285,7 @@ public abstract class CampedSpotJob extends FishJob {
                     Misc.getHighlightColor(),
                     size == null ? "something" : size.describe, getType().token, systemName);
 
-            info.addPara("Kill them, pay them off, or talk them out of it - nobody has asked for it"
-                    + " to be done a particular way.", pad);
+            info.addPara("Clear the camp by force, pay them off, or persuade them to leave.", pad);
 
             if (receiptAboard) {
                 info.addPara("The proof is already aboard. What remains is clearing the camp.", pad);

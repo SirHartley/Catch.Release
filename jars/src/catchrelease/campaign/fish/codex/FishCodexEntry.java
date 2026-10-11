@@ -240,7 +240,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
 
         FishSpec spec = state.spec;
         if (spec == null) {
-            text.addPara("The table no longer has a row for this one.",
+            text.addPara("No data is available for this species.",
                     Misc.getNegativeHighlightColor(), BOX_GAP);
             return;
         }
@@ -303,7 +303,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName,
                 logged.recordMethod.name);
 
-        text.addPara("The first %s in %s.", 3f, hl,
+        text.addPara("First caught %s in %s.", 3f, hl,
                 getDate(logged.firstTimestamp),
                 logged.firstSystemName == null ? "an unrecorded system" : logged.firstSystemName);
     }
@@ -317,8 +317,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 text.addPara("No range data is available for this species. It must be found"
                         + " without a chart.", Misc.getGrayColor(), BOX_GAP);
             } else {
-                text.addPara("Range data has not been acquired. Catch the species or obtain"
-                        + " its range data to reveal the habitat.", Misc.getGrayColor(), BOX_GAP);
+                text.addPara("Catch this species or obtain its range data to reveal its habitat.",
+                        Misc.getGrayColor(), BOX_GAP);
             }
             return;
         }
@@ -327,7 +327,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 FishLocationSummary.describe(spec));
 
         if (state.isRangeDataOnly()) {
-            text.addPara("Nothing of this one has been landed. The range is on the map.",
+            text.addPara("Not yet caught. Its range is marked on the map.",
                     Misc.getGrayColor(), 3f);
         } else {
             text.addPara("Recorded in %s.", 3f, Misc.getGrayColor(), Misc.getHighlightColor(),

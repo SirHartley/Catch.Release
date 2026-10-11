@@ -199,7 +199,7 @@ public final class FishHandoffPicker {
 
                         if (dialog.getTextPanel() != null) {
                             dialog.getTextPanel().addPara(
-                                    "That selection does not cover the order - nothing was"
+                                    "That selection does not match the order. No fish were"
                                             + " handed over.",
                                     Misc.getNegativeHighlightColor());
                         }
@@ -245,8 +245,8 @@ public final class FishHandoffPicker {
                                 String.valueOf(selected), String.valueOf(required));
 
                         if (selected > required) {
-                            panel.addPara("Only what the order asks will be taken - a larger"
-                                    + " selection is refused.", Misc.getNegativeHighlightColor(), 5f);
+                            panel.addPara("Select the exact number requested. Extra fish cannot"
+                                    + " be handed over.", Misc.getNegativeHighlightColor(), 5f);
                         } else if (!ready) {
                             panel.addPara("The selection does not yet cover the full request.",
                                     Misc.getGrayColor(), 5f);

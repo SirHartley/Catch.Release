@@ -423,7 +423,7 @@ public class LegendaryShields {
             state.shieldUnits = Math.min(JACK_STACK_MAX, getJackStack(state) + 1);
             if (state.shieldUnits == JACK_STACK_MAX) fish.setHunting(false);
             fish.flashShield();
-            say(self, "Mote consumed. Another shell layers on.");
+            say(self, "Mote consumed. Shield layer gained.");
         }
     }
 

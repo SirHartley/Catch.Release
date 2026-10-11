@@ -247,7 +247,7 @@ public class FishingIntro {
                     if (target.needsDeepGear) {
                         info.addPara("Breach Lights and Harpoon only", text, pad);
                     } else if (target.atPond) {
-                        info.addPara("ROD/LINE at the marked rupture", text, pad);
+                        info.addPara("ROD/LYNE at the marked rupture", text, pad);
                     }
                 }
             }

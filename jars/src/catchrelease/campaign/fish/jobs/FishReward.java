@@ -368,8 +368,8 @@ public abstract class FishReward {
             TooltipMakerAPI item = tooltip.beginImageWithText(
                     "graphics/catchrelease/icon/blank.png", 42f);
             item.addPara("Range data: %s", 0f, Misc.getHighlightColor(), spec.rarity.color, spec.getDisplayName());
-            item.addPara("Range data unlocks the habitat of the pattern on your map, allowing you"
-                    + " to see its range and plot a course to catch it.", Misc.getGrayColor(), 6f);
+            item.addPara("Charts this species' range on your map so you can plan a route to it.",
+                    Misc.getGrayColor(), 6f);
             UIPanelAPI card = tooltip.addImageWithText(pad);
 
             CustomPanelAPI silhouette = Global.getSettings().createCustom(42f, 42f,

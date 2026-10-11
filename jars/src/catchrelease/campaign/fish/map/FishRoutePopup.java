@@ -184,13 +184,13 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
         controls.addCustom(titleRow, 0f);
         controls.addTooltipTo(createSimpleTooltip(220f,
-                "Close the planner and put the sidebar back."),
+                "Close the planner and return to the species list."),
                 close, TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         searchField = controls.addTextField(innerWidth, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 8f);
         searchField.setText(SEARCH_GHOST);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
-                "Type to filter the species by name. The list follows as you type."),
+                "Search species by name."),
                 TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         FishType[] types = FishType.values();
@@ -399,14 +399,14 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                 tooltip.addPara("Planning a route", Misc.getBasePlayerColor(), 0f);
 
-                tooltip.addPara("Pick up to " + FishRoutePlanner.MAX_PICKS + " fish - wanted"
-                        + " ones (open jobs, marked gear) are pinned first, tagged with who is"
-                        + " asking.", 8f);
+                tooltip.addPara("Select up to " + FishRoutePlanner.MAX_PICKS + " species. Fish"
+                        + " needed for jobs and marked purchases appear first, with labels"
+                        + " showing what each is needed for.", 8f);
 
-                tooltip.addPara("The search field and the type chips narrow the list.", 8f);
+                tooltip.addPara("Search by name or use the type filters to narrow the list.", 8f);
 
-                tooltip.addPara("PLOT ROUTE plots the shortest route through the picked"
-                        + " species' ranges and draws it on the hyperspace map.", 8f);
+                tooltip.addPara("PLOT ROUTE finds the shortest route through the selected"
+                        + " ranges and shows it on the hyperspace map.", 8f);
 
                 tooltip.addPara("F2 over a row opens that species' codex page.",
                         Misc.getGrayColor(), 8f);
@@ -416,9 +416,9 @@ public class FishRoutePopup extends BaseCustomUIPanelPlugin {
 
     protected TooltipMakerAPI.TooltipCreator createRowTooltip(FishSpec spec) {
         return FishTooltips.create(spec, () -> {
-            if (selected.contains(spec.id)) return "Click to drop it from the route plan.";
+            if (selected.contains(spec.id)) return "Click to remove this species from the route.";
             if (selected.size() >= FishRoutePlanner.MAX_PICKS) {
-                return "All " + FishRoutePlanner.MAX_PICKS + " picks are used - drop one first.";
+                return "All " + FishRoutePlanner.MAX_PICKS + " slots are filled. Deselect one first.";
             }
             return "Click to pick it for the route. F2 opens the codex.";
         });

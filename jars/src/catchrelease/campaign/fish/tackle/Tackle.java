@@ -5,15 +5,14 @@ public enum Tackle {
     NONE("None", Fit.BOTH,
             "Nothing fitted."),
     SPOOL_GOVERNOR("Spool Governor", Fit.DRONE,
-            "Enlarges the catch window, but makes it rise more slowly in response to input.") {
+            "Enlarges the catch window but slows its upward movement.") {
         {
             barSizeMult = 1.35f;
             barLiftMult = 0.85f;
         }
     },
     INERTIAL_DAMPER("Inertial Damper", Fit.DRONE,
-            "Makes the catch window fall more slowly, but also makes it rise more slowly in"
-                    + " response to input.") {
+            "Slows both the rise and fall of the catch window.") {
         {
             barGravityMult = 0.7f;
             barLiftMult = 0.8f;
@@ -41,27 +40,27 @@ public enum Tackle {
         }
     },
     STASIS_CRADLE("Stasis Cradle", Fit.DRONE,
-            "Improves landed specimen coherence by reducing aberration during the catch.") {
+            "Improves the coherence of the fish you catch.") {
         {
             coherenceBonus = 0.25f;
         }
     },
     BAITED_RESONATOR("Baited Resonator", Fit.DRONE,
-            "Biases generated catches toward rarer species while fitted to the ROD.") {
+            "Makes rarer species more likely to appear while fitted to the ROD.") {
         {
             rarityBias = 1.6f;
         }
     },
     BREACH_COUPLER("Breach Coupler", Fit.DRONE,
-            "Allows ROD drones to operate in open space while Breach Lights are active, where they"
-                    + " pursue patterns currently exposed by the lamps.") {
+            "Lets ROD drones fish outside ruptures while Breach Lights are on. They can only"
+                    + " pursue patterns exposed by the lamps.") {
         {
             breachCoupling = true;
         }
     },
     CALIBRATED_GRADER("Calibrated Grader", Fit.BOTH,
-            "Biases landed specimens toward greater length and weight within their species'"
-                    + " possible range. It does not change coherence or rarity.") {
+            "Makes catches more likely to be longer and heavier, within their species' normal"
+                    + " size range. Does not affect coherence or rarity.") {
         {
             qualityBias = 0.25f;
         }
@@ -73,8 +72,7 @@ public enum Tackle {
         }
     },
     SONAR_HEAD("Sonar Head", Fit.BOTH,
-            "Replaces the unidentified mote on the minigame track with the hooked species' icon"
-                    + " before the catch is landed.") {
+            "Shows the hooked species' icon during the minigame, before you land it.") {
         {
             sonar = true;
         }
@@ -87,7 +85,7 @@ public enum Tackle {
         }
     },
     SHORING_HEAD("Shoring Head", Fit.HARPOON,
-            "Improves landed specimen coherence by reducing aberration during the catch.") {
+            "Improves the coherence of the fish you catch.") {
         {
             coherenceBonus = 0.25f;
         }
@@ -100,9 +98,8 @@ public enum Tackle {
         }
     },
     EXPLOSIVE_HEAD("Explosive Head", Fit.HARPOON,
-            "A single-use Harpoon Tip that detonates on contact. It destroys ordinary struck"
-                    + " patterns instead of landing them, damages struck fleets, and is consumed by"
-                    + " the blast. Legendary pattern reactions may differ.") {
+            "A single-use harpoon tip. Destroys ordinary patterns and damages fleets on impact."
+                    + " Legendaries may react differently. The blast consumes the tip.") {
         {
             explosive = true;
             stocked = false;
@@ -112,17 +109,15 @@ public enum Tackle {
             "While Breach Lights are off, hidden rare and epic patterns and dormant legendaries"
                     + " occasionally produce faint ripple rings. Does not detect the Imposter."),
     TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
-            "Pauses a Breach Light sweep when the lamp touches a buried pattern, follows that"
-                    + " pattern for a time, then resumes sweeping. The gimbal must cool down before"
-                    + " it can lock again.") {
+            "Makes each Breach Light pause its sweep to follow a buried pattern briefly."
+                    + " It then resumes sweeping and must cool down before locking on again.") {
         {
             lockTime = 4f;
         }
     },
     FANNED_ARRAY("Fanned Array", Fit.SEARCHLIGHT,
-            "Replaces each Breach Light's moving spot with a wide fan-shaped beam. The fans cover"
-                    + " more space at once, but sweep more slowly and expose off-axis or distant"
-                    + " patterns less strongly.") {
+            "Replaces each Breach Light's spot with a wide fan. Covers more space but sweeps"
+                    + " more slowly, with weaker exposure at the edges and farther from the lamp.") {
         {
             fanBeam = true;
         }

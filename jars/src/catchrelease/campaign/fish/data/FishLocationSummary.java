@@ -12,7 +12,7 @@ public class FishLocationSummary {
     protected static final String[] QUADRANTS = {"NE", "NW", "SE", "SW"};
 
     public static String describe(FishSpec spec) {
-        if (spec == null) return "Nowhere anyone has written down.";
+        if (spec == null) return "No habitat recorded.";
 
         List<String> clauses = new ArrayList<>();
 
@@ -136,9 +136,9 @@ public class FishLocationSummary {
 
         CatchImplement only = reachedBy.iterator().next();
 
-        if (only == CatchImplement.POND) return "and only ever out of a rupture";
+        if (only == CatchImplement.POND) return "and accessible only from a rupture";
 
-        return "and only ever loose in the dark, under a breach lamp";
+        return "and accessible only under breach lights";
     }
 
     protected static String describeTags(Set<String> systemTags) {
@@ -161,7 +161,7 @@ public class FishLocationSummary {
             case "theme_derelict": return "long abandoned";
             case "theme_remnant": return "held by remnants";
             case "has_slipstreams": return "crossed by slipstreams";
-            case "nebula": return "sunk in nebula";
+            case "nebula": return "inside a nebula";
             default: return tag.trim().toLowerCase().replace("theme_", "").replace('_', ' ');
         }
     }

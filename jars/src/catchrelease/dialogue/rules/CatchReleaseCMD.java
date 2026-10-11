@@ -376,7 +376,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             if (scene == null) return false;
 
             addCrabCostTooltip(dialog.getOptionPanel(), optionId,
-                    "A rolled aquarium backdrop: " + scene.getDisplayName() + ".",
+                    "Aquarium backdrop: " + scene.getDisplayName() + ".",
                     CrabBackdrops.getCredits(scene), CrabBackdrops.getCrabs(scene));
             return true;
         }

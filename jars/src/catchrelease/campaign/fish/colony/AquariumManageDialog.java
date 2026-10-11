@@ -38,8 +38,8 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         this.dialog = dialog;
 
         dialog.setPromptText("");
-        dialog.getTextPanel().addPara("The conservatory's back office smells of brine and"
-                + " filtration. The tank hums through the wall.");
+        dialog.getTextPanel().addPara("The conservatory's back office smells of brine."
+                + " You can hear the tank's filters through the wall.");
 
         showMain();
     }
@@ -81,8 +81,7 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         int first = backdropPage * BACKDROPS_PER_PAGE;
         int last = Math.min(first + BACKDROPS_PER_PAGE, owned.size());
 
-        dialog.getTextPanel().addPara("Rolled scenery in a rack along the back wall, most of it"
-                + " painted by somebody who has never been near the water it is of.",
+        dialog.getTextPanel().addPara("Painted backdrops sit rolled up in a rack along the back wall.",
                 Misc.getGrayColor());
 
         for (Backdrop backdrop : owned.subList(first, last)) {
@@ -90,8 +89,7 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
             if (hanging != null && backdrop.id.equals(hanging.id)) label += " - up now";
 
             dialog.getOptionPanel().addOption(label, backdrop, backdrop.rarity.color,
-                    "The backdrop can be changed at any time. More can be found through quests"
-                            + " or purchased from a certain crab merchant.");
+                    "Change backdrops at any time. Get more from quests or Crablobab's shop.");
         }
 
         if (backdropPage > 0) {
@@ -120,8 +118,8 @@ public class AquariumManageDialog implements InteractionDialogPlugin {
         if (optionData instanceof Backdrop backdrop) {
             if (Backdrops.hang(conservatory, backdrop)) {
                 dialog.getTextPanel().addPara(Backdrops.isBare(backdrop)
-                                ? "The rack goes back on the wall. Bare glass from here."
-                                : "It goes up behind the glass.",
+                                ? "The backdrop is removed, leaving bare glass."
+                                : "The new backdrop is hung behind the tank.",
                         Misc.getPositiveHighlightColor());
             }
 

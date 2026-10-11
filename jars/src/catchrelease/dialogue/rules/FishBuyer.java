@@ -363,8 +363,7 @@ public class FishBuyer {
                                 Misc.getBasePlayerColor(), 0f);
                         panel.setParaFontDefault();
 
-                        panel.addPara("Sold at market price - what each specimen would fetch from a"
-                                + " buyer who wanted it.", Misc.getGrayColor(), 10f);
+                        panel.addPara("Fish sell for their market value.", Misc.getGrayColor(), 10f);
 
                         panel.addPara("Total: %s", 10f, Misc.getHighlightColor(),
                                 Misc.getDGSCredits(valueOf(combined)));

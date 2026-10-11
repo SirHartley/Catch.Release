@@ -259,8 +259,8 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                             () -> lastPurchase != null, this::undoClicked));
             footer.addCustom(undo, 0f);
             footer.addTooltipToPrevious(createSimpleTooltip(260f,
-                    "Takes back the last chart bought this visit - the fish paid for it return"
-                            + " exactly as they were."),
+                    "Returns the last chart bought this visit and refunds the exact fish used"
+                            + " to pay for it."),
                     TooltipMakerAPI.TooltipLocation.ABOVE, false);
 
             panel.addUIElement(footer).inTL(PAD, HEIGHT - PAD - UNDO_HEIGHT);
@@ -341,12 +341,14 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    tooltip.addPara("Charts for charts", Misc.getBasePlayerColor(), 0f);
+                    tooltip.addPara("Range data", Misc.getBasePlayerColor(), 0f);
 
-                    tooltip.addPara("Range data unlocks the habitat of the pattern on your map, allowing you to see its range and plot a course to catch it. " +
-                            "It also unlocks the preliminary codex data, some behavioural information, and the presence indicator on the system map.", 8f);
+                    tooltip.addPara("Charts a species' range so you can plan a route to it. Also"
+                            + " adds habitat and movement details to the codex, and a species"
+                            + " indicator to the system map.", 8f);
 
-                    tooltip.addPara("Restocks after a while. Encounters outside the core carry a unique inventory.", 8f);
+                    tooltip.addPara("Stock refreshes periodically. Fishing boats outside the core"
+                            + " have their own stock.", 8f);
                 }
             };
         }
@@ -414,7 +416,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             lastPurchase = receipt;
             Global.getSoundPlayer().playUISound(FishShopDialog.SOUND_BOUGHT, 1f, 1f);
             Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
-                    "Puchased range data for " + offer.spec.getDisplayName());
+                    "Purchased range data for " + offer.spec.getDisplayName());
 
             rebuildGrid();
         }
