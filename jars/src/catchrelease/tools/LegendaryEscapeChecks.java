@@ -651,7 +651,7 @@ public final class LegendaryEscapeChecks {
             check(red.getRed() > red.getGreen() && red.getRed() > red.getBlue(), "Manta shield is red");
             for (String id : List.of("false_dawn", "slipstream_moray", "lantern_jack", "longliner")) {
                 check(LegendaryShields.getShieldColor(env.real(id)).equals(LegendaryShields.SHIELD_ORANGE),
-                        "non-regenerating shields share green");
+                        "non-regenerating shields share the configured color");
             }
             java.awt.Color blue = LegendaryShields.getShieldColor(env.real("quorum"));
             check(blue.getBlue() > blue.getRed() && blue.getBlue() > blue.getGreen(), "Quorum shield is blue");
@@ -990,8 +990,8 @@ public final class LegendaryEscapeChecks {
                 Fish fish = env.real(LegendaryShields.MORAY_SPECIES);
                 fish.setSwimTarget(new Vector2f(10000f, 10000f));
                 java.awt.Color color = LegendaryShields.getShieldColor(fish);
-                check(color.getGreen() > color.getRed() && color.getGreen() > color.getBlue(),
-                        "Moray shield and deflection flash are green");
+                check(color.equals(LegendaryShields.SHIELD_ORANGE),
+                        "Moray shield and deflection flash use the configured color");
                 check(LegendaryShields.isShielded(fish), "Moray starts shielded");
                 check(LegendaryShields.onHarpoonContact(fish.getMote(), explosive)
                         == LegendaryShields.HitResult.DEFLECTED && LegendaryShields.isShielded(fish),
