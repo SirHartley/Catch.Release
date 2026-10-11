@@ -399,7 +399,8 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 |---|---|
 | `FishShopDialog.java` | Outfitter and session undo. Automatic payment preview spends the same specimens; manual payment uses the shared picker and reopens next frame. Undo restores exact cargo/credits/gear/tiers/marks. |
 | `ShopEntry.java` | Uniform wrapper for upgrades, modules, and curio switches. |
-| `ShopPricing.java` | Seeded credit-and-fish prices. |
+| `ShopPricing.java` | Credit prices and saved fish payments. Upgrade credits use the 5k/10k/15k/20k ladder, end-aligned for shorter lines (two tiers: 15k/20k). Modules cost 20k–40k; Sonar is in the 40k bracket. Quest schematic valuation reads credits without generating a fish payment. |
+| `ShopFishPayments.java` | Generates ordinary `FishRequirement` payments: 50% named pattern, 30% species with two modifiers, 20% player-chosen matching batch with a modifier. Checks current ranges and owned fishing gear; no origin restriction. Higher bands favor rarer patterns, larger catches and Fine grade. |
 | `ShopMarks.java` | Persistent shopping list. |
 | `FishAsker.java` | Interface implemented by jobs, tutorial intel, and chart-request intel so the shop, cargo, and route planner can read fish requirements uniformly. |
 | `FishCurrency.java` | Counts and spends matching fish. |
@@ -804,13 +805,16 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - Unpacking a pile restores any singleton species as a loose fish, not a one-fish crate.
 - `Tackle.Fit.BOTH` describes compatibility; it is not a rig. Rig loops use `Fit.isRig()`.
 - Module ownership and module fitting are separate. Charge only when `isOwned()` is false; grants must both own and fit the module.
+- `ShopPricing` saves each generated `FishRequirement` in sector persistent data under `$catchrelease_shop_payments`, keyed by stat ID/target tier or module ID (shared across rigs). Shop refresh, schematic unlock, session undo and save/load must not reroll it. Named patterns prefer those used least by previous payments. If no catch is obtainable, the uncached null fish payment disables purchase; it does not waive the fish cost.
+- Shop payments use ordinary positive-weight patterns, never legendary or special rows. `ShopFishPayments` checks `FishRanges.matches()` in accessible systems and the player's existing ROD/harpoon/lamps/coupler. Low-coherence asks also need a suitable non-colony habitat without relying on a temporary rumor. Payments accept existing cargo and reuse `FishRequirement`, `FishCurrency` and `FishHandoffPicker`; grade, length and weight do not stack, nor do method and implement. Aim tolerance and lamp slowing use a higher fish-payment band without changing their credit ladder or effects.
+- A catch's method and implement are independent. `FishRequirement.couldBeSatisfiedBy()` may constrain an explicit implement, but must not infer it from the rig: harpoons can take pond fish and coupled drones can take lamp fish.
 - Stock is a third state. `TackleManager.getOptions()` contains stocked modules plus owned unstocked modules so purchased gear can be removed and refitted.
 - Explosive Head is unstocked and consumable. A miss keeps it; detonation removes ownership and the fitted slot, which makes Crablobab sell it again.
 - Upgrade tiers and modules granted outside the shop still go through `ShopEntry.grant()` so a running ability is stopped and restarted with its new values.
 - A curio is a switch, not a purchase. Its shop price is null, it never becomes “done,” and the button toggles it.
 - Celebration Charges are purchased from Crablobab and switched in the outfitter. They are not a LunaLib setting.
 - Abilities read tuning values when activated. Any code that changes their upgrade or module inputs must restart the affected running ability.
-- Needle Sensor is a stocked, schematic-gated Lens Array in the same price tier as Tracking Gimbal and Fanned Array. It uses the normal module reward, fitting and category-icon paths. Its controller and rings are transient. Vanilla registers abilities as entity scripts even when off; the existing callback supplies the passive timer, with no new campaign script or sector scan.
+- Needle Sensor is a stocked, schematic-gated Lens Array. It uses the normal module reward, fitting and category-icon paths. Its controller and rings are transient. Vanilla registers abilities as entity scripts even when off; the existing callback supplies the passive timer, with no new campaign script or sector scan.
 - `StatIds.getAbilityId()` uses an explicit map. Do not infer the ability from a stat-name prefix.
 - `harpoon_reach` has three additive 10% tiers: 1200 base range, then 1320/1440/1560 units. It uses normal upgrade prices, Harpoon category/icon fallback and schematics for tiers 2–3. `HarpoonAbilityPlugin.getReach()` supplies the player shot limit, trajectory guide and tooltip. NPC shots retain the base range.
 - ROD chase duration and rarity priority are progressive stats: every purchased tier must affect runtime behavior.

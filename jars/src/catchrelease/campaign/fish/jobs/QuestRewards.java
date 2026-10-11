@@ -324,10 +324,10 @@ public class QuestRewards {
                     ? null : UpgradeManager.getInstance().getAll().get(schematic.statId);
             if (stat == null) return SCHEMATIC_VALUE_FLOOR;
 
-            return schematicValue(ShopPricing.getPrice(stat, schematic.targetLevel));
+            return schematicValue(ShopPricing.getCredits(stat, schematic.targetLevel));
         }
         if (reward instanceof FishReward.TackleSchematic) {
-            return schematicValue(ShopPricing.getPrice(
+            return schematicValue(ShopPricing.getCredits(
                     ((FishReward.TackleSchematic) reward).tackle));
         }
         if (reward instanceof FishReward.BackdropReward) {
@@ -391,11 +391,9 @@ public class QuestRewards {
         }
     }
 
-    protected static int schematicValue(ShopPricing.Price price) {
-        if (price == null) return SCHEMATIC_VALUE_FLOOR;
-
+    protected static int schematicValue(int credits) {
         return Math.max(SCHEMATIC_VALUE_FLOOR,
-                Math.round(price.credits * SCHEMATIC_VALUE_MULT));
+                Math.round(credits * SCHEMATIC_VALUE_MULT));
     }
 
     protected static void reserve(FishReward reward, Set<String> reservedSchematics,

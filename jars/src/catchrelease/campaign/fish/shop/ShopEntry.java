@@ -202,10 +202,11 @@ public class ShopEntry {
 
         ShopPricing.Price price = getPrice();
         if (price == null) return true;
+        if (price.fish == null) return false;
 
         if (getPlayerCredits() < price.credits) return false;
 
-        return price.fish == null || FishCurrency.count(price.fish) >= price.fish.count;
+        return FishCurrency.count(price.fish) >= price.fish.count;
     }
 
     protected static float getPlayerCredits() {
