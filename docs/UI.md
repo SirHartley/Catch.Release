@@ -106,9 +106,13 @@ therefore reconcile these markers; no separate sector-wide polling script is nee
   follows the aligned body axis; UVs stay within the sprite's texture region.
   The IDE-facing picker is described under [registration and lifecycle](ARCHITECTURE.md#registration-and-lifecycle).
 - Aquarium distortion reads each specimen's saved `FishCatch.aberration`. Stable
-  fish bypass it; colour separation grows continuously above 0.12 aberration,
-  with stronger strip displacement, pixel breakup and partial dropouts at low
-  coherence. `AquariumFishShader` samples only the fish texture inside its UV
+  fish bypass it; digital strip displacement, pixel breakup and partial dropouts
+  grow above 0.12 aberration. At maximum strength, bursts occupy about half the
+  animation cycle, strips shift up to six pixels and pixel blocks reach five
+  pixels. Each fish has its own phase. All colour channels use the same sample;
+  there is no chromatic separation or RGB setting. The Digital artifacts toggle,
+  distortion slider and reduced-effects setting still control the filter.
+  `AquariumFishShader` samples only the fish texture inside its UV
   region. It never samples the screen or changes sprite properties. The tank,
   cargo icons, shops and Codex are unaffected. Keep the previous shader, texture
   unit, binding, blend and colour state intact after drawing. Disabled or failed
