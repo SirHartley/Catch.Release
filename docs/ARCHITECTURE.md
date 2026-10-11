@@ -116,13 +116,16 @@ ordinary-fish movement isolation, failure dispatch,
 four-turn shell-game bursts at 30/60/144 Hz,
 repeated-loss decoy caps, emergency dash duration,
 slipstream roll-up/fade lifetime and cleanup, immediate manta swaps, fixed hit-position
-labels and shield colours. `tools/LonglinerHauntChecks` covers segmented-shield
+labels and shield colours. It also checks corona-safe movement segments,
+invalid-position recovery, overlapping and companion stars, long-frame dashes,
+buried movement, formation clearance, and the False Dawn/ordinary-fish exclusions.
+`tools/LonglinerHauntChecks` covers segmented-shield
 geometry, swept harpoon hits through gaps, explosive adjacency, shield persistence,
 decoy start/stop at section hits, lamp-bound shield visibility through dives,
 independent swirling movement, separation/replenishment, opposite rotation and encounter cleanup.
-It also checks corona-safe movement segments, invalid-position recovery, overlapping
-and companion stars, long-frame dashes, buried movement, formation clearance, and
-the False Dawn/ordinary-fish exclusions.
+`tools/LonglinerCleanupChecks` covers immediate relocation on failure or a missing
+revealed mote, held-catch deferral, no-alternative suppression, boat/light teardown,
+stale bookings and exclusion of real Fishermen.
 `tools/LegendaryLifetimeChecks` checks repeated swim arrivals, dash expiry exclusions,
 distance-based sightings, departure cleanup and preservation of the host/relocation ledger.
 
@@ -565,9 +568,22 @@ sampling. Jack's called prey are released. Quorum decoys are removed; surviving
 escorts return with the fish and missing escorts are immediately replaced.
 The reset waits for any held fish or attached body to be released. Moray's shield,
 Jack's three starting shells and False Dawn's starting charge return. Longliner's broken-section mask and rotation reset.
-Longliner removes its revealed mote and clears `revealed`, allowing its existing
-boat reconciler to restore the disguise; its boat/reveal/flee movement is unchanged.
-Host/residency, sighting history, recognition and completed catches are preserved.
+Longliner instead removes its revealed mote, school and any remaining disguise,
+then `LegendaryChases.relocateAfterFailure` immediately selects a different host,
+even while the player remains in the failed system. Encounter progress and sighting
+time reset; recognition survives. The new residency expires old rumors. If no other
+host is eligible, saved `Chase.relocationPending` blocks habitat/boat/rumor availability
+until host selection succeeds; it never falls back to the failed system.
+The active haunt also fails when its real mote disappears. `LonglinerDecoy.reconcile`
+handles missing revealed motes before haunt activation through its existing callback.
+The 0.98a-RC8 custom-entity API has no removal callback; these checks use local mote
+tags in the existing haunt/reconciliation callbacks, not a new sector scan.
+All disguise retirement paths call `FishermanBehavior.unload()` before despawn,
+expiring lights and stopping their owner immediately, then remove the map marker and
+fleet. Registration and stale-booking cleanup use the same path; removing an unbooked
+duplicate cannot unset another boat's booking. No new polling script.
+Other species preserve host/residency and sighting history on haunt failure.
+Recognition and completed catches are always preserved.
 Leaving the system resets defenses and scars but removes motes instead of teleporting them.
 Catching the fish uses cleanup only and cannot reset or respawn it.
 The saved `Chase.roaming` flag restores an unfinished haunt
@@ -630,7 +646,7 @@ Subsequent swept hits use the section collision mesh, independent of visual line
 width; a shot through a broken section can reach the body before the
 far side of the ring. Explosive section hits use the existing detonation/consumption
 path. Failed catches, elapsed time, mote replacement and save/load retain damage.
-Full haunt failure restores the boat disguise; the next wake-up raises six intact
+Full haunt failure moves its boat disguise to a different system; the next wake-up raises six intact
 sections. Its school steers toward 180-unit spacing, with bounded substeps and
 pairwise separation to prevent overlap. Each fish chooses its own changing orbit
 radius and speed; they do not occupy fixed formation slots. The centre drifts away

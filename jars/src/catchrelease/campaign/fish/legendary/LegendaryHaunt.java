@@ -228,6 +228,12 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             return;
         }
 
+        if (LonglinerDecoy.spawnsAsBoat(active)
+                && !LegendarySpawns.hasMote(activeSystem, activeSpeciesId)) {
+            fail();
+            return;
+        }
+
         if (LegendaryShields.DAWN_SPECIES.equals(activeSpeciesId)) {
             fading = !lampsOn || !isDawnInRange();
             sinceSeen = fading ? sinceSeen + amount : 0f;
@@ -351,9 +357,13 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         Vector2f at = real == null || spec == null || disguise ? null : LegendarySpawns.position(activeSystem, spec);
         if (real != null && !disguise && at == null) return false;
         LegendaryChases.Chase chase = LegendaryChases.getState(activeSpeciesId);
+        StarSystemAPI failedSystem = activeSystem;
         stop(); // Detach formations before moving their real fish.
+        if (disguise) {
+            LonglinerDecoy.abandon(failedSystem);
+            return true;
+        }
         chase.resetEncounter();
-        if (disguise) chase.revealed = false;
         if (real != null) {
             QuorumShellGame.end(real.getMote(), true);
             for (SectorEntityToken mote : new ArrayList<>(real.getMote().getContainingLocation()
@@ -363,13 +373,8 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
                 if (fish.getDecoyAnchor() == real.getMote()) BaseHauntModule.removeHard(mote);
                 else if (fish.getOrbitAnchor() == real.getMote()) fish.resumePatrol(at);
             }
-            if (disguise) {
-                // The existing Longliner reconciler replaces the revealed mote with its boat.
-                BaseHauntModule.removeHard(real.getMote());
-            } else {
-                real.resumePatrol(at);
-                LegendaryShields.maintainSatellites(real);
-            }
+            real.resumePatrol(at);
+            LegendaryShields.maintainSatellites(real);
         }
         return true;
     }

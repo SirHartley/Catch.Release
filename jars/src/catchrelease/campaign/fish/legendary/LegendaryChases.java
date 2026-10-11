@@ -42,8 +42,9 @@ public class LegendaryChases {
         // permanent memory that the player saw through this particular disguise
         public boolean encountered;
 
-        // Cleared by re-disguising in-system; retained on departure for Longliner relocation.
         public boolean revealed;
+        // Keep systemId excluded until another host is available.
+        public boolean relocationPending;
 
         // Cleared when an abandoned haunt returns the fish to patrol.
         public boolean provoked;
@@ -88,7 +89,7 @@ public class LegendaryChases {
         if (where == null || !FishingIntro.isComplete()) return false;
 
         Chase chase = getChase(spec);
-        if (chase == null || chase.caught || chase.systemId == null) return false;
+        if (chase == null || chase.caught || chase.relocationPending || chase.systemId == null) return false;
 
         return chase.systemId.equals(where.getId())
                 && (!LegendaryShields.DAWN_SPECIES.equals(spec.id)
@@ -106,13 +107,13 @@ public class LegendaryChases {
 
         Chase chase = getChase(spec);
 
-        return chase == null || chase.caught ? null : chase.systemId;
+        return chase == null || chase.caught || chase.relocationPending ? null : chase.systemId;
     }
 
     public static boolean isCurrentResidency(String speciesId, String systemId, int residency) {
         // Rumor expiry is also read during habitat selection; do not assign or move hosts here.
         Chase chase = getLedger().get(speciesId);
-        return chase != null && !chase.caught && systemId != null
+        return chase != null && !chase.caught && !chase.relocationPending && systemId != null
                 && systemId.equals(chase.systemId) && residency == chase.residency;
     }
 
@@ -147,6 +148,18 @@ public class LegendaryChases {
         Chase chase = speciesId == null ? null : getLedger().get(speciesId);
 
         return chase != null && chase.provoked;
+    }
+
+    public static void relocateAfterFailure(FishSpec spec, String failedSystemId) {
+        if (spec == null || failedSystemId == null) return;
+        Chase chase = getState(spec.id);
+        if (chase.caught || !failedSystemId.equals(chase.systemId) || chase.relocationPending) return;
+
+        chase.resetEncounter();
+        chase.revealed = false;
+        chase.seenAt = 0L;
+        chase.relocationPending = true;
+        getChase(spec);
     }
 
     public static void onCatch(catchrelease.campaign.fish.data.FishCatch specimen) {
@@ -184,13 +197,16 @@ public class LegendaryChases {
             // a row created through getState carries no host; without this repair such
             // a species can never spawn and never haunt - silently, forever
             chase.systemId = pickHost(spec, null);
-        } else if (!chase.caught && !isPlayerIn(chase.systemId)
+        } else if (!chase.caught && (chase.relocationPending || !isPlayerIn(chase.systemId)
                 && (isDueToMove(chase) || isDoneHiding(spec, chase)
-                || LegendaryShields.DAWN_SPECIES.equals(spec.id) && !FalseDawnOrbit.isEligible(chase.systemId))) {
-            // the cooldown ran out unseen-side only: it never moves out from under a chase
+                || LegendaryShields.DAWN_SPECIES.equals(spec.id) && !FalseDawnOrbit.isEligible(chase.systemId)))) {
             String previousHost = chase.systemId;
-            chase.systemId = pickHost(spec, previousHost);
+            String nextHost = pickHost(spec, previousHost);
+            // A failed hunt must not fall back to the same system when no alternative exists.
+            if (chase.relocationPending && java.util.Objects.equals(previousHost, nextHost)) return chase;
+            chase.systemId = nextHost;
             if (!java.util.Objects.equals(previousHost, chase.systemId)) chase.residency++;
+            chase.relocationPending = false;
             chase.seenAt = 0L;
             chase.revealed = false;
             chase.resetEncounter();
@@ -238,8 +254,8 @@ public class LegendaryChases {
             List<String> candidates = new ArrayList<>();
 
             for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-                if (!abyssal && !FishPresence.isChartable(system)) continue;
                 if (system.getId().equals(avoid)) continue;
+                if (!abyssal && !FishPresence.isChartable(system)) continue;
                 if (!allowPopulated && OuterReaches.isPopulated(system)) continue;
                 if (spec.matches(FishHabitat.of(system), null, relax)) {
                     candidates.add(system.getId());

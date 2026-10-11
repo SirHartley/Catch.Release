@@ -17,14 +17,8 @@ import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
-/**
- * The Longliner's residency: not a mote but a boat - the Fisherman's boat, to every
- * instrument and every hail, built through the same fittings as the real ones and
- * flagged so the spawner's bookkeeping never counts it. The one test it cannot pass
- * is the player's own breach lamp: lit directly, the boat is gone and the fish is
- * there. An abandoned haunt restores the disguise. Leaving while revealed still
- * moves the fish to a new host through LegendaryChases.
- */
+import java.util.ArrayList;
+
 public class LonglinerDecoy implements EveryFrameScript {
 
     public static final String DECOY_FLAG = "$catchrelease_longliner_decoy";
@@ -103,9 +97,8 @@ public class LonglinerDecoy implements EveryFrameScript {
         // a decoy whose booking was lost must not stand around as a second boat
         Object booked = Global.getSector().getMemoryWithoutUpdate().get(BOAT_KEY);
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            for (CampaignFleetAPI fleet
-                    : new java.util.ArrayList<>(system.getFleets())) {
-                if (isDecoyBoat(fleet) && fleet != booked) fleet.despawn();
+            for (CampaignFleetAPI fleet : new ArrayList<>(system.getFleets())) {
+                if (isDecoyBoat(fleet) && fleet != booked) retire(fleet);
             }
         }
     }
@@ -133,18 +126,19 @@ public class LonglinerDecoy implements EveryFrameScript {
     public void advance(float amount) {
         CampaignFleetAPI boat = getBoat();
 
-        // the lamp test runs every frame while the boat shares the player's system
-        if (boat != null && isPlayerWith(boat)
-                && SearchlightAbilityPlugin.isInsideBeam(boat.getLocation(), REVEAL_RADIUS_SHARE)) {
-            reveal(boat);
-            return;
+        checkTimer -= amount;
+        if (checkTimer <= 0f) {
+            checkTimer = CHECK_SECONDS;
+            reconcile(boat);
+            boat = getBoat();
         }
 
-        checkTimer -= amount;
-        if (checkTimer > 0f) return;
-        checkTimer = CHECK_SECONDS;
-
-        reconcile(boat);
+        // the lamp test runs every frame while the boat shares the player's system
+        if (boat != null && !LegendaryChases.isCaught(LonglinerShield.SPECIES)
+                && !LegendaryChases.isRevealed(LonglinerShield.SPECIES) && isPlayerWith(boat)
+                && SearchlightAbilityPlugin.isInsideBeam(boat.getLocation(), REVEAL_RADIUS_SHARE)) {
+            reveal(boat);
+        }
     }
 
     protected void reconcile(CampaignFleetAPI boat) {
@@ -162,10 +156,9 @@ public class LonglinerDecoy implements EveryFrameScript {
             if (wanted && placed) return;
 
             retire(boat);
-            boat = null;
         }
 
-        if (!wanted) return;
+        if (hostId == null) return;
 
         StarSystemAPI host = null;
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
@@ -174,14 +167,21 @@ public class LonglinerDecoy implements EveryFrameScript {
                 break;
             }
         }
+        if (!wanted) {
+            if (host != null && host == Global.getSector().getCurrentLocation()
+                    && !LegendarySpawns.hasMote(host, spec.id)) abandon(host);
+            return;
+        }
         if (host != null) spawnBoat(host);
     }
 
     protected CampaignFleetAPI getBoat() {
         Object stored = Global.getSector().getMemoryWithoutUpdate().get(BOAT_KEY);
         if (stored instanceof CampaignFleetAPI fleet
-                && !fleet.isExpired() && fleet.isAlive() && isDecoyBoat(fleet)) {
-            return fleet;
+                && isDecoyBoat(fleet)) {
+            if (!fleet.isExpired() && fleet.isAlive() && fleet.getContainingLocation() != null
+                    && fleet.getContainingLocation().getFleets().contains(fleet)) return fleet;
+            retire(fleet);
         }
 
         return null;
@@ -233,7 +233,7 @@ public class LonglinerDecoy implements EveryFrameScript {
         Vector2f loc = new Vector2f(boat.getLocation());
         Vector2f driftVelocity = getRevealDriftVelocity(boat);
 
-        retireImmediately(boat, where);
+        retire(boat);
 
         Vector2f runTo = MathUtils.getPointOnCircumference(loc, RUN_TARGET_RANGE,
                 MathUtils.getRandomNumberInRange(0f, 360f));
@@ -282,29 +282,41 @@ public class LonglinerDecoy implements EveryFrameScript {
         return direction;
     }
 
-    protected void retire(CampaignFleetAPI boat) {
+    protected static void retire(CampaignFleetAPI boat) {
+        LocationAPI where = boat.getContainingLocation();
+        for (EveryFrameScript script : boat.getScripts()) {
+            if (script instanceof FishermanBehavior behavior) behavior.unload();
+        }
         FishermanShelf.releaseFor(boat);
         FishermanMapIcon.removeFor(boat);
 
-        for (EveryFrameScript script : boat.getScripts()) if (script instanceof FishermanBehavior) ((FishermanBehavior) script).beginWindDown(0f);
-
         boat.setAI(null);
-        boat.despawn();
-
-        Global.getSector().getMemoryWithoutUpdate().unset(BOAT_KEY);
-    }
-
-    protected void retireImmediately(CampaignFleetAPI boat, LocationAPI where) {
-        FishermanShelf.releaseFor(boat);
-        FishermanMapIcon.removeFor(boat);
-
-        for (EveryFrameScript script : boat.getScripts()) if (script instanceof FishermanBehavior) ((FishermanBehavior) script).beginWindDown(0.2f);
-
-        boat.setAI(null);
-        boat.despawn();
-        where.removeEntity(boat);
+        if (!boat.isExpired()) boat.despawn();
+        if (where != null) where.removeEntity(boat);
         boat.setExpired(true);
 
-        Global.getSector().getMemoryWithoutUpdate().unset(BOAT_KEY);
+        if (Global.getSector().getMemoryWithoutUpdate().get(BOAT_KEY) == boat) {
+            Global.getSector().getMemoryWithoutUpdate().unset(BOAT_KEY);
+        }
+    }
+
+    public static void abandon(StarSystemAPI system) {
+        if (system == null) return;
+        for (SectorEntityToken mote : new ArrayList<>(system.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG))) {
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin fish
+                    && LonglinerShield.SPECIES.equals(fish.getFishId())) {
+                system.removeEntity(mote);
+                mote.setExpired(true);
+            }
+        }
+        for (CampaignFleetAPI boat : new ArrayList<>(system.getFleets())) {
+            if (isDecoyBoat(boat)) retire(boat);
+        }
+        Object booked = Global.getSector().getMemoryWithoutUpdate().get(BOAT_KEY);
+        if (booked instanceof CampaignFleetAPI boat && isDecoyBoat(boat)
+                && (boat.getContainingLocation() == null || boat.getContainingLocation() == system)) {
+            retire(boat);
+        }
+        LegendaryChases.relocateAfterFailure(FishSpecLoader.getFishSpec(LonglinerShield.SPECIES), system.getId());
     }
 }
