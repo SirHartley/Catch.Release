@@ -25,7 +25,6 @@ public class FishermanInterception implements EveryFrameScript {
     public static final String INTERCEPTED_KEY = "$catchrelease_intercepted";
     public static final String CHASING_KEY = "$catchrelease_fisherClosing";
     public static final float CHASE_DAYS = 10f;
-    private static final int SPAWN_TRIES = 24;
 
     protected final IntervalUtil interval = new IntervalUtil(
             TutorialConstants.INTERCEPT_CHECK_SECONDS, TutorialConstants.INTERCEPT_CHECK_SECONDS);
@@ -87,9 +86,8 @@ public class FishermanInterception implements EveryFrameScript {
         ViewportAPI viewport = Global.getSector().getViewport();
         if (!ViewportEdge.contains(viewport, player.getLocation(), 0f)) return;
         Vector2f at = ViewportEdge.contains(viewport, boat.getLocation(), boat.getRadius())
-                ? new Vector2f(boat.getLocation()) : pickApproach(system, player, viewport);
+                ? new Vector2f(boat.getLocation()) : pickApproach(viewport);
         if (at == null) return;
-        if (!OuterReaches.isLegClear(system, at, player.getLocation())) return;
 
         boat.getMemoryWithoutUpdate().set(INTERCEPTED_KEY, true);
         if (!at.equals(boat.getLocation())) {
@@ -103,6 +101,9 @@ public class FishermanInterception implements EveryFrameScript {
         boat.getMemoryWithoutUpdate().set(FleetAIFlags.PLACE_TO_LOOK_FOR_TARGET,
                 new Vector2f(player.getLocation()), CHASE_DAYS);
         if (boat.getAI() instanceof ModularFleetAIAPI ai) {
+            for (SectorEntityToken market : OuterReaches.getPopulated(system)) {
+                ai.getNavModule().unavoidEntity(market);
+            }
             ai.getTacticalModule().setTarget(player);
             ai.getTacticalModule().setPriorityTarget(player, 0.5f, false);
             ai.getTacticalModule().setTravelDestination(null, 0f);
@@ -118,14 +119,9 @@ public class FishermanInterception implements EveryFrameScript {
         boat.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_ALLOW_LONG_PURSUIT, true, CHASE_DAYS);
     }
 
-    protected Vector2f pickApproach(StarSystemAPI system, CampaignFleetAPI player, ViewportAPI viewport) {
-        float firstAngle = MathUtils.getRandomNumberInRange(0f, 360f);
-        for (int i = 0; i < SPAWN_TRIES; i++) {
-            Vector2f at = ViewportEdge.outside(viewport, TutorialConstants.INTERCEPT_VIEWPORT_MARGIN_PX,
-                    firstAngle + i * 360f / SPAWN_TRIES);
-            if (at != null && OuterReaches.isLegClear(system, at, player.getLocation())) return at;
-        }
-        return null;
+    protected Vector2f pickApproach(ViewportAPI viewport) {
+        return ViewportEdge.outside(viewport, TutorialConstants.INTERCEPT_VIEWPORT_MARGIN_PX,
+                MathUtils.getRandomNumberInRange(0f, 360f));
     }
 
     public static boolean isClosing(CampaignFleetAPI fleet) {

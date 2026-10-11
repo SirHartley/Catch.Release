@@ -380,26 +380,33 @@ public class FishermanBehavior implements EveryFrameScript {
         if (fleet.getBattle() != null) return;
         if (!(fleet.getContainingLocation() instanceof StarSystemAPI system)) return;
 
+        FleetAssignmentDataAPI assignment = fleet.getCurrentAssignment();
+        SectorEntityToken target = assignment == null ? null : assignment.getTarget();
+        boolean tutorialApproach = target != null && !target.isExpired()
+                && target.getContainingLocation() == system
+                && assignment.getAssignment() == FleetAssignment.INTERCEPT
+                && !FishingIntro.isAtLeast(FishingIntro.RODDED)
+                && target == Global.getSector().getPlayerFleet();
+
         if (fleet.getAI() instanceof ModularFleetAIAPI ai) {
             for (SectorEntityToken market : OuterReaches.getPopulated(system)) {
+                if (tutorialApproach) {
+                    ai.getNavModule().unavoidEntity(market);
+                    continue;
+                }
                 float clearance = OuterReaches.AVOID_RADIUS + market.getRadius() + fleet.getRadius();
                 ai.getNavModule().avoidEntity(market, clearance,
                         clearance + OuterReaches.ROUTE_PAD, 1f);
             }
         }
 
-        FleetAssignmentDataAPI assignment = fleet.getCurrentAssignment();
+        if (tutorialApproach) return;
         if ((assignment == null || assignment.getAssignment() != FleetAssignment.INTERCEPT)
                 && FishermanInterception.hasIntercepted(fleet)
                 && fleet.getMemoryWithoutUpdate().getBoolean(MemFlags.MEMORY_KEY_PURSUE_PLAYER)) {
             FishermanInterception.cancelApproach(fleet);
         }
-        SectorEntityToken target = assignment == null ? null : assignment.getTarget();
         if (target != null && !target.isExpired() && target.getContainingLocation() == system) {
-            if (assignment.getAssignment() == FleetAssignment.INTERCEPT
-                    && !FishingIntro.isAtLeast(FishingIntro.RODDED)
-                    && target == Global.getSector().getPlayerFleet()
-                    && OuterReaches.isLegClear(system, fleet.getLocation(), target.getLocation())) return;
             if (assignment.getAssignment() == FleetAssignment.GO_TO_LOCATION
                     && OuterReaches.canTravel(system, fleet.getLocation(), fleet.getMoveDestination())
                     && OuterReaches.canTravel(system, fleet.getLocation(), target.getLocation())) return;
