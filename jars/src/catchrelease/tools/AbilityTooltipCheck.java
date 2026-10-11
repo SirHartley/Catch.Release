@@ -64,6 +64,10 @@ public final class AbilityTooltipCheck {
     private static void checkBase(Fixture f) {
         includes(f.rod(), "Drones: 1", "300 units/s", "190 units", "8 seconds", "No rupture in range.");
         includes(f.harpoon(), "2/2", "12 seconds", "1200 units", "900 units/s");
+        excludes(f.harpoon(), "Extra catch margin", "Aim correction", "degrees");
+        f.upgrades.setLevel(StatIds.HARPOON_AIM_ASSIST, 1);
+        includes(f.harpoon(), "Extra catch margin: 2 px");
+        f.upgrades.setLevel(StatIds.HARPOON_AIM_ASSIST, 0);
         for (int tier = 1; tier <= 3; tier++) {
             f.upgrades.setLevel(StatIds.HARPOON_REACH, tier);
             includes(f.harpoon(), (1200 + tier * 120) + " units");
@@ -82,7 +86,8 @@ public final class AbilityTooltipCheck {
         for (UpgradeStat stat : f.upgrades.levelMap.values()) stat.level = stat.maxLevel;
         f.data.remove(ChargeManager.KEY);
         includes(f.rod(), "Drones: 4", "444 units/s", "520 units", "16 seconds", "100%");
-        includes(f.harpoon(), "6/6", "4.8 seconds", "1560 units", "1332 units/s", "7.5 degrees");
+        includes(f.harpoon(), "6/6", "4.8 seconds", "1560 units", "1332 units/s", "Extra catch margin: 4 px");
+        excludes(f.harpoon(), "Aim correction", "degrees");
         includes(f.lamps(), "Lamps: 5", "Beam radius: 540 units", "48 units/s", "1000 units",
                 "8 seconds", "x1.20", "50%");
     }

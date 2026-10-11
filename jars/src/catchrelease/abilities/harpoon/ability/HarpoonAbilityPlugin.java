@@ -5,16 +5,12 @@ import catchrelease.abilities.charges.BaseChargedSkillshotAbility;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
-import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
-import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
-import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import lunalib.lunaSettings.LunaSettings;
-import org.lazywizard.lazylib.MathUtils;
 import catchrelease.skillshot.GuideLineStyle;
 import catchrelease.skillshot.render.DirectionReticuleRenderer;
 import catchrelease.skillshot.render.SkillshotRenderer;
@@ -26,8 +22,6 @@ import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 
 public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
@@ -111,7 +105,6 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         if (!spendCharge()) return;
 
         Vector2f from = new Vector2f(fleet.getLocation());
-        worldTarget = applyAimAssist(from, worldTarget);
 
         // fired at the aim point rather than at a mote: missing is allowed, and is most of the skill
         SectorEntityToken harpoon = fleet.getContainingLocation().addCustomEntity(
@@ -158,98 +151,6 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         return super.isUsable();
     }
 
-    protected Vector2f applyAimAssist(Vector2f from, Vector2f worldTarget) {
-        float assist = UpgradeManager.getValue(StatIds.HARPOON_AIM_ASSIST, 0f);
-        if (assist <= 0f) return worldTarget;
-
-        CampaignFleetAPI fleet = getFleet();
-        if (fleet == null) return worldTarget;
-
-        float aimAngle = Misc.getAngleInDegrees(from, worldTarget);
-        float distance = Misc.getDistance(from, worldTarget);
-        if (distance <= 0f) return worldTarget;
-
-        float speed = UpgradeManager.getValue(StatIds.HARPOON_SPEED, HarpoonConstants.SPEED);
-        float maxRange = getReach();
-
-        Vector2f best = null;
-        float bestOff = assist;
-        float bestRange = Float.MAX_VALUE;
-
-        for (SectorEntityToken mote : getStrikeableNearby(fleet, from)) {
-            Vector2f velocity;
-            if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) velocity = fish.getMovementVelocity();
-            else if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) velocity = buried.getMovementVelocity();
-            else continue;
-            Vector2f intercept = interceptPoint(from, mote.getLocation(), velocity, speed);
-            if (intercept == null) continue;
-
-            float range = Misc.getDistance(from, intercept);
-            if (range <= 0f || range > maxRange) continue;
-
-            float off = Math.abs(Misc.getAngleDiff(aimAngle,
-                    Misc.getAngleInDegrees(from, intercept)));
-
-            if (off > bestOff || (off == bestOff && range >= bestRange)) continue;
-
-            bestOff = off;
-            bestRange = range;
-            best = intercept;
-        }
-
-        if (best == null) return worldTarget;
-
-        // Only the launch direction changes; the projectile keeps its fixed range.
-        return MathUtils.getPointOnCircumference(from, distance,
-                Misc.getAngleInDegrees(from, best));
-    }
-
-    protected static Vector2f interceptPoint(Vector2f from, Vector2f target,
-                                             Vector2f velocity, float speed) {
-        if (!(speed > 0f) || !Float.isFinite(speed)) return null;
-
-        // Solve |target + velocity * t - from| = speed * t.
-        double x = target.x - from.x;
-        double y = target.y - from.y;
-        double a = (double) velocity.x * velocity.x + (double) velocity.y * velocity.y
-                - (double) speed * speed;
-        double b = 2d * (x * velocity.x + y * velocity.y);
-        double c = x * x + y * y;
-        if (c == 0d) return new Vector2f(target);
-
-        double time;
-        if (Math.abs(a) < 0.000001d) {
-            time = b < 0d ? -c / b : -1d;
-        } else {
-            double discriminant = b * b - 4d * a * c;
-            if (discriminant < 0d) return null;
-            double root = Math.sqrt(discriminant);
-            double first = (-b - root) / (2d * a);
-            double second = (-b + root) / (2d * a);
-            time = first > 0d && second > 0d ? Math.min(first, second) : Math.max(first, second);
-        }
-        if (!(time > 0d) || !Double.isFinite(time)) return null;
-
-        return new Vector2f((float) (target.x + velocity.x * time),
-                (float) (target.y + velocity.y * time));
-    }
-
-    protected List<SectorEntityToken> getStrikeableNearby(CampaignFleetAPI fleet, Vector2f from) {
-        List<SectorEntityToken> out = new ArrayList<>();
-        float maxRange = getReach();
-
-        for (String tag : new String[] {FishEntityPlugin.MOTE_TAG, BuriedMoteEntityPlugin.BURIED_TAG}) {
-            for (SectorEntityToken mote : fleet.getContainingLocation().getEntitiesWithTag(tag)) {
-                if (!HarpoonEntityPlugin.canTake(mote)) continue;
-                if (Misc.getDistance(from, mote.getLocation()) > maxRange) continue;
-
-                out.add(mote);
-            }
-        }
-
-        return out;
-    }
-
     @Override
     public void addTooltip(TooltipMakerAPI tooltip) {
         Color highlight = Misc.getHighlightColor();
@@ -270,8 +171,8 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
         float assist = UpgradeManager.getValue(StatIds.HARPOON_AIM_ASSIST, 0f);
         if (assist > 0f) {
-            tooltip.addPara("Aim correction: up to %s either side", 3f, highlight,
-                    Misc.getRoundedValueOneAfterDecimalIfNotWhole(assist) + " degrees");
+            tooltip.addPara("Extra catch margin: %s", 3f, highlight,
+                    Misc.getRoundedValue(assist) + " px");
         }
 
         Tackle fitted = TackleManager.get(Tackle.Fit.HARPOON);

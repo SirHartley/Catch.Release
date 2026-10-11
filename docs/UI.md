@@ -180,7 +180,8 @@ coverage to an angle and reduces sweep speed. Retained visibility is an upper
 limit, since partially illuminated fish fade sooner. Equipment rarity weighting
 combines the fitted drone module and lamp upgrade; it is not a probability and
 does not include temporary local rumor effects. Harpoon recharge is seconds per
-charge, with fractional seconds retained.
+charge, with fractional seconds retained. Its extra catch margin is measured in
+screen pixels, matching the collision upgrade; it is not an angular correction.
 
 Sources (0.98a-RC8): `BaseAbilityPlugin`, `SensorBurstAbility` and
 `EmergencyBurnAbility` in `sources-api/impl.campaign.java`; the ability-slot

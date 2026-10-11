@@ -17,4 +17,4 @@ harpoon_charges,2,INT,1,FLAT,4,Increases the number of harpoon shots you can kee
 harpoon_recharge_time,12,DOUBLE,-0.15,MULT,4,Restores spent harpoon charges faster.,
 harpoon_speed,900,INT,0.12,MULT,4,Increases harpoon projectile speed.,
 harpoon_reach,1200,INT,0.1,MULT,3,Increases maximum harpoon range.,
-harpoon_aim_assist,0,DOUBLE,2.5,FLAT,3,Widens the angle where shots snap toward a valid pattern. Adjusts direction but not the range you chose.,
+harpoon_aim_assist,0,INT,2,FLAT,2,Lets the head catch patterns it narrowly misses. The shot still follows your aim.,

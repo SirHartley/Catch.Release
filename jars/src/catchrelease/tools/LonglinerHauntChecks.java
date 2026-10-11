@@ -1,6 +1,7 @@
 package catchrelease.tools;
 
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
+import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.legendary.*;
 import catchrelease.tools.LegendaryEscapeChecks.Environment;
@@ -75,6 +76,7 @@ public final class LonglinerHauntChecks {
         boolean hasContact(Vector2f from, Vector2f to, boolean shield) { return findMoteContact(from, to, shield) != null; }
         @Override protected float getSpeed() { return 1000f; }
         @Override protected float getRange() { return 1000f; }
+        @Override protected float getCatchRadius() { return HarpoonConstants.CATCH_RADIUS; }
         @Override protected void playMoteHitSound() { }
         @Override protected SectorEntityToken findMine() { return null; }
         @Override protected CampaignFleetAPI findFleet() { return null; }
