@@ -128,6 +128,17 @@ public final class LegendaryEscapeChecks {
         @Override protected void advanceTrail() { }
         void diveTime(float amount) { advanceDive(amount); }
         void swim(Vector2f next) { moveTo(next); }
+
+        void setOrbit(SectorEntityToken anchor) {
+            orbit = anchor;
+            try {
+                var field = FishEntityPlugin.class.getDeclaredField("orbitAnchor");
+                field.setAccessible(true);
+                field.set(this, anchor);
+            } catch (ReflectiveOperationException e) {
+                throw new AssertionError(e);
+            }
+        }
     }
 
     static class Buried extends BuriedMoteEntityPlugin {
@@ -304,7 +315,7 @@ public final class LegendaryEscapeChecks {
                     FishEntityPlugin.Params params = (FishEntityPlugin.Params) a[4];
                     Fish created = new Fish(this, params.fishId, params.phantom, params.decoyAnchor);
                     created.setSwimTarget(params.target);
-                    created.orbit = params.orbitAnchor;
+                    created.setOrbit(params.orbitAnchor);
                     yield created.getMote();
                 }
                 case "addTerrain" -> {

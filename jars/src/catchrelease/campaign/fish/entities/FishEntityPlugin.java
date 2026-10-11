@@ -36,7 +36,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float MOVE_SPEED = 90f;
     private static final float MAX_SINE_VARIANCE = 90f;
 
-    private static final float ORBIT_RADIUS = 70f;
+    private static final float ORBIT_RADIUS = LegendaryShields.MOTE_ORBIT_RADIUS;
     private static final float ORBIT_DEG_PER_SECOND = 140f;
     private static final float SHIELD_FLASH_SECONDS = 0.6f;
     private static final float SHIELD_LENS_INTENSITY = 10f;
@@ -164,7 +164,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     // Legendary movement and shields
     private SectorEntityToken orbitAnchor;
-    private transient float orbitAngle = (float) (Math.random() * 360f);
+    private float orbitAngle;
     private float dashLeft;
     private Vector2f dashVelocity;
     private transient float shieldFlash;
@@ -294,6 +294,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             LegendaryStarAvoidance.confine(entity, getFishSpec(), patrolClearance());
         }
         advanceFish(amount);
+        LegendaryShields.maintainSatellites(this, amount);
         LonglinerShield.advance(this, amount);
         if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
         if (mantaFormation != null) mantaFormation.sync();
@@ -334,7 +335,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         if (orbitAnchor != null) {
-            advanceOrbit(amount);
+            advanceOrbit(0f);
             return;
         }
 
@@ -356,7 +357,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             longlinerSchool.swim(amount);
             return;
         }
-        LegendaryShields.maintainSatellites(this);
         LegendaryShields.advanceEater(this);
         if (LegendaryShields.isProwler(this)) advanceProwl(amount);
         if (LegendaryShields.isFleeing(this)) advanceFleeMode();
@@ -930,7 +930,17 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
-    protected void advanceOrbit(float amount) {
+    public float getOrbitAngle() {
+        return orbitAngle;
+    }
+
+    public void setOrbitAngle(float angle) {
+        orbitAngle = (angle % 360f + 360f) % 360f;
+        advanceOrbit(0f);
+    }
+
+    // Only the anchor advances orbit angles; satellite callbacks just sync position.
+    public void advanceOrbit(float amount) {
         if (orbitAnchor == null || orbitAnchor.isExpired()
                 || orbitAnchor.getContainingLocation() != entity.getContainingLocation()) {
             orbitAnchor = null;
@@ -938,7 +948,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        orbitAngle += ORBIT_DEG_PER_SECOND * amount;
+        orbitAngle = (orbitAngle + ORBIT_DEG_PER_SECOND * amount) % 360f;
+        if (held) return;
         Vector2f at = MathUtils.getPointOnCircumference(
                 orbitAnchor.getLocation(), ORBIT_RADIUS, orbitAngle);
         entity.setLocation(at.x, at.y);
