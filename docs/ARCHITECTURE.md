@@ -118,6 +118,7 @@ repeated-loss decoy caps, emergency dash duration,
 slipstream roll-up/fade lifetime and cleanup, immediate manta swaps, fixed hit-position
 labels and shield colours. `tools/LonglinerHauntChecks` covers segmented-shield
 geometry, swept harpoon hits through gaps, explosive adjacency, shield persistence,
+decoy start/stop at section hits, lamp-bound shield visibility through dives,
 independent swirling movement, separation/replenishment, opposite rotation and encounter cleanup.
 It also checks corona-safe movement segments, invalid-position recovery, overlapping
 and companion stars, long-frame dashes, buried movement, formation clearance, and
@@ -631,7 +632,8 @@ from the player with stellar clearance, and each swim segment avoids coronae.
 Held catches cannot be moved by the school; copies keep swimming without teleporting
 when the harpoon drags the real fish. Phantoms have no targetable body or shield, and their dive
 visibility comes from the real fish. Lamp visibility remains local to each mote.
-Shield drawing is defined in [UI.md](UI.md#drawing-gotchas).
+Shields stay visible through dives while lit; their drawing contract is in
+[UI.md](UI.md#drawing-gotchas).
 
 The Moray keeps its mixed campaign movement and fleeing weave. `FishEntityPlugin`
 caps its movement-mode multiplier at 1.25; the 12-second escape cycle uses 0.5 for

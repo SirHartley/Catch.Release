@@ -7,6 +7,7 @@ import catchrelease.tools.LegendaryEscapeChecks.Environment;
 import catchrelease.tools.LegendaryEscapeChecks.Fish;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.combat.ViewportAPI;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.io.*;
@@ -83,6 +84,7 @@ public final class LonglinerHauntChecks {
         geometry();
         shieldLifecycle();
         schoolEndsWithShield();
+        shieldVisibility();
         harpoonSweeps();
         school();
         System.out.println("Longliner haunt checks passed: " + checks);
@@ -213,6 +215,45 @@ public final class LonglinerHauntChecks {
                 f.haunt.restore();
                 check(f.copies().isEmpty() && binding.get(f.real) == null,
                         "restoring a fully broken shield cannot recreate the school");
+            }
+        }
+    }
+
+    private static void shieldVisibility() throws Exception {
+        var alpha = FishEntityPlugin.class.getDeclaredMethod("getShieldAlpha", ViewportAPI.class);
+        var lampFade = FishEntityPlugin.class.getDeclaredField("lampFade");
+        var diving = FishEntityPlugin.class.getDeclaredField("diving");
+        var diveClock = FishEntityPlugin.class.getDeclaredField("diveClock");
+        alpha.setAccessible(true);
+        lampFade.setAccessible(true);
+        diving.setAccessible(true);
+        diveClock.setAccessible(true);
+        for (float viewportAlpha : new float[]{0f, 0.4f, 1f}) {
+            ViewportAPI viewport = proxy(ViewportAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getAlphaMult" -> viewportAlpha;
+                default -> throw new AssertionError(m);
+            });
+            try (Fixture f = new Fixture()) {
+                f.wake();
+                f.crack();
+                for (float fade : new float[]{0f, 0.25f, 1f}) {
+                    for (Fish fish : f.env.fish) lampFade.setFloat(fish, fade);
+                    for (boolean submerged : new boolean[]{false, true}) {
+                        diving.setBoolean(f.real, submerged);
+                        diveClock.setFloat(f.real, 0.55f);
+                        for (Fish fish : f.env.fish) {
+                            check(fish.getVisibility() == (submerged ? 0f : 1f),
+                                    "real fish and copies still share the normal dive fade");
+                            check(Math.abs((float) alpha.invoke(fish, viewport) - viewportAlpha * fade) < 0.0001f,
+                                    "shield visibility follows local lamps and viewport, not the shared dive cycle");
+                        }
+                    }
+                }
+                lampFade.setFloat(f.real, 0f);
+                lampFade.setFloat(f.copies().get(0), 1f);
+                check((float) alpha.invoke(f.real, viewport) == 0f
+                                && (float) alpha.invoke(f.copies().get(0), viewport) == viewportAlpha,
+                        "a lit decoy retains its shield when the real fish is outside the lamps");
             }
         }
     }

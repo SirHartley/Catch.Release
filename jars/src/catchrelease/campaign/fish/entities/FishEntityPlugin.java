@@ -1083,15 +1083,17 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         renderShield(viewport);
     }
 
-    protected void renderShield(ViewportAPI viewport) {
-        float base = viewport.getAlphaMult();
-        if (base <= 0f) return;
+    protected float getShieldAlpha(ViewportAPI viewport) {
+        // Diving hides the body, not its lamp-lit shield.
+        return viewport.getAlphaMult() * lampFade;
+    }
 
-        // the defence display is lamp-bound: no beam on the fish, no shield to see
-        float alpha = base * lampFade;
+    protected void renderShield(ViewportAPI viewport) {
+        float alpha = getShieldAlpha(viewport);
+        if (alpha <= 0f) return;
         if (LonglinerShield.applies(this)) {
-            LonglinerShield.render(this, alpha * getVisibility());
-            renderShieldFlash(alpha * getVisibility(), entity.getLocation(),
+            LonglinerShield.render(this, alpha);
+            renderShieldFlash(alpha, entity.getLocation(),
                     LegendaryShields.getShieldColor(this), LonglinerShield.RADIUS);
             return;
         }
