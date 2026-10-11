@@ -25,7 +25,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
     public enum Kind {
 
         BLAST(new Color(255, 90, 60), 10f),
-        SHIELD(LegendaryShields.SHIELD_GREEN, 8f),
+        SHIELD(LegendaryShields.SHIELD_ORANGE, 8f),
         IMPLOSION(new Color(255, 210, 90), 6.5f);
 
         public final Color color;

@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="trail adjutments">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="adjustments">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/SlipDashModule.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/SlipDashModule.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/concept" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/concept" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/entities/HauntMineEntityPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/entities/HauntMineEntityPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/DawnShieldTransfer.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/DawnShieldTransfer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LegendaryShields.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LegendaryShields.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LonglinerShield.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/legendary/LonglinerShield.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/minigame/LegendaryScarDisplay.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/minigame/LegendaryScarDisplay.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/tools/LegendaryEscapeChecks.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/tools/LegendaryEscapeChecks.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +148,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="harpoon explosive head" />
     <MESSAGE value="shield colour adjustments" />
     <MESSAGE value="fixed harpoon sprite" />
     <MESSAGE value="Shield colours" />
@@ -170,7 +172,8 @@
     <MESSAGE value="tooltip formatting updates" />
     <MESSAGE value="todos" />
     <MESSAGE value="trail adjutments" />
-    <option name="LAST_COMMIT_MESSAGE" value="trail adjutments" />
+    <MESSAGE value="adjustments" />
+    <option name="LAST_COMMIT_MESSAGE" value="adjustments" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

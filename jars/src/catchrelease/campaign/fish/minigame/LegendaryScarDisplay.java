@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.minigame;
 
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.helper.loading.SpriteLoader;
@@ -24,7 +25,7 @@ public final class LegendaryScarDisplay {
     public static final float TOP_GAP = 8f;
     public static final float STAMP_SCALE = 2.4f;
     public static final float STAMP_TIME = 0.6f;
-    public static final float NOTICE_TIME = 5f;
+    public static final float NOTICE_TIME = 10f;
     public static final String SOUND = "ui_cargo_supplies_drop";
     public static final String EXPLANATION = "The pattern is now scarred. The hunt will be easier, at the cost of quality.";
 
@@ -142,8 +143,8 @@ public final class LegendaryScarDisplay {
     public void render(FishingMinigameLayout layout, float alphaMult) {
         if (disposed || count == 0) return;
         if (icon == null) icon = SpriteLoader.getSprite("shop_harpoon");
-        Color warning = failed ? Misc.getNegativeHighlightColor() : Color.GRAY;
-        Color fill = failed ? warning.darker().darker() : Color.DARK_GRAY;
+        Color warning = failed ? FishRarity.LEGENDARY.color : Color.GRAY;
+        Color fill = failed ? warning.darker().darker().darker().darker().darker() : Color.DARK_GRAY.darker().darker();
         Color rim = warning;
         Color ink = failed ? warning : Color.LIGHT_GRAY;
         float visibility = failed ? 1f : 0.35f;

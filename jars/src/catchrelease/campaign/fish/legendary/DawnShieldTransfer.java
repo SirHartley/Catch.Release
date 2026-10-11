@@ -108,7 +108,7 @@ public class DawnShieldTransfer {
         if (isDone()) return;
         float alpha = viewport.getAlphaMult() * (finished ? arrivalLeft / ARRIVAL_SECONDS : 1f);
         if (alpha <= 0f) return;
-        Color green = LegendaryShields.SHIELD_GREEN;
+        Color green = LegendaryShields.SHIELD_ORANGE;
         int index = 0;
         for (Vector2f point : trail) {
             float strength = ++index / (float) trail.size();

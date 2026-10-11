@@ -56,7 +56,7 @@ public class LegendaryShields {
 
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
-    public static final Color SHIELD_GREEN = new Color(70, 255, 120);
+    public static final Color SHIELD_ORANGE = new Color(161, 47, 255);
 
     public static HitResult onHarpoonContact(SectorEntityToken mote, boolean explosive) {
         return onHarpoonContact(mote, explosive, -1);
@@ -244,7 +244,7 @@ public class LegendaryShields {
 
         return switch (id) {
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
-            case DAWN_SPECIES, MORAY_SPECIES, CHARGE_SHIELD_SPECIES, LonglinerShield.SPECIES -> SHIELD_GREEN;
+            case DAWN_SPECIES, MORAY_SPECIES, CHARGE_SHIELD_SPECIES, LonglinerShield.SPECIES -> SHIELD_ORANGE;
             default -> SHIELD_RED;
         };
     }

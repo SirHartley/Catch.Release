@@ -637,7 +637,7 @@ public final class LegendaryEscapeChecks {
             java.awt.Color red = LegendaryShields.getShieldColor(env.real(MantaFormationModule.SPECIES));
             check(red.getRed() > red.getGreen() && red.getRed() > red.getBlue(), "Manta shield is red");
             for (String id : List.of("false_dawn", "slipstream_moray", "lantern_jack", "longliner")) {
-                check(LegendaryShields.getShieldColor(env.real(id)).equals(LegendaryShields.SHIELD_GREEN),
+                check(LegendaryShields.getShieldColor(env.real(id)).equals(LegendaryShields.SHIELD_ORANGE),
                         "non-regenerating shields share green");
             }
             java.awt.Color blue = LegendaryShields.getShieldColor(env.real("quorum"));

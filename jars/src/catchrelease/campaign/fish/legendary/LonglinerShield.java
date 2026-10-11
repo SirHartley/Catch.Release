@@ -139,7 +139,7 @@ public final class LonglinerShield {
         if (alpha <= 0f || !isUp()) return;
         int broken = LegendaryChases.getState(SPECIES).longlinerBroken;
         Vector2f at = fish.getMote().getLocation();
-        Color color = LegendaryShields.SHIELD_GREEN;
+        Color color = LegendaryShields.SHIELD_ORANGE;
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_LINE_BIT | GL11.GL_COLOR_BUFFER_BIT);
         GL11.glPushMatrix();
         try {
