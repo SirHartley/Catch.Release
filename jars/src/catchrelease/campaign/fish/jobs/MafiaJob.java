@@ -266,7 +266,7 @@ public class MafiaJob extends FishJob {
     protected String getIntelPurpose() {
         return "Supply any two fish from your own catch for the bar's next Fight Night main "
                 + "event. At hand-in, the Commissioner measures each fish against the normal "
-                + "size range for its species and posts both fighters' odds along with the house "
+                + "size range for its species and posts both public lines along with the house "
                 + "share.";
     }
 

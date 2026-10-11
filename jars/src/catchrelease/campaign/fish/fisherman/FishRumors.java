@@ -593,23 +593,26 @@ public class FishRumors {
         return switch (getKind(rumor)) {
             case LEGENDARY -> ruleText("CatchReleaseLegendaryRumorIntel_" + rumor.legendaryId);
             case RARITY -> "Rarer species are turning up more often in $catchreleaseRumorSystem.";
-            case LOOT -> "Bycatch is turning up more often in $catchreleaseRumorSystem.";
+            case LOOT -> "Retrievals in $catchreleaseRumorSystem have been bringing up more bycatch than usual.";
             case STRANGER -> "$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem, outside its charted range. "
                     + "Recent catches have generally been good specimens.";
-            case SIZE -> "Fish caught in $catchreleaseRumorSystem tend to be longer and heavier than usual.";
+            case SIZE -> "Catches in $catchreleaseRumorSystem are tending toward larger and heavier specimens.";
             case CALM -> "Fish in $catchreleaseRumorSystem are moving more slowly during retrieval, making them easier to "
                     + "pursue.";
-            case VALUABLE_LOOT -> "Bycatch in $catchreleaseRumorSystem is more likely to contain valuable items.";
-            case EXTREME_STABILITY -> "The fabric in $catchreleaseRumorSystem is stable, with much higher coherence than usual.";
-            case EXTREME_INSTABILITY -> "The fabric in $catchreleaseRumorSystem is failing, with much lower coherence than usual.";
-            case RARITY_LOOT -> "Rarer species and bycatch are both turning up more often in $catchreleaseRumorSystem.";
-            case SIZE_CALM -> "Fish caught in $catchreleaseRumorSystem tend to be longer and heavier than usual, "
-                    + "and move more slowly during retrieval.";
+            case VALUABLE_LOOT -> "Bycatch recovered in $catchreleaseRumorSystem has included more valuable finds than usual.";
+            case EXTREME_STABILITY -> "Local fabric in $catchreleaseRumorSystem is currently stable, a marked improvement "
+                    + "over the system's usual coherence.";
+            case EXTREME_INSTABILITY -> "Local fabric in $catchreleaseRumorSystem is currently failing, a sharp decline "
+                    + "from the system's usual coherence.";
+            case RARITY_LOOT -> "Rarer species are turning up more often in $catchreleaseRumorSystem, and retrievals there are "
+                    + "bringing up bycatch more frequently.";
+            case SIZE_CALM -> "Catches in $catchreleaseRumorSystem are tending larger and heavier, while fish there are moving more "
+                    + "slowly during retrieval.";
             case STRANGER_CALM -> "$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem outside its charted range, "
                     + "and fish there are moving more slowly during retrieval. Recent $catchreleaseRumorStranger catches "
                     + "have generally been good specimens.";
-            case LOOT_VALUABLE -> "Bycatch is turning up more often in $catchreleaseRumorSystem and is more likely "
-                    + "to contain valuable items.";
+            case LOOT_VALUABLE -> "Retrievals in $catchreleaseRumorSystem are bringing up bycatch more often, "
+                    + "and the finds have been more valuable.";
         };
     }
 }

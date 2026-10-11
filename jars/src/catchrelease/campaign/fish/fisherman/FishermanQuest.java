@@ -269,10 +269,12 @@ public class FishermanQuest {
                     faction.getBaseUIColor(),
                     faction.getDisplayNameWithArticleWithoutArticle());
 
-            info.addPara("Catch the bright cyan mote at the marked search point. Its coherence "
-                    + "is unusually low. Only this specimen counts; other fish of the same "
-                    + "species will not do. Completing the request expands the Fisherman's "
-                    + "range-data stock.", opad);
+            info.addPara("This request is for one identified anomalous specimen, not an ordinary "
+                    + "catch of the same pattern or a search for an unstable system. Its own "
+                    + "coherence reading is unusually poor, and the target is identified at the "
+                    + "marked search point by a bright cyan mote. Only that specimen qualifies. "
+                    + "Completing the request also increases the range-data listings the "
+                    + "Fisherman keeps available for purchase.", opad);
 
             info.addPara("What is wanted:", opad);
             bullet(info);

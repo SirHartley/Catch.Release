@@ -43,9 +43,9 @@ public final class FishIntelMapButton {
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                                       Object tooltipParam) {
                 if (targeted) {
-                    tooltip.addPara("Shows known ranges for this request. Each fish must still"
-                            + " meet its size, grade, coherence, origin, time and catch-method"
-                            + " requirements.", 0f);
+                    tooltip.addPara("Opens the fishing map with known species ranges narrowed to"
+                            + " this request. Size, grade, coherence, origin, time and catch-method"
+                            + " terms still apply to the individual specimen.", 0f);
                 } else {
                     tooltip.addPara("Opens the fishing overlay and centers the reported system.",
                             0f);
