@@ -6,6 +6,7 @@ Technical routing for the current implementation. Java paths below are relative 
 |---|---|
 | [CLAUDE.md](../CLAUDE.md) | Workflow, build gate and document upkeep |
 | [RELEASE.md](RELEASE.md) | Version numbers, release jar, package contents and publishing |
+| [CHANGELOG.md](CHANGELOG.md) | Change-note format and upkeep for every implementation task |
 | [DIALOGUE.md](DIALOGUE.md) | All player-facing text, rules or Java: workflow, shared text presentation and dialogue flow; prose constraints in LORE.md |
 | [LORE.md](LORE.md) | Setting facts, knowledge limits, character voices and source-labelled prose examples |
 | [Needle quest concept](NEEDLE_QUEST_CONCEPT.md#overview) | Deferred narrative plan, with a short theme, philosophy and content overview; not current canon or implementation |

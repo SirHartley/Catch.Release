@@ -3,6 +3,8 @@
 Read this when changing the build, preparing a release, or rebuilding the committed
 release jar. This covers packaging and version numbers, not gameplay or prose.
 
+For change notes, follow [CHANGELOG.md](CHANGELOG.md).
+
 ## Versions
 
 The first release is `1.0.a`. The three parts are:
