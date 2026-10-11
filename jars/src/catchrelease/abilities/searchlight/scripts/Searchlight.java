@@ -433,6 +433,19 @@ public class Searchlight implements EveryFrameScript {
         return FAN_HALF_ANGLE * (getArea() / AREA_FALLBACK);
     }
 
+    public boolean contains(Vector2f at, float radiusShare) {
+        float size = getArea();
+        if (!isFanned()) return Misc.getDistance(currentRenderLoc, at) <= size * radiusShare;
+
+        Vector2f origin = getOrigin();
+        float length = Misc.getDistance(origin, currentRenderLoc) + size;
+        float off = Math.abs(Misc.getAngleDiff(
+                Misc.getAngleInDegrees(origin, currentRenderLoc),
+                Misc.getAngleInDegrees(origin, at)));
+        return Misc.getDistance(origin, at) <= length * radiusShare
+                && off <= getFanHalfAngle() * radiusShare;
+    }
+
     public float getLitStrength(Vector2f at) {
         float size = getArea();
 
