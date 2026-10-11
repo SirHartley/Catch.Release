@@ -14,6 +14,7 @@ Added - Initial Mod Release
 
 General
 Adjusted - Release downloads leave out development tools, libraries and source files
+Adjusted - Rewrote fishing settings descriptions to explain their effects and limits more clearly
 
 Development
 Added - Changelog and release instructions

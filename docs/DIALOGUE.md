@@ -65,6 +65,7 @@ Use these surface requirements alongside the shared guidance above, regardless o
 | Surface | Required information |
 |---|---|
 | Tooltip | What it does first; flavor afterward. State restrictions and costs plainly. |
+| Setting description | Explain the effect in player terms, including which direction makes it stronger or easier where needed. Keep defaults, units, requirements and when changes take effect; use the UI's labels for related settings. |
 | Navigation or request hover | Explain the destination or filter and retain all requirements; showing a location is not a substitute for the full conditions. |
 | Schematic reward card | Exact upgrade tier or compatible module, its effect, purchase-permission status, and later credit-and-fish price. A schematic is not the equipment itself. Resolve the same icon as the shop, including category fallback. |
 | Quest offer | Complete demand, destination, deadline, reward preview, and unusual conditions before acceptance. Do not repeat the whole reward section in both character speech and the shared pitch. |
