@@ -254,10 +254,9 @@ Required compile dependencies:
 - `Graphics.jar` from `lib/GraphicsLib.zip`;
 - `LazyLib.jar` and `LunaLib.jar` from `lib/Lazylib_lunalib.zip`;
 - `MagicLib.jar` from `lib/MagicLib.zip`;
-- `lwjgl-2.9.3.jar`;
-- `lwjgl_util-2.9.3.jar`;
-- `json-20140107.jar`;
-- `log4j-1.2.17.jar`.
+- `lwjgl.jar`, `lwjgl_util.jar`, `json.jar` and `log4j-1.2.9.jar` from the target game's `starsector-core` directory.
+
+Use the game's bundled libraries for both compilation and checks. Do not substitute Maven versions or put a second JSON jar on the classpath: Starsector's `JSONException` is checked, while newer JSON versions make it unchecked and can hide build errors. `PlayerSettingsChecks` rejects that incompatible JSON exception type.
 
 These dependencies provide `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json`, and `Global.getLogger()`. GraphicsLib, LazyLib, LunaLib, and MagicLib are also the declared runtime dependencies in `mod_info.json`. `starfarer_obf.jar` is not required; the source compiles against the API jar alone.
 

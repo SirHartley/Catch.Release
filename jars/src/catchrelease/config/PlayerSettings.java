@@ -12,7 +12,9 @@ import lunalib.backend.ui.settings.LunaSettingsData;
 import lunalib.backend.ui.settings.LunaSettingsLoader;
 import lunalib.lunaSettings.LunaSettings;
 import lunalib.lunaSettings.LunaSettingsListener;
+import org.json.JSONException;
 
+import java.io.IOException;
 import java.util.EnumMap;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,19 +74,17 @@ public final class PlayerSettings implements LunaSettingsListener {
         Map<Setting, Object> requested = new EnumMap<>(Setting.class);
         for (Setting key : Setting.values()) requested.put(key, data.opt(key.id));
         current = resolve(requested);
-        boolean changed = false;
-        for (Setting key : Setting.values()) {
-            Object value = current.get(key);
-            if (value.equals(data.opt(key.id))) continue;
-            data.put(key.id, value);
-            changed = true;
-        }
-        if (changed) {
-            try {
-                data.save();
-            } catch (java.io.IOException ex) {
-                Global.getLogger(PlayerSettings.class).error("Could not save fishing settings", ex);
+        try {
+            boolean changed = false;
+            for (Setting key : Setting.values()) {
+                Object value = current.get(key);
+                if (value.equals(data.opt(key.id))) continue;
+                data.put(key.id, value);
+                changed = true;
             }
+            if (changed) data.save();
+        } catch (IOException | JSONException ex) {
+            Global.getLogger(PlayerSettings.class).error("Could not save fishing settings", ex);
         }
         updateStatus();
         LunaSettingsBridge.sync(current);
