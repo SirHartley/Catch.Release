@@ -11,6 +11,15 @@ scrapped
 
 todo / QA
 
+Fisherman tutorial
+Getting intercepted by the fisherman can result in two "come alongside" calls in dialogue
+exhausting the "why a fish" chain in the tutorial leads you to a point where you "continue", get no new dialogue, then select "you could have told me this before we started". The "you could have told..." option should be in place of continue here
+tutorial missions should not point you at neutron stars
+
+---
+
+Crime needs another audit
+
 Placeholder art
 15 fish
 industry

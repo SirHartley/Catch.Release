@@ -2,21 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="Removed leftover files">
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_3.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_4.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_5.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_6.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_7.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_8.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/fishing_hole_alphatest.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/effects/hahahahaha.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fx/ghost_asteroid_1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fx/ghost_asteroid_2.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fx/ghost_asteroid_3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/jars/src/scratchpad" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/scratchpad" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/overlay/whispers_stereo.ogg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sounds/catchrelease/spotlight/spotlight_toggle1.ogg" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
