@@ -46,7 +46,7 @@ public class LonglinerSchoolModule extends BaseHauntModule {
 
     @Override
     public void advance(float amount) {
-        if (LegendaryChases.getState(spec.id).longlinerBroken == 0) {
+        if (!LonglinerShield.isUp() || LegendaryChases.getState(spec.id).longlinerBroken == 0) {
             cleanup();
             return;
         }

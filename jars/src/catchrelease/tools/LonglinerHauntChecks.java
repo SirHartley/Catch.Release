@@ -82,6 +82,7 @@ public final class LonglinerHauntChecks {
     public static void main(String[] args) throws Exception {
         geometry();
         shieldLifecycle();
+        schoolEndsWithShield();
         harpoonSweeps();
         school();
         System.out.println("Longliner haunt checks passed: " + checks);
@@ -181,6 +182,38 @@ public final class LonglinerHauntChecks {
                     && !f.state.provoked && f.state.longlinerBroken == 0 && f.state.longlinerRotation == 0f
                     && f.state.scars == 0,
                     "full failure removes school and resets disguise, sections and scars");
+        }
+    }
+
+    private static void schoolEndsWithShield() throws Exception {
+        var binding = FishEntityPlugin.class.getDeclaredField("longlinerSchool");
+        binding.setAccessible(true);
+        for (boolean explosive : new boolean[]{false, true}) {
+            for (boolean lampsOn : new boolean[]{false, true}) try (Fixture f = new Fixture()) {
+                f.wake();
+                f.crack();
+                List<Fish> copies = f.copies();
+                check(copies.size() == 18 && binding.get(f.real) != null, "damaged shield starts the school");
+                for (int section = 1; section < 5; section++) {
+                    LegendaryShields.onHarpoonContact(f.real.getMote(), false, section);
+                }
+                f.env.lampsOn = lampsOn;
+                LegendaryShields.onHarpoonContact(f.real.getMote(), explosive, 5);
+                check(f.state.longlinerBroken == 63 && !LonglinerShield.isUp(), "last hit empties the shield");
+                check(copies.stream().allMatch(copy -> copy.expired && copy.removed),
+                        "last hit hard-removes every decoy before the next update, even with lamps off");
+                check(binding.get(f.real) == null && !f.real.expired,
+                        "last hit detaches school movement without removing the real fish");
+                for (int i = 0; i < 10; i++) f.haunt.tickSchool();
+                LegendaryShields.onFailedCatch(f.real.getMote());
+                f.haunt.tickSchool();
+                check(f.copies().isEmpty(), "empty shields cannot replenish decoys after a failed catch");
+                f.haunt.close();
+                f.state.roaming = true;
+                f.haunt.restore();
+                check(f.copies().isEmpty() && binding.get(f.real) == null,
+                        "restoring a fully broken shield cannot recreate the school");
+            }
         }
     }
 

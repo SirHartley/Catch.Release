@@ -97,7 +97,9 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
 
     public static void onLonglinerHit(FishEntityPlugin fish) {
         LegendaryHaunt haunt = activateFor(fish);
-        if (haunt == null) return;
+        if (haunt == null) haunt = getInstance();
+        if (haunt == null || haunt.activeSystem != fish.getMote().getContainingLocation()
+                || !LonglinerShield.SPECIES.equals(haunt.activeSpeciesId)) return;
         for (HauntModule module : haunt.modules) module.advance(0f);
     }
 
