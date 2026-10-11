@@ -186,12 +186,12 @@ public final class LegendaryPatrolChecks {
             longliner.setHeld(false);
             haunt.abandon();
             check(longliner.expired && longliner.removed && !state.provoked && !state.roaming
-                    && !state.revealed && state.longlinerBroken == 0 && state.encountered,
-                    "Longliner abandons its mote and resets sections and disguise, not recognition");
+                    && !state.revealed && state.relocationPending && state.longlinerBroken == 0 && state.encountered,
+                    "Longliner resets and awaits another host without forgetting recognition");
             env.tutorialStage = catchrelease.campaign.fish.tutorial.FishingIntro.DONE;
             Decoy decoy = new Decoy();
             decoy.reconcile();
-            check(decoy.boats == 1, "existing Longliner reconciliation offers a fresh boat after reset");
+            check(decoy.boats == 0, "no alternate host cannot respawn the Longliner in the failed system");
             Fish ordinary = env.real("ordinary");
             ordinary.spec.rarity = FishRarity.COMMON;
             ordinary.swim(new Vector2f(20000f, 0f));

@@ -236,6 +236,8 @@ public final class LegendaryEscapeChecks {
 
         final List<Fish> fish = new ArrayList<>();
         final List<Terrain> terrain = new ArrayList<>();
+        final List<CampaignFleetAPI> fleets = new ArrayList<>();
+        final Map<String, Object> sectorValues = new HashMap<>();
         final List<PlanetAPI> stars = new ArrayList<>();
         final List<CampaignTerrainAPI> coronas = new ArrayList<>();
         final Vector2f playerAt = new Vector2f();
@@ -276,6 +278,12 @@ public final class LegendaryEscapeChecks {
                 case "getPlanets" -> stars;
                 case "getStar" -> stars.stream().filter(PlanetAPI::isStar).findFirst().orElse(null);
                 case "getTerrainCopy" -> coronas;
+                case "getFleets" -> fleets;
+                case "getCustomEntities" -> List.of();
+                case "getMemoryWithoutUpdate" -> api(MemoryAPI.class, (mp, mm, ma) -> switch (mm.getName()) {
+                    case "get" -> null;
+                    default -> throw new AssertionError(mm);
+                });
                 case "createToken" -> {
                     Vector2f at = new Vector2f((float) a[0], (float) a[1]);
                     yield api(SectorEntityToken.class, (token, method, args) -> switch (method.getName()) {
@@ -305,6 +313,7 @@ public final class LegendaryEscapeChecks {
                     yield stream.token;
                 }
                 case "removeEntity" -> {
+                    fleets.remove(a[0]);
                     for (Fish f : fish) if (f.getMote() == a[0]) f.removed = true;
                     for (Terrain t : terrain) if (t.token == a[0]) t.removed = true;
                     yield null;
@@ -326,6 +335,9 @@ public final class LegendaryEscapeChecks {
             memory.set("$catchrelease_data/campaign/fish.csv", specs);
             MemoryAPI sectorMemory = api(MemoryAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getInt" -> TutorialConstants.STAGE_KEY.equals(a[0]) ? tutorialStage : 0;
+                case "get" -> sectorValues.get(a[0]);
+                case "set" -> { sectorValues.put((String) a[0], a[1]); yield null; }
+                case "unset" -> { sectorValues.remove(a[0]); yield null; }
                 default -> throw new AssertionError(m);
             });
             GenericPluginManagerAPI plugins = api(GenericPluginManagerAPI.class, (p, m, a) -> switch (m.getName()) {
@@ -344,6 +356,7 @@ public final class LegendaryEscapeChecks {
                 case "getTransientScripts" -> scripts;
                 case "getCurrentLocation" -> system;
                 case "getStarSystems" -> List.of(system);
+                case "getAllLocations" -> List.of(system);
                 case "getPlayerFleet" -> player;
                 case "getClock" -> clock;
                 default -> throw new AssertionError(m);
