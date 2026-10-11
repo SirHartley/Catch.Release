@@ -127,17 +127,8 @@ public class FishRequirement {
         if (minLength > 0f && spec.lengthMax < minLength) return false;
         if (minWeight > 0f && spec.weightMax < minWeight) return false;
 
-        CatchImplement methodImplement = null;
-        if (method == FishLogEntry.Method.DRONE) methodImplement = CatchImplement.POND;
-        if (method == FishLogEntry.Method.HARPOON) methodImplement = CatchImplement.BREACH_LAMP;
-
-        if (implement != null && methodImplement != null && implement != methodImplement) {
-            return false;
-        }
-
-        CatchImplement requiredImplement = implement == null ? methodImplement : implement;
-        if (requiredImplement != null && !spec.reachedBy.isEmpty()
-                && !spec.reachedBy.contains(requiredImplement)) return false;
+        // Either rig can take pond fish; a coupled drone can also take lamp fish.
+        if (implement != null && !spec.canBeReachedBy(implement)) return false;
 
         return true;
     }
