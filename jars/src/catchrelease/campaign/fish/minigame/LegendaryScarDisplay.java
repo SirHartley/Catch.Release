@@ -21,6 +21,7 @@ public final class LegendaryScarDisplay {
 
     public static final float DIAMETER = 24f;
     public static final float SPACING = 32f;
+    public static final float TOP_GAP = 8f;
     public static final float STAMP_SCALE = 2.4f;
     public static final float STAMP_TIME = 0.6f;
     public static final float NOTICE_TIME = 5f;
@@ -98,8 +99,8 @@ public final class LegendaryScarDisplay {
         frame.updateUIElementSizeAndMakeItProcessInput(text);
         notice = frame.wrapTooltipWithBox(text, Misc.getBasePlayerColor());
         FishingMinigameLayout layout = new FishingMinigameLayout(frame.getPosition());
-        frame.addComponent(notice).inTL(x(layout) - frame.getPosition().getX() + DIAMETER,
-                frame.getPosition().getY() + frame.getPosition().getHeight() - y(layout, count - 1)
+        frame.addComponent(notice).inTL(x(layout, count - 1, count) - frame.getPosition().getX() + DIAMETER,
+                frame.getPosition().getY() + frame.getPosition().getHeight() - y(layout)
                         - notice.getPosition().getHeight() * 0.5f);
     }
 
@@ -113,9 +114,9 @@ public final class LegendaryScarDisplay {
         for (int i = 0; i < count; i++) {
             CustomPanelAPI target = frame.createCustomPanel(DIAMETER, DIAMETER,
                     new BaseCustomUIPanelPlugin());
-            frame.addComponent(target).inTL(x(layout) - frame.getPosition().getX() - DIAMETER * 0.5f,
+            frame.addComponent(target).inTL(x(layout, i, count) - frame.getPosition().getX() - DIAMETER * 0.5f,
                     frame.getPosition().getY() + frame.getPosition().getHeight()
-                            - y(layout, i) - DIAMETER * 0.5f);
+                            - y(layout) - DIAMETER * 0.5f);
             components.add(target);
             tips.addTooltipTo(new BaseTooltipCreator() {
                 @Override public float getTooltipWidth(Object param) { return 240f; }
@@ -130,26 +131,30 @@ public final class LegendaryScarDisplay {
         tooltip.addPara(EXPLANATION, 0f, Misc.getHighlightColor(), "scarred", "easier", "quality");
     }
 
-    public static float x(FishingMinigameLayout layout) {
-        return layout.panelX + DIAMETER * 0.5f * STAMP_SCALE;
+    public static float x(FishingMinigameLayout layout, int index, int count) {
+        return layout.dialogCenterX + (index - (count - 1) * 0.5f) * SPACING;
     }
 
-    public static float y(FishingMinigameLayout layout, int index) {
-        return layout.meterY + layout.meterHeight - DIAMETER * 0.5f - index * SPACING;
+    public static float y(FishingMinigameLayout layout) {
+        return layout.dialogTop + TOP_GAP + DIAMETER * 0.5f * STAMP_SCALE;
     }
 
     public void render(FishingMinigameLayout layout, float alphaMult) {
         if (disposed || count == 0) return;
         if (icon == null) icon = SpriteLoader.getSprite("shop_harpoon");
+        Color fill = failed ? Misc.getDarkPlayerColor() : Color.DARK_GRAY;
+        Color rim = failed ? Misc.getBasePlayerColor() : Color.GRAY;
+        Color ink = failed ? Misc.getTextColor() : Color.LIGHT_GRAY;
+        float visibility = failed ? 1f : 0.35f;
         for (int i = 0; i < count; i++) {
             float phase = added && i == count - 1 ? Math.min(1f, elapsed / STAMP_TIME) : 1f;
             float scale = 1f + (STAMP_SCALE - 1f) * (float) Math.pow(1f - phase, 3);
-            float alpha = alphaMult * Math.min(1f, phase * 4f);
-            float x = x(layout);
-            float y = y(layout, i);
+            float alpha = alphaMult * visibility * Math.min(1f, phase * 4f);
+            float x = x(layout, i, count);
+            float y = y(layout);
             float radius = DIAMETER * 0.5f * scale;
-            Disc.draw(x, y, radius, Misc.getDarkPlayerColor(), 0.7f * alpha, 0.7f * alpha, false);
-            Disc.drawOutline(x, y, radius, Misc.getBasePlayerColor(), 0.65f * alpha, 1f);
+            Disc.draw(x, y, radius, fill, 0.7f * alpha, 0.7f * alpha, false);
+            Disc.drawOutline(x, y, radius, rim, 0.65f * alpha, 1f);
             float width = icon.getWidth();
             float height = icon.getHeight();
             Color color = icon.getColor();
@@ -157,7 +162,7 @@ public final class LegendaryScarDisplay {
             float fit = DIAMETER * 0.62f * scale / Math.max(width, height);
             icon.setSize(width * fit, height * fit);
             icon.setNormalBlend();
-            icon.setColor(Misc.getTextColor());
+            icon.setColor(ink);
             icon.setAlphaMult(0.65f * alpha);
             icon.renderAtCenter(x, y);
             icon.setSize(width, height);
