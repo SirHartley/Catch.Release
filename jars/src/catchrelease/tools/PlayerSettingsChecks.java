@@ -12,6 +12,7 @@ import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import lunalib.backend.ui.settings.ChangedSetting;
 import lunalib.backend.ui.settings.LunaSettingsUISettingsPanel;
+import org.json.JSONException;
 
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -63,6 +64,8 @@ public final class PlayerSettingsChecks {
     }
 
     public static void main(String[] args) throws Exception {
+        check(!RuntimeException.class.isAssignableFrom(JSONException.class),
+                "use Starsector's json.jar; newer JSON jars hide checked-exception build errors");
         csv();
         presets();
         retainedLunaValues();

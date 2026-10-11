@@ -70,6 +70,8 @@ Load order in `ModPlugin`: player settings -> pond listeners -> buried motes -> 
 `config/PlayerSettings` installs a LunaLib listener on application start and reloads on game load.
 `Setting` owns IDs, defaults, bounds and typed access. `data/config/LunaSettings.csv` supplies the
 nine tabs and help text. Runtime callers read the cached values, not the CSV or LunaLib each frame.
+`reload()` handles checked JSON errors from both the normalized-value writes and persistence,
+plus save I/O errors; failures are logged without skipping runtime preferences or Luna UI synchronization.
 
 Overall and hunt presets are one-shot actions. Applying one sets its sliders, saves them and
 returns the action to Keep current. Custom is a computed status, not a preset. Overall presets
