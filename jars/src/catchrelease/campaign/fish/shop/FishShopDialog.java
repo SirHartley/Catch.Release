@@ -235,8 +235,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                                           Object tooltipParam) {
-                    tooltip.addPara("Takes back the newest purchase made this visit and restores"
-                            + " its credits and fish exactly as they were.", 0f);
+                    tooltip.addPara("Returns the last purchase made this visit and refunds the"
+                            + " credits and exact fish used to pay for it.", 0f);
                 }
             }, TooltipMakerAPI.TooltipLocation.ABOVE);
 
@@ -451,10 +451,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     boolean marked = ShopMarks.isMarked(entry);
 
                     tooltip.addPara("Shopping list", Misc.getHighlightColor(), 0f);
-                    tooltip.addPara(marked ? "On the list - click the ring to clear it."
-                            : "Click the ring to save for this purchase.", 6f);
-                    tooltip.addPara("Fish that would pay for it wear the %s everywhere, and the"
-                                    + " route planner lists the entry at the top.", 6f,
+                    tooltip.addPara(marked ? "Click the ring to remove this from your list."
+                            : "Click the ring to add this to your list.", 6f);
+                    tooltip.addPara("Eligible fish are marked with a %s and listed first in"
+                                    + " the route planner.", 6f,
                             Misc.getGrayColor(), Misc.getHighlightColor(), "yellow dot");
                 }
             };
@@ -487,8 +487,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
                                 Misc.getHighlightColor(), tier);
                         tooltip.addPara("Each schematic unlocks one upgrade tier for purchase;"
                                 + " it does not grant the upgrade.", Misc.getGrayColor(), 6f);
-                        tooltip.addPara("Marking this tier dots its schematic on job offers until"
-                                + " the plan is learned.", Misc.getGrayColor(), 6f);
+                        tooltip.addPara("Mark this tier to highlight jobs offering its schematic"
+                                + " until you learn it.", Misc.getGrayColor(), 6f);
                         return;
                     }
 
@@ -553,8 +553,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 Tackle fitted = TackleManager.get(entry.rig);
 
                 if (fitted != entry.tackle && fitted != Tackle.NONE) {
-                    info.addPara("In the slot now: %s. One slot - fitting this puts that back on"
-                            + " the shelf.", 12f, Misc.getGrayColor(),
+                    info.addPara("Replaces %s. You keep the removed equipment.", 12f, Misc.getGrayColor(),
                             Misc.getHighlightColor(), fitted.name);
                 }
             }
@@ -574,22 +573,19 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                                           Object tooltipParam) {
                     tooltip.addPara("UPGRADES", Misc.getBasePlayerColor(), 0f);
-                    tooltip.addPara("Purchased one tier at a time. Every purchased tier remains"
-                            + " active, and different upgrades can be active together without"
-                            + " limit.", 8f);
+                    tooltip.addPara("Buy tiers in order. All purchased tiers and upgrades remain"
+                            + " active together.", 8f);
 
                     tooltip.addPara("EQUIPMENT", Misc.getBasePlayerColor(), 12f);
-                    tooltip.addPara("Each fishing ability can fit one item at a time. Owned"
-                            + " equipment may be refitted freely; switching items does not remove"
-                            + " ownership or require another purchase. Separately marked"
-                            + " single-use equipment may still be consumed when used.", 8f);
+                    tooltip.addPara("Each fishing ability has one equipment slot. Swap owned"
+                            + " equipment freely at no cost. Items marked as single-use are"
+                            + " consumed when used.", 8f);
 
                     tooltip.addPara("PURCHASING", Misc.getBasePlayerColor(), 12f);
-                    tooltip.addPara("Only specimens matching the displayed catch requirement are"
-                            + " taken. Loose eligible specimens are used first, with bundled catch"
-                            + " opened only if needed. If several specimens of one unnamed species"
-                            + " are required, the eligible species with the largest count aboard"
-                            + " is used.", 8f);
+                    tooltip.addPara("Payment takes only fish that meet the requirement, using"
+                            + " loose fish before opening boxes or piles. When several fish of"
+                            + " the same species are required but none is named, it uses the"
+                            + " eligible species you have most of.", 8f);
                 }
             };
         }
@@ -599,8 +595,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 info.addPara(entry.isOn() ? "Switched on." : "Switched off.",
                         entry.isOn() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor(), 16f);
 
-                info.addPara("Already paid for. Switching it off costs nothing and does not lose"
-                        + " it.", Misc.getGrayColor(), 4f);
+                info.addPara("Yours to switch on or off at any time, at no cost.",
+                        Misc.getGrayColor(), 4f);
                 return;
             }
 
@@ -646,7 +642,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 int have = FishCurrency.count(price.fish);
                 boolean fishOk = have >= price.fish.count;
 
-                info.addPara("And the catch: %s", 4f, Misc.getGrayColor(),
+                info.addPara("Fish required: %s", 4f, Misc.getGrayColor(),
                         rarity == null ? Misc.getHighlightColor() : rarity.color,
                         price.fish.describe());
 

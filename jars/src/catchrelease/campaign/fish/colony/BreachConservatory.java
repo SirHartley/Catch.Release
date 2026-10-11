@@ -43,8 +43,8 @@ public class BreachConservatory extends BaseIndustry {
     protected void addPostDescriptionSection(TooltipMakerAPI tooltip, IndustryTooltipMode mode) {
         super.addPostDescriptionSection(tooltip, mode);
 
-        tooltip.addPara("Opens the %s to this colony: the outfitter trades here, and the"
-                        + " conservatory keeps a public aquarium stocked from your own catch.",
+        tooltip.addPara("Brings the %s to this colony, with an outfitter and a public aquarium"
+                        + " you can stock from your own catch.",
                 10f, Misc.getHighlightColor(), "fishing trade");
 
         if (isFunctional() && mode == IndustryTooltipMode.NORMAL) {
@@ -61,12 +61,12 @@ public class BreachConservatory extends BaseIndustry {
             Backdrop hanging = Backdrops.getHanging(this);
 
             if (hanging != null && !Backdrops.isBare(hanging)) {
-                tooltip.addPara("Hung against %s.", 4f, Misc.getHighlightColor(),
+                tooltip.addPara("Backdrop: %s.", 4f, Misc.getHighlightColor(),
                         hanging.getDisplayName().toLowerCase());
             }
 
             if (!aquariumEnabled) {
-                tooltip.addPara("The display is currently shut off.", Misc.getGrayColor(), 4f);
+                tooltip.addPara("The display is switched off.", Misc.getGrayColor(), 4f);
             }
         }
     }

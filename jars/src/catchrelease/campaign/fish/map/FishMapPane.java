@@ -237,9 +237,8 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         }));
         footer.addCustom(toggle, 0f);
         footer.addTooltipToPrevious(createSimpleTooltip(280f,
-                "Paints how well the fabric is holding over the whole sector: clear where it"
-                        + " holds, purple where it runs thin, hot where it is barely there."
-                        + " Specimens taken where the fabric is thin come up aberrant."),
+                "Shows coherence across the sector. Clear areas are stable; brighter purple"
+                        + " marks less stable fabric. Fish caught there have lower coherence."),
                 TooltipMakerAPI.TooltipLocation.ABOVE, false);
 
         panel.addUIElement(footer).inTL(PAD, height - PAD - COHERENCE_HEIGHT);
@@ -292,15 +291,15 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         host::onPlannerRequested));
         controls.addCustom(planner, 0f);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
-                "Pick the fish you need - open jobs and upgrade asks are suggested - and plot"
-                        + " the shortest route through their ranges."),
+                "Plan the shortest route through the ranges of the fish you need. Fish wanted"
+                        + " for jobs and marked purchases appear first."),
                 TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         searchField = controls.addTextField(innerWidth, SEARCH_HEIGHT, ShopUi.FONT_SMALL, 8f);
         searchField.setText(filter.search == null || filter.search.isEmpty()
                 ? SEARCH_GHOST : filter.search);
         controls.addTooltipToPrevious(createSimpleTooltip(260f,
-                "Type to filter the species by name. The list and the shading follow as you type."),
+                "Search species by name. The list and map shading update as you type."),
                 TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         FishType[] types = FishType.values();
@@ -332,7 +331,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
                         this::onDeselectAll));
         controls.addCustom(deselect, 8f);
         controls.addTooltipTo(createSimpleTooltip(260f,
-                "Clear the picked species and switch off every category filter."),
+                "Deselect all species and clear the type filters."),
                 deselect, TooltipMakerAPI.TooltipLocation.BELOW, false);
 
         CustomPanelAPI header = panel.createCustomPanel(innerWidth, HEADER_HEIGHT,
@@ -481,14 +480,12 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                 tooltip.addPara("Reading the map", Misc.getBasePlayerColor(), 0f);
 
-                tooltip.addPara("Enable type chips to shade whole territories. Pick species off"
-                        + " the list to shade only those - up to three at once for planning a"
-                        + " route, the first filled, the second striped one way, the third the"
-                        + " other, so overlaps cross instead of piling.", 8f);
+                tooltip.addPara("Select a type to show its species' ranges, or choose up to three"
+                        + " species from the list. The first range is shaded solid; the other"
+                        + " two use opposite stripes so you can see where they overlap.", 8f);
 
-                tooltip.addPara("A filled circle by a name is a species somebody aboard has"
-                        + " landed. A hollow one is known only from range data: its range"
-                        + " shade, but nobody has seen the creature itself.", 8f);
+                tooltip.addPara("A filled circle marks a species you have caught. A hollow"
+                        + " circle means you have its range data but have not caught it yet.", 8f);
 
                 tooltip.addPara("F2 over a row opens that species' codex page.", Misc.getGrayColor(), 8f);
 
@@ -503,7 +500,7 @@ public class FishMapPane extends BaseCustomUIPanelPlugin {
     protected TooltipMakerAPI.TooltipCreator createRowTooltip(FishSpec spec) {
         return FishTooltips.create(spec, () ->
                 !selectedIds.contains(spec.id) && selectedIds.size() >= MAX_SELECTED
-                        ? "Three ranges are already up - deselect one first."
+                        ? "Three ranges are already selected. Deselect one first."
                         : "Click to toggle its range on the map. F2 opens the codex.");
     }
 }
