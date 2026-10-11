@@ -21,6 +21,7 @@ public final class LegendaryScarDisplay {
 
     public static final float DIAMETER = 24f;
     public static final float SPACING = 32f;
+    public static final float STAMP_SCALE = 2.4f;
     public static final float STAMP_TIME = 0.6f;
     public static final float NOTICE_TIME = 5f;
     public static final String SOUND = "ui_cargo_supplies_drop";
@@ -130,7 +131,7 @@ public final class LegendaryScarDisplay {
     }
 
     public static float x(FishingMinigameLayout layout) {
-        return layout.meterX + layout.meterWidth + DIAMETER * 0.5f + 12f;
+        return layout.panelX + DIAMETER * 0.5f * STAMP_SCALE;
     }
 
     public static float y(FishingMinigameLayout layout, int index) {
@@ -142,7 +143,7 @@ public final class LegendaryScarDisplay {
         if (icon == null) icon = SpriteLoader.getSprite("shop_harpoon");
         for (int i = 0; i < count; i++) {
             float phase = added && i == count - 1 ? Math.min(1f, elapsed / STAMP_TIME) : 1f;
-            float scale = 1f + 1.4f * (float) Math.pow(1f - phase, 3);
+            float scale = 1f + (STAMP_SCALE - 1f) * (float) Math.pow(1f - phase, 3);
             float alpha = alphaMult * Math.min(1f, phase * 4f);
             float x = x(layout);
             float y = y(layout, i);

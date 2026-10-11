@@ -353,7 +353,10 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 ### Minigame timing
 
 `LegendaryScarDisplay` draws up to four quiet 24-unit harpoon circles, spaced 32
-units vertically to the right of the progress meter. It uses the existing
+units vertically outside the main dialog's right edge, aligned with the progress
+meter. The column starts in the catch-card area (`layout.panelX`), reserving the
+stamp's maximum 2.4-times radius so the animation also clears the dialog. Hover
+regions and the explanation use that same anchor. It uses the existing
 `shop_harpoon` sprite and `Disc` primitives after the Manta distortion pass. There
 are no labels or hover regions during play. On a failed legendary minigame the
 dialog stays open: the new icon fades in and shrinks over 0.6 seconds, then plays
