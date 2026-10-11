@@ -161,7 +161,7 @@ public class FishLocationSummary {
             case "theme_derelict": return "long abandoned";
             case "theme_remnant": return "held by remnants";
             case "has_slipstreams": return "crossed by slipstreams";
-            case "nebula": return "inside a nebula";
+            case "nebula": return "sunk in nebula";
             default: return tag.trim().toLowerCase().replace("theme_", "").replace('_', ' ');
         }
     }
