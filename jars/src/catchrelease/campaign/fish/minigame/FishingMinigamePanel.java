@@ -121,13 +121,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             return;
         }
 
-        if (!failedSoundPlayed) {
-            failedSoundPlayed = true;
-            CatchCelebration.playHook(FishConstants.SOUND_FAILED);
-            if (scars != null) {
-                scars.failed(listener == null ? minigame.getScars() : listener.onMinigameFailed());
-            }
-        }
+        beginFailure();
 
         if (scars != null) {
             scars.advance(amount, false);
@@ -138,6 +132,15 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (endLingerLeft > 0f) return;
 
         end(false);
+    }
+
+    protected void beginFailure() {
+        if (failedSoundPlayed) return;
+        failedSoundPlayed = true;
+        CatchCelebration.playHook(FishConstants.SOUND_FAILED);
+        if (scars != null) {
+            scars.failed(listener == null ? minigame.getScars() : listener.onMinigameFailed());
+        }
     }
 
     protected void advanceLineSoundLoop(float amount) {
@@ -250,9 +253,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             }
 
             if (scars != null && !minigame.isRunning() && !minigame.isCaught()) {
-                if (event.isKeyDownEvent() || event.isLMBDownEvent() || event.isRMBDownEvent()) {
+                if (!event.isRepeat()
+                        && (event.isKeyDownEvent() || event.isLMBDownEvent() || event.isRMBDownEvent())) {
                     event.consume();
+                    beginFailure();
                     if (scars.canDismiss()) end(false);
+                    else scars.skipAnimation();
                 }
                 continue;
             }
