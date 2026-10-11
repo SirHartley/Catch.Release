@@ -68,6 +68,29 @@ public final class LegendaryScarChecks {
         @Override public int onMinigameFailed() { failures++; return next; }
     }
 
+    static class WinPanel extends FishingMinigamePanel {
+
+        final Ui ui;
+        int resultAdvances;
+
+        WinPanel(Game game, FishCatch specimen, Outcome outcome, Ui ui) {
+            super(game, specimen, null, null, outcome);
+            this.ui = ui;
+            attachFrame(ui.frame);
+        }
+
+        @Override protected void resolveTreasure() { }
+
+        @Override protected void advanceCaught(float amount) {
+            check(ui.mounted.isEmpty(), "scar components are gone before building the catch information");
+            scars.advance(amount, false);
+            check(ui.mounted.isEmpty(), "a disposed scar display cannot add win-screen hovers");
+            // A disposed display must return before sprite loading or GL drawing.
+            scars.render(null, 1f);
+            resultAdvances++;
+        }
+    }
+
     static class Ui {
 
         final Set<UIPanelAPI> mounted = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -141,6 +164,7 @@ public final class LegendaryScarChecks {
             tuning(env);
             panels(env, sounds);
             skipAnimation(env, sounds);
+            wins(env, sounds);
             display(sounds);
         } finally {
             Global.setSoundPlayer(null);
@@ -393,6 +417,33 @@ public final class LegendaryScarChecks {
         check(outcome.endings == 1 && !sounds.contains(LegendaryScarDisplay.SOUND),
                 "at the scar cap the first click closes because there is no new animation");
         panel.dispose();
+    }
+
+    private static void wins(LegendaryEscapeChecks.Environment env, List<String> sounds) {
+        FishSpec spec = env.real("scar_win").spec;
+        env.specs.put(spec.id, spec);
+        for (int scars = 0; scars <= 4; scars++) {
+            LegendaryChases.Chase chase = LegendaryChases.getState(spec.id);
+            chase.scars = scars;
+            FishCatch specimen = FishCatch.roll(spec, 0f);
+            specimen.scars = scars;
+            FishGrade grade = specimen.getGrade();
+            Game game = new Game(spec, env.system, scars);
+            Outcome outcome = new Outcome(scars + 1);
+            Ui ui = new Ui();
+            WinPanel panel = new WinPanel(game, specimen, outcome, ui);
+            game.setCaught();
+            sounds.clear();
+            panel.advance(0.1f);
+            panel.advance(1f);
+            check(panel.resultAdvances == 2 && ui.hovers == 0 && ui.boxes == 0 && sounds.isEmpty(),
+                    "wins show no scar animation, tooltip or sound at any scar count");
+            check(outcome.failures == 0 && chase.scars == scars && specimen.scars == scars
+                            && specimen.getGrade() == grade,
+                    "win cleanup removes only the display, not the landed quality or saved scars");
+            panel.dispose();
+            check(ui.mounted.isEmpty(), "closing a win remains safe after early scar disposal");
+        }
     }
 
     private static InputEventAPI key(boolean down) {

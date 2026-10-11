@@ -362,6 +362,9 @@ fresh keypress closes it, with the existing "Press any key" prompt beneath the
 track. Releases and key repeats cannot skip or dismiss. At four scars no further
 stamp, sound or quality-loss notice is added. Ordinary failures retain their short automatic
 close. Both dialog-dismiss paths dispose all owned tooltip components.
+On a win, scar drawing stops immediately and the display is disposed before the
+catch-information panel is created. No scar icons, hover regions or explanations
+remain beside the catch card; the landed specimen keeps its scar-based quality.
 Scar persistence and quality are covered in
 [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishlegendary).
 
