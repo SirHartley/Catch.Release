@@ -793,13 +793,18 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     protected MoteContact findMoteContact(Vector2f from, Vector2f to, boolean shieldsOnly) {
         MoteContact first = null;
+        float catchRadius = getCatchRadius();
 
         for (String tag : new String[]{FishEntityPlugin.MOTE_TAG, BuriedMoteEntityPlugin.BURIED_TAG}) {
             if (owner != null && BuriedMoteEntityPlugin.BURIED_TAG.equals(tag)) continue;
             for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(tag)) {
                 if (!canTake(mote)) continue;
                 if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && LonglinerShield.applies(fish)) {
-                    float body = getCircleEntry(from, to, mote.getLocation(), HarpoonConstants.CATCH_RADIUS);
+                    // At distant zoom, catch assistance must still stay inside the shield sections.
+                    float bodyRadius = LonglinerShield.isUp()
+                            ? Math.min(catchRadius, LonglinerShield.RADIUS - LonglinerShield.THICKNESS)
+                            : catchRadius;
+                    float body = getCircleEntry(from, to, mote.getLocation(), bodyRadius);
                     LonglinerShield.Contact contact = shieldsOnly ? LonglinerShield.findContact(fish, from, to) : null;
                     if (shieldsOnly && (contact == null || body >= 0f && body < contact.fraction())) continue;
                     float fraction = shieldsOnly ? contact.fraction() : body;
@@ -811,7 +816,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
                 boolean shielded = mote.getCustomPlugin() instanceof FishEntityPlugin fish
                         && LegendaryShields.isShielded(fish);
                 if (shieldsOnly && !shielded) continue;
-                float radius = shielded ? LegendaryShields.SHIELD_RADIUS : HarpoonConstants.CATCH_RADIUS;
+                float radius = shielded ? LegendaryShields.SHIELD_RADIUS : catchRadius;
                 float fraction = getCircleEntry(from, to, mote.getLocation(), radius);
                 if (fraction < 0f || (first != null && fraction >= first.fraction)) continue;
 
@@ -820,6 +825,13 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         return first;
+    }
+
+    protected float getCatchRadius() {
+        float margin = owner == null ? UpgradeManager.getValue(StatIds.HARPOON_AIM_ASSIST, 0f) : 0f;
+        if (margin <= 0f) return HarpoonConstants.CATCH_RADIUS;
+        ViewportAPI viewport = Global.getSector().getViewport();
+        return HarpoonConstants.CATCH_RADIUS + viewport.convertScreenWidthToWorldWidth(margin);
     }
 
     protected static float getCircleEntry(Vector2f from, Vector2f to,
