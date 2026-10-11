@@ -9,7 +9,7 @@ searchlight_detect_radius,400,INT,200,FLAT,3,Detects buried patterns as dents fa
 searchlight_slow,0,DOUBLE,0.25,FLAT,2,Slows surfaced patterns more while they are inside a Breach Light beam.,
 drone_speed,300,INT,0.12,MULT,4,Increases ROD drone travel speed.,
 drone_acceleration,0.45,DOUBLE,-0.1,MULT,4,Makes ROD drones turn and change speed faster.,
-drone_catch_area,150,INT,0.15,MULT,4,Expands the visible fishing ring and the drones' base search reach.,
+#drone_catch_area,150,INT,0.15,MULT,4,Expands the visible fishing ring and the drones' base search reach.,
 drone_chase_time,8,DOUBLE,2,FLAT,4,Lets drones chase a pattern longer before returning to the fishing ring.,
 drone_chase_margin,40,INT,80,FLAT,3,Lets drones spot and pursue patterns farther beyond the fishing ring.,
 drone_rare_priority,0,DOUBLE,0.25,FLAT,4,Makes idle drones more likely to choose the rarest pattern within reach.,
