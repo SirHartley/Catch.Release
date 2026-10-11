@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.entities;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.legendary.DawnShieldTransfer;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.rendering.distortion.CampaignDistortionRenderer;
@@ -54,6 +55,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
 
     protected Kind kind = Kind.BLAST;
     protected float time;
+    protected final float lifetime = LIFETIME_SECONDS * Setting.DAWN_MINE_LIFE.mult();
     protected float blinkOffset;
     protected boolean triggered;
     protected DawnShieldTransfer transfer;
@@ -124,7 +126,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
             return;
         }
 
-        if (time >= LIFETIME_SECONDS) {
+        if (time >= lifetime) {
             detonate();
             return;
         }
@@ -158,6 +160,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         Vector2f away = Vector2f.sub(player.getLocation(), entity.getLocation(), null);
         float distance = away.length();
         if (distance <= 1f) return;
+        speed *= Setting.HAZARD_DAMAGE.mult();
         Vector2f velocity = player.getVelocityFromMovementModule();
         // getVelocity() is a displayed sample; setVelocity writes the movement module used by steering.
         player.setVelocity(velocity.x + away.x / distance * speed,

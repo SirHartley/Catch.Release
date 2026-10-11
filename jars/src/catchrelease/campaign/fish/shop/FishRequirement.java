@@ -59,6 +59,30 @@ public class FishRequirement {
         }
     }
 
+    public FishRequirement() {
+    }
+
+    public FishRequirement(FishRequirement source) {
+        count = source.count;
+        sameSpecies = source.sameSpecies;
+        tag = source.tag;
+        speciesId = source.speciesId;
+        minRarity = source.minRarity;
+        minGrade = source.minGrade;
+        lowCoherence = source.lowCoherence;
+        minLength = source.minLength;
+        minWeight = source.minWeight;
+        origin = source.origin;
+        method = source.method;
+        implement = source.implement;
+        sourceId = source.sourceId;
+        freshCatch = source.freshCatch;
+        minCaughtAt = source.minCaughtAt;
+        caughtSystemId = source.caughtSystemId;
+        questTargetId = source.questTargetId;
+        for (FishRequirement alternative : source.anyOf) anyOf.add(new FishRequirement(alternative));
+    }
+
     public FishRequirement addAlternative(FishRequirement alternative) {
         if (alternative != null) anyOf.add(alternative);
 

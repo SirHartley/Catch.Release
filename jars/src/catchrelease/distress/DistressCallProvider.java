@@ -10,6 +10,10 @@ public interface DistressCallProvider {
         return true;
     }
 
+    default float getSpawnProbability(DistressCallSpec spec) {
+        return spec.probability;
+    }
+
     boolean onFleetSpawned(DistressCallInstance instance, CampaignFleetAPI fleet);
 
     default String getIntelText(DistressCallInstance instance, CampaignFleetAPI fleet) {

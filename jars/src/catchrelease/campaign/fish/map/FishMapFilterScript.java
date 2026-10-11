@@ -824,7 +824,7 @@ public class FishMapFilterScript implements EveryFrameScript, FishMapPane.Host,
                 overlayPanel.getPosition().setSize(narrowWidth, paneHeight);
             }
 
-            if (overlay != null) overlay.setCoherenceShown(FishMapPane.isCoherenceShown());
+            if (overlay != null) overlay.setCoherenceShown(pane.isCoherenceShown());
 
             rebuildBlobs();
             applied = true;

@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.rendering.plugins.MantaBackgroundBlackout;
@@ -90,7 +92,7 @@ public class MantaFormationModule extends BaseHauntModule {
         boolean wasSwitching = isSwitching();
         blackoutLeft = Math.max(0f, blackoutLeft - amount);
         if (wasSwitching && !isSwitching() && !real.isHeld()) reorientFormation();
-        blackoutTimer -= amount;
+        blackoutTimer -= amount / Setting.HUNT_RECOVERY.mult();
         if (blackoutTimer <= 0f && !real.isHeld() && atFullIntensity()) {
             beginBlackout();
         }
@@ -110,7 +112,7 @@ public class MantaFormationModule extends BaseHauntModule {
 
     public void renderSwitchJitter(SpriteAPI sprite, Vector2f at) {
         if (!isSwitching()) return;
-        switchJitter.render(sprite, at.x, at.y, SWITCH_JITTER_SPREAD, SWITCH_JITTER_COPIES);
+        switchJitter.render(sprite, at.x, at.y, SWITCH_JITTER_SPREAD * PlayerSettings.flashStrength(), SWITCH_JITTER_COPIES);
     }
 
     protected void showBlackout(boolean visible) {
@@ -175,6 +177,7 @@ public class MantaFormationModule extends BaseHauntModule {
         double wave = (Math.sin(time * 31) + Math.sin(time * 47.3)
                 + Math.sin(time * 11.7)) / 3;
         float pulse = wave < -0.15 ? 0.08f : 0.8f + 0.2f * (float) wave;
+        pulse = 1f - (1f - pulse) * PlayerSettings.flashStrength();
         return 1f - intensity * (1f - pulse);
     }
 

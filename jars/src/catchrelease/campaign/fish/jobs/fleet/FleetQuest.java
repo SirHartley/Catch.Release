@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.config.Setting;
 import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -323,6 +324,12 @@ public class FleetQuest extends FishJob {
             return;
         }
         if (takenUp) markDeliverable();
+        boolean visible = takenUp ? Setting.ACCEPTED_MARKERS.enabled()
+                : Setting.OFFER_MARKERS.enabled();
+        if (!visible) {
+            dropMarker();
+            return;
+        }
         if (marker != null && !marker.isExpired()) return;
 
         Color color = takenUp ? FleetQuestMapIcon.getMarkerColor() : OFFER_COLOR;

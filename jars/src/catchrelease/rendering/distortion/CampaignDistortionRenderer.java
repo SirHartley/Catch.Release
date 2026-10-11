@@ -1,5 +1,7 @@
 package catchrelease.rendering.distortion;
 
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.combat.ViewportAPI;
@@ -238,7 +240,8 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
             if (!isOnScreen(viewport, location, reach)) continue;
 
             GL20.glUniform1f(indexAux[1], distortion.getFacing());
-            GL20.glUniform1f(indexAux[2], unitsToUV(viewport, Math.max(distortion.getIntensity(), 0f)));
+            GL20.glUniform1f(indexAux[2], unitsToUV(viewport, Math.max(distortion.getIntensity(), 0f) * Setting.DISTORTION_STRENGTH.mult()
+                    * PlayerSettings.effects()));
             GL20.glUniform2f(indexAux[3], norm.x, norm.y);
             GL20.glUniform1f(indexAux[4], distortion.isFlipped() ? -1f : 1f);
             GL20.glUniform2f(indexAux[5], (float) Math.toRadians(distortion.getArcStart()),
@@ -284,7 +287,8 @@ public class CampaignDistortionRenderer implements LunaCampaignRenderingPlugin {
         for (DistortionAPI distortion : distortions) {
             if (counted++ >= limit) break;
 
-            max = Math.max(max, unitsToUV(viewport, distortion.getIntensity()));
+            max = Math.max(max, unitsToUV(viewport, distortion.getIntensity() * Setting.DISTORTION_STRENGTH.mult()
+                    * PlayerSettings.effects()));
         }
 
         return max;

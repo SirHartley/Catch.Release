@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.rendering.plugins.ChromaticAberrationOverlay;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
@@ -20,7 +22,8 @@ public class ChromaticAberrationModule extends BaseHauntModule {
     public void advance(float amount) {
         level = Math.min(1f, level + amount / RAMP_SECONDS);
 
-        ChromaticAberrationOverlay.setLevel((FLOOR + (1f - FLOOR) * level) * intensity);
+        ChromaticAberrationOverlay.setLevel((FLOOR + (1f - FLOOR) * level) * intensity
+                * Setting.DISTORTION_STRENGTH.mult() * PlayerSettings.effects());
     }
 
     @Override

@@ -7,6 +7,8 @@ uniform vec2 imageSize;
 uniform float strength;
 uniform float time;
 uniform float phase;
+uniform float rgbEnabled;
+uniform float digitalEnabled;
 
 float noise(vec2 cell) {
     return fract(sin(dot(cell, vec2(127.1, 311.7))) * 43758.5453);
@@ -21,7 +23,7 @@ vec4 sampleFish(vec2 uv) {
 
 void main() {
     vec2 uv = (gl_TexCoord[0].xy - region.xy) / region.zw;
-    float damage = strength * strength;
+    float damage = strength * strength * digitalEnabled;
     float tick = floor(time * 7.0 + phase * 17.0);
     float burst = smoothstep(0.45, 0.95, sin(time * 2.3 + phase * 5.7));
 
@@ -37,7 +39,7 @@ void main() {
     vec2 pixels = max(vec2(3.0), imageSize / mix(1.0, 3.0, damage));
     uv = mix(uv, (floor(uv * pixels) + 0.5) / pixels, block);
 
-    float fringe = strength * (1.4 + 1.1 * strength)
+    float fringe = rgbEnabled * strength * (1.4 + 1.1 * strength)
             * (0.85 + 0.15 * sin(time * 1.7 + phase));
     vec2 split = vec2(min(fringe / imageSize.x, 0.07),
             min(fringe * 0.18 / imageSize.y, 0.025));

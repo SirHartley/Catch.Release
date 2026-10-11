@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.HauntMineEntityPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -30,7 +31,9 @@ public class MinefieldModule extends BaseHauntModule {
     public void advance(float amount) {
         prune();
 
-        spawnTimer -= amount;
+        spawnTimer -= amount * Setting.HAZARD_FREQUENCY.mult()
+                * Setting.DAWN_MINE_FREQUENCY.mult()
+                / Setting.HUNT_RECOVERY.mult();
         int active = liveMines();
         if (spawnTimer <= 0f && active < MAX_ALIVE && atFullIntensity()) {
             spawnTimer = MathUtils.getRandomNumberInRange(

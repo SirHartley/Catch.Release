@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.minigame;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
@@ -314,7 +315,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         this.specimen = FishCatch.roll(fish, aberration, quality,
                 anchor == null ? null : SectorRegion.of(anchor.getContainingLocation()));
-        this.specimen.scars = minigame.getScars();
+        this.specimen.scars = Setting.SCAR_QUALITY.enabled() ? minigame.getScars() : 0;
 
         // must read off anchor before the catch resolves - the mote is gone afterward
         this.specimen.method = method;
@@ -343,7 +344,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
         previousCampaignMusicVolume = Global.getSettings().getFloat(CAMPAIGN_MUSIC_VOLUME_KEY);
         float requested = Math.max(0f, Math.min(1f,
-                FishConstants.MINIGAME_CAMPAIGN_MUSIC_VOLUME_MULT));
+                Setting.MUSIC_VOLUME.mult())) * previousCampaignMusicVolume;
         Global.getSettings().setFloat(CAMPAIGN_MUSIC_VOLUME_KEY, requested);
         campaignMusicVolumeScoped = true;
     }

@@ -1,5 +1,7 @@
 package catchrelease.rendering.plugins;
 
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.constants.FishConstants;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
@@ -78,7 +80,9 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (layer != CampaignEngineLayers.ABOVE) return;
-        if (level <= 0f) return;
+        float visibleLevel = Math.min(1f, level * Setting.OVERLAY_STRENGTH.mult()
+                * PlayerSettings.effects());
+        if (visibleLevel <= 0f) return;
         if (!load()) return;
 
         // gone when GraphicsLib's shaders are disabled - drawing then blacks the screen out
@@ -88,13 +92,13 @@ public class CoherenceOverlayRenderer implements LunaCampaignRenderingPlugin {
 
         ShaderLib.beginDraw(program);
 
-        GL20.glUniform1f(uLevel, level);
+        GL20.glUniform1f(uLevel, visibleLevel);
         GL20.glUniform1f(uTime, time);
         GL20.glUniform1f(uInnerClear, FishConstants.COHERENCE_OVERLAY_INNER_CLEAR);
         GL20.glUniform2f(uVisibleUV, ShaderLib.getVisibleU(), ShaderLib.getVisibleV());
 
         // pixels to per-axis texcoords, so the wobble is the same size in x and y on screen
-        float px = WARP_MAX_PX * level * level;
+        float px = WARP_MAX_PX * visibleLevel * visibleLevel;
         GL20.glUniform2f(uWarp,
                 px * ShaderLib.getVisibleU() / Global.getSettings().getScreenWidthPixels(),
                 px * ShaderLib.getVisibleV() / Global.getSettings().getScreenHeightPixels());

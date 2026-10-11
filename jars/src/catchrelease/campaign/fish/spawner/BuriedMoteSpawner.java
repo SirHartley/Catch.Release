@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.spawner;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
@@ -45,7 +46,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        interval.advance(amount);
+        interval.advance(amount * Setting.FISH_REPLENISH.mult());
         if (!interval.intervalElapsed()) return;
 
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
@@ -60,7 +61,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
 
         cullDistant(location, fleet.getLocation());
 
-        for (int i = nearby.size(); i < FishConstants.BURIED_POPULATION; i++) {
+        for (int i = nearby.size(); i < Math.round(FishConstants.BURIED_POPULATION * Setting.FISH_POPULATION.mult()); i++) {
             spawn(location, fleet.getLocation());
         }
     }

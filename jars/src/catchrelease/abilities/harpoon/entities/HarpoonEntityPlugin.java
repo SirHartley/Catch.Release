@@ -1,5 +1,6 @@
 package catchrelease.abilities.harpoon.entities;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.abilities.harpoon.ability.HarpoonAbilityPlugin;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
@@ -254,7 +255,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     protected void playMoteHitSound() {
         if (entity.isInCurrentLocation()) {
-            Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_MOTE_HIT, 1f, 1f);
+            FishingSounds.playUISound(HarpoonConstants.SOUND_MOTE_HIT, 1f, 1f);
         }
     }
 

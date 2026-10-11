@@ -1,5 +1,6 @@
 package catchrelease.abilities.searchlight.scripts;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.helper.math.CircularArc;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -118,7 +119,7 @@ public class Searchlight implements EveryFrameScript {
 
         advanceLook();
 
-        Global.getSoundPlayer().playSound("catchrelease_ui_searchlight_toggle", 1.1f, 1.3f, arc.getPointForAngle(baseArcAngle), new Vector2f(0,0));
+        FishingSounds.playSound("catchrelease_ui_searchlight_toggle", 1.1f, 1.3f, arc.getPointForAngle(baseArcAngle), new Vector2f(0,0));
     }
 
     @Override

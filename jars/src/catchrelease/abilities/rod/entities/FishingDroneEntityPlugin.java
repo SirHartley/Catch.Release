@@ -1,5 +1,7 @@
 package catchrelease.abilities.rod.entities;
 
+import catchrelease.config.FishingSounds;
+import catchrelease.config.Setting;
 import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.memory.upgrades.StatIds;
@@ -281,7 +283,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         float gain = Math.min(returnTime * RodConstants.DRONE_RETURN_ACCELERATION,
                 RodConstants.DRONE_RETURN_MAX_MULT - 1f);
 
-        return getSpeed() * (1f + gain);
+        return getSpeed() * (1f + gain) * Setting.DRONE_RETURN.mult();
     }
 
     protected float getApproachSpeed(float distance) {
@@ -357,7 +359,7 @@ public class FishingDroneEntityPlugin extends BaseCustomEntityPlugin {
         this.mode = Mode.CHASING;
 
         if (shouldReportLock) {
-            Global.getSoundPlayer().playSound(RodConstants.SOUND_TARGET_LOCK, 1f, 1f,
+            FishingSounds.playSound(RodConstants.SOUND_TARGET_LOCK, 1f, 1f,
                     entity.getLocation(), velocity);
         }
     }

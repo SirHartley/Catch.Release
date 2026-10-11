@@ -1,5 +1,6 @@
 package catchrelease.rendering.plugins;
 
+import catchrelease.config.PlayerSettings;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorAPI;
@@ -55,8 +56,10 @@ public class MantaBackgroundBlackout implements LunaCampaignRenderingPlugin {
         float right = x + viewport.getVisibleWidth(), top = y + viewport.getVisibleHeight();
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glColor4f(0f, 0f, 0f, 1f);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        float alpha = PlayerSettings.flashStrength();
+        GL11.glColor4f(0f, 0f, 0f, alpha);
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glVertex2f(x, y);
         GL11.glVertex2f(right, y);

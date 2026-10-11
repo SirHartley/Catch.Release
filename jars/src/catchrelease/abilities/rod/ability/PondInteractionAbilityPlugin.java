@@ -1,5 +1,6 @@
 package catchrelease.abilities.rod.ability;
 
+import catchrelease.config.PlayerSettings;
 import catchrelease.ModPlugin;
 import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.RodMoteEntityPlugin;
@@ -34,6 +35,11 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
     protected static final String SOUND_POND_OPEN_UI = "catchrelease_ui_rod_pond_open_sfx";
     protected static final String SOUND_DRONE_DISPATCH_UI = "catchrelease_ui_rod_drone_dispatch";
+
+    @Override
+    protected float getActivationVolume() {
+        return PlayerSettings.soundVolume(getOnSoundUI());
+    }
 
     @Override
     protected String getActivationText() {

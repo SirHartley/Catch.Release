@@ -11,8 +11,6 @@ public class RodConstants {
     public static final String SOUND_MOTE_CAUGHT = "catchrelease_rod_catch";
     public static final String SOUND_POND_OPEN = "catchrelease_pond_open_boom";
 
-    public static float DRONE_LAUNCH_OFFSET = 0.5f;
-
     public static final float DRONE_ORBIT_RADIUS = 60f;
     public static final float DRONE_ROAM_RADIUS = 140f;
     public static final float RING_RADIUS_FALLBACK = 150f;

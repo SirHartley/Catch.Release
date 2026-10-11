@@ -1,5 +1,6 @@
 package catchrelease.abilities.rod.entities;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.abilities.rod.animation.Flash;
 import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -133,7 +134,7 @@ public class RodMoteEntityPlugin extends BaseCustomEntityPlugin {
 
         // The supplied opening report is stereo, so RC8 requires the non-positional UI path.
         if (entity.isInCurrentLocation()) {
-            Global.getSoundPlayer().playUISound(RodConstants.SOUND_POND_OPEN, 1f, 1f);
+            FishingSounds.playUISound(RodConstants.SOUND_POND_OPEN, 1f, 1f);
         }
 
         flashed = true;

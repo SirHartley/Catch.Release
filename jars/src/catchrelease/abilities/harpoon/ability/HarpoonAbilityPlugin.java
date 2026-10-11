@@ -1,5 +1,6 @@
 package catchrelease.abilities.harpoon.ability;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.ModPlugin;
 import catchrelease.abilities.charges.BaseChargedSkillshotAbility;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
@@ -37,7 +38,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         @Override
         public void onChargeGained() {
             if (shouldPlayChargeReload()) {
-                Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_CHARGE_RELOAD, 1f, 1f);
+                FishingSounds.playUISound(HarpoonConstants.SOUND_CHARGE_RELOAD, 1f, 1f);
             }
         }
     }
@@ -115,7 +116,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
         harpoon.setLocation(from.x, from.y);
         harpoon.setFacing(Misc.getAngleInDegrees(from, worldTarget));
 
-        Global.getSoundPlayer().playUISound(HarpoonConstants.SOUND_FIRE, 1f, 1f);
+        FishingSounds.playUISound(HarpoonConstants.SOUND_FIRE, 1f, 1f);
     }
 
     @Override

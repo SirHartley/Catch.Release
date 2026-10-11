@@ -1,5 +1,7 @@
 package catchrelease.abilities.rod.scripts;
 
+import catchrelease.config.FishingSounds;
+import catchrelease.config.Setting;
 import catchrelease.abilities.rod.constants.RodConstants;
 import catchrelease.abilities.rod.entities.FishingDroneEntityPlugin;
 import catchrelease.abilities.rod.rendering.FishingDroneDebugRenderer;
@@ -98,7 +100,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         nextDroneLaunchIn = 0f;
 
         launchNextDrone();
-        nextDroneLaunchIn = Math.max(0f, RodConstants.DRONE_LAUNCH_OFFSET);
+        nextDroneLaunchIn = Math.max(0f, Setting.DRONE_SPACING.value());
     }
 
     protected boolean launchNextDrone() {
@@ -120,7 +122,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         drones.add(drone);
         nextDroneIndex++;
 
-        Global.getSoundPlayer().playSound(RodConstants.SOUND_DRONE_LAUNCH, 1f, 1f,
+        FishingSounds.playSound(RodConstants.SOUND_DRONE_LAUNCH, 1f, 1f,
                 drone.getLocation(), drone.getVelocity());
 
         return true;
@@ -133,7 +135,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         if (nextDroneLaunchIn > 0f) return;
 
         if (launchNextDrone()) {
-            nextDroneLaunchIn += Math.max(0f, RodConstants.DRONE_LAUNCH_OFFSET);
+            nextDroneLaunchIn += Math.max(0f, Setting.DRONE_SPACING.value());
         }
     }
 
@@ -371,7 +373,7 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
     }
 
     protected void playMoteHit(SectorEntityToken mote) {
-        Global.getSoundPlayer().playSound(RodConstants.SOUND_MOTE_CAUGHT, 1f, 1f,
+        FishingSounds.playSound(RodConstants.SOUND_MOTE_CAUGHT, 1f, 1f,
                 mote.getLocation(), mote.getVelocity());
     }
 

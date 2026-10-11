@@ -90,6 +90,7 @@ Useful hooks on `BaseSkillshotAbility`:
 | --- | --- |
 | `createReticule()` | New reticule per targeting session |
 | `onSkillshotFired(target, angle)` | Action after a targeted shot |
+| `getActivationVolume()` | Activation sound volume; default 1. Consumers may apply their own settings. |
 | `onConsume()` | Runs once per successful shot — remove the item, spend a charge |
 | `isTargetingBlocked()` | Why aiming can't start right now; override to add your own conditions |
 | `addTooltip(tooltip)` | Ability tooltip body; the framework appends its own blocked-reason lines |

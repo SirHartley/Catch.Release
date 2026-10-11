@@ -1,5 +1,6 @@
 package catchrelease.abilities.searchlight.ability;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.ponds.constants.PondConstants;
@@ -200,12 +201,12 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
 
         timePassed += amount;
 
-        if (!spoolDone && timePassed > SPOOL_UP_TIME){
+        if (!spoolDone && timePassed > SPOOL_UP_TIME * Setting.LAMP_ACTIVATION.mult()){
             timePassed = 0;
             spoolDone = true;
         }
 
-        if (spoolDone && lightsToActivate > 0 && timePassed > SEARCHLIGHT_ACTIVATION_PAUSE){
+        if (spoolDone && lightsToActivate > 0 && timePassed > SEARCHLIGHT_ACTIVATION_PAUSE * Setting.LAMP_ACTIVATION.mult()){
             if (addSearchlight()) {
                 lightsToActivate--;
             } else {

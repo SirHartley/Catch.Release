@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -68,7 +69,13 @@ public class LonglinerSchoolModule extends BaseHauntModule {
 
         prune();
         swimmers.removeIf(s -> s.mote.isExpired() || s.mote.getContainingLocation() != system);
-        while (swimmers.size() < SCHOOL_SIZE) {
+        int wanted = 1 + Math.round(Setting.LONGLINER_DECOYS.value());
+        while (swimmers.size() > wanted) {
+            Swimmer removed = swimmers.remove(swimmers.size() - 1);
+            removeHard(removed.mote);
+            spawned.remove(removed.mote);
+        }
+        while (swimmers.size() < wanted) {
             Vector2f at = spawnPosition();
             if (at == null) break;
             FishEntityPlugin.Params params = new FishEntityPlugin.Params(
@@ -108,7 +115,7 @@ public class LonglinerSchoolModule extends BaseHauntModule {
     public void swim(float amount) {
         if (real == null || real.getMote().isExpired() || amount <= 0f) return;
         int steps = Math.max(1, Math.min(120, (int) Math.ceil(amount * 60f)));
-        float step = amount / steps;
+        float step = amount * Setting.HUNT_SPEED.mult() / steps;
         for (int i = 0; i < steps; i++) {
             time += step;
             moveCenter(step);

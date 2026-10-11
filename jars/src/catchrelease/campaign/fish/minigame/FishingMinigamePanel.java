@@ -1,5 +1,8 @@
 package catchrelease.campaign.fish.minigame;
 
+import catchrelease.config.FishingSounds;
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishCatch;
@@ -155,11 +158,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             lineLoopHeldLevel = Math.max(0f, lineLoopHeldLevel - step);
         }
 
-        float volumeRange = FishConstants.LINE_LOOP_HELD_VOLUME - FishConstants.LINE_LOOP_BASE_VOLUME;
-        float volume = FishConstants.LINE_LOOP_BASE_VOLUME + volumeRange * lineLoopHeldLevel;
+        float baseVolume = Setting.LOOP_BASE.mult();
+        float volumeRange = Setting.LOOP_HELD.mult() - baseVolume;
+        float volume = baseVolume + volumeRange * lineLoopHeldLevel;
         if (FishConstants.SOUND_LINE_LOOP.isEmpty() || volume <= 0f) return;
 
-        Global.getSoundPlayer().playUILoop(FishConstants.SOUND_LINE_LOOP, 1f, volume);
+        FishingSounds.playUILoop(FishConstants.SOUND_LINE_LOOP, 1f, volume);
     }
 
     protected void advanceIndicatorSoundHook() {
@@ -266,12 +270,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             if (event.isLMBDownEvent()) {
                 if (!FishConstants.PLAY_LINE_CLICK_ON_RELEASE && minigame.isRunning())
                     CatchCelebration.playHook(FishConstants.SOUND_LINE_CLICK);
-                reeling = true;
+                reeling = !minigame.usesToggleLift() || !reeling;
                 event.consume();
             } else if (event.isLMBUpEvent()) {
                 if (FishConstants.PLAY_LINE_CLICK_ON_RELEASE && minigame.isRunning())
                     CatchCelebration.playHook(FishConstants.SOUND_LINE_CLICK);
-                reeling = false;
+                if (!minigame.usesToggleLift()) reeling = false;
                 event.consume();
             } else if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE){
                 event.consume();
@@ -330,7 +334,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (celebration != null) celebration.render(layout, getFishSprite(), alphaMult);
         if (aberration != null && minigame.isRunning()) {
             aberration.renderRegion(position.getX(), position.getY(),
-                    position.getWidth(), position.getHeight(), alphaMult);
+                    position.getWidth(), position.getHeight(), alphaMult * PlayerSettings.effects());
         }
         if (scars != null && !minigame.isCaught()) scars.render(layout, alphaMult);
     }

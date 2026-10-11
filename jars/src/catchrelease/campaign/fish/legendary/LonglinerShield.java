@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
@@ -31,7 +32,7 @@ public final class LonglinerShield {
     public static void advance(FishEntityPlugin fish, float amount) {
         if (!applies(fish) || fish.isPhantom()) return;
         LegendaryChases.Chase state = LegendaryChases.getState(SPECIES);
-        if (state.provoked) state.longlinerRotation = (state.longlinerRotation + amount * ROTATION_SPEED) % 360f;
+        if (state.provoked) state.longlinerRotation = (state.longlinerRotation + amount * ROTATION_SPEED * Setting.LONGLINER_ROTATION.mult()) % 360f;
     }
 
     public static boolean isUp() {

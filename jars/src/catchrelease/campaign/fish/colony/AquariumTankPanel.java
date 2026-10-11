@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.colony;
 
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -437,7 +439,7 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         float h = tankHeight();
         if (w <= 0f || h <= 0f) return;
 
-        for (TankFish swimmer : fish) swimmer.advance(amount, w, h);
+        for (TankFish swimmer : fish) swimmer.advance(amount * Setting.AQUARIUM_SPEED.mult(), w, h);
 
         advanceBubbles(amount, w, h);
     }
@@ -493,7 +495,11 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
     }
 
     protected void advanceBubbles(float amount, float w, float h) {
-        if (bubbles.size() < 7 && Math.random() < amount * 0.6) {
+        float density = Setting.AQUARIUM_PARTICLES.mult()
+                * PlayerSettings.effects();
+        int limit = Math.round(7 * density);
+        while (bubbles.size() > limit) bubbles.remove(bubbles.size() - 1);
+        if (bubbles.size() < limit && Math.random() < amount * 0.6 * density) {
             Bubble bubble = new Bubble();
             bubble.x = MathUtils.getRandomNumberInRange(6f, w - 6f);
             bubble.y = 4f;
@@ -557,10 +563,12 @@ public class AquariumTankPanel extends BaseCustomUIPanelPlugin {
         float scale = Math.max(w / backdrop.getWidth(), h / backdrop.getHeight());
 
         backdrop.setSize(backdrop.getWidth() * scale, backdrop.getHeight() * scale);
-        backdrop.setColor(Color.WHITE);
+        float brightness = Setting.AQUARIUM_BRIGHTNESS.mult();
+        backdrop.setColor(new Color(brightness, brightness, brightness));
         backdrop.setNormalBlend();
         backdrop.setAlphaMult(alphaMult);
         backdrop.renderAtCenter(x + w * 0.5f, y + h * 0.5f);
+        backdrop.setColor(Color.WHITE);
     }
 
     protected void drawWater(float x, float y, float w, float h, float alphaMult) {

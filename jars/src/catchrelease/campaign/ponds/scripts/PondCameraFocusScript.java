@@ -1,5 +1,6 @@
 package catchrelease.campaign.ponds.scripts;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -161,7 +162,7 @@ public class PondCameraFocusScript implements EveryFrameScript {
     protected boolean isViewportSnapEnabled() {
         Boolean enabled = LunaSettings.getBoolean("catchrelease", PondConstants.VIEWPORT_SNAP_SETTING);
 
-        return enabled == null || enabled;
+        return !Setting.REDUCED_EFFECTS.enabled() && (enabled == null || enabled);
     }
 
     protected boolean isOutOfSight() {
@@ -190,7 +191,8 @@ public class PondCameraFocusScript implements EveryFrameScript {
     }
 
     protected float approach(float current, float target, float delta, float timeConstant) {
-        float travelled = 1f - (float) Math.exp(-delta / Math.max(0.01f, timeConstant));
+        float travelled = 1f - (float) Math.exp(-delta * Setting.CAMERA_SPEED.mult()
+                / Math.max(0.01f, timeConstant));
 
         return current + (target - current) * travelled;
     }

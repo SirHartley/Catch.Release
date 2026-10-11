@@ -1,5 +1,6 @@
 package catchrelease.campaign.crime;
 
+import catchrelease.config.Setting;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -66,6 +67,7 @@ public class LampPatrolResponse implements EveryFrameScript {
     }
 
     protected void look() {
+        if (!Setting.LAMP_PATROLS.enabled()) return;
         final CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null || !player.isAlive()) return;
         if (player.isInHyperspace() || player.isInHyperspaceTransition()) return;

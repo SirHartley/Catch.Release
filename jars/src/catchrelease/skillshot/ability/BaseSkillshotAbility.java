@@ -70,14 +70,18 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
         });
     }
 
+    protected float getActivationVolume() {
+        return 1f;
+    }
+
     protected void playActivationSound() {
         String soundId = getOnSoundUI();
         if (soundId == null) return;
 
         if (PLAY_UI_SOUNDS_IN_WORLD_SOURCES) {
-            Global.getSoundPlayer().playSound(soundId, 1f, 1f, Global.getSoundPlayer().getListenerPos(), new Vector2f());
+            Global.getSoundPlayer().playSound(soundId, 1f, getActivationVolume(), Global.getSoundPlayer().getListenerPos(), new Vector2f());
         } else {
-            Global.getSoundPlayer().playUISound(soundId, 1f, 1f);
+            Global.getSoundPlayer().playUISound(soundId, 1f, getActivationVolume());
         }
     }
 

@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -179,7 +180,8 @@ public class FishermanShelf {
 
             int rung = spec.rarity.rank;
             offer.costRarity = rung == 0 ? FishRarity.COMMON : FishRarity.ofRank(rung - 1);
-            offer.costCount = FishermanConstants.SURVEY_COST;
+            offer.costCount = Math.max(1, (int) Math.ceil(FishermanConstants.SURVEY_COST
+                    * Setting.CHART_PRICE.mult()));
 
             offers.add(offer);
         }

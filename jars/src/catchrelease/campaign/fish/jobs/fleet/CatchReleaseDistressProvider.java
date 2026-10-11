@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.distress.DistressCallFramework;
@@ -29,6 +30,11 @@ public class CatchReleaseDistressProvider implements DistressCallProvider {
 
         FleetQuestType type = typeFor(spec);
         return type != null && type.canSpawnIn(system);
+    }
+
+    @Override
+    public float getSpawnProbability(DistressCallSpec spec) {
+        return Math.min(1f, spec.probability * Setting.DISTRESS_FREQUENCY.mult());
     }
 
     @Override

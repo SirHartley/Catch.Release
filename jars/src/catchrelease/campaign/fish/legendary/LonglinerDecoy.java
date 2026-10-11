@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -83,7 +84,7 @@ public class LonglinerDecoy implements EveryFrameScript {
 
         protected void alert() {
             if (mote.isInCurrentLocation()) {
-                Global.getSoundPlayer().playSound(
+                FishingSounds.playSound(
                         SOUND_FOUND, 1f, 1f, mote.getLocation(), Misc.ZERO);
                 LegendaryShields.say(mote, "!");
             }

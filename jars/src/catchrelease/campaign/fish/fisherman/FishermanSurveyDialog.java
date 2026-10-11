@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.ui.FishIcons;
@@ -414,7 +415,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             FishermanShelf.take(dialog.getInteractionTarget(), offer.spec.id);
 
             lastPurchase = receipt;
-            Global.getSoundPlayer().playUISound(FishShopDialog.SOUND_BOUGHT, 1f, 1f);
+            FishingSounds.playUISound(FishShopDialog.SOUND_BOUGHT, 1f, 1f);
             Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
                     "Purchased range data for " + offer.spec.getDisplayName());
 
@@ -470,7 +471,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                     .addMessage("Refunded " + name);
 
             lastPurchase = null;
-            Global.getSoundPlayer().playUISound(SOUND_UNDONE, 1f, 1f);
+            FishingSounds.playUISound(SOUND_UNDONE, 1f, 1f);
         }
     }
 

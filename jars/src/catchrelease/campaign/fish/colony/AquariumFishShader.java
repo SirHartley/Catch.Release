@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.colony;
 
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import org.dark.shaders.util.ShaderLib;
@@ -17,7 +19,7 @@ public final class AquariumFishShader {
     private static boolean attempted;
     private static boolean validated;
     private static int program;
-    private static int uTexture, uRegion, uTexel, uSize, uStrength, uTime, uPhase;
+    private static int uTexture, uRegion, uTexel, uSize, uStrength, uTime, uPhase, uRgb, uDigital;
 
     private AquariumFishShader() {
     }
@@ -31,7 +33,11 @@ public final class AquariumFishShader {
     // Returns the program to restore, or -1 when drawing without the filter.
     public static int begin(SpriteAPI sprite, float aberration, float time, float phase,
                             float width, float height) {
-        float strength = strength(aberration);
+        if (!Setting.AQUARIUM_RGB.enabled()
+                && !Setting.AQUARIUM_DIGITAL.enabled()) return -1;
+        float strength = Math.min(1f, strength(aberration)
+                * Setting.AQUARIUM_DISTORTION.mult()
+                * PlayerSettings.effects());
         if (strength <= 0f || !ShaderLib.areShadersAllowed() || !load()) return -1;
 
         int previous = GL11.glGetInteger(GL20.GL_CURRENT_PROGRAM);
@@ -46,6 +52,8 @@ public final class AquariumFishShader {
             GL20.glUniform1f(uStrength, strength);
             GL20.glUniform1f(uTime, time);
             GL20.glUniform1f(uPhase, phase);
+            GL20.glUniform1f(uRgb, Setting.AQUARIUM_RGB.enabled() ? 1f : 0f);
+            GL20.glUniform1f(uDigital, Setting.AQUARIUM_DIGITAL.enabled() ? 1f : 0f);
 
             if (!validated) {
                 GL20.glValidateProgram(program);
@@ -87,6 +95,8 @@ public final class AquariumFishShader {
         uStrength = GL20.glGetUniformLocation(program, "strength");
         uTime = GL20.glGetUniformLocation(program, "time");
         uPhase = GL20.glGetUniformLocation(program, "phase");
+        uRgb = GL20.glGetUniformLocation(program, "rgbEnabled");
+        uDigital = GL20.glGetUniformLocation(program, "digitalEnabled");
         return true;
     }
 }
