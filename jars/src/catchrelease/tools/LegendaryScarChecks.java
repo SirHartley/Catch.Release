@@ -370,17 +370,22 @@ public final class LegendaryScarChecks {
         check(ui.boxes == 1 && ui.hovers == 0 && sounds.size() == 1, "new scar gets one automatic boxed explanation");
         FishingMinigameLayout layout = new FishingMinigameLayout(ui.position);
         check(ui.placements.get(ui.boxPanels.get(0).getPosition())[0]
-                        >= LegendaryScarDisplay.x(layout) + LegendaryScarDisplay.DIAMETER,
-                "explanation sits beyond the scar column, outside the main dialog");
+                        >= LegendaryScarDisplay.x(layout, 2, 3) + LegendaryScarDisplay.DIAMETER,
+                "explanation sits to the right of the newest scar");
+        float[] noticeAt = ui.placements.get(ui.boxPanels.get(0).getPosition());
+        check(Math.abs(ui.position.getHeight() - noticeAt[1]
+                        - ui.boxPanels.get(0).getPosition().getHeight() * 0.5f
+                        - LegendaryScarDisplay.y(layout)) < 0.01f,
+                "explanation is vertically centered on the new scar above the dialog");
         check(display.canDismiss(), "natural stamp completion has no extra input lockout");
         display.advance(5f, false);
         check(ui.hovers == 3 && ui.mounted.size() == 5, "postgame hover replaces the temporary notice, retaining the close prompt");
         for (int i = 0; i < ui.hoverPanels.size(); i++) {
             float[] at = ui.placements.get(ui.hoverPanels.get(i).getPosition());
-            check(at[0] == LegendaryScarDisplay.x(layout) - LegendaryScarDisplay.DIAMETER * 0.5f
-                            && at[1] == ui.position.getHeight() - LegendaryScarDisplay.y(layout, i)
+            check(at[0] == LegendaryScarDisplay.x(layout, i, 3) - LegendaryScarDisplay.DIAMETER * 0.5f
+                            && at[1] == ui.position.getHeight() - LegendaryScarDisplay.y(layout)
                             - LegendaryScarDisplay.DIAMETER * 0.5f,
-                    "postgame hover regions follow the external icon column");
+                    "postgame hover regions follow the centered icon row");
         }
         display.dispose();
         display.dispose();
@@ -395,19 +400,27 @@ public final class LegendaryScarChecks {
                 "failure at four scars adds no fifth icon, false quality notice or stamp sound");
         capped.dispose();
         check(cappedUi.mounted.isEmpty(), "capped failure cleans up");
-        for (float width : new float[]{140f, 200f, 280f}) for (float x : new float[]{0f, 275f, 800f}) {
-            PositionAPI position = ui.position(x, 150f, width, 480f);
+        for (float width : new float[]{140f, 200f, 280f}) for (float x : new float[]{0f, 275f, 800f})
+                for (float y : new float[]{0f, 150f, 400f}) for (int count = 1; count <= 4; count++) {
+            PositionAPI position = ui.position(x, y, width, 480f);
             layout = new FishingMinigameLayout(position);
-            for (float scale : new float[]{1f, 1.5f, LegendaryScarDisplay.STAMP_SCALE}) {
-                check(LegendaryScarDisplay.x(layout) - LegendaryScarDisplay.DIAMETER * 0.5f * scale
-                                >= position.getX() + position.getWidth() + FishConstants.MINIGAME_RESULT_GAP - 0.01f,
-                        "the entire scar stamp clears the main dialog, not merely the progress meter");
+            float first = LegendaryScarDisplay.x(layout, 0, count);
+            float last = LegendaryScarDisplay.x(layout, count - 1, count);
+            check(Math.abs((first + last) * 0.5f - position.getCenterX()) < 0.01f,
+                    "every scar count is centered above the full dialog");
+            check(first - LegendaryScarDisplay.DIAMETER * 0.5f >= position.getX()
+                            && last + LegendaryScarDisplay.DIAMETER * 0.5f <= position.getX() + position.getWidth(),
+                    "the settled scar row fits within the dialog width");
+            for (int i = 1; i < count; i++) {
+                check(LegendaryScarDisplay.x(layout, i, count) - LegendaryScarDisplay.x(layout, i - 1, count)
+                                >= LegendaryScarDisplay.DIAMETER + 8f,
+                        "settled scar circles have a visible gap");
             }
-            check(LegendaryScarDisplay.x(layout) > layout.panelX
-                            && LegendaryScarDisplay.x(layout) < layout.panelX + layout.panelWidth,
-                    "scar column uses the catch-card space that is cleared on a win");
-            check(LegendaryScarDisplay.y(layout, 3) - LegendaryScarDisplay.DIAMETER * 0.5f > layout.meterY,
-                    "all four icons fit vertically beside the meter");
+            for (float scale : new float[]{1f, 1.5f, LegendaryScarDisplay.STAMP_SCALE}) {
+                check(LegendaryScarDisplay.y(layout) - LegendaryScarDisplay.DIAMETER * 0.5f * scale
+                                >= position.getY() + position.getHeight() + LegendaryScarDisplay.TOP_GAP - 0.01f,
+                        "the largest scar stamp remains above the full dialog with a gap");
+            }
         }
     }
 

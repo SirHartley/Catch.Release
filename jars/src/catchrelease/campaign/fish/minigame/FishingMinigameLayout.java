@@ -5,6 +5,9 @@ import com.fs.starfarer.api.ui.PositionAPI;
 
 public class FishingMinigameLayout {
 
+    public float dialogCenterX;
+    public float dialogTop;
+
     public float trackX;
     public float trackY;
     public float trackWidth;
@@ -42,6 +45,8 @@ public class FishingMinigameLayout {
     public float lootBoxY;
 
     public FishingMinigameLayout(PositionAPI position) {
+        dialogCenterX = position.getCenterX();
+        dialogTop = position.getY() + position.getHeight();
         trackWidth = FishConstants.MINIGAME_TRACK_WIDTH;
         trackHeight = FishConstants.MINIGAME_TRACK_HEIGHT;
         meterWidth = FishConstants.MINIGAME_METER_WIDTH;
