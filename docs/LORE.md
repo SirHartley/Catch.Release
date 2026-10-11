@@ -1557,6 +1557,7 @@ These names and descriptions do not imply additional campaign mechanics.
 | Relic Crab | A horseshoe-crab form matching a fossil cast. |
 | Vulcan Cannonfish | A fish resembling a Vulcan in miniature. The real weapon is a ship-mounted point-defence cannon, not a handheld firearm. |
 | Storm Salmon | Swims hard against a current, trailing charge. Its storm imagery refers to hyperspace storms, not atmospheric weather. |
+| Skelleton | A fish made entirely of bones that still moves despite having no flesh. |
 | False Dawn | A star-like sensor return revealed as a burning jelly form. Its heat is lethal; a story about bringing it aboard must not treat it as harmless illumination. |
 
 ## Questions the fiction leaves unanswered
