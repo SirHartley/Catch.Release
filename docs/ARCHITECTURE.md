@@ -399,7 +399,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 |---|---|
 | `FishShopDialog.java` | Outfitter and session undo. Automatic payment preview spends the same specimens; manual payment uses the shared picker and reopens next frame. Undo restores exact cargo/credits/gear/tiers/marks. |
 | `ShopEntry.java` | Uniform wrapper for upgrades, modules, and curio switches. |
-| `ShopPricing.java` | Seeded credit-and-fish prices. |
+| `ShopPricing.java` | Credit prices and seeded fish payments. Upgrade credits use the 5k/10k/15k/20k ladder, end-aligned for shorter lines (two tiers: 15k/20k). Modules cost 20k–40k; Sonar is in the 40k bracket. Quest schematic valuation reads credits without generating a fish payment. |
 | `ShopMarks.java` | Persistent shopping list. |
 | `FishAsker.java` | Interface implemented by jobs, tutorial intel, and chart-request intel so the shop, cargo, and route planner can read fish requirements uniformly. |
 | `FishCurrency.java` | Counts and spends matching fish. |

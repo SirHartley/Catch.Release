@@ -19,12 +19,9 @@ public class ShopPricing {
 
     public static final String SEED_KEY = "$catchrelease_shop_seed";
 
-    public static final int CREDITS_BASE = 2500;
-    public static final float CREDITS_PER_LEVEL = 1.7f;
-    public static final int TACKLE_CREDITS_PER_TIER = 4000;
-
     public static final int PREMIUM_TIER_BUMP = 2;
-    protected static final Set<String> PREMIUM_STATS = Set.of(StatIds.SEARCHLIGHT_SLOW);
+    protected static final Set<String> PREMIUM_STATS = Set.of(
+            StatIds.SEARCHLIGHT_SLOW, StatIds.HARPOON_AIM_ASSIST);
 
     public static class Price {
 
@@ -60,7 +57,7 @@ public class ShopPricing {
                 + (PREMIUM_STATS.contains(stat.id) ? PREMIUM_TIER_BUMP : 0);
         boolean last = targetLevel == stat.maxLevel;
 
-        int credits = round100((int) (CREDITS_BASE * Math.pow(CREDITS_PER_LEVEL, tier)));
+        int credits = getCredits(stat, targetLevel);
 
         return new Price(credits, generate(rngFor(stat.id, tier), tier, last));
     }
@@ -70,11 +67,33 @@ public class ShopPricing {
 
         int tier = getTackleTier(tackle);
 
-        return new Price(TACKLE_CREDITS_PER_TIER * (tier + 1),
+        return new Price(getCredits(tackle),
                 generate(rngFor("tackle_" + tackle.name(), tier), tier + 1, false));
     }
 
+    public static int getCredits(UpgradeStat stat, int targetLevel) {
+        if (stat == null || targetLevel < 1 || targetLevel > stat.maxLevel) return 0;
+
+        return 5000 * Math.max(1, Math.min(4, 4 - stat.maxLevel + targetLevel));
+    }
+
+    public static int getCredits(Tackle tackle) {
+        if (tackle == null) return 0;
+
+        return switch (tackle) {
+            case NONE -> 0;
+            case NEEDLE_SENSOR, STASIS_CRADLE, SHORING_HEAD -> 20000;
+            case CALIBRATED_GRADER, TRACKING_GIMBAL -> 25000;
+            case SALVAGE_TRAWL, BAITED_RESONATOR, FANNED_ARRAY,
+                    FATHOM_HEAD, RETRIEVAL_HEAD -> 30000;
+            case SPOOL_GOVERNOR, INERTIAL_DAMPER, LIFTING_RIG -> 35000;
+            case BARBED_HEAD, HOLDFAST_CLAMP, BREACH_COUPLER,
+                    SONAR_HEAD, EXPLOSIVE_HEAD -> 40000;
+        };
+    }
+
     protected static int getTackleTier(Tackle tackle) {
+        if (tackle.sonar) return 4;
         if (tackle.breachCoupling) return 4;
         if (tackle.retrievesCharge) return 3;
         if (tackle.shipTackle) return 3;
@@ -95,10 +114,6 @@ public class ShopPricing {
 
     protected static Random rngFor(String key, int tier) {
         return new Random(getSeed() ^ (key.hashCode() * 1000003L + tier * 7919L));
-    }
-
-    protected static int round100(int credits) {
-        return Math.max(100, (credits / 100) * 100);
     }
 
     protected static FishRequirement generate(Random rng, int tier, boolean last) {
