@@ -88,6 +88,7 @@ public final class LegendaryEscapeChecks {
                 case "getCustomPlugin" -> plugin;
                 case "getContainingLocation" -> env.system;
                 case "isExpired" -> expired;
+                case "isAlive" -> !expired;
                 case "setExpired" -> { expired = (boolean) a[0]; yield null; }
                 case "addTag" -> { tags.add((String) a[0]); yield null; }
                 case "hasTag" -> tags.contains(a[0]);
@@ -377,7 +378,6 @@ public final class LegendaryEscapeChecks {
 
     public static void main(String[] args) throws Exception {
         defaults();
-        imposterShields();
         shieldColors();
         quorum();
         morayHauntStart();
@@ -603,37 +603,16 @@ public final class LegendaryEscapeChecks {
 
     private static void defaults() throws Exception {
         try (Environment env = new Environment()) {
-            for (String id : List.of("lantern_jack", "false_dawn", "longliner")) {
+            for (String id : List.of("lantern_jack", "false_dawn")) {
                 Fish fish = env.real(id);
                 fish.tryBaseShieldDeflect();
                 fish.setHeld(true);
                 LegendaryChases.Chase state = LegendaryChases.getState(id);
-                state.shieldPopped = true;
                 state.shieldUnits = 0;
                 check(LegendaryShields.onFailedCatch(fish.getMote()), "preserve real legendary");
                 check(!fish.isHeld() && !fish.expired, "released alive");
-                check(LegendaryShields.isShielded(fish) == id.equals("longliner"),
-                        "failure restores the Imposter's base shield, not stored charges");
-                check(state.shieldUnits == 0, "no free escort or stored shells");
-                if (id.equals("longliner")) {
-                    check(state.shieldPopped && fish.isBaseShieldUp(), "hull remains broken above restored base shield");
-                    ByteArrayOutputStream saved = new ByteArrayOutputStream();
-                    try (ObjectOutputStream out = new ObjectOutputStream(saved)) {
-                        out.writeObject(state);
-                    }
-                    try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(saved.toByteArray()))) {
-                        LegendaryChases.Chase loaded = (LegendaryChases.Chase) in.readObject();
-                        check(loaded.shieldPopped, "broken hull persists through save/load");
-                    }
-                    check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
-                            == LegendaryShields.HitResult.DEFLECTED, "ordinary hit breaks base shield");
-                    check(!LegendaryShields.isShielded(fish), "base shield spent");
-                    check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
-                            == LegendaryShields.HitResult.NONE, "next ordinary hit can catch");
-                    check(state.shieldPopped, "no explosive head required again");
-                    LegendaryShields.onFailedCatch(fish.getMote());
-                    check(state.shieldPopped && fish.isBaseShieldUp(), "next failure restores only base shield");
-                }
+                check(!LegendaryShields.isShielded(fish), "failure does not restore stored charges");
+                check(state.shieldUnits == 0, "no free shells");
             }
             Fish ordinary = env.real("ordinary");
             ordinary.spec.rarity = FishRarity.COMMON;
@@ -643,83 +622,16 @@ public final class LegendaryEscapeChecks {
         }
     }
 
-    private static void imposterShields() throws Exception {
-        for (int fps : new int[]{30, 60, 144}) {
-            try (Environment env = new Environment()) {
-                Fish fish = env.real(LegendaryShields.POP_SHIELD_SPECIES);
-                var state = LegendaryChases.getState(fish.spec.id);
-                check(LegendaryShields.hasExplosiveShield(fish) && fish.isBaseShieldUp(),
-                        "Imposter begins with outer armour and an intact base shield");
-                for (int hit = 0; hit < 3; hit++) {
-                    check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
-                            == LegendaryShields.HitResult.DEFLECTED, "kinetic hits cannot break outer armour");
-                    check(fish.notices.get(fish.notices.size() - 1).text.equals("Immune (Kinetic)"),
-                            "kinetic immunity uses the requested label");
-                    check(!state.shieldPopped && fish.isBaseShieldUp()
-                            && LegendaryShields.isHauntSuppressed(fish.spec), "kinetic hits leave both layers and haunt gate intact");
-                }
-                check(LegendaryShields.onHarpoonContact(fish.getMote(), true)
-                        == LegendaryShields.HitResult.POPPED, "explosive head breaks the outer layer");
-                check(!LegendaryShields.hasExplosiveShield(fish) && LegendaryShields.isShielded(fish)
-                        && fish.isBaseShieldUp() && !LegendaryShields.isHauntSuppressed(fish.spec),
-                        "explosive break starts hunt eligibility and leaves the base layer intact");
-                for (int cycle = 0; cycle < 3; cycle++) {
-                    check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
-                            == LegendaryShields.HitResult.DEFLECTED, "ordinary hit breaks timed red shield");
-                    check(LegendaryShields.onHarpoonContact(fish.getMote(), false)
-                            == LegendaryShields.HitResult.NONE, "follow-up can catch through broken red shield");
-                    fish.setHeld(true);
-                    for (int frame = 0; frame < fps * 9; frame++) {
-                        fish.advance(1f / fps);
-                        check(!LegendaryShields.isShielded(fish), "red shield stays down within catch window");
-                    }
-                    for (int frame = 0; frame < fps * 2; frame++) fish.advance(1f / fps);
-                    fish.setHeld(false);
-                    check(LegendaryShields.isShielded(fish) && !LegendaryShields.hasExplosiveShield(fish),
-                            "only timed red layer returns after regeneration");
-                }
-                ByteArrayOutputStream saved = new ByteArrayOutputStream();
-                try (ObjectOutputStream out = new ObjectOutputStream(saved)) { out.writeObject(state); }
-                try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(saved.toByteArray()))) {
-                    state = (LegendaryChases.Chase) in.readObject();
-                    env.persistent.put(LegendaryChases.KEY, new LinkedHashMap<>(Map.of(fish.spec.id, state)));
-                }
-                Fish replacement = env.real(fish.spec.id);
-                check(!LegendaryShields.hasExplosiveShield(replacement) && LegendaryShields.isShielded(replacement),
-                        "mote replacement preserves broken outer layer with normal red shield");
-                check(LegendaryShields.onHarpoonContact(replacement.getMote(), true)
-                        == LegendaryShields.HitResult.DEFLECTED && !LegendaryShields.isShielded(replacement),
-                        "explosive head meets the same base shield once outer armour is gone");
-                state.resetEncounter();
-                replacement.resumePatrol(new Vector2f(500f, 500f));
-                check(LegendaryShields.hasExplosiveShield(replacement) && replacement.isBaseShieldUp(),
-                        "full encounter reset restores both shield layers");
-            }
-        }
-    }
-
     private static void shieldColors() {
         try (Environment env = new Environment()) {
-            java.awt.Color red = LegendaryShields.getShieldColor(env.real("longliner"));
-            check(red.getRed() > red.getGreen() && red.getRed() > red.getBlue(), "default shield is red");
-            check(red.equals(LegendaryShields.getShieldColor(env.real(MantaFormationModule.SPECIES))),
-                    "Manta and Imposter share the normal red shield");
-            for (String id : List.of("false_dawn", "slipstream_moray", "lantern_jack")) {
-                Fish fish = env.real(id);
-                check(LegendaryShields.getShieldColor(fish).equals(LegendaryShields.SHIELD_GREEN),
-                        "action-restored shields share green");
-                check(!LegendaryShields.hasExplosiveShield(fish), "green shields have no explosive-only layer");
+            java.awt.Color red = LegendaryShields.getShieldColor(env.real(MantaFormationModule.SPECIES));
+            check(red.getRed() > red.getGreen() && red.getRed() > red.getBlue(), "Manta shield is red");
+            for (String id : List.of("false_dawn", "slipstream_moray", "lantern_jack", "longliner")) {
+                check(LegendaryShields.getShieldColor(env.real(id)).equals(LegendaryShields.SHIELD_GREEN),
+                        "non-regenerating shields share green");
             }
             java.awt.Color blue = LegendaryShields.getShieldColor(env.real("quorum"));
             check(blue.getBlue() > blue.getRed() && blue.getBlue() > blue.getGreen(), "Quorum shield is blue");
-            java.awt.Color gold = LegendaryShields.getExplosiveShieldColor(0f);
-            check(gold.getRed() > gold.getBlue() && gold.getGreen() > gold.getBlue(), "outer pulse reaches gold");
-            float period = 1f / LegendaryShields.EXPLOSIVE_SHIELD_PULSE_HZ;
-            check(red.equals(LegendaryShields.getExplosiveShieldColor(period * 0.5f))
-                    && gold.equals(LegendaryShields.getExplosiveShieldColor(period)),
-                    "outer layer completes a gold-red-gold pulse each period");
-            check(LegendaryShields.EXPLOSIVE_SHIELD_RADIUS > LegendaryShields.SHIELD_RADIUS,
-                    "outer layer clears the normal shield rim");
         }
     }
 

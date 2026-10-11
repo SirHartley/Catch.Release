@@ -20,26 +20,13 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The legendary defences, one kind per species, answered at the shield boundary:
- *
- * - The Longliner wears a hull shield that only an Explosive Head can pop. Until then it
- *   deflects every throw and raises no haunt. A failed haunt restores it. Beneath it is the
- *   normal timed base shield. Out of the water it is a boat
- *   ({@link LonglinerDecoy}); in it, it runs.
- * - The Quorum's shield is held up by three fast-orbiting splinter motes. Each is a
- *   harpoonable rare-band catch of its own; the shield stands while any orbit, and lost
- *   splinters regrow at one a month.
- * - The Lantern Jack starts with three stored shells; the wake-up hit leaves two.
- *   Eating motes replenishes them, up to three. It has no regenerating base shell.
- * - False Dawn starts its haunt with one charge. Green mines can refill it up to three.
- * - The Moray's shell stays broken until the haunt is abandoned.
- * - Everything else wears the base shell: one deflection, regrown ten seconds later,
- *   so landing a throw means following the first with a second inside the window.
- */
 public class LegendaryShields {
 
-    public static final String POP_SHIELD_SPECIES = "longliner";
+    public enum HitResult {
+
+        NONE, DEFLECTED, POPPED
+    }
+
     public static final String MOTE_SHIELD_SPECIES = "quorum";
     public static final String CHARGE_SHIELD_SPECIES = "lantern_jack";
     public static final String SHARD_SPECIES = "quorum_shard";
@@ -66,32 +53,30 @@ public class LegendaryShields {
     public static final float LURE_SPAWN_MIN = 800f;
     public static final float LURE_SPAWN_MAX = 1400f;
     public static final float SHIELD_RADIUS = 52f;
-    public static final float EXPLOSIVE_SHIELD_RADIUS = SHIELD_RADIUS + 12f;
-    public static final float EXPLOSIVE_SHIELD_PULSE_HZ = 3f;
 
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
-    private static final Color SHIELD_GOLD = new Color(255, 200, 60);
     public static final Color SHIELD_GREEN = new Color(70, 255, 120);
 
-    public enum HitResult {
-        NONE, DEFLECTED, POPPED
+    public static HitResult onHarpoonContact(SectorEntityToken mote, boolean explosive) {
+        return onHarpoonContact(mote, explosive, -1);
     }
 
-    public static HitResult onHarpoonContact(SectorEntityToken mote, boolean explosive) {
+    public static HitResult onHarpoonContact(SectorEntityToken mote, boolean explosive, int section) {
         FishEntityPlugin fish = asLegendaryMote(mote);
         if (fish == null) return HitResult.NONE;
         if (fish.isMantaSwitching()) return HitResult.DEFLECTED;
+        if (LonglinerShield.applies(fish)) return LonglinerShield.hit(fish, explosive, section);
 
         String id = fish.getFishSpec().id;
         LegendaryChases.Chase state = LegendaryChases.getState(id);
 
         if (CHARGE_SHIELD_SPECIES.equals(id)) fish.startEvasive();
 
-        // Jack's stored shells and the Longliner's hull absorb the wake-up hit themselves.
+        // Jack's stored shells absorb the wake-up hit themselves.
         if (!state.provoked) {
             state.provoked = true;
-            if (!POP_SHIELD_SPECIES.equals(id) && !CHARGE_SHIELD_SPECIES.equals(id)) {
+            if (!CHARGE_SHIELD_SPECIES.equals(id)) {
                 fish.flashShield();
                 sayDeflection(fish, "Deflected - Now awake");
                 return HitResult.DEFLECTED;
@@ -99,19 +84,6 @@ public class LegendaryShields {
         }
 
         switch (id) {
-            case POP_SHIELD_SPECIES -> {
-                if (state.shieldPopped) return deflectBaseShield(fish);
-                fish.flashShield();
-                if (!explosive) {
-                    say(fish.getMote(), "Immune (Kinetic)");
-                    return HitResult.DEFLECTED;
-                }
-
-                state.shieldPopped = true;
-                fish.restoreBaseShield();
-                say(fish.getMote(), "The shell cracks");
-                return HitResult.POPPED;
-            }
             case MOTE_SHIELD_SPECIES -> {
                 if (getShieldUnits(state, MOTE_SHIELD_COUNT) <= 0) return HitResult.NONE;
                 fish.flashShield();
@@ -218,7 +190,7 @@ public class LegendaryShields {
         LegendaryChases.Chase state = LegendaryChases.getState(id);
         state.provoked = true;
         switch (id) {
-            case CHARGE_SHIELD_SPECIES, DAWN_SPECIES -> { } // Stored charges never refill on escape.
+            case CHARGE_SHIELD_SPECIES, DAWN_SPECIES, LonglinerShield.SPECIES -> { }
             case MOTE_SHIELD_SPECIES -> {
                 LegendaryHaunt.onFailedCatch(fish);
                 QuorumShellGame.onFailedCatch(fish);
@@ -233,12 +205,6 @@ public class LegendaryShields {
         return true;
     }
 
-    /** The unpopped Longliner does not fight back yet - it just shrugs and swims. */
-    public static boolean isHauntSuppressed(FishSpec spec) {
-        return spec != null && POP_SHIELD_SPECIES.equals(spec.id)
-                && !LegendaryChases.getState(spec.id).shieldPopped;
-    }
-
     public static boolean isShielded(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return false;
 
@@ -246,7 +212,7 @@ public class LegendaryShields {
         LegendaryChases.Chase state = LegendaryChases.getState(id);
 
         return switch (id) {
-            case POP_SHIELD_SPECIES -> !state.shieldPopped || fish.isBaseShieldUp();
+            case LonglinerShield.SPECIES -> LonglinerShield.isUp();
             case MOTE_SHIELD_SPECIES -> getShieldUnits(state, MOTE_SHIELD_COUNT) > 0;
             case CHARGE_SHIELD_SPECIES -> getJackStack(state) > 0;
             case DAWN_SPECIES -> getDawnCharges() > 0;
@@ -270,21 +236,9 @@ public class LegendaryShields {
 
         return switch (id) {
             case MOTE_SHIELD_SPECIES -> SHIELD_BLUE;
-            case DAWN_SPECIES, MORAY_SPECIES, CHARGE_SHIELD_SPECIES -> SHIELD_GREEN;
+            case DAWN_SPECIES, MORAY_SPECIES, CHARGE_SHIELD_SPECIES, LonglinerShield.SPECIES -> SHIELD_GREEN;
             default -> SHIELD_RED;
         };
-    }
-
-    public static boolean hasExplosiveShield(FishEntityPlugin fish) {
-        return asLegendaryMote(fish) != null && POP_SHIELD_SPECIES.equals(fish.getFishSpec().id)
-                && !LegendaryChases.getState(POP_SHIELD_SPECIES).shieldPopped;
-    }
-
-    public static Color getExplosiveShieldColor(float seconds) {
-        float gold = 0.5f + 0.5f * (float) Math.cos(seconds * Math.PI * 2 * EXPLOSIVE_SHIELD_PULSE_HZ);
-        return new Color(SHIELD_RED.getRed(),
-                Math.round(SHIELD_RED.getGreen() + (SHIELD_GOLD.getGreen() - SHIELD_RED.getGreen()) * gold),
-                Math.round(SHIELD_RED.getBlue() + (SHIELD_GOLD.getBlue() - SHIELD_RED.getBlue()) * gold));
     }
 
     /** Placid and easy to hit until provoked, then the flight envelope takes over.
@@ -343,7 +297,7 @@ public class LegendaryShields {
             return false;
         }
 
-        return POP_SHIELD_SPECIES.equals(id) || LegendaryChases.isProvoked(id);
+        return LonglinerShield.SPECIES.equals(id) || LegendaryChases.isProvoked(id);
     }
 
     /** The Lantern Jack's movement is its own: patrol legs, hunts and jink bursts. */

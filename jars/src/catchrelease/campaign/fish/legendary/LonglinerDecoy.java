@@ -77,7 +77,7 @@ public class LonglinerDecoy implements EveryFrameScript {
             if (drift > 0f) {
                 Vector2f at = mote.getLocation();
                 LegendaryStarAvoidance.move(mote,
-                        FishSpecLoader.getFishSpec(LegendaryShields.POP_SHIELD_SPECIES),
+                        FishSpecLoader.getFishSpec(LonglinerShield.SPECIES),
                         new Vector2f(at.x + velocity.x * drift, at.y + velocity.y * drift), 0f);
             }
 
@@ -114,7 +114,7 @@ public class LonglinerDecoy implements EveryFrameScript {
 
     /** The boat is the only way this species enters the water - never the spawner. */
     public static boolean spawnsAsBoat(FishSpec spec) {
-        return spec != null && LegendaryShields.POP_SHIELD_SPECIES.equals(spec.id);
+        return spec != null && LonglinerShield.SPECIES.equals(spec.id);
     }
 
     @Override
@@ -146,7 +146,7 @@ public class LonglinerDecoy implements EveryFrameScript {
     }
 
     protected void reconcile(CampaignFleetAPI boat) {
-        FishSpec spec = FishSpecLoader.getFishSpec(LegendaryShields.POP_SHIELD_SPECIES);
+        FishSpec spec = FishSpecLoader.getFishSpec(LonglinerShield.SPECIES);
         if (spec == null) return;
 
         String hostId = LegendaryChases.isCaught(spec.id)
@@ -236,17 +236,17 @@ public class LonglinerDecoy implements EveryFrameScript {
         Vector2f runTo = MathUtils.getPointOnCircumference(loc, RUN_TARGET_RANGE,
                 MathUtils.getRandomNumberInRange(0f, 360f));
         FishEntityPlugin.Params params = new FishEntityPlugin.Params(
-                runTo, LegendaryShields.POP_SHIELD_SPECIES);
+                runTo, LonglinerShield.SPECIES);
         params.movementDelay = REVEAL_DRIFT_SECONDS + REVEAL_ALERT_DELAY_SECONDS;
 
         SectorEntityToken mote = where.addCustomEntity(
                 Misc.genUID(), "Mote", "catchrelease_Mote", null,
                 params);
         mote.setLocation(loc.x, loc.y);
-        LegendaryStarAvoidance.confine(mote, FishSpecLoader.getFishSpec(LegendaryShields.POP_SHIELD_SPECIES));
+        LegendaryStarAvoidance.confine(mote, FishSpecLoader.getFishSpec(LonglinerShield.SPECIES));
         mote.addScript(new RevealDrift(mote, driftVelocity));
 
-        LegendaryChases.noteRevealed(LegendaryShields.POP_SHIELD_SPECIES);
+        LegendaryChases.noteRevealed(LonglinerShield.SPECIES);
     }
 
     protected Vector2f getRevealDriftVelocity(CampaignFleetAPI boat) {

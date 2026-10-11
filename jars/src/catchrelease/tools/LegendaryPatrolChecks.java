@@ -175,18 +175,19 @@ public final class LegendaryPatrolChecks {
             check(longliner.at.x == 14100f, "Longliner has no patrol radius limit");
             var state = LegendaryChases.getState(longliner.spec.id);
             state.provoked = true;
-            state.revealed = state.encountered = state.shieldPopped = true;
+            state.revealed = state.encountered = true;
+            state.longlinerBroken = 7;
             state.systemId = env.system.getId();
             Haunt haunt = new Haunt();
             haunt.begin(longliner, env);
             longliner.setHeld(true);
-            check(!haunt.abandon() && !longliner.expired && state.shieldPopped && state.revealed,
+            check(!haunt.abandon() && !longliner.expired && state.longlinerBroken == 7 && state.revealed,
                     "held Longliner cannot be replaced by its disguise");
             longliner.setHeld(false);
             haunt.abandon();
             check(longliner.expired && longliner.removed && !state.provoked && !state.roaming
-                    && !state.revealed && !state.shieldPopped && state.encountered,
-                    "Longliner abandons its mote and resets hull and disguise, not recognition");
+                    && !state.revealed && state.longlinerBroken == 0 && state.encountered,
+                    "Longliner abandons its mote and resets sections and disguise, not recognition");
             env.tutorialStage = catchrelease.campaign.fish.tutorial.FishingIntro.DONE;
             Decoy decoy = new Decoy();
             decoy.reconcile();
@@ -311,14 +312,15 @@ public final class LegendaryPatrolChecks {
             Fish fish = env.real("longliner");
             env.specs.put(fish.spec.id, fish.spec);
             var state = LegendaryChases.getState(fish.spec.id);
-            state.revealed = state.shieldPopped = true;
+            state.revealed = true;
+            state.longlinerBroken = 63;
             Haunt haunt = new Haunt();
             haunt.begin(fish, env);
             LegendaryChases.noteCaught(fish.spec.id);
             haunt.abandon();
             state.resetEncounter();
             check(state.caught && state.encountered && state.systemId == null
-                    && state.shieldPopped && state.revealed,
+                    && state.longlinerBroken == 63 && state.revealed,
                     "cleanup cannot reset a completed catch or restore its disguise");
             Decoy decoy = new Decoy();
             decoy.reconcile();

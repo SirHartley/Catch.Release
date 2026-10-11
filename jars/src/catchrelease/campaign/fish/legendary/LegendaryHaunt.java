@@ -95,6 +95,12 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         }
     }
 
+    public static void onLonglinerHit(FishEntityPlugin fish) {
+        LegendaryHaunt haunt = activateFor(fish);
+        if (haunt == null) return;
+        for (HauntModule module : haunt.modules) module.advance(0f);
+    }
+
     private static LegendaryHaunt activateFor(FishEntityPlugin fish) {
         if (!SearchlightAbilityPlugin.isBreaching()) return null;
         LegendaryHaunt haunt = getInstance();
@@ -264,8 +270,6 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             if (LegendaryChases.isCaught(spec.id)) continue;
             // no haunt until a harpoon has touched it - the first throw wakes the fish
             if (!LegendaryChases.isProvoked(spec.id)) continue;
-            // an unpopped shield keeps the fish complacent: no haunt until the pop
-            if (LegendaryShields.isHauntSuppressed(spec)) continue;
             if (!here.getId().equals(LegendaryChases.getHostSystemId(spec))) continue;
             if (isSighted(spec, here)) return spec;
         }
@@ -398,8 +402,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
                 out.add(new MinefieldModule(system, spec));
                 out.add(new CoherenceSurgeModule(system, spec));
             }
-            // the disguise and the shell are the Longliner's game; the haunt stays minor
-            case "longliner" -> out.add(new SensorGhostsModule(system, spec));
+            case LonglinerShield.SPECIES -> out.add(new LonglinerSchoolModule(system, spec));
             // its abyss already runs coherence low; the surge would be lost in the noise
             case "abyssal_ghost_manta" -> {
                 out.add(new MantaFormationModule(system, spec));

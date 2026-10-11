@@ -53,6 +53,9 @@ public class LegendaryChases {
         public int shieldUnits = -1;
         public long shieldStampAt;
 
+        public int longlinerBroken;
+        public float longlinerRotation;
+
         public void resetEncounter() {
             if (caught) return;
             provoked = false;
@@ -60,6 +63,8 @@ public class LegendaryChases {
             shieldPopped = false;
             shieldUnits = -1;
             shieldStampAt = 0L;
+            longlinerBroken = 0;
+            longlinerRotation = 0f;
         }
     }
 
@@ -179,8 +184,7 @@ public class LegendaryChases {
             if (!java.util.Objects.equals(previousHost, chase.systemId)) chase.residency++;
             chase.seenAt = 0L;
             chase.revealed = false;
-            chase.provoked = false;
-            chase.roaming = false;
+            chase.resetEncounter();
         }
 
         return chase;
@@ -190,7 +194,7 @@ public class LegendaryChases {
      *  player leaves the system, and the new water gets a fresh boat. */
     protected static boolean isDoneHiding(FishSpec spec, Chase chase) {
         return chase.revealed
-                && LegendaryShields.POP_SHIELD_SPECIES.equals(spec.id);
+                && LonglinerShield.SPECIES.equals(spec.id);
     }
 
     protected static boolean isDueToMove(Chase chase) {
