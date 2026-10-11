@@ -94,7 +94,6 @@ catchrelease_skipTutorialCompleted,Skip tutorial,Boolean,false,,Adds a Fisherman
 "catchrelease_quest_credits","Quest credit rewards (%)","Double","100","","Credit rewards rolled for new fishing jobs. Existing offers remain unchanged. Default: 100%.","10","500","Outfitter & Progression"
 "catchrelease_header_aquarium","","Header","Aquarium","","","","","Aquarium"
 "catchrelease_aquarium_distortion","Low-coherence distortion (%)","Double","100","","Strength of fish distortion in the aquarium only. Zero draws ordinary fish. Default: 100%.","0","200","Aquarium"
-"catchrelease_aquarium_rgb","Chromatic aberration","Boolean","true","","Separate colour channels on low-coherence aquarium fish. Default: true.","","","Aquarium"
 "catchrelease_aquarium_digital","Digital artifacts","Boolean","true","","Strip displacement and pixel breakup on low-coherence aquarium fish. Default: true.","","","Aquarium"
 "catchrelease_aquarium_speed","Swimming speed (%)","Double","100","","Aquarium animation speed. Does not change catch difficulty. Default: 100%.","25","200","Aquarium"
 "catchrelease_aquarium_brightness","Background brightness (%)","Double","100","","Brightness of the selected aquarium background. Default: 100%.","10","100","Aquarium"
