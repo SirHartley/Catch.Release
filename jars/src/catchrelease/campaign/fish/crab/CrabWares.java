@@ -23,9 +23,7 @@ import java.util.Set;
 public enum CrabWares {
 
     CELEBRATION("Celebration Charges", 15000, 3,
-            "A landed catch gets the full treatment: flash, confetti, the specimen kicked upward,"
-                    + " and a slanted celebration label across the card. Pure spectacle; the catch"
-                    + " and its information stay exactly the same.") {
+            "Adds a flash and confetti to the catch card. Cosmetic only.") {
         @Override
         public boolean isOwned() {
             return isBought(name());
@@ -42,9 +40,7 @@ public enum CrabWares {
         }
     },
     EARMUFFS("Earmuffs", 8000, 2,
-            "Thick enough for cold decks, comfortable enough for a long watch. In sufficiently thin"
-                    + " fabric, the wearer no longer hears the whispering, though the sound itself"
-                    + " continues.") {
+            "Keeps you from hearing the whispering in thin fabric.") {
         @Override
         public boolean isOwned() {
             return isBought(name());
@@ -61,8 +57,8 @@ public enum CrabWares {
         }
     },
     CHICKEN_PROFILE("Chicken Profile", 12000, 3,
-            "Swaps the generic unidentified-pattern marker for a chicken. If a Sonar Head has"
-                    + " identified the hooked species, the chicken loses the argument.") {
+            "Replaces the unidentified catch icon with a chicken. A Sonar Head still shows"
+                    + " the hooked species.") {
         @Override
         public boolean isOwned() {
             return isBought(name());
@@ -79,10 +75,9 @@ public enum CrabWares {
         }
     },
     EXPLOSIVE_HEAD("Explosive Head", 40000, 6,
-            "A single-use Harpoon Tip containing a shaped charge. It detonates on contact,"
-                    + " destroying ordinary struck patterns instead of landing them and damaging"
-                    + " struck fleets. Legendary patterns may react differently. An unfired tip can"
-                    + " be fitted or removed normally. Detonation consumes it.") {
+            "A single-use harpoon tip. Destroys ordinary patterns and damages fleets on impact."
+                    + " Legendaries may react differently. Can be removed or refitted until it"
+                    + " detonates.") {
         @Override
         public boolean isOwned() {
             return TackleManager.isOwned(Tackle.EXPLOSIVE_HEAD);
@@ -94,10 +89,8 @@ public enum CrabWares {
         }
     },
     CONSERVATORY("Breach Conservatory Plans", 60000, 8,
-            "A blueprint chip for a Breach Conservatory: a civic pressure-glass aquarium with a"
-                    + " local fishing outfitter and trade desk. It lets the colony join the fishing"
-                    + " trade and display specimens from the administrator's own catch. You are"
-                    + " buying the plans, not the building.") {
+            "Blueprints for a Breach Conservatory, a public aquarium for your catch with an"
+                    + " outfitter and fish buyer.") {
         @Override
         public boolean isOwned() {
             return isBought(name())
@@ -191,7 +184,7 @@ public enum CrabWares {
 
         grant();
         Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
-                "Traded crabs for " + name());
+                "Bought " + name + ".");
 
         return true;
     }
