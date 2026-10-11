@@ -118,7 +118,7 @@ repeated-loss decoy caps, emergency dash duration,
 slipstream roll-up/fade lifetime and cleanup, immediate manta swaps, fixed hit-position
 labels and shield colours. `tools/LonglinerHauntChecks` covers segmented-shield
 geometry, swept harpoon hits through gaps, explosive adjacency, shield persistence,
-school spacing/replenishment, opposite rotation and encounter cleanup.
+independent swirling movement, separation/replenishment, opposite rotation and encounter cleanup.
 It also checks corona-safe movement segments, invalid-position recovery, overlapping
 and companion stars, long-frame dashes, buried movement, formation clearance, and
 the False Dawn/ordinary-fish exclusions.
@@ -462,7 +462,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | `LanternSensorGhostsModule.java` | Jack-only vanilla `BaseSensorGhost` contacts: echo player movement, intercept then depart, or pass by. First and repeat spawns take 5–10 seconds, cap four including fades. Uses the haunt's existing advance and cleanup, not the hyperspace manager or a new sector script. Behavior durations convert seconds to campaign days; original tokens remain tracked after vanilla starts fading. No fleet spawning or drive drain. |
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 3s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee without a shield. Excluded from Fisherman reconciliation. |
 | `LonglinerShield.java` | Six rotating green sections; swept harpoon collision closes the decorative separators and guards intact sectors from inside-ring contacts. First body hit raises the shield and starts the haunt. Normal hits break one section; explosive hits also break its neighbours. `Chase.longlinerBroken/longlinerRotation` persist until encounter reset. |
-| `LonglinerSchoolModule.java` | Eighteen phantom copies in a separated 19-slot school with the real fish in a random inner slot. Shared movement and dive visibility, reversed shield rotation, shared section damage. Replenishes missing copies and removes them on replacement, failure, capture or departure through the existing haunt callbacks. |
+| `LonglinerSchoolModule.java` | The real fish and eighteen phantoms circle a drifting center with individual velocities, changing radii and neighbour avoidance. Movement runs from the real mote's callback, as Quorum's shell game does; the haunt callback owns replenishment. Shared dive visibility, reversed shield rotation and shared section damage remain. Cleanup removes copies on replacement, failure, capture or departure. |
 | `LegendaryShields.java` | Defense dispatch and render state: Longliner sections, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. |
 
 False Dawn starts with one stored shield charge. The wake-up hit provokes it
@@ -618,9 +618,12 @@ section geometry; a shot through a broken section can reach the body before the
 far side of the ring. Explosive section hits use the existing detonation/consumption
 path. Failed catches, elapsed time, mote replacement and save/load retain damage.
 Full haunt failure restores the boat disguise; the next wake-up raises six intact
-sections. Its school uses 180-unit spacing and moves its centre with enough stellar
-clearance for every copy. Real movement and harpoon dragging resynchronize the
-copies immediately. Phantoms have no targetable body or shield, and their dive
+sections. Its school steers toward 180-unit spacing, with bounded substeps and
+pairwise separation to prevent overlap. Each fish chooses its own changing orbit
+radius and speed; they do not occupy fixed formation slots. The centre drifts away
+from the player with stellar clearance, and each swim segment avoids coronae.
+Held catches cannot be moved by the school; copies keep swimming without teleporting
+when the harpoon drags the real fish. Phantoms have no targetable body or shield, and their dive
 visibility comes from the real fish. Lamp visibility remains local to each mote.
 Shield drawing is defined in [UI.md](UI.md#drawing-gotchas).
 

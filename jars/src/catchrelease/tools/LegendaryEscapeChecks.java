@@ -76,6 +76,16 @@ public final class LegendaryEscapeChecks {
                     : "quorum_shard".equals(id) ? FishRarity.RARE : FishRarity.LEGENDARY;
             this.phantom = phantom;
             this.anchor = anchor;
+            try {
+                var phantomField = FishEntityPlugin.class.getDeclaredField("phantom");
+                var anchorField = FishEntityPlugin.class.getDeclaredField("decoyAnchor");
+                phantomField.setAccessible(true);
+                anchorField.setAccessible(true);
+                phantomField.setBoolean(this, phantom);
+                anchorField.set(this, anchor);
+            } catch (ReflectiveOperationException e) {
+                throw new AssertionError(e);
+            }
             MemoryAPI moteMemory = api(MemoryAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getBoolean" -> quest && catchrelease.campaign.fish.jobs.QuestPond.QUEST_MOTE_FLAG.equals(a[0]);
                 default -> throw new AssertionError(m);

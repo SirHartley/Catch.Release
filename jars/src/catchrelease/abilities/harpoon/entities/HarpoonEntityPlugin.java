@@ -756,7 +756,6 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (!isHookedValid()) return;
 
         hooked.setLocation(entity.getLocation().x, entity.getLocation().y);
-        if (hooked.getCustomPlugin() instanceof FishEntityPlugin fish) fish.syncLonglinerSchool();
     }
 
     public static boolean canTake(SectorEntityToken target) {

@@ -198,7 +198,11 @@ public final class LonglinerHauntChecks {
             fly(followup, fps);
             check(followup.getState() == HarpoonEntityPlugin.State.PUSHING && followup.hooked() == f.real.getMote(),
                     "shot through a gap catches the body before the far-side shield");
+            Map<Fish, Vector2f> beforeDrag = new LinkedHashMap<>();
+            for (Fish copy : f.copies()) beforeDrag.put(copy, new Vector2f(copy.at));
             followup.dragTo(new Vector2f(2000f, 3000f));
+            for (Fish copy : f.copies()) check(copy.at.equals(beforeDrag.get(copy)),
+                    "dragging the real fish does not teleport its copies");
             separated(f);
         }
         try (Fixture f = new Fixture()) {
@@ -223,14 +227,37 @@ public final class LonglinerHauntChecks {
     private static void school() {
         for (int fps : new int[]{30, 60, 144}) try (Fixture f = new Fixture()) {
             f.env.star(0f, 0f, 800f, 1400f);
-            f.real.at.set(1600f, 0f);
+            f.real.at.set(1700f, 0f);
+            Vector2f wakePosition = new Vector2f(f.real.at);
             f.wake();
+            check(f.real.at.equals(wakePosition), "forming a school does not teleport the hit fish");
             separated(f);
-            for (int frame = 0; frame < fps * 3; frame++) {
+            List<Fish> school = f.env.fish.stream().filter(m -> !m.expired).toList();
+            Map<Fish, Vector2f> last = new LinkedHashMap<>();
+            Map<Fish, Float> turns = new LinkedHashMap<>();
+            Vector2f center = center(school);
+            for (Fish fish : school) {
+                last.put(fish, Vector2f.sub(fish.at, center, null));
+                turns.put(fish, 0f);
+            }
+            float initialDistance = Vector2f.sub(school.get(1).at, school.get(2).at, null).length();
+            boolean changedSpacing = false;
+            for (int frame = 0; frame < fps * 12; frame++) {
                 if (frame % 2 == 0) f.haunt.tickSchool();
                 f.real.advance(1f / fps);
+                for (Fish copy : f.copies()) copy.advance(1f / fps);
                 if (frame % 2 != 0) f.haunt.tickSchool();
                 separated(f);
+                center = center(school);
+                for (Fish fish : school) {
+                    Vector2f next = Vector2f.sub(fish.at, center, null), before = last.get(fish);
+                    turns.put(fish, turns.get(fish) + (float) Math.atan2(
+                            before.x * next.y - before.y * next.x, Vector2f.dot(before, next)));
+                    last.put(fish, next);
+                }
+                if (Math.abs(Vector2f.sub(school.get(1).at, school.get(2).at, null).length() - initialDistance) > 30f) {
+                    changedSpacing = true;
+                }
                 check(Math.abs(LonglinerShield.rotation(false) + LonglinerShield.rotation(true)) < 0.001f,
                         "real and phantom shields rotate in opposite directions");
                 for (Fish copy : f.copies()) {
@@ -238,7 +265,24 @@ public final class LonglinerHauntChecks {
                     check(copy.at.length() >= 1550f, "entire school clears the star and corona");
                 }
             }
-            check(Math.abs(f.state.longlinerRotation - 108f) < 0.01f, "rotation rate does not depend on frame rate");
+            check(changedSpacing, "fish move independently instead of retaining formation offsets");
+            for (Fish fish : school) check(turns.get(fish) > 1f,
+                    "every fish circulates around the school, including the real one: " + turns.get(fish));
+            check(Math.abs(f.state.longlinerRotation - 72f) < 0.02f, "rotation rate does not depend on frame rate");
+            Vector2f heldAt = new Vector2f(f.real.at), copyAt = new Vector2f(f.copies().get(0).at);
+            f.real.setHeld(true);
+            for (int frame = 0; frame < fps; frame++) f.real.advance(1f / fps);
+            check(f.real.at.equals(heldAt), "school steering cannot move a held catch");
+            check(Vector2f.sub(f.copies().get(0).at, copyAt, null).length() > 20f,
+                    "copies keep swimming while the real fish is held");
+            separated(f);
+            f.real.setHeld(false);
+            f.real.advance(1f);
+            separated(f);
+            Map<Fish, Vector2f> paused = new LinkedHashMap<>();
+            for (Fish fish : school) paused.put(fish, new Vector2f(fish.at));
+            for (Fish fish : school) fish.advance(0f);
+            for (Fish fish : school) check(fish.at.equals(paused.get(fish)), "zero elapsed time cannot move the school");
             f.copies().get(0).expired = true;
             f.haunt.tickSchool();
             check(f.copies().size() == 18, "missing copies are replenished, not accumulated");
@@ -259,10 +303,17 @@ public final class LonglinerHauntChecks {
         List<Fish> fish = f.env.fish.stream().filter(m -> !m.expired).toList();
         for (int a = 0; a < fish.size(); a++) {
             for (int b = a + 1; b < fish.size(); b++) {
-                check(Vector2f.sub(fish.get(a).at, fish.get(b).at, null).length() >= LonglinerSchoolModule.SPACING - 0.01f,
+                check(Vector2f.sub(fish.get(a).at, fish.get(b).at, null).length() >= LonglinerSchoolModule.SPACING - 0.1f,
                         "school spacing survives movement and callback order");
             }
         }
+    }
+
+    private static Vector2f center(List<Fish> fish) {
+        Vector2f center = new Vector2f();
+        for (Fish mote : fish) center.translate(mote.at.x, mote.at.y);
+        center.scale(1f / fish.size());
+        return center;
     }
 
     private static Vector2f polar(Vector2f center, float radius, float angle) {

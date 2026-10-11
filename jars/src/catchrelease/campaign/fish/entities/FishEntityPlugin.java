@@ -295,7 +295,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         LonglinerShield.advance(this, amount);
         if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
         if (mantaFormation != null) mantaFormation.sync();
-        syncLonglinerSchool();
         lastX = entity.getLocation().x;
         lastY = entity.getLocation().y;
         movementSampled = true;
@@ -322,7 +321,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         advanceDive(amount);
 
-        if (held) return;
+        if (held) {
+            if (longlinerSchool != null) longlinerSchool.swim(amount);
+            return;
+        }
 
         if (decoyAnchor != null) {
             advanceDecoy();
@@ -348,6 +350,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         if (slowLeft > 0f) slowLeft -= amount;
 
+        if (longlinerSchool != null) {
+            longlinerSchool.swim(amount);
+            return;
+        }
         LegendaryShields.maintainSatellites(this);
         LegendaryShields.advanceEater(this);
         if (LegendaryShields.isProwler(this)) advanceProwl(amount);
@@ -593,10 +599,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void moveTo(Vector2f next) {
-        if (longlinerSchool != null && !phantom) {
-            longlinerSchool.move(next);
-            return;
-        }
         if (mantaFormation != null && !phantom) {
             mantaFormation.move(next);
             return;
@@ -614,10 +616,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public void setLonglinerSchool(LonglinerSchoolModule school) {
         longlinerSchool = school;
-    }
-
-    public void syncLonglinerSchool() {
-        if (longlinerSchool != null) longlinerSchool.sync();
     }
 
     public boolean isMantaSwitching() {
