@@ -472,8 +472,11 @@ public final class FalseDawnCheck {
         require(LegendaryShields.getShieldColor(fish).equals(HauntMineEntityPlugin.Kind.SHIELD.color),
                 "Shield and mines share green");
         require(LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.DEFLECTED
-                        && state.provoked && state.shieldUnits == 0,
-                "Wake-up hit spends the only starting charge");
+                        && state.provoked && state.shieldUnits == 1,
+                "Wake-up hit leaves one starting charge for the haunt");
+        require(LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.DEFLECTED
+                        && state.shieldUnits == 0,
+                "First hit during the haunt spends the starting charge");
         fish.restoreBaseShield();
         require(!LegendaryShields.isShielded(fish)
                         && LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.NONE,
@@ -481,11 +484,13 @@ public final class FalseDawnCheck {
         fish.setHeld(true);
         require(LegendaryShields.onFailedCatch(fish.getMote()) && !fish.isHeld() && state.shieldUnits == 0,
                 "Failed catch releases fish without recharging");
-        state.provoked = false;
-        require(LegendaryShields.onHarpoonContact(fish.getMote(), false) == LegendaryShields.HitResult.NONE,
-                "Returning to patrol cannot grant another wake-up shield");
         Fish respawned = new Fish(env.local);
         require(!LegendaryShields.isShielded(respawned), "A fresh mote keeps spent charges");
+        state.resetEncounter();
+        require(LegendaryShields.onHarpoonContact(fish.getMote(), true) == LegendaryShields.HitResult.DEFLECTED
+                        && state.provoked && LegendaryShields.getDawnCharges() == 1,
+                "New encounter also retains its charge after an explosive wake-up hit");
+        LegendaryShields.onHarpoonContact(fish.getMote(), false);
         env.local.mines.remove(respawned.getMote());
         fish.token.notices.clear();
 
@@ -524,7 +529,7 @@ public final class FalseDawnCheck {
                     "Courier awards once and releases its spent mine");
         }
 
-        state.shieldUnits = 1;
+        state.shieldUnits = 2;
         Mine first = shieldMine(new Token(env.local, new Vector2f(100f, 0f)));
         Token excessOrigin = new Token(env.local, new Vector2f(100f, 0f));
         Mine second = shieldMine(excessOrigin);
@@ -532,11 +537,12 @@ public final class FalseDawnCheck {
         second.advance(2f);
         first.advance(2f);
         second.advance(2f);
-        require(state.shieldUnits == 2 && LegendaryShields.getStackedRings(fish) == 2,
-                "Overlapping arrivals cannot exceed two charges");
+        require(state.shieldUnits == 3 && LegendaryShields.getStackedRings(fish) == 3,
+                "Overlapping arrivals cannot exceed three charges");
         require(excessOrigin.notices.isEmpty(), "No gain notice at cap");
         require(LegendaryShields.onHarpoonContact(fish.getMote(), true) == LegendaryShields.HitResult.DEFLECTED
-                        && state.shieldUnits == 1, "Explosive hit also spends just one charge");
+                        && state.shieldUnits == 2, "Explosive hit also spends just one charge");
+        LegendaryShields.onHarpoonContact(fish.getMote(), false);
         LegendaryShields.onHarpoonContact(fish.getMote(), false);
         require(!LegendaryShields.isShielded(fish) && LegendaryShields.getStackedRings(fish) == 0,
                 "Empty charge ledger removes collision shield and rings");

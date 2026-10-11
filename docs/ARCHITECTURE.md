@@ -451,10 +451,11 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. |
 
-False Dawn starts with one stored shield charge; the wake-up hit consumes it.
-Green mine couriers add one on arrival, capped at two. Every deflection consumes
+False Dawn starts with one stored shield charge. The wake-up hit provokes it
+without spending that charge, so the haunt begins with one. Green mine couriers
+add one on arrival, capped at three. Each subsequent deflection consumes
 one; elapsed time, failed catches and mote replacement within a hunt never refill
-the ledger. Abandoning the haunt restores the single starting charge, even if two
+the ledger. Abandoning the haunt restores the single starting charge, even if three
 were stored before the reset. Shield collision, green rendering and charge rings use the same count.
 Minefield's 22-mine cap counts only live mines, not spent notice/courier anchors.
 
@@ -508,7 +509,19 @@ load sweep removes off-system legendary motes, preserves current residents, and 
 missing residents through `LegendarySpawns`. Departure resets uncaught residents'
 encounter state without changing host selection or relocation timing. Longliner's
 reveal flag remains set on departure so its existing relocation still runs.
-With lamps on, unseen haunt effects linger for
+False Dawn's active haunt ignores lost contact. With lamps on it remains at full
+strength within 3500 SU of its corona star's surface, including while the fish
+dives or crosses the far side of the star. `LegendaryHaunt.DAWN_SURFACE_RANGE`
+controls that distance; `FalseDawnOrbit.findCorona` selects the same star as its
+movement, including secondary stars. Leaving that range or turning lamps off
+starts the normal 12-second fade. Returning in range with lamps on reverses it
+without another sighting. Other legendary activations cannot replace this hunt
+while the player remains in range with lamps on. Initial activation still needs
+provocation and a sighting; capture and departure still clean up immediately.
+The existing haunt advance checks distance because vanilla's location listener
+only reports system changes, not crossings within a system. No new script.
+
+For other legendaries, with lamps on, unseen haunt effects linger for
 60 seconds, then fade over 12 seconds. Turning the player's lamps off starts that
 fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
@@ -534,9 +547,11 @@ Leaving the system resets defenses but removes motes instead of teleporting them
 Catching the fish uses cleanup only and cannot reset or respawn it.
 The saved `Chase.roaming` flag restores an unfinished haunt
 at full intensity with a fresh sighting grace period on load, even with lamps off;
-normal fading then applies. Ordinary fish, phantoms and splinters retain their
+normal fading then applies; False Dawn resumes its sun-distance check instead
+of a sighting grace period. Ordinary fish, phantoms and splinters retain their
 movement expiry. `tools/HauntWindDownChecks` covers lamp toggles, dark activation,
-lost contact, held catches, return placement, shield resets and load restoration.
+lost contact, False Dawn's surface-range boundary, held catches, return placement,
+shield resets and load restoration.
 
 Harpoon and drone failure callbacks release real legendary motes through
 `LegendaryShields.onFailedCatch` instead of fading them out. Ordinary fish,
