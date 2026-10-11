@@ -131,12 +131,13 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
                 alphaMult, glowMult);
     }
 
+    // Vanilla centres the native-size crate sprite; w/h describe the cell, not the art.
     protected float gridX(float x, float w, float imageX) {
-        return x + w * imageX / BOX_ICON_GRID;
+        return x + w * 0.5f - BOX_ICON_GRID * 0.5f + imageX;
     }
 
     protected float gridY(float y, float h, float imageY) {
-        return y + h * (BOX_ICON_GRID - imageY) / BOX_ICON_GRID;
+        return y + h * 0.5f + BOX_ICON_GRID * 0.5f - imageY;
     }
 
     @Override

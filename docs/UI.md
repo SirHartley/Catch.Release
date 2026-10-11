@@ -92,6 +92,12 @@ therefore reconcile these markers; no separate sector-wide polling script is nee
 - `SpriteLoader` and `FishIcons` use fresh sprite wrappers. Never retain mutable
   sprite state across screens. `FishIcons.draw` owns the fish/silhouette rendering;
   `drawBacklit` adds the rarity backlight. Both use the shared Codex unlock state.
+- Cargo crate labels use pixel coordinates in the native 80×80 `fishbarrel.png`,
+  centred in the supplied item cell. Do not scale those coordinates by cell width
+  or height: vanilla's `CargoStackView.renderAtCenter` draws the base sprite at
+  native size and applies any outer scale to both passes (0.98a-RC8,
+  `sources-obf/campaign.ui.java`). `tools/FishCargoIconChecks` checks the rendered
+  corners across cell sizes, translations, alpha and hover passes without OpenGL.
 - Aquarium backdrop source art: 388×170, visible 386×168; 2× visible assets: 772×336.
 - Aquarium fish use `spriteDirection` in degrees counter-clockwise from image
   right, measured from the full image centre. `FishSpritePose` aligns the mesh
