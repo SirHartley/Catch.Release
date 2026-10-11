@@ -19,6 +19,7 @@ import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.impl.campaign.velfield.SlipstreamTerrainPlugin2;
 import com.fs.starfarer.api.impl.campaign.terrain.StarCoronaTerrainPlugin;
+import com.fs.starfarer.api.impl.campaign.terrain.FlareManager;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.io.*;
@@ -138,6 +139,7 @@ public final class LegendaryEscapeChecks {
         Corona(PlanetAPI star, float outer) {
             params = new CoronaParams(outer - star.getRadius(),
                     (outer + star.getRadius()) * 0.5f, star, 0f, 0f, 0f);
+            flareManager = new FlareManager(this);
         }
     }
 
@@ -225,6 +227,7 @@ public final class LegendaryEscapeChecks {
         final List<Terrain> terrain = new ArrayList<>();
         final List<PlanetAPI> stars = new ArrayList<>();
         final List<CampaignTerrainAPI> coronas = new ArrayList<>();
+        final Vector2f playerAt = new Vector2f();
         final Map<String, Object> persistent = new HashMap<>();
         final Map<String, FishSpec> specs = new LinkedHashMap<>();
         final TransientMemory memory = new TransientMemory();
@@ -298,7 +301,7 @@ public final class LegendaryEscapeChecks {
                 default -> throw new AssertionError(m);
             });
             CampaignFleetAPI player = api(CampaignFleetAPI.class, (p, m, a) -> switch (m.getName()) {
-                case "getLocation" -> new Vector2f();
+                case "getLocation" -> playerAt;
                 case "getContainingLocation" -> system;
                 case "getAbility" -> SearchlightAbilityPlugin.ABILITY_ID.equals(a[0]) ? lamps : null;
                 default -> throw new AssertionError(m);
@@ -342,6 +345,7 @@ public final class LegendaryEscapeChecks {
             Vector2f at = new Vector2f(x, y);
             PlanetSpecAPI spec = api(PlanetSpecAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "isPulsar" -> false;
+                case "getCoronaColor" -> java.awt.Color.ORANGE;
                 default -> throw new AssertionError(m);
             });
             PlanetAPI star = api(PlanetAPI.class, (p, m, a) -> switch (m.getName()) {
