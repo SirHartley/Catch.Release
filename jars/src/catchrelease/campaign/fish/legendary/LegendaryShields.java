@@ -66,7 +66,6 @@ public class LegendaryShields {
         FishEntityPlugin fish = asLegendaryMote(mote);
         if (fish == null) return HitResult.NONE;
         if (fish.isMantaSwitching()) return HitResult.DEFLECTED;
-        if (LonglinerShield.applies(fish)) return LonglinerShield.hit(fish, explosive, section);
 
         String id = fish.getFishSpec().id;
         LegendaryChases.Chase state = LegendaryChases.getState(id);
@@ -79,11 +78,20 @@ public class LegendaryShields {
             if (!CHARGE_SHIELD_SPECIES.equals(id)) {
                 fish.flashShield();
                 sayDeflection(fish, "Deflected - Now awake");
+                if (LonglinerShield.applies(fish)) LegendaryHaunt.onLonglinerHit(fish);
                 return HitResult.DEFLECTED;
             }
         }
 
         switch (id) {
+            case LonglinerShield.SPECIES -> {
+                HitResult result = LonglinerShield.hit(fish, explosive, section);
+                if (result != HitResult.NONE) {
+                    fish.flashShield();
+                    sayDeflection(fish, "Deflected");
+                }
+                return result;
+            }
             case MOTE_SHIELD_SPECIES -> {
                 if (getShieldUnits(state, MOTE_SHIELD_COUNT) <= 0) return HitResult.NONE;
                 fish.flashShield();

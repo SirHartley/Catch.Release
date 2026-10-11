@@ -298,6 +298,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   shields turn counterclockwise using the same saved angle and damage mask.
   Rotation advances only from the real mote's existing callback. Lamp fade,
   dive visibility and viewport alpha apply; GL attributes and matrices are restored.
+  Wake-up and section hits use the shared expanding deflection flash at the section
+  radius, alongside the same floating notices as the other legendaries.
   No sprite mutation or extra frame script is involved.
   The engine advances custom entities through the unpaused location update
   (`CampaignEngine.advance` / `CustomCampaignEntity.advance`, 0.98a-RC8).

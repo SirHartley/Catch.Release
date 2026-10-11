@@ -612,8 +612,10 @@ Lantern Jack and False Dawn escape without restoring shields or changing stored 
 The Moray's shield uses the existing saved `Chase.shieldPopped` flag instead of
 the timed base shield. Once broken, it stays down through failed catches, elapsed
 time and mote recreation within a hunt. Abandoning the haunt restores it. Its failed-catch slipstream dash is unchanged.
-The Imposter has no timed base shield. Its wake-up hit deflects without breaking
-a section or consuming an Explosive Head. Subsequent swept hits use the visible
+The Imposter has no timed base shield. Its wake-up hit uses the shared legendary
+provocation, flash and deflection notice before starting the school, without breaking
+a section or consuming an Explosive Head. Section hits use the same flash and notice.
+Subsequent swept hits use the visible
 section geometry; a shot through a broken section can reach the body before the
 far side of the ring. Explosive section hits use the existing detonation/consumption
 path. Failed catches, elapsed time, mote replacement and save/load retain damage.

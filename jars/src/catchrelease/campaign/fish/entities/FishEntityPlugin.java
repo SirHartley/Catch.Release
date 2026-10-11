@@ -1091,6 +1091,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float alpha = base * lampFade;
         if (LonglinerShield.applies(this)) {
             LonglinerShield.render(this, alpha * getVisibility());
+            renderShieldFlash(alpha * getVisibility(), entity.getLocation(),
+                    LegendaryShields.getShieldColor(this), LonglinerShield.RADIUS);
             return;
         }
 
@@ -1131,12 +1133,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             }
         }
 
-        if (alpha > 0f && shieldFlash > 0f) {
-            float f = shieldFlash / SHIELD_FLASH_SECONDS;
-            float radius = LegendaryShields.SHIELD_RADIUS;
-            float ring = radius * (1f + 1.2f * (1f - f));
-            Disc.drawOutline(loc.x, loc.y, ring, shieldColor, f * alpha, 3f);
-        }
+        renderShieldFlash(alpha, loc, shieldColor, LegendaryShields.SHIELD_RADIUS);
 
         // the flare call: a shockwave ring run out to the full pull radius, so the
         // reach of the summons is drawn rather than told
@@ -1149,5 +1146,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             Disc.draw(loc.x, loc.y, LegendaryShields.SHIELD_RADIUS * (1f + 2f * p),
                     shieldColor, fade * 0.45f, 0f, true);
         }
+    }
+
+    protected void renderShieldFlash(float alpha, Vector2f loc, Color color, float radius) {
+        if (alpha <= 0f || shieldFlash <= 0f) return;
+        float f = shieldFlash / SHIELD_FLASH_SECONDS;
+        float ring = radius * (1f + 1.2f * (1f - f));
+        Disc.drawOutline(loc.x, loc.y, ring, color, f * alpha, 3f);
     }
 }

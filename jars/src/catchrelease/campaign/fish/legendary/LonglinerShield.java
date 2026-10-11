@@ -46,11 +46,6 @@ public final class LonglinerShield {
 
     public static LegendaryShields.HitResult hit(FishEntityPlugin fish, boolean explosive, int section) {
         LegendaryChases.Chase state = LegendaryChases.getState(SPECIES);
-        if (!state.provoked) {
-            state.provoked = true;
-            LegendaryHaunt.onLonglinerHit(fish);
-            return LegendaryShields.HitResult.DEFLECTED;
-        }
         if (section < 0 || section >= SECTIONS || (state.longlinerBroken & (1 << section)) != 0) {
             return LegendaryShields.HitResult.NONE;
         }

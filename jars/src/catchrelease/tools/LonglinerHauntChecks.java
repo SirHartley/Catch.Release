@@ -123,6 +123,11 @@ public final class LonglinerHauntChecks {
                     "first body hit wakes the haunt");
             check(f.state.provoked && f.state.roaming && f.state.longlinerBroken == 0
                     && LonglinerShield.SPECIES.equals(f.haunt.getActiveSpeciesId()), "wake raises all six sections immediately");
+            check(f.real.notices.size() == 1 && "Deflected - Now awake".equals(f.real.notices.get(0).text),
+                    "wake-up uses the same deflection notice as the other legendaries");
+            var flash = FishEntityPlugin.class.getDeclaredField("shieldFlash");
+            flash.setAccessible(true);
+            check(flash.getFloat(f.real) > 0f, "wake-up starts the shared shield flash");
             check(f.copies().size() == LonglinerSchoolModule.SCHOOL_SIZE - 1, "wake spawns the school immediately");
             for (int section = 0; section < 6; section++) {
                 f.state.longlinerBroken = 0;
@@ -132,6 +137,9 @@ public final class LonglinerHauntChecks {
                 int expected = 1 << section;
                 if (explosive) expected |= (1 << ((section + 1) % 6)) | (1 << ((section + 5) % 6));
                 check(f.state.longlinerBroken == expected, "blast breaks adjacent sections including wraparound");
+                check("Deflected".equals(f.real.notices.get(f.real.notices.size() - 1).text)
+                                && flash.getFloat(f.real) > 0f,
+                        "section hits retain shared deflection feedback");
                 check(LegendaryShields.onHarpoonContact(f.real.getMote(), false, section) == LegendaryShields.HitResult.NONE,
                         "broken section cannot deflect again");
             }
