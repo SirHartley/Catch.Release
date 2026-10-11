@@ -369,16 +369,17 @@ public final class LegendaryScarChecks {
         display.advance(0.61f, false);
         check(ui.boxes == 1 && ui.hovers == 0 && sounds.size() == 1, "first scar gets one automatic boxed explanation");
         FishingMinigameLayout layout = new FishingMinigameLayout(ui.position);
-        check(ui.placements.get(ui.boxPanels.get(0).getPosition())[0]
-                        >= LegendaryScarDisplay.x(layout, 0, 1) + LegendaryScarDisplay.DIAMETER,
-                "explanation sits to the right of the newest scar");
         float[] noticeAt = ui.placements.get(ui.boxPanels.get(0).getPosition());
-        check(Math.abs(ui.position.getHeight() - noticeAt[1]
-                        - ui.boxPanels.get(0).getPosition().getHeight() * 0.5f
-                        - LegendaryScarDisplay.y(layout)) < 0.01f,
-                "explanation is vertically centered on the new scar above the dialog");
+        PositionAPI notice = ui.boxPanels.get(0).getPosition();
+        check(Math.abs(ui.position.getX() + noticeAt[0] + notice.getWidth() * 0.5f
+                        - LegendaryScarDisplay.x(layout, 0, 1)) < 0.01f,
+                "first-scar explanation is horizontally centered on the icon");
+        check(Math.abs(ui.position.getY() + ui.position.getHeight() - noticeAt[1] - notice.getHeight()
+                        - LegendaryScarDisplay.y(layout) - LegendaryScarDisplay.DIAMETER * 0.5f
+                        - LegendaryScarDisplay.NOTICE_GAP) < 0.01f,
+                "first-scar explanation sits above the icon with a clear gap");
         check(display.canDismiss(), "natural stamp completion has no extra input lockout");
-        display.advance(5f, false);
+        display.advance(LegendaryScarDisplay.NOTICE_TIME, false);
         check(ui.hovers == 1 && ui.mounted.size() == 3, "postgame hover replaces the first-scar notice, retaining the close prompt");
         for (int i = 0; i < ui.hoverPanels.size(); i++) {
             float[] at = ui.placements.get(ui.hoverPanels.get(i).getPosition());

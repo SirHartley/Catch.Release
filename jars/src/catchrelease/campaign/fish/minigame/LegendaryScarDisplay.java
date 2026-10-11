@@ -23,6 +23,7 @@ public final class LegendaryScarDisplay {
     public static final float DIAMETER = 24f;
     public static final float SPACING = 32f;
     public static final float TOP_GAP = 8f;
+    public static final float NOTICE_GAP = 8f;
     public static final float STAMP_SCALE = 2.4f;
     public static final float STAMP_TIME = 0.6f;
     public static final float NOTICE_TIME = 10f;
@@ -100,9 +101,10 @@ public final class LegendaryScarDisplay {
         frame.updateUIElementSizeAndMakeItProcessInput(text);
         notice = frame.wrapTooltipWithBox(text, Misc.getNegativeHighlightColor());
         FishingMinigameLayout layout = new FishingMinigameLayout(frame.getPosition());
-        frame.addComponent(notice).inTL(x(layout, count - 1, count) - frame.getPosition().getX() + DIAMETER,
+        frame.addComponent(notice).inTL(x(layout, count - 1, count) - frame.getPosition().getX()
+                        - notice.getPosition().getWidth() * 0.5f,
                 frame.getPosition().getY() + frame.getPosition().getHeight() - y(layout)
-                        - notice.getPosition().getHeight() * 0.5f);
+                        - DIAMETER * 0.5f - NOTICE_GAP - notice.getPosition().getHeight());
     }
 
     private void addHovers() {
