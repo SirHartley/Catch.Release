@@ -18,6 +18,7 @@ import catchrelease.campaign.fish.entities.HauntMineEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
+import catchrelease.campaign.fish.legendary.LonglinerShield;
 import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.campaign.fish.minigame.FishingMinigameDialogPlugin;
 import catchrelease.helper.loading.SpriteLoader;
@@ -107,10 +108,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         protected final SectorEntityToken mote;
         protected final float fraction;
+        protected final int shieldSection;
 
         protected MoteContact(SectorEntityToken mote, float fraction) {
+            this(mote, fraction, -1);
+        }
+
+        protected MoteContact(SectorEntityToken mote, float fraction, int shieldSection) {
             this.mote = mote;
             this.fraction = fraction;
+            this.shieldSection = shieldSection;
         }
     }
 
@@ -185,7 +192,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (shield != null) {
             moveToContact(shield, from, entity.getLocation(), distance);
             playMoteHitSound();
-            if (handleShieldContact(shield.mote)) return;
+            if (handleShieldContact(shield.mote, shield.shieldSection)) return;
         }
 
         // a mine answers to a thrown head - clearing the field from range is the
@@ -252,8 +259,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected boolean handleShieldContact(SectorEntityToken mote) {
+        return handleShieldContact(mote, -1);
+    }
+
+    protected boolean handleShieldContact(SectorEntityToken mote, int shieldSection) {
         LegendaryShields.HitResult result = LegendaryShields.onHarpoonContact(mote,
-                owner == null && isExplosive());
+                owner == null && isExplosive(), shieldSection);
 
         if (result == LegendaryShields.HitResult.POPPED) {
             if (mote.getCustomPlugin() instanceof FishEntityPlugin fish
@@ -745,6 +756,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (!isHookedValid()) return;
 
         hooked.setLocation(entity.getLocation().x, entity.getLocation().y);
+        if (hooked.getCustomPlugin() instanceof FishEntityPlugin fish) fish.syncLonglinerSchool();
     }
 
     public static boolean canTake(SectorEntityToken target) {
@@ -787,6 +799,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             if (owner != null && BuriedMoteEntityPlugin.BURIED_TAG.equals(tag)) continue;
             for (SectorEntityToken mote : entity.getContainingLocation().getEntitiesWithTag(tag)) {
                 if (!canTake(mote)) continue;
+                if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && LonglinerShield.applies(fish)) {
+                    float body = getCircleEntry(from, to, mote.getLocation(), HarpoonConstants.CATCH_RADIUS);
+                    LonglinerShield.Contact contact = shieldsOnly ? LonglinerShield.findContact(fish, from, to) : null;
+                    if (shieldsOnly && (contact == null || body >= 0f && body < contact.fraction())) continue;
+                    float fraction = shieldsOnly ? contact.fraction() : body;
+                    if (fraction >= 0f && (first == null || fraction < first.fraction)) {
+                        first = new MoteContact(mote, fraction, shieldsOnly ? contact.section() : -1);
+                    }
+                    continue;
+                }
                 boolean shielded = mote.getCustomPlugin() instanceof FishEntityPlugin fish
                         && LegendaryShields.isShielded(fish);
                 if (shieldsOnly && !shielded) continue;

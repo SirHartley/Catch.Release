@@ -2561,14 +2561,14 @@ $catchreleaseRumorKind == legendary
 $catchreleaseRumorLegendary == false_dawn score:10","CatchReleaseCMD highlightFishText $catchreleaseRumorSystem ""False Dawn""","""A second sun in $catchreleaseRumorSystem, according to a crew that came through. Close beside the first, then gone when they looked again. False Dawn gets blamed for that.""",0:catchrelease_rumorLegendary_false_dawn_continue:Continue,
 catchrelease_rumorLegendary_false_dawn_continue,DialogOptionSelected,$option == catchrelease_rumorLegendary_false_dawn_continue,CatchReleaseCMD showRumorIntel,"""There's an old story about a ship that followed it clear out of fuel. The captain kept telling his crew there'd be a port when they got closer."" He marks the star on your chart. ""If you go looking, keep something in reserve. It's easy to spend more time out there than you meant to.""",100:catchrelease_fisherBack:Continue,
 catchrelease_rumorLegendaryIntel_false_dawn,CatchReleaseLegendaryRumorIntel_false_dawn,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Search the stellar corona with Breach Lights. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
-#catchrelease_rumorLegendary_longliner,CatchReleaseRumorText,"CatchReleaseCMD tokens
+catchrelease_rumorLegendary_longliner,CatchReleaseRumorText,"CatchReleaseCMD tokens
 $catchreleaseRumorKind == legendary
 $catchreleaseRumorLegendary == longliner score:10","SetTextHighlightColors $catchreleaseRumorLegendaryColor highlight
 SetTextHighlights Imposter $catchreleaseRumorSystem","""There's an Imposter story going round $catchreleaseRumorSystem. The one where a ship comes back with all her dead captains aboard, each insisting it's his turn to command. I heard that one told about a patrol cutter once. Knowing her officers, I could almost believe it.""",0:catchrelease_rumorLegendary_longliner_continue:Continue,
-#catchrelease_rumorLegendary_longliner_continue,DialogOptionSelected,$option == catchrelease_rumorLegendary_longliner_continue,CatchReleaseCMD showRumorIntel,"The Fisherman gives you the location.
+catchrelease_rumorLegendary_longliner_continue,DialogOptionSelected,$option == catchrelease_rumorLegendary_longliner_continue,CatchReleaseCMD showRumorIntel,"The Fisherman gives you the location.
 
 ""There's usually a boat behind the story, Captain. What you'll find aboard is another matter.""",100:catchrelease_fisherBack:Continue,
-#catchrelease_rumorLegendaryIntel_longliner,CatchReleaseLegendaryRumorIntel_longliner,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Look for a fishing boat and expose it with Breach Lights. Bring an Explosive Head if its hull shield is still intact. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
+catchrelease_rumorLegendaryIntel_longliner,CatchReleaseLegendaryRumorIntel_longliner,,,"$catchreleaseRumorStranger has been reported in $catchreleaseRumorSystem. Look for a fishing boat and expose it with Breach Lights. This is a recent sighting, not a fixed habitat. The lead expires after 60 days, or sooner if the fish moves on or is caught.",,
 catchrelease_rumorLegendary_abyssal_ghost_manta,CatchReleaseRumorText,"CatchReleaseCMD tokens
 $catchreleaseRumorKind == legendary
 $catchreleaseRumorLegendary == abyssal_ghost_manta score:10","CatchReleaseCMD highlightFishText ""Abyssal Ghost Manta"" $catchreleaseRumorSystem","""They've put the Abyssal Ghost Manta in $catchreleaseRumorSystem this time. Survey crews used to call it a blanket over the stars. Some drew one great shape. Others drew three.""",0:catchrelease_rumorLegendary_abyssal_ghost_manta_continue:Continue,
@@ -2689,10 +2689,10 @@ CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_largest:""What is the large
 catchrelease_ask_largest,DialogOptionSelected,$option == catchrelease_ask_largest,$global.catchrelease_fisherAsked_largest = true,"""One I didn't land.""","0:catchrelease_ask_largestFollow:""How large?""
 10:catchrelease_fisherAskBack:Something else",
 catchrelease_ask_largestFollow,DialogOptionSelected,$option == catchrelease_ask_largestFollow,,"""Large enough that leaving it there was cheaper.""",0:catchrelease_fisherAskBack:Something else,
-#catchrelease_fisherOptAsk_longliner,CatchReleaseFisherQuestions,"CatchReleaseCMD longlinerEncountered
+catchrelease_fisherOptAsk_longliner,CatchReleaseFisherQuestions,"CatchReleaseCMD longlinerEncountered
 !$global.catchrelease_fisherAsked_longliner
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_longliner:""I just had you turn into a fish.""",
-#catchrelease_ask_longliner,DialogOptionSelected,$option == catchrelease_ask_longliner,$global.catchrelease_fisherAsked_longliner = true,"""You put the lamps on a fishing boat and hauled in a whale.""
+catchrelease_ask_longliner,DialogOptionSelected,$option == catchrelease_ask_longliner,$global.catchrelease_fisherAsked_longliner = true,"""You put the lamps on a fishing boat and hauled in a whale.""
 
 The Fisherman pats his coat pockets, then checks the nearest display. ""You've got your catch. I'd leave it at that.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_tackle,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
@@ -2733,7 +2733,7 @@ CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_fishBack gray,,
 catchrelease_fisherAsked_largest,CatchReleaseFisherQuestions,"$catchreleaseStage >= 6
 $global.catchrelease_fisherAsked_largest
 CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_largest gray,,"50:catchrelease_ask_largest:""What is the largest thing you have landed?""",
-#catchrelease_fisherAsked_longliner,CatchReleaseFisherQuestions,"CatchReleaseCMD longlinerEncountered
+catchrelease_fisherAsked_longliner,CatchReleaseFisherQuestions,"CatchReleaseCMD longlinerEncountered
 $global.catchrelease_fisherAsked_longliner
 CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_longliner gray,,"50:catchrelease_ask_longliner:""I just had you turn into a fish.""",
 catchrelease_fisherAsked_tackle,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
@@ -2829,13 +2829,13 @@ catchrelease_ratingLegendary_false_dawn_3,DialogOptionSelected,$option == catchr
 CatchReleaseCMD showRatingReportIntel
 CatchReleaseCMD showRatingReportMap
 FireAll CatchReleaseRatingLegendaryQuestions","""They say you can still see the ship inside it. Trees growing out through the gunports, captain up on the bridge trying to find somewhere to dock. Crew came through from $catchreleaseRumorSystem last week swearing they'd seen a garden burning beside the star. They've got a name for it out there. I can't remember it.""",,
-#catchrelease_ratingLegendary_longliner,CatchReleaseRatingLegendaryReport,"$catchreleaseBarReportReady
+catchrelease_ratingLegendary_longliner,CatchReleaseRatingLegendaryReport,"$catchreleaseBarReportReady
 $catchreleaseRumorLegendary == longliner score:10","CatchReleaseCMD highlightFishText ""The Imposter""
 SetShortcut catchrelease_ratingLegendaryBack ESCAPE","""The Imposter comes into port when there's nobody awake to check the berth. Beautiful ship. Fresh paint, music from the locks, captain offering passage anywhere you please. Doesn't want credits. Wants you to tell him where you were born.""","0:catchrelease_ratingLegendary_longliner_2:Continue
 100:catchrelease_ratingLegendaryBack:Go back to the bar",
-#catchrelease_ratingLegendary_longliner_2,DialogOptionSelected,$option == catchrelease_ratingLegendary_longliner_2,SetShortcut catchrelease_ratingLegendaryBack ESCAPE,"""There was a woman who gave him a false name and a planet she'd made up. He took her there. Brought her back, too, with a husband and six children, and she wouldn't hear a word against him.""","0:catchrelease_ratingLegendary_longliner_3:Continue
+catchrelease_ratingLegendary_longliner_2,DialogOptionSelected,$option == catchrelease_ratingLegendary_longliner_2,SetShortcut catchrelease_ratingLegendaryBack ESCAPE,"""There was a woman who gave him a false name and a planet she'd made up. He took her there. Brought her back, too, with a husband and six children, and she wouldn't hear a word against him.""","0:catchrelease_ratingLegendary_longliner_3:Continue
 100:catchrelease_ratingLegendaryBack:Go back to the bar",
-#catchrelease_ratingLegendary_longliner_3,DialogOptionSelected,$option == catchrelease_ratingLegendary_longliner_3,"CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
+catchrelease_ratingLegendary_longliner_3,DialogOptionSelected,$option == catchrelease_ratingLegendary_longliner_3,"CatchReleaseCMD highlightFishText $catchreleaseRumorSystem
 CatchReleaseCMD showRatingReportIntel
 CatchReleaseCMD showRatingReportMap
 FireAll CatchReleaseRatingLegendaryQuestions","The spacer pulls the spare chair closer. ""That's the pleasant telling. My old bosun had another one, but he'd only tell it when we were docked. Somebody's been offering passages in $catchreleaseRumorSystem. I wouldn't take one.""",,

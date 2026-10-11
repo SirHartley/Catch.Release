@@ -116,7 +116,9 @@ ordinary-fish movement isolation, failure dispatch,
 four-turn shell-game bursts at 30/60/144 Hz,
 repeated-loss decoy caps, emergency dash duration,
 slipstream roll-up/fade lifetime and cleanup, immediate manta swaps, fixed hit-position
-labels, and the Imposter's explosive-only outer layer and regenerating base shield.
+labels and shield colours. `tools/LonglinerHauntChecks` covers segmented-shield
+geometry, swept harpoon hits through gaps, explosive adjacency, shield persistence,
+school spacing/replenishment, opposite rotation and encounter cleanup.
 It also checks corona-safe movement segments, invalid-position recovery, overlapping
 and companion stars, long-frame dashes, buried movement, formation clearance, and
 the False Dawn/ordinary-fish exclusions.
@@ -170,7 +172,7 @@ configuration; usage, checks, bands and exemptions are in [DIALOGUE.md](DIALOGUE
 
 Display names and internal IDs are separate. `LonglinerDecoy` and Longliner-named memory, sound and option keys still identify The Imposter. Asset status is recorded beside each species row (`placeholder art`). The `desc` column loads into `FishSpec.desc`, shared by `FishItemTooltips` and `FishCodexEntry`; handling advice and hazards in that text do not add campaign mechanics.
 
-The Imposter is disabled. Its row in `data/campaign/fish.csv` and all nine `longliner` rule IDs in `data/campaign/rules.csv` start with `#`; vanilla skips those records. This removes the species from spawning and rumor selection, along with its Fisherman questions, rumor intel text and bar reports. Code, assets and the original CSV contents remain for reactivation: remove those ten prefixes together. The Longliner contracts below describe that retained implementation.
+The Imposter's active `longliner` fish row and nine matching rules supply its spawn, Fisherman questions, rumor intel and bar reports. It retains the boat disguise and has no range-data entry.
 
 `RatingBarEvent` and rating-named rule IDs, commands and memory keys still identify the tutorial crew referrals. Player-facing job descriptions do not rename these bindings or saved keys.
 
@@ -447,9 +449,11 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `MinefieldModule.java` | Keeps the 3–6-mine waves and 22-mine cap but rejects overlapping trigger zones, leaving at least 300 units of passage (more for a large player fleet). Placement checks earlier waves as well as the current one, keeps clear of the player and stellar surfaces, and skips crowded spawns after bounded attempts. Mines arm after two seconds and detonate at ten seconds from spawn; both timers pause with the campaign. Blink phase is separate. Spent mines lose their harpoon/placement tag immediately. |
 | `GhostFleetsModule.java` | Lantern Jack's harmless fleets: first at 5–10 seconds, then every 15–25, at most two. Spawn 1000–1600 units away with 2–15 ships and at least 8 burn; intercept, with half switching to HOLD after 3–7 seconds. Hard-remove at 250 units or 30 seconds. Transponders stay off; flags prevent clicks, comms and other-fleet attention, and `setNoEngaging` prevents INTERCEPT battles. Harpoons ignore haunt fleets. |
 | `FakeWrecksModule.java` | Lantern Jack wrecks: groups of three, first at 5 seconds then every 10–18; at most 25 including fades, with smaller groups when nearly full. Spawn 600–1100 units away, expire after 120–240 seconds, and use registered ship variants except fighters/stations/modules. Click-to-approach stays enabled while interaction/salvage tags are withheld. At 100 units the first wreck approached becomes real; later wrecks have a 10% chance, otherwise fade over 0.5 seconds. Real wrecks restore vanilla interaction tags and retain default derelict salvage. All remain haunt-owned. |
-| `LanternSensorGhostsModule.java` | Jack-only vanilla `BaseSensorGhost` contacts: echo player movement, intercept then depart, or pass by. First and repeat spawns take 5–10 seconds, cap four including fades. Uses the haunt's existing advance and cleanup, not the hyperspace manager or a new sector script. Behavior durations convert seconds to campaign days; original tokens remain tracked after vanilla starts fading. No fleet spawning or drive drain. `SensorGhostsModule` remains the Imposter's separate implementation. |
-| `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
-| `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. |
+| `LanternSensorGhostsModule.java` | Jack-only vanilla `BaseSensorGhost` contacts: echo player movement, intercept then depart, or pass by. First and repeat spawns take 5–10 seconds, cap four including fades. Uses the haunt's existing advance and cleanup, not the hyperspace manager or a new sector script. Behavior durations convert seconds to campaign days; original tokens remain tracked after vanilla starts fading. No fleet spawning or drive drain. |
+| `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 3s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee without a shield. Excluded from Fisherman reconciliation. |
+| `LonglinerShield.java` | Six rotating green sections; shared polygon mesh for rendering and swept harpoon collision. First body hit raises the shield and starts the haunt. Normal hits break one section; explosive hits also break its neighbours. `Chase.longlinerBroken/longlinerRotation` persist until encounter reset. |
+| `LonglinerSchoolModule.java` | Eighteen phantom copies in a separated 19-slot school with the real fish in a random inner slot. Shared movement and dive visibility, reversed shield rotation, shared section damage. Replenishes missing copies and removes them on replacement, failure, capture or departure through the existing haunt callbacks. |
+| `LegendaryShields.java` | Defense dispatch and render state: Longliner sections, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. |
 
 False Dawn starts with one stored shield charge. The wake-up hit provokes it
 without spending that charge, so the haunt begins with one. Green mine couriers
@@ -527,7 +531,8 @@ fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
 Existing module callbacks handle the fade and cleanup; no new polling script.
 Spawners and timed Manta blackouts stop escalating below full intensity, except
-for the Moray's opening escape during ramp-up. Screen effects scale all the way
+for the Moray's opening escape and Longliner's school. The school forms on the
+wake-up hit and maintains its fixed size until cleanup. Screen effects scale all the way
 to zero, including their minimum-strength component.
 The full-screen chromatic pass also fades its pixel displacement to zero; the
 minigame's region-only pass keeps its existing displacement range.
@@ -539,7 +544,7 @@ and clears combat/movement timers, flare cooldown, stun, slowdown and velocity
 sampling. Jack's called prey are released. Quorum decoys are removed; surviving
 escorts return with the fish and missing escorts are immediately replaced.
 The reset waits for any held fish or attached body to be released. Moray's shield,
-Jack's three starting shells, False Dawn's starting charge and Longliner's explosive-only hull all return.
+Jack's three starting shells and False Dawn's starting charge return. Longliner's broken-section mask and rotation reset.
 Longliner removes its revealed mote and clears `revealed`, allowing its existing
 boat reconciler to restore the disguise; its boat/reveal/flee movement is unchanged.
 Host/residency, sighting history, recognition and completed catches are preserved.
@@ -584,15 +589,17 @@ Lantern Jack and False Dawn escape without restoring shields or changing stored 
 The Moray's shield uses the existing saved `Chase.shieldPopped` flag instead of
 the timed base shield. Once broken, it stays down through failed catches, elapsed
 time and mote recreation within a hunt. Abandoning the haunt restores it. Its failed-catch slipstream dash is unchanged.
-The remaining legendaries restore their base shield without changing movement.
-The Imposter's outer layer rejects ordinary harpoons with "Immune (Kinetic)".
-An explosive hit sets `shieldPopped`, enables its haunt and leaves the normal base
-shield intact. Subsequent hits use the same ten-second base-shield timer as the
-Manta. Failed catches restore that base shield without restoring the outer layer;
-full haunt abandonment restores both. The chase ledger preserves the broken
-outer layer across mote replacement and save/load; the base timer belongs to the
-saved `FishEntityPlugin`. Shield colours and layering are defined in
-[UI.md](UI.md#drawing-gotchas).
+The Imposter has no timed base shield. Its wake-up hit deflects without breaking
+a section or consuming an Explosive Head. Subsequent swept hits use the visible
+section geometry; a shot through a broken section can reach the body before the
+far side of the ring. Explosive section hits use the existing detonation/consumption
+path. Failed catches, elapsed time, mote replacement and save/load retain damage.
+Full haunt failure restores the boat disguise; the next wake-up raises six intact
+sections. Its school uses 180-unit spacing and moves its centre with enough stellar
+clearance for every copy. Real movement and harpoon dragging resynchronize the
+copies immediately. Phantoms have no targetable body or shield, and their dive
+visibility comes from the real fish. Lamp visibility remains local to each mote.
+Shield drawing is defined in [UI.md](UI.md#drawing-gotchas).
 
 The Moray keeps its mixed campaign movement and fleeing weave. `FishEntityPlugin`
 caps its movement-mode multiplier at 1.25; the 12-second escape cycle uses 0.5 for
@@ -761,7 +768,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - Species that share a rarity and `motion` differ in at least one of `motionSpeed`, `restlessness`, or `jitter`, so players can learn them apart.
 - Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` and a species' random moves may still roll either for one move.
 - `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
-- A legendary has one host, one permanent catch, and no range data or job asks. All five enabled legendaries are lamp-only. Lantern Jack, Slipstream Moray, Quorum and False Dawn are non-Abyssal; the manta is Abyssal. The Imposter is disabled (see Data identity).
+- A legendary has one host, one permanent catch, and no range data or job asks. All six legendaries are lamp-only. Lantern Jack, Slipstream Moray, Quorum, False Dawn and the Imposter are non-Abyssal; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
 - False Dawn selects the largest-radius usable corona star across chartable systems, regardless of coherence; its haunt supplies the coherence change. Its old regional sheet preference does not limit this selection. Equal-largest hosts can alternate; a sole largest host is retained. If no usable corona exists, no natural host is assigned. A host that becomes unsuitable is replaced only while the player is elsewhere; new natural spawns are gated immediately. `SpawnFish` still overrides the host for testing but places the fish in the largest usable local corona.
 - `LegendarySpawns` excludes resident legendaries from the ordinary population. False Dawn's existing specimens expire when their ledger marks capture or a different host; other legendary lifetimes and departure cleanup are described above.

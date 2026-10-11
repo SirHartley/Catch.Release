@@ -9,6 +9,8 @@ import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.campaign.fish.legendary.LegendaryTrail;
+import catchrelease.campaign.fish.legendary.LonglinerShield;
+import catchrelease.campaign.fish.legendary.LonglinerSchoolModule;
 import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -168,6 +170,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     // shell game: a decoy is steered by its real mote's controller, never by itself
     private SectorEntityToken decoyAnchor;
     private transient catchrelease.campaign.fish.legendary.MantaFormationModule mantaFormation;
+    private transient LonglinerSchoolModule longlinerSchool;
 
     // the base shell: spent by a deflection, back when this reaches zero
     private float baseShieldRegen;
@@ -284,13 +287,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         float x = movementSampled ? lastX : entity.getLocation().x;
         float y = movementSampled ? lastY : entity.getLocation().y;
-        if (!held && !phantom && decoyAnchor == null && orbitAnchor == null
+        if (!held && !phantom && decoyAnchor == null && orbitAnchor == null && longlinerSchool == null
                 && LegendaryStarAvoidance.applies(getFishSpec())) {
             LegendaryStarAvoidance.confine(entity, getFishSpec(), patrolClearance());
         }
         advanceFish(amount);
+        LonglinerShield.advance(this, amount);
         if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
         if (mantaFormation != null) mantaFormation.sync();
+        syncLonglinerSchool();
         lastX = entity.getLocation().x;
         lastY = entity.getLocation().y;
         movementSampled = true;
@@ -537,7 +542,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public float getVisibility() {
-        FishEntityPlugin source = getMantaVisualSource();
+        FishEntityPlugin source = getLegendaryVisualSource();
         if (source != this) return source.getVisibility();
         if (!diving) return 1f;
 
@@ -588,6 +593,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void moveTo(Vector2f next) {
+        if (longlinerSchool != null && !phantom) {
+            longlinerSchool.move(next);
+            return;
+        }
         if (mantaFormation != null && !phantom) {
             mantaFormation.move(next);
             return;
@@ -603,11 +612,19 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         mantaFormation = formation;
     }
 
+    public void setLonglinerSchool(LonglinerSchoolModule school) {
+        longlinerSchool = school;
+    }
+
+    public void syncLonglinerSchool() {
+        if (longlinerSchool != null) longlinerSchool.sync();
+    }
+
     public boolean isMantaSwitching() {
         return mantaFormation != null && mantaFormation.isSwitching();
     }
 
-    public void shiftMantaPosition(float dx, float dy) {
+    public void shiftFormationPosition(float dx, float dy) {
         entity.setLocation(entity.getLocation().x + dx, entity.getLocation().y + dy);
         if (target != null) target.translate(dx, dy);
         // A slot change is not swimming velocity for the harpoon's lead indicator.
@@ -615,9 +632,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         lastY += dy;
     }
 
-    protected FishEntityPlugin getMantaVisualSource() {
-        if (mantaFormation != null && phantom && decoyAnchor != null
-                && decoyAnchor.getCustomPlugin() instanceof FishEntityPlugin fish) return fish;
+    protected FishEntityPlugin getLegendaryVisualSource() {
+        if ((mantaFormation != null || LonglinerShield.applies(this)) && isPhantom() && getDecoyAnchor() != null
+                && getDecoyAnchor().getCustomPlugin() instanceof FishEntityPlugin fish) return fish;
         return this;
     }
 
@@ -874,7 +891,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void advanceShieldLens() {
-        boolean wanted = lampFade > 0.05f && LegendaryShields.isShielded(getMantaVisualSource())
+        boolean wanted = !LonglinerShield.applies(this) && lampFade > 0.05f
+                && LegendaryShields.isShielded(getLegendaryVisualSource())
                 && catchrelease.rendering.distortion.CampaignDistortionRenderer.isSupported();
 
         if (!wanted) {
@@ -1073,11 +1091,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         // the defence display is lamp-bound: no beam on the fish, no shield to see
         float alpha = base * lampFade;
+        if (LonglinerShield.applies(this)) {
+            LonglinerShield.render(this, alpha * getVisibility());
+            return;
+        }
 
         Vector2f loc = entity.getLocation();
         Color shieldColor = LegendaryShields.getShieldColor(this);
-        boolean explosiveShield = LegendaryShields.hasExplosiveShield(this);
-        Color outerColor = explosiveShield ? LegendaryShields.getExplosiveShieldColor(time) : shieldColor;
 
         // the tether that says the shield is the escort's doing, not the fish's own
         if (alpha > 0f && orbitAnchor != null && !orbitAnchor.isExpired()) {
@@ -1091,7 +1111,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                     0.08f * alpha, 0f, true);
         }
 
-        if (alpha > 0f && LegendaryShields.isShielded(getMantaVisualSource())) {
+        if (alpha > 0f && LegendaryShields.isShielded(getLegendaryVisualSource())) {
             // a soap bubble, not a plate: an all-but-empty middle, a film that thickens
             // toward the rim, a twin rim breathing slightly - the lens does the rest
             float pulse = 0.96f + 0.04f * (float) Math.sin(time * 2.1f);
@@ -1113,18 +1133,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             }
         }
 
-        if (alpha > 0f && explosiveShield) {
-            float radius = LegendaryShields.EXPLOSIVE_SHIELD_RADIUS;
-            Disc.draw(loc.x, loc.y, radius, outerColor, 0f, 0.15f * alpha, true);
-            Disc.drawOutline(loc.x, loc.y, radius, outerColor, 0.85f * alpha, 3f);
-            Disc.drawOutline(loc.x, loc.y, radius - 4f, outerColor, 0.4f * alpha, 1.5f);
-        }
-
         if (alpha > 0f && shieldFlash > 0f) {
             float f = shieldFlash / SHIELD_FLASH_SECONDS;
-            float radius = explosiveShield ? LegendaryShields.EXPLOSIVE_SHIELD_RADIUS : LegendaryShields.SHIELD_RADIUS;
+            float radius = LegendaryShields.SHIELD_RADIUS;
             float ring = radius * (1f + 1.2f * (1f - f));
-            Disc.drawOutline(loc.x, loc.y, ring, outerColor, f * alpha, 3f);
+            Disc.drawOutline(loc.x, loc.y, ring, shieldColor, f * alpha, 3f);
         }
 
         // the flare call: a shockwave ring run out to the full pull radius, so the

@@ -5,7 +5,6 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
-import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -59,9 +58,6 @@ public class HauntStatus implements BaseCommand {
             if (here != null && here.getId().equals(hostId)) line.append(" [HERE]");
 
             line.append(", provoked=").append(LegendaryChases.isProvoked(spec.id));
-            if (LegendaryShields.isHauntSuppressed(spec)) {
-                line.append(", haunt suppressed (hull shield intact)");
-            }
             if (LegendaryChases.isRevealed(spec.id)) line.append(", revealed");
 
             if (here != null) {

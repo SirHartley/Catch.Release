@@ -121,7 +121,7 @@ public class MantaFormationModule extends BaseHauntModule {
     protected void swapRealSlot() {
         int next = (realSlot + 1 + random.nextInt(slots.length - 1)) % slots.length;
         SectorEntityToken displaced = slots[next];
-        real.shiftMantaPosition((next - realSlot) * step.x, (next - realSlot) * step.y);
+        real.shiftFormationPosition((next - realSlot) * step.x, (next - realSlot) * step.y);
         slots[next] = slots[realSlot];
         slots[realSlot] = displaced;
         realSlot = next;
@@ -135,7 +135,7 @@ public class MantaFormationModule extends BaseHauntModule {
         double angle = Math.atan2(step.y, step.x) + Math.toRadians(turn);
         step.set((float) Math.cos(angle) * SPACING, (float) Math.sin(angle) * SPACING);
         Vector2f at = real.getMote().getLocation();
-        real.shiftMantaPosition(center.x + (realSlot - 1) * step.x - at.x,
+        real.shiftFormationPosition(center.x + (realSlot - 1) * step.x - at.x,
                 center.y + (realSlot - 1) * step.y - at.y);
         sync();
     }
@@ -145,7 +145,7 @@ public class MantaFormationModule extends BaseHauntModule {
         if (!real.isHeld()) {
             Vector2f center = center();
             Vector2f safe = LegendaryStarAvoidance.place(system, center, SPACING);
-            real.shiftMantaPosition(safe.x - center.x, safe.y - center.y);
+            real.shiftFormationPosition(safe.x - center.x, safe.y - center.y);
         }
         Vector2f at = real.getMote().getLocation();
         for (int i = 0; i < slots.length; i++) {
