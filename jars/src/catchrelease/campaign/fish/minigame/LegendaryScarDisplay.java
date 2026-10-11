@@ -59,18 +59,18 @@ public final class LegendaryScarDisplay {
     }
 
     public void advance(float amount, boolean running) {
-        if (disposed || running) return;
+        if (disposed || running || !failed) return;
         elapsed += amount;
         if (added && !stamped && elapsed >= STAMP_TIME) {
             stamped = true;
             CatchCelebration.playHook(SOUND);
-            if (frame != null) showNotice();
+            if (frame != null && count == 1) showNotice();
         }
         if (notice != null && elapsed >= STAMP_TIME + NOTICE_TIME) {
             frame.removeComponent(notice);
             notice = null;
         }
-        if (frame != null && !hoversAdded && (!added || elapsed >= STAMP_TIME + NOTICE_TIME)) {
+        if (frame != null && !hoversAdded && canDismiss() && notice == null) {
             addHovers();
         }
         if (frame != null && !promptAdded && canDismiss()) {
