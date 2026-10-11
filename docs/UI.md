@@ -355,18 +355,24 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 
 ### Minigame timing
 
-`LegendaryScarDisplay` draws up to four quiet 24-unit harpoon circles, spaced 32
-units vertically outside the main dialog's right edge, aligned with the progress
-meter. The column starts in the catch-card area (`layout.panelX`), reserving the
-stamp's maximum 2.4-times radius so the animation also clears the dialog. Hover
-regions and the explanation use that same anchor. It uses the existing
+`LegendaryScarDisplay` draws up to four quiet 24-unit harpoon circles in a horizontal
+row, spaced 32 units and centered over the full minigame dialog. The row recenters
+when its count changes. Its height reserves the stamp's maximum 2.4-times radius
+plus an eight-unit gap above the dialog. Hover regions follow each circle; the
+explanation sits to the right of the newly added, rightmost icon. It uses the existing
 `shop_harpoon` sprite and `Disc` primitives after the Manta distortion pass. There
-are no labels or hover regions during play. On a failed legendary minigame the
-dialog stays open: the new icon fades in and shrinks over 0.6 seconds, then plays
-vanilla's `ui_cargo_supplies_drop` and shows the explanation in a boxed tooltip
-beside it. After five seconds the box is replaced by postgame-only hover tooltips.
+are no labels or hover regions during play. The circles, rims and harpoons use
+neutral greys at 35% of their result opacity while playing. Failure immediately
+uses vanilla's negative-highlight colour for the rims, harpoons and explanation
+border, with darker tile fills and normal result opacity, including at the scar
+cap. This is red by default and follows vanilla's colourblind setting.
+The dialog stays open: each new icon fades in and shrinks over 0.6 seconds,
+then plays vanilla's `ui_cargo_supplies_drop`. Only the first scar of a hunt shows
+the automatic boxed explanation; after five seconds it becomes a hover tooltip.
+Later scars enable hover tooltips for every icon as soon as the stamp finishes,
+without an automatic box or an extra five-second wait.
 A click or fresh keypress during the stamp skips to its completed state. The next
-advance plays its sound once and adds the explanation; that input does not close
+advance plays its sound once and enables the appropriate explanation; that input does not close
 the result. After the stamp finishes naturally or is skipped, the next click or
 fresh keypress closes it, with the existing "Press any key" prompt beneath the
 track. Releases and key repeats cannot skip or dismiss. At four scars no further
@@ -374,7 +380,7 @@ stamp, sound or quality-loss notice is added. Ordinary failures retain their sho
 close. Both dialog-dismiss paths dispose all owned tooltip components.
 On a win, scar drawing stops immediately and the display is disposed before the
 catch-information panel is created. No scar icons, hover regions or explanations
-remain beside the catch card; the landed specimen keeps its scar-based quality.
+remain above the minigame; the landed specimen keeps its scar-based quality.
 Scar persistence and quality are covered in
 [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishlegendary).
 
