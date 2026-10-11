@@ -13,6 +13,7 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
+import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
     public static final String HAUNT_TAG = "catchrelease_haunt";
 
     public static final float SIGHT_RANGE = 2200f;
+    public static final float DAWN_SURFACE_RANGE = 3500f;
     public static final float LINGER_SECONDS = 60f;
     public static final float FADE_SECONDS = 12f;
     public static final float RAMP_SECONDS = 4f;
@@ -100,6 +102,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
                 || system != Global.getSector().getCurrentLocation()) return null;
         FishSpec spec = fish.getFishSpec();
         if (haunt.activeSystem != system || !spec.id.equals(haunt.activeSpeciesId)) {
+            if (haunt.isDawnInRange()) return null;
             if (!haunt.fail()) return null;
             haunt.start(spec, system);
         }
@@ -217,7 +220,10 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             return;
         }
 
-        if (lampsOn && isSighted(active, here)) {
+        if (LegendaryShields.DAWN_SPECIES.equals(activeSpeciesId)) {
+            fading = !lampsOn || !isDawnInRange();
+            sinceSeen = fading ? sinceSeen + amount : 0f;
+        } else if (lampsOn && isSighted(active, here)) {
             sinceSeen = 0f;
             fading = false;
         } else {
@@ -225,7 +231,6 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             if (!lampsOn || sinceSeen > LINGER_SECONDS) fading = true;
         }
 
-        // Lamp-off skips the lost-fish grace period; only a fresh sighting ends the fade.
         if (!fading) {
             intensity = Math.min(1f, intensity + amount / RAMP_SECONDS);
         } else {
@@ -240,6 +245,17 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             module.setIntensity(intensity);
             module.advance(amount);
         }
+    }
+
+    protected boolean isDawnInRange() {
+        if (!LegendaryShields.DAWN_SPECIES.equals(activeSpeciesId)) return false;
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || player.getContainingLocation() != activeSystem) return false;
+        var corona = FalseDawnOrbit.findCorona(activeSystem);
+        if (corona == null) return false;
+        SectorEntityToken star = corona.getParams().relatedEntity;
+        return Misc.getDistance(player.getLocation(), star.getLocation())
+                <= star.getRadius() + DAWN_SURFACE_RANGE;
     }
 
     protected FishSpec findSightedSpecies(StarSystemAPI here) {

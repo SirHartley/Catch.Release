@@ -58,12 +58,18 @@ public final class HauntWindDownChecks {
     static class Fixture implements AutoCloseable {
 
         final LegendaryEscapeChecks.Environment env = new LegendaryEscapeChecks.Environment();
-        final LegendaryEscapeChecks.Fish fish = env.real("slipstream_moray");
-        final LegendaryChases.Chase chase = LegendaryChases.getState(fish.spec.id);
+        final LegendaryEscapeChecks.Fish fish;
+        final LegendaryChases.Chase chase;
         final Haunt haunt = new Haunt();
         final List<Object> listeners = new ArrayList<>();
 
         Fixture() {
+            this("slipstream_moray");
+        }
+
+        Fixture(String species) {
+            fish = env.real(species);
+            chase = LegendaryChases.getState(species);
             chase.systemId = env.system.getId();
             chase.provoked = true;
             env.scripts.clear();
@@ -106,6 +112,8 @@ public final class HauntWindDownChecks {
         fadeAndRestart();
         lampToggle();
         lostFish();
+        dawnRange();
+        dawnCleanup();
         returnToPatrol();
         restoreHunt();
         overlays();
@@ -250,6 +258,89 @@ public final class HauntWindDownChecks {
             f.chase.caught = true;
             f.haunt.advance(0.1f);
             check(f.haunt.getModuleCount() == 0, "catching the legendary still cleans up immediately");
+        }
+    }
+
+    private static void dawnRange() {
+        for (int fps : new int[]{30, 60, 144}) try (Fixture f = new Fixture("false_dawn")) {
+            f.env.star(0f, 0f, 500f, 1500f);
+            var sun = f.env.star(20000f, -10000f, 8000f, 12000f);
+            f.env.playerAt.set(29000f, -10000f);
+            f.fish.at.set(f.env.playerAt);
+            f.chase.provoked = false;
+            f.haunt.advance(4f);
+            check(f.haunt.getModuleCount() == 0, "sun proximity alone cannot start the haunt");
+            LegendaryShields.onHarpoonContact(f.fish.getMote(), false);
+            f.haunt.advance(4f);
+            near(1f, f.haunt.getIntensity(), "provocation and sighting start Dawn's haunt");
+            check(LegendaryShields.getDawnCharges() == 1, "haunt starts with one charge after waking Dawn");
+            f.fish.at.set(10000f, -10000f);
+            f.fish.setSwimTarget(new Vector2f(10000f, -9000f));
+            f.fish.diveTime(100f);
+            f.fish.diveTime(0.4f);
+            check(f.fish.isDiving(), "Dawn is fully submerged during the lost-contact check");
+            for (int frame = 0; frame < fps * 90; frame++) f.haunt.advance(1f / fps);
+            near(1f, f.haunt.getIntensity(), "hidden Dawn stays active beyond lost-contact timeout at " + fps + " Hz");
+
+            f.env.playerAt.set(31500f, -10000f);
+            f.haunt.advance(1f);
+            near(1f, f.haunt.getIntensity(), "3500 from the host star's surface is inside");
+            f.env.playerAt.x += 1f;
+            f.fish.keepSurfaced(100f);
+            f.fish.at.set(f.env.playerAt);
+            f.haunt.advance(3f);
+            near(0.75f, f.haunt.getIntensity(), "outside surface range fades even with Dawn in sight");
+            f.env.playerAt.x -= 1f;
+            f.fish.at.set(10000f, -10000f);
+            f.haunt.advance(1f);
+            near(1f, f.haunt.getIntensity(), "returning to the sun cancels fade without seeing Dawn");
+
+            f.env.lampsOn = false;
+            f.haunt.advance(3f);
+            near(0.75f, f.haunt.getIntensity(), "lights off fades even inside the sun's vicinity");
+            f.env.lampsOn = true;
+            f.haunt.advance(1f);
+            near(1f, f.haunt.getIntensity(), "lights on resumes nearby Dawn without a new sighting");
+            var other = f.env.real(MantaFormationModule.SPECIES);
+            LegendaryHaunt.onFailedCatch(other);
+            check("false_dawn".equals(f.haunt.getActiveSpeciesId()), "another catch failure cannot replace nearby Dawn's hunt");
+
+            sun.getLocation().x += 2000f;
+            f.env.playerAt.x += 2000f;
+            f.haunt.advance(1f);
+            near(1f, f.haunt.getIntensity(), "range follows the moving host star");
+            f.chase.shieldUnits = 3;
+            f.haunt.close();
+            f.chase.roaming = true;
+            f.haunt.restore();
+            f.haunt.advance(90f);
+            check(f.haunt.getIntensity() == 1f && LegendaryShields.getDawnCharges() == 3,
+                    "loaded hunt stays active without resetting mine-fed charges");
+            f.env.playerAt.set(1000f, 0f);
+            f.haunt.advance(12f);
+            check(f.haunt.getModuleCount() == 0 && !f.chase.provoked && !f.chase.roaming,
+                    "near a different star is outside Dawn's hunt and completes wind-down");
+            check(LegendaryShields.getDawnCharges() == 1 && !f.fish.expired,
+                    "abandoning the sun resets to one charge and keeps Dawn resident");
+        }
+    }
+
+    private static void dawnCleanup() {
+        for (boolean caught : new boolean[]{false, true}) try (Fixture f = new Fixture("false_dawn")) {
+            f.env.star(0f, 0f, 500f, 2000f);
+            f.env.playerAt.set(1500f, 0f);
+            f.fish.at.set(f.env.playerAt);
+            f.haunt.advance(4f);
+            if (caught) {
+                f.chase.caught = true;
+                f.haunt.advance(0.1f);
+            } else {
+                f.env.lampsOn = false;
+                f.haunt.advance(12f);
+            }
+            check(f.haunt.getModuleCount() == 0 && f.haunt.module.cleanups == 1,
+                    "Dawn cleans up after " + (caught ? "capture" : "lights-off fade"));
+            check(f.chase.caught == caught, "wind-down preserves capture state");
         }
     }
 

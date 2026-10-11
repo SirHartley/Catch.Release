@@ -170,6 +170,8 @@ configuration; usage, checks, bands and exemptions are in [DIALOGUE.md](DIALOGUE
 
 Display names and internal IDs are separate. `LonglinerDecoy` and Longliner-named memory, sound and option keys still identify The Imposter. Asset status is recorded beside each species row (`placeholder art`). The `desc` column loads into `FishSpec.desc`, shared by `FishItemTooltips` and `FishCodexEntry`; handling advice and hazards in that text do not add campaign mechanics.
 
+The Imposter is disabled. Its row in `data/campaign/fish.csv` and all nine `longliner` rule IDs in `data/campaign/rules.csv` start with `#`; vanilla skips those records. This removes the species from spawning and rumor selection, along with its Fisherman questions, rumor intel text and bar reports. Code, assets and the original CSV contents remain for reactivation: remove those ten prefixes together. The Longliner contracts below describe that retained implementation.
+
 `RatingBarEvent` and rating-named rule IDs, commands and memory keys still identify the tutorial crew referrals. Player-facing job descriptions do not rename these bindings or saved keys.
 
 `RatingBarEvent.VisitCounter.reportPlayerOpenedMarket()` also prepares the same spacer's post-graduation legendary report. `REPORT_KEY` saves one unshared sighting across bar/market reopening; invalid sightings reroll only on a market-open callback. Both sources share `FishRumors`' unlock and 30-day publication cooldown. `hasRatingReport` is a read-only menu condition; `hearRatingReport` publishes once and snapshots dialogue tokens before `CatchReleaseRatingLegendaryReport`. Each species has a three-page rules chain; continuation options neither reroll nor republish the report. The final page displays the intel receipt and `QuestDialogMap` preview, then opens `CatchReleaseRatingLegendaryQuestions`. Location and shared gear answers both return to that menu; the location answer restores the map, while the gear answer and every bar exit remove it. Every story page has a bar exit. These are leads, not accepted quests; tutorial referral routes remain separate.
@@ -449,10 +451,11 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 1s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee. Excluded from Fisherman reconciliation. |
 | `LegendaryShields.java` | Persistent defenses and render state: Imposter explosive-only shield, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. |
 
-False Dawn starts with one stored shield charge; the wake-up hit consumes it.
-Green mine couriers add one on arrival, capped at two. Every deflection consumes
+False Dawn starts with one stored shield charge. The wake-up hit provokes it
+without spending that charge, so the haunt begins with one. Green mine couriers
+add one on arrival, capped at three. Each subsequent deflection consumes
 one; elapsed time, failed catches and mote replacement within a hunt never refill
-the ledger. Abandoning the haunt restores the single starting charge, even if two
+the ledger. Abandoning the haunt restores the single starting charge, even if three
 were stored before the reset. Shield collision, green rendering and charge rings use the same count.
 Minefield's 22-mine cap counts only live mines, not spent notice/courier anchors.
 
@@ -506,7 +509,19 @@ load sweep removes off-system legendary motes, preserves current residents, and 
 missing residents through `LegendarySpawns`. Departure resets uncaught residents'
 encounter state without changing host selection or relocation timing. Longliner's
 reveal flag remains set on departure so its existing relocation still runs.
-With lamps on, unseen haunt effects linger for
+False Dawn's active haunt ignores lost contact. With lamps on it remains at full
+strength within 3500 SU of its corona star's surface, including while the fish
+dives or crosses the far side of the star. `LegendaryHaunt.DAWN_SURFACE_RANGE`
+controls that distance; `FalseDawnOrbit.findCorona` selects the same star as its
+movement, including secondary stars. Leaving that range or turning lamps off
+starts the normal 12-second fade. Returning in range with lamps on reverses it
+without another sighting. Other legendary activations cannot replace this hunt
+while the player remains in range with lamps on. Initial activation still needs
+provocation and a sighting; capture and departure still clean up immediately.
+The existing haunt advance checks distance because vanilla's location listener
+only reports system changes, not crossings within a system. No new script.
+
+For other legendaries, with lamps on, unseen haunt effects linger for
 60 seconds, then fade over 12 seconds. Turning the player's lamps off starts that
 fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
@@ -532,9 +547,11 @@ Leaving the system resets defenses but removes motes instead of teleporting them
 Catching the fish uses cleanup only and cannot reset or respawn it.
 The saved `Chase.roaming` flag restores an unfinished haunt
 at full intensity with a fresh sighting grace period on load, even with lamps off;
-normal fading then applies. Ordinary fish, phantoms and splinters retain their
+normal fading then applies; False Dawn resumes its sun-distance check instead
+of a sighting grace period. Ordinary fish, phantoms and splinters retain their
 movement expiry. `tools/HauntWindDownChecks` covers lamp toggles, dark activation,
-lost contact, held catches, return placement, shield resets and load restoration.
+lost contact, False Dawn's surface-range boundary, held catches, return placement,
+shield resets and load restoration.
 
 Harpoon and drone failure callbacks release real legendary motes through
 `LegendaryShields.onFailedCatch` instead of fading them out. Ordinary fish,
@@ -744,7 +761,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - Species that share a rarity and `motion` differ in at least one of `motionSpeed`, `restlessness`, or `jitter`, so players can learn them apart.
 - Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` and a species' random moves may still roll either for one move.
 - `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
-- A legendary has one host, one permanent catch, and no range data or job asks. All six are lamp-only. The five non-Abyssal legendaries are Lantern Jack, Slipstream Moray, Quorum, False Dawn, and The Imposter; the manta is Abyssal.
+- A legendary has one host, one permanent catch, and no range data or job asks. All five enabled legendaries are lamp-only. Lantern Jack, Slipstream Moray, Quorum and False Dawn are non-Abyssal; the manta is Abyssal. The Imposter is disabled (see Data identity).
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
 - False Dawn selects the largest-radius usable corona star across chartable systems, regardless of coherence; its haunt supplies the coherence change. Its old regional sheet preference does not limit this selection. Equal-largest hosts can alternate; a sole largest host is retained. If no usable corona exists, no natural host is assigned. A host that becomes unsuitable is replaced only while the player is elsewhere; new natural spawns are gated immediately. `SpawnFish` still overrides the host for testing but places the fish in the largest usable local corona.
 - `LegendarySpawns` excludes resident legendaries from the ordinary population. False Dawn's existing specimens expire when their ledger marks capture or a different host; other legendary lifetimes and departure cleanup are described above.
