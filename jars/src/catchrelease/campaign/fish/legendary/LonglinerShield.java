@@ -17,7 +17,8 @@ public final class LonglinerShield {
     private static final int ARC_STEPS = 10;
     private static final float GAP_DEGREES = 4f;
     private static final int ALL_BROKEN = (1 << SECTIONS) - 1;
-    private static final float[][][] MESH = buildMesh();
+    private static final float[][][] MESH = buildMesh(GAP_DEGREES);
+    private static final float[][][] COLLISION_MESH = buildMesh(0f);
 
     public record Contact(int section, float fraction) {
 
@@ -74,10 +75,18 @@ public final class LonglinerShield {
         double y = (from.x - center.x) * sin + (from.y - center.y) * cos;
         double dx = (to.x - from.x) * cos - (to.y - from.y) * sin;
         double dy = (to.x - from.x) * sin + (to.y - from.y) * cos;
+        // A moving fish can overtake the head between callbacks. An intact sector
+        // must still block a head already inside it, as the other legendary shields do.
+        if (x * x + y * y < (RADIUS - THICKNESS) * (RADIUS - THICKNESS)) {
+            double bearing = Math.atan2(y, x);
+            if (x * x + y * y < 1e-6) bearing = Math.atan2(-dy, -dx);
+            int section = (int) ((Math.toDegrees(bearing) + 360d) % 360d / (360d / SECTIONS));
+            if ((broken & (1 << section)) == 0) return new Contact(section, 0f);
+        }
         Contact first = null;
         for (int section = 0; section < SECTIONS; section++) {
             if ((broken & (1 << section)) != 0) continue;
-            for (float[] quad : MESH[section]) {
+            for (float[] quad : COLLISION_MESH[section]) {
                 float fraction = clip(quad, x, y, dx, dy);
                 if (fraction >= 0f && (first == null || fraction < first.fraction())) {
                     first = new Contact(section, fraction);
@@ -87,7 +96,7 @@ public final class LonglinerShield {
         return first;
     }
 
-    // Clip the swept head against the same counterclockwise quads that are drawn.
+    // The drawn separators are cosmetic; only broken sections leave openings.
     private static float clip(float[] quad, double x, double y, double dx, double dy) {
         double enter = 0, leave = 1;
         for (int i = 0; i < 8; i += 2) {
@@ -107,14 +116,14 @@ public final class LonglinerShield {
         return (float) enter;
     }
 
-    private static float[][][] buildMesh() {
+    private static float[][][] buildMesh(float gap) {
         float[][][] mesh = new float[SECTIONS][ARC_STEPS][8];
         for (int section = 0; section < SECTIONS; section++) {
             for (int step = 0; step < ARC_STEPS; step++) {
-                double a = Math.toRadians(section * 360f / SECTIONS + GAP_DEGREES / 2f
-                        + (360f / SECTIONS - GAP_DEGREES) * step / ARC_STEPS);
-                double b = Math.toRadians(section * 360f / SECTIONS + GAP_DEGREES / 2f
-                        + (360f / SECTIONS - GAP_DEGREES) * (step + 1) / ARC_STEPS);
+                double a = Math.toRadians(section * 360f / SECTIONS + gap / 2f
+                        + (360f / SECTIONS - gap) * step / ARC_STEPS);
+                double b = Math.toRadians(section * 360f / SECTIONS + gap / 2f
+                        + (360f / SECTIONS - gap) * (step + 1) / ARC_STEPS);
                 float[] quad = mesh[section][step];
                 vertex(quad, 0, RADIUS - THICKNESS, a);
                 vertex(quad, 2, RADIUS, a);

@@ -290,8 +290,10 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   `LegendaryShields.getShieldColor` supplies the bubble, outline, stored rings and
   deflection flash through the shared mote renderer; there is no purple shield.
   The Imposter uses `LonglinerShield` instead of the bubble/lens renderer: six green
-  arcs at radius 68, with 6-unit thickness and 4-degree separators. Rendering and
-  harpoon collision share the same polygon mesh. Broken arcs disappear, including
+  arcs at radius 68, with 6-unit thickness and 4-degree decorative separators.
+  Harpoon collision closes those separators; only a broken section is passable.
+  An intact sector also blocks a head starting inside the ring, including when
+  the fish moves over it between callbacks. Broken arcs disappear, including
   from all copies. The real shield turns clockwise at 36 degrees/second; phantom
   shields turn counterclockwise using the same saved angle and damage mask.
   Rotation advances only from the real mote's existing callback. Lamp fade,

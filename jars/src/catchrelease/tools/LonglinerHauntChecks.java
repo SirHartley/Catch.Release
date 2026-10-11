@@ -103,10 +103,10 @@ public final class LonglinerHauntChecks {
                 Vector2f middle = polar(center, 65f, angle);
                 check(LonglinerShield.findContact(middle, middle, center, rotation, 0).fraction() == 0f,
                         "head already in a section collides without movement");
-                check(LonglinerShield.findContact(center, center, center, rotation, 0) == null,
-                        "shield has an empty interior");
+                check(LonglinerShield.findContact(center, center, center, rotation, 0) != null,
+                        "a head already inside an intact shield cannot bypass it");
                 check(LonglinerShield.findContact(polar(center, 150f, rotation + section * 60f), center,
-                        center, rotation, 0) == null, "visual separators have no invisible collision");
+                        center, rotation, 0) != null, "decorative separators cannot bypass intact sections");
                 check(LonglinerShield.findContact(from, center, center, rotation, 63) == null,
                         "fully broken shield has no collision");
             }
@@ -168,6 +168,20 @@ public final class LonglinerHauntChecks {
     }
 
     private static void harpoonSweeps() {
+        for (float angle : new float[]{0f, 1.9f, 30f, 60f, 180f, 359.9f}) {
+            for (float startRadius : new float[]{200f, 40f, 10f}) try (Fixture f = new Fixture()) {
+                Vector2f from = polar(f.real.at, startRadius, angle);
+                Shot wake = new Shot(f, from, f.real.at);
+                fly(wake, 60);
+                check(wake.getState() == HarpoonEntityPlugin.State.RETURNING && !f.real.isHeld(),
+                        "wake-up never hooks, including close-range re-engagement");
+                Shot followup = new Shot(f, from, f.real.at);
+                fly(followup, 60);
+                check(followup.getState() == HarpoonEntityPlugin.State.RETURNING
+                                && Integer.bitCount(f.state.longlinerBroken) == 1 && !f.real.isHeld(),
+                        "intact shield deflects the next shot at seams and from inside the ring");
+            }
+        }
         for (int fps : new int[]{1, 10, 30, 60, 144}) try (Fixture f = new Fixture()) {
             Vector2f from = polar(f.real.at, 200f, 210f);
             Shot wake = new Shot(f, from, f.real.at);
