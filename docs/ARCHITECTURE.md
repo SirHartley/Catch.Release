@@ -495,6 +495,11 @@ uses a direct heading after hit evasion ends. Each swallowed mote expires immedi
 and supplies one stored shell, up to three. At three it stops hunting, eating and
 calling. Pond stock, quest targets, held fish, legendaries and shield/phantom bodies
 are excluded.
+`FishEntityPlugin` scales its surfaced prowl, pursuit and evasive speed to
+100/85/70/55% with zero/one/two/three stored shells. Wandering and turn angles,
+plus the patrol and evasive retarget clocks, scale to 100/80/60/40%. Shell loss
+or feeding changes these factors immediately. Zero shells retain the original
+movement; dive timing, movement-mode timing and the five-second evasion do not change.
 Each call draws 1–3 fish total: eligible nearby motes within 3000 units are picked
 in random order, surfacing buried picks; shortages come from the normal local lamp
 pool, 800–1400 units away. Calls retain their 30-second cooldown. Called fish stay
@@ -502,7 +507,8 @@ surfaced and swim toward Jack for at most 20 seconds, breaking off immediately a
 50 units. They then resume their normal destination, movement and dive schedule;
 they do not wait or follow. New call-spawned fish have a destination beyond Jack,
 so release does not leave them aimed at its center. `tools/LanternFeedingChecks`
-covers shield counts, call limits, exclusions, release and ordinary movement.
+covers shield counts, shield-dependent movement, call limits, exclusions, release
+and ordinary movement.
 
 `LegendaryHaunt.getMantaLampAlpha(lamp)` gives each lamp an independent visual
 flicker phase using the identity of its stable aim vector, not its coordinates.
