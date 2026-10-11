@@ -42,10 +42,11 @@ public class ConservatoryOptionProvider extends BaseIndustryOptionProvider {
     @Override
     public void createTooltip(IndustryOptionData opt, TooltipMakerAPI tooltip, float width) {
         if (opt.id == SHOP) {
-            tooltip.addPara("Buy fishing upgrades and equipment with credits and fish.", 0f);
+            tooltip.addPara("Upgrade tiers and rig modules, paid for in fish - the same counter the"
+                    + " shop rig raises, without raising the rig.", 0f);
         } else if (opt.id == AQUARIUM) {
-            tooltip.addPara("Move fish between your hold and the aquarium, change its backdrop,"
-                    + " or switch the display off.", 0f);
+            tooltip.addPara("Stock the display tank from your hold, take specimens back"
+                    + " out, or shut the display off entirely.", 0f);
 
             int held = ((BreachConservatory) opt.ind).getAquariumFish().size();
             tooltip.addPara(held == 0 ? "The tank is empty." : "The tank holds "

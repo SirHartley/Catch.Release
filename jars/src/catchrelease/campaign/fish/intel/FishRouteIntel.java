@@ -239,7 +239,7 @@ public class FishRouteIntel extends BaseIntelPlugin {
 
         info.addPara("Route saved on %s.", opad, h, getSavedDate());
 
-        info.addPara("Route:", opad);
+        info.addPara("The plotted run:", opad);
         for (FishRoute.Stop stop : stops) {
             info.addPara("%s", 6f, text, h, getSystemName(stop));
 

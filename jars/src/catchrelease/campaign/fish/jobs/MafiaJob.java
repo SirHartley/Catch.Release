@@ -258,7 +258,7 @@ public class MafiaJob extends FishJob {
     protected String getIntelSpecialTerms() {
         return "You may take the fixed supplier fee of " + describeRewards()
                 + " or stake the entire fee on either fish. A winning stake replaces the fee "
-                + "with a larger purse; a loss pays nothing and leaves no debt. "
+                + "with a newly rolled, larger purse; a loss pays nothing and leaves no debt. "
                 + "The house keeps the share not assigned to either fighter.";
     }
 
@@ -266,7 +266,7 @@ public class MafiaJob extends FishJob {
     protected String getIntelPurpose() {
         return "Supply any two fish from your own catch for the bar's next Fight Night main "
                 + "event. At hand-in, the Commissioner measures each fish against the normal "
-                + "size range for its species and posts both fighters' odds along with the house "
+                + "size range for its species and posts both public lines along with the house "
                 + "share.";
     }
 
