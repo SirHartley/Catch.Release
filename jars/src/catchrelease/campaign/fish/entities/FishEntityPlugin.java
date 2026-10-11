@@ -77,6 +77,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float EVADE_JINK_MIN = 0.35f;
     private static final float EVADE_JINK_MAX = 0.7f;
     private static final float EVADE_LEG = 700f;
+    private static final float JACK_SPEED_LOSS_PER_SHELL = 0.15f;
+    private static final float JACK_AGILITY_LOSS_PER_SHELL = 0.2f;
 
     private static final float FLARE_COOLDOWN_SECONDS = 30f;
     private static final float FLARE_RING_SECONDS = 2f;
@@ -295,6 +297,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         LonglinerShield.advance(this, amount);
         if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
         if (mantaFormation != null) mantaFormation.sync();
+        advanceShieldLens();
         lastX = entity.getLocation().x;
         lastY = entity.getLocation().y;
         movementSampled = true;
@@ -317,7 +320,6 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (flareRing > 0f) flareRing -= amount;
 
         advanceLampFade(amount);
-        advanceShieldLens();
 
         advanceDive(amount);
 
@@ -446,7 +448,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float wander = (float) Math.sin(time * 1.5f) * sineVariance;
         float extra = (float) Math.sin(time * 2.63f + sineVariance) * sineVariance * 0.6f;
 
-        return (wander + extra * (wanderMult - 1f)) * wanderMult + getModeWander();
+        return ((wander + extra * (wanderMult - 1f)) * wanderMult + getModeWander())
+                * getJackAgilityMult();
     }
 
     protected float advanceMode(float amount) {
@@ -730,13 +733,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 ? DAWN_SPRINT_MULT : DAWN_CRUISE_MULT;
     }
 
-    /** The Lantern Jack's pace: a burst when struck, a closing rush on prey, and a
-     *  fast loping patrol the rest of the time - it is never standing water. */
     public float getJackSpeedMult() {
-        if (evasiveLeft > 0f) return EVADE_MULT;
-        if (hunting) return HUNT_MULT;
+        float pace = evasiveLeft > 0f ? EVADE_MULT : hunting ? HUNT_MULT : PROWL_MULT;
+        return pace * (1f - JACK_SPEED_LOSS_PER_SHELL * LegendaryShields.getStackedRings(this));
+    }
 
-        return PROWL_MULT;
+    private float getJackAgilityMult() {
+        return LegendaryShields.isProwler(this)
+                ? 1f - JACK_AGILITY_LOSS_PER_SHELL * LegendaryShields.getStackedRings(this) : 1f;
     }
 
     public void setHunting(boolean hunting) {
@@ -813,9 +817,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     /** Sweeping patrol legs while idle; hard alternating jinks while a throw is likely
      *  to follow. The hunt (the eater's swim target) takes the wheel by itself. */
     protected void advanceProwl(float amount) {
+        float agility = getJackAgilityMult();
         if (evasiveLeft > 0f) {
             evasiveLeft -= amount;
-            jinkLeft -= amount;
+            jinkLeft -= amount * agility;
             if (jinkLeft > 0f) return;
 
             jinkLeft = MathUtils.getRandomNumberInRange(EVADE_JINK_MIN, EVADE_JINK_MAX);
@@ -829,13 +834,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                     : MathUtils.getRandomNumberInRange(0f, 360f);
             setSwimTarget(MathUtils.getPointOnCircumference(entity.getLocation(),
                     EVADE_LEG,
-                    away + jinkSign * MathUtils.getRandomNumberInRange(50f, 110f)));
+                    away + jinkSign * MathUtils.getRandomNumberInRange(50f, 110f) * agility));
             return;
         }
 
         if (hunting) return;
 
-        prowlLeft -= amount;
+        prowlLeft -= amount * agility;
         if (prowlLeft > 0f && Misc.getDistance(entity.getLocation(), target)
                 > PROWL_ARRIVE_RANGE) {
             return;
@@ -845,7 +850,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 PROWL_RETARGET_MIN, PROWL_RETARGET_MAX);
         float heading = Misc.getAngleInDegrees(entity.getLocation(), target)
                 + (MathUtils.getRandomNumberInRange(0f, 1f) < 0.5f ? -1f : 1f)
-                * MathUtils.getRandomNumberInRange(PROWL_TURN_MIN_DEG, PROWL_TURN_MAX_DEG);
+                * MathUtils.getRandomNumberInRange(PROWL_TURN_MIN_DEG, PROWL_TURN_MAX_DEG) * agility;
         setSwimTarget(MathUtils.getPointOnCircumference(entity.getLocation(),
                 MathUtils.getRandomNumberInRange(PROWL_LEG_MIN, PROWL_LEG_MAX), heading));
     }
@@ -905,7 +910,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (shieldLens == null) {
             shieldLens = new org.dark.shaders.distortion.WaveDistortion(
                     entity.getLocation(), new Vector2f());
-            shieldLens.setSize(LegendaryShields.SHIELD_RADIUS * 2.2f);
+            // WaveDistortion's size is a radius, not the sprite diameter.
+            shieldLens.setSize(LegendaryShields.SHIELD_RADIUS);
             catchrelease.rendering.distortion.CampaignDistortionRenderer
                     .addDistortion(shieldLens);
         }

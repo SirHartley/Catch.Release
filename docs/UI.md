@@ -305,6 +305,10 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   alpha to all shields and deflection flashes. Diving hides the body, not the shield;
   a lit copy keeps its shield even when the real fish is outside the lamps.
   GL attributes and matrices are restored.
+  The bubble lens uses `WaveDistortion.setSize(SHIELD_RADIUS)`: GraphicsLib treats
+  size as a radius and draws a sprite twice that wide. Keep the lens inside the
+  shield rather than refracting the exposed trail beyond it. Update its position
+  after movement and confinement so it stays centered on the current mote.
   Wake-up and section hits use the shared expanding deflection flash at the section
   radius, alongside the same floating notices as the other legendaries.
   No sprite mutation or extra frame script is involved.
