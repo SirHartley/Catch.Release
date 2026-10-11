@@ -52,6 +52,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/config/settings.json` | `catchrelease.dialogue.rules` command package and sprites; black-hole warp settings belong to the deprecated test below |
 | `data/config/sounds.json` | Sound registry; callers in abilities and `FishConstants` |
 | `data/config/LunaSettings.csv` | Nine feature tabs; defaults and bounds mirror `config/Setting`. Runtime values and preset actions belong to `config/PlayerSettings`. |
+| `data/config/LunaSettingsConfig.json` | LunaLib mod-list icon; `catchrelease.iconPath` uses the existing `graphics/catchrelease/icon/small_icon_catchrelease.png` hook. |
 | `data/campaign/bar_events.csv` | 11 ordinary FishJob subclasses + 3 camp jobs; Crablobab and the tutorial spacer use AddBarEvents rules |
 | `data/campaign/distress_calls.csv` | Merged, namespaced specs; # IDs disabled; `CatchReleaseDistressProvider` |
 | `data/campaign/rules.csv` | Dialogue and type-selected fleet quest/intel text; Java supplies mechanics/state |
@@ -78,6 +79,8 @@ returns the action to Keep current. Custom is a computed status, not a preset. O
 cover catching and hunts; they leave equipment, prices, rewards, input mode and presentation alone.
 Marker presets set the four marker switches. [LunaLib UI synchronization](UI.md#lunalib-settings)
 prevents a retained action from overwriting later manual edits.
+The same [LunaLib UI contract](UI.md#lunalib-settings) defines CSV paragraph escaping;
+`tools/PlayerSettingsChecks` validates displayed formats as well as defaults and presets.
 
 | Area | Runtime owners |
 |---|---|
