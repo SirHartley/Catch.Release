@@ -67,7 +67,7 @@ public final class DevShortcutChecks {
         Fixture() throws Exception {
             List<List<FishCsv.Cell>> rows = FishCsv.parse(Files.readString(Path.of("data/config/UpgradeData.csv")));
             for (List<FishCsv.Cell> row : rows.subList(1, rows.size())) {
-                if (row.size() < 6 || row.get(0).value().isBlank()) continue;
+                if (row.size() < 6 || row.get(0).value().isBlank() || row.get(0).value().startsWith("#")) continue;
                 UpgradeStat stat = new UpgradeStat();
                 stat.id = row.get(0).value();
                 stat.maxLevel = Integer.parseInt(row.get(5).value());

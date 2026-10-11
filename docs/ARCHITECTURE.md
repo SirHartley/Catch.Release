@@ -804,6 +804,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - `StatIds.getAbilityId()` uses an explicit map. Do not infer the ability from a stat-name prefix.
 - `harpoon_reach` has three additive 10% tiers: 1200 base range, then 1320/1440/1560 units. It uses normal upgrade prices, Harpoon category/icon fallback and schematics for tiers 2–3. `HarpoonAbilityPlugin.getReach()` supplies the player shot limit, trajectory guide and tooltip. NPC shots retain the base range.
 - ROD chase duration and rarity priority are progressive stats: every purchased tier must affect runtime behavior.
+- `drone_catch_area` is commented out in `UpgradeData.csv`. New campaigns omit it from shops, schematic rewards and dev grants; `FishingDroneSwarmScript.getRingRadius()` uses the 150-unit fallback. Its stat ID and runtime hook remain. Existing saves retain their saved upgrade registry; this CSV change does not migrate them.
 - `drone_acceleration` is a steering response time in seconds: upgrades reduce it. `tools/DroneSteeringCheck` checks acceleration, turning and return approach across every tier at 30/60/144 Hz.
 - Retrieval Head refunds one charge only after a confirmed player mote collision. It preserves fractional recharge progress, respects the cap, and uses the ordinary charge-ready callback.
 - Explosive Head never lands a fish. Its blast state is terminal, consumes the head, and can immediately make a fleet hostile. Vanilla's explosion entity supplies fleet damage, visuals, and sound.

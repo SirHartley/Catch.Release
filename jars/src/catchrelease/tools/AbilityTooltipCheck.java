@@ -62,6 +62,8 @@ public final class AbilityTooltipCheck {
     }
 
     private static void checkBase(Fixture f) {
+        require(!f.upgrades.hasStat(StatIds.DRONE_CATCH_AREA), "Catch-area upgrade is disabled");
+        require(FishingDroneSwarmScript.getRingRadius() == 150f, "ROD keeps its base ring without the upgrade");
         includes(f.rod(), "Drones: 1", "300 units/s", "190 units", "8 seconds", "No rupture in range.");
         includes(f.harpoon(), "2/2", "12 seconds", "1200 units", "900 units/s");
         excludes(f.harpoon(), "Extra catch margin", "Aim correction", "degrees");
@@ -85,7 +87,7 @@ public final class AbilityTooltipCheck {
     private static void checkUpgraded(Fixture f) {
         for (UpgradeStat stat : f.upgrades.levelMap.values()) stat.level = stat.maxLevel;
         f.data.remove(ChargeManager.KEY);
-        includes(f.rod(), "Drones: 4", "444 units/s", "520 units", "16 seconds", "100%");
+        includes(f.rod(), "Drones: 4", "444 units/s", "430 units", "16 seconds", "100%");
         includes(f.harpoon(), "6/6", "4.8 seconds", "1560 units", "1332 units/s", "Extra catch margin: 4 px");
         excludes(f.harpoon(), "Aim correction", "degrees");
         includes(f.lamps(), "Lamps: 5", "Beam radius: 540 units", "48 units/s", "1000 units",
@@ -133,9 +135,9 @@ public final class AbilityTooltipCheck {
         f.lamps.on = true;
         TackleManager.fit(Tackle.Fit.DRONE, Tackle.NONE);
         TackleManager.own(Tackle.BREACH_COUPLER);
-        includes(f.rod(), "Turn off the breach lamps", "520 units from the selected spot");
+        includes(f.rod(), "Turn off the breach lamps", "430 units from the selected spot");
         TackleManager.fit(Tackle.Fit.DRONE, Tackle.BREACH_COUPLER);
-        includes(f.rod(), "2230 units from your fleet", "drones follow the fleet");
+        includes(f.rod(), "2140 units from your fleet", "drones follow the fleet");
         excludes(f.rod(), "No rupture in range.", "Turn off the breach lamps");
         f.scripts.add(new FishingDroneSwarmScript(null, null));
         includes(f.rod(), "Waiting for all drones to return.");
@@ -164,7 +166,7 @@ public final class AbilityTooltipCheck {
         private Fixture() throws Exception {
             List<List<FishCsv.Cell>> rows = FishCsv.parse(Files.readString(Path.of("data/config/UpgradeData.csv")));
             for (List<FishCsv.Cell> row : rows.subList(1, rows.size())) {
-                if (row.size() < 7 || row.get(0).value().isBlank()) continue;
+                if (row.size() < 7 || row.get(0).value().isBlank() || row.get(0).value().startsWith("#")) continue;
                 UpgradeStat stat = new UpgradeStat();
                 stat.id = row.get(0).value();
                 stat.baseValue = Double.parseDouble(row.get(1).value());
