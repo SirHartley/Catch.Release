@@ -94,19 +94,27 @@ public final class LegendaryScarChecks {
     static class Ui {
 
         final Set<UIPanelAPI> mounted = Collections.newSetFromMap(new IdentityHashMap<>());
+        final Map<PositionAPI, float[]> placements = new IdentityHashMap<>();
+        final List<UIPanelAPI> hoverPanels = new ArrayList<>();
+        final List<UIPanelAPI> boxPanels = new ArrayList<>();
         int hovers;
         int boxes;
         final PositionAPI position = position(140f, 480f);
         final CustomPanelAPI frame = panel(140f, 480f);
 
         PositionAPI position(float width, float height) {
+            return position(0f, 0f, width, height);
+        }
+
+        PositionAPI position(float x, float y, float width, float height) {
             return proxy(PositionAPI.class, (p, m, a) -> switch (m.getName()) {
-                case "getX", "getY" -> 0f;
+                case "getX" -> x;
+                case "getY" -> y;
                 case "getWidth" -> width;
                 case "getHeight" -> height;
-                case "getCenterX" -> width * 0.5f;
-                case "getCenterY" -> height * 0.5f;
-                case "inTL" -> p;
+                case "getCenterX" -> x + width * 0.5f;
+                case "getCenterY" -> y + height * 0.5f;
+                case "inTL" -> { placements.put((PositionAPI) p, new float[]{(float) a[0], (float) a[1]}); yield p; }
                 default -> throw new AssertionError(m);
             });
         }
@@ -122,7 +130,12 @@ public final class LegendaryScarChecks {
                 }
                 case "removeComponent" -> { mounted.remove(a[0]); yield null; }
                 case "updateUIElementSizeAndMakeItProcessInput" -> null;
-                case "wrapTooltipWithBox" -> { boxes++; yield panel(260f, 70f); }
+                case "wrapTooltipWithBox" -> {
+                    boxes++;
+                    UIPanelAPI box = panel(260f, 70f);
+                    boxPanels.add(box);
+                    yield box;
+                }
                 default -> throw new AssertionError(m);
             });
         }
@@ -139,7 +152,7 @@ public final class LegendaryScarChecks {
                     });
                 }
                 case "setParaFont" -> null;
-                case "addTooltipTo" -> { hovers++; yield null; }
+                case "addTooltipTo" -> { hovers++; hoverPanels.add((UIPanelAPI) a[1]); yield null; }
                 default -> throw new AssertionError(m);
             });
         }
@@ -355,9 +368,20 @@ public final class LegendaryScarChecks {
         display.failed(4);
         display.advance(0.61f, false);
         check(ui.boxes == 1 && ui.hovers == 0 && sounds.size() == 1, "new scar gets one automatic boxed explanation");
+        FishingMinigameLayout layout = new FishingMinigameLayout(ui.position);
+        check(ui.placements.get(ui.boxPanels.get(0).getPosition())[0]
+                        >= LegendaryScarDisplay.x(layout) + LegendaryScarDisplay.DIAMETER,
+                "explanation sits beyond the scar column, outside the main dialog");
         check(display.canDismiss(), "natural stamp completion has no extra input lockout");
         display.advance(5f, false);
         check(ui.hovers == 3 && ui.mounted.size() == 5, "postgame hover replaces the temporary notice, retaining the close prompt");
+        for (int i = 0; i < ui.hoverPanels.size(); i++) {
+            float[] at = ui.placements.get(ui.hoverPanels.get(i).getPosition());
+            check(at[0] == LegendaryScarDisplay.x(layout) - LegendaryScarDisplay.DIAMETER * 0.5f
+                            && at[1] == ui.position.getHeight() - LegendaryScarDisplay.y(layout, i)
+                            - LegendaryScarDisplay.DIAMETER * 0.5f,
+                    "postgame hover regions follow the external icon column");
+        }
         display.dispose();
         display.dispose();
         check(ui.mounted.isEmpty(), "dismissal removes the notice and all hover components");
@@ -371,10 +395,20 @@ public final class LegendaryScarChecks {
                 "failure at four scars adds no fifth icon, false quality notice or stamp sound");
         capped.dispose();
         check(cappedUi.mounted.isEmpty(), "capped failure cleans up");
-        FishingMinigameLayout layout = new FishingMinigameLayout(ui.position);
-        check(LegendaryScarDisplay.x(layout) - LegendaryScarDisplay.DIAMETER * 0.5f > layout.meterX + layout.meterWidth
-                        && LegendaryScarDisplay.y(layout, 3) - LegendaryScarDisplay.DIAMETER * 0.5f > layout.meterY,
-                "four icons fit vertically to the right of the progress meter");
+        for (float width : new float[]{140f, 200f, 280f}) for (float x : new float[]{0f, 275f, 800f}) {
+            PositionAPI position = ui.position(x, 150f, width, 480f);
+            layout = new FishingMinigameLayout(position);
+            for (float scale : new float[]{1f, 1.5f, LegendaryScarDisplay.STAMP_SCALE}) {
+                check(LegendaryScarDisplay.x(layout) - LegendaryScarDisplay.DIAMETER * 0.5f * scale
+                                >= position.getX() + position.getWidth() + FishConstants.MINIGAME_RESULT_GAP - 0.01f,
+                        "the entire scar stamp clears the main dialog, not merely the progress meter");
+            }
+            check(LegendaryScarDisplay.x(layout) > layout.panelX
+                            && LegendaryScarDisplay.x(layout) < layout.panelX + layout.panelWidth,
+                    "scar column uses the catch-card space that is cleared on a win");
+            check(LegendaryScarDisplay.y(layout, 3) - LegendaryScarDisplay.DIAMETER * 0.5f > layout.meterY,
+                    "all four icons fit vertically beside the meter");
+        }
     }
 
     private static void skipAnimation(LegendaryEscapeChecks.Environment env, List<String> sounds) {

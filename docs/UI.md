@@ -290,12 +290,16 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   `LegendaryShields.getShieldColor` supplies the bubble, outline, stored rings and
   deflection flash through the shared mote renderer; there is no purple shield.
   The Imposter uses `LonglinerShield` instead of the bubble/lens renderer: six green
-  arcs at radius 68, with 6-unit thickness and 4-degree separators. Rendering and
-  harpoon collision share the same polygon mesh. Broken arcs disappear, including
+  arcs at radius 68, with 6-unit thickness and 4-degree decorative separators.
+  Harpoon collision closes those separators; only a broken section is passable.
+  An intact sector also blocks a head starting inside the ring, including when
+  the fish moves over it between callbacks. Broken arcs disappear, including
   from all copies. The real shield turns clockwise at 36 degrees/second; phantom
   shields turn counterclockwise using the same saved angle and damage mask.
   Rotation advances only from the real mote's existing callback. Lamp fade,
   dive visibility and viewport alpha apply; GL attributes and matrices are restored.
+  Wake-up and section hits use the shared expanding deflection flash at the section
+  radius, alongside the same floating notices as the other legendaries.
   No sprite mutation or extra frame script is involved.
   The engine advances custom entities through the unpaused location update
   (`CampaignEngine.advance` / `CustomCampaignEntity.advance`, 0.98a-RC8).
@@ -349,7 +353,10 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 ### Minigame timing
 
 `LegendaryScarDisplay` draws up to four quiet 24-unit harpoon circles, spaced 32
-units vertically to the right of the progress meter. It uses the existing
+units vertically outside the main dialog's right edge, aligned with the progress
+meter. The column starts in the catch-card area (`layout.panelX`), reserving the
+stamp's maximum 2.4-times radius so the animation also clears the dialog. Hover
+regions and the explanation use that same anchor. It uses the existing
 `shop_harpoon` sprite and `Disc` primitives after the Manta distortion pass. There
 are no labels or hover regions during play. On a failed legendary minigame the
 dialog stays open: the new icon fades in and shrinks over 0.6 seconds, then plays
