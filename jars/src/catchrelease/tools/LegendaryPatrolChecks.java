@@ -236,8 +236,17 @@ public final class LegendaryPatrolChecks {
             check(env.fish.size() == 4 && state.shieldUnits == 3,
                     "return fills missing escorts without duplicating surviving ones");
             for (Fish escort : env.fish) {
-                check(!escort.expired && Vector2f.sub(escort.at, fish.at, null).length() < 1f,
-                        "surviving escorts return with the Quorum");
+                float expected = escort == fish ? 0f : LegendaryShields.MOTE_ORBIT_RADIUS;
+                check(!escort.expired
+                                && Math.abs(Vector2f.sub(escort.at, fish.at, null).length() - expected) < 0.01f,
+                        "surviving escorts return directly to the Quorum orbit");
+                if (escort == fish) continue;
+                for (Fish other : env.fish) {
+                    if (other == fish || other == escort) continue;
+                    check(Vector2f.sub(escort.at, other.at, null).length()
+                                    >= LegendaryShields.MOTE_MIN_DISTANCE - 0.01f,
+                            "returned escorts remain separated");
+                }
             }
         }
         try (Environment env = new Environment()) {
