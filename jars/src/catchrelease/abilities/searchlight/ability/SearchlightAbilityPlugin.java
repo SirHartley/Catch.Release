@@ -99,6 +99,18 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         return best;
     }
 
+    public static boolean isInsideBeam(Vector2f at, float radiusShare) {
+        CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
+        if (fleet == null || at == null
+                || !(fleet.getAbility(ABILITY_ID) instanceof SearchlightAbilityPlugin lamps)
+                || !lamps.isRuntimeCurrent()) return false;
+
+        for (Searchlight light : lamps.activeSearchlights) {
+            if (light.isRuntimeCurrent() && light.contains(at, radiusShare)) return true;
+        }
+        return false;
+    }
+
     protected static SearchlightImpressionRenderer getImpressions() {
         CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
         if (fleet == null) return null;

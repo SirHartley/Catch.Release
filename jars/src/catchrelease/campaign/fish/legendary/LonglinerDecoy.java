@@ -31,6 +31,8 @@ public class LonglinerDecoy implements EveryFrameScript {
     public static final String BOAT_KEY = "$catchrelease_longliner_boat";
     public static final String SOUND_FOUND = "catchrelease_longliner_found";
     public static final float CHECK_SECONDS = 0.5f;
+
+    public static final float REVEAL_RADIUS_SHARE = 0.8f;
     public static final float REVEAL_DRIFT_SECONDS = 3f;
     public static final float REVEAL_ALERT_DELAY_SECONDS = 0.3f;
     public static final float REVEAL_DRIFT_SPEED = 35f;
@@ -133,7 +135,7 @@ public class LonglinerDecoy implements EveryFrameScript {
 
         // the lamp test runs every frame while the boat shares the player's system
         if (boat != null && isPlayerWith(boat)
-                && SearchlightAbilityPlugin.getBeamStrengthAt(boat.getLocation()) > 0f) {
+                && SearchlightAbilityPlugin.isInsideBeam(boat.getLocation(), REVEAL_RADIUS_SHARE)) {
             reveal(boat);
             return;
         }

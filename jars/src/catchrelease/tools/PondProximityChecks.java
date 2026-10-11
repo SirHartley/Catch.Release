@@ -5,6 +5,12 @@ import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
+import catchrelease.campaign.fish.legendary.LonglinerDecoy;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
+import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -12,6 +18,7 @@ import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.fleet.MutableFleetStatsAPI;
 import com.fs.starfarer.api.combat.StatBonus;
 import com.fs.starfarer.api.impl.campaign.terrain.BaseTerrain;
@@ -32,6 +39,7 @@ public final class PondProximityChecks {
 
         void bind(CampaignFleetAPI fleet) { init(ABILITY_ID, fleet); }
         void on() { turnedOn = true; level = 1f; recoverRuntimeLocation(getFleet().getContainingLocation()); }
+        void off() { turnedOn = false; level = 0f; }
         void reload() { readResolve(); }
         @Override public boolean owns(Searchlight light) { return true; }
         @Override protected void ensureImpressionRenderer() { }
@@ -75,6 +83,7 @@ public final class PondProximityChecks {
         final Lamps lamps = new Lamps();
         final Rod rod = new Rod();
         final Searchlight beam = new Searchlight();
+        final UpgradeManager upgrades = new UpgradeManager();
         final CampaignFleetAPI fleet;
         final LocationAPI system;
         LocationAPI location;
@@ -101,10 +110,16 @@ public final class PondProximityChecks {
                 default -> throw new AssertionError(m);
             });
             var data = new HashMap<String, Object>();
+            MemoryAPI memory = proxy(MemoryAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "contains" -> UpgradeManager.MEMORY_ID.equals(a[0]);
+                case "get" -> UpgradeManager.MEMORY_ID.equals(a[0]) ? upgrades : null;
+                default -> throw new AssertionError(m);
+            });
             Global.setSector(proxy(SectorAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getPlayerFleet" -> fleet;
                 case "getCurrentLocation" -> location;
                 case "getPersistentData" -> data;
+                case "getMemoryWithoutUpdate" -> memory;
                 case "isPaused" -> paused;
                 case "addScript", "reportPlayerDeactivatedAbility" -> null;
                 default -> throw new AssertionError(m);
@@ -120,6 +135,11 @@ public final class PondProximityChecks {
                 case "getInt" -> 1;
                 case "getBoolean" -> false;
                 case "getColor" -> java.awt.Color.WHITE;
+                case "getAngleInDegreesFast" -> {
+                    Vector2f from = a.length == 1 ? new Vector2f() : (Vector2f) a[0];
+                    Vector2f to = (Vector2f) a[a.length - 1];
+                    yield (float) Math.toDegrees(Math.atan2(to.y - from.y, to.x - from.x));
+                }
                 default -> throw new AssertionError(m);
             }));
             lamps.bind(fleet);
@@ -143,11 +163,12 @@ public final class PondProximityChecks {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         terrainAndRange();
         repeatedQueries();
         pondChanges();
         locationAndLoad();
+        longlinerReveal();
         System.out.println("Pond proximity checks passed: " + checks);
     }
 
@@ -254,6 +275,81 @@ public final class PondProximityChecks {
             pond.activate();
             check(!f.allowed(), "fleet without lamp ability uses direct terrain query");
         }
+    }
+
+    private static void longlinerReveal() throws Exception {
+        try (Fixture f = new Fixture()) {
+            Searchlight beam = new Searchlight() {
+                @Override public Vector2f getOrigin() { return f.at; }
+            };
+            beam.bindOwner(f.lamps, f.fleet, f.system);
+            beam.updateRenderLoc(new Vector2f(1000f, 0f));
+            var lights = SearchlightAbilityPlugin.class.getDeclaredField("activeSearchlights");
+            lights.setAccessible(true);
+            lights.set(f.lamps, new ArrayList<>(List.of(beam)));
+            f.lamps.on();
+            for (float radius : new float[]{240f, 480f}) {
+                UpgradeStat area = new UpgradeStat();
+                area.baseValue = radius;
+                area.baseType = UpgradeStat.BaseType.DOUBLE;
+                area.upgradeType = UpgradeStat.UpgradeType.FLAT;
+                f.upgrades.levelMap.put(StatIds.SEARCHLIGHT_AREA, area);
+                for (float share : new float[]{0f, 0.79f, 0.8f, 0.801f, 0.99f, 1.01f}) {
+                    expectReveal(f, new Vector2f(1000f + radius * share, 0f), share <= 0.8f);
+                    expectReveal(f, new Vector2f(1000f, radius * share), share <= 0.8f);
+                }
+            }
+            TackleManager.fit(Tackle.Fit.SEARCHLIGHT, Tackle.FANNED_ARRAY);
+            float length = 1000f + Searchlight.getArea();
+            for (float share : new float[]{0.5f, 0.79f, 0.8f, 0.801f, 0.99f}) {
+                expectReveal(f, new Vector2f(length * share, 0f), share <= 0.8f);
+            }
+            for (float share : new float[]{-0.9f, -0.79f, 0f, 0.79f, 0.9f}) {
+                double angle = Math.toRadians(Searchlight.getFanHalfAngle() * share);
+                expectReveal(f, new Vector2f(length * 0.5f * (float) Math.cos(angle),
+                        length * 0.5f * (float) Math.sin(angle)), Math.abs(share) < 0.8f);
+            }
+            TackleManager.fit(Tackle.Fit.SEARCHLIGHT, Tackle.NONE);
+            Vector2f center = new Vector2f(1000f, 0f);
+            lights.set(f.lamps, new ArrayList<>());
+            expectReveal(f, center, false);
+            Searchlight other = new Searchlight();
+            other.bindOwner(f.lamps, f.fleet, f.system);
+            other.updateRenderLoc(new Vector2f(-1000f, 0f));
+            lights.set(f.lamps, new ArrayList<>(List.of(other, beam)));
+            expectReveal(f, center, true);
+            f.lamps.off();
+            expectReveal(f, center, false);
+            f.lamps.on();
+            f.installed = false;
+            expectReveal(f, center, false);
+            f.installed = true;
+            f.location = f.location(false);
+            expectReveal(f, center, false);
+            f.location = f.system;
+            Pond pond = new Pond(f, false);
+            pond.activate();
+            expectReveal(f, center, false);
+            pond.deactivate();
+            beam.expire(false);
+            expectReveal(f, center, false);
+        }
+    }
+
+    private static void expectReveal(Fixture f, Vector2f at, boolean expected) {
+        CampaignFleetAPI boat = proxy(CampaignFleetAPI.class, (p, m, a) -> switch (m.getName()) {
+            case "getLocation" -> at;
+            case "getContainingLocation" -> f.system;
+            default -> throw new AssertionError(m);
+        });
+        boolean[] revealed = {false};
+        LonglinerDecoy decoy = new LonglinerDecoy() {
+            @Override protected CampaignFleetAPI getBoat() { return revealed[0] ? null : boat; }
+            @Override protected void reveal(CampaignFleetAPI target) { revealed[0] = true; }
+            @Override protected void reconcile(CampaignFleetAPI target) { }
+        };
+        decoy.advance(1f / 60f);
+        check(revealed[0] == expected, "Longliner reveal boundary at " + at);
     }
 
     private static void check(boolean valid, String message) {
