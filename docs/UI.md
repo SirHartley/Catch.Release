@@ -235,6 +235,13 @@ in `sources-api/util.java`.
 Preset radios are one-shot actions, reset to Keep current after Save. The difficulty Text row
 describes saved values, and is rebuilt when its tab is reopened.
 
+Luna's coloured `addPara` calls format `fieldName`, `fieldDescription` and Text-row
+`defaultValue` with no arguments. Encode literal percent signs as `%%` in those CSV
+cells; they display as one `%`. Headers, stored values and radio choices are not
+paragraph formats. `PlayerSettingsChecks` exercises every formatted cell across all tabs.
+Sources: LunaSettingsUISettingsPanel.recreatePanel (bundled LunaLib) and
+StandardTooltipV2Expandable.addPara (`sources-obf/ui.impl.java`, 0.98a-RC8).
+
 LunaLib retains `LunaSettingsUISettingsPanel.Companion.changedSettings` and mounted controls
 after Save. `config/LunaSettingsBridge` synchronizes this mod's pending values and radio,
 boolean and numeric controls after applying a preset. Updating only the JSON would let a later

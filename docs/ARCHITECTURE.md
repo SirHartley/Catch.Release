@@ -78,6 +78,8 @@ returns the action to Keep current. Custom is a computed status, not a preset. O
 cover catching and hunts; they leave equipment, prices, rewards, input mode and presentation alone.
 Marker presets set the four marker switches. [LunaLib UI synchronization](UI.md#lunalib-settings)
 prevents a retained action from overwriting later manual edits.
+The same [LunaLib UI contract](UI.md#lunalib-settings) defines CSV paragraph escaping;
+`tools/PlayerSettingsChecks` validates displayed formats as well as defaults and presets.
 
 | Area | Runtime owners |
 |---|---|

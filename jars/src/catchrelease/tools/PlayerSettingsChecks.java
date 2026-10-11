@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -123,6 +124,15 @@ public final class PlayerSettingsChecks {
             check(row.size() == 9, "nine Luna columns");
             check(byId.put(row.get(0).value(), row) == null, "unique setting ID");
             tabs.add(row.get(8).value());
+            String id = row.get(0).value();
+            switch (row.get(2).value()) {
+                case "Header" -> { }
+                case "Text" -> lunaParagraph(row.get(3).value(), id + " defaultValue");
+                default -> {
+                    lunaParagraph(row.get(1).value(), id + " fieldName");
+                    lunaParagraph(row.get(5).value(), id + " fieldDescription");
+                }
+            }
         }
         check(tabs.size() == 9, "nine feature tabs");
         for (Setting setting : Setting.values()) {
@@ -151,6 +161,16 @@ public final class PlayerSettingsChecks {
             check(byId.containsKey(legacy), "preserved existing setting " + legacy);
         }
         check(START_PROGRESS.value() / 100f == FishConstants.MINIGAME_PROGRESS_START, "default starting progress");
+    }
+
+    private static void lunaParagraph(String text, String field) {
+        try {
+            // Luna's coloured addPara overload formats even with no highlight arguments.
+            check(String.format(text).equals(text.replace("%%", "%")),
+                    "Luna paragraph preserves literal text: " + field);
+        } catch (IllegalFormatException ex) {
+            throw new AssertionError("Invalid Luna paragraph format: " + field, ex);
+        }
     }
 
     private static void presets() {
