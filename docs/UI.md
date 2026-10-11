@@ -285,13 +285,17 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 ### Drawing gotchas
 
 - Shields use red for timed regeneration, green for charges restored by actions
-  rather than time (Moray, Lantern Jack, False Dawn and Longliner), and blue for Quorum's
-  escort-dependent immunity. Moray's shield returns only on encounter reset.
+  rather than time (Moray, Lantern Jack and False Dawn), blue for Quorum's
+  escort-dependent immunity, and orange for the Imposter's breakable sections.
+  Moray's shield returns only on encounter reset.
   `LegendaryShields.getShieldColor` supplies the bubble, outline, stored rings and
   deflection flash through the shared mote renderer; there is no purple shield.
-  The Imposter uses `LonglinerShield` instead of the bubble/lens renderer: six green
-  arcs at radius 68, with 6-unit thickness and 4-degree decorative separators.
-  Harpoon collision closes those separators; only a broken section is passable.
+  The Imposter uses `LonglinerShield` instead of the bubble/lens renderer: six orange
+  arcs at radius 68, drawn as single 1.5-pixel antialiased lines with normal alpha
+  blending and 0.4 opacity, matching the other shields' outer rims. There is no
+  filled band, inner edge or end cap. The 4-degree decorative separators remain.
+  The six-unit collision depth is independent of line width. Harpoon collision
+  closes those separators; only a broken section is passable.
   An intact sector also blocks a head starting inside the ring, including when
   the fish moves over it between callbacks. Broken arcs disappear, including
   from all copies. The real shield turns clockwise at 36 degrees/second; phantom

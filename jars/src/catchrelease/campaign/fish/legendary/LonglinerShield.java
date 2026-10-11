@@ -147,26 +147,16 @@ public final class LonglinerShield {
             GL11.glRotatef(rotation(fish.isPhantom()), 0f, 0f, 1f);
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+            GL11.glEnable(GL11.GL_LINE_SMOOTH);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
             GL11.glLineWidth(1.5f);
+            GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, alpha * 0.4f);
             for (int section = 0; section < SECTIONS; section++) {
                 if ((broken & (1 << section)) != 0) continue;
-                GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, alpha * 0.3f);
-                GL11.glBegin(GL11.GL_QUADS);
-                for (float[] quad : MESH[section]) {
-                    for (int i = 0; i < 8; i += 2) GL11.glVertex2f(quad[i], quad[i + 1]);
-                }
-                GL11.glEnd();
-                GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, alpha * 0.85f);
-                GL11.glBegin(GL11.GL_LINE_LOOP);
+                GL11.glBegin(GL11.GL_LINE_STRIP);
                 for (float[] quad : MESH[section]) GL11.glVertex2f(quad[2], quad[3]);
                 float[] end = MESH[section][ARC_STEPS - 1];
                 GL11.glVertex2f(end[4], end[5]);
-                GL11.glVertex2f(end[6], end[7]);
-                for (int step = ARC_STEPS - 1; step >= 0; step--) {
-                    float[] quad = MESH[section][step];
-                    GL11.glVertex2f(quad[0], quad[1]);
-                }
                 GL11.glEnd();
             }
         } finally {

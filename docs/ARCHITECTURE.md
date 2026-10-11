@@ -462,7 +462,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | `FakeWrecksModule.java` | Lantern Jack wrecks: groups of three, first at 5 seconds then every 10–18; at most 25 including fades, with smaller groups when nearly full. Spawn 600–1100 units away, expire after 120–240 seconds, and use registered ship variants except fighters/stations/modules. Click-to-approach stays enabled while interaction/salvage tags are withheld. At 100 units the first wreck approached becomes real; later wrecks have a 10% chance, otherwise fade over 0.5 seconds. Real wrecks restore vanilla interaction tags and retain default derelict salvage. All remain haunt-owned. |
 | `LanternSensorGhostsModule.java` | Jack-only vanilla `BaseSensorGhost` contacts: echo player movement, intercept then depart, or pass by. First and repeat spawns take 5–10 seconds, cap four including fades. Uses the haunt's existing advance and cleanup, not the hyperspace manager or a new sector script. Behavior durations convert seconds to campaign days; original tokens remain tracked after vanilla starts fading. No fleet spawning or drive drain. |
 | `LonglinerDecoy.java` | Imposter disguise. Player lamps remove fleet and spawn mote at the same location -> 3s drift along last velocity -> alert + positional sound -> 0.3s delay -> flee without a shield. Excluded from Fisherman reconciliation. |
-| `LonglinerShield.java` | Six rotating green sections; swept harpoon collision closes the decorative separators and guards intact sectors from inside-ring contacts. First body hit raises the shield and starts the haunt. Normal hits break one section; explosive hits also break its neighbours. `Chase.longlinerBroken/longlinerRotation` persist until encounter reset. |
+| `LonglinerShield.java` | Six rotating, independently breakable sections; swept harpoon collision closes the decorative separators and guards intact sectors from inside-ring contacts. First body hit raises the shield and starts the haunt. Normal hits break one section; explosive hits also break its neighbours. `Chase.longlinerBroken/longlinerRotation` persist until encounter reset. Rendering is covered in [UI.md](UI.md#drawing-gotchas). |
 | `LonglinerSchoolModule.java` | The real fish and eighteen phantoms circle a drifting center with individual velocities, changing radii and neighbour avoidance. Movement runs from the real mote's callback, as Quorum's shell game does; the haunt callback owns replenishment. Shared dive visibility, reversed shield rotation and shared section damage remain. Cleanup removes copies on replacement, failure, capture or departure. |
 | `LegendaryShields.java` | Defense dispatch and render state: Longliner sections, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. |
 
@@ -620,8 +620,8 @@ The Imposter has no timed base shield. Its wake-up hit uses the shared legendary
 provocation, flash and deflection notice without breaking a section, spawning decoys
 or consuming an Explosive Head. The first section hit forms the school immediately;
 restoring an intact shield on load leaves the fish alone. Section hits use the same flash and notice.
-Subsequent swept hits use the visible
-section geometry; a shot through a broken section can reach the body before the
+Subsequent swept hits use the section collision mesh, independent of visual line
+width; a shot through a broken section can reach the body before the
 far side of the ring. Explosive section hits use the existing detonation/consumption
 path. Failed catches, elapsed time, mote replacement and save/load retain damage.
 Full haunt failure restores the boat disguise; the next wake-up raises six intact
