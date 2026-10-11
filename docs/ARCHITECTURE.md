@@ -445,6 +445,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | `FishItems.java` | Item IDs, encoding, decoding, landing, unboxing, and transaction-screen packing. |
 | `FishItemPlugin.java`, `FishBundleItemPlugin.java`, `FishPileItemPlugin.java` | Specimen, crate and pile cargo items: names, prices, right-click stowing and unpacking, icons and tooltips. The three rows in `special_items.csv` carry `hide_in_codex`; species pages live in the mod's own Codex category. |
 | `FishItemTooltips.java` | Shared tooltip blocks for the three items; layout contract in [UI.md](UI.md#catch-item-and-species-tooltips). |
+| `FishBundleItemPlugin.renderBoxIcon()` | Species art fitted to the crate label's four native-image corners; [cargo sprite coordinates](UI.md#portraits-and-sprites). |
 
 ### `campaign/fish/crab`
 
