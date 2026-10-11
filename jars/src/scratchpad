@@ -1,9 +1,5 @@
 ---------------------
 
-todo
-
----------------------
-
 scrapped
     - Fishing logistics ships
     - Store fish, retrieve fish and sell fish buttons do not work because you can't load a new panel while another one is active without using a delegate //irrelevant because selling fish on open market and storing fish doesnt matter. Trading in fish also doesn't matter...
@@ -12,36 +8,22 @@ scrapped
     - making bait out of fish as progression mechanic? With some fish only spawning if you dump lure into the open pond?
 
 ---------------------
-qa_
 
-Haunts
-quorum done
-ghost manta done
-lantern jack done
-slipstream moray done
-
-false dawn
-imposter
-
-
-General todos before release
-Settings (+disable sidequest icon!)
-loot types and rarities
-fish descriptions
-item sprite label offsets
-shop prices
+todo / QA
 
 Placeholder art
 15 fish
 industry
 item box
 
+Fish requests
+- melon fish
+- radioactive fish
+
 New quest type that can show up whenever fitting: Treasure hauling.
 - Requirement: Fish until you find a specific treasure (assign spawn chance, quest yellow bg on treasure)
 - treasure contains a "treasure" placeholder icon (rig in settings)
 - bring that back for reward
-
-
 
 ---------------------
 
@@ -64,16 +46,6 @@ The LYNE drone Auto-Dispatcher
 
 handed off_
 
-
----------------------
-
-self_
-- upgrades too cheap
-- Industry icon
-- Fix fish crate display icon
-- fish heading all wrong
-- melon fish
-- radioactive fish
 
 ---------------------
 

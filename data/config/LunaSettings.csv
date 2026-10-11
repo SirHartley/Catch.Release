@@ -1,14 +1,14 @@
-"fieldID","fieldName","fieldType","defaultValue","secondaryValue","fieldDescription","minValue","maxValue","tab"
-"catchrelease_header_quicksettings","","Header","Quick Settings","","","","","Quick Settings"
-"catchrelease_difficulty_status","","Text","Saved difficulty: Standard (reopen this tab after saving)","","","","","Quick Settings"
-"catchrelease_preset","Overall fishing difficulty","Radio","Keep current","Keep current,Relaxed,Easy,Standard,Hard","Applies catching and hunt values when you save. Keep current leaves your individual adjustments alone. Default: Keep current.","","","Quick Settings"
-"catchrelease_no_escape","Prevent fish escaping","Boolean","false","","Catch progress cannot fail at zero. You still need to fill the meter. Takes effect next catch. Default: false.","","","Quick Settings"
-"catchrelease_marker_preset","Quest markers","Radio","Keep current","Keep current,All,Accepted quests only,None","Applies the marker choices in Quests & Markers when you save. Never changes quest state. Default: Keep current.","","","Quick Settings"
-"catchrelease_important_notifications","Important notifications only","Boolean","false","","Hides optional rumor notices. Does not suppress quest progress, completion or failure. Default: false.","","","Quick Settings"
-"catchrelease_reduced_effects","Reduced visual effects","Boolean","false","","Reduces flashes, distortion, decorative particles and camera movement. Gameplay warnings remain visible. Default: false.","","","Quick Settings"
-"catchrelease_sound_volume","Fishing sound volume (%)","Double","100","","Volume of fishing abilities, minigames and hunt sounds relative to your game volume. Vanilla UI and cargo sounds are unchanged. Default: 100%.","0","200","Quick Settings"
-catchrelease_harpoonChargeReloadSound,Harpoon reload sound,Radio,Play when relevant,"Never play, Play when relevant, Always play","Plays a sound when a harpoon charge is restored. 'Play when relevant' limits it to when breach lamps are on or your fleet is near an open pond.",,,Quick Settings
-catchrelease_pondViewportSnap,Snap viewport to open ponds,Boolean,true,,"Centers the camera on a pond as it opens for easier aiming. Disable to keep manual camera control. Manual movement may make aiming harder or cause discomfort if you are sensitive to motion.",,,Quick Settings
+fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
+catchrelease_header_quicksettings,,Header,Quick Settings,,,,,Quick Settings
+catchrelease_difficulty_status,,Text,Saved difficulty: Standard (reopen this tab after saving),,,,,Quick Settings
+catchrelease_preset,Overall fishing difficulty,Radio,Keep current,"Keep current,Relaxed,Easy,Standard,Hard",Applies catching and hunt values when you save. Keep current leaves your individual adjustments alone. Default: Keep current.,,,Quick Settings
+catchrelease_no_escape,Prevent fish escaping,Boolean,false,,Catch progress cannot fail at zero. You still need to fill the meter. Takes effect next catch. Default: false.,,,Quick Settings
+catchrelease_marker_preset,Quest markers,Radio,Keep current,"Keep current,All,Accepted quests only,None",Applies the marker choices in Quests & Markers when you save. Never changes quest state. Default: Keep current.,,,Quick Settings
+catchrelease_important_notifications,Important notifications only,Boolean,false,,"Hides optional rumor notices. Does not suppress quest progress, completion or failure. Default: false.",,,Quick Settings
+catchrelease_reduced_effects,Reduced visual effects,Boolean,false,,"Reduces flashes, distortion, decorative particles and camera movement. Gameplay warnings remain visible. Default: false.",,,Quick Settings
+catchrelease_sound_volume,Fishing sound volume (%),Double,100,,"Volume of fishing abilities, minigames and hunt sounds relative to your game volume. Vanilla UI and cargo sounds are unchanged. Default: 100%.",0,200,Quick Settings
+catchrelease_harpoonChargeReloadSound,Harpoon reload sound,Radio,Play when relevant,"Never play, Play when relevant, Always play",Plays a sound when a harpoon charge is restored. 'Play when relevant' limits it to when breach lamps are on or your fleet is near an open pond.,,,Quick Settings
+catchrelease_pondViewportSnap,Snap viewport to open ponds,Boolean,true,,Centers the camera on a pond as it opens for easier aiming. Disable to keep manual camera control. Manual movement may make aiming harder or cause discomfort if you are sensitive to motion.,,,Quick Settings
 catchrelease_skipTutorialCompleted,Skip tutorial,Boolean,false,,Adds a Fisherman dialogue option to skip the tutorial before you start it. Has no effect after the tutorial begins.,,,Quick Settings
 "catchrelease_header_catchingfish","","Header","Catching Fish","","","","","Catching Fish"
 "catchrelease_bar_size","Catching bar size (%)","Double","100","","Width of the safe tracking window along the minigame track. Larger is easier. Next catch. Default: 100%.","25","180","Catching Fish"
