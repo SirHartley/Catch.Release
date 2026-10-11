@@ -9,5 +9,11 @@ None
 
 --------------------------- Changelog -----------------------------
 
-1.0.a
+1.0.a - UNRELEASED
 Added - Initial Mod Release
+
+General
+Adjusted - Release downloads leave out development tools, libraries and source files
+
+Development
+Added - Changelog and release instructions

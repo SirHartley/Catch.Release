@@ -5,6 +5,8 @@ Technical routing for the current implementation. Java paths below are relative 
 | Reference | Scope |
 |---|---|
 | [CLAUDE.md](../CLAUDE.md) | Workflow, build gate and document upkeep |
+| [RELEASE.md](RELEASE.md) | Version numbers, release jar, package contents and publishing |
+| [CHANGELOG.md](CHANGELOG.md) | Change-note format and upkeep for every implementation task |
 | [DIALOGUE.md](DIALOGUE.md) | All player-facing text, rules or Java: workflow, shared text presentation and dialogue flow; prose constraints in LORE.md |
 | [LORE.md](LORE.md) | Setting facts, knowledge limits, character voices and source-labelled prose examples |
 | [Needle quest concept](NEEDLE_QUEST_CONCEPT.md#overview) | Deferred narrative plan, with a short theme, philosophy and content overview; not current canon or implementation |
@@ -102,6 +104,16 @@ The standalone difficulty tuner remains independent of player settings.
 ### Build and authoring tools
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
+
+`tools/ReleaseBuild` compiles into a fresh `out/release-build-*/classes` directory
+and writes the tracked runtime-only `jars/release/catchrelease.jar`. Its source
+hash covers runtime Java, the builder and the bundled compile libraries.
+`tools/ReleaseBuildChecks` tests version/changelog parsing, metadata stamping,
+archive filtering, freshness and reproducibility without game dependencies.
+`.github/workflows/release.yml` verifies that jar and packages allowlisted
+tracked resources into `out/release/`; only tag pushes publish.
+Packaging maps the jar to `Catch.Release/jars/catchrelease.jar` and stamps
+both version files from the tag. [Release procedure and contents](RELEASE.md).
 
 Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `HauntStatus`, `SpawnFisherman`, `SpawnFleetQuest`, `SpawnDistressCall`. They live in `commands/`, are the only classes that need `lw_Console.jar`, and nothing else references them; a build without the jar leaves them out ([Building](../CLAUDE.md#building)).
 
