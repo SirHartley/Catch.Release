@@ -210,10 +210,10 @@ public final class LegendaryPatrolChecks {
             check(haunt.abandon(), "False Dawn can return to a large corona");
             check(LegendaryShields.isShielded(dawn) && LegendaryShields.getDawnCharges() == 1,
                     "False Dawn regains its single starting charge");
-            LegendaryChases.getState(dawn.spec.id).shieldUnits = 2;
+            LegendaryChases.getState(dawn.spec.id).shieldUnits = 3;
             haunt.begin(dawn, env);
             haunt.abandon();
-            check(LegendaryShields.getDawnCharges() == 1, "reset also discards False Dawn's extra mine-fed charge");
+            check(LegendaryShields.getDawnCharges() == 1, "reset also discards False Dawn's extra mine-fed charges");
             float distance = Vector2f.sub(dawn.at, corona.getParams().relatedEntity.getLocation(), null).length();
             check(distance >= FalseDawnOrbit.innerRadius(corona) - 0.01f
                     && distance <= FalseDawnOrbit.outerRadius(corona) + 0.01f && distance > 6000f,

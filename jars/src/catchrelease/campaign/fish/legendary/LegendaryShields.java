@@ -32,7 +32,7 @@ import java.util.List;
  *   splinters regrow at one a month.
  * - The Lantern Jack starts with three stored shells; the wake-up hit leaves two.
  *   Eating motes replenishes them, up to three. It has no regenerating base shell.
- * - False Dawn starts with one charge. Green mines can refill it up to two.
+ * - False Dawn starts its haunt with one charge. Green mines can refill it up to three.
  * - The Moray's shell stays broken until the haunt is abandoned.
  * - Everything else wears the base shell: one deflection, regrown ten seconds later,
  *   so landing a throw means following the first with a second inside the window.
@@ -54,7 +54,7 @@ public class LegendaryShields {
     public static final float LAZY_SPEED_MULT = 0.4f;
 
     public static final int DAWN_CHARGES_INITIAL = 1;
-    public static final int DAWN_CHARGES_MAX = 2;
+    public static final int DAWN_CHARGES_MAX = 3;
 
     public static final float EAT_SEEK_RANGE = 3500f;
     public static final float EAT_RANGE = 80f;

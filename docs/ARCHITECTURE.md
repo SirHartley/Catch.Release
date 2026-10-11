@@ -451,9 +451,9 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 
 False Dawn starts with one stored shield charge. The wake-up hit provokes it
 without spending that charge, so the haunt begins with one. Green mine couriers
-add one on arrival, capped at two. Each subsequent deflection consumes
+add one on arrival, capped at three. Each subsequent deflection consumes
 one; elapsed time, failed catches and mote replacement within a hunt never refill
-the ledger. Abandoning the haunt restores the single starting charge, even if two
+the ledger. Abandoning the haunt restores the single starting charge, even if three
 were stored before the reset. Shield collision, green rendering and charge rings use the same count.
 Minefield's 22-mine cap counts only live mines, not spent notice/courier anchors.
 
