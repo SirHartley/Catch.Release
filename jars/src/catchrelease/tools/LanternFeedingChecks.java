@@ -9,6 +9,7 @@ import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.reflection.ReflectionUtils;
+import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -22,8 +23,33 @@ public final class LanternFeedingChecks {
 
     private static int checks;
 
+    private static class MovingFish extends LegendaryEscapeChecks.Fish {
+
+        MovingFish(LegendaryEscapeChecks.Environment env, String id) {
+            super(env, id, false, null);
+            setSwimTarget(new Vector2f(10000f, at.y));
+            keepSurfaced(60f);
+        }
+        void field(String name, Object value) { ReflectionUtils.set(this, name, value, true); }
+        float value(String name) { return (float) ReflectionUtils.get(this, name, null, true); }
+        float wander() { return getWander(); }
+        float unweightedWander() {
+            float variance = value("sineVariance");
+            float time = value("time");
+            float wander = (float) Math.sin(time * 1.5f) * variance;
+            float extra = (float) Math.sin(time * 2.63f + variance) * variance * 0.6f;
+            return (wander + extra * (getWanderMult() - 1f)) * getWanderMult() + getModeWander();
+        }
+        void prowl(float amount) { advanceProwl(amount); }
+        float heading() {
+            return Misc.getAngleInDegrees(at, (Vector2f) ReflectionUtils.get(this, "target", null, true));
+        }
+    }
+
     public static void main(String[] args) {
         startingShields();
+        shieldMovement();
+        shieldTurns();
         emptyShields();
         pursuit();
         buried();
@@ -39,8 +65,8 @@ public final class LanternFeedingChecks {
             callPool(env);
             var jack = env.real("lantern_jack");
             var color = LegendaryShields.getShieldColor(jack);
-            check(color.getGreen() > color.getRed() && color.getGreen() > color.getBlue(),
-                    "Jack's shield, stored rings and hit flash share green");
+            check(color.equals(LegendaryShields.SHIELD_ORANGE),
+                    "Jack uses the shared charge-shield color");
             check(LegendaryShields.isShielded(jack) && LegendaryShields.getStackedRings(jack) == 3,
                     "Jack has three hunt shields before the wake-up hit");
             for (int remaining : new int[]{2, 1, 0}) {
@@ -68,6 +94,81 @@ public final class LanternFeedingChecks {
                     "full shields ignore prey and suppress both call entry points");
             check((float) ReflectionUtils.get(jack, "flareCooldown", null, true) == cooldown,
                     "suppressed call does not spend cooldown");
+        }
+    }
+
+    private static void shieldMovement() {
+        try (var env = new LegendaryEscapeChecks.Environment()) {
+            var jack = new MovingFish(env, "lantern_jack");
+            var state = LegendaryChases.getState("lantern_jack");
+            jack.field("time", 1.7f);
+            jack.field("sineVariance", 53f);
+            for (int shells : new int[]{0, 1, 2, 3, 2, 1, 0, 3}) {
+                state.shieldUnits = shells;
+                float pace = new float[]{1f, .85f, .7f, .55f}[shells];
+                float agility = new float[]{1f, .8f, .6f, .4f}[shells];
+                for (int mode = 0; mode < 3; mode++) {
+                    jack.setHunting(mode == 1);
+                    jack.field("evasiveLeft", mode == 2 ? 5f : 0f);
+                    check(Math.abs(LegendaryShields.getSpeedMult(jack)
+                                    - new float[]{1.6f, 1.9f, 2.6f}[mode] * pace) < .00001f,
+                            "current shells scale prowl, pursuit and evasion immediately");
+                }
+                for (FishMotion mode : FishMotion.values()) {
+                    jack.spec.motion = mode;
+                    jack.field("activeMode", mode);
+                    jack.field("dashing", true);
+                    check(Math.abs(jack.wander() - jack.unweightedWander() * agility) < .0001f,
+                            "shells damp all wandering, with the original value at zero: " + mode);
+                }
+            }
+            for (String id : new String[]{"ordinary", "false_dawn", "slipstream_moray"}) {
+                var fish = new MovingFish(env, id);
+                if (id.equals("ordinary")) fish.spec.rarity = FishRarity.COMMON;
+                fish.field("time", 1.7f);
+                fish.field("sineVariance", 53f);
+                check(fish.wander() == fish.unweightedWander(), "other species keep their wandering");
+            }
+        }
+        for (int fps : new int[]{30, 60, 144}) for (int shells = 0; shells <= 3; shells++) {
+            try (var env = new LegendaryEscapeChecks.Environment()) {
+                var jack = new MovingFish(env, "lantern_jack");
+                LegendaryChases.getState("lantern_jack").shieldUnits = shells;
+                jack.field("prowlLeft", 100f);
+                Vector2f start = new Vector2f(jack.at);
+                for (int i = 0; i < fps; i++) jack.advance(1f / fps);
+                float expected = 90f * jack.spec.getCampaignSpeedMult() * 1.6f
+                        * new float[]{1f, .85f, .7f, .55f}[shells];
+                check(Math.abs(Vector2f.sub(jack.at, start, null).length() - expected) < .02f,
+                        "actual travel scales with shields at " + fps + " Hz");
+            }
+        }
+    }
+
+    private static void shieldTurns() {
+        for (boolean evading : new boolean[]{false, true}) for (int shells = 0; shells <= 3; shells++) {
+            try (var env = new LegendaryEscapeChecks.Environment()) {
+                var jack = new MovingFish(env, "lantern_jack");
+                LegendaryChases.getState("lantern_jack").shieldUnits = shells;
+                float agility = new float[]{1f, .8f, .6f, .4f}[shells];
+                MathUtils.getRandom().setSeed(413L);
+                float clock = MathUtils.getRandomNumberInRange(evading ? .35f : 2.5f, evading ? .7f : 4.5f);
+                float sign = evading ? -1f : MathUtils.getRandomNumberInRange(0f, 1f) < .5f ? -1f : 1f;
+                float turn = sign * MathUtils.getRandomNumberInRange(evading ? 50f : 25f, evading ? 110f : 60f);
+                float base = evading ? Misc.getAngleInDegrees(env.playerAt, jack.at) : jack.heading();
+                if (evading) jack.startEvasive();
+                MathUtils.getRandom().setSeed(413L);
+                jack.prowl(.1f);
+                check(Math.abs(Misc.getAngleDiff(jack.heading(), base + turn * agility)) < .001f,
+                        "patrol/evasive turns shrink with shells; zero retains the seeded turn");
+                String timer = evading ? "jinkLeft" : "prowlLeft";
+                check(jack.value(timer) == clock, "original randomized retarget interval is retained");
+                jack.prowl(.1f);
+                check(Math.abs(jack.value(timer) - (clock - .1f * agility)) < .00001f,
+                        "shields slow the existing retarget clock");
+                if (evading) check(Math.abs(jack.value("evasiveLeft") - 4.8f) < .00001f,
+                        "shield count does not extend the five-second evasion");
+            }
         }
     }
 
