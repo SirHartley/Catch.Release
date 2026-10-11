@@ -359,18 +359,18 @@ public final class LegendaryScarChecks {
 
     private static void display(List<String> sounds) {
         Ui ui = new Ui();
-        LegendaryScarDisplay display = new LegendaryScarDisplay(2);
+        LegendaryScarDisplay display = new LegendaryScarDisplay(0);
         display.attach(ui.frame);
         sounds.clear();
         display.advance(100f, true);
         check(ui.hovers == 0 && ui.boxes == 0 && sounds.isEmpty(), "no hover regions, explanation or stamp during play");
-        display.failed(3);
+        display.failed(1);
         display.failed(4);
         display.advance(0.61f, false);
-        check(ui.boxes == 1 && ui.hovers == 0 && sounds.size() == 1, "new scar gets one automatic boxed explanation");
+        check(ui.boxes == 1 && ui.hovers == 0 && sounds.size() == 1, "first scar gets one automatic boxed explanation");
         FishingMinigameLayout layout = new FishingMinigameLayout(ui.position);
         check(ui.placements.get(ui.boxPanels.get(0).getPosition())[0]
-                        >= LegendaryScarDisplay.x(layout, 2, 3) + LegendaryScarDisplay.DIAMETER,
+                        >= LegendaryScarDisplay.x(layout, 0, 1) + LegendaryScarDisplay.DIAMETER,
                 "explanation sits to the right of the newest scar");
         float[] noticeAt = ui.placements.get(ui.boxPanels.get(0).getPosition());
         check(Math.abs(ui.position.getHeight() - noticeAt[1]
@@ -379,10 +379,10 @@ public final class LegendaryScarChecks {
                 "explanation is vertically centered on the new scar above the dialog");
         check(display.canDismiss(), "natural stamp completion has no extra input lockout");
         display.advance(5f, false);
-        check(ui.hovers == 3 && ui.mounted.size() == 5, "postgame hover replaces the temporary notice, retaining the close prompt");
+        check(ui.hovers == 1 && ui.mounted.size() == 3, "postgame hover replaces the first-scar notice, retaining the close prompt");
         for (int i = 0; i < ui.hoverPanels.size(); i++) {
             float[] at = ui.placements.get(ui.hoverPanels.get(i).getPosition());
-            check(at[0] == LegendaryScarDisplay.x(layout, i, 3) - LegendaryScarDisplay.DIAMETER * 0.5f
+            check(at[0] == LegendaryScarDisplay.x(layout, i, 1) - LegendaryScarDisplay.DIAMETER * 0.5f
                             && at[1] == ui.position.getHeight() - LegendaryScarDisplay.y(layout)
                             - LegendaryScarDisplay.DIAMETER * 0.5f,
                     "postgame hover regions follow the centered icon row");
@@ -390,6 +390,32 @@ public final class LegendaryScarChecks {
         display.dispose();
         display.dispose();
         check(ui.mounted.isEmpty(), "dismissal removes the notice and all hover components");
+        for (int prior = 1; prior < 4; prior++) {
+            Ui laterUi = new Ui();
+            LegendaryScarDisplay later = new LegendaryScarDisplay(prior);
+            later.attach(laterUi.frame);
+            sounds.clear();
+            later.advance(100f, true);
+            check(laterUi.boxes == 0 && laterUi.hovers == 0 && sounds.isEmpty(),
+                    "existing scars have no tooltips or sound during play");
+            later.failed(prior + 1);
+            later.advance(0.3f, false);
+            check(laterUi.boxes == 0 && laterUi.hovers == 0 && sounds.isEmpty(),
+                    "later scars finish stamping before enabling hover targets");
+            later.advance(0.31f, false);
+            check(laterUi.boxes == 0 && laterUi.hovers == prior + 1 && sounds.size() == 1 && later.canDismiss(),
+                    "later scars stamp with one sound and immediately enable hover help for every icon");
+            for (int i = 0; i < laterUi.hoverPanels.size(); i++) {
+                float[] at = laterUi.placements.get(laterUi.hoverPanels.get(i).getPosition());
+                check(at[0] == LegendaryScarDisplay.x(layout, i, prior + 1) - LegendaryScarDisplay.DIAMETER * 0.5f,
+                        "later-scar hover targets follow every centered icon");
+            }
+            later.advance(10f, false);
+            check(laterUi.boxes == 0 && laterUi.hovers == prior + 1 && sounds.size() == 1,
+                    "later scars never produce a delayed popup, duplicate hover or repeated sound");
+            later.dispose();
+            check(laterUi.mounted.isEmpty(), "later-scar hover targets are removed on dismissal");
+        }
         Ui cappedUi = new Ui();
         LegendaryScarDisplay capped = new LegendaryScarDisplay(4);
         capped.attach(cappedUi.frame);
@@ -426,10 +452,10 @@ public final class LegendaryScarChecks {
 
     private static void skipAnimation(LegendaryEscapeChecks.Environment env, List<String> sounds) {
         for (int fps : new int[]{30, 60, 144}) for (int input : new int[]{0, 1, 2}) {
-            for (float at : new float[]{-1f, 0f, 0.3f, 0.59f}) {
+            for (float at : new float[]{-1f, 0f, 0.3f, 0.59f}) for (int prior = 0; prior < 4; prior++) {
                 FishSpec spec = env.real("scar_skip").spec;
-                Game game = new Game(spec, env.system, 1);
-                Outcome outcome = new Outcome(2);
+                Game game = new Game(spec, env.system, prior);
+                Outcome outcome = new Outcome(prior + 1);
                 FishingMinigamePanel panel = new FishingMinigamePanel(game, null, null, null, outcome);
                 Ui ui = new Ui();
                 panel.attachFrame(ui.frame);
@@ -443,8 +469,9 @@ public final class LegendaryScarChecks {
                         "first click/key skips the stamp, records one scar and keeps the result open");
                 check(ui.boxes == 0, "skipping defers UI mutation until advance");
                 panel.advance(1f / fps);
-                check(ui.boxes == 1 && Collections.frequency(sounds, LegendaryScarDisplay.SOUND) == 1,
-                        "skip completes the stamp with one sound and the explanation next frame");
+                check(ui.boxes == (prior == 0 ? 1 : 0) && ui.hovers == (prior == 0 ? 0 : prior + 1)
+                                && Collections.frequency(sounds, LegendaryScarDisplay.SOUND) == 1,
+                        "skip gives the first scar a popup and later scars hover help, with one sound");
                 panel.processInput(List.of(input(input, false, false), input(2, true, true)));
                 check(outcome.endings == 0, "release and held-key repeat cannot dismiss the skipped result");
                 panel.processInput(List.of(input(input, true, false)));
