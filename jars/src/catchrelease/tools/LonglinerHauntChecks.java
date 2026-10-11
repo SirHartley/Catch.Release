@@ -45,6 +45,7 @@ public final class LonglinerHauntChecks {
         }
 
         void wake() { LegendaryShields.onHarpoonContact(real.getMote(), false); }
+        void crack() { LegendaryShields.onHarpoonContact(real.getMote(), false, 0); }
         List<Fish> copies() { return env.fish.stream().filter(f -> f.phantom && !f.expired).toList(); }
 
         @Override public void close() { haunt.close(); env.close(); }
@@ -128,7 +129,13 @@ public final class LonglinerHauntChecks {
             var flash = FishEntityPlugin.class.getDeclaredField("shieldFlash");
             flash.setAccessible(true);
             check(flash.getFloat(f.real) > 0f, "wake-up starts the shared shield flash");
-            check(f.copies().size() == LonglinerSchoolModule.SCHOOL_SIZE - 1, "wake spawns the school immediately");
+            check(f.copies().isEmpty(), "wake raises the shield without decoys");
+            for (int i = 0; i < 10; i++) f.haunt.tickSchool();
+            check(f.copies().isEmpty(), "intact shield cannot replenish decoys");
+            f.haunt.close();
+            f.state.roaming = true;
+            f.haunt.restore();
+            check(f.copies().isEmpty(), "restoring an intact shield leaves the fish alone");
             for (int section = 0; section < 6; section++) {
                 f.state.longlinerBroken = 0;
                 check(LegendaryShields.onHarpoonContact(f.real.getMote(), explosive, section)
@@ -137,6 +144,8 @@ public final class LonglinerHauntChecks {
                 int expected = 1 << section;
                 if (explosive) expected |= (1 << ((section + 1) % 6)) | (1 << ((section + 5) % 6));
                 check(f.state.longlinerBroken == expected, "blast breaks adjacent sections including wraparound");
+                check(f.copies().size() == LonglinerSchoolModule.SCHOOL_SIZE - 1,
+                        "first section hit immediately spawns the school, including explosive hits");
                 check("Deflected".equals(f.real.notices.get(f.real.notices.size() - 1).text)
                                 && flash.getFloat(f.real) > 0f,
                         "section hits retain shared deflection feedback");
@@ -215,6 +224,7 @@ public final class LonglinerHauntChecks {
         }
         try (Fixture f = new Fixture()) {
             f.wake();
+            f.crack();
             Shot shot = new Shot(f, new Vector2f(), f.real.at);
             for (Fish copy : f.copies()) {
                 check(!HarpoonEntityPlugin.canTake(copy.getMote()), "copies cannot be selected by harpoons");
@@ -238,6 +248,7 @@ public final class LonglinerHauntChecks {
             f.real.at.set(1700f, 0f);
             Vector2f wakePosition = new Vector2f(f.real.at);
             f.wake();
+            f.crack();
             check(f.real.at.equals(wakePosition), "forming a school does not teleport the hit fish");
             separated(f);
             List<Fish> school = f.env.fish.stream().filter(m -> !m.expired).toList();

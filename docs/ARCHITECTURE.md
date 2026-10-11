@@ -541,8 +541,8 @@ fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
 Existing module callbacks handle the fade and cleanup; no new polling script.
 Spawners and timed Manta blackouts stop escalating below full intensity, except
-for the Moray's opening escape and Longliner's school. The school forms on the
-wake-up hit and maintains its fixed size until cleanup. Screen effects scale all the way
+for the Moray's opening escape and Longliner's school. The school forms when the
+first shield section breaks, not on the wake-up hit, and maintains its size until cleanup. Screen effects scale all the way
 to zero, including their minimum-strength component.
 The full-screen chromatic pass also fades its pixel displacement to zero; the
 minigame's region-only pass keeps its existing displacement range.
@@ -613,8 +613,9 @@ The Moray's shield uses the existing saved `Chase.shieldPopped` flag instead of
 the timed base shield. Once broken, it stays down through failed catches, elapsed
 time and mote recreation within a hunt. Abandoning the haunt restores it. Its failed-catch slipstream dash is unchanged.
 The Imposter has no timed base shield. Its wake-up hit uses the shared legendary
-provocation, flash and deflection notice before starting the school, without breaking
-a section or consuming an Explosive Head. Section hits use the same flash and notice.
+provocation, flash and deflection notice without breaking a section, spawning decoys
+or consuming an Explosive Head. The first section hit forms the school immediately;
+restoring an intact shield on load leaves the fish alone. Section hits use the same flash and notice.
 Subsequent swept hits use the visible
 section geometry; a shot through a broken section can reach the body before the
 far side of the ring. Explosive section hits use the existing detonation/consumption
