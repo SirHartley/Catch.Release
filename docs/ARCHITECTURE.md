@@ -207,6 +207,8 @@ configuration; usage, checks, bands and exemptions are in [DIALOGUE.md](DIALOGUE
 
 Display names and internal IDs are separate. `LonglinerDecoy` and Longliner-named memory, sound and option keys still identify The Imposter. Asset status is recorded beside each species row (`placeholder art`). The `desc` column loads into `FishSpec.desc`, shared by `FishItemTooltips` and `FishCodexEntry`. It contains quoted sailors' yarns; their events and hazards do not add campaign mechanics. Description edits leave species identifiers, balance, assets and facing values unchanged. Prose guidance belongs in [LORE.md](LORE.md#fish-descriptions).
 
+Both description displays pass the text to `addPara` verbatim. Spoken quotation marks belong in the `desc` value, escaped as doubled quotes in the CSV.
+
 The Imposter's active `longliner` fish row and nine matching rules supply its spawn, Fisherman questions, rumor intel and bar reports. It retains the boat disguise and has no range-data entry.
 
 `RatingBarEvent` and rating-named rule IDs, commands and memory keys still identify the tutorial crew referrals. Player-facing job descriptions do not rename these bindings or saved keys.
