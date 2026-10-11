@@ -113,21 +113,15 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         }
 
         if (minigame.isCaught()) {
+            if (scars != null) scars.dispose();
             // only on a win - losing the fish also loses whatever was taken
             resolveTreasure();
 
             advanceCaught(amount);
-            if (scars != null) scars.advance(amount, false);
             return;
         }
 
-        if (!failedSoundPlayed) {
-            failedSoundPlayed = true;
-            CatchCelebration.playHook(FishConstants.SOUND_FAILED);
-            if (scars != null) {
-                scars.failed(listener == null ? minigame.getScars() : listener.onMinigameFailed());
-            }
-        }
+        beginFailure();
 
         if (scars != null) {
             scars.advance(amount, false);
@@ -138,6 +132,15 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (endLingerLeft > 0f) return;
 
         end(false);
+    }
+
+    protected void beginFailure() {
+        if (failedSoundPlayed) return;
+        failedSoundPlayed = true;
+        CatchCelebration.playHook(FishConstants.SOUND_FAILED);
+        if (scars != null) {
+            scars.failed(listener == null ? minigame.getScars() : listener.onMinigameFailed());
+        }
     }
 
     protected void advanceLineSoundLoop(float amount) {
@@ -250,9 +253,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             }
 
             if (scars != null && !minigame.isRunning() && !minigame.isCaught()) {
-                if (event.isKeyDownEvent() || event.isLMBDownEvent() || event.isRMBDownEvent()) {
+                if (!event.isRepeat()
+                        && (event.isKeyDownEvent() || event.isLMBDownEvent() || event.isRMBDownEvent())) {
                     event.consume();
+                    beginFailure();
                     if (scars.canDismiss()) end(false);
+                    else scars.skipAnimation();
                 }
                 continue;
             }
@@ -326,7 +332,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             aberration.renderRegion(position.getX(), position.getY(),
                     position.getWidth(), position.getHeight(), alphaMult);
         }
-        if (scars != null) scars.render(layout, alphaMult);
+        if (scars != null && !minigame.isCaught()) scars.render(layout, alphaMult);
     }
 
     public void dispose() {

@@ -82,7 +82,13 @@ public final class LegendaryScarDisplay {
     }
 
     public boolean canDismiss() {
-        return failed && elapsed >= STAMP_TIME + 0.2f;
+        return !disposed && failed && (!added || stamped);
+    }
+
+    public void skipAnimation() {
+        if (disposed || !failed || !added || stamped) return;
+        // Finish on advance so input dispatch does not rebuild the panel tree.
+        elapsed = STAMP_TIME;
     }
 
     private void showNotice() {

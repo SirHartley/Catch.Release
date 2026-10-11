@@ -355,11 +355,16 @@ are no labels or hover regions during play. On a failed legendary minigame the
 dialog stays open: the new icon fades in and shrinks over 0.6 seconds, then plays
 vanilla's `ui_cargo_supplies_drop` and shows the explanation in a boxed tooltip
 beside it. After five seconds the box is replaced by postgame-only hover tooltips.
-A fresh click or keypress can close the result after 0.8 seconds, with the existing
-"Press any key" prompt beneath the track; the Escape release
-from abandoning play cannot dismiss it. At four scars no further stamp, sound or
-quality-loss notice is added. Ordinary failures retain their short automatic
+A click or fresh keypress during the stamp skips to its completed state. The next
+advance plays its sound once and adds the explanation; that input does not close
+the result. After the stamp finishes naturally or is skipped, the next click or
+fresh keypress closes it, with the existing "Press any key" prompt beneath the
+track. Releases and key repeats cannot skip or dismiss. At four scars no further
+stamp, sound or quality-loss notice is added. Ordinary failures retain their short automatic
 close. Both dialog-dismiss paths dispose all owned tooltip components.
+On a win, scar drawing stops immediately and the display is disposed before the
+catch-information panel is created. No scar icons, hover regions or explanations
+remain beside the catch card; the landed specimen keeps its scar-based quality.
 Scar persistence and quality are covered in
 [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishlegendary).
 

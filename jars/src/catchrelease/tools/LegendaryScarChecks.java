@@ -68,6 +68,29 @@ public final class LegendaryScarChecks {
         @Override public int onMinigameFailed() { failures++; return next; }
     }
 
+    static class WinPanel extends FishingMinigamePanel {
+
+        final Ui ui;
+        int resultAdvances;
+
+        WinPanel(Game game, FishCatch specimen, Outcome outcome, Ui ui) {
+            super(game, specimen, null, null, outcome);
+            this.ui = ui;
+            attachFrame(ui.frame);
+        }
+
+        @Override protected void resolveTreasure() { }
+
+        @Override protected void advanceCaught(float amount) {
+            check(ui.mounted.isEmpty(), "scar components are gone before building the catch information");
+            scars.advance(amount, false);
+            check(ui.mounted.isEmpty(), "a disposed scar display cannot add win-screen hovers");
+            // A disposed display must return before sprite loading or GL drawing.
+            scars.render(null, 1f);
+            resultAdvances++;
+        }
+    }
+
     static class Ui {
 
         final Set<UIPanelAPI> mounted = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -140,6 +163,8 @@ public final class LegendaryScarChecks {
             failures(env);
             tuning(env);
             panels(env, sounds);
+            skipAnimation(env, sounds);
+            wins(env, sounds);
             display(sounds);
         } finally {
             Global.setSoundPlayer(null);
@@ -330,6 +355,7 @@ public final class LegendaryScarChecks {
         display.failed(4);
         display.advance(0.61f, false);
         check(ui.boxes == 1 && ui.hovers == 0 && sounds.size() == 1, "new scar gets one automatic boxed explanation");
+        check(display.canDismiss(), "natural stamp completion has no extra input lockout");
         display.advance(5f, false);
         check(ui.hovers == 3 && ui.mounted.size() == 5, "postgame hover replaces the temporary notice, retaining the close prompt");
         display.dispose();
@@ -351,13 +377,89 @@ public final class LegendaryScarChecks {
                 "four icons fit vertically to the right of the progress meter");
     }
 
+    private static void skipAnimation(LegendaryEscapeChecks.Environment env, List<String> sounds) {
+        for (int fps : new int[]{30, 60, 144}) for (int input : new int[]{0, 1, 2}) {
+            for (float at : new float[]{-1f, 0f, 0.3f, 0.59f}) {
+                FishSpec spec = env.real("scar_skip").spec;
+                Game game = new Game(spec, env.system, 1);
+                Outcome outcome = new Outcome(2);
+                FishingMinigamePanel panel = new FishingMinigamePanel(game, null, null, null, outcome);
+                Ui ui = new Ui();
+                panel.attachFrame(ui.frame);
+                game.setEscaped();
+                sounds.clear();
+                // Negative time tests input arriving before the first failed-state advance.
+                if (at >= 0f) panel.advance(at);
+                InputEventAPI skip = input(input, true, false);
+                panel.processInput(List.of(skip));
+                check(skip.isConsumed() && outcome.failures == 1 && outcome.endings == 0,
+                        "first click/key skips the stamp, records one scar and keeps the result open");
+                check(ui.boxes == 0, "skipping defers UI mutation until advance");
+                panel.advance(1f / fps);
+                check(ui.boxes == 1 && Collections.frequency(sounds, LegendaryScarDisplay.SOUND) == 1,
+                        "skip completes the stamp with one sound and the explanation next frame");
+                panel.processInput(List.of(input(input, false, false), input(2, true, true)));
+                check(outcome.endings == 0, "release and held-key repeat cannot dismiss the skipped result");
+                panel.processInput(List.of(input(input, true, false)));
+                check(outcome.endings == 1 && outcome.failures == 1,
+                        "next fresh click/key closes without another scar");
+                panel.dispose();
+                check(ui.mounted.isEmpty(), "skipped result cleans up its explanation and prompt");
+            }
+        }
+        FishSpec spec = env.real("scar_skip_cap").spec;
+        Game game = new Game(spec, env.system, 4);
+        Outcome outcome = new Outcome(4);
+        FishingMinigamePanel panel = new FishingMinigamePanel(game, null, null, null, outcome);
+        game.setEscaped();
+        sounds.clear();
+        panel.processInput(List.of(input(0, true, false)));
+        check(outcome.endings == 1 && !sounds.contains(LegendaryScarDisplay.SOUND),
+                "at the scar cap the first click closes because there is no new animation");
+        panel.dispose();
+    }
+
+    private static void wins(LegendaryEscapeChecks.Environment env, List<String> sounds) {
+        FishSpec spec = env.real("scar_win").spec;
+        env.specs.put(spec.id, spec);
+        for (int scars = 0; scars <= 4; scars++) {
+            LegendaryChases.Chase chase = LegendaryChases.getState(spec.id);
+            chase.scars = scars;
+            FishCatch specimen = FishCatch.roll(spec, 0f);
+            specimen.scars = scars;
+            FishGrade grade = specimen.getGrade();
+            Game game = new Game(spec, env.system, scars);
+            Outcome outcome = new Outcome(scars + 1);
+            Ui ui = new Ui();
+            WinPanel panel = new WinPanel(game, specimen, outcome, ui);
+            game.setCaught();
+            sounds.clear();
+            panel.advance(0.1f);
+            panel.advance(1f);
+            check(panel.resultAdvances == 2 && ui.hovers == 0 && ui.boxes == 0 && sounds.isEmpty(),
+                    "wins show no scar animation, tooltip or sound at any scar count");
+            check(outcome.failures == 0 && chase.scars == scars && specimen.scars == scars
+                            && specimen.getGrade() == grade,
+                    "win cleanup removes only the display, not the landed quality or saved scars");
+            panel.dispose();
+            check(ui.mounted.isEmpty(), "closing a win remains safe after early scar disposal");
+        }
+    }
+
     private static InputEventAPI key(boolean down) {
+        return input(2, down, false);
+    }
+
+    private static InputEventAPI input(int button, boolean down, boolean repeat) {
         boolean[] consumed = {false};
         return proxy(InputEventAPI.class, (p, m, a) -> switch (m.getName()) {
             case "isConsumed" -> consumed[0];
             case "consume" -> { consumed[0] = true; yield null; }
-            case "isKeyDownEvent" -> down;
-            case "isLMBDownEvent", "isLMBUpEvent", "isRMBDownEvent" -> false;
+            case "isRepeat" -> repeat;
+            case "isKeyDownEvent" -> button == 2 && down;
+            case "isLMBDownEvent" -> button == 0 && down;
+            case "isLMBUpEvent" -> button == 0 && !down;
+            case "isRMBDownEvent" -> button == 1 && down;
             case "getEventValue" -> Keyboard.KEY_ESCAPE;
             default -> throw new AssertionError(m);
         });
