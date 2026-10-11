@@ -118,6 +118,7 @@ repeated-loss decoy caps, emergency dash duration,
 slipstream roll-up/fade lifetime and cleanup, immediate manta swaps, fixed hit-position
 labels and shield colours. `tools/LonglinerHauntChecks` covers segmented-shield
 geometry, swept harpoon hits through gaps, explosive adjacency, shield persistence,
+decoy start/stop at section hits, lamp-bound shield visibility through dives,
 independent swirling movement, separation/replenishment, opposite rotation and encounter cleanup.
 It also checks corona-safe movement segments, invalid-position recovery, overlapping
 and companion stars, long-frame dashes, buried movement, formation clearance, and
@@ -541,8 +542,11 @@ fade immediately and blocks new haunts, including shield-break and failed-catch
 activation. Switching them back on only reverses a fade after a fresh sighting.
 Existing module callbacks handle the fade and cleanup; no new polling script.
 Spawners and timed Manta blackouts stop escalating below full intensity, except
-for the Moray's opening escape and Longliner's school. The school forms on the
-wake-up hit and maintains its fixed size until cleanup. Screen effects scale all the way
+for the Moray's opening escape and Longliner's school. The school forms when the
+first shield section breaks, not on the wake-up hit, and maintains its size while
+any section remains intact. The final section hit removes every decoy and detaches
+school movement immediately, even if the lamps went off while the harpoon was in flight.
+An empty shield cannot rebuild the school after a failed catch or load. Screen effects scale all the way
 to zero, including their minimum-strength component.
 The full-screen chromatic pass also fades its pixel displacement to zero; the
 minigame's region-only pass keeps its existing displacement range.
@@ -613,8 +617,9 @@ The Moray's shield uses the existing saved `Chase.shieldPopped` flag instead of
 the timed base shield. Once broken, it stays down through failed catches, elapsed
 time and mote recreation within a hunt. Abandoning the haunt restores it. Its failed-catch slipstream dash is unchanged.
 The Imposter has no timed base shield. Its wake-up hit uses the shared legendary
-provocation, flash and deflection notice before starting the school, without breaking
-a section or consuming an Explosive Head. Section hits use the same flash and notice.
+provocation, flash and deflection notice without breaking a section, spawning decoys
+or consuming an Explosive Head. The first section hit forms the school immediately;
+restoring an intact shield on load leaves the fish alone. Section hits use the same flash and notice.
 Subsequent swept hits use the visible
 section geometry; a shot through a broken section can reach the body before the
 far side of the ring. Explosive section hits use the existing detonation/consumption
@@ -627,7 +632,8 @@ from the player with stellar clearance, and each swim segment avoids coronae.
 Held catches cannot be moved by the school; copies keep swimming without teleporting
 when the harpoon drags the real fish. Phantoms have no targetable body or shield, and their dive
 visibility comes from the real fish. Lamp visibility remains local to each mote.
-Shield drawing is defined in [UI.md](UI.md#drawing-gotchas).
+Shields stay visible through dives while lit; their drawing contract is in
+[UI.md](UI.md#drawing-gotchas).
 
 The Moray keeps its mixed campaign movement and fleeing weave. `FishEntityPlugin`
 caps its movement-mode multiplier at 1.25; the 12-second escape cycle uses 0.5 for

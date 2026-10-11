@@ -54,6 +54,7 @@ public final class LonglinerShield {
             state.longlinerBroken |= 1 << ((section + 1) % SECTIONS);
             state.longlinerBroken |= 1 << ((section + SECTIONS - 1) % SECTIONS);
         }
+        LegendaryHaunt.onLonglinerHit(fish);
         return explosive ? LegendaryShields.HitResult.POPPED : LegendaryShields.HitResult.DEFLECTED;
     }
 

@@ -296,8 +296,11 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   the fish moves over it between callbacks. Broken arcs disappear, including
   from all copies. The real shield turns clockwise at 36 degrees/second; phantom
   shields turn counterclockwise using the same saved angle and damage mask.
-  Rotation advances only from the real mote's existing callback. Lamp fade,
-  dive visibility and viewport alpha apply; GL attributes and matrices are restored.
+  Rotation advances only from the real mote's existing callback.
+  `FishEntityPlugin.getShieldAlpha` applies each mote's local lamp fade and viewport
+  alpha to all shields and deflection flashes. Diving hides the body, not the shield;
+  a lit copy keeps its shield even when the real fish is outside the lamps.
+  GL attributes and matrices are restored.
   Wake-up and section hits use the shared expanding deflection flash at the section
   radius, alongside the same floating notices as the other legendaries.
   No sprite mutation or extra frame script is involved.

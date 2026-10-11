@@ -7,6 +7,7 @@ import catchrelease.tools.LegendaryEscapeChecks.Environment;
 import catchrelease.tools.LegendaryEscapeChecks.Fish;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.combat.ViewportAPI;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.io.*;
@@ -45,6 +46,7 @@ public final class LonglinerHauntChecks {
         }
 
         void wake() { LegendaryShields.onHarpoonContact(real.getMote(), false); }
+        void crack() { LegendaryShields.onHarpoonContact(real.getMote(), false, 0); }
         List<Fish> copies() { return env.fish.stream().filter(f -> f.phantom && !f.expired).toList(); }
 
         @Override public void close() { haunt.close(); env.close(); }
@@ -81,6 +83,8 @@ public final class LonglinerHauntChecks {
     public static void main(String[] args) throws Exception {
         geometry();
         shieldLifecycle();
+        schoolEndsWithShield();
+        shieldVisibility();
         harpoonSweeps();
         school();
         System.out.println("Longliner haunt checks passed: " + checks);
@@ -128,7 +132,13 @@ public final class LonglinerHauntChecks {
             var flash = FishEntityPlugin.class.getDeclaredField("shieldFlash");
             flash.setAccessible(true);
             check(flash.getFloat(f.real) > 0f, "wake-up starts the shared shield flash");
-            check(f.copies().size() == LonglinerSchoolModule.SCHOOL_SIZE - 1, "wake spawns the school immediately");
+            check(f.copies().isEmpty(), "wake raises the shield without decoys");
+            for (int i = 0; i < 10; i++) f.haunt.tickSchool();
+            check(f.copies().isEmpty(), "intact shield cannot replenish decoys");
+            f.haunt.close();
+            f.state.roaming = true;
+            f.haunt.restore();
+            check(f.copies().isEmpty(), "restoring an intact shield leaves the fish alone");
             for (int section = 0; section < 6; section++) {
                 f.state.longlinerBroken = 0;
                 check(LegendaryShields.onHarpoonContact(f.real.getMote(), explosive, section)
@@ -137,6 +147,8 @@ public final class LonglinerHauntChecks {
                 int expected = 1 << section;
                 if (explosive) expected |= (1 << ((section + 1) % 6)) | (1 << ((section + 5) % 6));
                 check(f.state.longlinerBroken == expected, "blast breaks adjacent sections including wraparound");
+                check(f.copies().size() == LonglinerSchoolModule.SCHOOL_SIZE - 1,
+                        "first section hit immediately spawns the school, including explosive hits");
                 check("Deflected".equals(f.real.notices.get(f.real.notices.size() - 1).text)
                                 && flash.getFloat(f.real) > 0f,
                         "section hits retain shared deflection feedback");
@@ -172,6 +184,77 @@ public final class LonglinerHauntChecks {
                     && !f.state.provoked && f.state.longlinerBroken == 0 && f.state.longlinerRotation == 0f
                     && f.state.scars == 0,
                     "full failure removes school and resets disguise, sections and scars");
+        }
+    }
+
+    private static void schoolEndsWithShield() throws Exception {
+        var binding = FishEntityPlugin.class.getDeclaredField("longlinerSchool");
+        binding.setAccessible(true);
+        for (boolean explosive : new boolean[]{false, true}) {
+            for (boolean lampsOn : new boolean[]{false, true}) try (Fixture f = new Fixture()) {
+                f.wake();
+                f.crack();
+                List<Fish> copies = f.copies();
+                check(copies.size() == 18 && binding.get(f.real) != null, "damaged shield starts the school");
+                for (int section = 1; section < 5; section++) {
+                    LegendaryShields.onHarpoonContact(f.real.getMote(), false, section);
+                }
+                f.env.lampsOn = lampsOn;
+                LegendaryShields.onHarpoonContact(f.real.getMote(), explosive, 5);
+                check(f.state.longlinerBroken == 63 && !LonglinerShield.isUp(), "last hit empties the shield");
+                check(copies.stream().allMatch(copy -> copy.expired && copy.removed),
+                        "last hit hard-removes every decoy before the next update, even with lamps off");
+                check(binding.get(f.real) == null && !f.real.expired,
+                        "last hit detaches school movement without removing the real fish");
+                for (int i = 0; i < 10; i++) f.haunt.tickSchool();
+                LegendaryShields.onFailedCatch(f.real.getMote());
+                f.haunt.tickSchool();
+                check(f.copies().isEmpty(), "empty shields cannot replenish decoys after a failed catch");
+                f.haunt.close();
+                f.state.roaming = true;
+                f.haunt.restore();
+                check(f.copies().isEmpty() && binding.get(f.real) == null,
+                        "restoring a fully broken shield cannot recreate the school");
+            }
+        }
+    }
+
+    private static void shieldVisibility() throws Exception {
+        var alpha = FishEntityPlugin.class.getDeclaredMethod("getShieldAlpha", ViewportAPI.class);
+        var lampFade = FishEntityPlugin.class.getDeclaredField("lampFade");
+        var diving = FishEntityPlugin.class.getDeclaredField("diving");
+        var diveClock = FishEntityPlugin.class.getDeclaredField("diveClock");
+        alpha.setAccessible(true);
+        lampFade.setAccessible(true);
+        diving.setAccessible(true);
+        diveClock.setAccessible(true);
+        for (float viewportAlpha : new float[]{0f, 0.4f, 1f}) {
+            ViewportAPI viewport = proxy(ViewportAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getAlphaMult" -> viewportAlpha;
+                default -> throw new AssertionError(m);
+            });
+            try (Fixture f = new Fixture()) {
+                f.wake();
+                f.crack();
+                for (float fade : new float[]{0f, 0.25f, 1f}) {
+                    for (Fish fish : f.env.fish) lampFade.setFloat(fish, fade);
+                    for (boolean submerged : new boolean[]{false, true}) {
+                        diving.setBoolean(f.real, submerged);
+                        diveClock.setFloat(f.real, 0.55f);
+                        for (Fish fish : f.env.fish) {
+                            check(fish.getVisibility() == (submerged ? 0f : 1f),
+                                    "real fish and copies still share the normal dive fade");
+                            check(Math.abs((float) alpha.invoke(fish, viewport) - viewportAlpha * fade) < 0.0001f,
+                                    "shield visibility follows local lamps and viewport, not the shared dive cycle");
+                        }
+                    }
+                }
+                lampFade.setFloat(f.real, 0f);
+                lampFade.setFloat(f.copies().get(0), 1f);
+                check((float) alpha.invoke(f.real, viewport) == 0f
+                                && (float) alpha.invoke(f.copies().get(0), viewport) == viewportAlpha,
+                        "a lit decoy retains its shield when the real fish is outside the lamps");
+            }
         }
     }
 
@@ -215,6 +298,7 @@ public final class LonglinerHauntChecks {
         }
         try (Fixture f = new Fixture()) {
             f.wake();
+            f.crack();
             Shot shot = new Shot(f, new Vector2f(), f.real.at);
             for (Fish copy : f.copies()) {
                 check(!HarpoonEntityPlugin.canTake(copy.getMote()), "copies cannot be selected by harpoons");
@@ -238,6 +322,7 @@ public final class LonglinerHauntChecks {
             f.real.at.set(1700f, 0f);
             Vector2f wakePosition = new Vector2f(f.real.at);
             f.wake();
+            f.crack();
             check(f.real.at.equals(wakePosition), "forming a school does not teleport the hit fish");
             separated(f);
             List<Fish> school = f.env.fish.stream().filter(m -> !m.expired).toList();

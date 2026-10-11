@@ -46,6 +46,10 @@ public class LonglinerSchoolModule extends BaseHauntModule {
 
     @Override
     public void advance(float amount) {
+        if (!LonglinerShield.isUp() || LegendaryChases.getState(spec.id).longlinerBroken == 0) {
+            cleanup();
+            return;
+        }
         FishEntityPlugin current = findOwnMote();
         if (current != real) {
             cleanup();
