@@ -427,7 +427,7 @@ public class CatchResultPanel {
             title.setAnchor(LazyFont.TextAnchor.TOP_CENTER);
             title.setAlignment(LazyFont.TextAlignment.CENTER);
 
-            prompt = font.createText("Press any key", Color.WHITE, FishConstants.MINIGAME_RESULT_TEXT_SIZE);
+            prompt = font.createText(FishConstants.MINIGAME_RESULT_PROMPT, Color.WHITE, FishConstants.MINIGAME_RESULT_TEXT_SIZE);
             prompt.setAnchor(LazyFont.TextAnchor.TOP_CENTER);
 
             if (record) {

@@ -5,6 +5,7 @@ import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishermanBycatch;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureAward;
@@ -22,6 +23,7 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.input.Keyboard;
@@ -35,6 +37,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     protected FishingMinigame minigame;
     protected final ChromaticAberrationOverlay aberration;
+    protected final LegendaryScarDisplay scars;
     protected Listener listener;
     protected FishCatch specimen;
     protected SectorEntityToken where;
@@ -67,6 +70,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     public interface Listener {
 
         void onMinigameEnded(boolean caught);
+        int onMinigameFailed();
     }
 
     public FishingMinigamePanel(FishingMinigame minigame, FishCatch specimen, SectorEntityToken where,
@@ -74,11 +78,17 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         this.minigame = minigame;
         this.aberration = MantaFormationModule.SPECIES.equals(minigame.getFish().id)
                 ? new ChromaticAberrationOverlay() : null;
+        this.scars = minigame.getFish().rarity == FishRarity.LEGENDARY
+                ? new LegendaryScarDisplay(minigame.getScars()) : null;
         this.specimen = specimen;
         this.where = where;
         this.method = method;
         this.listener = listener;
         this.fishCoveredLastFrame = minigame.isFishInBar();
+    }
+
+    public void attachFrame(CustomPanelAPI frame) {
+        if (scars != null) scars.attach(frame);
     }
 
     @Override
@@ -88,6 +98,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     @Override
     public void advance(float amount) {
+        if (reported) return;
         jitterTime += amount;
 
         getWarp().advance(amount);
@@ -106,12 +117,21 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             resolveTreasure();
 
             advanceCaught(amount);
+            if (scars != null) scars.advance(amount, false);
             return;
         }
 
         if (!failedSoundPlayed) {
             failedSoundPlayed = true;
             CatchCelebration.playHook(FishConstants.SOUND_FAILED);
+            if (scars != null) {
+                scars.failed(listener == null ? minigame.getScars() : listener.onMinigameFailed());
+            }
+        }
+
+        if (scars != null) {
+            scars.advance(amount, false);
+            return;
         }
 
         endLingerLeft -= amount;
@@ -229,6 +249,14 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 continue;
             }
 
+            if (scars != null && !minigame.isRunning() && !minigame.isCaught()) {
+                if (event.isKeyDownEvent() || event.isLMBDownEvent() || event.isRMBDownEvent()) {
+                    event.consume();
+                    if (scars.canDismiss()) end(false);
+                }
+                continue;
+            }
+
             if (event.isLMBDownEvent()) {
                 if (!FishConstants.PLAY_LINE_CLICK_ON_RELEASE && minigame.isRunning())
                     CatchCelebration.playHook(FishConstants.SOUND_LINE_CLICK);
@@ -239,7 +267,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                     CatchCelebration.playHook(FishConstants.SOUND_LINE_CLICK);
                 reeling = false;
                 event.consume();
-            } else if (event.getEventValue() == Keyboard.KEY_ESCAPE){
+            } else if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE){
                 event.consume();
                 minigame.setEscaped();
                 endLingerLeft = 0f;
@@ -298,10 +326,12 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             aberration.renderRegion(position.getX(), position.getY(),
                     position.getWidth(), position.getHeight(), alphaMult);
         }
+        if (scars != null) scars.render(layout, alphaMult);
     }
 
     public void dispose() {
         if (aberration != null) aberration.dispose();
+        if (scars != null) scars.dispose();
     }
 
     protected void renderFrame(FishingMinigameLayout layout, float alphaMult) {

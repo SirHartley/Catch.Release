@@ -43,6 +43,7 @@ public class FishLog {
             logged.recordLength = entry.length;
             logged.recordWeight = entry.weight;
             logged.recordAberration = entry.aberration;
+            logged.recordScars = entry.scars;
             logged.recordSystemName = getSystemName(where);
             logged.recordLocationInHyper = getLocationInHyper(where);
             logged.recordTimestamp = getTimestamp();

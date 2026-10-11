@@ -136,11 +136,13 @@ public final class LonglinerHauntChecks {
                         "broken section cannot deflect again");
             }
             int broken = f.state.longlinerBroken;
+            f.state.scars = 2;
             f.real.setHeld(true);
             for (int i = 0; i < 1200; i++) f.real.advance(0.1f);
             check(f.state.longlinerBroken == broken, "elapsed time never regenerates sections");
             LegendaryShields.onFailedCatch(f.real.getMote());
-            check(f.state.longlinerBroken == broken && !f.real.isHeld(), "failed catch does not reset haunt damage");
+            check(f.state.longlinerBroken == broken && f.state.scars == 2 && !f.real.isHeld(),
+                    "failed-catch release preserves shield damage and minigame scars");
             ByteArrayOutputStream saved = new ByteArrayOutputStream();
             try (ObjectOutputStream out = new ObjectOutputStream(saved)) { out.writeObject(f.state); }
             try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(saved.toByteArray()))) {
@@ -159,8 +161,9 @@ public final class LonglinerHauntChecks {
             f.real.setHeld(false);
             check(f.haunt.abandon(), "abandoned haunt completes");
             check(f.real.expired && f.copies().isEmpty() && !f.state.revealed
-                    && !f.state.provoked && f.state.longlinerBroken == 0 && f.state.longlinerRotation == 0f,
-                    "failure removes school and resets the disguise and all six sections");
+                    && !f.state.provoked && f.state.longlinerBroken == 0 && f.state.longlinerRotation == 0f
+                    && f.state.scars == 0,
+                    "full failure removes school and resets disguise, sections and scars");
         }
     }
 

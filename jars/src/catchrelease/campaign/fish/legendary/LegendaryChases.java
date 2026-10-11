@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.legendary;
 
 import catchrelease.campaign.fish.data.FishHabitat;
+import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.SectorRegion;
@@ -29,6 +30,7 @@ public class LegendaryChases {
 
     public static final String KEY = "$catchrelease_legendary_chases";
     public static final float RELOCATION_DAYS = 90f;
+    public static final int MAX_SCARS = FishGrade.EXCEPTIONAL.rank - FishGrade.TERRIBLE.rank;
 
     public static class Chase implements Serializable {
 
@@ -46,6 +48,7 @@ public class LegendaryChases {
         // Cleared when an abandoned haunt returns the fish to patrol.
         public boolean provoked;
         public boolean roaming;
+        public int scars;
 
         // shield bookkeeping, semantics per species in LegendaryShields:
         // units = orbit motes or deflection charges, -1 until first initialised
@@ -56,10 +59,16 @@ public class LegendaryChases {
         public int longlinerBroken;
         public float longlinerRotation;
 
+        public int addScar() {
+            if (!caught) scars = Math.min(MAX_SCARS, scars + 1);
+            return scars;
+        }
+
         public void resetEncounter() {
             if (caught) return;
             provoked = false;
             roaming = false;
+            scars = 0;
             shieldPopped = false;
             shieldUnits = -1;
             shieldStampAt = 0L;

@@ -370,6 +370,16 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 | `FishingMinigamePanel.java` | Draws the track, target, progress, and treasure, including the tell before a telegraphed move; handles input; records bycatch, catch intel, route progress, and legendary completion. Manta fights own a panel-bounded `ChromaticAberrationOverlay` instance, disposed by both dialog-dismiss paths; campaign aberration still excludes dialogs. |
 | `MantaMinigame.java` | Manta-only model selected by the dialog. Two independent motion-only decoys call the same `FishingMinigame.advanceFish`; each has its own targets, velocity and tells, but no treasure/progress/rewards. Opening positions are shuffled across all three. The panel renders all with the real target's presentation (including sonar/chicken); only the real model controls green-bar coverage, catch progress and sound hooks. Restart resets all three; ending stops them. |
 | `FishingMinigameDialogPlugin.java` | Hosts the custom visual, preserves source rupture and quest identity for drone and harpoon catches, applies tutorial catch protection, preserves campaign music, and exposes dev reopens that bypass substitution. |
+| `LegendaryScarDisplay.java` | Minigame-owned scar icons, failure stamp and postgame explanation. Presentation and input timing are in [UI.md](UI.md#minigame-timing). |
+
+Legendary minigames snapshot `Chase.scars` at opening. `FishingMinigame.applyScars`
+blends movement speed, turn frequency and catch/drain rates toward a Common profile
+by Poor quality; the fourth scar eases them further. `FishConstants.SCAR_*` owns
+that tuning. Species motion, rarity, treasure and tackle effects remain intact;
+Manta decoys receive the same modifiers. No shared `FishSpec` is changed.
+`tools/LegendaryScarChecks` covers retries, failure callbacks, quality and cargo,
+saved records, per-species easing, and postgame UI lifetime; normal movement parity
+remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 
 ### `campaign/fish/entities` and `campaign/fish/spawner`
 
@@ -434,7 +444,7 @@ Lantern Jack keeps two treasures active throughout its minigame, immediately rep
 
 | File | Owner / connection |
 |---|---|
-| `LegendaryChases.java` | Persistent host, sighting, provocation, active-hunt (`roaming`), Imposter reveal, completion, and defense state for each legendary. |
+| `LegendaryChases.java` | Persistent host, sighting, provocation, active-hunt (`roaming`), scars, Imposter reveal, completion, and defense state for each legendary. |
 | `LegendarySpawns.java` | Spawns each uncaught resident on system entry and load through `LegendaryHaunt`'s location listener, after tutorial graduation. One buried or surfaced mote per species; no random-population rolls or distance culling. Placement and inactive patrols stay within 6000 units of the primary sun, otherwise the largest planet, otherwise 0/0, and clear stellar hazards. False Dawn uses its corona without the 6000-unit limit; Longliner retains its boat spawn and movement. |
 | `LegendaryStarAvoidance.java` | All non-False-Dawn legendaries avoid each local star's surface and nominal corona plus 150 units. Natural buried spawns, surfacing, console placement, explosive respawns and Imposter reveal use the same stellar boundary. Swimming, submerged runs, travel dashes and reveal drift test complete movement segments; positions already inside are corrected. Quorum steering reserves its escort radius; shell-game centers reserve the largest decoy ring. Manta steering moves its line center with one-slot clearance, preserving spacing and blackout swaps. Held catches remain attached to their retrieval gear. Uses existing movement callbacks, with no new script or sector-wide scan. |
 | `SlipDashModule.java` | Moray slipstream trail and curved travel dash. The first haunt update starts a surfaced escape and stream without waiting for cooldown, full intensity or the repeat-dash range; held/diving fish wait, and lamps must remain on. Repeat dashes wait 11–18 unpaused seconds after the previous dash ends and retain their range/intensity gates. A failed-catch escape consumes the opening so it cannot spawn twice. Streams are 620 units wide. `STREAM_LIFETIME_MULT` is 5: tail roll-up is 0.5 segments per second and segment fade-out is 15 seconds, independent of dash timing. With the 14-segment standing window, fully lit trails finish fading about 43 seconds after a dash ends. A failed catch bypasses range/intensity/cooldown gates, ends any prior growing trail, and starts a 9.75-second emergency dash (1.5 × normal maximum), keeping the fish surfaced. Haunt cleanup removes all owned terrain immediately. |
@@ -548,7 +558,7 @@ Jack's three starting shells and False Dawn's starting charge return. Longliner'
 Longliner removes its revealed mote and clears `revealed`, allowing its existing
 boat reconciler to restore the disguise; its boat/reveal/flee movement is unchanged.
 Host/residency, sighting history, recognition and completed catches are preserved.
-Leaving the system resets defenses but removes motes instead of teleporting them.
+Leaving the system resets defenses and scars but removes motes instead of teleporting them.
 Catching the fish uses cleanup only and cannot reset or respawn it.
 The saved `Chase.roaming` flag restores an unfinished haunt
 at full intensity with a fresh sighting grace period on load, even with lamps off;
@@ -562,6 +572,19 @@ Harpoon and drone failure callbacks release real legendary motes through
 `LegendaryShields.onFailedCatch` instead of fading them out. Ordinary fish,
 Quorum splinters and phantoms retain their previous failure handling. The callback
 path runs once per resolved minigame, not for a busy UI or a dev fish replacement.
+
+`FishingMinigameDialogPlugin.recordFailure` adds one scar per failed real-legendary
+minigame, including abandonment with Escape, before the retained failure display.
+Final dismissal also checks this path, with a once-only guard. Decoys, phantoms and
+dev substitutions for a different source species cannot scar a legendary. Scars
+survive retries, mote recreation and save/load within the hunt. `resetEncounter`
+clears them on full haunt fade, departure or host relocation; completing a catch
+preserves its landed state. There are four scars: Exceptional, Fine, Average, Poor,
+then Terrible. `FishCatch.getGrade` uses this sequence for legendaries instead of
+rolled size; length and weight still roll normally. Ordinary grading is unchanged.
+`FishLog` saves the record's scar count, and both codex grade displays use
+`FishLogEntry.getRecordGrade` so they agree with the landed specimen.
+
 `LegendaryHaunt.onFailedCatch` starts the matching haunt if necessary, refreshes
 its sighting grace period and dispatches `HauntModule.onFailedCatch`; responses
 then advance through the existing coordinator, with no additional frame script.
@@ -729,7 +752,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 
 Cross-version campaign saves are unsupported during development; see [workflow](../CLAUDE.md#make-and-record-changes). Current saves retain levels, cargo, quest state and equipment ownership. Load hooks restore transient state and current registrations, not old data formats.
 
-- Fish encoding uses four required fields and positional optional tail fields for origin, method, implement and chart provenance. The current encoder trims absent tail fields; preserve interior placeholders and accept its short records.
+- Fish encoding uses four required fields and positional optional tail fields for origin, method, implement, chart provenance and legendary scars (index 11). The current encoder trims absent tail fields; preserve interior placeholders and accept its short records. All fish/crate/pile paths retain the landed scar count independently of the hunt ledger.
 - Containers are identified by contents, not stack identity. Spending part of a crate or pile removes it and creates a replacement. Always repack with the original container ID.
 - `FishItems.stow()` is the only landing path and normally creates a crate. Loose fish remain valid for all counting and spending.
 - `FishItems.isContainer()` is the shared crate/pile test. Do not add direct bundle-ID checks.

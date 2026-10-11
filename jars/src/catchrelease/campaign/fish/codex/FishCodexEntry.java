@@ -1,6 +1,5 @@
 package catchrelease.campaign.fish.codex;
 
-import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishLocationSummary;
@@ -286,9 +285,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     }
 
     protected void addRecord(TooltipMakerAPI text, FishLogEntry logged) {
-        // grade recomputed from stored numbers, not stored itself, so table retuning regrades old catches
-        FishGrade best = new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
-                logged.recordAberration).getGrade();
+        FishGrade best = logged.getRecordGrade();
 
         Color hl = Misc.getHighlightColor();
 
@@ -388,8 +385,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         float cardSize = Math.max(100f, Math.max(artWidth, artHeight) + CARD_PAD * 2f);
 
         FishGrade best = logged == null || logged.caught <= 0 ? null
-                : new FishCatch(speciesId, logged.recordLength, logged.recordWeight,
-                        logged.recordAberration).getGrade();
+                : logged.getRecordGrade();
 
         CustomPanelAPI card = panel.createCustomPanel(cardSize, cardSize,
                 new IconCard(spec, artWidth, artHeight, best));
