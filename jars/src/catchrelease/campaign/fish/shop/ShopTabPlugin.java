@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.ui.ShopUi;
 import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.Global;
@@ -123,7 +124,7 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
             event.consume();
 
             if (!host.isActiveTab(id)) {
-                Global.getSoundPlayer().playUISound("ui_button_pressed", 1f, 1f);
+                FishingSounds.playUISound("ui_button_pressed", 1f, 1f);
                 host.onTabClicked(id);
             }
 

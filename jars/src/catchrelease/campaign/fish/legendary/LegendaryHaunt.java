@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.Setting;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -242,7 +243,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             fading = false;
         } else {
             sinceSeen += amount;
-            if (!lampsOn || sinceSeen > LINGER_SECONDS) fading = true;
+            if (!lampsOn || sinceSeen > LINGER_SECONDS * Setting.HUNT_GRACE.mult()) fading = true;
         }
 
         if (!fading) {

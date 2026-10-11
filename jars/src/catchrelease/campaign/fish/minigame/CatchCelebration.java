@@ -1,5 +1,8 @@
 package catchrelease.campaign.fish.minigame;
 
+import catchrelease.config.FishingSounds;
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -107,7 +110,8 @@ public class CatchCelebration {
         if (!confettiSpawned) {
             confettiSpawned = true;
 
-            for (int i = 0; i < FishConstants.CELEBRATION_CONFETTI; i++) {
+            for (int i = 0; i < Math.round(FishConstants.CELEBRATION_CONFETTI
+                    * Setting.PARTICLES.mult() * PlayerSettings.effects()); i++) {
                 confetti.add(spawn(centerX, centerY, fish));
             }
         }
@@ -124,7 +128,7 @@ public class CatchCelebration {
         if (share >= 1f) return;
 
         Disc.draw(centerX, centerY, FishConstants.CELEBRATION_FLASH_SIZE * (0.2f + share * 0.8f),
-                getAccentColor(), (1f - share) * FishConstants.CELEBRATION_FLASH_ALPHA * alpha, 0f, true);
+                getAccentColor(), (1f - share) * FishConstants.CELEBRATION_FLASH_ALPHA * alpha * PlayerSettings.flashStrength(), 0f, true);
     }
 
     protected void renderBacklight(float centerX, float centerY, float progress, float alpha) {
@@ -239,7 +243,7 @@ public class CatchCelebration {
     public static void playHook(String soundId, float pitch) {
         if (soundId == null || soundId.isEmpty()) return;
 
-        Global.getSoundPlayer().playUISound(soundId, pitch, 1f);
+        FishingSounds.playUISound(soundId, pitch, 1f);
     }
 
     protected static float ease(float t) {

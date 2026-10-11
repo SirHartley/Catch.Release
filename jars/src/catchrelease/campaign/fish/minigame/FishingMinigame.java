@@ -1,6 +1,8 @@
 package catchrelease.campaign.fish.minigame;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
@@ -17,6 +19,7 @@ import org.lazywizard.lazylib.MathUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FishingMinigame {
 
@@ -31,6 +34,9 @@ public class FishingMinigame {
 
     protected FishSpec fish;
     protected final int scars;
+    protected final Map<Setting, Object> settings = PlayerSettings.snapshot();
+
+    protected float rarityDifficulty;
     protected float difficulty;
     protected float motionSpeed;
     protected float restlessness;
@@ -58,6 +64,9 @@ public class FishingMinigame {
     protected float fishVelocity = 0f;
 
     protected float progress = FishConstants.MINIGAME_PROGRESS_START;
+    protected float zeroProgressTime;
+
+    protected boolean collectingTreasure;
     protected final List<MinigameTreasure> treasures = new ArrayList<>();
     protected final List<MinigameTreasure> takenTreasures = new ArrayList<>();
     protected int treasuresLeft = 0;
@@ -103,12 +112,21 @@ public class FishingMinigame {
         this.mixChance = fish.mixChance;
         this.motion = fish.motion;
         applyScars();
+        rarityDifficulty = setting(switch (fish.rarity) {
+            case COMMON -> Setting.COMMON_DIFFICULTY;
+            case UNCOMMON -> Setting.UNCOMMON_DIFFICULTY;
+            case RARE -> Setting.RARE_DIFFICULTY;
+            case EPIC -> Setting.EPIC_DIFFICULTY;
+            case LEGENDARY -> Setting.LEGENDARY_DIFFICULTY;
+        }) / 100f;
+        motionSpeed *= multiplier(Setting.FISH_SPEED) * rarityDifficulty;
+        progress = setting(Setting.START_PROGRESS) / 100f;
 
         // clamped after the tackle has had its say, so a wide window is still a window
-        this.barHeight = MathUtils.clamp(getBarHeight() * this.tackle.barSizeMult,
+        this.barHeight = MathUtils.clamp(getBarHeight() * this.tackle.barSizeMult * multiplier(Setting.BAR_SIZE),
                 FishConstants.MINIGAME_BAR_MIN_FRACTION, FishConstants.MINIGAME_BAR_MAX_FRACTION);
         applyMove(chooseMove());
-        this.cannotLose = Global.getSettings().isDevMode();
+        this.cannotLose = Global.getSettings().isDevMode() || enabled(Setting.NO_ESCAPE);
 
         rollTreasure();
     }
@@ -117,14 +135,15 @@ public class FishingMinigame {
         if (scars == 0) return;
 
         // Three scars reach Poor: approximate an ordinary mixed-motion Common catch.
-        float blend = Math.min(1f, scars / (float) (FishGrade.EXCEPTIONAL.rank - FishGrade.POOR.rank));
+        float blend = Math.min(1f, scars / (float) (FishGrade.EXCEPTIONAL.rank - FishGrade.POOR.rank)
+                * multiplier(Setting.SCAR_HELP));
         difficulty += (Math.min(difficulty, FishConstants.SCAR_POOR_DIFFICULTY) - difficulty) * blend;
         motionSpeed += (Math.min(motionSpeed, FishConstants.SCAR_POOR_SPEED) - motionSpeed) * blend;
         restlessness += (Math.min(restlessness, FishConstants.SCAR_POOR_RESTLESSNESS) - restlessness) * blend;
         progressRateMult += (Math.max(progressRateMult, FishConstants.SCAR_POOR_PROGRESS) - progressRateMult) * blend;
         escapeRateMult += (Math.min(escapeRateMult, FishConstants.SCAR_POOR_ESCAPE) - escapeRateMult) * blend;
 
-        if (scars == LegendaryChases.MAX_SCARS) {
+        if (scars == LegendaryChases.MAX_SCARS && setting(Setting.SCAR_HELP) > 0f) {
             motionSpeed *= FishConstants.SCAR_TERRIBLE_EASE;
             restlessness *= FishConstants.SCAR_TERRIBLE_EASE;
             progressRateMult /= FishConstants.SCAR_TERRIBLE_EASE;
@@ -180,7 +199,9 @@ public class FishingMinigame {
         fishVelocity = 0f;
         fishThinkTimer = 0f;
         applyMove(chooseMove());
-        progress = FishConstants.MINIGAME_PROGRESS_START;
+        progress = setting(Setting.START_PROGRESS) / 100f;
+        zeroProgressTime = 0f;
+        collectingTreasure = false;
 
         rollTreasure();
         state = State.RUNNING;
@@ -194,20 +215,22 @@ public class FishingMinigame {
     }
 
     public void advance(float amount, boolean reeling) {
-        if (state != State.RUNNING) return;
+        if (state != State.RUNNING || amount <= 0f) return;
+        amount *= multiplier(Setting.GAME_SPEED);
 
         timeTotal += amount;
 
         advanceBar(amount, reeling);
         advanceFish(amount);
+        collectingTreasure = treasures.stream().anyMatch(t -> t.isActive() && covers(t.position));
         advanceTreasure(amount);
         advanceProgress(amount);
     }
 
     protected void advanceBar(float amount, boolean reeling) {
         barVelocity += (reeling
-                ? FishConstants.MINIGAME_BAR_LIFT * tackle.barLiftMult
-                : -FishConstants.MINIGAME_BAR_GRAVITY * tackle.barGravityMult) * amount;
+                ? FishConstants.MINIGAME_BAR_LIFT * tackle.barLiftMult * multiplier(Setting.BAR_LIFT)
+                : -FishConstants.MINIGAME_BAR_GRAVITY * tackle.barGravityMult * multiplier(Setting.BAR_FALL)) * amount;
         barVelocity = MathUtils.clamp(barVelocity, -FishConstants.MINIGAME_BAR_MAX_SPEED, FishConstants.MINIGAME_BAR_MAX_SPEED);
 
         barPosition += barVelocity * amount;
@@ -218,10 +241,10 @@ public class FishingMinigame {
     protected void bounce(float lowest, float highest) {
         if (barPosition < lowest) {
             barPosition = lowest;
-            barVelocity = -barVelocity * FishConstants.MINIGAME_BAR_RESTITUTION;
+            barVelocity = -barVelocity * FishConstants.MINIGAME_BAR_RESTITUTION * multiplier(Setting.BAR_BOUNCE);
         } else if (barPosition > highest) {
             barPosition = highest;
-            barVelocity = -barVelocity * FishConstants.MINIGAME_BAR_RESTITUTION;
+            barVelocity = -barVelocity * FishConstants.MINIGAME_BAR_RESTITUTION * multiplier(Setting.BAR_BOUNCE);
         } else {
             return;
         }
@@ -241,7 +264,7 @@ public class FishingMinigame {
 
                 if (move.telegraphed()) {
                     pendingMove = move;
-                    tellLeft = FishConstants.MINIGAME_TELL_TIME;
+                    tellLeft = FishConstants.MINIGAME_TELL_TIME * multiplier(Setting.TELL_TIME);
                     tellDirection = Math.signum(move.target() - fishPosition);
                 } else {
                     startMove(move);
@@ -276,15 +299,21 @@ public class FishingMinigame {
     }
 
     protected void advanceProgress(float amount) {
+        float before = progress;
+        float grace = setting(Setting.OPENING_GRACE);
+        float speed = multiplier(Setting.GAME_SPEED);
+        float drainTime = grace <= 0f ? amount
+                : Math.min(amount, Math.max(0f, timeTotal - grace * speed));
+        float drainRate = FishConstants.MINIGAME_ESCAPE_RATE * compressRate(escapeRateMult)
+                * tackle.escapeMult * multiplier(Setting.CATCH_LOSS) * rarityDifficulty;
         if (isFishInBar()) {
             timeHeld += amount;
             progress += FishConstants.MINIGAME_CATCH_RATE * compressRate(progressRateMult)
                     * amount
-                    * tackle.progressMult;
-        } else {
+                    * tackle.progressMult * multiplier(Setting.CATCH_GAIN) / rarityDifficulty;
+        } else if (!(collectingTreasure && enabled(Setting.TREASURE_SAFE))) {
             progress -= FishConstants.MINIGAME_ESCAPE_RATE * compressRate(escapeRateMult)
-                    * amount
-                    * tackle.escapeMult;
+                    * drainTime * tackle.escapeMult * multiplier(Setting.CATCH_LOSS) * rarityDifficulty;
         }
 
         if (progress >= 1f) {
@@ -293,15 +322,20 @@ public class FishingMinigame {
             return;
         }
 
-        // dev mode: floor instead of escaping, so the fish can be retuned indefinitely
         if (cannotLose) {
+            zeroProgressTime = 0f;
             progress = Math.max(progress, FishConstants.MINIGAME_DEV_PROGRESS_FLOOR);
             return;
         }
 
         if (progress <= 0f) {
             progress = 0f;
-            state = State.ESCAPED;
+            float atZero = before > 0f && drainRate > 0f
+                    ? Math.max(0f, drainTime - before / drainRate) : amount;
+            zeroProgressTime += atZero / speed;
+            if (zeroProgressTime >= setting(Setting.FAIL_DELAY)) state = State.ESCAPED;
+        } else {
+            zeroProgressTime = 0f;
         }
     }
 
@@ -607,12 +641,29 @@ public class FishingMinigame {
 
     // 0 when no tell is showing, otherwise how far the pending move is through its tell
     public float getTellProgress() {
-        return pendingMove == null || state != State.RUNNING ? 0f : 1f - tellLeft / FishConstants.MINIGAME_TELL_TIME;
+        return pendingMove == null || state != State.RUNNING || !Setting.SHOW_TELLS.enabled()
+                ? 0f : 1f - tellLeft / (FishConstants.MINIGAME_TELL_TIME * multiplier(Setting.TELL_TIME));
     }
 
     // +1 up the track, -1 down, 0 when no tell is showing
     public float getTellDirection() {
-        return pendingMove == null || state != State.RUNNING ? 0f : tellDirection;
+        return pendingMove == null || state != State.RUNNING || !Setting.SHOW_TELLS.enabled() ? 0f : tellDirection;
+    }
+
+    protected float setting(Setting key) {
+        return ((Number) settings.get(key)).floatValue();
+    }
+
+    protected float multiplier(Setting key) {
+        return setting(key) / 100f;
+    }
+
+    protected boolean enabled(Setting key) {
+        return (Boolean) settings.get(key);
+    }
+
+    public boolean usesToggleLift() {
+        return enabled(Setting.TOGGLE_LIFT);
     }
 
     public State getState() {

@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.coherence;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.abilities.FishingRigs;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.Aberration;
@@ -57,7 +58,7 @@ public class CoherenceOverlayScript implements EveryFrameScript {
         if (level > 0f) CoherenceTerrain.ensureIn(fleet.getContainingLocation());
 
         if (level > 0f && here() >= 0.3f && !catchrelease.campaign.fish.crab.CrabWares.EARMUFFS.isOn()) {
-            Global.getSoundPlayer().playLoop(FishConstants.SOUND_COHERENCE_WHISPERS, fleet, 1f,
+            FishingSounds.playLoop(FishConstants.SOUND_COHERENCE_WHISPERS, fleet, 1f,
                     FishConstants.COHERENCE_WHISPER_VOLUME * level * here(), fleet.getLocation(), Misc.ZERO);
         }
     }

@@ -23,6 +23,8 @@ import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.memory.TransientMemory;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeStat;
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.*;
@@ -150,6 +152,7 @@ public final class ShopPricingChecks {
             recipes(fixture);
             availabilityAndPersistence(fixture);
             sharedPayment(fixture);
+            settings(fixture);
         }
         System.out.println("Shop pricing checks passed: " + checks);
     }
@@ -328,6 +331,40 @@ public final class ShopPricingChecks {
         }
         require(ShopPricing.getCredits(Tackle.SONAR_HEAD) == 40000, "Sonar top bracket");
         require(ShopPricing.getCredits(Tackle.NONE) == 0, "empty slot stays free");
+    }
+
+    private static void settings(Fixture fixture) throws Exception {
+        UpgradeStat stat = new UpgradeStat();
+        stat.id = "settings_price_check";
+        stat.maxLevel = 4;
+        FishRequirement original = new FishRequirement();
+        original.count = 3;
+        original.sameSpecies = true;
+        original.minGrade = FishGrade.FINE;
+        original.implement = CatchImplement.POND;
+        fixture.data.put(ShopPricing.PAYMENTS_KEY,
+                new LinkedHashMap<>(Map.of("stat:" + stat.id + ":1", original)));
+        try {
+            var values = PlayerSettings.defaults();
+            values.put(Setting.UPGRADE_CREDITS, 50d);
+            values.put(Setting.UPGRADE_FISH, 150d);
+            values.put(Setting.EQUIPMENT_COST, 25d);
+            PlayerSettingsChecks.use(values);
+            var price = ShopPricing.getPrice(stat, 1);
+            require(price.credits == 2500 && price.fish.count == 5, "configured upgrade prices");
+            require(price.fish != original && original.count == 3, "saved base payment is not mutated");
+            require(price.fish.sameSpecies && price.fish.minGrade == FishGrade.FINE
+                    && price.fish.implement == CatchImplement.POND, "payment modifiers survive scaling");
+            require(ShopPricing.getPrice(stat, 1).fish.count == 5, "refresh cannot compound the multiplier");
+            require(ShopPricing.getCredits(stat, 1) == 5000, "reward valuation retains base prices");
+            require(ShopPricing.getPrice(Tackle.SONAR_HEAD).credits == 10000, "configured module credits");
+            values.put(Setting.UPGRADE_FISH, 25d);
+            PlayerSettingsChecks.use(values);
+            require(ShopPricing.getPrice(stat, 1).fish.count == 1, "fish payment rounds up to at least one");
+        } finally {
+            PlayerSettingsChecks.use(PlayerSettings.defaults());
+        }
+        require(ShopPricing.getPrice(stat, 1).fish == original, "restoring defaults restores the saved payment");
     }
 
     private static void require(boolean condition, String message) {

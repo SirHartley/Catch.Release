@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishSpec;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -44,7 +45,8 @@ public class LanternSensorGhostsModule extends BaseHauntModule {
             if (ghost.isDone()) it.remove();
         }
 
-        spawnTimer -= amount;
+        spawnTimer -= amount * Setting.HAZARD_FREQUENCY.mult()
+                / Setting.HUNT_RECOVERY.mult();
         if (spawnTimer <= 0f && spawned.size() < MAX_ALIVE && atFullIntensity()
                 && player() != null && player().getContainingLocation() == system) {
             spawnTimer = MathUtils.getRandomNumberInRange(SPAWN_MIN_SECONDS, SPAWN_MAX_SECONDS);

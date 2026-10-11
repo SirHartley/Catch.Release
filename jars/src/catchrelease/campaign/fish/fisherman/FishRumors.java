@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.shop.FishRequirement;
@@ -96,6 +98,7 @@ public class FishRumors {
         public String legendaryId;
         public int residency;
         public long started;
+        public float duration = Setting.RUMOR_DURATION.value();
     }
 
     public static class RumorIntel extends BaseIntelPlugin {
@@ -158,7 +161,7 @@ public class FishRumors {
 
             bullet(info);
 
-            float daysLeft = FishermanConstants.RUMOR_DURATION_DAYS
+            float daysLeft = rumor.duration
                     - Global.getSector().getClock().getElapsedDaysSince(rumor.started);
 
             addDays(info, "before it is stale", Math.max(daysLeft, 0f), tc, initPad);
@@ -170,7 +173,9 @@ public class FishRumors {
         protected void notifyEnded() {
             super.notifyEnded();
 
-            if (shouldNotifyExpiry()) sendUpdateIfPlayerHasIntel(EXPIRED_UPDATE, false);
+            if (shouldNotifyExpiry() && PlayerSettings.rumorNotices()) {
+                sendUpdateIfPlayerHasIntel(EXPIRED_UPDATE, false);
+            }
         }
 
         protected boolean shouldNotifyExpiry() {
@@ -292,7 +297,7 @@ public class FishRumors {
     public static boolean isExpired(Saved rumor) {
         return rumor == null || Global.getSector() == null
                 || Global.getSector().getClock().getElapsedDaysSince(rumor.started)
-                >= FishermanConstants.RUMOR_DURATION_DAYS
+                >= rumor.duration
                 || getKind(rumor) == Kind.LEGENDARY
                 && (!LegendaryChases.isCurrentResidency(rumor.legendaryId, rumor.systemId, rumor.residency)
                 || findSystem(rumor.systemId) == null);
@@ -480,7 +485,8 @@ public class FishRumors {
                 Global.getSector().getClock().getTimestamp());
 
         RumorIntel intel = new RumorIntel(rumor);
-        FishIntelNotifications.queue(intel);
+        if (PlayerSettings.rumorNotices()) FishIntelNotifications.queue(intel);
+        else Global.getSector().getIntelManager().addIntel(intel, true);
 
         return rumor;
     }

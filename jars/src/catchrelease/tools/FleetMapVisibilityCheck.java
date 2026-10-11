@@ -1,5 +1,7 @@
 package catchrelease.tools;
 
+import catchrelease.config.PlayerSettings;
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.fisherman.FishermanMapIcon;
 import catchrelease.campaign.fish.fisherman.FishermanBehavior;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuest;
@@ -28,7 +30,7 @@ public final class FleetMapVisibilityCheck {
     private FleetMapVisibilityCheck() {
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         SectorAPI original = Global.getSector();
         try {
             Fixture f = new Fixture();
@@ -69,9 +71,36 @@ public final class FleetMapVisibilityCheck {
             require(FishermanMapIcon.findStanding(f.system) == f.marker, "Teardown forgot posting");
             checkBoatOwner();
             checkQuest();
+            checkSettings();
             System.out.println("Fleet map visibility: radar levels, restoration, navigation and teardown passed");
         } finally {
             Global.setSector(original);
+        }
+    }
+
+    private static void checkSettings() throws Exception {
+        try {
+            for (boolean quest : new boolean[]{false, true}) {
+                Fixture f = new Fixture(quest);
+                Global.setSector(f.sector);
+                var values = PlayerSettings.defaults();
+                var setting = quest ? Setting.ACCEPTED_MARKERS
+                        : Setting.FISHERMAN_MARKERS;
+                values.put(setting, false);
+                PlayerSettingsChecks.use(values);
+                FleetMapVisibility.sync(f.marker, f.fleet);
+                require(f.entities.isEmpty(), "Hidden preference removes map token");
+                require(f.fleetMemory.getBoolean(FleetQuest.QUEST_FLAG)
+                        && f.fleetMemory.getBoolean(FleetQuest.TAKEN_FLAG), "Hiding cannot remove quest state");
+                FleetMapVisibility.restore(f.marker);
+                require(f.entities.isEmpty(), "Detach cannot restore a disabled marker");
+                values.put(setting, true);
+                PlayerSettingsChecks.use(values);
+                FleetMapVisibility.sync(f.marker, f.fleet);
+                require(f.entities.size() == 1, "Enabling restores the same token");
+            }
+        } finally {
+            PlayerSettingsChecks.use(PlayerSettings.defaults());
         }
     }
 

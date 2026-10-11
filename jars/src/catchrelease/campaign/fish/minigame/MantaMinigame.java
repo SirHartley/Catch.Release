@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.minigame;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -24,6 +25,7 @@ public class MantaMinigame extends FishingMinigame {
 
         @Override
         public void advance(float amount, boolean reeling) {
+            amount *= multiplier(Setting.GAME_SPEED);
             timeTotal += amount;
             advanceFish(amount);
         }

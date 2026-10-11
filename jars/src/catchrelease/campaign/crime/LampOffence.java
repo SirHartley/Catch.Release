@@ -1,5 +1,6 @@
 package catchrelease.campaign.crime;
 
+import catchrelease.config.Setting;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -114,7 +115,7 @@ public class LampOffence {
     }
 
     public static int getRung(CampaignFleetAPI player, String factionId) {
-        int count = getCount(player, factionId);
+        int count = (int) (getCount(player, factionId) * Setting.LAMP_ESCALATION.mult());
 
         if (count <= 0) return 1;
         if (count == 1) return 2;

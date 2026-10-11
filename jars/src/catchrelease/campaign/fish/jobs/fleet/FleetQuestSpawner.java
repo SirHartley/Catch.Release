@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -152,7 +153,8 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (!canOffer()) return;
         if (!FishingIntro.isComplete()) return;
 
-        if (random.nextFloat() > CHANCE) return;
+        float chance = CHANCE * Setting.FLEET_FREQUENCY.mult();
+        if (chance <= 0f || random.nextFloat() > chance) return;
 
         StarSystemAPI system = (StarSystemAPI) Global.getSector().getPlayerFleet()
                 .getContainingLocation();

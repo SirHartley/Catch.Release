@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeStat;
@@ -51,14 +52,20 @@ public class ShopPricing {
         int credits = getCredits(stat, targetLevel);
         int band = credits / 5000 - 1 + (PREMIUM_STATS.contains(stat.id) ? 1 : 0);
 
-        return new Price(credits, getPayment("stat:" + stat.id + ":" + targetLevel, band));
+        FishRequirement fish = getPayment("stat:" + stat.id + ":" + targetLevel, band);
+        if (fish != null && Setting.UPGRADE_FISH.mult() != 1f) {
+            fish = new FishRequirement(fish);
+            fish.count = Math.max(1, (int) Math.ceil(fish.count * Setting.UPGRADE_FISH.mult()));
+        }
+        return new Price(Math.round(credits * Setting.UPGRADE_CREDITS.mult()), fish);
     }
 
     public static Price getPrice(Tackle tackle) {
         if (tackle == null || tackle == Tackle.NONE) return null;
 
         int credits = getCredits(tackle);
-        return new Price(credits, getPayment("tackle:" + tackle.name(), (credits - 20000) / 5000));
+        return new Price(Math.round(credits * Setting.EQUIPMENT_COST.mult()),
+                getPayment("tackle:" + tackle.name(), (credits - 20000) / 5000));
     }
 
     public static int getCredits(UpgradeStat stat, int targetLevel) {

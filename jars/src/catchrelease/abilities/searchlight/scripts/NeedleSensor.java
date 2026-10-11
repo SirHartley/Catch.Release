@@ -1,5 +1,6 @@
 package catchrelease.abilities.searchlight.scripts;
 
+import catchrelease.config.Setting;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -74,7 +75,7 @@ public class NeedleSensor {
             float alpha = Math.max(0f, Math.min(1f, viewport.getAlphaMult()));
             if (alpha <= 0f) return;
             color = new Color(RIPPLE_COLOR.getRed(), RIPPLE_COLOR.getGreen(), RIPPLE_COLOR.getBlue(),
-                    Math.round(RIPPLE_COLOR.getAlpha() * alpha));
+                    Math.min(255, Math.round(RIPPLE_COLOR.getAlpha() * alpha * Setting.NEEDLE_VISIBILITY.mult())));
             super.render(layer, viewport);
         }
     }
@@ -156,7 +157,7 @@ public class NeedleSensor {
     }
 
     protected float nextDelay() {
-        return MathUtils.getRandomNumberInRange(INTERVAL_MIN, INTERVAL_MAX);
+        return MathUtils.getRandomNumberInRange(INTERVAL_MIN, INTERVAL_MAX) / Setting.NEEDLE_FREQUENCY.mult();
     }
 
     protected void register(RippleRingRenderer ring) {

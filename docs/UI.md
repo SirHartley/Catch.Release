@@ -219,6 +219,21 @@ Sources: `BaseSpecialItemPlugin.createTooltip/addCostLabel` and the vanilla item
 plugins in the knowledge base's `sources-api/campaign.impl.java`; `Misc.addDesignTypePara`
 in `sources-api/util.java`.
 
+## LunaLib settings
+
+`LunaSettings.csv` and `config/Setting` must agree on IDs, types, defaults and bounds.
+Preset radios are one-shot actions, reset to Keep current after Save. The difficulty Text row
+describes saved values, and is rebuilt when its tab is reopened.
+
+LunaLib retains `LunaSettingsUISettingsPanel.Companion.changedSettings` and mounted controls
+after Save. `config/LunaSettingsBridge` synchronizes this mod's pending values and radio,
+boolean and numeric controls after applying a preset. Updating only the JSON would let a later
+Save restore the old preset or slider values. Do not clear another mod's pending settings.
+
+LunaLib suppresses settings listeners during new-game setup. `PlayerSettings.install()` reloads
+on game load as well as application start, so those choices are applied. Dependency source:
+`lib/Lazylib_lunalib.zip`, LunaSettingsUISettingsPanel and LunaSettingsLoader.
+
 ## Rebuilding lists
 
 Create a UI element and call `addUIElement` on the same `CustomPanelAPI`.
@@ -391,12 +406,12 @@ stamp, sound or quality-loss notice is added. Ordinary failures retain their sho
 close. Both dialog-dismiss paths dispose all owned tooltip components.
 On a win, scar drawing stops immediately and the display is disposed before the
 catch-information panel is created. No scar icons, hover regions or explanations
-remain above the minigame; the landed specimen keeps its scar-based quality.
+remain above the minigame; the landed specimen keeps its scar-based quality unless the player disables that penalty.
 Scar persistence and quality are covered in
 [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishlegendary).
 
 Manta minigames apply `ChromaticAberrationOverlay.renderRegion` after drawing the
-running panel. It shifts RGB samples only inside that panel, with pixel/UI scaling,
+running panel. Reduced visual effects lowers its strength. It shifts RGB samples only inside that panel, with pixel/UI scaling,
 and never registers a campaign listener. Both custom-dialog dismissal paths dispose
 its framebuffer texture, including dev reopens. Result readouts remain undistorted.
 The two minigame decoys reuse the real fish's marker style and the same jitter/tell
@@ -404,14 +419,14 @@ renderer with their own motion state. Only the real model drives the bar colour 
 coverage sounds; decoys do not capture treasure or produce catches. The parity check
 reads the model-parameterized `getJitter` body; keep its math aligned with the tools.
 
-The manta haunt's `MantaBackgroundBlackout` draws an opaque field at the start of
+The manta haunt's `MantaBackgroundBlackout` draws a normally opaque field at the start of
 Luna's `TERRAIN_1` renderer list. Vanilla draws background and stars before campaign
 layers (`CampaignState.render` in 0.98a-RC8); Luna draws plugins in registration order.
 Keep this field before breach windows and the later entity/UI layers. It must not be
-an above-world or above-UI overlay, nor change the location's saved background.
+an above-world or above-UI overlay, nor change the location's saved background. Reduced flashes lowers opacity without skipping the formation swap.
 
 - A telegraphed move shows a tell for `MINIGAME_TELL_TIME` before it starts: the drawn marker leans toward the coming move and bobs twice, eased in and out so the path has no corners, peaking at about 5 px. Ordinary jitter calms to 15% over the same envelope (`MINIGAME_TELL_CALM`), the fish's glow flares over the same envelope, and from 35% of the tell a small detached glow mote slips about 34 px toward the move and fades out before the fish follows. The lean and calm are drawn position and are mirrored by the tools' simulation; the flare and mote are overlays, which the tools' `FishPreview` draws in the same colours but the simulation does not model. None of them moves the hit position. `getJitter` also reads `getTellProgress()`, which the parity check maps to the tool's `tellProgress` parameter. `getTell` depends only on its arguments, and `FishingParityChecks` compares its body with `FishingSimulation.tell` as text, so keep the body brace-free. Its size grows with the species' jitter so shaky fish still show it.
-- The line sound uses one continuously refreshed UI loop with changing volume.
+- The line sound uses one continuously refreshed UI loop with changing volume. Player settings control its held/released levels and group volume; they do not restart the loop.
 - Lantern Jack has two active treasure icons; each keeps its own timer and capture ring. The panel reads `FishingMinigame.getTreasures()` and plays each kind of treasure sound at most once per frame when several spawn or are taken together.
 - The loot result has a backdrop clock that starts when the panel is created and
   a list clock that starts after the catch tally. Coin rain uses the backdrop clock.

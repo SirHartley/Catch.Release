@@ -51,7 +51,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon |
 | `data/config/settings.json` | `catchrelease.dialogue.rules` command package and sprites; black-hole warp settings belong to the deprecated test below |
 | `data/config/sounds.json` | Sound registry; callers in abilities and `FishConstants` |
-| `data/config/LunaSettings.csv` | Charge-ready sound policy, camera snap, returning-player tutorial skip |
+| `data/config/LunaSettings.csv` | Nine feature tabs; defaults and bounds mirror `config/Setting`. Runtime values and preset actions belong to `config/PlayerSettings`. |
 | `data/campaign/bar_events.csv` | 11 ordinary FishJob subclasses + 3 camp jobs; Crablobab and the tutorial spacer use AddBarEvents rules |
 | `data/campaign/distress_calls.csv` | Merged, namespaced specs; # IDs disabled; `CatchReleaseDistressProvider` |
 | `data/campaign/rules.csv` | Dialogue and type-selected fleet quest/intel text; Java supplies mechanics/state |
@@ -63,7 +63,38 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
 | `data/config/UpgradeData.csv` -> `memory/upgrades/` | Current stat definitions, saved levels and runtime values |
 
-Load order in `ModPlugin`: pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> expedition/prospecting routes -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims -> dev shortcut.
+Load order in `ModPlugin`: player settings -> pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> expedition/prospecting routes -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims -> dev shortcut.
+
+### Player settings
+
+`config/PlayerSettings` installs a LunaLib listener on application start and reloads on game load.
+`Setting` owns IDs, defaults, bounds and typed access. `data/config/LunaSettings.csv` supplies the
+nine tabs and help text. Runtime callers read the cached values, not the CSV or LunaLib each frame.
+
+Overall and hunt presets are one-shot actions. Applying one sets its sliders, saves them and
+returns the action to Keep current. Custom is a computed status, not a preset. Overall presets
+cover catching and hunts; they leave equipment, prices, rewards, input mode and presentation alone.
+Marker presets set the four marker switches. [LunaLib UI synchronization](UI.md#lunalib-settings)
+prevents a retained action from overwriting later manual edits.
+
+| Area | Runtime owners |
+|---|---|
+| Catching | `FishingMinigame` snapshots physics per attempt; `MinigameTreasure` snapshots chest timing. Zero-progress failure delay and opening grace use real, unpaused seconds, independent of game speed. Recovery resets the failure timer; no-loss overrides it. |
+| Equipment | `UpgradeManager.getValue()` scales the upgraded value without changing owned levels. Drone return speed, launch spacing, lamp activation and Needle hints use their existing owners. |
+| Hunts | `FishSpec`, haunt modules and `LegendaryShields` consume movement, hazard, recovery and species-specific settings. Easier hunting does not reduce rewards. |
+| Quests | `QuestDuration` and `QuestRewards` scale newly generated offers; accepted terms stay fixed. The listener scales this mod's bar weights from captured base weights. Fleet and distress providers scale only their own natural rolls. |
+| Markers | `FleetQuest.ensureMarked()`, `FleetMapVisibility` and `QuestPond.refreshMarkers()` hide presentation only. Quest memory, claims, routing and completion stay active. The settings callback refreshes loaded owners without a polling script. |
+| Exploration | `PondCreator` stores each system's target count on first initialization; existing systems are not reseeded by slider edits. Ordinary mote population and replenishment exclude legendary residency. |
+| Outfitter | `ShopPricing`, `ShopTabPlugin` and `FishermanShelf` scale prices, retaining fish minima and saved purchase receipts. Stock is permanent; there is no restock setting. Upgrade fish-count scaling uses a copy of the saved base requirement, so refreshes cannot compound it. Quest valuation keeps base credit prices. |
+| Presentation | Aquarium and campaign renderers scale their own effects; shared fish icons are untouched. `FishingSounds` applies mod/group volumes to existing sound calls. Music ducking restores the previous music setting on dialogue close. |
+
+Defaults preserve normal gameplay. Active minigames keep their initial physics; cached equipment
+stats refresh on their normal activation. Renderer/audio preferences apply on their next update.
+New quest terms, rumors and uninitialized systems use the values at creation. Important-only
+notifications suppress optional rumor notices, not required quest grants or completion notices.
+The standalone difficulty tuner remains independent of player settings.
+
+### Build and authoring tools
 
 IntelliJ classes: `out/production/catchrelease`; artifact: `jars/catchrelease.jar`. Keep compiler output outside `jars/`. Build procedure: [CLAUDE.md](../CLAUDE.md#building).
 
@@ -313,7 +344,7 @@ Run from the mod root with the normal compile dependencies.
 | `OuterReaches.java` | Collects real market entities, including connected/hidden/non-economy entities; chooses cleared spawn points and travel legs. Conditions-only planet markets are not settlements. |
 | `FishermanBehavior.java` | Shared visitor/standing route checks and market navigation avoidance; also lamps, staged motes, pacing, visibility, visit duration, and departure. `CoreFisherBehavior` selects standing lifetime and assignment text. |
 | `FishermanShelf.java` | Stores each boat's two initial habitat-data slots, duplicate prevention, and sale-based 30-day restocking. |
-| `FishermanQuest.java` | Saved chart offer and exact identified catch. Selects species/system/source together and checks implement eligibility before offering the request. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts a 90-day cooldown. Decline/reopen does not reroll. |
+| `FishermanQuest.java` | Saved chart offer and exact identified catch. Selects species/system/source together and checks implement eligibility before offering the request. FishRequirement/FishCurrency govern progress, picker and spending; completion widens the shelf and starts the configured work cooldown (90 days by default). Decline/reopen does not reroll. |
 | `FishermanIdentity.java` | Stores the shared `PersonAPI` and selects one of five coherence portraits immediately before a hail. |
 | `FishRumors.java` | Monthly leads: eight effects, four effect pairs, and one legendary-sighting slot unlocked by `FishingIntro.isComplete() && FishermanQuest.getRound() > 0`. Graduation alone grants an ordinary lead. Legendary reports snapshot an uncaught fish's actual host/residency; they neither transplant fish nor grant range data. |
 
@@ -321,7 +352,7 @@ Run from the mod root with the normal compile dependencies.
 
 Each ordinary `FishRumors.Kind` has one matching `CatchReleaseRumorText` row; legendary sightings select a species-specific row with `$catchreleaseRumorLegendary`, followed by its `_continue` option handler. The second page displays the intel receipt and returns to the Fisherman menu. `CatchReleaseCMD.setRumorTokens()` supplies the dialogue-lifetime `$catchreleaseRumorLegendaryColor` from `FishRarity.LEGENDARY.color` for shortened names; full names use `highlightFishText`. Legendary intel reads `CatchReleaseLegendaryRumorIntel_<speciesId>` from rules. Combined leads use their own passages. Intel expands the saved system/fish values with ordered highlights; ordinary dialogue and the no-lead fallback retain Continue to business.
 
-Rumors last 60 days from `started`; publication starts the shared 30-day cooldown, including delayed bar reports. `ACTIVE_KEY` stores overlapping leads; ordinary effect rolls avoid occupied systems. Legendary rolls exclude caught fish and species with a live report; no eligible legendary falls back to the ordinary rotation. `getActive()` selects the newest published lead for dialogue; effect getters search all live leads. Legendary leads have no effects and expire on capture, host/residency change, or removed system. They offer autopilot and fishing-map navigation to the saved system without granting range data; expired leads cannot navigate. `LegendaryChases.isCurrentResidency()` only reads the ledger, avoiding rumor -> habitat -> rumor recursion. Host changes increment residency, preventing an old report from reviving after a fish moves away and back. `RumorIntel.shouldRemoveIntel()` shares expiry without reviving ended entries; vanilla calls it for queued and visible entries while unpaused. No new timer script.
+Rumors snapshot the configured lifetime (default 60 days) from `started`; publication starts the shared 30-day cooldown, including delayed bar reports. `ACTIVE_KEY` stores overlapping leads; ordinary effect rolls avoid occupied systems. Legendary rolls exclude caught fish and species with a live report; no eligible legendary falls back to the ordinary rotation. `getActive()` selects the newest published lead for dialogue; effect getters search all live leads. Legendary leads have no effects and expire on capture, host/residency change, or removed system. They offer autopilot and fishing-map navigation to the saved system without granting range data; expired leads cannot navigate. `LegendaryChases.isCurrentResidency()` only reads the ledger, avoiding rumor -> habitat -> rumor recursion. Host changes increment residency, preventing an old report from reviving after a fish moves away and back. `RumorIntel.shouldRemoveIntel()` shares expiry without reviving ended entries; vanilla calls it for queued and visible entries while unpaused. No new timer script.
 
 ### `dialogue/rules`
 
@@ -812,7 +843,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - Explosive Head is unstocked and consumable. A miss keeps it; detonation removes ownership and the fitted slot, which makes Crablobab sell it again.
 - Upgrade tiers and modules granted outside the shop still go through `ShopEntry.grant()` so a running ability is stopped and restarted with its new values.
 - A curio is a switch, not a purchase. Its shop price is null, it never becomes “done,” and the button toggles it.
-- Celebration Charges are purchased from Crablobab and switched in the outfitter. They are not a LunaLib setting.
+- Celebration Charges are purchased from Crablobab and switched in the outfitter. Player settings scale the celebration's visuals; they do not grant or equip it.
 - Abilities read tuning values when activated. Any code that changes their upgrade or module inputs must restart the affected running ability.
 - Needle Sensor is a stocked, schematic-gated Lens Array. It uses the normal module reward, fitting and category-icon paths. Its controller and rings are transient. Vanilla registers abilities as entity scripts even when off; the existing callback supplies the passive timer, with no new campaign script or sector scan.
 - `StatIds.getAbilityId()` uses an explicit map. Do not infer the ability from a stat-name prefix.
@@ -874,7 +905,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 
 - A mote spawned at its destination expires immediately. Spawn and target positions must differ.
 - `FishEntityPlugin.HOLDS_KEY` makes a tutorial mote choose another point in its pond instead of expiring. Chart and camp fish intentionally do not hold.
-- Campaign motes move at `FishRarity.speedMult` and `wanderMult` scaled per species through `FishSpec.getCampaignSpeedMult()` and `getCampaignWanderMult()`, for both surfaced and buried motes. `FishSpecLoader` derives the factors from `motionSpeed` and `restlessness` relative to the median of the rarity's weighted non-Abyssal roster. It clamps them to `CAMPAIGN_PACE_MIN`/`MAX` and `CAMPAIGN_WANDER_MIN`/`MAX` and caps combined wander at `CAMPAIGN_WANDER_CAP`. Legendaries keep factor 1 because their chases are scripted. Editing a species' minigame speed or restlessness therefore changes its world movement too.
+- Campaign motes move at `FishRarity.speedMult` and `wanderMult` scaled per species through `FishSpec.getCampaignSpeedMult()` and `getCampaignWanderMult()`, for both surfaced and buried motes. `FishSpecLoader` derives the factors from `motionSpeed` and `restlessness` relative to the median of the rarity's weighted non-Abyssal roster. It clamps them to `CAMPAIGN_PACE_MIN`/`MAX` and `CAMPAIGN_WANDER_MIN`/`MAX` and caps combined wander at `CAMPAIGN_WANDER_CAP`. Legendaries skip species-derived pacing and use the player's hunt-speed multiplier because their chases are scripted. Editing a species' minigame speed or restlessness therefore changes its world movement too.
 - No ordinary mote stands still for long: a lunger's freeze is capped at `LUNGER_FREEZE_MAX` and still creeps. Rare-and-above motes dive for `DIVE_TIME` about every `DIVE_INTERVAL`, shortened for more erratic species. Under the fabric they hold a straight course at cruise speed along the bearing they dived on, so the surfacing point can be anticipated.
 - The method says which rig caught a fish; the implement says what exposed it. Both values must follow the mote's actual provenance.
 - Pond and harpoon catches must carry the exact source rupture where applicable. Chart requests also carry target ID, target system, and earliest valid timestamp through loose fish and containers.

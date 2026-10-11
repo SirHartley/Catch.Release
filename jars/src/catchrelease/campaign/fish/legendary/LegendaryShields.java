@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -388,7 +389,7 @@ public class LegendaryShields {
         if (fish.isEvading()) return;
 
         LegendaryChases.Chase state = LegendaryChases.getState(CHARGE_SHIELD_SPECIES);
-        if (getJackStack(state) >= JACK_STACK_MAX) return;
+        if (getJackStack(state) >= getJackLimit()) return;
 
         SectorEntityToken self = fish.getMote();
         if (self == null || self.getContainingLocation() == null) return;
@@ -418,15 +419,15 @@ public class LegendaryShields {
         if (best <= EAT_RANGE) {
             // A fading mote is still edible on the next frame. Consume it once.
             prey.setExpired(true);
-            state.shieldUnits = Math.min(JACK_STACK_MAX, getJackStack(state) + 1);
-            if (state.shieldUnits == JACK_STACK_MAX) fish.setHunting(false);
+            state.shieldUnits = Math.min(getJackLimit(), getJackStack(state) + 1);
+            if (state.shieldUnits == getJackLimit()) fish.setHunting(false);
             fish.flashShield();
             say(self, "Mote consumed. Shield layer gained.");
         }
     }
 
     public static void lureFlare(FishEntityPlugin jack) {
-        if (getStackedRings(jack) >= JACK_STACK_MAX) return;
+        if (getStackedRings(jack) >= getJackLimit()) return;
         SectorEntityToken self = jack.getMote();
         if (self == null || self.getContainingLocation() == null) return;
 
@@ -464,7 +465,9 @@ public class LegendaryShields {
             ((FishEntityPlugin) mote.getCustomPlugin()).startLure(self, LURE_SECONDS);
         }
 
-        say(self, "The lantern flares. Nearby motes turn toward it.");
+        if (Setting.FLAVOUR_TEXT.enabled()) {
+            say(self, "The lantern flares. Nearby motes turn toward it.");
+        }
     }
 
     protected static List<SectorEntityToken> preyMotes(SectorEntityToken self) {
@@ -495,8 +498,13 @@ public class LegendaryShields {
         return spec != null && spec.rarity != FishRarity.LEGENDARY;
     }
 
+    public static int getJackLimit() {
+        return Math.round(Setting.JACK_SHIELD_LIMIT.value());
+    }
+
     protected static int getJackStack(LegendaryChases.Chase state) {
-        if (state.shieldUnits < 0) state.shieldUnits = JACK_STACK_INITIAL;
+        if (state.shieldUnits < 0) state.shieldUnits = Math.min(JACK_STACK_INITIAL, getJackLimit());
+        state.shieldUnits = Math.min(state.shieldUnits, getJackLimit());
 
         return state.shieldUnits;
     }

@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -202,6 +203,13 @@ public class QuestRewards {
         }
 
         FishRewardRoller.coalesceCredits(rewards);
+        float creditScale = Setting.QUEST_CREDITS.mult();
+        for (int i = 0; i < rewards.size(); i++) {
+            if (rewards.get(i) instanceof FishReward.Credits credits) {
+                rewards.set(i, new FishReward.Credits(Math.round(credits.amount * creditScale),
+                        credits.valueMultiplier * creditScale));
+            }
+        }
 
         return new Result(score, tier, budget, rewards);
     }

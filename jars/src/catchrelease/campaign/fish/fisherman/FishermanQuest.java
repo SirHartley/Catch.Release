@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -55,7 +56,6 @@ public class FishermanQuest {
     public static final String OFFER_KEY = "$catchrelease_fisherQuestOffer";
     public static final String ROUND_KEY = "$catchrelease_fisherQuestRound";
     public static final String LAST_COMPLETED_KEY = "$catchrelease_fisherQuestLastCompleted";
-    public static final float COOLDOWN_DAYS = 90f;
 
     public static final String QUEST_FISH_FLAG = "$catchrelease_questFish";
     public static final String QUEST_TARGET_ID_KEY = "$catchrelease_questTargetId";
@@ -410,7 +410,7 @@ public class FishermanQuest {
 
         Object last = Global.getSector().getPersistentData().get(LAST_COMPLETED_KEY);
         return !(last instanceof Long) || Global.getSector().getClock()
-                .getElapsedDaysSince((Long) last) >= COOLDOWN_DAYS;
+                .getElapsedDaysSince((Long) last) >= Setting.WORK_COOLDOWN.value();
     }
 
     public static Saved roll() {

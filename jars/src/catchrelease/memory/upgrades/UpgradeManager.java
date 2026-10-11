@@ -1,6 +1,7 @@
 package catchrelease.memory.upgrades;
 
 import catchrelease.helper.loading.UpgradeStatLoader;
+import catchrelease.config.Setting;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 
@@ -56,9 +57,19 @@ public class UpgradeManager {
     public static float getValue(String statId, float fallback) {
         UpgradeManager manager = getInstance();
 
-        if (manager == null || !manager.hasStat(statId)) return fallback;
-
-        return manager.getCurrentValue(statId);
+        float value = manager == null || !manager.hasStat(statId) ? fallback : manager.getCurrentValue(statId);
+        Setting setting = switch (statId) {
+            case StatIds.DRONE_SPEED -> Setting.DRONE_SPEED;
+            case StatIds.DRONE_CHASE_TIME -> Setting.DRONE_CHASE;
+            case StatIds.HARPOON_RECHARGE_TIME -> Setting.HARPOON_RECHARGE;
+            case StatIds.HARPOON_SPEED -> Setting.HARPOON_SPEED;
+            case StatIds.HARPOON_REACH -> Setting.HARPOON_RANGE;
+            case StatIds.HARPOON_AIM_ASSIST -> Setting.HARPOON_ASSIST;
+            case StatIds.SEARCHLIGHT_AREA -> Setting.LAMP_AREA;
+            case StatIds.SEARCHLIGHT_TRACK_TIME -> Setting.TRACKING_TIME;
+            default -> null;
+        };
+        return setting == null ? value : value * setting.mult();
     }
 
     public static boolean isUnlocked(String statId) {

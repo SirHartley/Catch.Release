@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
@@ -214,7 +215,7 @@ public class FishermanBehavior implements EveryFrameScript {
         expireLamps(dur);
 
         if (isPlayerHere()) {
-            Global.getSoundPlayer().playSound(FishermanConstants.SOUND_TOGGLE, 0.9f, 1f,
+            FishingSounds.playSound(FishermanConstants.SOUND_TOGGLE, 0.9f, 1f,
                     fleet.getLocation(), new Vector2f());
         }
     }
@@ -226,7 +227,7 @@ public class FishermanBehavior implements EveryFrameScript {
         expireLamps(FishermanConstants.WIND_DOWN_SECONDS);
 
         if (isPlayerHere()) {
-            Global.getSoundPlayer().playSound(FishermanConstants.SOUND_TOGGLE, 0.9f, 1f,
+            FishingSounds.playSound(FishermanConstants.SOUND_TOGGLE, 0.9f, 1f,
                     fleet.getLocation(), new Vector2f());
         }
     }
@@ -467,7 +468,7 @@ public class FishermanBehavior implements EveryFrameScript {
 
         if (!litSoundPlayed) {
             litSoundPlayed = true;
-            Global.getSoundPlayer().playSound(FishermanConstants.SOUND_TOGGLE, 1.1f, 1f,
+            FishingSounds.playSound(FishermanConstants.SOUND_TOGGLE, 1.1f, 1f,
                     fleet.getLocation(), new Vector2f());
         }
     }

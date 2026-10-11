@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
@@ -183,7 +184,8 @@ public abstract class FishJob extends HubMissionWithBarEvent
     protected boolean setDurationForAsks(MarketAPI from) {
         SectorEntityToken at = from == null ? null : from.getPrimaryEntity();
         if (at == null || asks.isEmpty()) {
-            days = QuestDuration.STANDARD.days;
+            days = Setting.QUEST_NO_DEADLINE.enabled() ? 0f
+                    : QuestDuration.STANDARD.days * Setting.QUEST_TIME.mult();
             return true;
         }
 
@@ -300,7 +302,9 @@ public abstract class FishJob extends HubMissionWithBarEvent
 
         Object updateParam = getDisplayedProgressUpdate(displayedProgress, current);
         displayedProgress = current;
-        FishIntelNotifications.update(this, updateParam);
+        if (Setting.PROGRESS_NOTICES.enabled()) {
+            FishIntelNotifications.update(this, updateParam);
+        }
     }
 
     protected List<Integer> captureDisplayedProgress() {

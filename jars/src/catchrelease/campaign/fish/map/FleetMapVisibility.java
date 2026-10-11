@@ -1,5 +1,8 @@
 package catchrelease.campaign.fish.map;
 
+import catchrelease.config.Setting;
+import catchrelease.campaign.fish.fisherman.FishermanMapIcon;
+import catchrelease.campaign.fish.jobs.fleet.FleetQuestMapIcon;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -21,7 +24,7 @@ public final class FleetMapVisibility {
     public static void sync(SectorEntityToken marker, CampaignFleetAPI fleet) {
         if (marker == null || marker.isExpired()) return;
         if (fleet != null) marker.setLocation(fleet.getLocation().x, fleet.getLocation().y);
-        if (isDetected(fleet)) {
+        if (!isEnabled(marker) || isDetected(fleet)) {
             redirectCourse(marker, fleet);
             if (marker.isAlive()) marker.getContainingLocation().removeEntity(marker);
         } else {
@@ -30,11 +33,28 @@ public final class FleetMapVisibility {
     }
 
     public static void restore(SectorEntityToken marker) {
+        if (marker != null && !isEnabled(marker)) {
+            if (marker.isAlive() && marker.getContainingLocation() != null) {
+                marker.getContainingLocation().removeEntity(marker);
+            }
+            return;
+        }
         // removeEntity retains the location; isAlive tests actual membership.
         if (marker != null && !marker.isExpired() && !marker.isAlive()
                 && marker.getContainingLocation() != null) {
             marker.getContainingLocation().addEntity(marker);
         }
+    }
+
+    public static boolean isEnabled(SectorEntityToken marker) {
+        if (marker == null) return false;
+        if (marker.getCustomPlugin() instanceof FishermanMapIcon) {
+            return Setting.FISHERMAN_MARKERS.enabled();
+        }
+        if (marker.getCustomPlugin() instanceof FleetQuestMapIcon) {
+            return Setting.ACCEPTED_MARKERS.enabled();
+        }
+        return true;
     }
 
     public static void redirectCourse(SectorEntityToken marker, CampaignFleetAPI fleet) {

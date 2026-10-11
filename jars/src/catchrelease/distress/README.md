@@ -38,6 +38,10 @@ the game's order for duplicate non-master rows is undefined.
 `dialogTrigger` is fired when the comm link opens. `tags` are opaque to the framework and available
 to the provider.
 
+Providers can override `getSpawnProbability(spec)` for their own final roll; the default returns
+the CSV probability. Zero disables natural spawning for that provider row. This does not change
+vanilla's first chance or prevent explicit test-command spawns.
+
 The provider decides whether a row is eligible, attaches its own quest state to the supplied
 fleet, and may replace the default jump-point orbit anchor with another token in the same system.
 It owns all dialogue, rewards, acceptance and completion. The generic comm entry requires the

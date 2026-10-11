@@ -202,10 +202,12 @@ public final class MoraySlipstreamChecks {
                 var fish = env.fish.get(0);
                 slip.advance(1f / fps);
                 slip.step(fish, 100);
-                for (int n = 0; n < 10 * fps; n++) slip.advance(1f / fps);
-                check(slip.remaining() == 0, "repeat dash waits beyond the old nine-second minimum");
-                for (int n = 0; n < 8 * fps + 2 && slip.remaining() <= 0; n++) slip.advance(1f / fps);
-                check(slip.remaining() > 0, "eligible repeat dash starts within the new upper bound");
+                int earliest = (int) (SlipDashModule.COOLDOWN_MIN_SECONDS * fps) - 1;
+                for (int n = 0; n < earliest; n++) slip.advance(1f / fps);
+                check(slip.remaining() == 0, "repeat dash respects the cooldown minimum");
+                int remaining = (int) (SlipDashModule.COOLDOWN_MAX_SECONDS * fps) - earliest + 2;
+                for (int n = 0; n < remaining && slip.remaining() <= 0; n++) slip.advance(1f / fps);
+                check(slip.remaining() > 0, "eligible repeat dash starts within the cooldown maximum");
                 slip.cleanup();
             }
         }

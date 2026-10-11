@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -34,7 +35,7 @@ public class QuestPond {
         pond.getMemoryWithoutUpdate().set(CLAIMED_BY_KEY, claims);
         pond.getMemoryWithoutUpdate().set(IMPORTANT_FLAG, true);
 
-        Misc.makeImportant(pond, jobId);
+        if (Setting.POND_MARKERS.enabled()) Misc.makeImportant(pond, jobId);
 
         return true;
     }
@@ -52,6 +53,18 @@ public class QuestPond {
             pond.getMemoryWithoutUpdate().unset(IMPORTANT_FLAG);
         } else {
             pond.getMemoryWithoutUpdate().set(CLAIMED_BY_KEY, claims);
+        }
+    }
+
+    public static void refreshMarkers() {
+        if (Global.getSector() == null) return;
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            for (SectorEntityToken pond : getPonds(system)) {
+                for (String jobId : getClaims(pond)) {
+                    if (Setting.POND_MARKERS.enabled()) Misc.makeImportant(pond, jobId);
+                    else Misc.makeUnimportant(pond, jobId);
+                }
+            }
         }
     }
 

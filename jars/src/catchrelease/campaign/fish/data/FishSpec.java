@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.data;
 
+import catchrelease.config.Setting;
 import com.fs.starfarer.api.impl.campaign.procgen.StarAge;
 
 import java.util.LinkedHashSet;
@@ -67,7 +68,8 @@ public class FishSpec {
     }
 
     public float getCampaignSpeedMult() {
-        return rarity.speedMult * campaignPace;
+        return rarity.speedMult * campaignPace * (rarity == FishRarity.LEGENDARY
+                ? Setting.HUNT_SPEED.mult() : 1f);
     }
 
     public float getCampaignWanderMult() {

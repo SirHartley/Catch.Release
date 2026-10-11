@@ -1,5 +1,6 @@
 package catchrelease;
 
+import catchrelease.config.PlayerSettings;
 import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.crime.LampPatrolResponse;
@@ -46,6 +47,11 @@ public class ModPlugin extends BaseModPlugin {
     public static final String MOD_ID = "catchrelease";
 
     @Override
+    public void onApplicationLoad() {
+        PlayerSettings.install();
+    }
+
+    @Override
     public void onCodexDataGenerated() {
         super.onCodexDataGenerated();
 
@@ -55,6 +61,7 @@ public class ModPlugin extends BaseModPlugin {
     @Override
     public void onGameLoad(boolean newGame) {
         super.onGameLoad(newGame);
+        PlayerSettings.install();
 
         OnJumpPondSpawner.register();
         BuriedMoteSpawner.register();

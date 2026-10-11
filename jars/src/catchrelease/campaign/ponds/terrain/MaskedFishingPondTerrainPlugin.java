@@ -1,5 +1,6 @@
 package catchrelease.campaign.ponds.terrain;
 
+import catchrelease.config.Setting;
 import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
@@ -234,7 +235,8 @@ public class MaskedFishingPondTerrainPlugin extends BaseTerrain {
         activity = Math.max(0f, Math.min(1f, activity));
 
         // only spawns while active and not visualOnly - motes on a closed pond are stencilled invisible but still harpoonable
-        moteSpawnInterval.advance(amount);
+        moteSpawnInterval.advance(amount * Setting.FISH_REPLENISH.mult()
+                * Setting.FISH_POPULATION.mult());
         if (moteSpawnInterval.intervalElapsed() && isActive && !visualOnly) spawnRandomMote();
         if (warpGrid != null) warpGrid.advance(amount);
 

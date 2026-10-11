@@ -1,5 +1,6 @@
 package catchrelease.campaign.ponds.listener;
 
+import catchrelease.config.Setting;
 import catchrelease.memory.RandomMemoryHelper;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -18,6 +19,8 @@ import java.util.Random;
 
 public class PondCreator {
 
+    private static final String TARGET_COUNT = "$catchrelease_pondTargetCount";
+
     private final StarSystemAPI system;
     private int pondsToCreate;
     private final Random random;
@@ -30,7 +33,13 @@ public class PondCreator {
         int targetSpots = Math.min(PondConstants.MAX_POND_AMT_PER_SYSTEM,
                 PondConstants.MIN_POND_AMT_PER_SYSTEM
                         + (int) Math.floor(planetAmt / PondConstants.PLANETS_PER_ADDITIONAL_POND));
-        this.pondsToCreate = targetSpots - presentSpots;
+        var memory = system.getMemoryWithoutUpdate();
+        if (!memory.contains(TARGET_COUNT)) {
+            targetSpots = Math.max(presentSpots, Math.max(1, Math.round(targetSpots
+                    * Setting.POND_ABUNDANCE.mult())));
+            memory.set(TARGET_COUNT, targetSpots);
+        }
+        this.pondsToCreate = Math.max(0, memory.getInt(TARGET_COUNT) - presentSpots);
 
         this.random = RandomMemoryHelper.getRandom(system);
     }

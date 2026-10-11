@@ -219,7 +219,10 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         }
 
         Candidate candidate = picker.pick();
-        if (candidate == null || random.nextFloat() > candidate.spec.probability) return;
+        if (candidate == null) return;
+        DistressCallProvider provider = DistressCallFramework.getProvider(candidate.spec.providerId);
+        float probability = provider == null ? 0f : provider.getSpawnProbability(candidate.spec);
+        if (!Float.isFinite(probability) || probability <= 0f || random.nextFloat() > probability) return;
 
         startRoute(candidate.spec, candidate.system);
     }

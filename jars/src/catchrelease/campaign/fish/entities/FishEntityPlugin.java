@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.entities;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -317,7 +318,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         flicker.advance(amount);
         if (shieldFlash > 0f) shieldFlash -= amount;
         if (baseShieldRegen > 0f) baseShieldRegen -= amount;
-        if (flareCooldown > 0f) flareCooldown -= amount;
+        if (flareCooldown > 0f) flareCooldown -= amount * Setting.JACK_CALL_FREQUENCY.mult()
+                / Setting.HUNT_RECOVERY.mult();
         if (flareRing > 0f) flareRing -= amount;
 
         advanceLampFade(amount);
@@ -759,7 +761,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     /** Low on shells, the Jack rings the water: one call, then a long reload. */
     public void tryLureFlare() {
-        if (flareCooldown > 0f || LegendaryShields.getStackedRings(this) >= LegendaryShields.JACK_STACK_MAX) return;
+        if (flareCooldown > 0f || LegendaryShields.getStackedRings(this) >= LegendaryShields.getJackLimit()) return;
 
         flareCooldown = FLARE_COOLDOWN_SECONDS;
         flareRing = FLARE_RING_SECONDS;

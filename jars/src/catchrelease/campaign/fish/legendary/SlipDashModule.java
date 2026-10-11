@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.Setting;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -96,7 +97,7 @@ public class SlipDashModule extends BaseHauntModule {
             return;
         }
 
-        cooldown -= amount;
+        cooldown -= amount / Setting.HUNT_RECOVERY.mult();
         if (firstDash) {
             if (!SearchlightAbilityPlugin.isBreaching()) return;
         } else if (cooldown > 0f || !atFullIntensity()) {
@@ -186,9 +187,9 @@ public class SlipDashModule extends BaseHauntModule {
         Vector2f at = fish.getMote().getLocation();
         float moved = Misc.getDistance(at, lastDashPosition);
         // Retrieval/teleports are not the previous slipstream's direction of travel.
-        if (moved > 0.01f && moved <= DASH_SPEED * amount + 1f) {
+        if (moved > 0.01f && moved <= DASH_SPEED * Setting.HUNT_SPEED.mult() * amount + 1f) {
             lastTravelBearing = Misc.getAngleInDegrees(lastDashPosition, at);
-        } else if (amount > 0f && moved > DASH_SPEED * amount + 1f && trail != null) {
+        } else if (amount > 0f && moved > DASH_SPEED * Setting.HUNT_SPEED.mult() * amount + 1f && trail != null) {
             trail.growing = false;
         }
         lastDashPosition.set(at);
@@ -204,7 +205,7 @@ public class SlipDashModule extends BaseHauntModule {
         }
 
         fish.startTravelDash(
-                MathUtils.getPointOnCircumference(null, DASH_SPEED, bearing), dashLeft);
+                MathUtils.getPointOnCircumference(null, DASH_SPEED * Setting.HUNT_SPEED.mult(), bearing), dashLeft);
 
         recordTrail(fish.getMote().getLocation());
     }
@@ -323,7 +324,7 @@ public class SlipDashModule extends BaseHauntModule {
             }
 
             List<SlipstreamSegment> segments = trail.plugin.getSegments();
-            if (!trail.growing) trail.standing -= ROLLUP_PER_SECOND * amount;
+            if (!trail.growing) trail.standing -= ROLLUP_PER_SECOND * amount / Setting.MORAY_DURATION.mult();
 
             // oldest first: everything below the cut fades, and the cut only ever rises,
             // so the stream rolls up from its tail toward where the fish went
@@ -331,7 +332,7 @@ public class SlipDashModule extends BaseHauntModule {
                     - (trail.growing ? 1 : 0);
             for (int i = trail.rolled; i < cut && i < segments.size(); i++) {
                 SlipstreamSegment segment = segments.get(i);
-                segment.fader.setDurationOut(ROLLUP_FADE_SECONDS);
+                segment.fader.setDurationOut(ROLLUP_FADE_SECONDS * Setting.MORAY_DURATION.mult());
                 segment.fader.fadeOut();
                 trail.rolled = i + 1;
             }

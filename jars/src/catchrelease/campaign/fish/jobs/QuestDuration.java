@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -76,7 +77,8 @@ public enum QuestDuration {
         float bonus = requiresRareOrEpicCatch(asks) ? RARE_CATCH_BONUS_DAYS : 0f;
         if (requiresFreshCatch(asks)) bonus += FRESH_CATCH_BONUS_DAYS;
 
-        return base + bonus;
+        return Setting.QUEST_NO_DEADLINE.enabled() ? 0f
+                : (base + bonus) * Setting.QUEST_TIME.mult();
     }
 
     public static float daysForTravelLY(float oneWayLY, FishRequirement ask) {

@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.ui.PaneWidgets;
 import catchrelease.ui.ShopUi;
 import catchrelease.campaign.fish.crab.CrabWares;
@@ -756,7 +757,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             if (receipt != null) purchases.add(receipt);
 
-            Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
+            FishingSounds.playUISound(SOUND_BOUGHT, 1f, 1f);
 
             refreshWallet();
             rebuild(true);
@@ -794,7 +795,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                         public void picked(FishHandoffPicker.Selection selection) {
                             if (entry.buyWithFishPayment(selection::spend)) {
                                 purchases.add(receipt);
-                                Global.getSoundPlayer().playUISound(SOUND_BOUGHT, 1f, 1f);
+                                FishingSounds.playUISound(SOUND_BOUGHT, 1f, 1f);
                             } else {
                                 restoreFish(receipt);
                             }
@@ -872,7 +873,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
                     "Refunded " + (entry != null ? entry.getName() : "the last purchase"));
-            Global.getSoundPlayer().playUISound(SOUND_UNDONE, 1f, 1f);
+            FishingSounds.playUISound(SOUND_UNDONE, 1f, 1f);
         }
 
         protected ShopEntry findEntry(String key) {
