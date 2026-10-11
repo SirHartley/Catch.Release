@@ -141,15 +141,19 @@ public final class LegendaryScarDisplay {
     public void render(FishingMinigameLayout layout, float alphaMult) {
         if (disposed || count == 0) return;
         if (icon == null) icon = SpriteLoader.getSprite("shop_harpoon");
+        Color fill = failed ? Misc.getDarkPlayerColor() : Color.DARK_GRAY;
+        Color rim = failed ? Misc.getBasePlayerColor() : Color.GRAY;
+        Color ink = failed ? Misc.getTextColor() : Color.LIGHT_GRAY;
+        float visibility = failed ? 1f : 0.35f;
         for (int i = 0; i < count; i++) {
             float phase = added && i == count - 1 ? Math.min(1f, elapsed / STAMP_TIME) : 1f;
             float scale = 1f + (STAMP_SCALE - 1f) * (float) Math.pow(1f - phase, 3);
-            float alpha = alphaMult * Math.min(1f, phase * 4f);
+            float alpha = alphaMult * visibility * Math.min(1f, phase * 4f);
             float x = x(layout);
             float y = y(layout, i);
             float radius = DIAMETER * 0.5f * scale;
-            Disc.draw(x, y, radius, Misc.getDarkPlayerColor(), 0.7f * alpha, 0.7f * alpha, false);
-            Disc.drawOutline(x, y, radius, Misc.getBasePlayerColor(), 0.65f * alpha, 1f);
+            Disc.draw(x, y, radius, fill, 0.7f * alpha, 0.7f * alpha, false);
+            Disc.drawOutline(x, y, radius, rim, 0.65f * alpha, 1f);
             float width = icon.getWidth();
             float height = icon.getHeight();
             Color color = icon.getColor();
@@ -157,7 +161,7 @@ public final class LegendaryScarDisplay {
             float fit = DIAMETER * 0.62f * scale / Math.max(width, height);
             icon.setSize(width * fit, height * fit);
             icon.setNormalBlend();
-            icon.setColor(Misc.getTextColor());
+            icon.setColor(ink);
             icon.setAlphaMult(0.65f * alpha);
             icon.renderAtCenter(x, y);
             icon.setSize(width, height);

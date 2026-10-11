@@ -358,8 +358,10 @@ meter. The column starts in the catch-card area (`layout.panelX`), reserving the
 stamp's maximum 2.4-times radius so the animation also clears the dialog. Hover
 regions and the explanation use that same anchor. It uses the existing
 `shop_harpoon` sprite and `Disc` primitives after the Manta distortion pass. There
-are no labels or hover regions during play. On a failed legendary minigame the
-dialog stays open: the new icon fades in and shrinks over 0.6 seconds, then plays
+are no labels or hover regions during play. The circles, rims and harpoons use
+neutral greys at 35% of their result opacity while playing. Failure restores
+their player/text colours and result opacity immediately, including at the scar
+cap. The dialog stays open: the new icon fades in and shrinks over 0.6 seconds, then plays
 vanilla's `ui_cargo_supplies_drop` and shows the explanation in a boxed tooltip
 beside it. After five seconds the box is replaced by postgame-only hover tooltips.
 A click or fresh keypress during the stamp skips to its completed state. The next
