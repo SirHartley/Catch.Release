@@ -368,7 +368,9 @@ The coherence map keeps temporary system conditions separate from hyperspace hea
 row, spaced 32 units and centered over the full minigame dialog. The row recenters
 when its count changes. Its height reserves the stamp's maximum 2.4-times radius
 plus an eight-unit gap above the dialog. Hover regions follow each circle; the
-explanation sits to the right of the newly added, rightmost icon. It uses the existing
+automatic first-scar explanation is centered horizontally above the icon, with an
+eight-unit gap between the circle and the bottom of the box. Hover tooltips remain
+to the right of their icons. It uses the existing
 `shop_harpoon` sprite and `Disc` primitives after the Manta distortion pass. There
 are no labels or hover regions during play. The circles, rims and harpoons use
 neutral greys at 35% of their result opacity while playing. Failure immediately
@@ -377,9 +379,9 @@ border, with darker tile fills and normal result opacity, including at the scar
 cap. This is red by default and follows vanilla's colourblind setting.
 The dialog stays open: each new icon fades in and shrinks over 0.6 seconds,
 then plays vanilla's `ui_cargo_supplies_drop`. Only the first scar of a hunt shows
-the automatic boxed explanation; after five seconds it becomes a hover tooltip.
+the automatic boxed explanation; after `NOTICE_TIME` (ten seconds) it becomes a hover tooltip.
 Later scars enable hover tooltips for every icon as soon as the stamp finishes,
-without an automatic box or an extra five-second wait.
+without an automatic box or an extra wait.
 A click or fresh keypress during the stamp skips to its completed state. The next
 advance plays its sound once and enables the appropriate explanation; that input does not close
 the result. After the stamp finishes naturally or is skipped, the next click or
