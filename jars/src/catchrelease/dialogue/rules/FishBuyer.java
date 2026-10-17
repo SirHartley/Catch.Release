@@ -126,6 +126,8 @@ public class FishBuyer {
                     BUTTON_WIDTH, BUTTON_HEIGHT, 10f);
             // Vanilla rebuilds this tooltip every frame, before a later mouse-up.
             plugin.button.setQuickMode(true);
+            // Each rebuilt button sees the cursor arrive, so a hover sound would replay every frame.
+            plugin.button.setMouseOverSound(null);
             plugin.button.setEnabled(pickedUp == null && !toggleRequested);
             custom.addUIElement(element).inTL(0f, 0f);
             panel.addCustom(custom, 0f);

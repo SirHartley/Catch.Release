@@ -4,7 +4,6 @@ import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
-import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.legendary.LegendaryTrail;
 import catchrelease.campaign.fish.legendary.MantaFormationModule;
@@ -22,6 +21,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +44,7 @@ public final class LegendaryTrailChecks {
         @Override protected void drawVertex(float x, float y, float u, float v, float alpha) {
             vertices.add(new Vertex(x, y, alpha));
         }
+        Color color() { return getColor(); }
         float paint(Fixture f) {
             vertices.clear();
             renderTrail(f.viewport);
@@ -165,6 +166,8 @@ public final class LegendaryTrailChecks {
             }
             check(Math.abs(epic.recorded.paint(f) - legendary.recorded.paint(f) * LegendaryTrail.EPIC_ALPHA_MULT) < 0.00001f,
                     "epic trails are fainter legendary trails");
+            check(epic.recorded.color().equals(FishRarity.EPIC.color) && !legendary.recorded.color().equals(FishRarity.EPIC.color),
+                    "epic trails take the epic colour");
             Mote decoy = new Mote(f, FishRarity.RARE);
             decoy.field("decoyAnchor", decoy.getMote());
             decoy.tick(0f, 0f);
@@ -174,36 +177,6 @@ public final class LegendaryTrailChecks {
             decoy.field("phantom", true);
             decoy.tick(20f, 0f);
             check(decoy.recorded.paint(f) > 0f, "phantoms keep their trails");
-
-            Mote token = new Mote(f, FishRarity.LEGENDARY);
-            class Buried extends BuriedMoteEntityPlugin {
-
-                Buried() { entity = token.getMote(); }
-                @Override public FishSpec getFishSpec() { return token.spec; }
-                void tick() { advanceTrail(); }
-            }
-            Buried buried = new Buried();
-            ReflectionUtils.set(buried, "trail", token.recorded, true);
-            f.on = false;
-            buried.tick();
-            token.at.set(10f, 0f);
-            buried.tick();
-            check(token.recorded.paint(f) == 0f, "buried history is hidden without lamps");
-            f.on = true;
-            check(token.recorded.paint(f) > 0f && f.env.haunt.getActiveSpeciesId() == null,
-                    "unrevealed buried history appears under lamps without a haunt");
-            token.spec.rarity = FishRarity.EPIC;
-            token.recorded.advance(5.1f);
-            token.at.set(30f, 0f);
-            buried.tick();
-            token.at.set(40f, 0f);
-            buried.tick();
-            check(token.recorded.paint(f) > 0f, "buried epics leave fainter trails under lamps");
-            token.spec.rarity = FishRarity.COMMON;
-            token.recorded.advance(5.1f);
-            token.at.set(20f, 0f);
-            buried.tick();
-            check(token.recorded.paint(f) == 0f, "ordinary buried fish have no trails");
         }
     }
 

@@ -206,7 +206,7 @@ public class FishermanShelf {
 
         if (!isShared(fleet)) return;
 
-        // the newest booking is this purchase's, since undo only ever takes back the last one
+        // the newest booking is this purchase's, since undo takes purchases back newest first
         List<Long> pending = getPending();
         if (!pending.isEmpty()) pending.remove(pending.size() - 1);
     }
