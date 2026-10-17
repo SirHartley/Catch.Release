@@ -40,6 +40,7 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
     private Point previous;
     private float time;
     private float alphaMult = 1f;
+    private Color color = COLOR;
     private SpriteAPI sprite;
     private final Vector2f vertexPosition = new Vector2f();
 
@@ -56,16 +57,15 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
         }
     }
 
-    public static float getAlphaMult(FishRarity rarity) {
-        return switch (rarity) {
-            case LEGENDARY -> 1f;
-            case EPIC -> EPIC_ALPHA_MULT;
-            default -> 0f;
-        };
+    public static boolean hasTrail(FishRarity rarity) {
+        return rarity == FishRarity.LEGENDARY || rarity == FishRarity.EPIC;
     }
 
-    public void sample(SectorEntityToken mote, boolean emitting, float alphaMult) {
-        this.alphaMult = alphaMult;
+    // Epic trails take the epic colour at reduced alpha; anything else draws as legendary.
+    public void sample(SectorEntityToken mote, boolean emitting, FishRarity rarity) {
+        boolean epic = rarity == FishRarity.EPIC;
+        alphaMult = epic ? EPIC_ALPHA_MULT : 1f;
+        color = epic ? FishRarity.EPIC.color : COLOR;
         if (Global.getSector() == null || Global.getSector().isPaused() || isExpired()) return;
         if (!emitting || mote.isExpired() || !mote.isInCurrentLocation()) {
             previous = null;
@@ -172,8 +172,12 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
                 ALPHA * alphaMult * (1f - age) * alpha * lit);
     }
 
+    protected Color getColor() {
+        return color;
+    }
+
     protected void drawVertex(float x, float y, float u, float v, float alpha) {
-        glColor4f(COLOR.getRed() / 255f, COLOR.getGreen() / 255f, COLOR.getBlue() / 255f, alpha);
+        glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, alpha);
         glTexCoord2f(u, v);
         glVertex2f(x, y);
     }

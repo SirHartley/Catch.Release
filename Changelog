@@ -20,7 +20,8 @@ Fixed - Fish, crate and pile tooltips only show their right-click hints for fish
 Added - Hovering an Outfitter fish count shows the species of that rarity aboard
 Added - Lantern Jack's lure call now plays a distress-call sound
 Added - Harpoons deflected by a legendary's shield play a varied shield-hit sound
-Added - Epic fish leave a fainter version of the legendary trail under breach lights
+Added - Epic fish leave a fainter purple version of the legendary trail under breach lights
+Adjusted - Buried legendaries no longer leave a trail
 Added - A foghorn sounds when a legendary haunt starts, and a lower one when it ends
 Adjusted - Fish art on crate labels in cargo is drawn sharper
 Added - Codex pages of caught fish show a size distribution chart with your best and latest catch

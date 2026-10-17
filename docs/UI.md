@@ -400,8 +400,9 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   vanilla's one-second notice plus half-second fade can finish. Full shields do
   not print a gain notice. Spent anchors are not harpoon targets.
 - Legendary trails retain the red foggy texture, 10-to-1-unit taper, 0.85 opacity,
-  normal blending and five-second fade. Epic trails are identical at half that
-  opacity (`LegendaryTrail.EPIC_ALPHA_MULT`), passed with each `sample` call. Their transient Luna renderer runs independently of the mote's render
+  normal blending and five-second fade. Epic trails use `FishRarity.EPIC.color` at
+  half that opacity (`LegendaryTrail.EPIC_ALPHA_MULT`); each `sample` call passes
+  the rarity, and decoys pass legendary. Their transient Luna renderer runs independently of the mote's render
   callback, so a hidden or offscreen head does not hide its illuminated tail.
   Quads are subdivided at most four world units apart; each vertex uses current
   spot/fan coverage and that lamp's Manta flicker, not stored mote visibility or
