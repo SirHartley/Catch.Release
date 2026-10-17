@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="rules, rules, rules">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="item Tooltip">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/items/FishBundleItemPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/items/FishBundleItemPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/items/FishItemPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/items/FishItemPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/items/FishPileItemPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/items/FishPileItemPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Changelog" beforeDir="false" afterPath="$PROJECT_DIR$/Changelog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/fish.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/fish.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/FishingIntro.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/tutorial/FishingIntro.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/scratchpad" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/scratchpad" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +147,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="rules rules I want to kill myself" />
     <MESSAGE value="Fisherman Tutorial Handoff / Rules" />
     <MESSAGE value="Rules and desc adjustments" />
     <MESSAGE value="longliner sfx" />
@@ -170,7 +171,8 @@
     <MESSAGE value="Removed leftover files" />
     <MESSAGE value="updated todo" />
     <MESSAGE value="rules, rules, rules" />
-    <option name="LAST_COMMIT_MESSAGE" value="rules, rules, rules" />
+    <MESSAGE value="item Tooltip" />
+    <option name="LAST_COMMIT_MESSAGE" value="item Tooltip" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

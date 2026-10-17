@@ -383,7 +383,7 @@ public class FishingIntro {
                         + "make the assigned catch, then bring it back.";
             }
 
-            return "This lesson covers a natural rupture: use the ROD/LYNE ability to land the "
+            return "This lesson covers a natural rupture in low-coherence space: use the ROD/LYNE ability to land the "
                     + "assigned catch and bring it back.";
         }
 

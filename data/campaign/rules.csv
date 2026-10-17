@@ -2653,19 +2653,19 @@ catchrelease_ask_whyOut,DialogOptionSelected,$option == catchrelease_ask_whyOut,
 catchrelease_fisherOptAsk_looking,CatchReleaseFisherQuestions,"$catchreleaseStage >= 5
 !$global.catchrelease_fisherAsked_looking
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_looking:""Are the fish watching us?""",
-catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_looking,$global.catchrelease_fisherAsked_looking = true,"""They look."" He turns a control unit over in his hands. ""Don't mistake it for seeing you.""","0:catchrelease_ask_lookingFollow:""What's the difference?""
+catchrelease_ask_looking,DialogOptionSelected,$option == catchrelease_ask_looking,$global.catchrelease_fisherAsked_looking = true,"""They exist."" He turns a control unit over in his hands. ""They are not an existence.""","0:catchrelease_ask_lookingFollow:""What's the difference?""
 10:catchrelease_fisherAskBack:Something else",
 catchrelease_ask_lookingFollow,DialogOptionSelected,$option == catchrelease_ask_lookingFollow,,"""Enough of one that I wouldn't start treating the catch as a passenger.""
 
-The Fisherman puts the control unit down. ""You can watch what it does, Captain. Be careful what you decide that means.""",0:catchrelease_fisherAskBack:Something else,
+The Fisherman puts the control unit down. ""They look, Captain. Be careful to not mistake that for seeing you.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_patterns,CatchReleaseFisherQuestions,"$catchreleaseStage >= 3
 !$global.catchrelease_fisherAsked_patterns
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_patterns:""The patterns. What are they, actually?""",
 catchrelease_ask_patterns,DialogOptionSelected,$option == catchrelease_ask_patterns,$global.catchrelease_fisherAsked_patterns = true,"""We call what comes through a pattern. You'll find that in the technical records. Ghost is the older spacer word. Fish is what you'll hear from anyone buying or selling one, unless you've brought them a crab.""","0:catchrelease_ask_patternsWhy:""Why fish?""
 10:catchrelease_fisherAskBack:Something else",
-catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_patternsWhy,,"""They do take other shapes. You've probably brought in a few yourself by now. Fish are easier to recognize, and easier to sell.""
+catchrelease_ask_patternsWhy,DialogOptionSelected,$option == catchrelease_ask_patternsWhy,,"""No idea."" he ponders the question for half a second.
 
-He waits to see whether you have another question.",0:catchrelease_fisherAskBack:Something else,
+""Never found an answer that improved the fishing.""",0:catchrelease_fisherAskBack:Something else,
 catchrelease_fisherOptAsk_deepWater,CatchReleaseFisherQuestions,"$catchreleaseStage >= 4
 !$global.catchrelease_fisherAsked_deepWater
 CatchReleaseCMD fisherAskOnPage",,,"catchrelease_ask_deepWater:""Why is the deep water worse?""",
@@ -2724,7 +2724,7 @@ $global.catchrelease_fisherAsked_whyOut
 CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_whyOut gray,,"50:catchrelease_ask_whyOut:""Why are you always so far out?""",
 catchrelease_fisherAsked_looking,CatchReleaseFisherQuestions,"$catchreleaseStage >= 5
 $global.catchrelease_fisherAsked_looking
-CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_looking gray,,"50:catchrelease_ask_looking:""Are the fish watching us?""",
+CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_looking gray,,"50:catchrelease_ask_looking:""Are the fish sentient?""",
 catchrelease_fisherAsked_patterns,CatchReleaseFisherQuestions,"$catchreleaseStage >= 3
 $global.catchrelease_fisherAsked_patterns
 CatchReleaseCMD fisherAskOnPage",SetOptionColor catchrelease_ask_patterns gray,,"50:catchrelease_ask_patterns:""The patterns. What are they, actually?""",
@@ -3247,7 +3247,7 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 3
 $catchreleaseDeepHandoff","$option = catchrelease_introDeepGear 0
 FireBest DialogOptionSelected",,,
-catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,FireAll ShopIntroQuestions,"""Parts, upgrades, rig modules. You'll have a better idea what you want now you've done some fishing. Have a look through it; ask if something isn't clear.""",,
+catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,FireAll ShopIntroQuestions,"""A place to buy parts, upgrades and rig modules. Every fishing fleet worth their salt has one aboard; as does this one. You'll have a better idea what you want now you've done some fishing. Have a look through it; ask if something isn't clear.""",,
 catchrelease_introAskTackleOption,ShopIntroQuestions,!$catchrelease_introAskedTackle,,,"0:catchrelease_introAskTackle:""What are rig modules?""",
 catchrelease_introAskUpgradeOption,ShopIntroQuestions,!$catchrelease_introAskedUpgrade,,,"0:catchrelease_introAskUpgrade:""What is an upgrade?""",
 catchrelease_introAskWhereOption,ShopIntroQuestions,!$catchrelease_introAskedWhere,,,"0:catchrelease_introAskWhere:""Where can I find schematics?""",
@@ -3260,10 +3260,10 @@ catchrelease_introAskWhere,DialogOptionSelected,$option == catchrelease_introAsk
 FireAll ShopIntroQuestions","""Ask around in port, or see what the working fleets need. People sometimes offer schematics in payment. Check which rig they're for before you take a job; there's no shortage of work that pays you in something you can't use yet.""",,
 catchrelease_introShopLater,DialogOptionSelected,$option == catchrelease_introShopLater,,"""It'll be there when you need it. Have your deck crew clear some space; there's more equipment coming over.""",catchrelease_introDeepGear:Continue,
 catchrelease_introShopLater2,DialogOptionSelected,$option == catchrelease_introShopLater2,,"""Then have your deck crew clear some space. There's more equipment coming over.""",catchrelease_introDeepGear:Continue,
-catchrelease_introDeepGear,DialogOptionSelected,$option == catchrelease_introDeepGear,CatchReleaseCMD giveDeepGear,"The first transfer brings a bank of articulated projectors on a reinforced frame. The second transfer ferries a massive harpoon launcher, heavy enough to require both cargo booms. Your deck officer calls for another crew to help with the mounting.
+catchrelease_introDeepGear,DialogOptionSelected,$option == catchrelease_introDeepGear,CatchReleaseCMD giveDeepGear,"The next equipment transfer brings a bank of articulated projectors on a reinforced frame, followed by a massive harpoon launcher, heavy enough to require both cargo booms. Your deck officer calls for another crew to help with the mounting.
 
 ""Breach Lights,"" the Fisherman says, indicating the projectors. ""They work the fabric until we can reach a pattern without opening a full rupture. That's what the harpoon is for.""",0:catchrelease_introDeepResume_continue:Continue,
-catchrelease_introDeepResume_continue,DialogOptionSelected,$option == catchrelease_introDeepResume_continue,FireAll CatchReleaseIntroDeepQuestions,"""There's a ROD in the head. Once you've got a return under the lights, put the harpoon into it and the ROD takes hold. The return trace brings your catch across.""
+catchrelease_introDeepResume_continue,DialogOptionSelected,$option == catchrelease_introDeepResume_continue,FireAll CatchReleaseIntroDeepQuestions,"""There's a ROD in the head of that harpoon. Once you've got a return under the lights, put the harpoon into it and the ROD takes hold. The return trace brings your catch across.""
 
 Your deck officer asks about the launcher controls. ""Have your gunnery officer show them, Captain. Same precautions you'd take with anything that heavy.""",,
 catchrelease_introLightQuestion,DialogOptionSelected,$option == catchrelease_introLightQuestion,$catchreleaseIntroLightAsked = true,"""Enough of a breach for the harpoon. An ordinary drone won't find its way back through it. That's why I'm giving you both.""
@@ -3299,10 +3299,14 @@ catchrelease_introPlannerAskOpt,CatchReleaseRangeDataBrief,,SetOptionColor catch
 # tutorial habitat data stage,,,,,,
 catchrelease_introSurveyWhat,DialogOptionSelected,$option == catchrelease_introSurveyWhat,"$catchrelease_introAskedRangeWhat = true
 AddTextSmall ""The map has a filter option to show fishing information. Use the sidebar to filter for fish habitat. Use the route planner at the top to plot a quick route."" highlight
-FireAll CatchReleaseRangeDataBrief","""Open your map and select the fishing information. Pick a pattern and you'll see where it can turn up. Check the conditions as well as the distance; the nearest system isn't necessarily the one you want.""",,
+FireAll CatchReleaseRangeDataBrief
+$hasSeenExplicitMapHint = true 0","""Open your map and select the fishing information. Pick a pattern and you'll see where it can turn up. Check the conditions as well as the distance; the nearest system isn't necessarily the one you want.""",,
 catchrelease_introSurveyWhere,DialogOptionSelected,$option == catchrelease_introSurveyWhere,"$catchrelease_introAskedRangeWhere = true
 FireAll CatchReleaseRangeDataBrief","""Somebody had to go looking. You're welcome to do the same, but you'll spend a fair bit of fuel before you've covered as much as one of those records. I find them worth paying for.""",,
-catchrelease_introPlannerAsk,DialogOptionSelected,$option == catchrelease_introPlannerAsk,"Highlight ""fishing planner""","""Bring me one of each. Put them both in the fishing planner and see what route it gives you. You may be able to get them on the same trip. No sense flying all the way home just to go out again.""",catchrelease_introSurveyDone:Continue,
+catchrelease_introPlannerAsk,DialogOptionSelected,$option == catchrelease_introPlannerAsk,FireBest catchrelease_introPlannerAsk,,,
+catchrelease_introPlannerAskSeen,catchrelease_introPlannerAsk,$hasSeenExplicitMapHint,"Highlight ""fishing planner""","""Bring me one of each. Put them both in the fishing planner and see what route it gives you. You may be able to get them on the same trip. No sense flying all the way home just to go out again.""",catchrelease_introSurveyDone:Continue,
+catchrelease_introPlannerAskNotSeen,catchrelease_introPlannerAsk,,"Highlight ""fishing planner""
+AddTextSmall ""The map has a filter option to show fishing information. Use the sidebar to filter for fish habitat. Use the route planner at the top to plot a quick route."" highlight","""Bring me one of each. Put them both in the fishing planner and see what route it gives you. You may be able to get them on the same trip. No sense flying all the way home just to go out again.""",catchrelease_introSurveyDone:Continue,
 catchrelease_introSurveyDone,DialogOptionSelected,$option == catchrelease_introSurveyDone,"FireBest CatchReleaseIntroBrief
 CatchReleaseCMD showIntroIntel",,,
 catchrelease_introTurnIn5,DialogOptionSelected,"$option == catchrelease_fisherIntro score:65
@@ -3314,7 +3318,7 @@ CatchReleaseCMD finishIntro
 CatchReleaseCMD tokens
 AddTextSmall ""Range data purchasing unlocked"" highlight","""Both of them. Good."" The Fisherman calls down to have your catches received.
 
-""I've four more entries for you: two common, one uncommon and a rare one. Those are on me. Anything else you want, have a look at the charts I'm selling.""",catchrelease_introTurnIn5_cont:Continue,
+""I've four more entries for you: two common, one uncommon and a rare one. Anything else you'll have to buy.""",catchrelease_introTurnIn5_cont:Continue,
 catchrelease_introTurnIn5_cont,DialogOptionSelected,$option == catchrelease_introTurnIn5_cont,,"""You know enough to take work now. Read what they're asking for before you agree to a price. People get particular when it's their money.""
 
 He picks up a tool from the bench. ""Bring me whatever you want to sell. And keep the rig serviced, Captain. I'd rather hear about your catch than your breakdowns.""","catchrelease_introGetFreeRumor:""Heard of anywhere worth fishing?""",
