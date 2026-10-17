@@ -2327,14 +2327,21 @@ He sees your expression and hurries on.
 
 He gestures at the compartment behind him.
 
-""I waited for them to notice. Then I thought I'd better see what was in the cache.""","0:catchrelease_ratingWho:""What boat?""",
+""I waited for them to notice. Then I thought I'd better see what was in the cache.""","0:catchrelease_ratingWho:""What boat?""
+1:catchrelease_ratingAskCache:""So, what was in the cache?""",
+catchrelease_ratingAskCache,DialogOptionSelected,$option == catchrelease_ratingAskCache,,"""Take a guess?"" He gestures towards the pile of empty ration cans.
+
+""Lasted until a week ago. Water recycler's still running, at least. I'd almost given up hope!""","0:catchrelease_ratingWho:""You mentioned a fleet earlier.""",
+,,,,,,
 catchrelease_ratingWho,DialogOptionSelected,$option == catchrelease_ratingWho,"CatchReleaseCMD point
 FireAll CatchReleaseCastawayOptions
 CatchReleaseCMD showIntroIntel","""Fishing crew. Worked with the Fisherman's boats.""
 
 He digs out an old comm unit and reads your officer a fleet handshake.
 
-""Try that when you find them. Trawlers, usually, out past the settled traffic. Tell the Fisherman who you've got aboard. He'll know me.""",,
+""Try that when you find them. Trawlers, usually, out past the settled traffic."" He does a quick glance at the pile of empty ration cans.
+
+""Please get me off this rock. I can make myself useful until we get to The Fisherman, won't any skin off your back.""",,
 catchrelease_ratingMurder,DialogOptionSelected,$option == catchrelease_ratingMurder,$catchrelease_castawaySeen = true,"You order bombardment of the coordinates the beacon is broadcasting from. 
 
 It falls silent with a single shot.",0:catchrelease_castawayToPlanet:See to the planet,
@@ -2372,7 +2379,7 @@ CatchReleaseCMD tokens
 $catchreleaseDrift == 3","$menuState = catchreleaseFisher 0
 FireAll CatchReleaseFisherOptions","The Fisherman is watching someone work out of view when the link opens. ""Easy with that. Set it down first.""
 
-Metal strikes a deck plate on your left audio channel, though the trawler lies to starboard. He turns back to the pickup. ""Sorry, Captain. You were saying?""",,
+Metal strikes a deck plate to your left, a terrifying sound that makes your crew jump. He turns back to the pickup. ""Sorry, Captain. You were saying?""",,
 catchrelease_fisherFirstContact,OpenCommLink,"$entity.catchrelease_fisherman score:1050
 CatchReleaseCMD tokens
 $catchreleaseStage == 0","CatchReleaseCMD point
@@ -2389,7 +2396,7 @@ $menuState = catchreleaseFisher 0
 $catchrelease_fisherInterceptOpened = true 0
 SetShortcut catchrelease_fisherLeave ""ESCAPE""","The trawler comes across your course and hails you before you can close on the unstable fabric.
 
-""Hold where you are, Captain."" The man on the feed checks your fleet against his plot. ""If you're here to fish, come alongside. You'll need the equipment before you go any closer.""
+""Hold where you are, Captain."" The man on the feed checks your fleet against his plot. ""If you're here to fish, you'll need the equipment before you go any closer.""
 
 The trawler banks clear, leaving room off its port side.","0:catchrelease_fisherIntro:Move alongside.
 100:catchrelease_fisherLeave:Leave",
@@ -2758,7 +2765,7 @@ FireAll CatchReleaseFisherQuestions",,,
 catchrelease_ratingBarAdd,AddBarEvents,"$global.catchrelease_marketsSeen >= 2
 $global.catchrelease_intro_stage < 1
 CatchReleaseCMD tokens
-$catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Ask the spacer in faded deck coveralls about the fishing boats"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
+$catchreleaseFishWelcome","AddBarEvent catchrelease_ratingBar ""Approach the spacer in faded deck coveralls"" ""A spacer in faded deck coveralls has been working on the same drink for most of the evening. There is no ship patch on the shoulder, though the boots and knuckles both suggest recent employment."" highlight",,,
 catchrelease_ratingBarTalk,DialogOptionSelected,$option == catchrelease_ratingBar,"$global.catchrelease_metRating = true
 CatchReleaseCMD rememberRatingPlanet
 CatchReleaseCMD point
@@ -2889,7 +2896,7 @@ CatchReleaseCMD crabAcknowledgeExplosive
 CatchReleaseCMD highlightFishText $catchreleaseCrabExplosiveTarget
 SetShortcut catchrelease_crabLeave ""ESCAPE""","""You're back!"" Crablobab points at you. ""$catchreleaseCrabExplosiveTarget!""
 
-A pocket near his shoulder flashes once.
+A pocket near his shoulder flashes, a small puff of smoke rising out the top.
 
 ""It worked, then. Excellent! Wasn't too sure about that one."" He looks expectantly at your empty hands. ""You need things.""","0:catchrelease_crabStall:""Show me what you have""
 100:catchrelease_crabLeave:Leave",
@@ -2899,18 +2906,18 @@ CatchReleaseCMD tokens","SaveCurrentVisual
 CatchReleaseCMD showCrabPortrait
 SetShortcut catchrelease_crabLeave ""ESCAPE""","""You're back!""
 
-One of the crabs has got as far as the next stool. Crablobab returns it to the crate through a pocket in his coat. ""Introductions already done. Saves time twice."" He spreads his hands toward you. ""You need things.""","0:catchrelease_crabStall:""Show me what you have""
+One of the crabs has got as far as the next stool. Crablobab returns it to the crate through a pocket in his coat. ""Introductions already done. Saves time twice!"" He spreads his hands toward you. ""You need things.""","0:catchrelease_crabStall:""Show me what you have""
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabCrabs,DialogOptionSelected,$option == catchrelease_crabCrabs,"SetShortcut catchrelease_crabLeave ""ESCAPE""","""Crabs!"" He looks down at the crate as if reminded. ""Very dependable. Nearly all of them arrive.""
 
-He pats the lid. Something inside the coat knocks back.","0:catchrelease_crabStall:Ask about the merchandise
+He taps the lid. Something inside the coat knocks back at him.","0:catchrelease_crabStall:Ask about the merchandise
 100:catchrelease_crabLeave:Leave",
 catchrelease_crabStallEmpty,DialogOptionSelected,"$option == catchrelease_crabStall score:20
 CatchReleaseCMD tokens
 !$catchreleaseCrabAny","CatchReleaseCMD showCrabPortrait
 FireAll CatchReleaseCrabStallOptions","Crablobab opens his coat. The shelves are empty.
 
-He checks one pocket, then another. A crab checks the first one again.
+He checks one pocket, then another. A crab checks the first one again, then scuttles away.
 
 ""Nothing."" He considers this. ""Except crabs.""",,
 catchrelease_crabStall,DialogOptionSelected,"$option == catchrelease_crabStall score:10
@@ -2923,13 +2930,13 @@ catchrelease_crabWareCelebration,DialogOptionSelected,"$option == catchrelease_c
 CatchReleaseCMD tokens
 $catchreleaseCrabCelebrationAfford",SetTextHighlights $catchreleaseCrabCelebrationPrice $catchreleaseCrabCelebrationCrabs,"Crablobab reaches past a shelf several metres inside the coat and retrieves a cartridge box.
 
-""Celebration charges! Catch comes aboard, these go off. Paper everywhere. Colours. Terrible for the deck crew."" He beams. ""Excellent for morale.""
+""Celebration charges! Fish comes aboard, these go off. Paper everywhere! Colours! Terrible for the deck crew!"" He beams. ""Excellent for morale.""
 
 He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs.","0:catchrelease_crabBuyCelebration:Pay him
 10:catchrelease_crabStall:""Another time.""",
 catchrelease_crabWareCelebrationShort,DialogOptionSelected,"$option == catchrelease_crabWareCelebration score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabCelebrationAfford",SetTextHighlights $catchreleaseCrabCelebrationPrice $catchreleaseCrabCelebrationCrabs,"Crablobab produces a cartridge box and gives it an encouraging shake. ""Celebration charges! Catch comes aboard, these go off. Paper everywhere. Colours everywhere. Deck crew complains."" He beams. ""Excellent for morale.""
+!$catchreleaseCrabCelebrationAfford",SetTextHighlights $catchreleaseCrabCelebrationPrice $catchreleaseCrabCelebrationCrabs,"Crablobab produces a cartridge box and gives it an encouraging shake. ""Celebration charges! Fish comes aboard, these go off. Paper everywhere! Colours everywhere! Deck crew complains!"" He beams. ""Excellent for morale.""
 
 He wants $catchreleaseCrabCelebrationPrice for it, and $catchreleaseCrabCelebrationCrabs crabs.
 
@@ -2939,7 +2946,7 @@ catchrelease_crabWareEarmuffs,DialogOptionSelected,"$option == catchrelease_crab
 CatchReleaseCMD tokens
 $catchreleaseCrabEarmuffsAfford",SetTextHighlights $catchreleaseCrabEarmuffsPrice $catchreleaseCrabEarmuffsCrabs,"""Earmuffs."" They are already in his hands. ""Very comfortable. Good seal. Put them on and you don't have to listen to the whispering.""
 
-He places them on the table. The faint sound your bridge recordings have been carrying from low-coherence space continues normally.
+He places them on the table. You notice the faint whispers usually heard in low-coherence space creeping into a fringe corner of your perception.
 
 He wants $catchreleaseCrabEarmuffsPrice for them, and $catchreleaseCrabEarmuffsCrabs crabs.","0:catchrelease_crabBuyEarmuffs:Pay him
 10:catchrelease_crabStall:""Another time.""",
@@ -2947,7 +2954,7 @@ catchrelease_crabWareEarmuffsShort,DialogOptionSelected,"$option == catchrelease
 CatchReleaseCMD tokens
 !$catchreleaseCrabEarmuffsAfford",SetTextHighlights $catchreleaseCrabEarmuffsPrice $catchreleaseCrabEarmuffsCrabs,"""Earmuffs."" They are already in his hands. ""Very comfortable. Good seal. Put them on and you don't have to listen to the whispering.""
 
-He places them on the table. The faint sound your bridge recordings have been carrying from low-coherence space continues normally.
+He places them on the table. You notice the faint whispers usually heard in low-coherence space creeping into a fringe corner of your perception.
 
 He wants $catchreleaseCrabEarmuffsPrice for them, and $catchreleaseCrabEarmuffsCrabs crabs.
 
@@ -2965,7 +2972,7 @@ $catchreleaseCrabChicken_profileAfford",SetTextHighlights $catchreleaseCrabChick
 
 Crablobab reaches into his coat, past a rack of boxed merchandise, and produces a little display tile. A chicken marches across the screen, vanishes around one edge, and promptly returns from the other.
 
-""No Sonar Head? Follow him instead. Goes where the catch goes. If you've got a head that shows the fish, he'll leave that to the fish.""
+""No Sonar Head? Follow him instead. Goes where the catch goes. If you've got equipment that shows the fish, he'll leave the show to the fish.""
 
 He turns the tile toward you. ""Very important: not a fish. If he were a fish, I'd have to charge you for the fish.""
 
@@ -2981,10 +2988,10 @@ A chicken marches across the screen, vanishes around one edge, and promptly retu
 
 ""For following the catch when you haven't got a head that shows the fish."" He turns the tile toward you, then glances at your payment. ""Ah! Nearly a chicken.""
 
-Crablobab counts the credits, then the crabs, then counts both again in the opposite order. ""$catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. This is less than that.""
+Crablobab counts the credits, then the crabs, then counts both again in the opposite order. ""$catchreleaseCrabChicken_profilePrice credits and $catchreleaseCrabChicken_profileCrabs crabs. The chicken says you're short a bit.""
 
 He takes the tile back. The chicken continues marching. ""Good news! He'll still be here when you're richer.""","10:catchrelease_crabStall:""Another time.""",
-catchrelease_crabBuyChicken_profile,DialogOptionSelected,$option == catchrelease_crabBuyChicken_profile,CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your tripad, already held in his other hand. The chicken walks right over.
+catchrelease_crabBuyChicken_profile,DialogOptionSelected,$option == catchrelease_crabBuyChicken_profile,CatchReleaseCMD crabBuy CHICKEN_PROFILE,"Crablobab taps the display tile against your tripad, already held in his other hand. The chicken moves right over, nonchalantely walking across the metal to get to the screen.
 
 ""There we go! Installed, registered, acknowledged by whatever insists on acknowledging these things."" He gives the chicken an approving little nod. ""If you get tired of him, the Outfitter can put him away. He won't mind.""
 
@@ -3005,7 +3012,7 @@ CatchReleaseCMD tokens
 
 He wants $catchreleaseCrabExplosive_headPrice for it, and $catchreleaseCrabExplosive_headCrabs crabs.
 
-You do not have enough. ""Probably for the best."" Crablobab puts it into an inside pocket. The pocket flashes once.","10:catchrelease_crabStall:""Another time.""",
+You do not have enough. ""Probably for the best."" Crablobab puts it into an inside pocket.","10:catchrelease_crabStall:""Another time.""",
 catchrelease_crabBuyExplosive_head,DialogOptionSelected,$option == catchrelease_crabBuyExplosive_head,CatchReleaseCMD crabBuy EXPLOSIVE_HEAD,"The head comes out of the coat wrapped, tagged, and already entered against your ship's inventory.
 
 Your ops chief checks the timestamp.
@@ -3091,7 +3098,7 @@ catchrelease_introHarpoonReturn,DialogOptionSelected,$option == catchrelease_int
 The trawler's cargo boom swings out while your crew release the clamps. A man waiting on the receiving deck signs the transfer under a name already printed on the receipt. The Fisherman watches until the frame is secured.
 
 ""That'll save us some trouble. You do any fishing yourself, Captain?""","catchrelease_introWantWork:""Not yet. Is there work in it?""
-catchrelease_introCurious:""What are you fishing for?""
+catchrelease_introCuriousFish:""What are you fishing for?""
 catchrelease_fisherBack:""I only came to return the equipment.""",
 catchrelease_introHarpoonAsk,DialogOptionSelected,$option == catchrelease_introHarpoonAsk,,"""Part of a LYNE service frame. The drone docks in it when it comes back. Yours has lost most of the machinery, but the mounts are worth keeping.""
 
@@ -3106,8 +3113,9 @@ $catchreleaseStage < 2
 The Fisherman gives the order without asking which crewman you mean. On your side of the channel, the passenger is already waiting by the launch bay with his belongings.
 
 ""You've gone out of your way for us, Captain. Were you looking for work?""","0:catchrelease_introWantWork:""If you have some, yes.""
-10:catchrelease_introCurious:""I was curious about the fishing.""
-100:catchrelease_fisherBack:""No. Just bringing your crewman home.""",
+10:catchrelease_introCurious:""What are you even doing out here?""
+100:catchrelease_introCastawayBackNoWork:""No. Just bringing your crewman home.""",
+catchrelease_introCastawayBackNoWork,DialogOptionSelected,$option == catchrelease_introCastawayBackNoWork,$global.catchrelease_castawayRescued = false,"""Understood. Find my fleet if you change your mind, I've got a spare rig waiting for you.""",100:catchrelease_fisherBack:Continue,
 catchrelease_introHelloIntercept,DialogOptionSelected,"$option == catchrelease_fisherIntro score:51
 CatchReleaseCMD tokens
 $catchreleaseStage < 2
@@ -3125,7 +3133,7 @@ $catchreleaseStage < 2
 $global.catchrelease_metRating",,"""From $ratingPlanetName? Yes, there's work.""
 
 The Fisherman looks over your fleet's particulars. ""That crewman should have come himself. Still, you're here. What did he tell you?""","0:catchrelease_introWantWork:""That you might have work for me.""
-10:catchrelease_introCurious:""He used to pack your catch. What are you fishing for?""
+10:catchrelease_introCuriousFish:""He used to pack your catch. What are you fishing for?""
 20:catchrelease_introRodQuestion:""Not much about the equipment. What would I need?""
 100:catchrelease_fisherBack:""Enough to come looking. The work can wait.""",
 catchrelease_introHello,DialogOptionSelected,"$option == catchrelease_fisherIntro score:50
@@ -3143,8 +3151,13 @@ Your deck officer receives a handling manifest and calls for permission to bring
 catchrelease_introCuriousIntercepted,DialogOptionSelected,"$option == catchrelease_introCurious
 $entity.catchrelease_intercepted",,"""It's a patch of unstable realspace. We use it to fish. Come alongside and I'll get you equipped, if you want. You can have a look at our catch while the deck crews are busy, but you'll learn more bringing in one of your own.""","catchrelease_intro_rod:""All right. Bring the rig over.""
 catchrelease_fisherBack:""No, thanks. I was only curious.""",
+catchrelease_introCuriousFish,DialogOptionSelected,"$option == catchrelease_introCuriousFish
+!$entity.catchrelease_intercepted",,"""We fish for fish. Didn't see that one coming, did you?"" he grins at you with the satisfaction of having landed a joke told a thousand times before, then settles back into a stoic demeanor.
+
+""We trawl the breaches and pull up fish using heavy equipment. It's not glorious, but it pays the bills.""","catchrelease_intro_rod:""Okay. Got a spare rig?""
+catchrelease_fisherBack:""That's not for me.""",
 catchrelease_introCurious,DialogOptionSelected,"$option == catchrelease_introCurious
-!$entity.catchrelease_intercepted",,"""Fishing. There's a market for what comes through here, if you can get it aboard. Want to try? I've got a rig you can use.""","catchrelease_intro_rod:""I'll try it. Bring the rig over.""
+!$entity.catchrelease_intercepted",,"""Fishing. There's a market for what comes through a breach, if you can get it aboard. Want to try? I've got a rig you can use.""","catchrelease_intro_rod:""I'll try it. Bring the rig over.""
 catchrelease_fisherBack:""No, thanks. I was only curious.""",
 catchrelease_introSpawnQuestion,DialogOptionSelected,$option == catchrelease_introSpawnQuestion,,"""I was nearby. A fishing fleet is small and hard to spot, your sensor officer probably just missed our signature. Now, about the ruputre.""","10:catchrelease_introCurious:""What is this place?""
 100:catchrelease_fisherBack:""I'm not interested.""",
@@ -3152,23 +3165,27 @@ catchrelease_introRodQuestion,DialogOptionSelected,$option == catchrelease_intro
 
 Your science officer quietly points out that the D already stands for Device. The Fisherman hears this. ""Yes.""","0:catchrelease_introRodMeaning:""What do the other letters stand for?""
 10:catchrelease_intro_rod:""All right. I'll take a rig.""",
-catchrelease_introRodMeaning,DialogOptionSelected,$option == catchrelease_introRodMeaning,,"""The manuals can't agree on that. Ask for a ROD and you'll get the right piece of machinery.""
+catchrelease_introRodMeaning,DialogOptionSelected,$option == catchrelease_introRodMeaning,,"""Depends on which manual you got. None of the good ones agree.""
 
-He sends over the equipment manifest for your deck officer.",catchrelease_intro_rod:Have the deck crew take delivery.,
+He sends over the equipment manifest for your deck officer.
+
+""Tell me if you figure it out.""",catchrelease_intro_rod:Have the deck crew take delivery.,
 catchrelease_intro_rod,DialogOptionSelected,$option == catchrelease_intro_rod,"CatchReleaseCMD giveRod
 CatchReleaseCMD tokens
-FireAll CatchReleaseIntroRodQuestions","Your ops chief calls to confirm the mass on the manifest. The LYNE drone coming across on the trawler's cargo boom is the size of a light fighter, with maneuvering gear built around the ROD assembly. The launch rack follows on a second transfer.
+FireAll CatchReleaseIntroRodQuestions","Availability is confirmed and your ops chief starts barking commands to receive the new equipment. The LYNE drone coming across on the trawler's cargo boom is the size of a medium fighter, maneuvering gear built around an arcane-looking central assembly.
 
-""Yes, that's the right figure,"" the Fisherman tells your officer. ""Give it some room on the working deck. You'll want that clear when it launches; the exhaust is hot.""
+""Yes, that's the right figure,"" the Fisherman tells your officer as he does a double take on the emissions profile. ""Give it some room on the working deck. You'll want that clear when it launches; the exhaust isn't good for your health.""
 
 He sends your helm a nav mark. ""There's a patch nearby you can start with. Bring back a fish and we'll go over the retrieval.""",,
 catchrelease_introRodOperateOption,CatchReleaseIntroRodQuestions,!$catchrelease_introAskedRodOperate,,,"catchrelease_introRodOperate:""How do I operate it?""",
-catchrelease_introRodTrustOption,CatchReleaseIntroRodQuestions,!$catchrelease_introAskedRodTrust,,,"catchrelease_introRodTrust:""You lend these to anyone who asks?""",
+catchrelease_introRodTrustOption,CatchReleaseIntroRodQuestions,!$catchrelease_introAskedRodTrust,,,"catchrelease_introRodTrust:""You hand this to anyone who asks?""",
 catchrelease_introRodContinueOption,CatchReleaseIntroRodQuestions,,,,"100:catchrelease_introRodGo:""I'll bring you a fish.""",
 catchrelease_introRodOperate,DialogOptionSelected,$option == catchrelease_introRodOperate,"$catchrelease_introAskedRodOperate = true
-FireAll CatchReleaseIntroRodQuestions","""Take the fleet up to the unstable fabric and activate the ROD. That opens the rupture. Activate it again to aim the LYNE drone at a return.""
+FireAll CatchReleaseIntroRodQuestions","Availability is confirmed and your ops chief starts barking commands to receive the new equipment. The LYNE drone coming across on the trawler's cargo boom is the size of a medium fighter, maneuvering gear built around an arcane-looking central assembly.
 
-He points out the retrieval display. ""Once it takes hold, keep the catch in the indicator while the drone brings it through. If you need the drones back, use the ability again.""",,
+""Yes, that's the right figure,"" the Fisherman tells your officer doing a double take on the emissions profile. ""Give it some room on the working deck. You'll want that clear when it launches; the exhaust isn't good for your health.""
+
+He sends your helm a nav mark. ""There's a patch nearby you can start with. Bring back a fish and we'll go over the retrieval.""",,
 catchrelease_introRodTrust,DialogOptionSelected,$option == catchrelease_introRodTrust,"$catchrelease_introAskedRodTrust = true
 FireAll CatchReleaseIntroRodQuestions","""No. I give it to captains that will not squander it. You've got a working ship and a crew who can handle it, and the rig won't earn either of us much sitting on my deck and taking up space.""",,
 catchrelease_introRodGo,DialogOptionSelected,$option == catchrelease_introRodGo,"FireBest CatchReleaseIntroBrief
@@ -3198,7 +3215,9 @@ $catchrelease_introAskedFishShape","$option = catchrelease_introFirstDone 0
 FireBest DialogOptionSelected",,,
 catchrelease_intro_ghosts,DialogOptionSelected,$option == catchrelease_intro_ghosts,"$catchrelease_introAskedFishShape = true
 FireAll CatchReleaseIntroFishShapeQuestions","""It isn't always a fish. We've had crabs, shells, things you'd have trouble fitting a name to. Fish are easier to talk about.""",,
-catchrelease_introGhostWord,DialogOptionSelected,$option == catchrelease_introGhostWord,$catchrelease_introAskedGhostWord = true,"""Spacers have a lot of names for things out there. Usually a story to go with each one. I've heard enough versions that I wouldn't use any of them as a guide to what you've caught.""",catchrelease_introFirstQuestionsBack:Continue,
+catchrelease_introGhostWord,DialogOptionSelected,$option == catchrelease_introGhostWord,"$catchrelease_introAskedGhostWord = true
+FireAll CatchReleaseIntroFishShapeQuestions","""Spacers have a lot of names for things out there. Usually a story to go with each one. I've heard enough versions that I wouldn't use any of them as a guide to what you've caught.""",,
+,,,,,,
 catchrelease_introFirstQuestionsBack,DialogOptionSelected,$option == catchrelease_introFirstQuestionsBack,FireAll CatchReleaseIntroFirstQuestions,,,
 catchrelease_introFirstDone,DialogOptionSelected,"$option == catchrelease_introFirstDone
 CatchReleaseCMD tokens

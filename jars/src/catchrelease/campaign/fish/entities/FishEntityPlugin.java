@@ -124,7 +124,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public static final String HOLDS_KEY = "$catchrelease_moteHolds";
     public static final float HOLD_RANGE = 0.5f;
-    public static final Color QUEST_COLOR = new Color(90, 240, 255);
+    public static final Color QUEST_COLOR = Misc.getHighlightColor();
 
     private float time = 0f;
     private float sineVariance;
