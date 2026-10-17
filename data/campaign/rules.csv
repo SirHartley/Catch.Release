@@ -929,9 +929,7 @@ $catchreleasePaid",,"$HeOrShe checks the catch's recorded length against the ord
 The agreed payment changes hands.",,
 catchrelease_client_paidBonus,catchreleaseJobPaid,"$missionId == catchrelease_client
 $catchreleasePaid
-$catchreleaseBonus score:100",,"$HeOrShe checks the measurements once more and compares the specimen's recorded length with a short note on $hisOrHer slate.
-
-""Upper two-fifths. That qualifies.""
+$catchreleaseBonus score:100",,"$HeOrShe checks the measurements once more and compares the specimen's recorded length with a short note on $hisOrHer slate, then emulates the girth of the fish with $HisOrHer hands. ""Yeah, that'll work.""
 
 The agreed payment changes hands. There is no handshake. $HeOrShe is already checking the next appointment.",,
 ,,,,,,
@@ -950,7 +948,7 @@ catchrelease_jobDecline:Decline.",
 catchrelease_academy_accepted,catchreleaseJobAccepted,$missionId == catchrelease_academy,,"""Thank you. Please keep each retrieval log with its specimen. I've lost days trying to match up containers after delivery.""",,
 catchrelease_academy_declined,catchreleaseJobDeclined,$missionId == catchrelease_academy,,"""All right. If you find someone doing the work, send them to me.""
 
-The researcher looks at the two piles of records, then resumes sorting.",,
+The researcher looks at the two piles of records, sighs, then resumes sorting.",,
 catchrelease_academy_remind,catchreleaseJobRemind,$missionId == catchrelease_academy score:100,CatchReleaseCMD highlightJobText $catchreleaseAsk $catchreleaseDeadlineLeft,"""$catchreleaseAsk. $catchreleaseDeadlineLeft Low coherence, with the original retrieval records.""
 
 The researcher rubs both eyes. ""Please don't have the port tidy the records up for me. I need the bad readings too.""",,
@@ -989,7 +987,7 @@ catchrelease_tuberDeclineOption,CatchReleaseTuberQuestions,,,,110:catchrelease_j
 catchrelease_tuber_accepted,catchreleaseJobAccepted,$missionId == catchrelease_tuber,,"""Yes. Perfect. Chat, we have a captain."" $HeOrShe starts recording before you can move. ""Everyone asking whether this is actually happening: it is happening. We are getting the specimen.""
 
 $HeOrShe pauses the stream, and the grin goes a little desperate. ""Please bring it back before everyone starts accusing me of faking the whole thing.""",,
-catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow."" $HeOrShe turns to the lens without moving it off you. ""Chat, you just watched a captain walk away from easy sponsor money. Would you have taken it? Tell me I'm wrong.""
+catchrelease_tuber_declined,catchreleaseJobDeclined,$missionId == catchrelease_tuber,,"""Okay. Wow."" $HeOrShe turns to the lens without moving it off you. ""Chat, you just watched a captain walk away from easy money. Would you have taken it? Tell me I'm wrong.""
 
 Then, quietly, to you: ""Please take the job.""",,
 catchrelease_tuber_remind,catchreleaseJobRemind,$missionId == catchrelease_tuber score:100,CatchReleaseCMD highlightJobText $catchreleaseAskCap $catchreleaseDeadlineLeft,"""$catchreleaseAskCap. Still waiting."" $HeOrShe raises the camera as soon as $heOrShe sees you. ""Chat, update. The captain is back. Do we have it? We do not have it.""

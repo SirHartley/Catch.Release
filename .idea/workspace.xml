@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="foghorn ui sfx">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="fish icons and more tooltip &amp; rule work">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/codex/FishCodexEntry.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/codex/FishCodexEntry.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/coherence/CoherenceTerrain.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/coherence/CoherenceTerrain.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/intel/CatchLogIntel.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/intel/CatchLogIntel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/items/FishItemTooltips.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/items/FishItemTooltips.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/camp/CampedSpotJob.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/jobs/camp/CampedSpotJob.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/shop/FishRequirement.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/shop/FishRequirement.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/scratchpad" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/scratchpad" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/bulkhead_turtle.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/bulkhead_turtle.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/dopefish.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/dopefish.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/freight_clam.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/freight_clam.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/hammerhead.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/hammerhead.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/hull_grazer.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/hull_grazer.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/imposter.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/imposter.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/lantern_jack.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/lantern_jack.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/nav_turtle.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/nav_turtle.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/quorum_splinter.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/quorum_splinter.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/relic_crab.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/relic_crab.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/slipstream_moray.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/slipstream_moray.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/the_quorum.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/the_quorum.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/volley_dolphin.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/volley_dolphin.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/fish/weathervane.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/fish/weathervane.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -150,7 +157,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="longliner sfx" />
     <MESSAGE value="Intel edits" />
     <MESSAGE value="rules" />
     <MESSAGE value="wordings" />
@@ -175,7 +181,8 @@
     <MESSAGE value="item Tooltip" />
     <MESSAGE value="rules rules&#10;dopefish" />
     <MESSAGE value="foghorn ui sfx" />
-    <option name="LAST_COMMIT_MESSAGE" value="foghorn ui sfx" />
+    <MESSAGE value="fish icons and more tooltip &amp; rule work" />
+    <option name="LAST_COMMIT_MESSAGE" value="fish icons and more tooltip &amp; rule work" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
