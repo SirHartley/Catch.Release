@@ -67,7 +67,8 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
         protected PositionAPI pos;
         protected final List<UIComponentAPI> gridParts = new ArrayList<>();
-        protected Receipt lastPurchase;
+        // Newest last; undo takes them back in reverse order, each restoring the hold as it was before.
+        protected final List<Receipt> purchases = new ArrayList<>();
 
         protected static class Receipt {
 
@@ -257,7 +258,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
             CustomPanelAPI undo = panel.createCustomPanel(UNDO_WIDTH, UNDO_HEIGHT,
                     new PaneWidgets.TextButton(() -> "UNDO LAST PURCHASE",
-                            () -> lastPurchase != null, this::undoClicked));
+                            () -> !purchases.isEmpty(), this::undoClicked));
             footer.addCustom(undo, 0f);
             footer.addTooltipToPrevious(createSimpleTooltip(260f,
                     "Returns the last chart bought this visit and refunds the exact fish used"
@@ -414,7 +415,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             FishLog.unlockLocationData(offer.spec.id);
             FishermanShelf.take(dialog.getInteractionTarget(), offer.spec.id);
 
-            lastPurchase = receipt;
+            purchases.add(receipt);
             FishingSounds.playUISound(FishShopDialog.SOUND_BOUGHT, 1f, 1f);
             Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
                     "Purchased range data for " + offer.spec.getDisplayName());
@@ -443,7 +444,8 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         }
 
         protected void undo() {
-            if (lastPurchase == null) return;
+            if (purchases.isEmpty()) return;
+            Receipt receipt = purchases.remove(purchases.size() - 1);
 
             CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
 
@@ -454,23 +456,22 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
                 cargo.removeItems(CargoItemType.SPECIAL, data, stack.getSize());
             }
-            for (Object[] entry : lastPurchase.fishAboard) {
+            for (Object[] entry : receipt.fishAboard) {
                 cargo.addSpecial((SpecialItemData) entry[0], (Integer) entry[1]);
             }
 
-            FishLog.relockLocationData(lastPurchase.specId);
+            FishLog.relockLocationData(receipt.specId);
 
-            FishermanShelf.putBack(dialog.getInteractionTarget(), lastPurchase.specId,
-                    lastPurchase.stockIndex);
+            FishermanShelf.putBack(dialog.getInteractionTarget(), receipt.specId,
+                    receipt.stockIndex);
 
             String name = catchrelease.helper.loading.FishSpecLoader
-                    .getFishSpec(lastPurchase.specId) == null ? "the last chart"
+                    .getFishSpec(receipt.specId) == null ? "the last chart"
                     : catchrelease.helper.loading.FishSpecLoader
-                            .getFishSpec(lastPurchase.specId).getDisplayName() + " range data";
+                            .getFishSpec(receipt.specId).getDisplayName() + " range data";
             Global.getSector().getCampaignUI().getMessageDisplay()
                     .addMessage("Refunded " + name);
 
-            lastPurchase = null;
             FishingSounds.playUISound(SOUND_UNDONE, 1f, 1f);
         }
     }

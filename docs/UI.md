@@ -147,7 +147,10 @@ tooltip, not an interactive UI element. Its outer `setForceProcessInput(true)`
 must be called through `ReflectionUtils` before nested buttons can receive input.
 The nested custom panel's normal `buttonPressed` callback then works. Set its
 button to quick mode: vanilla rebuilds this tooltip every frame, so a button
-waiting for mouse-up can be replaced between press and release.
+waiting for mouse-up can be replaced between press and release. Clear its
+mouse-over sound with `setMouseOverSound(null)`: each new button sees the cursor
+enter, so the hover click would replay every frame. The button skips a null
+sound (0.98a-RC8 `ui.newui` button class).
 
 `FishBuyer`'s one button toggles between "Pack into crates" and "Unpack from
 crates"; the picker opens unpacked. It queues the toggle for the button panel's
@@ -400,8 +403,9 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   vanilla's one-second notice plus half-second fade can finish. Full shields do
   not print a gain notice. Spent anchors are not harpoon targets.
 - Legendary trails retain the red foggy texture, 10-to-1-unit taper, 0.85 opacity,
-  normal blending and five-second fade. Epic trails are identical at half that
-  opacity (`LegendaryTrail.EPIC_ALPHA_MULT`), passed with each `sample` call. Their transient Luna renderer runs independently of the mote's render
+  normal blending and five-second fade. Epic trails use `FishRarity.EPIC.color` at
+  half that opacity (`LegendaryTrail.EPIC_ALPHA_MULT`); each `sample` call passes
+  the rarity, and decoys pass legendary. Their transient Luna renderer runs independently of the mote's render
   callback, so a hidden or offscreen head does not hide its illuminated tail.
   Quads are subdivided at most four world units apart; each vertex uses current
   spot/fan coverage and that lamp's Manta flicker, not stored mote visibility or
