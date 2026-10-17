@@ -3206,7 +3206,10 @@ catchrelease_introFirstContinue,DialogOptionSelected,$option == catchrelease_int
 The crewman lifts the container a little so you can see it better. The Fisherman lets you look.",,
 catchrelease_introFirstShapeOption,CatchReleaseIntroFirstQuestions,!$catchrelease_introAskedFishShape,,,"catchrelease_intro_ghosts:""Why a fish?""",
 catchrelease_introFirstGhostOption,CatchReleaseIntroFishShapeQuestions,!$catchrelease_introAskedGhostWord,,,"catchrelease_introGhostWord:""Ghost is an odd name for it.""",
-catchrelease_introFirstShapeReturnOption,CatchReleaseIntroFishShapeQuestions,$catchrelease_introAskedGhostWord,,,100:catchrelease_introFirstQuestionsBack:Continue,
+catchrelease_introFirstShapeToldBeforeOption,CatchReleaseIntroFishShapeQuestions,"$catchrelease_introAskedGhostWord
+!$catchrelease_introAskedToldBefore",,,"catchrelease_introToldBefore:""You could have told me this before I started.""",
+catchrelease_introFirstShapeReturnOption,CatchReleaseIntroFishShapeQuestions,"$catchrelease_introAskedGhostWord
+$catchrelease_introAskedToldBefore",,,100:catchrelease_introFirstQuestionsBack:Continue,
 catchrelease_introFirstToldBeforeOption,CatchReleaseIntroFirstQuestions,!$catchrelease_introAskedToldBefore,,,"catchrelease_introToldBefore:""You could have told me this before I started.""",
 catchrelease_introFirstContinueOption,CatchReleaseIntroFirstQuestions,"!$catchrelease_introAskedToldBefore
 !$catchrelease_introAskedFishShape",,,"100:catchrelease_introFirstDone:""What's next?""",

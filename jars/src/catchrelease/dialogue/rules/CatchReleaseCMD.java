@@ -212,7 +212,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "showIntroIntel":
                 return FishingIntro.showCurrentIntel(text(dialog));
             case "giveRod":
-                FishingIntro.giveRod(text(dialog));
+                FishingIntro.giveRod(text(dialog), dialog.getInteractionTarget());
                 return true;
             case "sendOut":
                 FishingIntro.sendOut(text(dialog));

@@ -566,19 +566,19 @@ public class FishingIntro {
         FishIntelNotifications.queue(intel);
     }
 
-    public static void giveRod(TextPanelAPI text) {
+    public static void giveRod(TextPanelAPI text, SectorEntityToken fisherman) {
         point();
         setStage(RODDED);
 
         grant(TutorialConstants.ROD, text);
 
-        setTarget(rollTarget(RODDED));
+        setTarget(rollTarget(RODDED, fisherman));
     }
 
     public static void sendOut(TextPanelAPI text) {
         setStage(FISH_ONE);
 
-        Target target = rollTarget(FISH_ONE);
+        Target target = rollTarget(FISH_ONE, null);
         setTarget(target);
         ensureTargetBoat(target);
     }
@@ -636,7 +636,7 @@ public class FishingIntro {
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
         Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
-        setTarget(rollTarget(FISH_TWO));
+        setTarget(rollTarget(FISH_TWO, null));
     }
 
     public static void giveCharts(TextPanelAPI text) {
@@ -840,15 +840,14 @@ public class FishingIntro {
         return target != null && target.landed;
     }
 
-    protected static Target rollTarget(int stage) {
+    protected static Target rollTarget(int stage, SectorEntityToken fisherman) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return null;
 
-        StarSystemAPI system = stage == RODDED
-                ? asSystem(player.getContainingLocation())
-                : pickSystem(stage);
+        StarSystemAPI current = asSystem(player.getContainingLocation());
+        StarSystemAPI system = stage == RODDED ? pickRodSystem(current) : pickSystem(stage);
 
-        if (system == null) system = asSystem(player.getContainingLocation());
+        if (system == null && isLessonSystem(current)) system = current;
         if (system == null) return null;
 
         Target target = new Target();
@@ -886,7 +885,10 @@ public class FishingIntro {
         }
         target.speciesIds.add(spec.id);
 
-        SectorEntityToken pond = target.needsDeepGear ? null : QuestPond.findFreePond(system);
+        Vector2f origin = stage == RODDED ? getRodOrigin(system, fisherman, player) : null;
+        SectorEntityToken pond = target.needsDeepGear ? null
+                : origin != null ? QuestPond.findNearestFreePond(system, origin)
+                : QuestPond.findFreePond(system);
 
         if (pond != null) {
             target.atPond = true;
@@ -906,8 +908,46 @@ public class FishingIntro {
         return target;
     }
 
+    protected static Vector2f getRodOrigin(StarSystemAPI system, SectorEntityToken fisherman,
+                                           CampaignFleetAPI player) {
+        if (fisherman != null && fisherman.getContainingLocation() == system) return fisherman.getLocation();
+        if (player.getContainingLocation() == system) return player.getLocation();
+        return null;
+    }
+
     protected static StarSystemAPI asSystem(Object location) {
         return location instanceof StarSystemAPI ? (StarSystemAPI) location : null;
+    }
+
+    protected static boolean isLessonSystem(StarSystemAPI system) {
+        if (system == null || system.getId() == null || system.getCenter() == null) return false;
+        if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) return false;
+        if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) return false;
+
+        // hasPulsar() also covers a neutron star that is the secondary or tertiary star.
+        return !system.hasPulsar();
+    }
+
+    protected static StarSystemAPI pickRodSystem(StarSystemAPI current) {
+        if (isLessonSystem(current)) return current;
+
+        Vector2f from = current != null ? current.getLocation()
+                : Global.getSector().getPlayerFleet().getLocationInHyperspace();
+        StarSystemAPI nearest = null;
+        float best = Float.MAX_VALUE;
+
+        for (StarSystemAPI system : Global.getSector().getStarSystems()) {
+            if (!isLessonSystem(system)) continue;
+            if (getSpeciesCandidates(RODDED, system, CatchImplement.POND).isEmpty()) continue;
+
+            float distance = Misc.getDistanceLY(from, system.getLocation());
+            if (distance < best) {
+                best = distance;
+                nearest = system;
+            }
+        }
+
+        return nearest;
     }
 
     protected static StarSystemAPI pickSystem(int stage) {
@@ -918,9 +958,7 @@ public class FishingIntro {
         WeightedRandomPicker<StarSystemAPI> any = new WeightedRandomPicker<>();
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
-            if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) continue;
-            if (system.getCenter() == null) continue;
+            if (!isLessonSystem(system)) continue;
 
             float distance = Misc.getDistanceLY(from, system.getLocation());
             if (distance < TutorialConstants.SECOND_MIN_LY) continue;
@@ -996,7 +1034,8 @@ public class FishingIntro {
         StarSystemAPI current = player == null ? null : asSystem(player.getContainingLocation());
 
         if (stage == RODDED) {
-            return getSpeciesCandidates(stage, current, implement).isEmpty() ? null : current;
+            return isLessonSystem(current)
+                    && !getSpeciesCandidates(stage, current, implement).isEmpty() ? current : null;
         }
 
         Vector2f from = player == null ? new Vector2f() : player.getLocationInHyperspace();
@@ -1004,10 +1043,7 @@ public class FishingIntro {
         List<StarSystemAPI> any = new ArrayList<>();
 
         for (StarSystemAPI candidate : Global.getSector().getStarSystems()) {
-            if (candidate == null || candidate.getId() == null) continue;
-            if (candidate.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
-            if (candidate.hasTag(Tags.THEME_SPECIAL) || candidate.hasTag(Tags.THEME_HIDDEN)) continue;
-            if (candidate.getCenter() == null) continue;
+            if (!isLessonSystem(candidate)) continue;
 
             float distance = Misc.getDistanceLY(from, candidate.getLocation());
             if (distance < TutorialConstants.SECOND_MIN_LY) continue;
@@ -1173,9 +1209,7 @@ public class FishingIntro {
         Vector2f from = player.getLocationInHyperspace();
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER)) continue;
-            if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) continue;
-            if (system.getCenter() == null) continue;
+            if (!isLessonSystem(system)) continue;
             if (Misc.getDistanceLY(from, system.getLocation())
                     > TutorialConstants.CHART_TARGET_RANGE_LY) continue;
 

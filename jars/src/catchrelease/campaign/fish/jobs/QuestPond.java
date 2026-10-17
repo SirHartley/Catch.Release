@@ -221,6 +221,23 @@ public class QuestPond {
         return null;
     }
 
+    public static SectorEntityToken findNearestFreePond(LocationAPI location, Vector2f from) {
+        SectorEntityToken nearest = null;
+        float best = Float.MAX_VALUE;
+
+        for (SectorEntityToken pond : getPonds(location)) {
+            if (isImportant(pond) || CampedSpot.isPondBlocked(pond)) continue;
+
+            float distance = Misc.getDistance(pond.getLocation(), from);
+            if (distance < best) {
+                best = distance;
+                nearest = pond;
+            }
+        }
+
+        return nearest;
+    }
+
     protected static boolean isPond(SectorEntityToken entity) {
         return MaskedFishingPondTerrainPlugin.getPondPlugin(entity) != null;
     }
