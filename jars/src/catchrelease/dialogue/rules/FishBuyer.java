@@ -105,47 +105,49 @@ public class FishBuyer {
 
         protected final CargoAPI offer;
         protected boolean packed;
-        protected boolean packRequested;
+        protected boolean toggleRequested;
 
         PickerPackingSession(CargoAPI offer) {
             this.offer = offer;
         }
 
         void addButton(TooltipMakerAPI panel, CargoAPI selected, CargoStackAPI pickedUp) {
-            if (packed || panel == null) return;
+            if (panel == null) return;
 
             // The picker's outer tooltip blocks input to its children by default.
             ReflectionUtils.invoke(panel, "setForceProcessInput", true);
-            PackButton plugin = new PackButton(this, selected);
+            PackToggleButton plugin = new PackToggleButton(this, selected);
             CustomPanelAPI custom = Global.getSettings().createCustom(
                     BUTTON_WIDTH, BUTTON_HEIGHT + 10f, plugin);
             plugin.panel = custom;
             TooltipMakerAPI element = custom.createUIElement(
                     BUTTON_WIDTH, BUTTON_HEIGHT + 10f, false);
-            plugin.button = element.addButton("Pack into crates", plugin.buttonId,
+            plugin.button = element.addButton(packed ? "Unpack from crates" : "Pack into crates", plugin.buttonId,
                     BUTTON_WIDTH, BUTTON_HEIGHT, 10f);
             // Vanilla rebuilds this tooltip every frame, before a later mouse-up.
             plugin.button.setQuickMode(true);
-            plugin.button.setEnabled(pickedUp == null && !packRequested);
+            plugin.button.setEnabled(pickedUp == null && !toggleRequested);
             custom.addUIElement(element).inTL(0f, 0f);
             panel.addCustom(custom, 0f);
         }
 
-        boolean pack(CargoAPI selected, CargoAPI playerCargo) {
-            if (packed) return false;
+        void toggle(CargoAPI selected, CargoAPI playerCargo) {
+            if (packed) {
+                FishItems.unbox(playerCargo);
+            } else {
+                FishItems.packIntoCrates(playerCargo);
+            }
 
-            // Copy the packed hold so crate contents have identical ordering for sale removal.
-            FishItems.packIntoCrates(playerCargo);
+            // Copy the hold so crate contents have identical ordering for sale removal.
             selected.clear();
             offer.clear();
             offer.addAll(FishItems.copyFishStacks(playerCargo));
             offer.sort();
-            packed = true;
-            return true;
+            packed = !packed;
         }
     }
 
-    protected static final class PackButton extends BaseCustomUIPanelPlugin {
+    protected static final class PackToggleButton extends BaseCustomUIPanelPlugin {
 
         protected final Object buttonId = new Object();
         protected final PickerPackingSession session;
@@ -154,35 +156,35 @@ public class FishBuyer {
         protected CustomPanelAPI panel;
         protected ButtonAPI button;
 
-        PackButton(PickerPackingSession session, CargoAPI selected) {
+        PackToggleButton(PickerPackingSession session, CargoAPI selected) {
             this.session = session;
             this.selected = selected;
         }
 
         @Override
         public void buttonPressed(Object buttonId) {
-            if (buttonId != this.buttonId || session.packed || !button.isEnabled()) return;
+            if (buttonId != this.buttonId || !button.isEnabled()) return;
 
-            session.packRequested = true;
+            session.toggleRequested = true;
             button.setEnabled(false);
         }
 
         @Override
         public void advance(float amount) {
-            if (!session.packRequested || session.packed) return;
-            session.packRequested = false;
+            if (!session.toggleRequested) return;
+            session.toggleRequested = false;
 
             try {
                 Object tradePanel = PickerCargoAccess.findTradePanel(panel, session.offer);
                 Object transfers = ReflectionUtils.invoke(tradePanel, "getTransferHandler");
                 if (ReflectionUtils.invoke(transfers, "getPickedUpStack") != null) return;
 
-                // Forget loose-item transfers before replacing the picker cargo with crates.
+                // Forget pending transfers before replacing the picker cargo.
                 ReflectionUtils.invoke(transfers, "resetTransaction");
-                session.pack(selected, Global.getSector().getPlayerFleet().getCargo());
+                session.toggle(selected, Global.getSector().getPlayerFleet().getCargo());
                 ReflectionUtils.invoke(tradePanel, "updateCargoViews");
             } catch (RuntimeException ex) {
-                Global.getLogger(FishBuyer.class).warn("Could not pack fish in cargo picker", ex);
+                Global.getLogger(FishBuyer.class).warn("Could not pack or unpack fish in cargo picker", ex);
             }
         }
     }

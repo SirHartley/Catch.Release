@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.CatchImplement;
@@ -58,6 +59,8 @@ public class LegendaryShields {
     public static final float LURE_SPAWN_MIN = 800f;
     public static final float LURE_SPAWN_MAX = 1400f;
     public static final float SHIELD_RADIUS = 52f;
+    // vanilla ui_intel_distress_call audio, registered under the mod's legendary volume
+    public static final String SOUND_LURE = "catchrelease_legendary_lantern_call";
 
     private static final Color SHIELD_BLUE = new Color(150, 220, 255);
     private static final Color SHIELD_RED = new Color(255, 70, 70);
@@ -430,6 +433,8 @@ public class LegendaryShields {
         if (getStackedRings(jack) >= getJackLimit()) return;
         SectorEntityToken self = jack.getMote();
         if (self == null || self.getContainingLocation() == null) return;
+
+        if (self.isInCurrentLocation()) FishingSounds.playSound(SOUND_LURE, 1f, 1f, self.getLocation(), Misc.ZERO);
 
         int remaining = MathUtils.getRandomNumberInRange(LURE_COUNT_MIN, LURE_COUNT_MAX);
         List<SectorEntityToken> nearby = preyMotes(self);

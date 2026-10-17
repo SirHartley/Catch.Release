@@ -187,7 +187,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
 
         addCostLabel(tooltip, opad, transferHandler, stackSource);
 
-        FishItemTooltips.addActions(tooltip,
+        FishItemTooltips.addActions(tooltip, stack,
                 "Right-click to unpack.", null);
     }
 

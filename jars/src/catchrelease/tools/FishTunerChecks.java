@@ -210,10 +210,12 @@ public class FishTunerChecks {
             "RARE", new double[]{47, 57}, "EPIC", new double[]{29, 39}, "LEGENDARY", new double[]{13, 21});
     // 400 attempts measure a rate to about ±2.5 points
     static final double BAND_ALLOWANCE = 4;
+    // deliberately trivial catches whose rarity sets only frequency and value
+    static final Set<String> BAND_EXEMPT = Set.of("alfonzo_dopefish");
 
     static void rarityBandChecks(FishTuningSheet sheet) {
         FishBalance.Setup setup = new FishBalance.Setup(Tackle.NONE, FishConstants.MINIGAME_BAR_SIZE_FALLBACK, 1, 1, 1);
-        List<String> outside = sheet.fish.parallelStream().map(row -> {
+        List<String> outside = sheet.fish.parallelStream().filter(row -> !BAND_EXEMPT.contains(row.id)).map(row -> {
             FishBalance.Spec spec = FishBalance.Spec.of(row, false);
             int caught = 0;
             for (long seed = 0; seed < 400; seed++) {
