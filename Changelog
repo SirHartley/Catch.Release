@@ -15,6 +15,7 @@ Fixed - Finishing the Fisherman's "Why a fish?" questions no longer shows an emp
 Fixed - Fisherman tutorial lessons no longer send you to systems with a neutron star
 Adjusted - The Fisherman's first lesson now points at the rupture closest to him
 Added - Dopefish, a rare Epic catch that barely moves and is very easy to land
+Added - Selling fish to the Fisherman can unpack crates again after using "Pack into crates"
 Adjusted - Buncha dialogue
 Adjusted - Tooltips across most items
 Fixed - Fish, crates and piles sold to a market now disappear when its stock refreshes, as sold weapons do

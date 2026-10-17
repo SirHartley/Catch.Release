@@ -142,14 +142,17 @@ The nested custom panel's normal `buttonPressed` callback then works. Set its
 button to quick mode: vanilla rebuilds this tooltip every frame, so a button
 waiting for mouse-up can be replaced between press and release.
 
-`FishBuyer` queues packing for the button panel's `advance`, outside input
-dispatch. It finds only the ancestor picker holding its exact offer cargo, then
-that picker's cargo panel by `updateCargoViews`; no obfuscated names or global
-UI search. Packing waits until no stack is held by the cursor and clears the
-transfer handler's ledger with `resetTransaction` before replacing either grid.
-Otherwise, cancel would replay transfers using obsolete loose-fish identities.
-Copy the packed player cargo into the offer instead of packing both independently:
-crate contents must have identical ordering for item removal on sale.
+`FishBuyer`'s one button toggles between "Pack into crates" and "Unpack from
+crates"; the picker opens unpacked. It queues the toggle for the button panel's
+`advance`, outside input dispatch. It finds only the ancestor picker holding its
+exact offer cargo, then that picker's cargo panel by `updateCargoViews`; no
+obfuscated names or global UI search. The toggle waits until no stack is held by
+the cursor and clears the transfer handler's ledger with `resetTransaction`
+before replacing either grid. Otherwise, cancel would replay transfers using
+obsolete fish or crate identities. Copy the packed or unpacked player cargo into
+the offer instead of changing both independently: crate contents must have
+identical ordering for item removal on sale. Confirm and cancel both restore the
+crates the hold had before the picker opened.
 
 Sources (0.98a-RC8): cargo picker and custom-panel implementations in
 `sources-obf/ui.newui.java`; `StandardTooltipV2.processInputImpl` in
