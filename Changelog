@@ -18,6 +18,7 @@ Added - Dopefish, a rare Epic catch that barely moves and is very easy to land
 Added - Selling fish to the Fisherman can unpack crates again after using "Pack into crates"
 Fixed - Fish, crate and pile tooltips only show their right-click hints for fish in your fleet's cargo, not in markets, storage or selection screens
 Added - Hovering an Outfitter fish count shows the species of that rarity aboard
+Added - Lantern Jack's lure call now plays a distress-call sound
 Adjusted - Buncha dialogue
 Adjusted - Tooltips across most items
 Fixed - Fish, crates and piles sold to a market now disappear when its stock refreshes, as sold weapons do

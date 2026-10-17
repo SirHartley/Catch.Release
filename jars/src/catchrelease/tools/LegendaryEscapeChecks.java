@@ -104,6 +104,7 @@ public final class LegendaryEscapeChecks {
                 case "hasTag" -> tags.contains(a[0]);
                 case "addScript" -> { entityScripts.add((EveryFrameScript) a[0]); yield null; }
                 case "isVisibleToPlayerFleet" -> visible;
+                case "isInCurrentLocation" -> false;
                 case "getFloatingText" -> notices.isEmpty() ? null : notices;
                 case "addFloatingText" -> {
                     if (visible) notices.add(new Notice((SectorEntityToken) p, (String) a[0]));

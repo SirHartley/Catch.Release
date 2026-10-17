@@ -569,7 +569,9 @@ or feeding changes these factors immediately. Zero shells retain the original
 movement; dive timing, movement-mode timing and the five-second evasion do not change.
 Each call draws 1–3 fish total: eligible nearby motes within 3000 units are picked
 in random order, surfacing buried picks; shortages come from the normal local lamp
-pool, 800–1400 units away. Calls retain their 30-second cooldown. Called fish stay
+pool, 800–1400 units away. Calls retain their 30-second cooldown. A call in the
+player's location plays `LegendaryShields.SOUND_LURE` at Jack: vanilla
+`ui_intel_distress_call` audio under the mod's legendary volume. Called fish stay
 surfaced and swim toward Jack for at most 20 seconds, breaking off immediately at
 50 units. They then resume their normal destination, movement and dive schedule;
 they do not wait or follow. New call-spawned fish have a destination beyond Jack,
