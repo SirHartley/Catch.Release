@@ -26,6 +26,7 @@ public class FishLog {
         }
 
         logged.caught++;
+        logged.lastLength = entry.length;
         logged.hintOnly = false;
 
         logged.locationDataUnlocked = true;

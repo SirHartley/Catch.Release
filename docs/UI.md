@@ -98,6 +98,13 @@ therefore reconcile these markers; no separate sector-wide polling script is nee
   native size and applies any outer scale to both passes (0.98a-RC8,
   `sources-obf/campaign.ui.java`). `tools/FishCargoIconChecks` checks the rendered
   corners across cell sizes, translations, alpha and hover passes without OpenGL.
+- The crate label shrinks the 80×80 fish art about four times. Game textures up to
+  1024 px are trilinear with generated mipmaps (`TextureLoader`, 0.98a-RC8), so the
+  label samples a soft box-filtered level. `FishBundleItemPlugin.render` adds
+  `BOX_ICON_LOD_BIAS` (−0.5) to the texture-environment LOD bias around
+  `renderBoxIcon` only and restores it in `finally`: three GL calls per crate, no
+  texture memory. Loose fish draw at native size and are not biased. Keep the GL
+  calls out of `renderBoxIcon`, which the check tool calls without a GL context.
 - Aquarium backdrop source art: 388×170, visible 386×168; 2× visible assets: 772×336.
 - Aquarium fish use `spriteDirection` in degrees counter-clockwise from image
   right, measured from the full image centre. `FishSpritePose` aligns the mesh
@@ -246,6 +253,20 @@ Sources: `BaseSpecialItemPlugin.createTooltip/addCostLabel` and the vanilla item
 plugins in the knowledge base's `sources-api/campaign.impl.java`; `Misc.addDesignTypePara`
 in `sources-api/util.java`.
 
+## Codex size chart
+
+Caught species get a "Size distribution" box below the Codex icon card, as wide
+as the right column. `FishSizeChart` draws a normal curve from `lengthMin` to
+`lengthMax` with the roll's mean and spread (σ = range/√24). It is lowered so both
+ends touch the axis. The actual roll in `FishCatch.roll` is triangular, so the
+curve is an approximation, and quality bias is not shown. Gray axis labels give
+the range ends. The best catch (`recordLength`) is a highlight-colour stem and dot
+labelled on the top row. The latest catch (`lastLength`) is a bright-player stem
+labelled on the row below. When they match, or no latest length is logged yet,
+one combined "Best and last" label is drawn. The curve, fill, and markers use
+`GL_TRIANGLE_STRIP`/`GL_LINE_STRIP` inside pushed attributes. The LazyFont labels
+are created on first render, because fonts load on the render thread.
+
 ## LunaLib settings
 
 `data/config/LunaSettingsConfig.json` registers this mod's existing 40×40 hook icon
@@ -379,7 +400,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   vanilla's one-second notice plus half-second fade can finish. Full shields do
   not print a gain notice. Spent anchors are not harpoon targets.
 - Legendary trails retain the red foggy texture, 10-to-1-unit taper, 0.85 opacity,
-  normal blending and five-second fade. Their transient Luna renderer runs independently of the mote's render
+  normal blending and five-second fade. Epic trails are identical at half that
+  opacity (`LegendaryTrail.EPIC_ALPHA_MULT`), passed with each `sample` call. Their transient Luna renderer runs independently of the mote's render
   callback, so a hidden or offscreen head does not hide its illuminated tail.
   Quads are subdivided at most four world units apart; each vertex uses current
   spot/fan coverage and that lamp's Manta flicker, not stored mote visibility or

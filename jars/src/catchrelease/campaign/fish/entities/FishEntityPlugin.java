@@ -685,7 +685,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         lastY = at.y;
         velocityX = velocityY = 0f;
         movementSampled = true;
-        if (trail != null) trail.sample(entity, false);
+        if (trail != null) trail.sample(entity, false, 1f);
     }
 
     public boolean isDecoy() {
@@ -1063,9 +1063,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void advanceTrail() {
-        if (getRarity() != FishRarity.LEGENDARY && !isDecoy()) return;
+        float alphaMult = isDecoy() ? 1f : LegendaryTrail.getAlphaMult(getRarity());
+        if (alphaMult <= 0f) return;
         if (trail == null || trail.isExpired()) trail = new LegendaryTrail();
-        trail.sample(entity, !held);
+        trail.sample(entity, !held, alphaMult);
     }
 
     public void externalRender(ViewportAPI viewport){

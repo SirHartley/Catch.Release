@@ -15,6 +15,8 @@ import com.fs.starfarer.api.campaign.impl.items.BaseSpecialItemPlugin;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL14;
 
 import java.awt.Color;
 import java.util.EnumMap;
@@ -32,6 +34,8 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
     public static final float BOX_ICON_UR_Y = 29f;
     public static final float BOX_ICON_LR_X = 69f;
     public static final float BOX_ICON_LR_Y = 51f;
+    // The label shrinks 80px art about 4x; a negative bias samples a sharper mip level. Below -1 it aliases.
+    public static final float BOX_ICON_LOD_BIAS = -0.5f;
 
     public List<FishCatch> getContents() {
         SpecialItemData data = stack == null ? null : stack.getSpecialDataIfSpecial();
@@ -100,7 +104,14 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         if (contents.isEmpty()) return;
 
         FishSpec spec = contents.get(0).getSpec();
-        renderBoxIcon(x, y, w, h, alphaMult, glowMult, spec);
+        // Texture-environment bias needs no texture binding; restore it before anything else draws.
+        float bias = GL11.glGetTexEnvf(GL14.GL_TEXTURE_FILTER_CONTROL, GL14.GL_TEXTURE_LOD_BIAS);
+        GL11.glTexEnvf(GL14.GL_TEXTURE_FILTER_CONTROL, GL14.GL_TEXTURE_LOD_BIAS, bias + BOX_ICON_LOD_BIAS);
+        try {
+            renderBoxIcon(x, y, w, h, alphaMult, glowMult, spec);
+        } finally {
+            GL11.glTexEnvf(GL14.GL_TEXTURE_FILTER_CONTROL, GL14.GL_TEXTURE_LOD_BIAS, bias);
+        }
 
         FishGrade best = FishGrade.TERRIBLE;
         for (FishCatch entry : contents) {

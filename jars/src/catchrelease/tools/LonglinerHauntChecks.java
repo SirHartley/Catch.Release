@@ -26,6 +26,7 @@ public final class LonglinerHauntChecks {
 
         void tickSchool() { for (HauntModule module : modules) module.advance(0f); }
         void restore() { restoreHunt(); tickSchool(); }
+        @Override protected void playFoghorn(float pitch) { }
         boolean abandon() { return fail(); }
         void close() { stop(); }
     }
@@ -78,6 +79,7 @@ public final class LonglinerHauntChecks {
         @Override protected float getRange() { return 1000f; }
         @Override protected float getCatchRadius() { return HarpoonConstants.CATCH_RADIUS; }
         @Override protected void playMoteHitSound() { }
+        @Override protected void playShieldDeflectSound() { }
         @Override protected SectorEntityToken findMine() { return null; }
         @Override protected CampaignFleetAPI findFleet() { return null; }
     }

@@ -259,6 +259,16 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
     }
 
+    // Vanilla's shield-hit files are positional, as in combat; the set's random file and the call pitch vary each hit.
+    protected void playShieldDeflectSound() {
+        if (entity.isInCurrentLocation()) {
+            FishingSounds.playSound(HarpoonConstants.SOUND_SHIELD_DEFLECT,
+                    MathUtils.getRandomNumberInRange(HarpoonConstants.SHIELD_DEFLECT_PITCH_MIN,
+                            HarpoonConstants.SHIELD_DEFLECT_PITCH_MAX),
+                    1f, entity.getLocation(), Misc.ZERO);
+        }
+    }
+
     protected boolean handleShieldContact(SectorEntityToken mote) {
         return handleShieldContact(mote, -1);
     }
@@ -276,6 +286,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             return true;
         }
         if (result == LegendaryShields.HitResult.DEFLECTED) {
+            playShieldDeflectSound();
             enter(State.RETURNING);
             return true;
         }

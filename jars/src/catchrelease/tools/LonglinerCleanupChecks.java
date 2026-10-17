@@ -24,6 +24,7 @@ public final class LonglinerCleanupChecks {
 
     private static class Haunt extends LegendaryHaunt {
 
+        @Override protected void playFoghorn(float pitch) { }
         boolean abandon() { return fail(); }
         void close() { stop(); }
     }

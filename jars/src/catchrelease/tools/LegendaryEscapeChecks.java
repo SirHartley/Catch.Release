@@ -236,6 +236,7 @@ public final class LegendaryEscapeChecks {
             };
             return List.of(module);
         }
+        @Override protected void playFoghorn(float pitch) { }
         void close() { stop(); }
     }
 

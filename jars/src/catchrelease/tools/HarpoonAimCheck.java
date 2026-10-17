@@ -152,6 +152,7 @@ public final class HarpoonAimCheck {
     private static final class Shot extends HarpoonEntityPlugin {
 
         int sounds;
+        int deflects;
 
         Shot(Token token, Vector2f aim) {
             entity = token.api;
@@ -166,6 +167,7 @@ public final class HarpoonAimCheck {
         boolean shielded(Vector2f from, Vector2f to) { return findMoteContact(from, to, true) != null; }
         void npc(CampaignFleetAPI fleet) { owner = fleet; }
         @Override protected void playMoteHitSound() { sounds++; }
+        @Override protected void playShieldDeflectSound() { deflects++; }
     }
 
     private static final class Mine extends HauntMineEntityPlugin {
@@ -528,8 +530,8 @@ public final class HarpoonAimCheck {
         head = f.token(null, 0f, 0f);
         shot = new Shot(head, atAngle(0f));
         shot.step(0.1f);
-        require(shot.getState() == HarpoonEntityPlugin.State.RETURNING && shot.sounds == 1,
-                "Shield contact still deflects once");
+        require(shot.getState() == HarpoonEntityPlugin.State.RETURNING && shot.sounds == 1
+                        && shot.deflects == 1, "Shield contact still deflects once, with one deflect sound");
         same(head.at, new Vector2f(100f - LegendaryShields.SHIELD_RADIUS, 0f), "Shield boundary");
         require(!legendary.isHeld(), "Shield does not hook fish");
         require(LegendaryShields.getStackedRings(legendary) == 2 && LegendaryChases.isProvoked("lantern_jack"),

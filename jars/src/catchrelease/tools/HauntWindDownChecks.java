@@ -48,9 +48,11 @@ public final class HauntWindDownChecks {
     static class Haunt extends LegendaryHaunt {
 
         final Module module = new Module();
+        final List<Float> foghorns = new ArrayList<>();
         @Override protected List<HauntModule> buildModules(FishSpec spec, StarSystemAPI system) {
             return List.of(module);
         }
+        @Override protected void playFoghorn(float pitch) { foghorns.add(pitch); }
         void close() { stop(); }
         void restore() { restoreHunt(); }
     }
@@ -132,6 +134,7 @@ public final class HauntWindDownChecks {
             f.env.lampsOn = true;
             f.haunt.advance(LegendaryHaunt.RAMP_SECONDS);
             near(1f, f.haunt.getIntensity(), "lamps and a sighting start the haunt");
+            check(f.haunt.foghorns.equals(List.of(1f)), "a starting haunt sounds the foghorn once");
             int spawns = f.haunt.module.spawns;
             int advances = f.haunt.module.advances;
             f.env.lampsOn = false;
@@ -146,10 +149,13 @@ public final class HauntWindDownChecks {
             check(f.haunt.module.failures == 0, "failed catch cannot retaliate while lamps are off");
             f.haunt.advance(9f);
             check(f.haunt.getModuleCount() == 0 && f.haunt.module.cleanups == 1, "fade cleans up after twelve seconds");
+            check(f.haunt.foghorns.equals(List.of(1f, LegendaryHaunt.FOGHORN_END_PITCH)),
+                    "an ending haunt sounds one lower foghorn");
             check(!f.fish.expired && !f.chase.caught && !f.chase.provoked && !f.chase.roaming
                     && f.env.system.getId().equals(f.chase.systemId), "wind-down preserves the resident but ends the hunt");
             f.haunt.advance(100f);
             check(f.haunt.module.cleanups == 1 && f.haunt.getActiveSpeciesId() == null, "darkness cannot restart the haunt");
+            check(f.haunt.foghorns.size() == 2, "an idle haunt stays silent");
             f.env.lampsOn = true;
             f.fish.at.set(500f, 500f);
             f.haunt.advance(1f);
@@ -220,6 +226,7 @@ public final class HauntWindDownChecks {
             f.haunt.restore();
             check(f.haunt.getModuleCount() == 1 && f.chase.roaming,
                     "saved hunt restores even outside sight range with lamps off");
+            check(f.haunt.foghorns.isEmpty(), "loading a hunt does not sound the foghorn");
             check(f.chase.shieldPopped, "loading an unfinished hunt does not reset its shield");
             f.haunt.advance(12f);
             check(!f.chase.roaming && !f.chase.shieldPopped && f.fish.at.length() <= LegendarySpawns.RADIUS,

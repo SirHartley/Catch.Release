@@ -193,9 +193,22 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
             rightHeight = card.getPosition().getHeight();
         }
 
-        if (relatedEntries != null) {
+        UIPanelAPI chart = state.isCaught() && logged != null && spec != null
+                ? buildSizeChart(spec, logged, width - leftWidth - BOX_GAP) : null;
+        if (chart != null) {
             if (card != null) {
-                panel.addComponent(relatedEntries).belowLeft(card, BOX_GAP);
+                panel.addComponent(chart).belowLeft(card, BOX_GAP);
+                rightHeight += BOX_GAP;
+            } else {
+                panel.addComponent(chart).rightOfTop(description, BOX_GAP);
+            }
+            rightHeight += chart.getPosition().getHeight();
+        }
+
+        UIPanelAPI above = chart != null ? chart : card;
+        if (relatedEntries != null) {
+            if (above != null) {
+                panel.addComponent(relatedEntries).belowLeft(above, BOX_GAP);
                 rightHeight += BOX_GAP + relatedEntries.getPosition().getHeight();
             } else {
                 panel.addComponent(relatedEntries).inTR(0f, 0f);
@@ -359,6 +372,22 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
             Global.getLogger(FishCodexEntry.class)
                     .warn("Could not jump from the codex to the sector map", t);
         }
+    }
+
+    protected UIPanelAPI buildSizeChart(FishSpec spec, FishLogEntry logged, float maxWidth) {
+        float width = maxWidth - 30f;
+        if (width <= 0f || spec.lengthMax <= spec.lengthMin) return null;
+
+        TooltipMakerAPI text = panel.createUIElement(width, 0, false);
+        text.setParaSmallInsignia();
+        text.addSectionHeading("Size distribution", Misc.getBasePlayerColor(), Misc.getDarkPlayerColor(),
+                Alignment.MID, 0f);
+        text.addCustom(panel.createCustomPanel(width - 10f, FishSizeChart.HEIGHT,
+                new FishSizeChart(spec, logged)), BOX_GAP);
+
+        panel.updateUIElementSizeAndMakeItProcessInput(text);
+
+        return panel.wrapTooltipWithBox(text);
     }
 
     protected UIPanelAPI buildIconCard(FishSpec spec, FishLogEntry logged, float maxWidth) {
