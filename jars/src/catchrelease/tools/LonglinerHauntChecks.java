@@ -78,6 +78,7 @@ public final class LonglinerHauntChecks {
         @Override protected float getRange() { return 1000f; }
         @Override protected float getCatchRadius() { return HarpoonConstants.CATCH_RADIUS; }
         @Override protected void playMoteHitSound() { }
+        @Override protected void playShieldDeflectSound() { }
         @Override protected SectorEntityToken findMine() { return null; }
         @Override protected CampaignFleetAPI findFleet() { return null; }
     }

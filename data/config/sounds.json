@@ -130,6 +130,15 @@
 	"catchrelease_harpoon_hit":[
 		{"file":"sounds/catchrelease/skillshot/harpoon_hit2.ogg","pitch":0.9,"volume":0.5},
 	],
+	"catchrelease_harpoon_shield_deflect":[
+		{"file":"sounds/sfx_impacts/shield_hit_solid_01.ogg","pitch":1,"volume":0.6},
+		{"file":"sounds/sfx_impacts/shield_hit_solid_02.ogg","pitch":0.95,"volume":0.6},
+		{"file":"sounds/sfx_impacts/shield_hit_solid_03.ogg","pitch":1.05,"volume":0.6},
+		{"file":"sounds/sfx_impacts/shield_hit_heavy_01.ogg","pitch":1,"volume":0.7},
+		{"file":"sounds/sfx_impacts/shield_hit_heavy_02.ogg","pitch":0.95,"volume":0.7},
+		{"file":"sounds/sfx_impacts/shield_hit_heavy_03.ogg","pitch":1.05,"volume":0.7},
+		{"file":"sounds/sfx_impacts/shield_hit_heavy_04.ogg","pitch":1,"volume":0.7},
+	],
 	"catchrelease_pond_open_boom":[
 		{"file":"sounds/catchrelease/skillshot/pond_open_boom.ogg","pitch":1,"volume":1},
 	],
