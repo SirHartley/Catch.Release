@@ -16,6 +16,7 @@ Fixed - Fisherman tutorial lessons no longer send you to systems with a neutron 
 Adjusted - The Fisherman's first lesson now points at the rupture closest to him
 Added - Dopefish, a rare Epic catch that barely moves and is very easy to land
 Added - Selling fish to the Fisherman can unpack crates again after using "Pack into crates"
+Fixed - Fish, crate and pile tooltips only show their right-click hints for fish in your fleet's cargo, not in markets, storage or selection screens
 Adjusted - Buncha dialogue
 Adjusted - Tooltips across most items
 Fixed - Fish, crates and piles sold to a market now disappear when its stock refreshes, as sold weapons do

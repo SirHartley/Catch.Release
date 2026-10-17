@@ -157,7 +157,7 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         addCostLabel(tooltip, FishItemTooltips.OPAD, transferHandler, stackSource);
 
-        FishItemTooltips.addActions(tooltip, "Right-click to stow it with others of its kind.",
+        FishItemTooltips.addActions(tooltip, stack, "Right-click to stow it with others of its kind.",
                 "Control-right-click stows every loose one of its kind aboard.");
     }
 

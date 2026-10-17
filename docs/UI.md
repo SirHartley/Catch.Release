@@ -217,7 +217,12 @@ The specimen, crate and pile tooltips follow vanilla's special-item order throug
 Use pad 10 between blocks and 3 inside one. The primary right-click hint is
 positive and a Control-click tip is gray. Hints are omitted in Codex mode,
 which also replaces the title with `addSpacer(-10)`, as
-`BaseSpecialItemPlugin` does.
+`BaseSpecialItemPlugin` does. They are also omitted unless the stack's cargo is
+the player fleet's cargo (`FishItemTooltips.isInFleetCargo`). Grid stacks are
+copies, but `CargoData.addStack` points each copy at its source cargo, so the
+player side of the cargo, trade and loot screens passes. Market and storage
+sides, salvage and every cargo picker fail: picker offers are separate cargo,
+and vanilla disables right-click actions in pickers.
 
 Specimen provenance uses the same phrases as request text, `FishLogEntry.Method.phrase`,
 `CatchImplement.name` and `SectorRegion.describe()`, so a specimen can be

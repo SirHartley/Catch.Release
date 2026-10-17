@@ -193,7 +193,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
         addCostLabel(tooltip, opad, transferHandler, stackSource);
 
-        FishItemTooltips.addActions(tooltip, "Right-click to unpack into loose specimens.",
+        FishItemTooltips.addActions(tooltip, stack, "Right-click to unpack into loose specimens.",
                 "Control-right-click sweeps every fish aboard into one pile.");
     }
 

@@ -7,6 +7,8 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.shop.ShopMarks;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
@@ -108,11 +110,19 @@ final class FishItemTooltips {
     }
 
     // Vanilla colours the primary right-click action positive and a modifier-click tip gray.
-    static void addActions(TooltipMakerAPI tooltip, String action, String modifierTip) {
-        if (Global.CODEX_TOOLTIP_MODE) return;
+    static void addActions(TooltipMakerAPI tooltip, CargoStackAPI stack, String action, String modifierTip) {
+        if (Global.CODEX_TOOLTIP_MODE || !isInFleetCargo(stack)) return;
 
         tooltip.addPara(action, Misc.getPositiveHighlightColor(), OPAD);
         if (modifierTip != null) tooltip.addPara(modifierTip, Misc.getGrayColor(), PAD);
+    }
+
+    // Grid tooltips show copies whose cargo points back at the source; pickers and markets use other cargo.
+    static boolean isInFleetCargo(CargoStackAPI stack) {
+        if (stack == null || Global.getSector() == null) return false;
+
+        CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+        return fleet != null && stack.getCargo() == fleet.getCargo();
     }
 
     static String getDate(long timestamp) {
