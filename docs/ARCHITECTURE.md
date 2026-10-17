@@ -247,7 +247,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishCatch.java` | One specimen: size, weight, aberration, region, source rupture, timestamp, method, and optional chart-request provenance. |
 | `FishLog.java` | Persistent per-species discovery and record data. |
 | `Aberration.java` | Caches ordinary aberration from the strongest destabilizer minus the strongest colony field, then applies temporary system rumors. `naturalAt` bypasses rumors for target selection. |
-| `FishRanges.java` | Authoritative current range test. |
+| `FishRanges.java` | Authoritative current range test, including the fifteen-species system cap. |
 
 ### `campaign/fish/jobs`
 
@@ -885,7 +885,8 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 
 - `FishHabitat.of()` is the shared habitat snapshot. `FishRanges.matches()` is the only range decision, including pins and relaxation. UI calls `FishPresence.livesIn()`, which routes through the same logic but excludes zero-weight mechanism rows, as the system cap does; otherwise the Quorum splinter would count in every non-Abyssal system.
 - Habitat criteria treat blank as unrestricted except for the Abyss. Abyssal species must explicitly name `ABYSSAL`.
-- Monthly reassessment refreshes moving habitat inputs and relaxes non-Abyssal species with fewer than three systems. Relaxation order is constellation age, ±0.25 coherence, star colour, then region. It never crosses the Abyss boundary or raises any system above fifteen species.
+- Monthly reassessment refreshes moving habitat inputs and relaxes non-Abyssal species with fewer than three systems. Relaxation order is constellation age, ±0.25 coherence, star colour, then region. It never crosses the Abyss boundary or widens a species into a system that already has fifteen.
+- The system cap is strict. After relaxation, `FishRanges.recomputeAdmissions()` ranks each chartable system's matching species under `$catchrelease_range_admit`: pinned quest species first, then species with the fewest homes, then by ID. `matches()` admits only the first fifteen, minus legendaries currently hosted there (`LegendaryChases.countHostedIn()`, which reads the ledger without moving hosts), so a legendary temporarily pushes out the lowest-ranked species until it leaves. A species that starts matching between reassessments, through habitat drift or a rumor, stays unranked and does not spawn there until the next reassessment. Pinned species bypass the cap through their frozen lists, which are snapshotted through the capped `matches()`. Systems without a ranking (the Abyss and systems cut off from hyperspace) are uncapped; a missing ranking table triggers a reassessment on load.
 - Active `FishAsker` species are pinned to their previous system list during reassessment and unpin when the ask ends.
 - Ordinary species use one or two adjacent regions unless a stronger star, coherence, or theme gate already provides the range. Every region retains at least two ungated Common species.
 - The non-legendary roster is exactly 100 fish in a 59/23/12/6 Common/Uncommon/Rare/Epic split. The Abyss contributes 7/2/1/1 of those. Zero-weight mechanism rows, such as the Quorum splinter, are outside the hundred.
