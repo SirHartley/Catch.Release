@@ -566,19 +566,19 @@ public class FishingIntro {
         FishIntelNotifications.queue(intel);
     }
 
-    public static void giveRod(TextPanelAPI text) {
+    public static void giveRod(TextPanelAPI text, SectorEntityToken fisherman) {
         point();
         setStage(RODDED);
 
         grant(TutorialConstants.ROD, text);
 
-        setTarget(rollTarget(RODDED));
+        setTarget(rollTarget(RODDED, fisherman));
     }
 
     public static void sendOut(TextPanelAPI text) {
         setStage(FISH_ONE);
 
-        Target target = rollTarget(FISH_ONE);
+        Target target = rollTarget(FISH_ONE, null);
         setTarget(target);
         ensureTargetBoat(target);
     }
@@ -636,7 +636,7 @@ public class FishingIntro {
         for (String ability : TutorialConstants.DEEP_GEAR) grant(ability, text);
         Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
-        setTarget(rollTarget(FISH_TWO));
+        setTarget(rollTarget(FISH_TWO, null));
     }
 
     public static void giveCharts(TextPanelAPI text) {
@@ -840,7 +840,7 @@ public class FishingIntro {
         return target != null && target.landed;
     }
 
-    protected static Target rollTarget(int stage) {
+    protected static Target rollTarget(int stage, SectorEntityToken fisherman) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return null;
 
@@ -885,7 +885,10 @@ public class FishingIntro {
         }
         target.speciesIds.add(spec.id);
 
-        SectorEntityToken pond = target.needsDeepGear ? null : QuestPond.findFreePond(system);
+        Vector2f origin = stage == RODDED ? getRodOrigin(system, fisherman, player) : null;
+        SectorEntityToken pond = target.needsDeepGear ? null
+                : origin != null ? QuestPond.findNearestFreePond(system, origin)
+                : QuestPond.findFreePond(system);
 
         if (pond != null) {
             target.atPond = true;
@@ -903,6 +906,13 @@ public class FishingIntro {
         }
 
         return target;
+    }
+
+    protected static Vector2f getRodOrigin(StarSystemAPI system, SectorEntityToken fisherman,
+                                           CampaignFleetAPI player) {
+        if (fisherman != null && fisherman.getContainingLocation() == system) return fisherman.getLocation();
+        if (player.getContainingLocation() == system) return player.getLocation();
+        return null;
     }
 
     protected static StarSystemAPI asSystem(Object location) {

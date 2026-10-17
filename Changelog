@@ -13,6 +13,7 @@ None
 Fixed - Nearby settlements no longer prevent the Fisherman from approaching you for the tutorial
 Fixed - Finishing the Fisherman's "Why a fish?" questions no longer shows an empty Continue before "You could have told me this before I started."
 Fixed - Fisherman tutorial lessons no longer send you to systems with a neutron star
+Adjusted - The Fisherman's first lesson now points at the rupture closest to him
 
 1.0.a
 Added - Initial Mod Release
