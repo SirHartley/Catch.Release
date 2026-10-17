@@ -49,7 +49,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `ModPlugin.onCodexDataGenerated()` | `FishCodex`, only while Codex data is generated |
 | `ModPlugin.onGameLoad()` | Idempotent script/listener registration and current-state cleanup; order below |
 | `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting; remove False Dawn's owned coronal flares before serialization |
-| `data/campaign/fish.csv` | Species; `FishSpecLoader` |
+| `data/campaign/fish.csv` | Species; `FishSpecLoader`. The `icon` column is a literal asset path loaded by `SpriteLoader`, shared by cargo, Codex, map, shop and aquarium; no `settings.json` sprite registration. Match `spriteDirection` to replacement art for aquarium swimming. |
 | `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon |
 | `data/config/settings.json` | `catchrelease.dialogue.rules` command package and sprites; black-hole warp settings belong to the deprecated test below |
 | `data/config/sounds.json` | Sound registry; callers in abilities and `FishConstants` |
