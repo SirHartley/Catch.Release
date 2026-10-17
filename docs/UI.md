@@ -147,7 +147,10 @@ tooltip, not an interactive UI element. Its outer `setForceProcessInput(true)`
 must be called through `ReflectionUtils` before nested buttons can receive input.
 The nested custom panel's normal `buttonPressed` callback then works. Set its
 button to quick mode: vanilla rebuilds this tooltip every frame, so a button
-waiting for mouse-up can be replaced between press and release.
+waiting for mouse-up can be replaced between press and release. Clear its
+mouse-over sound with `setMouseOverSound(null)`: each new button sees the cursor
+enter, so the hover click would replay every frame. The button skips a null
+sound (0.98a-RC8 `ui.newui` button class).
 
 `FishBuyer`'s one button toggles between "Pack into crates" and "Unpack from
 crates"; the picker opens unpacked. It queues the toggle for the button panel's
