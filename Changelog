@@ -15,6 +15,7 @@ Fixed - Finishing the Fisherman's "Why a fish?" questions no longer shows an emp
 Fixed - Fisherman tutorial lessons no longer send you to systems with a neutron star
 Adjusted - The Fisherman's first lesson now points at the rupture closest to him
 Fixed - Fish, crates and piles sold to a market now disappear when its stock refreshes, as sold weapons do
+Fixed - "Set autopilot" on tutorial and chart request intel now targets a visiting Fisherman in your current system instead of a boat elsewhere
 
 1.0.a
 Added - Initial Mod Release
