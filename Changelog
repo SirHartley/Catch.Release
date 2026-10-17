@@ -20,6 +20,7 @@ Fixed - Fish, crate and pile tooltips only show their right-click hints for fish
 Added - Hovering an Outfitter fish count shows the species of that rarity aboard
 Added - Lantern Jack's lure call now plays a distress-call sound
 Added - Harpoons deflected by a legendary's shield play a varied shield-hit sound
+Added - Epic fish leave a fainter version of the legendary trail under breach lights
 Adjusted - Buncha dialogue
 Adjusted - Tooltips across most items
 Fixed - Fish, crates and piles sold to a market now disappear when its stock refreshes, as sold weapons do
