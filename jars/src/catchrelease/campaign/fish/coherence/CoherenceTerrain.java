@@ -107,7 +107,7 @@ public class CoherenceTerrain extends StarCoronaTerrainPlugin {
         String source = getSource();
         if (source != null) tooltip.addPara("Thinned by %s.", pad, Misc.getHighlightColor(), source);
 
-        tooltip.addPara("Specimens taken here come up further from what they should be, which is"
+        tooltip.addPara("Specimens caught here come up further from what they should be, which is"
                 + " worth more to some buyers and less to others.", pad);
     }
 

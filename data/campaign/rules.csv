@@ -8,11 +8,9 @@ catchrelease_hitmanHail,OpenCommLink,"$entity.catchrelease_harpoonHitman score:1
 !$entity.catchrelease_harpoonHitmanHailed
 !$entity.catchrelease_harpoonHitmanClientGone","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
 $entity.catchrelease_harpoonHitmanHailed = true 30
-$entity.ignorePlayerCommRequests = true 30","The officer on the screen is wearing an unmarked pressure suit. Your transponder record appears beside a damage report.
+$entity.ignorePlayerCommRequests = true 30","The officer on the screen is wearing an unmarked pressure suit. Your transponder code appears beside a damage report.
 
 ""$entity.catchrelease_harpoonHitmanVictim. $entity.catchrelease_harpoonHitmanOrigin. You hit them with $entity.catchrelease_harpoonHitmanOffence.""
-
-The officer waits while your comms officer verifies the record.
 
 ""They've paid us to deal with you. Anything you'd like to say before we start?""","0:catchrelease_hitmanBribeAsk:Make a counteroffer
 100:cutCommLinkNoText:Cut the comm link",
@@ -20,7 +18,7 @@ catchrelease_hitmanHailFromGrave,OpenCommLink,"$entity.catchrelease_harpoonHitma
 !$entity.catchrelease_harpoonHitmanHailed
 $entity.catchrelease_harpoonHitmanClientGone","Highlight $entity.catchrelease_harpoonHitmanClient $entity.catchrelease_harpoonHitmanVictim $entity.catchrelease_harpoonHitmanOrigin $entity.catchrelease_harpoonHitmanOffence
 $entity.catchrelease_harpoonHitmanHailed = true 30
-$entity.ignorePlayerCommRequests = true 30","The officer on the screen is wearing an unmarked pressure suit. Your transponder record appears beside a damage report.
+$entity.ignorePlayerCommRequests = true 30","The officer on the screen is wearing an unmarked pressure suit. Your transponder code appears beside a damage report.
 
 ""You hit $entity.catchrelease_harpoonHitmanVictim with $entity.catchrelease_harpoonHitmanOffence in $entity.catchrelease_harpoonHitmanOrigin. They hired us.""
 
@@ -31,11 +29,11 @@ Your comms officer points out that the client is no longer around to collect.
 catchrelease_hitmanBribeAskSel,DialogOptionSelected,$option == catchrelease_hitmanBribeAsk,"Highlight $entity.catchrelease_harpoonHitmanBribeDGS
 DoCanAffordCheck $entity.catchrelease_harpoonHitmanBribe catchrelease_hitmanBribePay","The officer checks a clause in the contract.
 
-""Cancellation, damages, legal fees. $entity.catchrelease_harpoonHitmanBribeDGS credits, paid now. We both walk away.""","catchrelease_hitmanBribePay:Pay $entity.catchrelease_harpoonHitmanBribeDGS credits
+""Cancellation, damages, legal fees and penalties totalling $entity.catchrelease_harpoonHitmanBribeDGS credits, to be paid immediately.""","catchrelease_hitmanBribePay:Pay $entity.catchrelease_harpoonHitmanBribeDGS credits
 100:cutCommLinkNoText:Cut the comm link",
 catchrelease_hitmanBribePaySel,DialogOptionSelected,$option == catchrelease_hitmanBribePay,"AddCredits -$entity.catchrelease_harpoonHitmanBribe
 CatchReleaseCMD bribeHitman
-FireAll CatchReleaseFleetResolutionOptions","The transfer clears. The officer closes your file.
+FireAll CatchReleaseFleetResolutionOptions","The transfer clears.
 
 ""Contract cancelled. Try not to harpoon someone important, next time.""",,
 ,,,,,,
@@ -68,7 +66,7 @@ An incident report appears on your display.
 
 $HeOrShe looks up.
 
-""That isn't an invitation to come and collect it.""",,
+""This isn't an invitation to come and collect it.""",,
 catchrelease_harpoonedCommsTT,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == tritachyon
 $entity.catchrelease_harpooned score:1110
@@ -88,7 +86,7 @@ $faction.id == luddic_path
 $entity.catchrelease_harpooned score:1110
 !$entity.catchrelease_harpoonHostile
 !$entity.isHostile","$menuState = fleetConvMain 0
-FireAll PopulateOptions","The speaker has the recovered ROD head on the table behind them.
+FireAll PopulateOptions","The speaker has the recovered ROD head on the table behind them. A prayer bead is attached to the assembly.
 
 ""Accident?"" They jab a finger toward it. ""You cast Moloch's iron through a ship full of Ludd's children and call it an accident?""
 
@@ -118,11 +116,9 @@ $entity.catchrelease_harpooned score:1110
 !$entity.isHostile","$menuState = fleetConvMain 0
 FireAll PopulateOptions","$PersonRank $personName is searching through a set of regulations.
 
-""Negligent discharge, damage to an associated hull... there's a recovery-equipment provision somewhere.""
+""Negligent discharge, damage to an associated hull... there's a recovery-equipment provision somewhere."" $HeOrShe gives up looking. 
 
-$HeOrShe gives up looking.
-
-""I will find the appropriate charge, captain. Don't mistake a gap in the index for permission.""",,
+""I will find the appropriate charge at some point, I hope.""",,
 catchrelease_harpoonedCommsIndie,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == independent
 $entity.catchrelease_harpooned score:1110
@@ -131,31 +127,28 @@ $entity.catchrelease_harpooned score:1110
 FireAll PopulateOptions","""You put a hole in us with fishing gear."" $personName rubs the bridge of $hisOrHer nose. ""I have to explain that sentence to a yardmaster.""",,
 catchrelease_harpoonedCommsOther,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1050","ShowDefaultVisual
-AddText ""The officer answering your call already has several complaints about your fleet. The harpoon is added to the list before you can explain it.""
-EndConversation",,,
+EndConversation"," ""The officer answering your call already has several complaints about your fleet. The harpoon is added to the list before you can explain it.""",,
 catchrelease_harpoonedCommsHostile,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1200
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""Again.\"" The channel closes.""
-EndConversation",,,
+EndConversation","""Again."" 
+
+The channel closes.",,
 catchrelease_harpoonedCommsHostileHeg,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == hegemony
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""Second discharge confirmed.\"" $PersonRank $personName sets the report aside. \""Engage.\""""
-EndConversation",,,
+EndConversation","""Second discharge confirmed."" $PersonRank $personName sets the report aside. ""Engage.""",,
 catchrelease_harpoonedCommsHostileTT,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == tritachyon
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""Another deliberate strike.\"" $PersonRank $personName closes the claim. \""Security will handle this.\""""
-EndConversation",,,
+EndConversation","""Another deliberate strike."" $PersonRank $personName closes the claim. ""Security will handle this.""",,
 catchrelease_harpoonedCommsHostileLC,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == luddic_church
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""We asked you once to keep that machine from crewed hulls.\"" The officer folds their hands. \""You chose otherwise. We will keep it from them for you.\""""
-EndConversation",,,
+EndConversation","""We asked you once to keep that machine from crewed hulls."" The officer folds their hands. ""You chose otherwise. We will keep it from them for you.""",,
 catchrelease_harpoonedCommsHostileLP,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == luddic_path
 $entity.catchrelease_harpooned score:1210
@@ -175,19 +168,16 @@ catchrelease_harpoonedCommsHostilePirate,OpenCommLink,"!$entity.catchrelease_fis
 $faction.id == pirates
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""The recovered impact image remains open. \""Once was funny. Twice means I get to see what else comes off your ship.\""""
-EndConversation",,,
+EndConversation","""The recovered impact image remains open. ""Once was funny. Twice means I get to see what else comes off your ship.""",,
 catchrelease_harpoonedCommsHostileDiktat,OpenCommLink,"!$entity.catchrelease_fisherman
 $faction.id == sindrian_diktat
 $entity.catchrelease_harpooned score:1210
 $entity.catchrelease_harpoonHostile","ShowDefaultVisual
-AddText ""\""Deliberate, then.\"" The officer straightens. \""You have fired twice on a vessel of the Sindrian Diktat. We will answer in kind.\""""
-EndConversation",,,
+EndConversation","""Deliberate, then."" The officer straightens. ""You have fired twice on a vessel of the Sindrian Diktat. We will answer in kind.""",,
 catchrelease_harpoonedCommsFleeing,OpenCommLink,"!$entity.catchrelease_fisherman
 $entity.catchrelease_harpooned score:1250
 $entity.catchrelease_harpoonFleeing","ShowDefaultVisual
-AddText ""Your call connects to an empty chair. Someone off-screen is repeating a course order. The link drops before you can speak.""
-CatchReleaseCMD leaveEncounter",,,
+CatchReleaseCMD leaveEncounter","""Your call connects to an empty chair. Someone off-screen is repeating a course order. The link drops before you can speak.",,
 ,,,,,,
 # harpoon: patrol fine,,,,,,
 catchrelease_patrolStop,BeginFleetEncounter,"$catchrelease_harpoonPatrol score:1100
@@ -280,15 +270,15 @@ The link closes as the other ships move to engage.",,
 catchrelease_fineDemandRepeatHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
-$entity.catchrelease_harpoonCount == 2",FireBest CatchReleaseHarpoonPatrolAttack,"""The first incident may have been an accident. The second is deliberate."" $PersonRank $personName sets the slate face down. ""Weapons are authorized.""",,
+$entity.catchrelease_harpoonCount == 2",FireBest CatchReleaseHarpoonPatrolAttack,"""The first incident may have been an accident. This one is deliberate."" $PersonRank $personName sets the slate face down. ""Weapons are authorized.""",,
 catchrelease_fineDemandRepeatTT,OpenCommLink,"$faction.id == tritachyon
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
-$entity.catchrelease_harpoonCount == 2",FireBest CatchReleaseHarpoonPatrolAttack,"""You've done it twice. That does simplify things. Your fleet is now recorded as deliberately hostile to Tri-Tachyon assets. I expect the consequences will be considerably less routine.""",,
+$entity.catchrelease_harpoonCount == 2",FireBest CatchReleaseHarpoonPatrolAttack,"""You've done it twice. That does simplify things. Your fleet is now recorded as deliberately hostile to Tri-Tachyon assets. I expect the consequences will be considerably less... routine.""",,
 catchrelease_fineDemandRepeatLC,OpenCommLink,"$faction.id == luddic_church
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
-$entity.catchrelease_harpoonCount == 2",FireBest CatchReleaseHarpoonPatrolAttack,"$PersonRank $personName does not offer peace this time. ""We took payment for the hull and said nothing about the gear that made the hole. That was a courtesy, and you have shown us what it bought.""",,
+$entity.catchrelease_harpoonCount == 2",FireBest CatchReleaseHarpoonPatrolAttack,"$PersonRank $personName does not offer peace this time. ""We took payment for the hull and said nothing about the machine that made the hole. That was a courtesy, and you have shown us what it bought.""",,
 catchrelease_fineDemandRepeatLP,OpenCommLink,"$faction.id == luddic_path
 $entity.catchrelease_fineConv score:1410
 $entity.catchrelease_harpoonRepeat
@@ -3510,18 +3500,18 @@ $entity.catchrelease_lampConv score:1515
 $entity.catchrelease_lampRung == 2","SetTextHighlights $entity.catchrelease_lampFineDGS
 FireAll CatchReleaseLampFineOptions","""You again."" $personName puts the figure on-screen. ""$entity.catchrelease_lampFineDGS. Lights off. I'd like this to be the last time I learn something new about fishing.""",,
 catchrelease_lampScan,OpenCommLink,"$entity.catchrelease_lampConv score:1520
-$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Power down and prepare for inspection. We're seizing all the catch aboard, including packed crates. Have your cargo records ready and keep your crew clear of the team.""",,
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Power down and prepare for inspection. We're seizing all the catch aboard. Have your cargo records ready and keep your crew clear of the team.""",,
 catchrelease_lampScanHeg,OpenCommLink,"$faction.id == hegemony
 $entity.catchrelease_lampConv score:1525
 $entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Hegemony Navy. Heave to. Prepare to be boarded.""
 
-The officer does not read the warning history back to you. ""You ignored the warning and the fine. We are inspecting the rig and seizing all catch aboard, including packed crates.
+The officer does not read the warning history back to you. ""You ignored the warning and the fine. We are inspecting the rig and seizing all catch aboard.
 Cut the lights.""",,
 catchrelease_lampScanTT,OpenCommLink,"$faction.id == tritachyon
 $entity.catchrelease_lampConv score:1525
 $entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""The previous notices have been insufficient, Captain. Stand by for boarding.""
 
-A shuttle separates from the formation. ""All catch aboard is subject to seizure, including packed crates. Power down and have your records ready. Your cooperation will keep this from becoming a security incident.""",,
+A shuttle separates from the formation. ""All catch aboard is subject to seizure. Power down and have your records ready. Your cooperation will keep this from becoming a security incident.""",,
 catchrelease_lampScanLC,OpenCommLink,"$faction.id == luddic_church
 $entity.catchrelease_lampConv score:1525
 $entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Power it down.""
@@ -3549,17 +3539,17 @@ $entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""All r
 The speaker glances past the camera, then back. ""And don't make me put a price on resisting.""",,
 catchrelease_lampScanDiktat,OpenCommLink,"$faction.id == sindrian_diktat
 $entity.catchrelease_lampConv score:1525
-$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Prepare to be boarded. Your equipment will be inspected and all catch aboard seized, including packed crates. Shut it down now. I will not repeat the order while our people are crossing.""",,
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""Prepare to be boarded. Your equipment will be inspected and all catch aboard seized. Shut it down now. I will not repeat the order while our people are crossing.""",,
 catchrelease_lampScanLeague,OpenCommLink,"$faction.id == persean_league
 $entity.catchrelease_lampConv score:1525
-$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""We're proceeding to inspection, Captain. Power down. The team will need your records, and they'll seize all catch aboard, including packed crates. I'll send the authorization so you know what to expect.""",,
+$entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"""We're proceeding to inspection, Captain. Power down. The team will need your records, and they'll seize all catch aboard. I'll send the authorization so you know what to expect.""",,
 catchrelease_lampScanIndie,OpenCommLink,"$faction.id == independent
 $entity.catchrelease_lampConv score:1525
 $entity.catchrelease_lampRung == 3",FireAll CatchReleaseLampScanOptions,"$personName has the boarding authorization ready.
 
 ""I told you I didn't want to learn more about this. Apparently I do.""
 
-""Shut it down. We'll need your cargo records, and we're taking all the catch aboard, including packed crates.""",,
+""Shut it down. We'll need your cargo records, and we're taking all the catch aboard.""",,
 catchrelease_lampGuns,OpenCommLink,"$entity.catchrelease_lampConv score:1530
 $entity.catchrelease_lampRung == 4",FireBest CatchReleaseLampOpenFire,"""You've repeatedly ignored orders to stop operating that device. We're authorized to engage.""
 
@@ -3659,7 +3649,8 @@ A shuttle crosses. For the better part of an hour there are strangers in the hol
 catchrelease_lampSeizedSel,DialogOptionSelected,$option == catchrelease_lampSeized,FireBest CatchReleaseLampSeized,,,
 catchrelease_lampSeizedFull,CatchReleaseLampSeized,$entity.catchrelease_lampHaul score:10,"CatchReleaseCMD seizeFish
 ShowDefaultVisual
-FireAll CatchReleaseFleetResolutionOptions","The patrol inventory team removes all catch aboard, including packed crates.
+FireAll CatchReleaseFleetResolutionOptions","The patrol inventory team rummages through your holds and removes the entirety of your catch.
+They are suprisingly thorough and do not cause much damage to your ships.
 
 When the transfer manifest clears, $PersonRank $personName signs it. ""That will be all.""",,
 catchrelease_lampSeizedEmpty,CatchReleaseLampSeized,!$entity.catchrelease_lampHaul,"CatchReleaseCMD seizeFish

@@ -421,7 +421,7 @@ public class FishRequirement {
         if (minWeight > 0f) text.append(", at least ").append(trim(minWeight)).append(" kg");
         if (minLength > 0f) text.append(", at least ").append(trim(minLength)).append(" m");
 
-        if (origin != null) text.append(", taken ").append(getOriginName());
+        if (origin != null) text.append(", caught ").append(getOriginName());
 
         if (lowCoherence) text.append(", with unstable or worse coherence");
 
@@ -436,7 +436,7 @@ public class FishRequirement {
 
         if (method != null) text.append("caught with ").append(getMethodName());
         if (implement != null) {
-            text.append(method == null ? "taken through " : " through ").append(implement.name);
+            text.append(method == null ? "caught through " : " through ").append(implement.name);
         }
 
         return text.toString();

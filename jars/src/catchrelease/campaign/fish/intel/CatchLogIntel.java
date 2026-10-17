@@ -197,7 +197,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
         String tail = systemName == null ? "" : ", in " + systemName;
         if (date != null) tail += ", on " + date;
 
-        LabelAPI taken = info.addPara("Taken with %s through %s" + tail + ".", opad, h,
+        LabelAPI taken = info.addPara("Caught with %s through %s" + tail + ".", opad, h,
                 method, implement);
         if (systemName != null && date != null) taken.setHighlight(method, implement,
                 systemName, date);

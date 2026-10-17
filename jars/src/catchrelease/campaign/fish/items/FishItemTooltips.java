@@ -61,7 +61,7 @@ final class FishItemTooltips {
     // Uses the same phrases as request text (FishRequirement), so a specimen can be matched against an ask by eye.
     static void addProvenance(TooltipMakerAPI tooltip, FishCatch entry) {
         List<String> values = new ArrayList<>();
-        StringBuilder format = new StringBuilder("Taken");
+        StringBuilder format = new StringBuilder("Caught");
 
         String method = entry.method == null ? null : entry.method.phrase;
         if (method != null) {

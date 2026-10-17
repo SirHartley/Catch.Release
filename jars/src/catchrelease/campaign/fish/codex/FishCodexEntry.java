@@ -295,7 +295,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
                 String.format("%.1f kg", logged.recordWeight),
                 best.name);
 
-        text.addPara("Taken %s in %s, by %s.", 3f, hl,
+        text.addPara("Caught %s in %s, by %s.", 3f, hl,
                 getDate(logged.recordTimestamp),
                 logged.recordSystemName == null ? "an unrecorded system" : logged.recordSystemName,
                 logged.recordMethod.name);

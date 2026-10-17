@@ -291,7 +291,7 @@ public abstract class CampedSpotJob extends FishJob {
             if (receiptAboard) {
                 info.addPara("The proof is already aboard. What remains is clearing the camp.", pad);
             } else {
-                info.addPara("Bring back a catch from this exact rupture, taken after you accepted"
+                info.addPara("Bring back a catch from this exact rupture, caught after you accepted"
                         + " the job. The fleet must also be gone before the fisher will pay.", pad);
             }
         } else if (receiptAboard) {
@@ -299,7 +299,7 @@ public abstract class CampedSpotJob extends FishJob {
                             + " for payment.", pad, Misc.getHighlightColor(), systemName);
         } else {
             info.addPara("The rupture in %s is clear. Bring back a catch from this exact rupture,"
-                            + " taken after you accepted the job.", pad,
+                            + " caught after you accepted the job.", pad,
                     Misc.getHighlightColor(), systemName);
         }
 
