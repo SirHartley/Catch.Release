@@ -16,6 +16,7 @@ Fixed - Fisherman tutorial lessons no longer send you to systems with a neutron 
 Adjusted - The Fisherman's first lesson now points at the rupture closest to him
 Fixed - Fish, crates and piles sold to a market now disappear when its stock refreshes, as sold weapons do
 Fixed - "Set autopilot" on tutorial and chart request intel now targets a visiting Fisherman in your current system instead of a boat elsewhere
+Fixed - System fish counts no longer include a species that never spawns there, which made a full system show 16 species
 
 1.0.a
 Added - Initial Mod Release

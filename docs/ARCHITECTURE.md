@@ -883,7 +883,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 
 ### Fish habitats, ranges, and balance
 
-- `FishHabitat.of()` is the shared habitat snapshot. `FishRanges.matches()` is the only range decision, including pins and relaxation. UI calls `FishPresence.livesIn()`, which routes through the same logic.
+- `FishHabitat.of()` is the shared habitat snapshot. `FishRanges.matches()` is the only range decision, including pins and relaxation. UI calls `FishPresence.livesIn()`, which routes through the same logic but excludes zero-weight mechanism rows, as the system cap does; otherwise the Quorum splinter would count in every non-Abyssal system.
 - Habitat criteria treat blank as unrestricted except for the Abyss. Abyssal species must explicitly name `ABYSSAL`.
 - Monthly reassessment refreshes moving habitat inputs and relaxes non-Abyssal species with fewer than three systems. Relaxation order is constellation age, ±0.25 coherence, star colour, then region. It never crosses the Abyss boundary or raises any system above fifteen species.
 - Active `FishAsker` species are pinned to their previous system list during reassessment and unpin when the ask ends.

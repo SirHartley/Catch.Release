@@ -64,6 +64,9 @@ public class FishPresence {
     }
 
     public static boolean livesIn(FishSpec spec, StarSystemAPI system) {
+        // Zero-weight mechanism rows (the Quorum splinter) never spawn from ranges and take no cap slot.
+        if (spec == null || spec.spawnWeight <= 0f) return false;
+
         return FishRanges.matches(spec, system, null);
     }
 
