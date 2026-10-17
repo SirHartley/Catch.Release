@@ -1067,7 +1067,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         FishRarity style = isDecoy() ? FishRarity.LEGENDARY : getRarity();
         if (!LegendaryTrail.hasTrail(style)) return;
         if (trail == null || trail.isExpired()) trail = new LegendaryTrail();
-        trail.sample(entity, !held, style);
+        // a dive is a gap in the strip, not a hidden stretch the lamps can reveal
+        trail.sample(entity, !held && getVisibility() > 0f, style);
     }
 
     public void externalRender(ViewportAPI viewport){
