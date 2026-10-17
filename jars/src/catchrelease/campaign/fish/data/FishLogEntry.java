@@ -30,6 +30,8 @@ public class FishLogEntry implements Serializable {
     public float recordWeight = 0f;
     public float recordAberration = 0f;
     public int recordScars;
+    // 0 means no catch logged since this field was added
+    public float lastLength = 0f;
 
     public String firstSystemName;
     public Vector2f firstLocationInHyper;

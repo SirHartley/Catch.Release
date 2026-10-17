@@ -253,6 +253,20 @@ Sources: `BaseSpecialItemPlugin.createTooltip/addCostLabel` and the vanilla item
 plugins in the knowledge base's `sources-api/campaign.impl.java`; `Misc.addDesignTypePara`
 in `sources-api/util.java`.
 
+## Codex size chart
+
+Caught species get a "Size distribution" box below the Codex icon card, as wide
+as the right column. `FishSizeChart` draws a normal curve from `lengthMin` to
+`lengthMax` with the roll's mean and spread (σ = range/√24). It is lowered so both
+ends touch the axis. The actual roll in `FishCatch.roll` is triangular, so the
+curve is an approximation, and quality bias is not shown. Gray axis labels give
+the range ends. The best catch (`recordLength`) is a highlight-colour stem and dot
+labelled on the top row. The latest catch (`lastLength`) is a bright-player stem
+labelled on the row below. When they match, or no latest length is logged yet,
+one combined "Best and last" label is drawn. The curve, fill, and markers use
+`GL_TRIANGLE_STRIP`/`GL_LINE_STRIP` inside pushed attributes. The LazyFont labels
+are created on first render, because fonts load on the render thread.
+
 ## LunaLib settings
 
 `data/config/LunaSettingsConfig.json` registers this mod's existing 40×40 hook icon

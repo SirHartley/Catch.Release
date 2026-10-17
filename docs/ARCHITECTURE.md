@@ -245,7 +245,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `FishSpec.java` | Species row, stable save ID and display fields, minigame tuning, the campaign pace and wander factors `FishSpecLoader` derives from it, value/size, habitat and implements; display renames do not rename saved IDs. |
 | `FishLocationSummary.java` | Shared habitat prose for range-data and caught-fish hovers (`FishTooltips`) and Codex range panels. Always names the catch sources, including both breach lights and ruptures for blank or mixed `reachedBy`. |
 | `FishCatch.java` | One specimen: size, weight, aberration, region, source rupture, timestamp, method, and optional chart-request provenance. |
-| `FishLog.java` | Persistent per-species discovery and record data. |
+| `FishLog.java` | Persistent per-species discovery and record data. `record` also stores the latest catch's `lastLength`; 0 means none logged yet. |
 | `Aberration.java` | Caches ordinary aberration from the strongest destabilizer minus the strongest colony field, then applies temporary system rumors. `naturalAt` bypasses rumors for target selection. |
 | `FishRanges.java` | Authoritative current range test, including the fifteen-species system cap. |
 
@@ -500,6 +500,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | File | Owner / connection |
 |---|---|
 | `FishCodexEntryState.java` | Central `UNKNOWN`, `RANGE_DATA`, and `CAUGHT` policy for visibility, links, art, description, records, and map access. |
+| `FishCodexEntry.java`, `FishSizeChart.java` | Species page: left-column boxes, right-column icon card and, for caught species, the size-distribution box below it. [Chart contract](UI.md#codex-size-chart). |
 
 ### `campaign/fish/legendary`
 
