@@ -406,7 +406,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   normal blending and five-second fade. Epic trails use `FishRarity.EPIC.color` at
   half that opacity (`LegendaryTrail.EPIC_ALPHA_MULT`); each `sample` call passes
   the rarity, and decoys pass legendary. Their transient Luna renderer runs independently of the mote's render
-  callback, so a hidden or offscreen head does not hide its illuminated tail.
+  callback, so an unlit or offscreen head does not hide its illuminated tail. A
+  fully faded dive stops sampling, so the strip breaks across the dive.
   Quads are subdivided at most four world units apart; each vertex uses current
   spot/fan coverage and that lamp's Manta flicker, not stored mote visibility or
   retained contact marks. Lamps off means no visible trail. Viewport alpha and

@@ -183,7 +183,6 @@ public final class LegendaryTrailChecks {
     private static void hiddenTrail() {
         try (Fixture f = new Fixture()) {
             Mote fish = new Mote(f, FishRarity.LEGENDARY);
-            fish.visibility = 0f;
             fish.sensor = 0f;
             fish.field("lampFade", 0f);
             check(fish.opacity() == 0f, "fixture mote really is invisible");
@@ -193,7 +192,7 @@ public final class LegendaryTrailChecks {
             check(fish.recorded.paint(f) == 0f, "darkness hides sampled movement");
             f.on = true;
             float lit = fish.recorded.paint(f);
-            check(lit > 0f, "beam exposes history emitted while fish was invisible");
+            check(lit > 0f, "beam exposes history emitted while the unlit fish was undrawn");
             f.lights.get(0).updateRenderLoc(new Vector2f(1000f, 0f));
             check(fish.recorded.paint(f) == 0f, "moving lamp away hides existing trail immediately");
             f.lights.get(0).updateRenderLoc(new Vector2f());
@@ -213,6 +212,20 @@ public final class LegendaryTrailChecks {
             fish.recorded.advance(2.6f);
             check(fish.recorded.paint(f) == 0f, "short trail expires even without mote callbacks");
             check(fish.recorded.registrations == 1, "one transient renderer per live trail");
+        }
+        try (Fixture f = new Fixture()) {
+            Mote fish = new Mote(f, FishRarity.LEGENDARY);
+            fish.tick(0f, 0f);
+            fish.tick(10f, 0f);
+            fish.visibility = 0f;
+            fish.tick(20f, 0f);
+            fish.tick(30f, 0f);
+            fish.visibility = 1f;
+            fish.tick(40f, 0f);
+            fish.tick(50f, 0f);
+            check(fish.recorded.paint(f) > 0f, "surfaced stretches keep their trail");
+            check(fish.recorded.vertices.stream().noneMatch(v -> v.x() > 10.5f && v.x() < 39.5f),
+                    "a dive leaves a gap instead of a trail");
         }
     }
 
