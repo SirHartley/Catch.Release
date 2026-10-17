@@ -110,6 +110,19 @@ public class LegendaryChases {
         return chase == null || chase.caught || chase.relocationPending ? null : chase.systemId;
     }
 
+    // Reads the ledger directly: getChase() may assign or move hosts, which range lookups must not do.
+    public static int countHostedIn(String systemId) {
+        if (systemId == null || !FishingIntro.isComplete()) return 0;
+
+        int count = 0;
+        for (Chase chase : getLedger().values()) {
+            if (chase != null && !chase.caught && !chase.relocationPending
+                    && systemId.equals(chase.systemId)) count++;
+        }
+
+        return count;
+    }
+
     public static boolean isCurrentResidency(String speciesId, String systemId, int residency) {
         // Rumor expiry is also read during habitat selection; do not assign or move hosts here.
         Chase chase = getLedger().get(speciesId);
