@@ -150,10 +150,10 @@ public class FishItemPlugin extends BaseSpecialItemPlugin {
 
         FishItemTooltips.addTitle(tooltip, entry.getDisplayName(), spec);
         FishItemTooltips.addClassification(tooltip, spec);
+        FishItemTooltips.addWantedFor(tooltip, List.of(entry));
         FishItemTooltips.addDescription(tooltip, spec);
         FishItemTooltips.addStats(tooltip, entry);
         FishItemTooltips.addProvenance(tooltip, entry);
-        FishItemTooltips.addWantedFor(tooltip, List.of(entry));
 
         addCostLabel(tooltip, FishItemTooltips.OPAD, transferHandler, stackSource);
 

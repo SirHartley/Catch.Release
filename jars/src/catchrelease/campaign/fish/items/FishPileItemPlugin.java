@@ -153,6 +153,7 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
         Color h = Misc.getHighlightColor();
 
         FishItemTooltips.addTitle(tooltip, getName(), null);
+        FishItemTooltips.addWantedFor(tooltip, contents);
 
         Map<String, List<FishCatch>> bySpecies = new LinkedHashMap<>();
         for (FishCatch entry : contents) {
@@ -183,8 +184,6 @@ public class FishPileItemPlugin extends BaseSpecialItemPlugin {
             tooltip.addPara(BaseIntelPlugin.INDENT + "... and %s other species.", FishItemTooltips.PAD, h,
                     String.valueOf(lines.size() - shown));
         }
-
-        FishItemTooltips.addWantedFor(tooltip, contents);
 
         addCostLabel(tooltip, opad, transferHandler, stackSource);
 

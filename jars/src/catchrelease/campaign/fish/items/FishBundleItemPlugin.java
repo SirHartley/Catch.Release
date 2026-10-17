@@ -159,6 +159,7 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
         FishItemTooltips.addTitle(tooltip, getName(), spec);
         FishItemTooltips.addClassification(tooltip, spec);
+        FishItemTooltips.addWantedFor(tooltip, contents);
         FishItemTooltips.addDescription(tooltip, spec);
 
         Map<FishGrade, Integer> byGrade = new EnumMap<>(FishGrade.class);
@@ -189,8 +190,6 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
         }
 
         addCoherenceRange(tooltip, leastAberration, mostAberration);
-
-        FishItemTooltips.addWantedFor(tooltip, contents);
 
         addCostLabel(tooltip, opad, transferHandler, stackSource);
 
