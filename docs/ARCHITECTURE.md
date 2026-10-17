@@ -457,7 +457,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | `ShopFishPayments.java` | Generates ordinary `FishRequirement` payments: 50% named pattern, 30% species with two modifiers, 20% player-chosen matching batch with a modifier. Checks current ranges and owned fishing gear; no origin restriction. Higher bands favor rarer patterns, larger catches and Fine grade. |
 | `ShopMarks.java` | Persistent shopping list. |
 | `FishAsker.java` | Interface implemented by jobs, tutorial intel, and chart-request intel so the shop, cargo, and route planner can read fish requirements uniformly. |
-| `FishCurrency.java` | Counts and spends matching fish. |
+| `FishCurrency.java` | Counts and spends matching fish; `countSpecies` feeds the outfitter's rarity-chip tooltips. |
 | `FishRequirement.java` | Describes and evaluates count, rarity, grade, species, region, source rupture, timestamp, coherence, method, and implement. |
 | `ShopSchematics.java` | Saves quest-earned permissions for stocked modules and the last two tiers of each upgrade. |
 

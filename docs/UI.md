@@ -169,10 +169,19 @@ Pass `false` as the last argument for fixed help text. Vanilla still creates the
 content when the tooltip is shown; this only stops rebuilding it throughout the
 hover.
 
-Map and planner help, category descriptions, chart-shop help, outfitter help and
-intel navigation tips use this non-rebuilding mode. Fish-row selection hints,
+Map and planner help, category descriptions, chart-shop help, outfitter help,
+the outfitter's rarity-count chips and intel navigation tips use this
+non-rebuilding mode. Fish-row selection hints,
 chart affordability, shop marks, tier status and payment details keep live updates.
 Do not cache a tooltip that reads changing state unless its owner refreshes it.
+
+The outfitter header draws its rarity chips in `ShopHeaderPlugin.render`;
+`FishShopDialog.buildHeader` places hotspots from the same
+`ShopHeaderPlugin.getChipLeft/getChipTop` offsets. Each chip's tooltip lists the
+species aboard from `FishCurrency.countSpecies`, most-held first, as up to two
+rows of `FishIcons` with an "xN" count for duplicates. Species past those rows
+are summarized as "... and N other species." so the grid never outgrows the
+320-pixel tooltip.
 
 Source: `StandardTooltipV2Expandable.addTooltipTo/addTooltipToPrevious`,
 `beforeShown` and `advanceImpl` in the knowledge base's `sources-obf/ui.impl.java`.

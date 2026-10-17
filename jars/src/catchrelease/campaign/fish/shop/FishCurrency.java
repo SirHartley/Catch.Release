@@ -37,6 +37,27 @@ public class FishCurrency {
         return counts;
     }
 
+    // Most-held species first, then by name.
+    public static List<Map.Entry<FishSpec, Integer>> countSpecies(FishRarity rarity) {
+        Map<FishSpec, Integer> held = new HashMap<>();
+
+        CargoAPI cargo = getCargo();
+        if (cargo != null) {
+            for (CargoStackAPI stack : cargo.getStacksCopy()) {
+                for (FishCatch entry : read(stack)) {
+                    FishSpec spec = entry == null ? null : entry.getSpec();
+                    if (spec != null && spec.rarity == rarity) held.merge(spec, 1, Integer::sum);
+                }
+            }
+        }
+
+        List<Map.Entry<FishSpec, Integer>> out = new ArrayList<>(held.entrySet());
+        out.sort(Map.Entry.<FishSpec, Integer>comparingByValue().reversed()
+                .thenComparing(e -> e.getKey().getDisplayName()));
+
+        return out;
+    }
+
     public static int count(FishRarity rarity) {
         Integer held = count().get(rarity);
 

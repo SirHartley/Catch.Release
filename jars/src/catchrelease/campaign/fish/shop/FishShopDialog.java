@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.shop;
 
 import catchrelease.config.FishingSounds;
+import catchrelease.ui.FishIcons;
 import catchrelease.ui.PaneWidgets;
 import catchrelease.ui.ShopUi;
 import catchrelease.campaign.fish.crab.CrabWares;
@@ -61,6 +62,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final String SOUND_BOUGHT = "ui_upgrade_industry";
 
     public static final float TOOLTIP_WIDTH = 320f;
+    // addCustom insets a tooltip's custom panel by this much on each side
+    public static final float PURSE_TOOLTIP_MARGIN = 5f;
+    public static final float PURSE_ICON_SIZE = 32f;
+    public static final float PURSE_ICON_GAP = 6f;
+    public static final int PURSE_ICON_ROWS = 2;
     public static final float MAIN_TAB_HEIGHT = 28f;
     public static final float CATEGORY_TAB_HEIGHT = 44f;
     public static final float TAB_GAP = 4f;
@@ -271,11 +277,105 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         protected void buildHeader() {
-            CustomPanelAPI header = panel.createCustomPanel(WIDTH - PAD * 2f, HEADER_HEIGHT,
+            float width = WIDTH - PAD * 2f;
+            CustomPanelAPI header = panel.createCustomPanel(width, HEADER_HEIGHT,
                     new ShopHeaderPlugin(this));
+
+            TooltipMakerAPI tooltipHost = header.createUIElement(1f, 1f, false);
+            header.addUIElement(tooltipHost).inTL(0f, 0f);
+
+            // transparent hotspots over the drawn rarity chips; the header itself is one render surface
+            for (FishRarity rarity : FishRarity.values()) {
+                CustomPanelAPI chip = header.createCustomPanel(ShopHeaderPlugin.CHIP_WIDTH,
+                        ShopHeaderPlugin.CHIP_HEIGHT, new BaseCustomUIPanelPlugin() {
+                        });
+                header.addComponent(chip).inTL(ShopHeaderPlugin.getChipLeft(rarity, width),
+                        ShopHeaderPlugin.getChipTop(HEADER_HEIGHT));
+
+                // built when shown; the cargo cannot change while the pointer rests on a chip
+                tooltipHost.addTooltipTo(createPurseTooltip(rarity), chip,
+                        TooltipMakerAPI.TooltipLocation.BELOW, false);
+            }
 
             panel.addComponent(header).inTL(PAD, PAD);
             added.add(header);
+        }
+
+        protected TooltipMakerAPI.TooltipCreator createPurseTooltip(FishRarity rarity) {
+            return new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return TOOLTIP_WIDTH;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
+                                          Object tooltipParam) {
+                    String name = Misc.ucFirst(rarity.name().toLowerCase());
+                    List<Map.Entry<FishSpec, Integer>> held = FishCurrency.countSpecies(rarity);
+
+                    tooltip.addPara("%s fish aboard", 0f, rarity.color, name);
+                    if (held.isEmpty()) {
+                        tooltip.addPara("None.", Misc.getGrayColor(), 6f);
+                        return;
+                    }
+
+                    float width = TOOLTIP_WIDTH - 2f * PURSE_TOOLTIP_MARGIN;
+                    int perRow = Math.max(1, (int) ((width + PURSE_ICON_GAP)
+                            / (PURSE_ICON_SIZE + PURSE_ICON_GAP)));
+                    int shown = Math.min(held.size(), perRow * PURSE_ICON_ROWS);
+                    tooltip.addCustom(createPurseIcons(held.subList(0, shown), width, perRow), 6f);
+
+                    if (held.size() > shown) {
+                        tooltip.addPara("... and %s other species.", 6f, Misc.getGrayColor(),
+                                Misc.getHighlightColor(), String.valueOf(held.size() - shown));
+                    }
+                }
+            };
+        }
+
+        protected CustomPanelAPI createPurseIcons(List<Map.Entry<FishSpec, Integer>> held,
+                                                  float width, int perRow) {
+            int rows = (held.size() + perRow - 1) / perRow;
+            float cell = PURSE_ICON_SIZE + PURSE_ICON_GAP;
+            float height = rows * cell - PURSE_ICON_GAP;
+
+            return Global.getSettings().createCustom(width, height, new BaseCustomUIPanelPlugin() {
+                private PositionAPI pos;
+                private final List<LazyFont.DrawableString> counts = new ArrayList<>();
+
+                @Override
+                public void positionChanged(PositionAPI position) {
+                    pos = position;
+                }
+
+                @Override
+                public void render(float alphaMult) {
+                    if (pos == null) return;
+
+                    LazyFont font = ShopUi.getBodyFont();
+                    if (font != null && counts.isEmpty()) {
+                        for (Map.Entry<FishSpec, Integer> entry : held) {
+                            LazyFont.DrawableString count = ShopUi.createText(font, "x" + entry.getValue());
+                            count.setAnchor(LazyFont.TextAnchor.BOTTOM_RIGHT);
+                            counts.add(count);
+                        }
+                    }
+
+                    for (int i = 0; i < held.size(); i++) {
+                        float left = pos.getX() + (i % perRow) * cell;
+                        float top = pos.getY() + pos.getHeight() - (i / perRow) * cell;
+                        FishIcons.draw(held.get(i).getKey(), left + PURSE_ICON_SIZE * 0.5f,
+                                top - PURSE_ICON_SIZE * 0.5f, PURSE_ICON_SIZE, alphaMult);
+
+                        if (i < counts.size() && held.get(i).getValue() > 1) {
+                            LazyFont.DrawableString count = counts.get(i);
+                            count.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
+                            count.draw(Math.round(left + PURSE_ICON_SIZE), Math.round(top - PURSE_ICON_SIZE));
+                        }
+                    }
+                }
+            });
         }
 
         protected ShopGroup[] getCategories(ShopEntry.Kind tab) {
