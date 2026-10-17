@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.b - UNRELEASED
+Added - Hooked up the new placeholder portraits for 16 fish, including Quorum Splinters
 Fixed - Nearby settlements no longer prevent the Fisherman from approaching you for the tutorial
 Fixed - Finishing the Fisherman's "Why a fish?" questions no longer shows an empty Continue before "You could have told me this before I started."
 Fixed - Fisherman tutorial lessons no longer send you to systems with a neutron star
