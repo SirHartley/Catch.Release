@@ -26,6 +26,7 @@ public final class LonglinerHauntChecks {
 
         void tickSchool() { for (HauntModule module : modules) module.advance(0f); }
         void restore() { restoreHunt(); tickSchool(); }
+        @Override protected void playFoghorn(float pitch) { }
         boolean abandon() { return fail(); }
         void close() { stop(); }
     }

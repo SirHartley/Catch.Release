@@ -79,6 +79,8 @@ public final class MantaHauntChecks {
             modules.add(formation);
         }
 
+        @Override protected void playFoghorn(float pitch) { }
+
         List<HauntModule> modulesForManta() {
             FishSpec spec = new FishSpec();
             spec.id = MantaFormationModule.SPECIES;

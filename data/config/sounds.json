@@ -76,6 +76,9 @@
 	"catchrelease_longliner_found":[
 		{"file":"sounds/catchrelease/sfx/longliner_found.ogg","pitch":1,"volume":1},
 	],
+	"catchrelease_haunt_foghorn":[
+		{"file":"sounds/catchrelease/sfx/foghorn_stereo.ogg","pitch":1,"volume":0.45},
+	],
 
 	"catchrelease_legendary_lantern_call":[
 		{"file":"sounds/sfx_abilities/ability_emergency_signal_01.ogg","pitch":1,"volume":0.4},
