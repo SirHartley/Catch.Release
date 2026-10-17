@@ -66,7 +66,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
 | `data/config/UpgradeData.csv` -> `memory/upgrades/` | Current stat definitions, saved levels and runtime values |
 
-Load order in `ModPlugin`: player settings -> pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> expedition/prospecting routes -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims -> dev shortcut.
+Load order in `ModPlugin`: player settings -> pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> expedition/prospecting routes -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> sold-fish restock -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims -> dev shortcut.
 
 ### Player settings
 
@@ -467,6 +467,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 |---|---|
 | `FishItems.java` | Item IDs, encoding, decoding, landing, unboxing, and transaction-screen packing. |
 | `FishItemPlugin.java`, `FishBundleItemPlugin.java`, `FishPileItemPlugin.java` | Specimen, crate and pile cargo items: names, prices, right-click stowing and unpacking, icons and tooltips. The three rows in `special_items.csv` carry `hide_in_codex`; species pages live in the mod's own Codex category. |
+| `SoldFishRestock.java` | Transient `SubmarketUpdateListener` that removes sold fish, crates and piles when a submarket restocks. |
 | `FishItemTooltips.java` | Shared tooltip blocks for the three items; layout contract in [UI.md](UI.md#catch-item-and-species-tooltips). |
 | `FishBundleItemPlugin.renderBoxIcon()` | Species art fitted to the crate label's four native-image corners; [cargo sprite coordinates](UI.md#portraits-and-sprites). |
 
@@ -858,6 +859,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - `FishItems.stow()` is the only landing path and normally creates a crate. Loose fish remain valid for all counting and spending.
 - `FishItems.isContainer()` is the shared crate/pile test. Do not add direct bundle-ID checks.
 - Unpacking a pile restores any singleton species as a loose fish, not a one-fish crate.
+- Vanilla restocks remove sold weapons and ships but never special items. `SoldFishRestock` removes every `FishItems.isCatch()` stack from a submarket in the listener call that follows its restock: `BaseSubmarketPlugin.getSinceSWUpdate()` is 0 there because the engine reports right after `updateCargoPrePlayerInteraction()`. Free-transfer submarkets (player storage) and submarkets that do not extend `BaseSubmarketPlugin` are skipped. A per-submarket market-memory timestamp (`$catchrelease_soldFishPurgedAt_<submarket id>`) stops a second purge when the market reopens while time is paused. Restocks that vanilla runs without the listener call, such as `FoodShortageEvent`, leave fish until the next reported restock.
 - `Tackle.Fit.BOTH` describes compatibility; it is not a rig. Rig loops use `Fit.isRig()`.
 - Module ownership and module fitting are separate. Charge only when `isOwned()` is false; grants must both own and fit the module.
 - `ShopPricing` saves each generated `FishRequirement` in sector persistent data under `$catchrelease_shop_payments`, keyed by stat ID/target tier or module ID (shared across rigs). Shop refresh, schematic unlock, session undo and save/load must not reroll it. Named patterns prefer those used least by previous payments. If no catch is obtainable, the uncached null fish payment disables purchase; it does not waive the fish cost.
@@ -881,7 +883,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 
 ### Fish habitats, ranges, and balance
 
-- `FishHabitat.of()` is the shared habitat snapshot. `FishRanges.matches()` is the only range decision, including pins and relaxation. UI calls `FishPresence.livesIn()`, which routes through the same logic.
+- `FishHabitat.of()` is the shared habitat snapshot. `FishRanges.matches()` is the only range decision, including pins and relaxation. UI calls `FishPresence.livesIn()`, which routes through the same logic but excludes zero-weight mechanism rows, as the system cap does; otherwise the Quorum splinter would count in every non-Abyssal system.
 - Habitat criteria treat blank as unrestricted except for the Abyss. Abyssal species must explicitly name `ABYSSAL`.
 - Monthly reassessment refreshes moving habitat inputs and relaxes non-Abyssal species with fewer than three systems. Relaxation order is constellation age, ±0.25 coherence, star colour, then region. It never crosses the Abyss boundary or raises any system above fifteen species.
 - Active `FishAsker` species are pinned to their previous system list during reassessment and unpin when the ask ends.
@@ -967,7 +969,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - Standing Fisherman markers are map-only and have no sensor profile. Eligible core-system postings are known from the start; other inhabited-system postings remain known after discovery. The fleet stays loaded throughout the player's stay in-system, regardless of viewport or sensor visibility. It unloads only after the player leaves; tutorial reservations and battles delay that unloading. It returns at the saved marker position. Shared identity, stock, restock timers and chart requests live outside the unloaded fleet.
 - `FleetMapVisibility` hides local fleet proxies at every visibility level above `NONE`, including sensor contacts, and restores them at `NONE`. Standing postings retain the same token off-map and restore it when the boat detaches. The attached boat's existing callback maintains its posting even for a visiting/tutorial-temporary boat; temporary marker owners also restore hidden tokens. See [UI map lifetime](UI.md#fleet-map-markers).
 - Visiting/procgen and Imposter markers remain temporary: departure removes the marker, and the existing fleet departure/expiry rules still apply. Reconciliation preserves standing markers and removes duplicate markers.
-- Tutorial and chart-request return navigation can target a standing marker when its boat is unloaded; local marker autopilot redirects to the fleet after spawning.
+- Tutorial and chart-request return navigation (`FishingIntro.getNearestBoat()`) first takes a boat in the player's current system through `CoreFisherSpawner.getAnyBoat()`, including a visiting boat, which has no map marker once detected. Otherwise it targets the nearest system's non-visiting boat, or its standing marker when that boat is unloaded; local marker autopilot redirects to the fleet after spawning.
 - The visitor shelf restocks from each sale date, not a global monthly tick. Chart-request completion is the only way to increase shelf width.
 - `FishingIntro.point()` is idempotent and can be reached from the wreck, stranded crewman, bar referral, Fisherman interception, or a direct hail. Recovered property takes origin precedence, then rescued crew, then recorded market.
 - Every tutorial target system and chart-scoring system passes `FishingIntro.isLessonSystem()`: reachable through hyperspace, not special or hidden, and without a neutron star (`StarSystemAPI.hasPulsar()`, which also checks secondary and tertiary stars). The first lesson uses the Fisherman's system; if that system fails the check, `pickRodSystem()` takes the nearest passing system with a common pond species. Its marked pond is the free pond nearest the hailed Fisherman (`QuestPond.findNearestFreePond`, passed from `CatchReleaseCMD giveRod`), or nearest the player when he is elsewhere; later lessons keep `findFreePond`.

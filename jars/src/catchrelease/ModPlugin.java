@@ -18,6 +18,7 @@ import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.fish.tutorial.TutorialConstants;
+import catchrelease.campaign.fish.items.SoldFishRestock;
 import catchrelease.campaign.fish.tutorial.RatingBarEvent;
 import catchrelease.campaign.fish.tutorial.FishermanInterception;
 import catchrelease.campaign.fish.tutorial.TutorialWreck;
@@ -81,6 +82,7 @@ public class ModPlugin extends BaseModPlugin {
 
         TutorialWreck.Watcher.register();
         RatingBarEvent.VisitCounter.register();
+        SoldFishRestock.register();
         FishermanInterception.register();
         FishingIntro.Keeper.register();
 

@@ -1325,6 +1325,10 @@ public class FishingIntro {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
         if (player == null) return null;
 
+        // A visiting boat has no marker once detected, so only the local scan can find it.
+        SectorEntityToken local = CoreFisherSpawner.getAnyBoat(asSystem(player.getContainingLocation()));
+        if (local != null) return local;
+
         SectorEntityToken best = null;
         float bestDistance = Float.MAX_VALUE;
 
