@@ -11,13 +11,7 @@ scrapped
 
 todo / QA
 
-high prio
-
-
 low prio
-unpack from crates button in sell screen (same as pack into crates)
-only show the "pack into crate" tt if stack is currently in fleet cargo
-hovering the fish count tiles in the outfitter top right should show tooltip with the relevant icons (cut off before it overruns)
 legendary haunt equipment prerequisites / readiness eval via fisherman?
 Fisherman impostor dialogue / fisherman (real) reaction / questioning
 check epic fish persistence / trail?
@@ -26,9 +20,6 @@ Add a "size distribution" and "your catch" chart that shows the a gaussian chart
 Apply some kinda sharpening to rescaled fish icon on cargo icon?
 
 SFX
-shield deflect sfx
-foghorn sfx for haunt start
-distress call for lantern jack attractor (ui_intel_distress_call) whenever it fires
 lantern jack mote consumption / dash animation + mote death "bubbles/crumbs" on hit
 Haunt soundtrack? Music?
 
