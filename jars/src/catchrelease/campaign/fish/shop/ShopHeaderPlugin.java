@@ -79,20 +79,30 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         Map<FishRarity, Integer> wallet = purse.getWallet();
         if (wallet == null) return;
 
-        FishRarity[] ladder = FishRarity.values();
-        float chipX = x + width - ladder.length * CHIP_WIDTH - ladder.length * CHIP_GAP
-                - CREDITS_CHIP_WIDTH;
-        float chipY = y + (height - CHIP_HEIGHT) * 0.5f;
+        float chipY = y + getChipTop(height);
 
-        renderCredits(chipX, chipY, alphaMult);
-        chipX += CREDITS_CHIP_WIDTH + CHIP_GAP;
+        renderCredits(x + getCreditsChipLeft(width), chipY, alphaMult);
 
-        for (FishRarity rarity : ladder) {
+        for (FishRarity rarity : FishRarity.values()) {
             renderChip(rarity, wallet.get(rarity) == null ? 0 : wallet.get(rarity),
-                    chipX, chipY, alphaMult);
-
-            chipX += CHIP_WIDTH + CHIP_GAP;
+                    x + getChipLeft(rarity, width), chipY, alphaMult);
         }
+    }
+
+    // FishShopDialog places the chips' tooltip hotspots with these offsets.
+    public static float getCreditsChipLeft(float headerWidth) {
+        int chips = FishRarity.values().length;
+
+        return headerWidth - chips * (CHIP_WIDTH + CHIP_GAP) - CREDITS_CHIP_WIDTH;
+    }
+
+    public static float getChipLeft(FishRarity rarity, float headerWidth) {
+        return getCreditsChipLeft(headerWidth) + CREDITS_CHIP_WIDTH + CHIP_GAP
+                + rarity.ordinal() * (CHIP_WIDTH + CHIP_GAP);
+    }
+
+    public static float getChipTop(float headerHeight) {
+        return (headerHeight - CHIP_HEIGHT) * 0.5f;
     }
 
     protected void renderCredits(float x, float y, float alphaMult) {
