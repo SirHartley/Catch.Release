@@ -98,6 +98,13 @@ therefore reconcile these markers; no separate sector-wide polling script is nee
   native size and applies any outer scale to both passes (0.98a-RC8,
   `sources-obf/campaign.ui.java`). `tools/FishCargoIconChecks` checks the rendered
   corners across cell sizes, translations, alpha and hover passes without OpenGL.
+- The crate label shrinks the 80×80 fish art about four times. Game textures up to
+  1024 px are trilinear with generated mipmaps (`TextureLoader`, 0.98a-RC8), so the
+  label samples a soft box-filtered level. `FishBundleItemPlugin.render` adds
+  `BOX_ICON_LOD_BIAS` (−0.5) to the texture-environment LOD bias around
+  `renderBoxIcon` only and restores it in `finally`: three GL calls per crate, no
+  texture memory. Loose fish draw at native size and are not biased. Keep the GL
+  calls out of `renderBoxIcon`, which the check tool calls without a GL context.
 - Aquarium backdrop source art: 388×170, visible 386×168; 2× visible assets: 772×336.
 - Aquarium fish use `spriteDirection` in degrees counter-clockwise from image
   right, measured from the full image centre. `FishSpritePose` aligns the mesh
