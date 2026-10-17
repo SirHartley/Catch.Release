@@ -91,9 +91,10 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void advanceTrail() {
-        if (getRarity() != FishRarity.LEGENDARY) return;
+        float alphaMult = LegendaryTrail.getAlphaMult(getRarity());
+        if (alphaMult <= 0f) return;
         if (trail == null || trail.isExpired()) trail = new LegendaryTrail();
-        trail.sample(entity, true);
+        trail.sample(entity, true, alphaMult);
     }
 
     public Vector2f getMovementVelocity() {

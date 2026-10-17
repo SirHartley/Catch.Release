@@ -8,6 +8,9 @@ public class HarpoonConstants {
 
     public static final String SOUND_FIRE = "catchrelease_harpoon_fire";
     public static final String SOUND_MOTE_HIT = "catchrelease_harpoon_hit";
+    public static final String SOUND_SHIELD_DEFLECT = "catchrelease_harpoon_shield_deflect";
+    public static final float SHIELD_DEFLECT_PITCH_MIN = 0.9f;
+    public static final float SHIELD_DEFLECT_PITCH_MAX = 1.1f;
     public static final String SOUND_CHARGE_RELOAD = "catchrelease_harpoon_charge_reload";
 
     public static final String RELOAD_SOUND_SETTING = "catchrelease_harpoonChargeReloadSound";

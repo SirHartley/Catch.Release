@@ -146,7 +146,7 @@ public final class LegendaryTrailChecks {
         lifecycle();
         straightGeometry();
         lensFollowsMovement();
-        System.out.println("Legendary trail checks passed: " + checks);
+        System.out.println("Legendary and epic trail checks passed: " + checks);
     }
 
     private static void eligibility() {
@@ -155,13 +155,22 @@ public final class LegendaryTrailChecks {
                 Mote fish = new Mote(f, rarity);
                 fish.tick(0f, 0f);
                 fish.tick(10f, 0f);
-                check((fish.recorded.paint(f) > 0f) == (rarity == FishRarity.LEGENDARY), "rarity gate " + rarity);
+                check((fish.recorded.paint(f) > 0f) == (rarity.rank >= FishRarity.EPIC.rank), "rarity gate " + rarity);
             }
+            Mote legendary = new Mote(f, FishRarity.LEGENDARY);
+            Mote epic = new Mote(f, FishRarity.EPIC);
+            for (Mote fish : new Mote[]{legendary, epic}) {
+                fish.tick(0f, 0f);
+                fish.tick(10f, 0f);
+            }
+            check(Math.abs(epic.recorded.paint(f) - legendary.recorded.paint(f) * LegendaryTrail.EPIC_ALPHA_MULT) < 0.00001f,
+                    "epic trails are fainter legendary trails");
             Mote decoy = new Mote(f, FishRarity.RARE);
             decoy.field("decoyAnchor", decoy.getMote());
             decoy.tick(0f, 0f);
             decoy.tick(10f, 0f);
-            check(decoy.recorded.paint(f) > 0f, "Quorum decoy matches the real trail");
+            check(Math.abs(decoy.recorded.paint(f) - legendary.recorded.paint(f)) < 0.00001f,
+                    "Quorum decoy matches the real trail");
             decoy.field("phantom", true);
             decoy.tick(20f, 0f);
             check(decoy.recorded.paint(f) > 0f, "phantoms keep their trails");
@@ -183,6 +192,13 @@ public final class LegendaryTrailChecks {
             f.on = true;
             check(token.recorded.paint(f) > 0f && f.env.haunt.getActiveSpeciesId() == null,
                     "unrevealed buried history appears under lamps without a haunt");
+            token.spec.rarity = FishRarity.EPIC;
+            token.recorded.advance(5.1f);
+            token.at.set(30f, 0f);
+            buried.tick();
+            token.at.set(40f, 0f);
+            buried.tick();
+            check(token.recorded.paint(f) > 0f, "buried epics leave fainter trails under lamps");
             token.spec.rarity = FishRarity.COMMON;
             token.recorded.advance(5.1f);
             token.at.set(20f, 0f);

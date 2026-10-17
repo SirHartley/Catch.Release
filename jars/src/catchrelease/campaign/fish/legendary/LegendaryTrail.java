@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.legendary;
 
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.helper.loading.SpriteLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
@@ -23,6 +24,8 @@ import static org.lwjgl.opengl.GL11.*;
 public class LegendaryTrail implements LunaCampaignRenderingPlugin {
 
     private static final Color COLOR = new Color(255, 45, 45);
+    private static final float ALPHA = 0.85f;
+    public static final float EPIC_ALPHA_MULT = 0.5f;
     private static final float WIDTH = 10f;
     private static final float SECONDS = 5f;
     private static final float MAX_STEP = 90f;
@@ -36,6 +39,7 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
     private final List<Point> points = new ArrayList<>();
     private Point previous;
     private float time;
+    private float alphaMult = 1f;
     private SpriteAPI sprite;
     private final Vector2f vertexPosition = new Vector2f();
 
@@ -52,7 +56,16 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
         }
     }
 
-    public void sample(SectorEntityToken mote, boolean emitting) {
+    public static float getAlphaMult(FishRarity rarity) {
+        return switch (rarity) {
+            case LEGENDARY -> 1f;
+            case EPIC -> EPIC_ALPHA_MULT;
+            default -> 0f;
+        };
+    }
+
+    public void sample(SectorEntityToken mote, boolean emitting, float alphaMult) {
+        this.alphaMult = alphaMult;
         if (Global.getSector() == null || Global.getSector().isPaused() || isExpired()) return;
         if (!emitting || mote.isExpired() || !mote.isInCurrentLocation()) {
             previous = null;
@@ -156,7 +169,7 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
                 from.at.y + (to.at.y - from.at.y) * fraction + ny * side * radius);
         float lit = SearchlightAbilityPlugin.getBeamVisibilityAt(vertexPosition);
         drawVertex(vertexPosition.x, vertexPosition.y, (side + 1f) * 0.5f, age,
-                0.85f * (1f - age) * alpha * lit);
+                ALPHA * alphaMult * (1f - age) * alpha * lit);
     }
 
     protected void drawVertex(float x, float y, float u, float v, float alpha) {

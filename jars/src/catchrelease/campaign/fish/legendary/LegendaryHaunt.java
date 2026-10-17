@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.config.Setting;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -33,6 +34,8 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
     public static final float LINGER_SECONDS = 60f;
     public static final float FADE_SECONDS = 12f;
     public static final float RAMP_SECONDS = 4f;
+    public static final String SOUND_FOGHORN = "catchrelease_haunt_foghorn";
+    public static final float FOGHORN_END_PITCH = 0.8f;
 
     protected String activeSpeciesId;
     protected StarSystemAPI activeSystem;
@@ -114,6 +117,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
             if (haunt.isDawnInRange()) return null;
             if (!haunt.fail()) return null;
             haunt.start(spec, system);
+            haunt.playFoghorn(1f);
         }
         haunt.sinceSeen = 0f;
         haunt.fading = false;
@@ -215,7 +219,10 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         // a haunt begins only when the fish itself has been laid eyes on
         if (modules.isEmpty()) {
             FishSpec sighted = here == null || !lampsOn ? null : findSightedSpecies(here);
-            if (sighted != null) start(sighted, here);
+            if (sighted != null) {
+                start(sighted, here);
+                playFoghorn(1f);
+            }
             if (modules.isEmpty()) return;
         }
 
@@ -321,6 +328,11 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
         modules.addAll(buildModules(spec, here));
     }
 
+    // Real starts only: restoreHunt() rebuilds a saved haunt silently through start().
+    protected void playFoghorn(float pitch) {
+        FishingSounds.playUISound(SOUND_FOGHORN, pitch, 1f);
+    }
+
     protected void restoreHunt() {
         if (!(Global.getSector().getCurrentLocation() instanceof StarSystemAPI here)) return;
         for (SectorEntityToken mote : here.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
@@ -381,6 +393,7 @@ public class LegendaryHaunt implements EveryFrameScript, CurrentLocationChangedL
     }
 
     protected void stop() {
+        if (activeSpeciesId != null) playFoghorn(FOGHORN_END_PITCH);
         for (HauntModule module : modules) {
             module.cleanup();
         }
