@@ -66,7 +66,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
 | `data/config/UpgradeData.csv` -> `memory/upgrades/` | Current stat definitions, saved levels and runtime values |
 
-Load order in `ModPlugin`: player settings -> pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> expedition/prospecting routes -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims -> dev shortcut.
+Load order in `ModPlugin`: player settings -> pond listeners -> buried motes -> charges -> harpooned FID selector -> offence responses -> local fleet offers -> expedition/prospecting routes -> visiting Fishermen -> standing Fishermen -> chart upkeep -> tutorial/wreck/bar referral/interception -> sold-fish restock -> colony options -> aquarium -> coherence cache -> monthly ranges (including initial assessment) -> legendary cleanup -> Imposter cleanup -> distress provider/framework -> skillshot -> map filter -> intel planet panel -> coherence overlay -> stale pond claims -> dev shortcut.
 
 ### Player settings
 
@@ -467,6 +467,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 |---|---|
 | `FishItems.java` | Item IDs, encoding, decoding, landing, unboxing, and transaction-screen packing. |
 | `FishItemPlugin.java`, `FishBundleItemPlugin.java`, `FishPileItemPlugin.java` | Specimen, crate and pile cargo items: names, prices, right-click stowing and unpacking, icons and tooltips. The three rows in `special_items.csv` carry `hide_in_codex`; species pages live in the mod's own Codex category. |
+| `SoldFishRestock.java` | Transient `SubmarketUpdateListener` that removes sold fish, crates and piles when a submarket restocks. |
 | `FishItemTooltips.java` | Shared tooltip blocks for the three items; layout contract in [UI.md](UI.md#catch-item-and-species-tooltips). |
 | `FishBundleItemPlugin.renderBoxIcon()` | Species art fitted to the crate label's four native-image corners; [cargo sprite coordinates](UI.md#portraits-and-sprites). |
 
@@ -858,6 +859,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - `FishItems.stow()` is the only landing path and normally creates a crate. Loose fish remain valid for all counting and spending.
 - `FishItems.isContainer()` is the shared crate/pile test. Do not add direct bundle-ID checks.
 - Unpacking a pile restores any singleton species as a loose fish, not a one-fish crate.
+- Vanilla restocks remove sold weapons and ships but never special items. `SoldFishRestock` removes every `FishItems.isCatch()` stack from a submarket in the listener call that follows its restock: `BaseSubmarketPlugin.getSinceSWUpdate()` is 0 there because the engine reports right after `updateCargoPrePlayerInteraction()`. Free-transfer submarkets (player storage) and submarkets that do not extend `BaseSubmarketPlugin` are skipped. A per-submarket market-memory timestamp (`$catchrelease_soldFishPurgedAt_<submarket id>`) stops a second purge when the market reopens while time is paused. Restocks that vanilla runs without the listener call, such as `FoodShortageEvent`, leave fish until the next reported restock.
 - `Tackle.Fit.BOTH` describes compatibility; it is not a rig. Rig loops use `Fit.isRig()`.
 - Module ownership and module fitting are separate. Charge only when `isOwned()` is false; grants must both own and fit the module.
 - `ShopPricing` saves each generated `FishRequirement` in sector persistent data under `$catchrelease_shop_payments`, keyed by stat ID/target tier or module ID (shared across rigs). Shop refresh, schematic unlock, session undo and save/load must not reroll it. Named patterns prefer those used least by previous payments. If no catch is obtainable, the uncached null fish payment disables purchase; it does not waive the fish cost.
