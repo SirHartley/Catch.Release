@@ -43,6 +43,8 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
     private Color color = COLOR;
     private SpriteAPI sprite;
     private final Vector2f vertexPosition = new Vector2f();
+    private float[] startEdge = new float[7];
+    private float[] endEdge = new float[7];
 
     private static class Point {
 
@@ -118,6 +120,11 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
     @Override
     public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
         if (isExpired() || points.size() < 2 || viewport.getAlphaMult() <= 0f) return;
+
+        // lamps off draws nothing: skip the geometry, not just its alpha
+        SearchlightAbilityPlugin.BeamSnapshot beams = SearchlightAbilityPlugin.snapshotBeams();
+        if (beams.isEmpty()) return;
+
         if (sprite == null) sprite = SpriteLoader.getSprite("trail_foggy");
         glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_TEXTURE_BIT | GL_CURRENT_BIT);
         try {
@@ -127,7 +134,7 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glBegin(GL_QUADS);
             try {
-                renderTrail(viewport);
+                renderTrail(viewport, beams);
             } finally {
                 glEnd();
             }
@@ -137,7 +144,11 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
     }
 
     protected void renderTrail(ViewportAPI viewport) {
-        if (isExpired()) return;
+        renderTrail(viewport, SearchlightAbilityPlugin.snapshotBeams());
+    }
+
+    protected void renderTrail(ViewportAPI viewport, SearchlightAbilityPlugin.BeamSnapshot beams) {
+        if (isExpired() || beams.isEmpty()) return;
         float viewportAlpha = Math.max(0f, Math.min(1f, viewport.getAlphaMult()));
         for (int i = 1; i < points.size(); i++) {
             Point from = points.get(i - 1);
@@ -150,26 +161,38 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
             float nx = -dy / distance;
             float ny = dx / distance;
             int steps = Math.max(1, (int) Math.ceil(distance / LIGHT_SAMPLE_SPACING));
+            // neighbouring quads share an edge, so each edge is lit once and reused
+            edge(from, to, 0f, nx, ny, beams, viewportAlpha, startEdge);
             for (int step = 0; step < steps; step++) {
-                float start = (float) step / steps;
-                float end = (float) (step + 1) / steps;
-                edge(from, to, start, nx, ny, -1f, viewportAlpha);
-                edge(from, to, start, nx, ny, 1f, viewportAlpha);
-                edge(from, to, end, nx, ny, 1f, viewportAlpha);
-                edge(from, to, end, nx, ny, -1f, viewportAlpha);
+                edge(from, to, (float) (step + 1) / steps, nx, ny, beams, viewportAlpha, endEdge);
+                drawVertex(startEdge[0], startEdge[1], 0f, startEdge[6], startEdge[2]);
+                drawVertex(startEdge[3], startEdge[4], 1f, startEdge[6], startEdge[5]);
+                drawVertex(endEdge[3], endEdge[4], 1f, endEdge[6], endEdge[5]);
+                drawVertex(endEdge[0], endEdge[1], 0f, endEdge[6], endEdge[2]);
+                float[] swap = startEdge;
+                startEdge = endEdge;
+                endEdge = swap;
             }
         }
     }
 
-    private void edge(Point from, Point to, float fraction, float nx, float ny, float side, float alpha) {
+    // out: left x, y, alpha; right x, y, alpha; age
+    private void edge(Point from, Point to, float fraction, float nx, float ny,
+                      SearchlightAbilityPlugin.BeamSnapshot beams, float alpha, float[] out) {
         float born = from.born + (to.born - from.born) * fraction;
         float age = Math.max(0f, Math.min(1f, (time - born) / SECONDS));
         float radius = (WIDTH + (1f - WIDTH) * age) * 0.5f;
-        vertexPosition.set(from.at.x + (to.at.x - from.at.x) * fraction + nx * side * radius,
-                from.at.y + (to.at.y - from.at.y) * fraction + ny * side * radius);
-        float lit = SearchlightAbilityPlugin.getBeamVisibilityAt(vertexPosition);
-        drawVertex(vertexPosition.x, vertexPosition.y, (side + 1f) * 0.5f, age,
-                ALPHA * alphaMult * (1f - age) * alpha * lit);
+        float fade = ALPHA * alphaMult * (1f - age) * alpha;
+        float cx = from.at.x + (to.at.x - from.at.x) * fraction;
+        float cy = from.at.y + (to.at.y - from.at.y) * fraction;
+        for (int side = 0; side < 2; side++) {
+            float sign = side == 0 ? -1f : 1f;
+            vertexPosition.set(cx + nx * sign * radius, cy + ny * sign * radius);
+            out[side * 3] = vertexPosition.x;
+            out[side * 3 + 1] = vertexPosition.y;
+            out[side * 3 + 2] = fade * beams.getVisibilityAt(vertexPosition);
+        }
+        out[6] = age;
     }
 
     protected Color getColor() {
