@@ -97,6 +97,8 @@ public class BuriedMoteSpawner implements EveryFrameScript {
             if (buried.isExpired() || isLegendary(buried)) continue;
 
             if (Misc.getDistance(around, buried.getLocation()) > FishConstants.BURIED_CULL_RANGE) {
+                // removeEntity does not expire it, and an epic's trail renderer retires on expiry
+                buried.setExpired(true);
                 buried.getContainingLocation().removeEntity(buried);
             }
         }
