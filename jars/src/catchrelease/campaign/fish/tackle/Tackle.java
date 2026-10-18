@@ -107,7 +107,7 @@ public enum Tackle {
     },
     NEEDLE_SENSOR("Needle Sensor", Fit.SEARCHLIGHT,
             "While Breach Lights are off, hidden rare and epic patterns and dormant legendaries"
-                    + " occasionally produce faint ripple rings. Does not detect the Imposter."),
+                    + " occasionally produce faint ripple rings."),
     TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
             "Makes each Breach Light pause its sweep to follow a buried pattern briefly."
                     + " It then resumes sweeping and must cool down before locking on again.") {

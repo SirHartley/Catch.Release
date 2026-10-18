@@ -1,5 +1,6 @@
 package catchrelease.abilities.searchlight.scripts;
 
+import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.config.Setting;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -37,7 +38,7 @@ public class NeedleSensor {
 
     public static final float RADIUS = 100f;
     public static final float RIPPLE_SECONDS = 3.5f;
-    public static final Color RIPPLE_COLOR = new Color(160, 190, 205, 55);
+    public static final Color RIPPLE_COLOR = UnstableFabricRippleTerrainRenderer.BASE_RIPPLE_COLOR;
 
     private final SearchlightAbilityPlugin owner;
     private LocationAPI home;

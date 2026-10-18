@@ -11,19 +11,32 @@ scrapped
 
 todo / QA
 
-High prio
+Epic and legendary motes under searchlights don't show their trail while not "activated". Both should show their trail while not active to make hunting them easier (epics are never activated and thus never have a trail...).
+something about the lantern jack is broken, can't spawn them & they don't spawn naturally
+quorum "decoy spawning" after first catch attempt is way too agressive and tanks framerate. Get rid of that, we'll keep with the normal decoy behaviour without the extra ones the ability makes
+Needle sensor doesn't work
+"the false dawn brightens" and related labels should be shield colour or mote colour but never a random one? how did that even happen? Why are the labels green?
+range data should sometimes drop from uncommon salvage chests
 
+use patchlib to amend the neutrino detector to show a blue, red or purple spike to find rares, epics and legendaries respectively
 
+Lined --
 
-low prio
-legendary haunt equipment prerequisites / readiness eval via fisherman?
+Legendary Fish introductions
+- Yeah the fisherman needs to help with getting to those they are the most interesting part of the mod - best to have him give out exposition and a quest for them?
+- Explain that tugs help a bunch & that susburn is a trap
+- Explain what the neutrino does
+- Explain that you don't have enough upgrades or are ready
+- "help" with each fish after you failed the haunt completely once ("The False Dawn is best approached with a dedicated hunting fleet with solar shielding" ect)
 Fisherman impostor dialogue / fisherman (real) reaction / questioning
 
+Kanta
+> Each legendary aboard appears as its own entry in Kanta’s tribute list, so you always pick the exact fish. Picking it runs vanilla’s normal grant of protection.
+wrong- if you have multiple in cargo, should allow selecting one via cargo picker.
+if you only have one, show themed row.
+this extra option should always only be one extra option
+
 SFX
-
-when hunting for a mote to eat, lantern jack should - upon coming close to a target - slow down for 0.3s, then do a quick dash through the target mote. Upon hitting it, the mote should disassemble into randomly strewn-about "sub-motes", like an underwater bubble being popped, ejected perpendicular (circle) to the path of the dash, both sides.
-upon popping, play mote_pop.ogg (mono)
-
 Haunt soundtrack? Music?
 
 ---
