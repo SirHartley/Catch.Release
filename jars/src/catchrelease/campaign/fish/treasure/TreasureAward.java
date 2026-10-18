@@ -36,12 +36,12 @@ public class TreasureAward {
         StringBuilder out = new StringBuilder();
 
         for (Item item : items) {
-            if (out.length() > 0) out.append(", ");
+            if (!out.isEmpty()) out.append(", ");
 
             out.append(item.name);
             if (item.count > 1) out.append(" x").append(item.count);
         }
 
-        return out.length() == 0 ? "nothing" : out.toString();
+        return out.isEmpty() ? "nothing" : out.toString();
     }
 }

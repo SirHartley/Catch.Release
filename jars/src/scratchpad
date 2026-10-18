@@ -13,7 +13,14 @@ todo / QA
 
 use patchlib to amend the neutrino detector to show a blue, red or purple spike to find rares, epics and legendaries respectively
 
-Lined --
+Minigame
+Treasure display list is still rather terrible - should all have the same format:
+Left aligned: Icon + Name
+Right aligned: Quantity (if 1; show 1x)
+If name text > column size the quantity number should be in the first line
+
+Range data for treasure display should show as "Range data: FishName"
+
 
 Legendary Fish introductions
 - The fisherman needs to help with getting to those they are the most interesting part of the mod - best to have him give out exposition and a quest for them?
