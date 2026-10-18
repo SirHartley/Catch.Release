@@ -169,7 +169,8 @@ public class LegendaryShields {
 
         // the fish is gone in a blink; the word floats where the strike happened
         say(Global.getSector().getPlayerFleet(),
-                "The fish dives before the blast and resurfaces farther away.");
+                "The fish dives before the blast and resurfaces farther away.",
+                getPresentedColor(fish.getFishSpec(), mote));
 
         return true;
     }
@@ -190,10 +191,10 @@ public class LegendaryShields {
             say(Global.getSector().getPlayerFleet(), state.shieldUnits
                     + (state.shieldUnits == 1
                     ? " Splinter remains."
-                    : " Splinters remain."));
+                    : " Splinters remain."), SHIELD_BLUE);
         } else {
             say(Global.getSector().getPlayerFleet(),
-                    "The shield cracks.");
+                    "The shield cracks.", SHIELD_BLUE);
         }
     }
 
@@ -635,10 +636,16 @@ public class LegendaryShields {
 
     /** Chase feedback floats at the thing it happened to, never the message feed. */
     public static void say(SectorEntityToken at, String text) {
+        Color color = at != null && at.getCustomPlugin() instanceof FishEntityPlugin fish
+                ? getShieldColor(fish) : FishRarity.LEGENDARY.color;
+        say(at, text, color);
+    }
+
+    public static void say(SectorEntityToken at, String text, Color color) {
         if (at == null || at.isExpired()) at = Global.getSector().getPlayerFleet();
         if (at == null || !at.isVisibleToPlayerFleet()) return;
 
-        at.addFloatingText(text, Misc.getHighlightColor(), 1f);
+        at.addFloatingText(text, color, 1f);
         List<?> labels = (List<?>) ReflectionUtils.invoke(at, "getFloatingText");
         if (labels == null || labels.size() < 2) return;
         Object newest = labels.get(labels.size() - 1);

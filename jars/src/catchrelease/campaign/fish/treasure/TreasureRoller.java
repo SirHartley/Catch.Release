@@ -1,6 +1,9 @@
 package catchrelease.campaign.fish.treasure;
 
 import catchrelease.campaign.fish.constants.FishConstants;
+import catchrelease.campaign.fish.jobs.FishReward;
+import catchrelease.campaign.fish.jobs.FishRewardRoller;
+import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
@@ -67,6 +70,7 @@ public class TreasureRoller {
             case UNCOMMON:
                 if (hasShipTackle) awardHull(award, HullSize.CRUISER);
                 else awardCommon(award, cargo);
+                awardRangeData(award, MathUtils.getRandom());
                 break;
             case RARE:
                 if (hasShipTackle) awardHull(award, HullSize.CAPITAL_SHIP);
@@ -88,6 +92,19 @@ public class TreasureRoller {
         if (roll < 0.6f) awardCommodity(award, cargo);
         else if (roll < 0.8f) awardWeapon(award, cargo);
         else awardFighter(award, cargo);
+    }
+
+    protected static void awardRangeData(TreasureAward award, Random random) {
+        if (random.nextFloat() >= FishConstants.TREASURE_RANGE_DATA_CHANCE) return;
+
+        for (FishReward reward : FishRewardRoller.rollLocationData(random, 1, 0)) {
+            FishReward.LocationData data = (FishReward.LocationData) reward;
+            var spec = FishSpecLoader.getFishSpec(data.speciesId);
+            String description = data.describe();
+            data.grant();
+            award.items.add(new TreasureAward.Item(description,
+                    "graphics/icons/intel/remote_survey_data.png", 1, spec.rarity.color));
+        }
     }
 
     protected static void awardCommodity(TreasureAward award, CargoAPI cargo) {
