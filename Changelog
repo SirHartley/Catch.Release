@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
+Added - Crablobab sells a Party Horn once you own Celebration Charges, then a Crab Fanfare; each replaces the catch sound, switches in the Outfitter, and can be heard on its offer screen first
 Removed - A failed Quorum catch no longer scatters twelve extra decoys around the shell game
 Fixed - Needle Sensor ripples are brighter, larger and stay visible when zoomed out to where buried fish swim
 Fixed - Lantern Jack's feeding dash now runs through the mote and out the other side, and the burst it leaves is clearly visible

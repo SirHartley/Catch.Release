@@ -114,6 +114,12 @@
 	"catchrelease_minigame_success":[
 		{"file":"sounds/catchrelease/minigame/sucess2.ogg","pitch":1,"volume":0.8},
 	],
+	"catchrelease_minigame_crab_horn":[
+		{"file":"sounds/catchrelease/minigame/crab_celebration.ogg","pitch":1,"volume":0.8},
+	],
+	"catchrelease_minigame_crab_fanfare":[
+		{"file":"sounds/catchrelease/minigame/crab_fanfare.ogg","pitch":1,"volume":0.8},
+	],
 	"catchrelease_minigame_failure":[
 		{"file":"sounds/catchrelease/minigame/fail.ogg","pitch":0.8,"volume":0.8},
 	],

@@ -197,7 +197,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
 
     protected void advanceCaught(float amount) {
         if (result == null) {
-            CatchCelebration.playHook(FishConstants.SOUND_CAUGHT);
+            CatchCelebration.playHook(CrabWares.getActiveCatchSound());
             result = new CatchResultPanel(specimen, where, method);
 
             // filed beside the species log, after resolveTreasure, so the entry knows its bycatch
