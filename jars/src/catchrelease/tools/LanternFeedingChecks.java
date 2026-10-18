@@ -57,6 +57,7 @@ public final class LanternFeedingChecks {
         pursuit();
         buried();
         lunge();
+        loadedLunge();
         exclusions();
         call();
         calledMovement();
@@ -313,6 +314,24 @@ public final class LanternFeedingChecks {
             jack.advance(TICK);
             check(jack.getLungePhase() == FishEntityPlugin.LungePhase.NONE,
                     "losing the mote during the coil drops the lunge");
+        }
+    }
+
+    // a save restores transient fields to null, not to their initializers
+    private static void loadedLunge() {
+        try (var env = new LegendaryEscapeChecks.Environment()) {
+            var jack = env.real("lantern_jack");
+            LegendaryChases.getState("lantern_jack").shieldUnits = 0;
+            jack.at.set(0f, 0f);
+            jack.setSwimTarget(new Vector2f(0f, 3000f));
+            var meal = meal(env, FishEntityPlugin.LUNGE_RANGE + 200f, 0f);
+            ReflectionUtils.set(jack, "lungePhase", null, true);
+
+            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.NONE
+                    && LegendaryShields.getSpeedMult(jack) > 0f, "a loaded Jack reads no lunge");
+            for (int i = 0; i < 1200 && !meal.expired; i++) jack.advance(TICK);
+            check(meal.expired && LegendaryChases.getState("lantern_jack").shieldUnits == 1,
+                    "a loaded Jack still closes, coils and swallows");
         }
     }
 

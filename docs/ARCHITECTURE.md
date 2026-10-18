@@ -568,6 +568,8 @@ aimed `LUNGE_OVERRUN` past the mote so it passes through. Only the dash swallows
 a direction. The contact radius is `EAT_RANGE` grown by the previous frame's travel, because the
 test runs before the frame's movement. Losing the mote, a full stack, evasion or a dash that ends
 without contact clears the lunge; the phases scale with stored shells like every other Jack pace.
+The phase is transient and a loaded save leaves it null, not `NONE`; read it only through
+`getLungePhase()`. `LanternFeedingChecks.loadedLunge` covers a restored Jack.
 Each swallowed mote expires immediately
 and supplies one stored shell, up to three. At three it stops hunting, eating and
 calling. Pond stock, quest targets, held fish, legendaries and shield/phantom bodies
