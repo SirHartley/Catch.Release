@@ -84,6 +84,11 @@
 		{"file":"sounds/sfx_abilities/ability_emergency_signal_01.ogg","pitch":1,"volume":0.4},
 	],
 
+	# mono: played positionally at the popped mote
+	"catchrelease_legendary_mote_pop":[
+		{"file":"sounds/catchrelease/sfx/mote_pop.ogg","pitch":1,"volume":0.5},
+	],
+
 	#minigame
 
 	"catchrelease_minigame_loop":[

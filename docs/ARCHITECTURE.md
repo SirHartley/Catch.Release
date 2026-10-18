@@ -561,7 +561,14 @@ spends one. Empty shells do not regenerate with time, haunt activation or a fail
 catch. Abandoning the haunt restores the initial count; collision and display both use the
 stored count in `LegendaryShields.isShielded`. It hunts surfaced
 prey and lamp-revealed buried prey, surfacing the latter before pursuit. Pursuit
-uses a direct heading after hit evasion ends. Each swallowed mote expires immediately
+uses a direct heading after hit evasion ends. Inside `FishEntityPlugin.LUNGE_RANGE` (300 units)
+the approach becomes a two-stage lunge: a `LUNGE_COIL_SECONDS` 0.3-second coil at 0.6 pace, then a
+`LUNGE_DASH_SECONDS` 0.45-second dash at 5 pace along the heading taken when the dash starts,
+aimed `LUNGE_OVERRUN` past the mote so it passes through. Only the dash swallows, so every meal has
+a direction. The contact radius is `EAT_RANGE` grown by the previous frame's travel, because the
+test runs before the frame's movement. Losing the mote, a full stack, evasion or a dash that ends
+without contact clears the lunge; the phases scale with stored shells like every other Jack pace.
+Each swallowed mote expires immediately
 and supplies one stored shell, up to three. At three it stops hunting, eating and
 calling. Pond stock, quest targets, held fish, legendaries and shield/phantom bodies
 are excluded.
@@ -579,8 +586,8 @@ surfaced and swim toward Jack for at most 20 seconds, breaking off immediately a
 50 units. They then resume their normal destination, movement and dive schedule;
 they do not wait or follow. New call-spawned fish have a destination beyond Jack,
 so release does not leave them aimed at its center. `tools/LanternFeedingChecks`
-covers shield counts, shield-dependent movement, call limits, exclusions, release
-and ordinary movement.
+covers shield counts, shield-dependent movement, the lunge's stages and paces at 30/60/144 Hz,
+call limits, exclusions, release and ordinary movement.
 
 `LegendaryHaunt.getMantaLampAlpha(lamp)` gives each lamp an independent visual
 flicker phase using the identity of its stable aim vector, not its coordinates.

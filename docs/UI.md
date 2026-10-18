@@ -416,6 +416,16 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   Beam validity reuses the lamp ability's cached pond proximity; vertex sampling
   must not rescan terrain. Cache lifetime is documented under
   [abilities](ARCHITECTURE.md#abilities).
+- A mote swallowed by Lantern Jack leaves a burst drawn by `FishEntityPlugin.renderPop`: its own
+  `fusion_lamp_glow` sprite in its own rarity colour, additively blended, thrown out to both sides
+  of the dash heading and dragged to a halt, with one `Disc` flash at the origin. It is owned by
+  the Jack, not the mote, because the mote is expired on the same frame and an effect owned by it
+  would never draw. Sub-mote positions are derived from one clock rather than integrated, so there
+  is no per-frame state to drift or leak and a pause holds the burst in place. The sub-motes are
+  visual only; a real entity here would be edible and harpoonable. It uses the same
+  `getShieldAlpha` lamp-and-viewport fade as the shields, so it is lamp-only like the rest of a
+  legendary's extras, and sets colour, size, alpha and blend on the shared sprite before every
+  draw.
 - Legendary floating notices use `LegendaryShields.say`. It keeps vanilla's renderer
   and lifetime, but stacks older labels above newer ones by the font height plus four
   screen units, converted through the current viewport. Older labels drift upward

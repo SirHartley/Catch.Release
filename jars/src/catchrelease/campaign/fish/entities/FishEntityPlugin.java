@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.entities;
 
+import catchrelease.config.FishingSounds;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishMotion;
@@ -31,6 +32,13 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 public class FishEntityPlugin extends BaseCustomEntityPlugin {
+
+    /** Stages of the Lantern Jack's feeding lunge. Driven by {@link LegendaryShields#advanceEater}. */
+    public enum LungePhase {
+        NONE,
+        COIL,
+        DASH
+    }
 
     public static final String MOTE_TAG = "catchrelease_mote";
     private static final float GLOW_SIZE = 25f;
@@ -80,6 +88,25 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private static final float EVADE_LEG = 700f;
     private static final float JACK_SPEED_LOSS_PER_SHELL = 0.15f;
     private static final float JACK_AGILITY_LOSS_PER_SHELL = 0.2f;
+
+    // the feeding lunge: close, coil, then run the line through the mote
+    public static final float LUNGE_RANGE = 300f;
+    public static final float LUNGE_COIL_SECONDS = 0.3f;
+    public static final float LUNGE_DASH_SECONDS = 0.45f;
+    private static final float LUNGE_COIL_MULT = 0.6f;
+    private static final float LUNGE_DASH_MULT = 5f;
+    private static final float LUNGE_OVERRUN = 400f;
+
+    // the burst left where a mote came apart
+    private static final int POP_MOTES = 14;
+    private static final float POP_SECONDS = 0.55f;
+    private static final float POP_SPEED_MIN = 160f;
+    private static final float POP_SPEED_MAX = 380f;
+    private static final float POP_DRAG_TAU = 0.18f;
+    private static final float POP_SPREAD_DEG = 35f;
+    private static final float POP_DASH_CARRY = 0.25f;
+    private static final float POP_SIZE = 9f;
+    private static final float POP_FLASH_SIZE = 30f;
 
     private static final float FLARE_COOLDOWN_SECONDS = 30f;
     private static final float FLARE_RING_SECONDS = 2f;
@@ -185,6 +212,19 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient float jinkSign = 1f;
     private transient boolean hunting;
 
+    // the lunge, and the burst it leaves behind. Both read as idle after loading, which is
+    // correct: the next feeding tick re-finds the prey and starts the approach again.
+    private transient LungePhase lungePhase = LungePhase.NONE;
+    private transient float lungeLeft;
+    private transient float lungeHeading;
+    private transient float popLeft;
+    private transient Vector2f popOrigin;
+    private transient Color popColor;
+    private transient float popHeading;
+    private transient float[] popAngle;
+    private transient float[] popSpeed;
+    private transient float[] popSize;
+
     // the flare call: the Jack's ring vfx and, on any mote, being called in by one
     private transient float flareCooldown;
     private transient float flareRing;
@@ -230,6 +270,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public void refreshColor() {
         this.color = resolveColor();
+    }
+
+    public Color getMoteColor() {
+        return color;
     }
 
     public FishSpec getFishSpec() {
@@ -321,6 +365,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (flareCooldown > 0f) flareCooldown -= amount * Setting.JACK_CALL_FREQUENCY.mult()
                 / Setting.HUNT_RECOVERY.mult();
         if (flareRing > 0f) flareRing -= amount;
+        if (lungeLeft > 0f) lungeLeft -= amount;
+        if (popLeft > 0f) popLeft -= amount;
 
         advanceLampFade(amount);
 
@@ -359,7 +405,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             longlinerSchool.swim(amount);
             return;
         }
-        LegendaryShields.advanceEater(this);
+        LegendaryShields.advanceEater(this, amount);
         if (LegendaryShields.isProwler(this)) advanceProwl(amount);
         if (LegendaryShields.isFleeing(this)) advanceFleeMode();
         if (QuorumShellGame.advance(this, amount)) return;
@@ -674,6 +720,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         stunLeft = slowLeft = slowStrength = 0f;
         evasiveLeft = jinkLeft = prowlLeft = 0f;
         hunting = false;
+        clearLunge();
+        popLeft = 0f;
         stopLure();
         diving = false;
         diveScheduled = false;
@@ -736,8 +784,84 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public float getJackSpeedMult() {
-        float pace = evasiveLeft > 0f ? EVADE_MULT : hunting ? HUNT_MULT : PROWL_MULT;
+        float pace = switch (lungePhase) {
+            case COIL -> LUNGE_COIL_MULT;
+            case DASH -> LUNGE_DASH_MULT;
+            case NONE -> evasiveLeft > 0f ? EVADE_MULT : hunting ? HUNT_MULT : PROWL_MULT;
+        };
         return pace * (1f - JACK_SPEED_LOSS_PER_SHELL * LegendaryShields.getStackedRings(this));
+    }
+
+    public LungePhase getLungePhase() {
+        return lungePhase;
+    }
+
+    /**
+     * Holds up short of the mote for {@link #LUNGE_COIL_SECONDS}. The heading is not fixed yet:
+     * the line is taken when the dash starts, so a mote that drifts during the coil is still
+     * on it.
+     */
+    public void startLungeCoil() {
+        lungePhase = LungePhase.COIL;
+        lungeLeft = LUNGE_COIL_SECONDS;
+    }
+
+    /** Runs the frozen line through the mote and out the far side. */
+    public void startLungeDash(float headingDeg) {
+        lungePhase = LungePhase.DASH;
+        lungeLeft = LUNGE_DASH_SECONDS;
+        lungeHeading = headingDeg;
+        keepSurfaced(LUNGE_DASH_SECONDS);
+    }
+
+    public float getLungeHeading() {
+        return lungeHeading;
+    }
+
+    public boolean isLungeElapsed() {
+        return lungeLeft <= 0f;
+    }
+
+    public void clearLunge() {
+        lungePhase = LungePhase.NONE;
+        lungeLeft = 0f;
+    }
+
+    /** How far beyond the mote the dash aims, so it passes through rather than stopping on it. */
+    public Vector2f getLungeOverrun() {
+        return MathUtils.getPointOnCircumference(entity.getLocation(),
+                LUNGE_RANGE + LUNGE_OVERRUN, lungeHeading);
+    }
+
+    /**
+     * Seeds the burst a swallowed mote leaves, and sounds it.
+     * <p>
+     * Held on the Jack rather than on the mote because the mote is expired on the same frame;
+     * an effect owned by it would never draw. The sub-motes are visual only - a real entity here
+     * would be edible and harpoonable.
+     */
+    public void popMote(Vector2f at, float headingDeg, Color moteColor) {
+        popLeft = POP_SECONDS;
+        popOrigin = new Vector2f(at);
+        popHeading = headingDeg;
+        popColor = moteColor == null ? color : moteColor;
+
+        popAngle = new float[POP_MOTES];
+        popSpeed = new float[POP_MOTES];
+        popSize = new float[POP_MOTES];
+        for (int i = 0; i < POP_MOTES; i++) {
+            // half to each side of the dash, scattered around the perpendicular rather than
+            // laid along it: a popped bubble's skin, not two lines
+            float side = i % 2 == 0 ? 90f : -90f;
+            popAngle[i] = headingDeg + side
+                    + MathUtils.getRandomNumberInRange(-POP_SPREAD_DEG, POP_SPREAD_DEG);
+            popSpeed[i] = MathUtils.getRandomNumberInRange(POP_SPEED_MIN, POP_SPEED_MAX);
+            popSize[i] = POP_SIZE * MathUtils.getRandomNumberInRange(0.6f, 1.4f);
+        }
+
+        if (entity.isInCurrentLocation()) {
+            FishingSounds.playSound(LegendaryShields.SOUND_MOTE_POP, 1f, 1f, at, Misc.ZERO);
+        }
     }
 
     private float getJackAgilityMult() {
@@ -1103,6 +1227,53 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         if (!isFromPond()) externalRender(viewport);
 
         renderShield(viewport);
+        renderPop(viewport);
+    }
+
+    /**
+     * The mote coming apart: its own glow sprite in its own colour, thrown out to both sides of
+     * the line the dash took and dragged to a halt.
+     * <p>
+     * Positions are derived from one clock rather than integrated, so there is no per-frame state
+     * to drift or leak, and a pause simply holds the burst where it is. Exponential drag gives
+     * {@code v * tau * (1 - e^-t/tau)} of travel.
+     */
+    protected void renderPop(ViewportAPI viewport) {
+        if (popLeft <= 0f || popOrigin == null || popAngle == null) return;
+
+        // the same lamp-and-viewport fade the shields use: a legendary's extras are lamp-only
+        float alpha = getShieldAlpha(viewport);
+        if (alpha <= 0f) return;
+
+        if (sprite == null) sprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
+
+        float t = POP_SECONDS - popLeft;
+        float p = t / POP_SECONDS;
+        float fade = (1f - p) * (1f - p) * alpha;
+        float travel = POP_DRAG_TAU * (1f - (float) Math.exp(-t / POP_DRAG_TAU));
+
+        // the skin of the bubble is gone first; the flash marks where it was
+        Disc.draw(popOrigin.x, popOrigin.y, POP_FLASH_SIZE * (0.4f + p),
+                popColor, fade * 0.5f, 0f, true);
+
+        sprite.setColor(popColor);
+        sprite.setAdditiveBlend();
+
+        Vector2f carry = Misc.getUnitVectorAtDegreeAngle(popHeading);
+        for (int i = 0; i < popAngle.length; i++) {
+            float reach = popSpeed[i] * travel;
+            Vector2f at = MathUtils.getPointOnCircumference(popOrigin, reach, popAngle[i]);
+            // the mote was pushed through, so the pieces keep a little of the dash
+            at.x += carry.x * reach * POP_DASH_CARRY;
+            at.y += carry.y * reach * POP_DASH_CARRY;
+
+            float size = popSize[i] * (1f - p);
+            if (size <= 0f) continue;
+
+            sprite.setSize(size, size);
+            sprite.setAlphaMult(fade);
+            sprite.renderAtCenter(at.x, at.y);
+        }
     }
 
     protected float getShieldAlpha(ViewportAPI viewport) {
