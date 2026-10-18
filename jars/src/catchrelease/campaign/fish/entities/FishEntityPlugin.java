@@ -214,6 +214,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     // the lunge, and the burst it leaves behind. Both read as idle after loading, which is
     // correct: the next feeding tick re-finds the prey and starts the approach again.
+    // transient field initializers do not run on load, so read this through getLungePhase()
     private transient LungePhase lungePhase = LungePhase.NONE;
     private transient float lungeLeft;
     private transient float lungeHeading;
@@ -784,7 +785,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public float getJackSpeedMult() {
-        float pace = switch (lungePhase) {
+        float pace = switch (getLungePhase()) {
             case COIL -> LUNGE_COIL_MULT;
             case DASH -> LUNGE_DASH_MULT;
             case NONE -> evasiveLeft > 0f ? EVADE_MULT : hunting ? HUNT_MULT : PROWL_MULT;
@@ -793,7 +794,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public LungePhase getLungePhase() {
-        return lungePhase;
+        return lungePhase == null ? LungePhase.NONE : lungePhase;
     }
 
     /**
