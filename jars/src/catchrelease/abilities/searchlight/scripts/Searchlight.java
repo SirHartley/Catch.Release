@@ -448,35 +448,61 @@ public class Searchlight implements EveryFrameScript {
     }
 
     public float getLitStrength(Vector2f at) {
-        float size = getArea();
+        return snapshot().getLitStrength(at);
+    }
 
-        if (!isFanned()) {
-            float distance = Misc.getDistance(currentRenderLoc, at);
-            if (distance > size) return 0f;
+    public Beam snapshot() {
+        return new Beam(this);
+    }
 
-            float inBeam = 1f - MathUtils.clamp(distance / Math.max(1f, size), 0f, 1f);
+    // One frame's beam geometry, so per-point queries skip the upgrade, tackle and ownership lookups.
+    public static final class Beam {
 
-            return inBeam * inBeam;
+        protected final Vector2f loc;
+        protected final Vector2f origin;
+        protected final float size;
+        protected final boolean fanned;
+        protected final float halfAngle;
+        protected final float length;
+        protected final float facing;
+
+        protected Beam(Searchlight light) {
+            loc = new Vector2f(light.currentRenderLoc);
+            origin = new Vector2f(light.getOrigin());
+            size = getArea();
+            fanned = isFanned();
+            halfAngle = FAN_HALF_ANGLE * (size / AREA_FALLBACK);
+            length = Misc.getDistance(origin, loc) + size;
+            facing = Misc.getAngleInDegrees(origin, loc);
         }
 
-        Vector2f origin = getOrigin();
+        public Vector2f getLoc() {
+            return loc;
+        }
 
-        float length = Misc.getDistance(origin, currentRenderLoc) + size;
-        if (length <= 1f) return 0f;
+        public float getLitStrength(Vector2f at) {
+            if (!fanned) {
+                float distance = Misc.getDistance(loc, at);
+                if (distance > size) return 0f;
 
-        float distance = Misc.getDistance(origin, at);
-        if (distance > length) return 0f;
+                float inBeam = 1f - MathUtils.clamp(distance / Math.max(1f, size), 0f, 1f);
 
-        float off = Math.abs(Misc.getAngleDiff(
-                Misc.getAngleInDegrees(origin, currentRenderLoc),
-                Misc.getAngleInDegrees(origin, at)));
+                return inBeam * inBeam;
+            }
 
-        if (off > getFanHalfAngle()) return 0f;
+            if (length <= 1f) return 0f;
 
-        float across = 1f - off / getFanHalfAngle();
-        float along = 1f - MathUtils.clamp(distance / length, 0f, 1f);
+            float distance = Misc.getDistance(origin, at);
+            if (distance > length) return 0f;
 
-        return across * across * (FAN_TIP_STRENGTH + (1f - FAN_TIP_STRENGTH) * along);
+            float off = Math.abs(Misc.getAngleDiff(facing, Misc.getAngleInDegrees(origin, at)));
+            if (off > halfAngle) return 0f;
+
+            float across = 1f - off / halfAngle;
+            float along = 1f - MathUtils.clamp(distance / length, 0f, 1f);
+
+            return across * across * (FAN_TIP_STRENGTH + (1f - FAN_TIP_STRENGTH) * along);
+        }
     }
 
     public float getSize() {

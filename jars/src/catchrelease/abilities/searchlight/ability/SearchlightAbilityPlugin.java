@@ -123,18 +123,57 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     }
 
     public static float getBeamVisibilityAt(Vector2f at) {
+        return snapshotBeams().getVisibilityAt(at);
+    }
+
+    // Take once per render pass and query per point; the lookups behind it are constant within a frame.
+    public static BeamSnapshot snapshotBeams() {
         CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
-        if (fleet == null || at == null
-                || !(fleet.getAbility(ABILITY_ID) instanceof SearchlightAbilityPlugin lamps)
-                || !lamps.isRuntimeCurrent()) return 0f;
-        float best = 0f;
+        if (fleet == null || !(fleet.getAbility(ABILITY_ID) instanceof SearchlightAbilityPlugin lamps)
+                || !lamps.isRuntimeCurrent()) return BeamSnapshot.EMPTY;
+
+        List<Searchlight.Beam> beams = new ArrayList<>();
+        List<Float> alphas = new ArrayList<>();
         for (Searchlight light : lamps.activeSearchlights) {
             if (!light.isRuntimeCurrent()) continue;
-            float reveal = Math.min(1f, light.getLitStrength(at) * 3f);
+
             float visible = catchrelease.campaign.fish.legendary.LegendaryHaunt.getMantaLampAlpha(light.getRenderLoc());
-            best = Math.max(best, reveal * visible);
+            if (visible <= 0f) continue;
+
+            beams.add(light.snapshot());
+            alphas.add(visible);
         }
-        return best;
+
+        return beams.isEmpty() ? BeamSnapshot.EMPTY : new BeamSnapshot(beams, alphas);
+    }
+
+    public static final class BeamSnapshot {
+
+        public static final BeamSnapshot EMPTY = new BeamSnapshot(List.of(), List.of());
+
+        protected final Searchlight.Beam[] beams;
+        protected final float[] alphas;
+
+        protected BeamSnapshot(List<Searchlight.Beam> beams, List<Float> alphas) {
+            this.beams = beams.toArray(new Searchlight.Beam[0]);
+            this.alphas = new float[alphas.size()];
+            for (int i = 0; i < this.alphas.length; i++) this.alphas[i] = alphas.get(i);
+        }
+
+        public boolean isEmpty() {
+            return beams.length == 0;
+        }
+
+        public float getVisibilityAt(Vector2f at) {
+            if (at == null) return 0f;
+
+            float best = 0f;
+            for (int i = 0; i < beams.length; i++) {
+                float reveal = Math.min(1f, beams[i].getLitStrength(at) * 3f);
+                best = Math.max(best, reveal * alphas[i]);
+            }
+            return best;
+        }
     }
 
     @Override

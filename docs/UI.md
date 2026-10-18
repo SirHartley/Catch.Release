@@ -410,8 +410,13 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   fully faded dive stops sampling, so the strip breaks across the dive.
   Quads are subdivided at most four world units apart; each vertex uses current
   spot/fan coverage and that lamp's Manta flicker, not stored mote visibility or
-  retained contact marks. Lamps off means no visible trail. Viewport alpha and
-  culling still apply. Pause freezes sampling and ageing; GL and shared sprite
+  retained contact marks. `render` takes `SearchlightAbilityPlugin.snapshotBeams()`
+  once per pass. Each `Searchlight.Beam` freezes that frame's position, area, fan
+  state and Manta alpha, so vertices only do distance and angle maths. Neighbouring
+  quads reuse their shared edge. Keep upgrade, tackle, ownership and haunt lookups
+  out of the per-vertex path: profiling showed them taking over 90% of trail
+  render time. Lamps off means no visible trail, and an empty snapshot skips the
+  geometry entirely. Viewport alpha and culling still apply. Pause freezes sampling and ageing; GL and shared sprite
   state are preserved. No MagicLib trail registration remains for these motes.
   Beam validity reuses the lamp ability's cached pond proximity; vertex sampling
   must not rescan terrain. Cache lifetime is documented under
