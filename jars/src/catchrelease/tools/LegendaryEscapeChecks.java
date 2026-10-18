@@ -41,10 +41,12 @@ public final class LegendaryEscapeChecks {
         final Vector2f offset = new Vector2f(0f, 25f);
         final TextSize label = new TextSize();
         final String text;
+        final java.awt.Color color;
 
-        Notice(SectorEntityToken entity, String text) {
+        Notice(SectorEntityToken entity, String text, java.awt.Color color) {
             this.entity = entity;
             this.text = text;
+            this.color = color;
         }
     }
 
@@ -107,7 +109,7 @@ public final class LegendaryEscapeChecks {
                 case "isInCurrentLocation" -> false;
                 case "getFloatingText" -> notices.isEmpty() ? null : notices;
                 case "addFloatingText" -> {
-                    if (visible) notices.add(new Notice((SectorEntityToken) p, (String) a[0]));
+                    if (visible) notices.add(new Notice((SectorEntityToken) p, (String) a[0], (java.awt.Color) a[1]));
                     yield null;
                 }
                 default -> throw new AssertionError(m);
@@ -633,6 +635,8 @@ public final class LegendaryEscapeChecks {
             fish.at.set(700f, 900f);
             check(fish.notices.size() == 2 && fish.notices.stream().allMatch(n -> n.entity == fish.getMote()),
                     "other legendary labels retain vanilla entity following");
+            check(fish.notices.stream().allMatch(n -> n.color.equals(LegendaryShields.getShieldColor(fish))),
+                    "deflections use the fish shield color rather than a UI highlight");
         }
     }
 
@@ -671,6 +675,22 @@ public final class LegendaryEscapeChecks {
     }
 
     private static void labelSpacing() {
+        try (Environment env = new Environment()) {
+            for (String id : List.of("false_dawn", "slipstream_moray", "lantern_jack", "longliner", "quorum", MantaFormationModule.SPECIES)) {
+                Fish fish = env.real(id);
+                LegendaryShields.say(fish.getMote(), "Deflected");
+                check(fish.notices.get(0).color.equals(LegendaryShields.getShieldColor(fish)),
+                        "notice matches its species shield color");
+            }
+            Fish mine = env.real("mine-anchor");
+            mine.plugin = null;
+            LegendaryShields.say(mine.getMote(), "The False Dawn brightens", LegendaryShields.SHIELD_ORANGE);
+            check(mine.notices.get(0).color.equals(LegendaryShields.SHIELD_ORANGE),
+                    "mine-anchored recharge retains the Dawn shield color");
+            LegendaryShields.say(mine.getMote(), "Decoy. The school reforms.");
+            check(mine.notices.get(1).color.equals(FishRarity.LEGENDARY.color),
+                    "non-fish anchors fall back to legendary mote color");
+        }
         for (float zoom : new float[]{0.5f, 1f, 3f}) try (Environment env = new Environment()) {
             env.zoom = zoom;
             Fish jack = env.real("lantern_jack");

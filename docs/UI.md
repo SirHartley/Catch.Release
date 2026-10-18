@@ -393,8 +393,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   The engine advances custom entities through the unpaused location update
   (`CampaignEngine.advance` / `CustomCampaignEntity.advance`, 0.98a-RC8).
   Full encounter resets are covered in [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishlegendary).
-- False Dawn's shield mines and couriers share `LegendaryShields.SHIELD_GREEN`.
-  `DawnShieldTransfer` draws a white-centred glow, a bounded green trail and an
+- False Dawn's shield mines and couriers share `LegendaryShields.SHIELD_ORANGE`.
+  `DawnShieldTransfer` draws a white-centred glow, a trail in that colour and an
   arrival ring using `Disc`, which preserves GL state. It remains visible outside
   lamp beams; the expanding render range follows it away from the stationary mine.
   Viewport alpha/culling still apply, and pause freezes movement and arrival fade.
@@ -431,8 +431,12 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   `getShieldAlpha` lamp-and-viewport fade as the shields, so it is lamp-only like the rest of a
   legendary's extras, and sets colour, size, alpha and blend on the shared sprite before every
   draw.
-- Legendary floating notices use `LegendaryShields.say`. It keeps vanilla's renderer
-  and lifetime, but stacks older labels above newer ones by the font height plus four
+- Legendary floating notices use `LegendaryShields.say` and the fish's shield
+  colour, never the generic UI highlight. Mine-anchored
+  recharge passes the mine/shield colour explicitly; Quorum escort updates use its
+  blue shield colour even at the player fleet. Other non-fish anchors and the
+  Imposter alert use the legendary mote colour.
+  It keeps vanilla's renderer and lifetime, but stacks older labels above newer ones by the font height plus four
   screen units, converted through the current viewport. Older labels drift upward
   first, away from new notices. This
   covers shield hits, the Lantern call, feeding, Quorum feedback and the Imposter alert.

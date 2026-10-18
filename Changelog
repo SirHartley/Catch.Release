@@ -17,6 +17,7 @@ Removed - Legendary tribute at Kanta's Den is disabled until its placeholder dia
 Fixed - 13 species, including the Dopefish and several legendaries, now face the way they swim in aquarium tanks
 
 Legendaries
+Fixed - Legendary notices use their shield or mote colour instead of a generic UI highlight
 Added - Lantern Jack now coils for 0.3 seconds within 300 units of a mote, then dashes through it to feed
 Added - A mote swallowed by Lantern Jack bursts into sub-motes thrown out to both sides of the dash, with a new pop sound
 
