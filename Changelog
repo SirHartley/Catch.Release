@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
+Fixed - Lantern Jack's feeding dash now runs through the mote and out the other side, and the burst it leaves is clearly visible
 Removed - A failed Quorum catch no longer scatters twelve extra decoys around the shell game
 Fixed - Needle Sensor ripples are brighter, larger and stay visible when zoomed out to where buried fish swim
 Fixed - Loading a save with Lantern Jack surfaced in the current system no longer crashes the game

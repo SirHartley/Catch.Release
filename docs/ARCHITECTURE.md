@@ -563,11 +563,15 @@ stored count in `LegendaryShields.isShielded`. It hunts surfaced
 prey and lamp-revealed buried prey, surfacing the latter before pursuit. Pursuit
 uses a direct heading after hit evasion ends. Inside `FishEntityPlugin.LUNGE_RANGE` (300 units)
 the approach becomes a two-stage lunge: a `LUNGE_COIL_SECONDS` 0.3-second coil at 0.6 pace, then a
-`LUNGE_DASH_SECONDS` 0.45-second dash at 5 pace along the heading taken when the dash starts,
-aimed `LUNGE_OVERRUN` past the mote so it passes through. Only the dash swallows, so every meal has
-a direction. The contact radius is `EAT_RANGE` grown by the previous frame's travel, because the
-test runs before the frame's movement. Losing the mote, a full stack, evasion or a dash that ends
-without contact clears the lunge; the phases scale with stored shells like every other Jack pace.
+dash at 5 pace along the heading taken when the dash starts. The dash commits to that mote and to a
+fixed exit `LUNGE_OVERRUN` (180 units) past it, and steers beyond the exit so arrival never brakes
+it. The mote is swallowed when the Jack's centre crosses it within `LUNGE_SWALLOW_WIDTH` of the
+line. The check runs before the frame's move, so it is at most one frame late. The dash then runs on
+to the exit, ending there or at the `LUNGE_DASH_SECONDS` 1.2-second cap. It is handled before the
+stack and prey checks, so a swallow that fills the stack or leaves no prey cannot stop it on the
+mote, and it counts as pursuit (no wander or mode multiplier). Only the dash swallows, so every meal
+has a direction. A mote that dodges the line is missed. Losing the mote during the coil, a full
+stack, or evasion clears the lunge; the phases scale with stored shells like every other Jack pace.
 The phase is transient and a loaded save leaves it null, not `NONE`; read it only through
 `getLungePhase()`. `LanternFeedingChecks.loadedLunge` covers a restored Jack.
 Each swallowed mote expires immediately

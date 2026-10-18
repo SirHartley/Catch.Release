@@ -427,10 +427,12 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   the Jack, not the mote, because the mote is expired on the same frame and an effect owned by it
   would never draw. Sub-mote positions are derived from one clock rather than integrated, so there
   is no per-frame state to drift or leak and a pause holds the burst in place. The sub-motes are
-  visual only; a real entity here would be edible and harpoonable. It uses the same
-  `getShieldAlpha` lamp-and-viewport fade as the shields, so it is lamp-only like the rest of a
-  legendary's extras, and sets colour, size, alpha and blend on the shared sprite before every
-  draw.
+  visual only; a real entity here would be edible and harpoonable. Eighteen pieces spread up to
+  about 280 units over 0.9 seconds, each with a 0.35× bright core, fading linearly. Its brightness is
+  the lamp at the burst (`getBeamStrengthAt(popOrigin)` × 3, clamped) times viewport alpha, not the
+  Jack's lamp fade, because the Jack has run on. `getRenderRange` covers the burst while it lasts,
+  since the engine culls by the Jack's position. It sets colour, size, alpha and blend on the shared
+  sprite before every draw.
 - Legendary floating notices use `LegendaryShields.say`. It keeps vanilla's renderer
   and lifetime, but stacks older labels above newer ones by the font height plus four
   screen units, converted through the current viewport. Older labels drift upward
