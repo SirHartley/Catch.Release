@@ -44,6 +44,9 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
 
     public static final FishRarity[] SHOWN = {FishRarity.RARE, FishRarity.EPIC, FishRarity.LEGENDARY};
 
+    // the rare rarity blue is too dark against space and next to the cyan ring, so its spikes are tinted toward white
+    public static final float RARE_LIFT = 0.35f;
+
     protected static class Ping {
 
         final float angle;
@@ -180,7 +183,7 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
         GL11.glEnable(GL11.GL_BLEND);
 
         for (int i = 0; i < SHOWN.length; i++) {
-            if (data[i] != null) renderBand(player, data[i], SHOWN[i].color, level, alphaMult);
+            if (data[i] != null) renderBand(player, data[i], getTint(SHOWN[i]), level, alphaMult);
         }
 
         GL11.glPopMatrix();
@@ -248,6 +251,10 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
         }
     }
 
+    protected static Color getTint(FishRarity rarity) {
+        return rarity == FishRarity.RARE ? Misc.interpolateColor(rarity.color, Color.WHITE, RARE_LIFT) : rarity.color;
+    }
+
     protected void playPingSound(CampaignFleetAPI player, Ping ping) {
         Vector2f at = Misc.getUnitVectorAtDegreeAngle(ping.angle);
         at.scale(1000f + (1f - Math.min(1f, ping.grav / 200f)) * 1450f);
@@ -291,7 +298,7 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
         return switch (rarity) {
             case LEGENDARY -> 300f;
             case EPIC -> 220f;
-            default -> 160f;
+            default -> 200f;
         };
     }
 
