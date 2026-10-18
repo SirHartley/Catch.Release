@@ -478,7 +478,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 
 | File | Owner / connection |
 |---|---|
-| `CrabWares.java` | Stock, prices, ownership, curio switches, fallback bass and last explosive target; industry plans count as owned when held or learned. |
+| `CrabWares.java` | Stock, prices, prerequisites (`isOffered`), ownership, curio switches, the catch sound, fallback bass and last explosive target; industry plans count as owned when held or learned. |
 | `CrabBackdrops.java` | Rotates one backdrop per port from `backdrops.csv`. |
 
 ### `campaign/fish/tackle`
@@ -891,6 +891,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - Upgrade tiers and modules granted outside the shop still go through `ShopEntry.grant()` so a running ability is stopped and restarted with its new values.
 - A curio is a switch, not a purchase. Its shop price is null, it never becomes “done,” and the button toggles it.
 - Celebration Charges are purchased from Crablobab and switched in the outfitter. Player settings scale the celebration's visuals; they do not grant or equip it.
+- Party Horn is offered once Celebration Charges are owned, and Crab Fanfare once the horn is owned; both are curios. `CrabWares.getActiveCatchSound()` picks the minigame catch sound: Fanfare if switched on, then Horn, then `SOUND_CAUGHT`. The offer screens' sample options run `CatchReleaseCMD crabPlay`, whose row has no options, so `FireBest` leaves the current menu in place.
 - Abilities read tuning values when activated. Any code that changes their upgrade or module inputs must restart the affected running ability.
 - Needle Sensor is a stocked, schematic-gated Lens Array. It uses the normal module reward, fitting and category-icon paths. Its controller and rings are transient. Vanilla registers abilities as entity scripts even when off; the existing callback supplies the passive timer, with no new campaign script or sector scan.
 - `StatIds.getAbilityId()` uses an explicit map. Do not infer the ability from a stat-name prefix.

@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.crab;
 
 import catchrelease.campaign.fish.colony.BreachConservatory;
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
@@ -37,6 +38,61 @@ public enum CrabWares {
         @Override
         public boolean isSwitchable() {
             return true;
+        }
+    },
+    PARTY_HORN("Party Horn", 5000, 3,
+            "Plays a party horn instead of the usual catch sound. Cosmetic only.") {
+        @Override
+        public boolean isOffered() {
+            return CELEBRATION.isOwned();
+        }
+
+        @Override
+        public boolean isOwned() {
+            return isBought(name());
+        }
+
+        @Override
+        public void grant() {
+            markBought(name());
+        }
+
+        @Override
+        public boolean isSwitchable() {
+            return true;
+        }
+
+        @Override
+        public String getCatchSound() {
+            return FishConstants.SOUND_CAUGHT_HORN;
+        }
+    },
+    FANFARE("Crab Fanfare", 10000, 4,
+            "Plays a crab fanfare instead of the usual catch sound. Takes priority over the Party Horn."
+                    + " Cosmetic only.") {
+        @Override
+        public boolean isOffered() {
+            return PARTY_HORN.isOwned();
+        }
+
+        @Override
+        public boolean isOwned() {
+            return isBought(name());
+        }
+
+        @Override
+        public void grant() {
+            markBought(name());
+        }
+
+        @Override
+        public boolean isSwitchable() {
+            return true;
+        }
+
+        @Override
+        public String getCatchSound() {
+            return FishConstants.SOUND_CAUGHT_FANFARE;
         }
     },
     EARMUFFS("Earmuffs", 8000, 2,
@@ -137,6 +193,14 @@ public enum CrabWares {
         return false;
     }
 
+    public boolean isOffered() {
+        return true;
+    }
+
+    public String getCatchSound() {
+        return null;
+    }
+
     public boolean isOn() {
         if (!isOwned()) return false;
 
@@ -191,10 +255,17 @@ public enum CrabWares {
 
     public static boolean isAnythingLeft() {
         for (CrabWares ware : values()) {
-            if (!ware.isOwned()) return true;
+            if (ware.isOffered() && !ware.isOwned()) return true;
         }
 
         return false;
+    }
+
+    public static String getActiveCatchSound() {
+        if (FANFARE.isOn()) return FANFARE.getCatchSound();
+        if (PARTY_HORN.isOn()) return PARTY_HORN.getCatchSound();
+
+        return FishConstants.SOUND_CAUGHT;
     }
 
     public static boolean hasConservatoryPlans() {
