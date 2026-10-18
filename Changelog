@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
+Changed - Contract hunters are sent less often for a single harpoon hit, but refusing a repair bill can now bring them; paying the patrol later calls them off, and being seen with your transponder on after a dark hit and then running can bring them too
 Changed - Refusing a harpooned crew's repair bill no longer makes them chase you; they report you to a local patrol, and every patrol in that system that sees you then demands the fine until it is paid
 Added - Crablobab sells a Party Horn once you own Celebration Charges, then a Crab Fanfare; each replaces the catch sound, switches in the Outfitter, and can be heard on its offer screen first
 Removed - A failed Quorum catch no longer scatters twelve extra decoys around the shell game

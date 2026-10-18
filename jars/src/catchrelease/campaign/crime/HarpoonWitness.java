@@ -44,15 +44,12 @@ public class HarpoonWitness implements EveryFrameScript {
         if (victim == null || factionId == null) return;
 
         String victimName = victim.getName();
-        LocationAPI origin = victim.getContainingLocation();
-        String originName = origin == null ? "open space"
-                : origin instanceof StarSystemAPI
-                ? ((StarSystemAPI) origin).getNameWithNoType() : origin.getName();
+        String originName = originName(victim.getContainingLocation());
         boolean hitmanEligible = HarpoonHitman.isEligibleVictim(victim);
 
-        if (explosive && identified && hitmanEligible) {
-            HarpoonHitman.send(factionId, victimName, originName, true, true);
-            return;
+        if (explosive && hitmanEligible) {
+            HarpoonHitman.send(factionId, victimName, originName, true, true,
+                    identified ? HarpoonHitman.CHANCE_EXPLOSIVE : HarpoonHitman.CHANCE_EXPLOSIVE_DARK);
         }
         if (explosive && identified) return;
 
@@ -62,7 +59,8 @@ public class HarpoonWitness implements EveryFrameScript {
 
         if (patrol == null) {
             if (identified && hitmanEligible) {
-                HarpoonHitman.send(factionId, victimName, originName, explosive, false);
+                HarpoonHitman.send(factionId, victimName, originName, explosive, false,
+                        HarpoonHitman.CHANCE_HIT);
             }
             return;
         }
@@ -138,6 +136,12 @@ public class HarpoonWitness implements EveryFrameScript {
         if (daysSpent > TRAVEL_DAYS) giveUp();
     }
 
+    public static String originName(LocationAPI origin) {
+        return origin == null ? "open space"
+                : origin instanceof StarSystemAPI
+                ? ((StarSystemAPI) origin).getNameWithNoType() : origin.getName();
+    }
+
     protected static boolean isAlive(CampaignFleetAPI fleet) {
         return fleet != null && !fleet.isExpired() && fleet.isAlive();
     }
@@ -154,7 +158,8 @@ public class HarpoonWitness implements EveryFrameScript {
         if (refusal) HarpoonOffence.noteEvasion(factionId);
 
         if (identified && hitmanEligible) {
-            HarpoonHitman.send(factionId, victimName, originName, explosive, false);
+            HarpoonHitman.send(factionId, victimName, originName, explosive, false,
+                    HarpoonHitman.CHANCE_HIT);
         }
 
         release();

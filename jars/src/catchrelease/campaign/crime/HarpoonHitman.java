@@ -50,12 +50,19 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final float SPAWN_RANGE_MAX = 4500f;
 
     public static final float INTERCEPT_DAYS = 30f;
-    public static final float CHANCE = 0.30f;
+
+    public static final float CHANCE_HIT = 0.15f;
+    public static final float CHANCE_EXPLOSIVE = 0.30f;
+    public static final float CHANCE_EXPLOSIVE_DARK = 0.15f;
+    public static final float CHANCE_REFUSED = 0.30f;
+    public static final float CHANCE_REFUSED_DARK = 0.15f;
+    public static final float CHANCE_ESCAPED = 0.15f;
 
     protected String hiredBy;
     protected String victimName;
     protected String originName;
     protected boolean explosive;
+    protected String cancelledBySettling;
     protected float daysWaiting;
     protected boolean done;
 
@@ -67,23 +74,20 @@ public class HarpoonHitman implements EveryFrameScript {
         this.explosive = explosive;
     }
 
-    public static boolean send(String hiredBy) {
-        return send(hiredBy, null, null, false, false);
-    }
-
-    public static boolean send(String hiredBy, boolean bypassCooldown) {
-        return send(hiredBy, null, null, false, bypassCooldown);
-    }
-
     public static boolean send(String hiredBy, String victimName, String originName,
-                               boolean explosive, boolean bypassCooldown) {
+                               boolean explosive, boolean bypassCooldown, float chance) {
+        return send(hiredBy, victimName, originName, explosive, bypassCooldown, chance, null);
+    }
+
+    // cancelledBySettling: the claim ledger key whose later settlement calls the contract off
+    public static boolean send(String hiredBy, String victimName, String originName,
+                               boolean explosive, boolean bypassCooldown, float chance,
+                               String cancelledBySettling) {
         if (!hasEstablishedColony(hiredBy)) return false;
 
+        // the hunters only spawn once the player is in a system; a roll made in hyperspace waits for that
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        if (player == null) return false;
-
-        LocationAPI location = player.getContainingLocation();
-        if (location == null || location.isHyperspace()) return false;
+        if (player == null || player.getContainingLocation() == null) return false;
 
         if (isOut() || isPending()) return false;
 
@@ -91,10 +95,11 @@ public class HarpoonHitman implements EveryFrameScript {
                 && Global.getSector().getMemoryWithoutUpdate().getBoolean(COOLDOWN_KEY)) {
             return false;
         }
-        if (Math.random() >= CHANCE) return false;
+        if (Math.random() >= chance) return false;
 
         HarpoonHitman pending = new HarpoonHitman(
                 hiredBy, victimName, originName, explosive);
+        pending.cancelledBySettling = cancelledBySettling;
 
         Global.getSector().getMemoryWithoutUpdate().set(PENDING_KEY, pending);
         Global.getSector().addScript(pending);
@@ -269,6 +274,14 @@ public class HarpoonHitman implements EveryFrameScript {
         }
 
         return false;
+    }
+
+    public static void cancelForSettled(String ledgerKey) {
+        Object pending = Global.getSector().getMemoryWithoutUpdate().get(PENDING_KEY);
+        if (pending instanceof HarpoonHitman hitman && ledgerKey != null
+                && ledgerKey.equals(hitman.cancelledBySettling)) {
+            hitman.finish();
+        }
     }
 
     public static boolean isPending() {
