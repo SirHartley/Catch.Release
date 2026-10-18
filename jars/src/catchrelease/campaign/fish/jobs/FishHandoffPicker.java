@@ -301,7 +301,7 @@ public final class FishHandoffPicker {
             }
 
             for (FishCatch fish : held) {
-                if (fish.getSpec() == null || !matchesAny(fish, asks)) continue;
+                if (fish.getSpec() == null || !autoPayableByAny(fish, asks)) continue;
                 if (eligibility != null && !eligibility.accepts(fish)) continue;
 
                 for (int i = 0; i < (int) stack.getSize(); i++) {
@@ -328,7 +328,7 @@ public final class FishHandoffPicker {
         String[] speciesPerAsk = new String[asks.size()];
 
         if (!assign(0, slots, assignment, used, assignedPerAsk, speciesPerAsk,
-                candidates, asks)) return null;
+                candidates, asks, true)) return null;
 
         List<SpecialItemData> items = new ArrayList<>();
         List<FishCatch> contents = new ArrayList<>();
@@ -365,7 +365,7 @@ public final class FishHandoffPicker {
         String[] speciesPerAsk = new String[asks.size()];
 
         if (!assign(0, slots, assignment, used, assignedPerAsk, speciesPerAsk,
-                candidates, asks)) return null;
+                candidates, asks, false)) return null;
 
         List<SpecialItemData> items = new ArrayList<>();
         List<FishCatch> contents = new ArrayList<>();
@@ -387,7 +387,8 @@ public final class FishHandoffPicker {
 
     protected static boolean assign(int slot, int[] slots, int[] assignment, boolean[] used,
                                     int[] assignedPerAsk, String[] speciesPerAsk,
-                                    List<Candidate> candidates, List<FishRequirement> asks) {
+                                    List<Candidate> candidates, List<FishRequirement> asks,
+                                    boolean automatic) {
         if (slot >= slots.length) return true;
 
         int askIndex = slots[slot];
@@ -397,7 +398,7 @@ public final class FishHandoffPicker {
             if (used[i]) continue;
 
             FishCatch fish = candidates.get(i).fish;
-            if (!ask.matches(fish)) continue;
+            if (automatic ? !FishCurrency.isAutoPayable(ask, fish) : !ask.matches(fish)) continue;
 
             String chosenSpecies = speciesPerAsk[askIndex];
             if (ask.sameSpecies && ask.speciesId == null && chosenSpecies != null
@@ -413,7 +414,7 @@ public final class FishHandoffPicker {
             assignedPerAsk[askIndex]++;
 
             if (assign(slot + 1, slots, assignment, used, assignedPerAsk, speciesPerAsk,
-                    candidates, asks)) return true;
+                    candidates, asks, automatic)) return true;
 
             assignedPerAsk[askIndex]--;
             used[i] = false;
@@ -491,6 +492,12 @@ public final class FishHandoffPicker {
 
     protected static boolean matchesAny(FishCatch fish, List<FishRequirement> asks) {
         for (FishRequirement ask : asks) if (ask.matches(fish)) return true;
+
+        return false;
+    }
+
+    protected static boolean autoPayableByAny(FishCatch fish, List<FishRequirement> asks) {
+        for (FishRequirement ask : asks) if (FishCurrency.isAutoPayable(ask, fish)) return true;
 
         return false;
     }

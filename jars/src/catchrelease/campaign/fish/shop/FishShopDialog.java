@@ -844,6 +844,14 @@ public class FishShopDialog implements InteractionDialogPlugin {
             Receipt receipt = !free && entry.getPrice() != null
                     ? new Receipt(entry) : null;
 
+            ShopPricing.Price price = entry.getPrice();
+            // only a legendary would cover it: the player must choose to spend it
+            if (!free && automaticPayment == null && !entry.isCurio()
+                    && price != null && price.fish != null && !FishCurrency.canAutoPay(price.fish)) {
+                selectedPaymentClicked(entry);
+                return;
+            }
+
             boolean bought;
             if (free) {
                 bought = entry.devBuy();

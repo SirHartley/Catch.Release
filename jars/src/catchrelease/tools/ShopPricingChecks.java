@@ -307,6 +307,21 @@ public final class ShopPricingChecks {
         f.cargo.clear();
         f.cargo.put(FishItems.toItem(first), 2);
         require(FishCurrency.spend(req) && f.cargo.isEmpty(), "automatic currency uses the same matching rule");
+
+        FishSpec legendary = FishSpecLoader.getAllFishSpecs().stream()
+                .filter(spec -> spec.rarity == FishRarity.LEGENDARY).findFirst().orElseThrow();
+        FishCatch trophy = new FishCatch(legendary.id, legendary.lengthMax, legendary.weightMax, 0f);
+        FishRequirement anyRare = new FishRequirement();
+        anyRare.minRarity = FishRarity.RARE;
+        f.cargo.put(FishItems.toBundle(List.of(trophy)), 1);
+        require(FishCurrency.count(anyRare) == 1 && !FishCurrency.canAutoPay(anyRare)
+                        && FishHandoffPicker.autoSelect(List.of(anyRare), null) == null
+                        && !FishCurrency.spend(anyRare) && FishCurrency.count(anyRare) == 1,
+                "automatic payment never takes a legendary for a broader ask");
+        FishRequirement named = new FishRequirement();
+        named.speciesId = legendary.id;
+        require(FishHandoffPicker.autoSelect(List.of(named), null) != null && FishCurrency.spend(named)
+                && f.cargo.isEmpty(), "an ask naming the legendary may still take it");
     }
 
     private static void creditPrices() {
