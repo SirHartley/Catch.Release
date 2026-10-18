@@ -438,9 +438,11 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   covers shield hits, the Lantern call, feeding, Quorum feedback and the Imposter alert.
   The stable `CampaignFloatingText.offset` and `label` fields are accessed through
   `ReflectionUtils`; Manta notices still detach before a slot swap.
-- Needle Sensor reuses `RippleRingRenderer`: a fixed emission point, 100-unit outer
-  radius, 1.5-unit starting width, 3.5-second growth/fade and pale blue-grey at 55/255
-  colour alpha. It shows no species icon or rarity colour. Render-time checks retire
+- Needle Sensor reuses `RippleRingRenderer`: a fixed emission point, 180-unit outer
+  radius, 5-second growth/fade and opaque pale blue (`RIPPLE_COLOR`). Its 4-unit
+  starting width is multiplied by the viewport's view mult when zoomed out, because
+  buried motes spawn beyond the default view and a fixed world width goes sub-pixel.
+  It shows no species icon or rarity colour. Render-time checks retire
   rings immediately on lamp activation, refitting, departure, capture or provocation;
   retained lamp reveals suppress them too. Pause freezes both cadence and rings.
   Each ring respects viewport alpha and culling. Load restores the passive controller

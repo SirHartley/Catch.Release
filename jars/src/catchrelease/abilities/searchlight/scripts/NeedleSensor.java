@@ -1,6 +1,5 @@
 package catchrelease.abilities.searchlight.scripts;
 
-import catchrelease.campaign.ponds.renderer.UnstableFabricRippleTerrainRenderer;
 import catchrelease.config.Setting;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -36,9 +35,10 @@ public class NeedleSensor {
     public static final float INTERVAL_MIN = 6f;
     public static final float INTERVAL_MAX = 12f;
 
-    public static final float RADIUS = 100f;
-    public static final float RIPPLE_SECONDS = 3.5f;
-    public static final Color RIPPLE_COLOR = UnstableFabricRippleTerrainRenderer.BASE_RIPPLE_COLOR;
+    public static final float RADIUS = 180f;
+    public static final float RIPPLE_SECONDS = 5f;
+    public static final float RING_WIDTH = 4f;
+    public static final Color RIPPLE_COLOR = new Color(170, 200, 230);
 
     private final SearchlightAbilityPlugin owner;
     private LocationAPI home;
@@ -53,7 +53,7 @@ public class NeedleSensor {
         private final SectorEntityToken mote;
 
         Ripple(SectorEntityToken mote) {
-            super(RIPPLE_COLOR, RADIUS, new Vector2f(mote.getLocation()), 1.5f, RIPPLE_SECONDS, 0.2f);
+            super(RIPPLE_COLOR, RADIUS, new Vector2f(mote.getLocation()), RING_WIDTH, RIPPLE_SECONDS, 0.2f);
             this.mote = mote;
             home = mote.getContainingLocation();
         }
@@ -77,6 +77,8 @@ public class NeedleSensor {
             if (alpha <= 0f) return;
             color = new Color(RIPPLE_COLOR.getRed(), RIPPLE_COLOR.getGreen(), RIPPLE_COLOR.getBlue(),
                     Math.min(255, Math.round(RIPPLE_COLOR.getAlpha() * alpha * Setting.NEEDLE_VISIBILITY.mult())));
+            // Width is in world units; buried motes sit beyond the default view, so zooming out must not thin the ring.
+            startWidth = RING_WIDTH * Math.max(1f, viewport.getViewMult());
             super.render(layer, viewport);
         }
     }
