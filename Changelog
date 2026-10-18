@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
+Removed - A failed Quorum catch no longer scatters twelve extra decoys around the shell game
 Fixed - Loading a save with Lantern Jack surfaced in the current system no longer crashes the game
 Fixed - Legendary and epic trails under breach lights no longer cost a large share of frame time
 Fixed - Automatic payments for jobs and the Outfitter never use a legendary catch; you can still choose one yourself in the hand-in picker

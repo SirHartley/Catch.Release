@@ -706,8 +706,8 @@ public final class LegendaryEscapeChecks {
             for (Fish body : env.fish) Vector2f.add(center, body.at, center);
             center.scale(1f / env.fish.size());
             LegendaryShields.onFailedCatch(fish.getMote());
-            check(env.fish.size() == 15, "one real, two shell bodies, twelve illusions");
-            check(env.fish.stream().filter(f -> f.phantom).count() == 12, "illusions cannot become loot");
+            check(env.fish.size() == 3 && env.fish.stream().noneMatch(f -> f.phantom),
+                    "a failed catch adds no bodies beyond the real one and two shell bodies");
             double previous = angle(center, fish.at), total = 0;
             float elapsed = 0;
             while (elapsed < QuorumShellGame.ESCAPE_SPIN_SECONDS) {
@@ -721,11 +721,11 @@ public final class LegendaryEscapeChecks {
             }
             check(Math.abs(total / (Math.PI * 2) - 4) < 0.001, "exactly four rotations at " + fps + " Hz");
             LegendaryShields.onFailedCatch(fish.getMote());
-            check(env.fish.size() == 15, "repeated failures cap illusions");
+            check(env.fish.size() == 3, "repeated failures add no bodies");
             check(!LegendaryShields.onFailedCatch(env.fish.get(1).getMote()), "ordinary shell body loss is not legendary loss");
             Shell.reset();
             QuorumShellGame.advance(fish, 0f);
-            check(env.fish.size() == 15, "controller reconstruction reuses persisted bodies");
+            check(env.fish.size() == 3, "controller reconstruction reuses persisted bodies");
         }
     }
 
