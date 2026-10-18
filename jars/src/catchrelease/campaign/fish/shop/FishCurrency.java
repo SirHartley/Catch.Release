@@ -65,6 +65,22 @@ public class FishCurrency {
     }
 
     public static int count(FishRequirement req) {
+        return count(req, false);
+    }
+
+    // Legendaries are unique: automatic payment takes one only when the ask names that species.
+    // The player can still choose one in a picker.
+    public static boolean isAutoPayable(FishRequirement req, FishCatch entry) {
+        if (req == null || !req.matches(entry)) return false;
+
+        return getRarity(entry) != FishRarity.LEGENDARY || entry.speciesId.equals(req.speciesId);
+    }
+
+    public static boolean canAutoPay(FishRequirement req) {
+        return req == null || count(req, true) >= req.count;
+    }
+
+    protected static int count(FishRequirement req, boolean autoPayableOnly) {
         if (req == null) return Integer.MAX_VALUE;
 
         CargoAPI cargo = getCargo();
@@ -75,7 +91,7 @@ public class FishCurrency {
 
         for (CargoStackAPI stack : cargo.getStacksCopy()) {
             for (FishCatch entry : read(stack)) {
-                if (!req.matches(entry)) continue;
+                if (autoPayableOnly ? !isAutoPayable(req, entry) : !req.matches(entry)) continue;
 
                 total++;
                 bySpecies.merge(entry.speciesId, 1, Integer::sum);
@@ -92,7 +108,7 @@ public class FishCurrency {
 
     public static boolean spend(FishRequirement req) {
         if (req == null) return true;
-        if (count(req) < req.count) return false;
+        if (!canAutoPay(req)) return false;
 
         CargoAPI cargo = getCargo();
         if (cargo == null) return false;
@@ -101,9 +117,9 @@ public class FishCurrency {
         if (req.sameSpecies && species == null) species = pickBestSpecies(req);
 
         final String chosen = species;
-        int left = spendMatching(cargo, entry -> req.matches(entry)
+        int left = spendMatching(cargo, entry -> isAutoPayable(req, entry)
                 && (chosen == null || chosen.equals(entry.speciesId)), req.count, false);
-        if (left > 0) left = spendMatching(cargo, entry -> req.matches(entry)
+        if (left > 0) left = spendMatching(cargo, entry -> isAutoPayable(req, entry)
                 && (chosen == null || chosen.equals(entry.speciesId)), left, true);
 
         return left <= 0;
@@ -116,7 +132,7 @@ public class FishCurrency {
         Map<String, Integer> bySpecies = new HashMap<>();
         for (CargoStackAPI stack : cargo.getStacksCopy()) {
             for (FishCatch entry : read(stack)) {
-                if (req.matches(entry)) bySpecies.merge(entry.speciesId, 1, Integer::sum);
+                if (isAutoPayable(req, entry)) bySpecies.merge(entry.speciesId, 1, Integer::sum);
             }
         }
 
@@ -175,6 +191,7 @@ public class FishCurrency {
 
     public static boolean spend(FishRarity rarity, int amount) {
         if (rarity == null || amount <= 0) return true;
+        if (rarity == FishRarity.LEGENDARY) return false;
         if (count(rarity) < amount) return false;
 
         CargoAPI cargo = getCargo();
@@ -253,7 +270,7 @@ public class FishCurrency {
 
         for (CargoStackAPI stack : cargo.getStacksCopy()) {
             for (FishCatch entry : read(stack)) {
-                if (!req.matches(entry)) continue;
+                if (!isAutoPayable(req, entry)) continue;
 
                 if (best == null || entry.getSizeFraction() > best.getSizeFraction()) best = entry;
             }
