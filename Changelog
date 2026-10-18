@@ -10,8 +10,8 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.b - UNRELEASED
-Added - Hooked up the new placeholder portraits for 16 fish, including Quorum Splinters
-Adjusted - Standardized the new fish portrait filenames and corrected their spelling
+Added - Temporary industry image
+Added - New portraits for 16 fish that had placeholders until now
 Fixed - Nearby settlements no longer prevent the Fisherman from approaching you for the tutorial
 Fixed - Finishing the Fisherman's "Why a fish?" questions no longer shows an empty Continue before "You could have told me this before I started."
 Fixed - Fisherman tutorial lessons no longer send you to systems with a neutron star
@@ -19,19 +19,19 @@ Adjusted - The Fisherman's first lesson now points at the rupture closest to him
 Added - Dopefish, a rare Epic catch that barely moves and is very easy to land
 Added - Selling fish to the Fisherman can unpack crates again after using "Pack into crates"
 Fixed - Hovering the "Pack into crates" button in the Fisherman sale screen no longer repeats the click sound
-Fixed - Undo in the Fisherman's range data shop takes back every purchase in turn, newest first, like the Outfitter
+Fixed - Undo in the Fisherman's range data shop takes back every purchase in sequence, newest first, like the Outfitter
 Fixed - Fish, crate and pile tooltips only show their right-click hints for fish in your fleet's cargo, not in markets, storage or selection screens
 Added - Hovering an Outfitter fish count shows the species of that rarity aboard
 Added - Lantern Jack's lure call now plays a distress-call sound
 Added - Harpoons deflected by a legendary's shield play a varied shield-hit sound
 Added - Epic fish leave a fainter purple version of the legendary trail under breach lights
 Adjusted - Buried and diving legendaries and epics no longer leave a trail
-Added - A foghorn sounds when a legendary haunt starts, and a lower one when it ends
+Added - A foghorn sounds when a legendary haunt starts and ends
 Adjusted - Fish art on crate labels in cargo is drawn sharper
 Added - Codex pages of caught fish show a size distribution chart with your best and latest catch
 Adjusted - Buncha dialogue
 Adjusted - Tooltips across most items
-Fixed - Fish, crates and piles sold to a market now disappear when its stock refreshes, as sold weapons do
+Fixed - Fish, crates and piles sold to a market now disappear when its stock refreshes
 Fixed - "Set autopilot" on tutorial and chart request intel now targets a visiting Fisherman in your current system instead of a boat elsewhere
 Fixed - System fish counts no longer include a species that never spawns there, which made a full system show 16 species
 Fixed - A star system never offers more than 15 species; a legendary in a full system temporarily takes one of those slots
