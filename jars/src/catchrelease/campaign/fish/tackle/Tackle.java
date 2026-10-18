@@ -108,6 +108,10 @@ public enum Tackle {
     NEEDLE_SENSOR("Needle Sensor", Fit.SEARCHLIGHT,
             "While Breach Lights are off, hidden rare and epic patterns and dormant legendaries"
                     + " occasionally produce faint ripple rings."),
+    NEUTRINO_LENS("Neutrino Lens", Fit.SEARCHLIGHT,
+            "While the Neutrino Detector is on, rare, epic and legendary patterns in the system show"
+                    + " as blue, red and purple spikes on its ring. Grants the Neutrino Detector if you"
+                    + " don't have it."),
     TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
             "Makes each Breach Light pause its sweep to follow a buried pattern briefly."
                     + " It then resumes sweeping and must cool down before locking on again.") {

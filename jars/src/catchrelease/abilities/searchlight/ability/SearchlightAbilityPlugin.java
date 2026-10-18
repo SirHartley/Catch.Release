@@ -11,6 +11,7 @@ import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.abilities.searchlight.rendering.SearchlightImpressionRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.abilities.searchlight.scripts.NeedleSensor;
+import catchrelease.abilities.searchlight.scripts.NeutrinoLens;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
@@ -49,6 +50,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private transient SearchlightImpressionRenderer impressionRenderer;
     private transient LocationAPI activationLocation;
     private transient NeedleSensor needleSensor;
+    private transient NeutrinoLens neutrinoLens;
 
     private transient LocationAPI proximityLocation;
     private transient long pondStateVersion;
@@ -214,6 +216,11 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             needleSensor = new NeedleSensor(this);
         }
         if (needleSensor != null) needleSensor.advance(amount);
+        if ((neutrinoLens == null || neutrinoLens.isExpired())
+                && getFleet() == Global.getSector().getPlayerFleet() && NeutrinoLens.isFitted()) {
+            neutrinoLens = new NeutrinoLens();
+            LunaCampaignRenderer.addTransientRenderer(neutrinoLens);
+        }
     }
 
     @Override
@@ -537,6 +544,8 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             tooltip.addPara("Fan beams weaken toward their edges and tips.", 3f);
         } else if (fitted == Tackle.NEEDLE_SENSOR) {
             tooltip.addPara("Passive sensor: occasional ripples while lamps are off.", 3f);
+        } else if (fitted == Tackle.NEUTRINO_LENS) {
+            tooltip.addPara("Neutrino Detector: coloured spikes for rare, epic and legendary patterns.", 3f);
         }
     }
 
