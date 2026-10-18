@@ -106,6 +106,7 @@ public class FishConstants {
     public static final String TREASURE_GROUP_BLUEPRINTS = "blueprints";
     public static final String TREASURE_GROUP_RARE_TECH = "rare_tech";
     public static final float TREASURE_COMMODITY_VALUE = 2500f;
+    public static final float TREASURE_RANGE_DATA_CHANCE = 0.25f;
 
     // minigame - the loot card, beside the track on the side the catch card is not
     public static final String MINIGAME_LOOT_TITLE = "Recovered";

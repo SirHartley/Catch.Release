@@ -193,6 +193,7 @@ public class FishRewardRoller {
 
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.id == null) continue;
+            if (spec.spawnWeight <= 0f) continue;
             if (!spec.hasHabitat()) continue;
             if (spec.rarity == FishRarity.LEGENDARY) continue;
             if (FishLog.isCaught(spec.id) || FishLog.isLocationDataUnlocked(spec.id)) continue;

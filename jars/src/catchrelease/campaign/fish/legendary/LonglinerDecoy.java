@@ -86,7 +86,7 @@ public class LonglinerDecoy implements EveryFrameScript {
             if (mote.isInCurrentLocation()) {
                 FishingSounds.playSound(
                         SOUND_FOUND, 1f, 1f, mote.getLocation(), Misc.ZERO);
-                LegendaryShields.say(mote, "!");
+                LegendaryShields.say(mote, "!", catchrelease.campaign.fish.data.FishRarity.LEGENDARY.color);
             }
             alerted = true;
         }
