@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
+Added - Uncommon fishing chests have a 25% chance to include previously unknown range data alongside their normal loot, including when using a Lifting Rig
 Fixed - Loading a save with Lantern Jack surfaced in the current system no longer crashes the game
 Fixed - Legendary and epic trails under breach lights no longer cost a large share of frame time
 Fixed - Automatic payments for jobs and the Outfitter never use a legendary catch; you can still choose one yourself in the hand-in picker

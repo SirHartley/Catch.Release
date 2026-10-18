@@ -32,6 +32,11 @@ Do not maintain separate wording or formatting standards for Java strings.
 In the outfitter, a null module price can mean an empty slot or an already-owned
 module. UI text must distinguish them.
 
+Treasure result rows normally use the chest rarity colour. Range-data bonuses
+carry `TreasureAward.Item.color` from the species rarity and use the vanilla
+remote-survey-data icon, not an uncaught fish portrait. `LootResultPanel` keeps
+the chest colour as the default for existing item rewards.
+
 ## Intel and sidebar maps
 
 - Offers and location reminders use `QuestDialogMap` below the portrait, including

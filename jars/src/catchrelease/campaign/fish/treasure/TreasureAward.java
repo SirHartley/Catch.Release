@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.treasure;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.Color;
 
 public class TreasureAward {
 
@@ -13,11 +14,17 @@ public class TreasureAward {
         public final String name;
         public final String sprite;
         public final int count;
+        public final Color color;
 
         public Item(String name, String sprite, int count) {
+            this(name, sprite, count, null);
+        }
+
+        public Item(String name, String sprite, int count, Color color) {
             this.name = name;
             this.sprite = sprite;
             this.count = Math.max(1, count);
+            this.color = color;
         }
     }
 

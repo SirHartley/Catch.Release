@@ -84,7 +84,8 @@ public class LootResultPanel {
 
         for (TreasureAward award : this.awards) {
             for (TreasureAward.Item item : award.items) {
-                rows.add(new Row(item.name, item.sprite, item.count, award.rarity.color));
+                rows.add(new Row(item.name, item.sprite, item.count,
+                        item.color == null ? award.rarity.color : item.color));
             }
         }
     }
