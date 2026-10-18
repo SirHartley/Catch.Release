@@ -21,6 +21,7 @@ import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.camp.CampedSpotJob;
+import catchrelease.campaign.fish.legendary.KantaTribute;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.LonglinerShield;
@@ -299,6 +300,13 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return forgiveLampStop(dialog);
             case "seizeFish":
                 return seizeFish(dialog);
+
+            case "kantaHasLegendary":
+                return KantaTribute.has(arg);
+            case "kantaGiftTokens":
+                return KantaTribute.prepare(arg, memoryMap.get(MemKeys.LOCAL));
+            case "kantaGiveLegendary":
+                return KantaTribute.give(arg, getMarket(dialog), text(dialog));
 
             case "crabBarAvailable":
                 return CrablobabBarPresence.isAvailable(dialog);
