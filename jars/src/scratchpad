@@ -11,19 +11,12 @@ scrapped
 
 todo / QA
 
-Epic and legendary motes under searchlights don't show their trail while not "activated". Both should show their trail while not active to make hunting them easier (epics are never activated and thus never have a trail...).
-something about the lantern jack is broken, can't spawn them & they don't spawn naturally
-quorum "decoy spawning" after first catch attempt is way too agressive and tanks framerate. Get rid of that, we'll keep with the normal decoy behaviour without the extra ones the ability makes
-Needle sensor doesn't work
-"the false dawn brightens" and related labels should be shield colour or mote colour but never a random one? how did that even happen? Why are the labels green?
-range data should sometimes drop from uncommon salvage chests
-
 use patchlib to amend the neutrino detector to show a blue, red or purple spike to find rares, epics and legendaries respectively
 
 Lined --
 
 Legendary Fish introductions
-- Yeah the fisherman needs to help with getting to those they are the most interesting part of the mod - best to have him give out exposition and a quest for them?
+- The fisherman needs to help with getting to those they are the most interesting part of the mod - best to have him give out exposition and a quest for them?
 - Explain that tugs help a bunch & that susburn is a trap
 - Explain what the neutrino does
 - Explain that you don't have enough upgrades or are ready
