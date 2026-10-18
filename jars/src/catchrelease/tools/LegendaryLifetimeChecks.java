@@ -126,8 +126,8 @@ public final class LegendaryLifetimeChecks {
             LegendaryChases.getState("quorum").shieldUnits = 0;
             LegendaryChases.getState("quorum").roaming = true;
             QuorumShellGame.onFailedCatch(fish);
-            check(Shell.size() == 1 && env.fish.size() == 18,
-                    "fixture includes real Quorum, escorts, shell decoys and escape illusions");
+            check(Shell.size() == 1 && env.fish.size() == 6,
+                    "fixture includes real Quorum, escorts and shell decoys");
             env.haunt.reportCurrentLocationChanged(env.system, null);
             check(env.fish.stream().allMatch(f -> f.expired), "departure clears the Quorum and all attached bodies");
             check(Shell.size() == 0, "departure releases the shell-game controller");

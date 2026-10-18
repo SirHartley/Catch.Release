@@ -118,7 +118,7 @@ public class HauntMineEntityPlugin extends BaseCustomEntityPlugin {
         if (triggered) {
             noticeLeft = Math.max(0f, noticeLeft - amount);
             if (transfer != null && transfer.advance(amount)) {
-                LegendaryShields.say(entity, "The False Dawn brightens");
+                LegendaryShields.say(entity, "The False Dawn brightens", kind.color);
                 // Vanilla keeps this notice for one second, then fades it for half a second.
                 noticeLeft = NOTICE_SECONDS;
             }

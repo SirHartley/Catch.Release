@@ -143,7 +143,7 @@ public final class NeedleSensorChecks {
                     "new module enters the ordinary schematic reward pool");
             ShopSchematics.unlock(sensor);
             check(!entry.isPurchaseLocked(), "schematic exposes purchase");
-            check(ShopPricing.getPrice(sensor).credits == 12000, "same credit tier as existing lens arrays");
+            check(ShopPricing.getPrice(sensor).credits == 20000, "same credit tier as the other late lamp modules");
             f.fit();
             check(entry.isOwned() && entry.isFitted(), "grant owns and fits");
             TackleManager.fit(Tackle.Fit.SEARCHLIGHT, Tackle.FANNED_ARRAY);
@@ -189,7 +189,8 @@ public final class NeedleSensorChecks {
             epic.at.set(2000f, 2000f);
             jack.at.set(2000f, 2000f);
             check(ring.location.equals(origin), "ripple stays at emission point instead of tracking fish");
-            check(ring.color.getAlpha() == 55 && ring.size == 100f, "small faint ring");
+            check(ring.color.equals(NeedleSensor.RIPPLE_COLOR) && ring.size == NeedleSensor.RADIUS
+                    && ring.startWidth == NeedleSensor.RING_WIDTH, "ring uses the sensor tuning");
             f.reveal = 1f;
             check(ring.isExpired(), "remaining lamp reveal suppresses a ripple");
             f.sensor.advance(0.5f);

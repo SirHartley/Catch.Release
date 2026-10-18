@@ -32,6 +32,11 @@ Do not maintain separate wording or formatting standards for Java strings.
 In the outfitter, a null module price can mean an empty slot or an already-owned
 module. UI text must distinguish them.
 
+Treasure result rows normally use the chest rarity colour. Range-data bonuses
+carry `TreasureAward.Item.color` from the species rarity and use the vanilla
+remote-survey-data icon, not an uncaught fish portrait. `LootResultPanel` keeps
+the chest colour as the default for existing item rewards.
+
 ## Intel and sidebar maps
 
 - Offers and location reminders use `QuestDialogMap` below the portrait, including
@@ -393,8 +398,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   The engine advances custom entities through the unpaused location update
   (`CampaignEngine.advance` / `CustomCampaignEntity.advance`, 0.98a-RC8).
   Full encounter resets are covered in [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishlegendary).
-- False Dawn's shield mines and couriers share `LegendaryShields.SHIELD_GREEN`.
-  `DawnShieldTransfer` draws a white-centred glow, a bounded green trail and an
+- False Dawn's shield mines and couriers share `LegendaryShields.SHIELD_ORANGE`.
+  `DawnShieldTransfer` draws a white-centred glow, a trail in that colour and an
   arrival ring using `Disc`, which preserves GL state. It remains visible outside
   lamp beams; the expanding render range follows it away from the stationary mine.
   Viewport alpha/culling still apply, and pause freezes movement and arrival fade.
@@ -427,20 +432,28 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   the Jack, not the mote, because the mote is expired on the same frame and an effect owned by it
   would never draw. Sub-mote positions are derived from one clock rather than integrated, so there
   is no per-frame state to drift or leak and a pause holds the burst in place. The sub-motes are
-  visual only; a real entity here would be edible and harpoonable. It uses the same
-  `getShieldAlpha` lamp-and-viewport fade as the shields, so it is lamp-only like the rest of a
-  legendary's extras, and sets colour, size, alpha and blend on the shared sprite before every
-  draw.
-- Legendary floating notices use `LegendaryShields.say`. It keeps vanilla's renderer
-  and lifetime, but stacks older labels above newer ones by the font height plus four
+  visual only; a real entity here would be edible and harpoonable. Eighteen pieces spread up to
+  about 280 units over 0.9 seconds, each with a 0.35× bright core, fading linearly. Its brightness is
+  the lamp at the burst (`getBeamStrengthAt(popOrigin)` × 3, clamped) times viewport alpha, not the
+  Jack's lamp fade, because the Jack has run on. `getRenderRange` covers the burst while it lasts,
+  since the engine culls by the Jack's position. It sets colour, size, alpha and blend on the shared
+  sprite before every draw.
+- Legendary floating notices use `LegendaryShields.say` and the fish's shield
+  colour, never the generic UI highlight. Mine-anchored
+  recharge passes the mine/shield colour explicitly; Quorum escort updates use its
+  blue shield colour even at the player fleet. Other non-fish anchors and the
+  Imposter alert use the legendary mote colour.
+  It keeps vanilla's renderer and lifetime, but stacks older labels above newer ones by the font height plus four
   screen units, converted through the current viewport. Older labels drift upward
   first, away from new notices. This
   covers shield hits, the Lantern call, feeding, Quorum feedback and the Imposter alert.
   The stable `CampaignFloatingText.offset` and `label` fields are accessed through
   `ReflectionUtils`; Manta notices still detach before a slot swap.
-- Needle Sensor reuses `RippleRingRenderer`: a fixed emission point, 100-unit outer
-  radius, 1.5-unit starting width, 3.5-second growth/fade and pale blue-grey at 55/255
-  colour alpha. It shows no species icon or rarity colour. Render-time checks retire
+- Needle Sensor reuses `RippleRingRenderer`: a fixed emission point, 180-unit outer
+  radius, 5-second growth/fade and opaque pale blue (`RIPPLE_COLOR`). Its 4-unit
+  starting width is multiplied by the viewport's view mult when zoomed out, because
+  buried motes spawn beyond the default view and a fixed world width goes sub-pixel.
+  It shows no species icon or rarity colour. Render-time checks retire
   rings immediately on lamp activation, refitting, departure, capture or provocation;
   retained lamp reveals suppress them too. Pause freezes both cadence and rings.
   Each ring respects viewport alpha and culling. Load restores the passive controller

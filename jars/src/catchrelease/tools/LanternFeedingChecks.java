@@ -220,7 +220,7 @@ public final class LanternFeedingChecks {
             check(LegendaryChases.getState("lantern_jack").shieldUnits == 3, "meal cannot be counted twice");
             var extra = meal(env, jack.at.x, jack.at.y);
             Vector2f oldTarget = new Vector2f((Vector2f) ReflectionUtils.get(jack, "target", null, true));
-            LegendaryShields.advanceEater(jack, TICK);
+            LegendaryShields.advanceEater(jack);
             check(!extra.expired && !(boolean) ReflectionUtils.get(jack, "hunting", null, true)
                     && oldTarget.equals(ReflectionUtils.get(jack, "target", null, true)),
                     "full shields ignore nearby prey without retargeting");
@@ -245,10 +245,10 @@ public final class LanternFeedingChecks {
                 }
             };
             ReflectionUtils.set(env.lamps, "impressionRenderer", impressions, true);
-            LegendaryShields.advanceEater(jack, TICK);
+            LegendaryShields.advanceEater(jack);
             check(!meal.expired, "passive hunt leaves unexposed buried prey alone");
             reveal[0] = 1f;
-            LegendaryShields.advanceEater(jack, TICK);
+            LegendaryShields.advanceEater(jack);
             check(meal.expired && env.fish.size() == 3, "exposed buried prey is surfaced");
             var surfaced = env.fish.get(2);
             check(!surfaced.expired, "the surfaced mote is not swallowed before the lunge");
@@ -295,11 +295,20 @@ public final class LanternFeedingChecks {
                             && LegendaryShields.getSpeedMult(jack) > 2.6f,
                     "the dash follows the coil and outruns evasion pace at " + fps + " Hz");
 
+            Vector2f mealAt = new Vector2f(meal.at);
             for (int i = 0; i < fps * 10 && !meal.expired; i++) jack.advance(dt);
             check(meal.expired && state.shieldUnits == 1,
                     "the dash swallows the mote at " + fps + " Hz");
-            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.NONE,
-                    "a swallowed mote ends the lunge at " + fps + " Hz");
+            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.DASH
+                            && jack.at.x >= mealAt.x - 1f,
+                    "the mote is swallowed as the Jack runs through it, not before, at " + fps + " Hz");
+            for (int i = 0; i < fps * 10
+                    && jack.getLungePhase() == FishEntityPlugin.LungePhase.DASH; i++) {
+                jack.advance(dt);
+            }
+            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.NONE
+                            && jack.at.x >= mealAt.x + FishEntityPlugin.LUNGE_OVERRUN - 1f,
+                    "the dash carries on past the mote at " + fps + " Hz");
         }
 
         // a mote that leaves during the coil is not chased by a dash with nothing on its line
@@ -342,23 +351,23 @@ public final class LanternFeedingChecks {
             var meal = env.real("meal");
             meal.spec.rarity = FishRarity.COMMON;
             meal.quest = true;
-            LegendaryShields.advanceEater(jack, TICK);
+            LegendaryShields.advanceEater(jack);
             check(!meal.expired, "quest fish protected");
             meal.quest = false;
             meal.pond = true;
-            LegendaryShields.advanceEater(jack, TICK);
+            LegendaryShields.advanceEater(jack);
             check(!meal.expired, "pond stock protected");
             meal.pond = false;
             meal.setHeld(true);
-            LegendaryShields.advanceEater(jack, TICK);
+            LegendaryShields.advanceEater(jack);
             check(!meal.expired, "held catch protected");
             meal.setHeld(false);
             LegendaryChases.getState("lantern_jack").shieldUnits = LegendaryShields.JACK_STACK_MAX;
-            LegendaryShields.advanceEater(jack, TICK);
+            LegendaryShields.advanceEater(jack);
             check(!meal.expired, "full shell stack stops feeding");
             LegendaryChases.getState("lantern_jack").shieldUnits = 0;
             jack.startEvasive();
-            LegendaryShields.advanceEater(jack, TICK);
+            LegendaryShields.advanceEater(jack);
             check(!meal.expired, "evasion takes priority over feeding");
         }
     }

@@ -147,7 +147,7 @@ public final class LegendaryPatrolChecks {
             haunt.begin(fish, env);
             QuorumShellGame.advance(fish, 0.1f);
             QuorumShellGame.onFailedCatch(fish);
-            check(env.fish.size() == 15, "bare Quorum has shell bodies and escape illusions");
+            check(env.fish.size() == 3, "bare Quorum has its two shell bodies");
             fish.at.set(14000f, 0f);
             haunt.abandon();
             check(env.fish.stream().filter(f -> !f.expired).count() == 4 && state.shieldUnits == 3,
