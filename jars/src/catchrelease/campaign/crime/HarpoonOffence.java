@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.RepLevel;
+import com.fs.starfarer.api.campaign.SectorEntityToken.VisibilityLevel;
 import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
@@ -29,6 +30,8 @@ public class HarpoonOffence {
     public static final String INCIDENTS_KEY = "$catchrelease_harpoonIncidents";
     public static final String OUTSTANDING_KEY = "$catchrelease_harpoonOutstanding";
     public static final String EVASIONS_KEY = "$catchrelease_harpoonEvasions";
+    public static final String UNSEEN_KEY = "$catchrelease_harpoonUnseen";
+    public static final String SEEN_ON_KEY = "$catchrelease_harpoonSeenOn";
 
     public static final float EVASION_DELAY_DAYS = 4f;
     public static final float EVASION_REP_LOSS = 0.1f;
@@ -78,6 +81,12 @@ public class HarpoonOffence {
 
         remember(faction.getId(), victim.getContainingLocation());
         owe(faction.getId(), victim.getContainingLocation());
+
+        // a dark hit keeps the victim's name on file, for the one extra contract roll if the player is later seen lit and runs
+        if (!isPlayerIdentified()) {
+            getMap(UNSEEN_KEY).putIfAbsent(ledgerKey(faction.getId(), victim.getContainingLocation()),
+                    victim.getName());
+        }
 
         // after the debt is on the books, because the third one calls a patrol in about it and there has to be something for that patrol to have come about
         escalate(victim, hits);
@@ -258,8 +267,48 @@ public class HarpoonOffence {
         FactionAPI faction = getOffendedFaction(victim);
         if (faction == null) return;
 
+        if (HarpoonHitman.isEligibleVictim(victim)) {
+            LocationAPI where = victim.getContainingLocation();
+            HarpoonHitman.send(faction.getId(), victim.getName(), HarpoonWitness.originName(where), false, false,
+                    isPlayerIdentified() ? HarpoonHitman.CHANCE_REFUSED : HarpoonHitman.CHANCE_REFUSED_DARK,
+                    ledgerKey(faction.getId(), where));
+        }
+
         // the crew take the claim to a patrol; with nobody to take it to, it only costs standing
         if (!HarpoonWitness.reportRefusal(victim, faction.getId())) noteEvasion(faction.getId());
+    }
+
+    // The player was hit-and-run dark, then seen lit by the victim or a collector and ran again: one more contract roll per claim.
+    public static void noteEscapeWhileSeen(String factionId, LocationAPI where) {
+        if (factionId == null || !isOutstanding(factionId, where)) return;
+
+        String victimName = (String) getMap(UNSEEN_KEY).remove(ledgerKey(factionId, where));
+        if (victimName == null) return;
+
+        HarpoonHitman.send(factionId, victimName, HarpoonWitness.originName(where), false, false,
+                HarpoonHitman.CHANCE_ESCAPED);
+    }
+
+    // a demanding crew that saw the player lit and whose demand lapsed unanswered was run from
+    public static void watchDemand(CampaignFleetAPI victim, CampaignFleetAPI player) {
+        MemoryAPI mem = victim.getMemoryWithoutUpdate();
+
+        if (isDemanding(victim)) {
+            if (player != null && player.isTransponderOn()
+                    && victim.getContainingLocation() == player.getContainingLocation()
+                    && player.getVisibilityLevelTo(victim) != VisibilityLevel.NONE) {
+                mem.set(SEEN_ON_KEY, true, MEMORY_DAYS);
+            }
+            return;
+        }
+
+        if (!mem.getBoolean(SEEN_ON_KEY)) return;
+        mem.unset(SEEN_ON_KEY);
+
+        if (mem.getBoolean(DEMAND_DONE_KEY) || isFleeing(victim) || hasTurnedHostile(victim)) return;
+
+        FactionAPI faction = getOffendedFaction(victim);
+        if (faction != null) noteEscapeWhileSeen(faction.getId(), victim.getContainingLocation());
     }
 
     public static void resolveAnsweredDemands() {
@@ -436,6 +485,10 @@ public class HarpoonOffence {
                 Global.getSector().getClock().getTimestamp());
     }
 
+    public static void callOffContract(String factionId, LocationAPI where) {
+        HarpoonHitman.cancelForSettled(ledgerKey(factionId, where));
+    }
+
     public static boolean isOutstanding(String factionId, LocationAPI where) {
         String key = ledgerKey(factionId, where);
         Long when = getOutstanding().get(key);
@@ -467,7 +520,9 @@ public class HarpoonOffence {
     }
 
     public static void settle(String factionId, LocationAPI where) {
-        getOutstanding().remove(ledgerKey(factionId, where));
+        String key = ledgerKey(factionId, where);
+        getOutstanding().remove(key);
+        getMap(UNSEEN_KEY).remove(key);
         HarpoonPatrolResponse.clearAlert(factionId, where);
     }
 

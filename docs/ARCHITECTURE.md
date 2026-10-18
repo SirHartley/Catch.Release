@@ -799,7 +799,7 @@ charges, moving couriers, notice placement, pause and cleanup.
 | `HarpoonOffence.java` | Per-faction, per-system hit history, debts, reputation loss, witness state, and response ladders. |
 | `HarpoonPatrolResponse.java` | Sends one collector at a time in the incident system; after a reported refusal, every eligible patrol there that sees the player. |
 | `HarpoonWitness.java` | Makes a civilian seek a patrol, after a first hit or a refused repair bill. |
-| `HarpoonHitman.java` | 30% revenge-contract roll for eligible colonial factions and eligible victims. |
+| `HarpoonHitman.java` | Revenge-contract roll for eligible colonial factions and eligible victims; the `CHANCE_*` constants set each trigger's odds. |
 
 ### `abilities`
 
@@ -863,6 +863,7 @@ Rules-engine and menu routing constraints: [RULES.md](RULES.md#project-routing).
 - Lamp enforcement follows vanilla transponder logic. All seeing patrols may interrupt their assignments only while the player is within 3,000 units of an inhabited market; leaving that radius cancels their temporary intercepts. The first dialogue claimant releases only the temporary intercepts of the others. Turning the lights off does not erase an already observed offence.
 - Harpoon incidents are stored per faction and system. Patrol collectors are local; one system cannot escalate another.
 - Refusing a holed crew's repair bill stands the crew down (`HarpoonOffence.stopChasing` also drops the demand intercept) and sends them to the nearest patrol that may collect for their faction (`HarpoonPatrolResponse.findReportTarget`; sight of the player is not required). Their report raises a per-faction, per-system alert in sector memory for `ALERT_DAYS`: every eligible patrol in that system that sees the player is sent with the first-offence fine offer, not the repeat-offence attack. Settling the claim with any one of them clears the alert and stands the others down. With no patrol to report to, the refusal costs standing after `EVASION_DELAY_DAYS` as before.
+- Contract rolls, transponder on / off: an ordinary first hit 15% / none (only where it already rolled: no patrol to report to, or the report fails); an explosive hit 30% / 15%; refusing the second-hit repair bill 30% / 15%; paying it none. A refusal contract is called off if a patrol later collects the fine (`HarpoonOffence.callOffContract`). A dark hit files the victim's name under `UNSEEN_KEY`; if the player is later seen with the transponder on by the demanding crew or a collecting patrol (`SEEN_ON_KEY`) and the demand lapses or the chase ends with the claim still open, `noteEscapeWhileSeen` rolls once more at 15%. The roll can be made in hyperspace; the hunters still spawn only once the player is in a system.
 - Civilian harpoon responses depend on fleet role, relationship, and vanilla's reciprocal 1.25× strength threshold. A convoy remains civilian even when heavily escorted.
 - Repair bills and fines return their outcomes through memory. The global pending marker prevents repeated sector-wide searches when the original fleet is no longer nearby.
 - Camp completion is polled because destruction, bribery, dialogue, and departure do not share a callback.

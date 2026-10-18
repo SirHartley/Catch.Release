@@ -526,6 +526,9 @@ an above-world or above-UI overlay, nor change the location's saved background. 
   Long loot lists are clipped below the chest and title, follow new reward lines,
   and support mouse-wheel scrolling and a draggable scrollbar without dismissing
   the result. Manual scrolling stops automatic following; rewards remain uncapped.
+- Every loot row has one layout: icon and name left-aligned, quantity right-aligned as `Nx`, including `1x`.
+  The name wraps inside the column left after the quantity. The quantity and icon sit on the name's first
+  line, so a wrapped name continues below them. Range-data rows read `Range data: <species>`.
 
 ### Fish difficulty tuner
 

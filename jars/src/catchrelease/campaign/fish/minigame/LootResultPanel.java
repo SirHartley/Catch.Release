@@ -222,11 +222,8 @@ public class LootResultPanel {
         for (Row row : rows) {
             build(row);
 
-            float width = getRowWidth(row);
-
-            if (row.countText != null) {
-                width += FishConstants.MINIGAME_LOOT_COUNT_GAP + row.countText.getWidth();
-            }
+            float width = getRowWidth(row) + FishConstants.MINIGAME_LOOT_COUNT_GAP
+                    + row.countText.getWidth();
 
             widest = Math.max(widest, width);
         }
@@ -407,10 +404,10 @@ public class LootResultPanel {
                     ? alphaMult
                     : alphaMult * MathUtils.clamp(age / FishConstants.MINIGAME_RESULT_FADE, 0f, 1f);
 
-            float centerY = y - rowHeight * 0.5f;
-
-            float left = row.countText != null ? layout.lootX
-                    : layout.lootX + (layout.lootWidth - getRowWidth(row)) * 0.5f;
+            // the name block is centred in the row; icon and count sit on its first line, so a wrapped name hangs below them
+            float textTop = y - (rowHeight - row.nameText.getHeight()) * 0.5f;
+            float firstLineCenter = textTop - row.countText.getHeight() * 0.5f;
+            float left = layout.lootX;
 
             SpriteAPI sprite = getRowSprite(row);
             if (sprite != null) {
@@ -419,18 +416,15 @@ public class LootResultPanel {
                 sprite.setSize(sprite.getWidth() * scale, sprite.getHeight() * scale);
                 sprite.setNormalBlend();
                 sprite.setAlphaMult(alpha);
-                sprite.renderAtCenter(Math.round(left + iconSize * 0.5f), Math.round(centerY));
+                sprite.renderAtCenter(Math.round(left + iconSize * 0.5f), Math.round(firstLineCenter));
             }
 
             row.nameText.setBaseColor(CatchResultPanel.withAlpha(row.color, alpha));
             row.nameText.draw(Math.round(left + iconSize + FishConstants.MINIGAME_LOOT_ICON_GAP),
-                    Math.round(centerY + row.nameText.getHeight() * 0.5f));
+                    Math.round(textTop));
 
-            if (row.countText != null) {
-                row.countText.setBaseColor(CatchResultPanel.withAlpha(Misc.getGrayColor(), alpha));
-                row.countText.draw(Math.round(right),
-                        Math.round(centerY + row.countText.getHeight() * 0.5f));
-            }
+            row.countText.setBaseColor(CatchResultPanel.withAlpha(Misc.getGrayColor(), alpha));
+            row.countText.draw(Math.round(right), Math.round(textTop));
 
             y -= rowHeight;
         }
@@ -452,11 +446,8 @@ public class LootResultPanel {
         float width = FishConstants.MINIGAME_RESULT_WIDTH
                 - FishConstants.MINIGAME_RESULT_PAD * 2f
                 - FishConstants.MINIGAME_LOOT_ICON
-                - FishConstants.MINIGAME_LOOT_ICON_GAP;
-
-        if (row.countText != null) {
-            width -= FishConstants.MINIGAME_LOOT_COUNT_GAP + row.countText.getWidth();
-        }
+                - FishConstants.MINIGAME_LOOT_ICON_GAP
+                - FishConstants.MINIGAME_LOOT_COUNT_GAP - row.countText.getWidth();
 
         return width;
     }
@@ -464,11 +455,9 @@ public class LootResultPanel {
     protected void build(Row row) {
         if (row.nameText != null) return;
 
-        if (row.count > 1) {
-            row.countText = font.createText("x" + row.count, Color.WHITE,
-                    FishConstants.MINIGAME_RESULT_TEXT_SIZE);
-            row.countText.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
-        }
+        row.countText = font.createText(row.count + "x", Color.WHITE,
+                FishConstants.MINIGAME_RESULT_TEXT_SIZE);
+        row.countText.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
 
         row.nameText = font.createText(row.name, Color.WHITE, FishConstants.MINIGAME_RESULT_TEXT_SIZE);
         row.nameText.setAnchor(LazyFont.TextAnchor.TOP_LEFT);

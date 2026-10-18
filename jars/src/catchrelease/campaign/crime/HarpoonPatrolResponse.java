@@ -83,8 +83,13 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     protected void reacquire() {
         for (LocationAPI location : Global.getSector().getAllLocations()) {
             for (CampaignFleetAPI fleet : location.getFleets()) {
-                if (fleet.getMemoryWithoutUpdate().getBoolean(PATROL_FLAG)
-                        && !chasing.contains(fleet)) chasing.add(fleet);
+                MemoryAPI mem = fleet.getMemoryWithoutUpdate();
+                if (mem.getBoolean(PATROL_FLAG) && !chasing.contains(fleet)) chasing.add(fleet);
+
+                // the same sweep follows holed crews still demanding, or who were run from
+                if (mem.getBoolean(HarpoonOffence.DEMAND_FLAG) || mem.getBoolean(HarpoonOffence.SEEN_ON_KEY)) {
+                    HarpoonOffence.watchDemand(fleet, Global.getSector().getPlayerFleet());
+                }
             }
         }
     }
@@ -367,6 +372,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         if (player.getVisibilityLevelTo(patrol) != VisibilityLevel.NONE) {
             Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, 1f);
+            if (player.isTransponderOn()) mem.set(HarpoonOffence.SEEN_ON_KEY, true, CHASE_DAYS);
         }
     }
 
@@ -384,6 +390,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         if (mem.getBoolean(PAID_KEY)) {
             mem.unset(PAID_KEY);
+            HarpoonOffence.callOffContract(factionId, patrol.getContainingLocation());
             return;
         }
 
@@ -419,6 +426,13 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         // read before the keys below clear it
         String factionId = mem.getString(PATROL_FACTION_KEY);
+
+        // a chase that ends with the claim still open, after the patrol saw the player lit, was run from
+        if (mem.getBoolean(HarpoonOffence.SEEN_ON_KEY) && player != null && !patrol.isHostileTo(player)) {
+            HarpoonOffence.noteEscapeWhileSeen(factionId, patrol.getContainingLocation());
+        }
+        mem.unset(HarpoonOffence.SEEN_ON_KEY);
+
         if (factionId != null) {
             Global.getSector().getMemoryWithoutUpdate().set(
                     retryKey(factionId, patrol.getContainingLocation()), true, RETRY_DAYS);

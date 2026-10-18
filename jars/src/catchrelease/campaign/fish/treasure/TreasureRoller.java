@@ -100,9 +100,8 @@ public class TreasureRoller {
         for (FishReward reward : FishRewardRoller.rollLocationData(random, 1, 0)) {
             FishReward.LocationData data = (FishReward.LocationData) reward;
             var spec = FishSpecLoader.getFishSpec(data.speciesId);
-            String description = data.describe();
             data.grant();
-            award.items.add(new TreasureAward.Item(description,
+            award.items.add(new TreasureAward.Item("Range data: " + spec.getDisplayName(),
                     "graphics/icons/intel/remote_survey_data.png", 1, spec.rarity.color));
         }
     }
