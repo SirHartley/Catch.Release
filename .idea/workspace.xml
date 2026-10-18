@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="fanfare sfx">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="hits on shield no longer have harpoon catch sfx">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/treasure/TreasureAward.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/treasure/TreasureAward.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/scratchpad" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/scratchpad" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Changelog" beforeDir="false" afterPath="$PROJECT_DIR$/Changelog" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/colony/AquariumManageDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/colony/AquariumManageDialog.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/shop/FishShopDialog.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/shop/FishShopDialog.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +145,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixed a massive amount of rules" />
     <MESSAGE value="changed module dep to coretto 17" />
     <MESSAGE value="dialogue &amp; formatting" />
     <MESSAGE value="manual play sessions" />
@@ -169,7 +169,8 @@
     <MESSAGE value="mote pop sfx" />
     <MESSAGE value="tooltip corrections&#10;fish spawn location update" />
     <MESSAGE value="fanfare sfx" />
-    <option name="LAST_COMMIT_MESSAGE" value="fanfare sfx" />
+    <MESSAGE value="hits on shield no longer have harpoon catch sfx" />
+    <option name="LAST_COMMIT_MESSAGE" value="hits on shield no longer have harpoon catch sfx" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

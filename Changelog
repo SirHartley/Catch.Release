@@ -21,6 +21,7 @@ Fixed - Legendary and epic trails under breach lights no longer cost a large sha
 Fixed - Automatic payments for jobs and the Outfitter never use a legendary catch; you can still choose one yourself in the hand-in picker
 Removed - Legendary tribute at Kanta's Den is disabled until its placeholder dialogue is replaced
 Fixed - 13 species, including the Dopefish and several legendaries, now face the way they swim in aquarium tanks
+Adjusted - Harpoon hits on shields no longer cause harpoon catch sfx to fire
 
 Legendaries
 Fixed - Legendary notices use their shield or mote colour instead of a generic UI highlight

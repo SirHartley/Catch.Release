@@ -2932,36 +2932,39 @@ You are short. Crablobab checks your credits, checks the crabs, then checks a po
 catchrelease_crabBuyCelebration,DialogOptionSelected,$option == catchrelease_crabBuyCelebration,CatchReleaseCMD crabBuy CELEBRATION,"He reaches into a breast pocket and hands you a box too large to have passed through the opening. ""Celebrate responsibly. Outfitter toggles it! On, off, on again. You know the drill.""",0:catchrelease_crabStall:Continue,
 catchrelease_crabWareParty_horn,DialogOptionSelected,"$option == catchrelease_crabWareParty_horn score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabParty_hornAfford",SetTextHighlights $catchreleaseCrabParty_hornPrice $catchreleaseCrabParty_hornCrabs,"""Party!"" Crablobab lifts a crab out of his breast pocket. It has a paper party horn clamped in its mouthparts.
+$catchreleaseCrabParty_hornAfford","SetTextHighlights $catchreleaseCrabParty_hornPrice $catchreleaseCrabParty_hornCrabs
+CatchReleaseCMD crabPlay PARTY_HORN","""Party!"" Crablobab lifts a crab out of his breast pocket. It has a paper party horn clamped in its mouthparts.
 
 He aims the crab at you. It blows. The paper curl shoots out across the table and stops a finger's width from your nose, then rolls back up with a wheeze.
 
-""Party horn! Fish comes aboard, horn goes off. Goes with the charges. Paper and more paper!"" He sets the crab down beside your drink. ""Demonstration crab. The horn comes on its own.""
+""Party horn! Fish comes aboard, horn goes off. Perfect celebration!"" He sets the crab down beside your drink. ""Demonstration crab. The horn comes on its own.""
 
 He wants $catchreleaseCrabParty_hornPrice for it, and $catchreleaseCrabParty_hornCrabs crabs.","0:catchrelease_crabBuyParty_horn:Pay him
 5:catchrelease_crabPlayParty_horn:Try the horn
 10:catchrelease_crabStall:""Another time.""",
 catchrelease_crabWareParty_hornShort,DialogOptionSelected,"$option == catchrelease_crabWareParty_horn score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabParty_hornAfford",SetTextHighlights $catchreleaseCrabParty_hornPrice $catchreleaseCrabParty_hornCrabs,"""Party!"" Crablobab lifts a crab out of his breast pocket. It has a paper party horn clamped in its mouthparts.
+!$catchreleaseCrabParty_hornAfford","SetTextHighlights $catchreleaseCrabParty_hornPrice $catchreleaseCrabParty_hornCrabs
+CatchReleaseCMD crabPlay PARTY_HORN","""Party!"" Crablobab lifts a crab out of his breast pocket. It has a paper party horn clamped in its mouthparts.
 
 He aims the crab at you. It blows. The paper curl shoots out across the table and stops a finger's width from your nose, then rolls back up with a wheeze.
 
-""Party horn! Fish comes aboard, horn goes off. Goes with the charges. Paper and more paper!"" He sets the crab down beside your drink. ""Demonstration crab. The horn comes on its own.""
+""Party horn! Fish comes aboard, horn goes off. Perfect celebration!"" He sets the crab down beside your drink. ""Demonstration crab. The horn comes on its own.""
 
 He wants $catchreleaseCrabParty_hornPrice for it, and $catchreleaseCrabParty_hornCrabs crabs.
 
 You are short. The crab blows the horn at you again. ""Encouraging!"" Crablobab says, and puts both of them back in the pocket.","5:catchrelease_crabPlayParty_horn:Try the horn
 10:catchrelease_crabStall:""Another time.""",
-catchrelease_crabBuyParty_horn,DialogOptionSelected,$option == catchrelease_crabBuyParty_horn,CatchReleaseCMD crabBuy PARTY_HORN,"The crab lets go of the horn when Crablobab asks it to. He wipes the mouthpiece on his sleeve and hands it over.
+catchrelease_crabBuyParty_horn,DialogOptionSelected,$option == catchrelease_crabBuyParty_horn,CatchReleaseCMD crabBuy PARTY_HORN,"The crab reluctantly lets go of the horn when Crablobab asks it to. He wipes the mouthpiece on his sleeve and hands it over.
 
 ""Outfitter toggles it! Same as the charges. Party when you want a party.""",0:catchrelease_crabStall:Continue,
 catchrelease_crabPlayParty_horn,DialogOptionSelected,$option == catchrelease_crabPlayParty_horn,CatchReleaseCMD crabPlay PARTY_HORN,,,
 catchrelease_crabWareFanfare,DialogOptionSelected,"$option == catchrelease_crabWareFanfare score:10
 CatchReleaseCMD tokens
-$catchreleaseCrabFanfareAfford",SetTextHighlights $catchreleaseCrabFanfarePrice $catchreleaseCrabFanfareCrabs,"""The upgrade!"" Crablobab holds his coat open. On a shelf inside, three crabs sit in a row, each with a little brass fanfare trumpet. A fourth crab stands in front of them holding a toothpick.
+$catchreleaseCrabFanfareAfford","SetTextHighlights $catchreleaseCrabFanfarePrice $catchreleaseCrabFanfareCrabs
+CatchReleaseCMD crabPlay FANFARE","""The big guns!"" Crablobab holds his coat open. On a shelf inside, three crabs sit in a row, each with a little brass fanfare trumpet. A fourth crab stands in front of them holding a toothpick.
 
-The fourth crab raises the toothpick. The other three raise their fanfares.
+The conductor crab raises the toothpick. The other three raise their fanfares and blow a flourish.
 
 ""Fanfare! Fish comes aboard, the section plays. Takes over from the horn. Keep the horn anyway. Somebody has to practise.""
 
@@ -2970,9 +2973,10 @@ He wants $catchreleaseCrabFanfarePrice for it, and $catchreleaseCrabFanfareCrabs
 10:catchrelease_crabStall:""Another time.""",
 catchrelease_crabWareFanfareShort,DialogOptionSelected,"$option == catchrelease_crabWareFanfare score:5
 CatchReleaseCMD tokens
-!$catchreleaseCrabFanfareAfford",SetTextHighlights $catchreleaseCrabFanfarePrice $catchreleaseCrabFanfareCrabs,"""The upgrade!"" Crablobab holds his coat open. On a shelf inside, three crabs sit in a row, each with a little brass fanfare trumpet. A fourth crab stands in front of them holding a toothpick.
+!$catchreleaseCrabFanfareAfford","SetTextHighlights $catchreleaseCrabFanfarePrice $catchreleaseCrabFanfareCrabs
+CatchReleaseCMD crabPlay FANFARE","""The big guns!"" Crablobab holds his coat open. On a shelf inside, three crabs sit in a row, each with a little brass fanfare trumpet. A fourth crab stands in front of them holding a toothpick.
 
-The fourth crab raises the toothpick. The other three raise their fanfares.
+The conductor crab raises the toothpick. The other three raise their fanfares and blow a flourish.
 
 ""Fanfare! Fish comes aboard, the section plays. Takes over from the horn. Keep the horn anyway. Somebody has to practise.""
 
@@ -2980,7 +2984,7 @@ He wants $catchreleaseCrabFanfarePrice for it, and $catchreleaseCrabFanfareCrabs
 
 You are short. The conductor lowers the toothpick. ""Rehearsal, then,"" Crablobab says, and buttons the coat over the section.","5:catchrelease_crabPlayFanfare:Ask the section to play
 10:catchrelease_crabStall:""Another time.""",
-catchrelease_crabBuyFanfare,DialogOptionSelected,$option == catchrelease_crabBuyFanfare,CatchReleaseCMD crabBuy FANFARE,"The conductor taps the toothpick twice on the edge of the shelf. The section files into an inside pocket, fanfares first, and Crablobab buttons it shut.
+catchrelease_crabBuyFanfare,DialogOptionSelected,$option == catchrelease_crabBuyFanfare,CatchReleaseCMD crabBuy FANFARE,"The conductor taps the toothpick twice on the edge of the shelf. The section files into an inside pocket, fanfares first, and Crablobab buttons it shut and hands you a small trombone.
 
 ""Outfitter toggles it! Section plays when the fish lands. Horn gets the night off.""",0:catchrelease_crabStall:Continue,
 catchrelease_crabPlayFanfare,DialogOptionSelected,$option == catchrelease_crabPlayFanfare,CatchReleaseCMD crabPlay FANFARE,,,

@@ -696,7 +696,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 info.addPara(entry.isOn() ? "Switched on." : "Switched off.",
                         entry.isOn() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor(), 16f);
 
-                info.addPara("Yours to switch on or off at any time, at no cost.",
+                info.addPara("Toggle at any time, no cost.",
                         Misc.getGrayColor(), 4f);
                 return;
             }
@@ -718,7 +718,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             }
 
             if (entry.isOwned()) {
-                info.addPara("Already yours - fitting it costs nothing.", Misc.getGrayColor(), 16f);
+                info.addPara("Owned - fitting it is free.", Misc.getGrayColor(), 16f);
                 return;
             }
 
