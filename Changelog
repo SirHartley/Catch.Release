@@ -10,7 +10,13 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
+
+Fish
 Fixed - 13 species, including the Dopefish and several legendaries, now face the way they swim in aquarium tanks
+
+Legendaries
+Added - Lantern Jack now coils for 0.3 seconds within 300 units of a mote, then dashes through it to feed
+Added - A mote swallowed by Lantern Jack bursts into sub-motes thrown out to both sides of the dash, with a new pop sound
 
 1.0.b
 

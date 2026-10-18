@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.reflection.ReflectionUtils;
@@ -20,6 +21,8 @@ import java.util.Map;
 import java.util.Set;
 
 public final class LanternFeedingChecks {
+
+    private static final float TICK = 1f / 60f;
 
     private static int checks;
 
@@ -53,6 +56,7 @@ public final class LanternFeedingChecks {
         emptyShields();
         pursuit();
         buried();
+        lunge();
         exclusions();
         call();
         calledMovement();
@@ -189,7 +193,7 @@ public final class LanternFeedingChecks {
                         == LegendaryShields.HitResult.NONE, "Jack stays catchable without prey");
                 for (int i = 0; i < 10 * 60; i++) jack.advance(1f / 60f);
                 var prey = meal(env, jack.at.x, jack.at.y);
-                LegendaryShields.advanceEater(jack);
+                for (int i = 0; i < 60 && !prey.expired; i++) jack.advance(TICK);
                 check(prey.expired && state.shieldUnits == 1 && LegendaryShields.isShielded(jack),
                         "eating restores a hunt shield after the stack empties");
                 check(LegendaryShields.onHarpoonContact(jack.getMote(), explosive)
@@ -215,7 +219,7 @@ public final class LanternFeedingChecks {
             check(LegendaryChases.getState("lantern_jack").shieldUnits == 3, "meal cannot be counted twice");
             var extra = meal(env, jack.at.x, jack.at.y);
             Vector2f oldTarget = new Vector2f((Vector2f) ReflectionUtils.get(jack, "target", null, true));
-            LegendaryShields.advanceEater(jack);
+            LegendaryShields.advanceEater(jack, TICK);
             check(!extra.expired && !(boolean) ReflectionUtils.get(jack, "hunting", null, true)
                     && oldTarget.equals(ReflectionUtils.get(jack, "target", null, true)),
                     "full shields ignore nearby prey without retargeting");
@@ -240,13 +244,75 @@ public final class LanternFeedingChecks {
                 }
             };
             ReflectionUtils.set(env.lamps, "impressionRenderer", impressions, true);
-            LegendaryShields.advanceEater(jack);
+            LegendaryShields.advanceEater(jack, TICK);
             check(!meal.expired, "passive hunt leaves unexposed buried prey alone");
             reveal[0] = 1f;
-            LegendaryShields.advanceEater(jack);
+            LegendaryShields.advanceEater(jack, TICK);
             check(meal.expired && env.fish.size() == 3, "exposed buried prey is surfaced");
-            check(env.fish.get(2).expired && LegendaryChases.getState("lantern_jack").shieldUnits == 3,
+            var surfaced = env.fish.get(2);
+            check(!surfaced.expired, "the surfaced mote is not swallowed before the lunge");
+            for (int i = 0; i < 60 && !surfaced.expired; i++) jack.advance(TICK);
+            check(surfaced.expired && LegendaryChases.getState("lantern_jack").shieldUnits == 3,
                     "surfaced prey within reach is swallowed once");
+        }
+    }
+
+    /** Closing, the coil, the dash through, and the pace each stage runs at. */
+    private static void lunge() {
+        for (int fps : new int[]{30, 60, 144}) try (var env = new LegendaryEscapeChecks.Environment()) {
+            var jack = env.real("lantern_jack");
+            var state = LegendaryChases.getState("lantern_jack");
+            state.shieldUnits = 0;
+            jack.at.set(0f, 0f);
+            jack.setSwimTarget(new Vector2f(0f, 3000f));
+            var meal = meal(env, FishEntityPlugin.LUNGE_RANGE + 200f, 0f);
+
+            float dt = 1f / fps;
+            jack.advance(dt);
+            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.NONE,
+                    "prey beyond lunge range is only approached at " + fps + " Hz");
+
+            for (int i = 0; i < fps * 10
+                    && jack.getLungePhase() == FishEntityPlugin.LungePhase.NONE; i++) {
+                jack.advance(dt);
+            }
+            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.COIL
+                            && Misc.getDistance(jack.at, meal.at) <= FishEntityPlugin.LUNGE_RANGE,
+                    "closing inside lunge range starts the coil at " + fps + " Hz");
+            check(LegendaryShields.getSpeedMult(jack) < 1f,
+                    "the coil is slower than any ordinary pace at " + fps + " Hz");
+
+            Vector2f coiledAt = new Vector2f(jack.at);
+            for (int i = 0; i < fps * 10
+                    && jack.getLungePhase() == FishEntityPlugin.LungePhase.COIL; i++) {
+                jack.advance(dt);
+            }
+            check(!meal.expired, "the coil does not swallow at " + fps + " Hz");
+            check(Misc.getDistance(coiledAt, jack.at) < FishEntityPlugin.LUNGE_RANGE,
+                    "the coil crawls rather than closing the gap at " + fps + " Hz");
+            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.DASH
+                            && LegendaryShields.getSpeedMult(jack) > 2.6f,
+                    "the dash follows the coil and outruns evasion pace at " + fps + " Hz");
+
+            for (int i = 0; i < fps * 10 && !meal.expired; i++) jack.advance(dt);
+            check(meal.expired && state.shieldUnits == 1,
+                    "the dash swallows the mote at " + fps + " Hz");
+            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.NONE,
+                    "a swallowed mote ends the lunge at " + fps + " Hz");
+        }
+
+        // a mote that leaves during the coil is not chased by a dash with nothing on its line
+        try (var env = new LegendaryEscapeChecks.Environment()) {
+            var jack = env.real("lantern_jack");
+            LegendaryChases.getState("lantern_jack").shieldUnits = 0;
+            jack.at.set(0f, 0f);
+            var meal = meal(env, 100f, 0f);
+            jack.advance(TICK);
+            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.COIL, "prey underfoot coils");
+            meal.expired = true;
+            jack.advance(TICK);
+            check(jack.getLungePhase() == FishEntityPlugin.LungePhase.NONE,
+                    "losing the mote during the coil drops the lunge");
         }
     }
 
@@ -257,23 +323,23 @@ public final class LanternFeedingChecks {
             var meal = env.real("meal");
             meal.spec.rarity = FishRarity.COMMON;
             meal.quest = true;
-            LegendaryShields.advanceEater(jack);
+            LegendaryShields.advanceEater(jack, TICK);
             check(!meal.expired, "quest fish protected");
             meal.quest = false;
             meal.pond = true;
-            LegendaryShields.advanceEater(jack);
+            LegendaryShields.advanceEater(jack, TICK);
             check(!meal.expired, "pond stock protected");
             meal.pond = false;
             meal.setHeld(true);
-            LegendaryShields.advanceEater(jack);
+            LegendaryShields.advanceEater(jack, TICK);
             check(!meal.expired, "held catch protected");
             meal.setHeld(false);
             LegendaryChases.getState("lantern_jack").shieldUnits = LegendaryShields.JACK_STACK_MAX;
-            LegendaryShields.advanceEater(jack);
+            LegendaryShields.advanceEater(jack, TICK);
             check(!meal.expired, "full shell stack stops feeding");
             LegendaryChases.getState("lantern_jack").shieldUnits = 0;
             jack.startEvasive();
-            LegendaryShields.advanceEater(jack);
+            LegendaryShields.advanceEater(jack, TICK);
             check(!meal.expired, "evasion takes priority over feeding");
         }
     }
