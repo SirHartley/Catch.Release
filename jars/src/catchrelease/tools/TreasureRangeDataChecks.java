@@ -85,7 +85,7 @@ public final class TreasureRangeDataChecks extends TreasureRoller {
                     if (result.items.size() == 2) {
                         drops++;
                         TreasureAward.Item data = result.items.get(1);
-                        check(data.name.equals("range data on the unknown"), "only eligible species selected");
+                        check(data.name.equals("Range data: unknown"), "only eligible species selected");
                         check(data.color.equals(unknown.rarity.color), "species colour retained");
                         check(data.sprite.equals("graphics/icons/intel/remote_survey_data.png"), "no uncaught portrait revealed");
                         check(FishPresence.hasRangeData(unknown) && !FishLog.isCaught(unknown.id), "map unlock without a catch");
