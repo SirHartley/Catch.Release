@@ -11,7 +11,7 @@ None
 
 1.0.c - UNRELEASED
 Fixed - Automatic payments for jobs and the Outfitter never use a legendary catch; you can still choose one yourself in the hand-in picker
-Added - A landed legendary can be offered to Warlord Kanta as tribute for her protection; she keeps it on display at Kanta's Den
+Removed - Legendary tribute at Kanta's Den is disabled until its placeholder dialogue is replaced
 Fixed - 13 species, including the Dopefish and several legendaries, now face the way they swim in aquarium tanks
 
 1.0.b

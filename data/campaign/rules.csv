@@ -3957,52 +3957,52 @@ catchrelease_startup_boughtFish,DialogOptionSelected,$option == catchrelease_sta
 
 The factor looks pleased that you've understood.",100:catchrelease_jobClose:Leave.,
 ,,,,,,
-# kanta's protection: legendary tribute,,,,,,
-catchrelease_kpLegendaryManta,KPFindGifts,"CatchReleaseCMD kantaHasLegendary abyssal_ghost_manta
-$kpNumGifts++",,,"catchrelease_kpGiftManta:Abyssal Ghost Manta, a legendary catch",Joins vanilla's audience gift list. Deliberately no $kpNumGifts < 5 gate: mod rows load after vanilla's and would be cut. The increment is vanilla's contract and unlocks its Favor option.
-catchrelease_kpLegendaryJack,KPFindGifts,"CatchReleaseCMD kantaHasLegendary lantern_jack
-$kpNumGifts++",,,"catchrelease_kpGiftJack:Lantern Jack, a legendary catch",
-catchrelease_kpLegendaryQuorum,KPFindGifts,"CatchReleaseCMD kantaHasLegendary quorum
-$kpNumGifts++",,,"catchrelease_kpGiftQuorum:The Quorum, a legendary catch",
-catchrelease_kpLegendaryMoray,KPFindGifts,"CatchReleaseCMD kantaHasLegendary slipstream_moray
-$kpNumGifts++",,,"catchrelease_kpGiftMoray:Slipstream Moray, a legendary catch",
-catchrelease_kpLegendaryDawn,KPFindGifts,"CatchReleaseCMD kantaHasLegendary false_dawn
-$kpNumGifts++",,,"catchrelease_kpGiftDawn:False Dawn, a legendary catch",
-catchrelease_kpLegendaryImposter,KPFindGifts,"CatchReleaseCMD kantaHasLegendary longliner
-$kpNumGifts++",,,"catchrelease_kpGiftImposter:The Imposter, a legendary catch",
-catchrelease_kpGiftMantaSel,DialogOptionSelected,$option == catchrelease_kpGiftManta,"CatchReleaseCMD kantaGiftTokens abyssal_ghost_manta
-FireBest CatchReleaseKantaGift",,,
-catchrelease_kpGiftJackSel,DialogOptionSelected,$option == catchrelease_kpGiftJack,"CatchReleaseCMD kantaGiftTokens lantern_jack
-FireBest CatchReleaseKantaGift",,,
-catchrelease_kpGiftQuorumSel,DialogOptionSelected,$option == catchrelease_kpGiftQuorum,"CatchReleaseCMD kantaGiftTokens quorum
-FireBest CatchReleaseKantaGift",,,
-catchrelease_kpGiftMoraySel,DialogOptionSelected,$option == catchrelease_kpGiftMoray,"CatchReleaseCMD kantaGiftTokens slipstream_moray
-FireBest CatchReleaseKantaGift",,,
-catchrelease_kpGiftDawnSel,DialogOptionSelected,$option == catchrelease_kpGiftDawn,"CatchReleaseCMD kantaGiftTokens false_dawn
-FireBest CatchReleaseKantaGift",,,
-catchrelease_kpGiftImposterSel,DialogOptionSelected,$option == catchrelease_kpGiftImposter,"CatchReleaseCMD kantaGiftTokens longliner
-FireBest CatchReleaseKantaGift",,,
-catchrelease_kpGift,CatchReleaseKantaGift,,"CatchReleaseCMD highlightFishText $catchrelease_kantaGiftName
+# kanta legendary tribute - DISABLED PLACEHOLDER; replace all dialogue before re-enabling,,,,,,
+#catchrelease_kpLegendaryManta,KPFindGifts,"CatchReleaseCMD kantaHasLegendary abyssal_ghost_manta
+$kpNumGifts++",,,"catchrelease_kpGiftManta:Abyssal Ghost Manta, a legendary catch",PLACEHOLDER: disabled pending dialogue replacement. Joins vanilla's audience gift list. Deliberately no $kpNumGifts < 5 gate: mod rows load after vanilla's and would be cut. The increment is vanilla's contract and unlocks its Favor option.
+#catchrelease_kpLegendaryJack,KPFindGifts,"CatchReleaseCMD kantaHasLegendary lantern_jack
+$kpNumGifts++",,,"catchrelease_kpGiftJack:Lantern Jack, a legendary catch",PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpLegendaryQuorum,KPFindGifts,"CatchReleaseCMD kantaHasLegendary quorum
+$kpNumGifts++",,,"catchrelease_kpGiftQuorum:The Quorum, a legendary catch",PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpLegendaryMoray,KPFindGifts,"CatchReleaseCMD kantaHasLegendary slipstream_moray
+$kpNumGifts++",,,"catchrelease_kpGiftMoray:Slipstream Moray, a legendary catch",PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpLegendaryDawn,KPFindGifts,"CatchReleaseCMD kantaHasLegendary false_dawn
+$kpNumGifts++",,,"catchrelease_kpGiftDawn:False Dawn, a legendary catch",PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpLegendaryImposter,KPFindGifts,"CatchReleaseCMD kantaHasLegendary longliner
+$kpNumGifts++",,,"catchrelease_kpGiftImposter:The Imposter, a legendary catch",PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftMantaSel,DialogOptionSelected,$option == catchrelease_kpGiftManta,"CatchReleaseCMD kantaGiftTokens abyssal_ghost_manta
+FireBest CatchReleaseKantaGift",,,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftJackSel,DialogOptionSelected,$option == catchrelease_kpGiftJack,"CatchReleaseCMD kantaGiftTokens lantern_jack
+FireBest CatchReleaseKantaGift",,,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftQuorumSel,DialogOptionSelected,$option == catchrelease_kpGiftQuorum,"CatchReleaseCMD kantaGiftTokens quorum
+FireBest CatchReleaseKantaGift",,,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftMoraySel,DialogOptionSelected,$option == catchrelease_kpGiftMoray,"CatchReleaseCMD kantaGiftTokens slipstream_moray
+FireBest CatchReleaseKantaGift",,,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftDawnSel,DialogOptionSelected,$option == catchrelease_kpGiftDawn,"CatchReleaseCMD kantaGiftTokens false_dawn
+FireBest CatchReleaseKantaGift",,,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftImposterSel,DialogOptionSelected,$option == catchrelease_kpGiftImposter,"CatchReleaseCMD kantaGiftTokens longliner
+FireBest CatchReleaseKantaGift",,,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGift,CatchReleaseKantaGift,,"CatchReleaseCMD highlightFishText $catchrelease_kantaGiftName
 FireBest CatchReleaseKantaGiftReaction
 FireBest CatchReleaseKantaGiftVerdict
-CatchReleaseCMD kantaGiveLegendary $catchrelease_kantaGiftSpecies","Your deck crew wheel a sealed tank in on a cargo sled and set it at the foot of the throne. Inside it, $catchrelease_kantaGiftName hangs very still.",kpLeaveProt:Continue,Vanilla kpLeaveProt grants the protection and closes the audience.
-catchrelease_kpGiftReaction,CatchReleaseKantaGiftReaction,,,"Doctor Cydonia steps between the sled and the warlord. ""With respect, this is a fish. We discussed fish."" He glances at the throne. ""After the lobsters.""
+CatchReleaseCMD kantaGiveLegendary $catchrelease_kantaGiftSpecies","Your deck crew wheel a sealed tank in on a cargo sled and set it at the foot of the throne. Inside it, $catchrelease_kantaGiftName hangs very still.",kpLeaveProt:Continue,PLACEHOLDER: disabled pending dialogue replacement. Vanilla kpLeaveProt grants the protection and closes the audience.
+#catchrelease_kpGiftReaction,CatchReleaseKantaGiftReaction,,,"Doctor Cydonia steps between the sled and the warlord. ""With respect, this is a fish. We discussed fish."" He glances at the throne. ""After the lobsters.""
 
-""WE HAVE HEARD OF THIS ONE,"" Kanta booms. ""Spacers drink to it from here to the Abyss. Every captain who docks at the Den will come to look at it, and every one of them will know whose it is.""",,
-catchrelease_kpGiftReactionScarred,CatchReleaseKantaGiftReaction,$catchrelease_kantaGiftScarred,,"Doctor Cydonia leans toward the tank, then away from it. ""It has been through a fight, Warlord. Several.""
+""WE HAVE HEARD OF THIS ONE,"" Kanta booms. ""Spacers drink to it from here to the Abyss. Every captain who docks at the Den will come to look at it, and every one of them will know whose it is.""",,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftReactionScarred,CatchReleaseKantaGiftReaction,$catchrelease_kantaGiftScarred,,"Doctor Cydonia leans toward the tank, then away from it. ""It has been through a fight, Warlord. Several.""
 
-""So has everything worth keeping,"" Kanta booms. ""WE ACCEPT.""",,Poor or Terrible grade: scars from the chase.
-catchrelease_kpGiftVerdict,CatchReleaseKantaGiftVerdict,,,,,Fallback for a legendary without its own line.
-catchrelease_kpGiftVerdictManta,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == abyssal_ghost_manta,,"""Kanta never liked that song,"" she booms. ""Kanta will like this.""",,
-catchrelease_kpGiftVerdictJack,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == lantern_jack,,"""It lures ships in with a dead man's beacon,"" Kanta booms. ""Kanta approves of its methods.""",,
-catchrelease_kpGiftVerdictQuorum,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == quorum,,"""Ten thousand mouths answering to one,"" Kanta booms. ""Kanta keeps a fleet like that.""",,
-catchrelease_kpGiftVerdictMoray,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == slipstream_moray,,"""The eel that bends the charts,"" Kanta booms. ""Our navigators will curse it every morning.""",,
-catchrelease_kpGiftVerdictDawn,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == false_dawn,,"Cydonia checks the tank's gauge and steps back. ""It is reading heat the glass should not be able to hold.""
+""So has everything worth keeping,"" Kanta booms. ""WE ACCEPT.""",,PLACEHOLDER: disabled pending dialogue replacement. Poor or Terrible grade: scars from the chase.
+#catchrelease_kpGiftVerdict,CatchReleaseKantaGiftVerdict,,,,,PLACEHOLDER: disabled pending dialogue replacement. Fallback for a legendary without its own line.
+#catchrelease_kpGiftVerdictManta,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == abyssal_ghost_manta,,"""Kanta never liked that song,"" she booms. ""Kanta will like this.""",,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftVerdictJack,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == lantern_jack,,"""It lures ships in with a dead man's beacon,"" Kanta booms. ""Kanta approves of its methods.""",,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftVerdictQuorum,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == quorum,,"""Ten thousand mouths answering to one,"" Kanta booms. ""Kanta keeps a fleet like that.""",,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftVerdictMoray,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == slipstream_moray,,"""The eel that bends the charts,"" Kanta booms. ""Our navigators will curse it every morning.""",,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftVerdictDawn,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == false_dawn,,"Cydonia checks the tank's gauge and steps back. ""It is reading heat the glass should not be able to hold.""
 
-""Then put it where the Hegemony envoys wait,"" Kanta booms.",,
-catchrelease_kpGiftVerdictImposter,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == longliner,,"""They say it wore a boat to take sailors,"" Kanta booms. ""Kanta has hired worse disguises.""",,
-catchrelease_kpTrophyDesc,MarketPostOpen,"$market.id == kantas_den
+""Then put it where the Hegemony envoys wait,"" Kanta booms.",,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpGiftVerdictImposter,CatchReleaseKantaGiftVerdict,$catchrelease_kantaGiftSpecies == longliner,,"""They say it wore a boat to take sailors,"" Kanta booms. ""Kanta has hired worse disguises.""",,PLACEHOLDER: disabled pending dialogue replacement.
+#catchrelease_kpTrophyDesc,MarketPostOpen,"$market.id == kantas_den
 $market.catchrelease_kantaTrophy score:1000
 !$market.catchrelease_kantaTrophyShown","$market.catchrelease_kantaTrophyShown = true 0
 CatchReleaseCMD highlightFishText $market.catchrelease_kantaTrophyName
-FireBest MarketPostOpen","A queue of pirate captains winds toward Kanta's court. Each is waiting for a look at the $market.catchrelease_kantaTrophyName, your gift to the warlord, in its tank beside the throne.",,Mirrors vanilla kpRemnantTrophyDesc.
+FireBest MarketPostOpen","A queue of pirate captains winds toward Kanta's court. Each is waiting for a look at the $market.catchrelease_kantaTrophyName, your gift to the warlord, in its tank beside the throne.",,PLACEHOLDER: disabled pending dialogue replacement. Mirrors vanilla kpRemnantTrophyDesc.
