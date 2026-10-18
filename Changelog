@@ -10,7 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
-Added - Neutrino Lens, a Lens Array module: while the Neutrino Detector is on, rare, epic and legendary patterns in the system show as blue, red and purple spikes; it grants the Neutrino Detector if you do not have it
+Added - Neutrino Lens, a Lens Array module: while the Neutrino Detector is on, rare, epic and legendary patterns in the system show as detector spikes in their rarity colours; it grants the Neutrino Detector if you do not have it
 Changed - The catch screen's recovered-treasure list lines every item up the same way, with its quantity on the right, and range data reads "Range data: <fish>"
 Changed - Contract hunters are sent less often for a single harpoon hit, but refusing a repair bill can now bring them; paying the patrol later calls them off, and being seen with your transponder on after a dark hit and then running can bring them too
 Changed - Refusing a harpooned crew's repair bill no longer makes them chase you; they report you to a local patrol, and every patrol in that system that sees you then demands the fine until it is paid
