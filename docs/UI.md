@@ -458,6 +458,7 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   retained lamp reveals suppress them too. Pause freezes both cadence and rings.
   Each ring respects viewport alpha and culling. Load restores the passive controller
   through the lamp ability's existing advance; it does not save timers or renderers.
+- Neutrino Lens spikes are untextured additive triangles drawn on the ABOVE layer around the player fleet. Each base sits 30 units inside the outer edge of vanilla's detector band, so the spike reads as part of the ring. Each spike is a faint wide glow under a narrow core, with alpha fading toward the tip. Rare is (60,120,255), epic (255,50,50), legendary (185,60,255). Height falls from full at 2,000 units to 35% at 16,000, and scales with the detector's progress and viewport alpha.
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short

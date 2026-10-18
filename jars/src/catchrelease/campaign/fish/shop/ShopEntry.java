@@ -5,11 +5,13 @@ import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.SpriteLoader;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.impl.campaign.ids.Abilities;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.graphics.SpriteAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -287,6 +289,10 @@ public class ShopEntry {
         // own before fit - ownership is what was paid for; the slot can be swapped freely afterward
         TackleManager.own(tackle);
         TackleManager.fit(rig, tackle);
+
+        if (tackle == Tackle.NEUTRINO_LENS) {
+            FishingIntro.grant(Abilities.GRAVITIC_SCAN, null);
+        }
 
         // same reason - deactivate so the rig picks up the new module
         stopAbility(getRigAbilityId());
