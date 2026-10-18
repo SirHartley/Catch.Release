@@ -36,9 +36,8 @@ public class QuorumShellGame {
     public static final float SPLIT_SECONDS = 0.8f;
     public static final float ESCAPE_SPIN_SECONDS = 1.2f;
     public static final int ESCAPE_ROTATIONS = 4;
-    public static final int ESCAPE_DECOYS = 12;
-    // Outer-ring illusions participate in the outward half of a swap too.
-    private static final float CLEARANCE_RADIUS = RING_RADIUS * 2.5f * 1.55f;
+    // Swapping bodies bulge outward past the ring.
+    private static final float CLEARANCE_RADIUS = RING_RADIUS * 1.55f;
 
     protected static class Body {
 
@@ -47,7 +46,6 @@ public class QuorumShellGame {
         float fromAngle, toAngle, swapLeft;
         float radiusBias = 1f;
         float splitLeft;
-        boolean illusion;
     }
 
     protected static class State {
@@ -101,9 +99,6 @@ public class QuorumShellGame {
             body.swapLeft = 0f;
             body.radiusBias = 1f;
         }
-        while (state.bodies.stream().filter(b -> b.illusion).count() < ESCAPE_DECOYS) {
-            addDecoy(state, true);
-        }
         state.escapeSpinLeft = ESCAPE_SPIN_SECONDS;
         state.swapTimer = SWAP_MIN_SECONDS;
     }
@@ -142,7 +137,6 @@ public class QuorumShellGame {
 
             Body decoy = new Body();
             decoy.token = other;
-            decoy.illusion = plugin.isPhantom();
             decoy.angle = Misc.getAngleInDegrees(state.center, other.getLocation());
             state.bodies.add(decoy);
         }
@@ -151,17 +145,14 @@ public class QuorumShellGame {
     }
 
     protected static void replenish(State state) {
-        while (state.bodies.stream().filter(b -> !b.illusion).count() < DECOYS + 1) {
-            addDecoy(state, false);
-        }
+        while (state.bodies.size() < DECOYS + 1) addDecoy(state);
     }
 
-    protected static void addDecoy(State state, boolean illusion) {
+    protected static void addDecoy(State state) {
         float slot = freeSlotAngle(state);
         FishEntityPlugin.Params params = new FishEntityPlugin.Params(
                 new Vector2f(state.real.getLocation()), LegendaryShields.SHARD_SPECIES);
         params.decoyAnchor = state.real;
-        params.phantom = illusion;
 
         SectorEntityToken token = state.real.getContainingLocation().addCustomEntity(
                 Misc.genUID(), "Mote", "catchrelease_Mote", null, params);
@@ -170,7 +161,6 @@ public class QuorumShellGame {
         Body decoy = new Body();
         decoy.token = token;
         decoy.angle = slot;
-        decoy.illusion = illusion;
         decoy.splitLeft = SPLIT_SECONDS;
         state.bodies.add(decoy);
     }
@@ -255,7 +245,7 @@ public class QuorumShellGame {
             if (isHeld(body)) continue;
             body.angle += spin;
 
-            float radius = RING_RADIUS * (body.illusion ? 2.5f : 1f);
+            float radius = RING_RADIUS;
 
             if (body.swapLeft > 0f) {
                 body.swapLeft -= amount;

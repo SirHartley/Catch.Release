@@ -432,10 +432,12 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   the Jack, not the mote, because the mote is expired on the same frame and an effect owned by it
   would never draw. Sub-mote positions are derived from one clock rather than integrated, so there
   is no per-frame state to drift or leak and a pause holds the burst in place. The sub-motes are
-  visual only; a real entity here would be edible and harpoonable. It uses the same
-  `getShieldAlpha` lamp-and-viewport fade as the shields, so it is lamp-only like the rest of a
-  legendary's extras, and sets colour, size, alpha and blend on the shared sprite before every
-  draw.
+  visual only; a real entity here would be edible and harpoonable. Eighteen pieces spread up to
+  about 280 units over 0.9 seconds, each with a 0.35× bright core, fading linearly. Its brightness is
+  the lamp at the burst (`getBeamStrengthAt(popOrigin)` × 3, clamped) times viewport alpha, not the
+  Jack's lamp fade, because the Jack has run on. `getRenderRange` covers the burst while it lasts,
+  since the engine culls by the Jack's position. It sets colour, size, alpha and blend on the shared
+  sprite before every draw.
 - Legendary floating notices use `LegendaryShields.say` and the fish's shield
   colour, never the generic UI highlight. Mine-anchored
   recharge passes the mine/shield colour explicitly; Quorum escort updates use its
@@ -447,9 +449,11 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   covers shield hits, the Lantern call, feeding, Quorum feedback and the Imposter alert.
   The stable `CampaignFloatingText.offset` and `label` fields are accessed through
   `ReflectionUtils`; Manta notices still detach before a slot swap.
-- Needle Sensor reuses `RippleRingRenderer`: a fixed emission point, 100-unit outer
-  radius, 1.5-unit starting width, 3.5-second growth/fade and pale blue-grey at 55/255
-  colour alpha. It shows no species icon or rarity colour. Render-time checks retire
+- Needle Sensor reuses `RippleRingRenderer`: a fixed emission point, 180-unit outer
+  radius, 5-second growth/fade and opaque pale blue (`RIPPLE_COLOR`). Its 4-unit
+  starting width is multiplied by the viewport's view mult when zoomed out, because
+  buried motes spawn beyond the default view and a fixed world width goes sub-pixel.
+  It shows no species icon or rarity colour. Render-time checks retire
   rings immediately on lamp activation, refitting, departure, capture or provocation;
   retained lamp reveals suppress them too. Pause freezes both cadence and rings.
   Each ring respects viewport alpha and culling. Load restores the passive controller

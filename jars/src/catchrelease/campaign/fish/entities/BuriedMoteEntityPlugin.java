@@ -3,7 +3,9 @@ package catchrelease.campaign.fish.entities;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
+import catchrelease.campaign.fish.legendary.LegendaryTrail;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
@@ -27,6 +29,7 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
     private transient float velocityX;
     private transient float velocityY;
+    private transient LegendaryTrail trail;
 
     public static class Params {
 
@@ -85,6 +88,15 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         advanceFish(amount);
         velocityX = (entity.getLocation().x - x) / amount;
         velocityY = (entity.getLocation().y - y) / amount;
+        advanceTrail();
+    }
+
+    // Only lit stretches are recorded: a buried mote is unseen, so the lamps show where it swims, not where it swam.
+    protected void advanceTrail() {
+        FishRarity rarity = getRarity();
+        if (!LegendaryTrail.hasTrail(rarity)) return;
+        if (trail == null || trail.isExpired()) trail = new LegendaryTrail();
+        trail.sample(entity, SearchlightAbilityPlugin.getBeamVisibilityAt(entity.getLocation()) > 0f, rarity);
     }
 
     public Vector2f getMovementVelocity() {

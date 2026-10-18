@@ -4,6 +4,7 @@ import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.legendary.LegendaryTrail;
 import catchrelease.campaign.fish.legendary.MantaFormationModule;
@@ -177,6 +178,36 @@ public final class LegendaryTrailChecks {
             decoy.field("phantom", true);
             decoy.tick(20f, 0f);
             check(decoy.recorded.paint(f) > 0f, "phantoms keep their trails");
+
+            Mote token = new Mote(f, FishRarity.LEGENDARY);
+            class Buried extends BuriedMoteEntityPlugin {
+
+                Buried() { entity = token.getMote(); }
+                @Override public FishSpec getFishSpec() { return token.spec; }
+                void tick(float x) { token.at.set(x, 0f); advanceTrail(); }
+            }
+            Buried buried = new Buried();
+            ReflectionUtils.set(buried, "trail", token.recorded, true);
+            f.on = false;
+            buried.tick(0f);
+            buried.tick(10f);
+            f.on = true;
+            check(token.recorded.paint(f) == 0f, "a buried mote records nothing while unlit");
+            buried.tick(20f);
+            buried.tick(30f);
+            check(token.recorded.paint(f) > 0f && f.env.haunt.getActiveSpeciesId() == null,
+                    "a dormant buried legendary shows its trail under the lamps");
+            token.spec.rarity = FishRarity.EPIC;
+            token.recorded.advance(5.1f);
+            buried.tick(40f);
+            buried.tick(50f);
+            check(token.recorded.paint(f) > 0f && token.recorded.color().equals(FishRarity.EPIC.color),
+                    "a buried epic shows its trail under the lamps");
+            token.spec.rarity = FishRarity.COMMON;
+            token.recorded.advance(5.1f);
+            buried.tick(60f);
+            buried.tick(70f);
+            check(token.recorded.paint(f) == 0f, "ordinary buried fish have no trails");
         }
     }
 

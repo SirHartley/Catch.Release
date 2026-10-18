@@ -10,6 +10,10 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
+Removed - A failed Quorum catch no longer scatters twelve extra decoys around the shell game
+Fixed - Needle Sensor ripples are brighter, larger and stay visible when zoomed out to where buried fish swim
+Fixed - Lantern Jack's feeding dash now runs through the mote and out the other side, and the burst it leaves is clearly visible
+Fixed - Dormant legendaries and epics leave their trail where breach lights catch them, not only after they are provoked
 Added - Uncommon fishing chests have a 25% chance to include previously unknown range data alongside their normal loot, including when using a Lifting Rig
 Fixed - Loading a save with Lantern Jack surfaced in the current system no longer crashes the game
 Fixed - Legendary and epic trails under breach lights no longer cost a large share of frame time

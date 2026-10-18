@@ -50,7 +50,6 @@ public class LegendaryShields {
     public static final int DAWN_CHARGES_MAX = 3;
 
     public static final float EAT_SEEK_RANGE = 3500f;
-    public static final float EAT_RANGE = 80f;
     public static final float FLARE_PULL_RANGE = 3000f;
     public static final float LURE_SECONDS = 20f;
     public static final int LURE_COUNT_MIN = 1;
@@ -394,7 +393,7 @@ public class LegendaryShields {
      * The dash is what swallows. Nothing is eaten on contact alone, so every meal has a direction
      * and the burst it leaves can be thrown out across it.
      */
-    public static void advanceEater(FishEntityPlugin fish, float amount) {
+    public static void advanceEater(FishEntityPlugin fish) {
         if (asLegendaryMote(fish) == null) return;
         if (!CHARGE_SHIELD_SPECIES.equals(fish.getFishSpec().id)) return;
 
@@ -405,6 +404,13 @@ public class LegendaryShields {
         }
 
         LegendaryChases.Chase state = LegendaryChases.getState(CHARGE_SHIELD_SPECIES);
+
+        // a dash runs its line to the end whatever it ate on the way, so it comes before the stack and prey checks
+        if (fish.getLungePhase() == FishEntityPlugin.LungePhase.DASH) {
+            advanceDash(fish, state);
+            return;
+        }
+
         if (getJackStack(state) >= getJackLimit()) {
             fish.clearLunge();
             return;
@@ -441,57 +447,61 @@ public class LegendaryShields {
         fish.setHunting(true);
 
         switch (fish.getLungePhase()) {
-            case DASH -> {
-                fish.setSwimTarget(fish.getLungeOverrun());
-                if (!swallow(fish, self, prey, state, amount)) {
-                    // the mote slipped the line; break off and close again
-                    if (fish.isLungeElapsed()) fish.clearLunge();
-                }
-            }
             case COIL -> {
                 fish.setSwimTarget(new Vector2f(prey.getLocation()));
                 if (fish.isLungeElapsed()) {
                     fish.startLungeDash(Misc.getAngleInDegrees(self.getLocation(),
-                            prey.getLocation()));
+                            prey.getLocation()), prey);
                 }
             }
             case NONE -> {
                 fish.setSwimTarget(new Vector2f(prey.getLocation()));
                 if (best <= FishEntityPlugin.LUNGE_RANGE) fish.startLungeCoil();
             }
+            default -> { }
         }
     }
 
-    /**
-     * Consumes the mote if this frame's dash reaches it.
-     * <p>
-     * The reach grows by the distance the Jack covered last frame: the test runs before the
-     * frame's movement, and a dash at five times prowl pace can clear {@link #EAT_RANGE} in one
-     * step on a long frame.
-     *
-     * @return whether the mote was swallowed
-     */
-    private static boolean swallow(FishEntityPlugin fish, SectorEntityToken self,
-                                   SectorEntityToken prey, LegendaryChases.Chase state,
-                                   float amount) {
-        float reach = EAT_RANGE + fish.getMovementVelocity().length() * amount;
-        if (Misc.getDistance(self.getLocation(), prey.getLocation()) > reach) return false;
+    // The dash holds its line to a fixed exit past the mote, eating the mote as the Jack's centre crosses it.
+    private static void advanceDash(FishEntityPlugin fish, LegendaryChases.Chase state) {
+        fish.setHunting(true);
+        fish.setSwimTarget(fish.getLungeOverrun());
 
+        SectorEntityToken prey = fish.getLungePrey();
+        if (!fish.isLungeFed() && prey != null && isEdible(prey) && isRunThrough(fish, prey)) {
+            swallow(fish, prey, state);
+        }
+
+        // a mote that dodged the line is simply missed; the Jack closes again afterwards
+        if (fish.isLungePastExit() || fish.isLungeElapsed()) fish.clearLunge();
+    }
+
+    // Checked before this frame's move, so the crossing frame is caught one frame late at most.
+    private static boolean isRunThrough(FishEntityPlugin fish, SectorEntityToken prey) {
+        if (fish.getLungeProgressPast(prey.getLocation()) < 0f) return false;
+
+        Vector2f dir = Misc.getUnitVectorAtDegreeAngle(fish.getLungeHeading());
+        Vector2f self = fish.getMote().getLocation();
+        float dx = self.x - prey.getLocation().x;
+        float dy = self.y - prey.getLocation().y;
+        float across = Math.abs(dx * -dir.y + dy * dir.x);
+
+        return across <= FishEntityPlugin.LUNGE_SWALLOW_WIDTH;
+    }
+
+    private static void swallow(FishEntityPlugin fish, SectorEntityToken prey, LegendaryChases.Chase state) {
         Color moteColor = prey.getCustomPlugin() instanceof FishEntityPlugin meal
                 ? meal.getMoteColor() : null;
         Vector2f at = new Vector2f(prey.getLocation());
 
         // A fading mote is still edible on the next frame. Consume it once.
         prey.setExpired(true);
+        fish.markLungeFed();
         fish.popMote(at, fish.getLungeHeading(), moteColor);
-        fish.clearLunge();
 
         state.shieldUnits = Math.min(getJackLimit(), getJackStack(state) + 1);
-        if (state.shieldUnits == getJackLimit()) fish.setHunting(false);
         fish.flashShield();
-        say(self, "Mote consumed. Shield layer gained.");
-
-        return true;
+        say(fish.getMote(), "Mote consumed. Shield layer gained.");
     }
 
     public static void lureFlare(FishEntityPlugin jack) {

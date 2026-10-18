@@ -92,21 +92,26 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     // the feeding lunge: close, coil, then run the line through the mote
     public static final float LUNGE_RANGE = 300f;
     public static final float LUNGE_COIL_SECONDS = 0.3f;
-    public static final float LUNGE_DASH_SECONDS = 0.45f;
+    // a cap, not the length: the dash ends once it is LUNGE_OVERRUN past the mote
+    public static final float LUNGE_DASH_SECONDS = 1.2f;
     private static final float LUNGE_COIL_MULT = 0.6f;
     private static final float LUNGE_DASH_MULT = 5f;
-    private static final float LUNGE_OVERRUN = 400f;
+    public static final float LUNGE_OVERRUN = 180f;
+    // half-width of the line the dash sweeps: a mote this far off it is still run through
+    public static final float LUNGE_SWALLOW_WIDTH = 40f;
 
     // the burst left where a mote came apart
-    private static final int POP_MOTES = 14;
-    private static final float POP_SECONDS = 0.55f;
-    private static final float POP_SPEED_MIN = 160f;
-    private static final float POP_SPEED_MAX = 380f;
-    private static final float POP_DRAG_TAU = 0.18f;
+    private static final int POP_MOTES = 18;
+    private static final float POP_SECONDS = 0.9f;
+    private static final float POP_SPEED_MIN = 400f;
+    private static final float POP_SPEED_MAX = 900f;
+    private static final float POP_DRAG_TAU = 0.25f;
     private static final float POP_SPREAD_DEG = 35f;
     private static final float POP_DASH_CARRY = 0.25f;
-    private static final float POP_SIZE = 9f;
-    private static final float POP_FLASH_SIZE = 30f;
+    private static final float POP_SIZE = 22f;
+    private static final float POP_CORE_SHARE = 0.35f;
+    private static final float POP_FLASH_SIZE = 70f;
+    private static final float POP_REACH = POP_SPEED_MAX * POP_DRAG_TAU * (1f + POP_DASH_CARRY);
 
     private static final float FLARE_COOLDOWN_SECONDS = 30f;
     private static final float FLARE_RING_SECONDS = 2f;
@@ -218,6 +223,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient LungePhase lungePhase = LungePhase.NONE;
     private transient float lungeLeft;
     private transient float lungeHeading;
+    private transient SectorEntityToken lungePrey;
+    private transient Vector2f lungeExit;
+    private transient boolean lungeFed;
     private transient float popLeft;
     private transient Vector2f popOrigin;
     private transient Color popColor;
@@ -406,12 +414,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             longlinerSchool.swim(amount);
             return;
         }
-        LegendaryShields.advanceEater(this, amount);
+        LegendaryShields.advanceEater(this);
         if (LegendaryShields.isProwler(this)) advanceProwl(amount);
         if (LegendaryShields.isFleeing(this)) advanceFleeMode();
         if (QuorumShellGame.advance(this, amount)) return;
         if (advanceLure(amount)) return;
-        boolean pursuing = hunting && evasiveLeft <= 0f;
+        boolean pursuing = (hunting || getLungePhase() == LungePhase.DASH) && evasiveLeft <= 0f;
         if (pursuing) keepSurfaced(1f);
 
         float motionMult = diving || pursuing ? 1f : advanceMode(amount);
@@ -807,12 +815,37 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         lungeLeft = LUNGE_COIL_SECONDS;
     }
 
-    /** Runs the frozen line through the mote and out the far side. */
-    public void startLungeDash(float headingDeg) {
+    /** Runs the frozen line through the mote and out to a fixed point past it. */
+    public void startLungeDash(float headingDeg, SectorEntityToken prey) {
         lungePhase = LungePhase.DASH;
         lungeLeft = LUNGE_DASH_SECONDS;
         lungeHeading = headingDeg;
+        lungePrey = prey;
+        lungeFed = false;
+        lungeExit = MathUtils.getPointOnCircumference(prey.getLocation(), LUNGE_OVERRUN, headingDeg);
         keepSurfaced(LUNGE_DASH_SECONDS);
+    }
+
+    public SectorEntityToken getLungePrey() {
+        return lungePrey;
+    }
+
+    public boolean isLungeFed() {
+        return lungeFed;
+    }
+
+    public void markLungeFed() {
+        lungeFed = true;
+    }
+
+    /** Signed distance along the dash line from {@code point} to the Jack; positive once past it. */
+    public float getLungeProgressPast(Vector2f point) {
+        Vector2f dir = Misc.getUnitVectorAtDegreeAngle(lungeHeading);
+        return (entity.getLocation().x - point.x) * dir.x + (entity.getLocation().y - point.y) * dir.y;
+    }
+
+    public boolean isLungePastExit() {
+        return lungeExit != null && getLungeProgressPast(lungeExit) >= 0f;
     }
 
     public float getLungeHeading() {
@@ -826,12 +859,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     public void clearLunge() {
         lungePhase = LungePhase.NONE;
         lungeLeft = 0f;
+        lungePrey = null;
+        lungeExit = null;
+        lungeFed = false;
     }
 
-    /** How far beyond the mote the dash aims, so it passes through rather than stopping on it. */
+    /** Steering point well beyond the exit, so arrival handling never brakes the dash. */
     public Vector2f getLungeOverrun() {
-        return MathUtils.getPointOnCircumference(entity.getLocation(),
-                LUNGE_RANGE + LUNGE_OVERRUN, lungeHeading);
+        Vector2f from = lungeExit == null ? entity.getLocation() : lungeExit;
+        return MathUtils.getPointOnCircumference(from, LUNGE_RANGE, lungeHeading);
     }
 
     /**
@@ -1242,15 +1278,16 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     protected void renderPop(ViewportAPI viewport) {
         if (popLeft <= 0f || popOrigin == null || popAngle == null) return;
 
-        // the same lamp-and-viewport fade the shields use: a legendary's extras are lamp-only
-        float alpha = getShieldAlpha(viewport);
+        // lit where it happened, not where the Jack has gone since
+        float alpha = viewport.getAlphaMult() * Math.min(1f,
+                catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin.getBeamStrengthAt(popOrigin) * 3f);
         if (alpha <= 0f) return;
 
         if (sprite == null) sprite = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
 
         float t = POP_SECONDS - popLeft;
         float p = t / POP_SECONDS;
-        float fade = (1f - p) * (1f - p) * alpha;
+        float fade = (1f - p) * alpha;
         float travel = POP_DRAG_TAU * (1f - (float) Math.exp(-t / POP_DRAG_TAU));
 
         // the skin of the bubble is gone first; the flash marks where it was
@@ -1274,7 +1311,18 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             sprite.setSize(size, size);
             sprite.setAlphaMult(fade);
             sprite.renderAtCenter(at.x, at.y);
+            sprite.setSize(size * POP_CORE_SHARE, size * POP_CORE_SHARE);
+            sprite.renderAtCenter(at.x, at.y);
         }
+    }
+
+    // the burst stays where the mote was while the Jack runs on; keep drawing it from there
+    @Override
+    public float getRenderRange() {
+        float range = super.getRenderRange();
+        if (popLeft <= 0f || popOrigin == null) return range;
+
+        return Math.max(range, Misc.getDistance(entity.getLocation(), popOrigin) + POP_REACH + POP_FLASH_SIZE);
     }
 
     protected float getShieldAlpha(ViewportAPI viewport) {
