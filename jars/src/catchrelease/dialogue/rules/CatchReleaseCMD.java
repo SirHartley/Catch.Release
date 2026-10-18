@@ -25,6 +25,7 @@ import catchrelease.campaign.fish.legendary.KantaTribute;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.LonglinerShield;
+import catchrelease.campaign.fish.minigame.CatchCelebration;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
@@ -314,6 +315,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return CrablobabIdentity.show(dialog);
             case "crabBuy":
                 return buyCrabWare(arg);
+            case "crabPlay":
+                return playCrabWare(arg);
             case "crabBuyBass":
                 return CrabWares.buyFallbackBass();
             case "crabExplosivePending":
@@ -372,6 +375,20 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         try {
             return CrabWares.valueOf(wareName.trim().toUpperCase()).buy();
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    protected boolean playCrabWare(String wareName) {
+        if (wareName == null) return false;
+
+        try {
+            String sound = CrabWares.valueOf(wareName.trim().toUpperCase()).getCatchSound();
+            if (sound == null) return false;
+
+            CatchCelebration.playHook(sound);
+            return true;
         } catch (IllegalArgumentException e) {
             return false;
         }
@@ -742,6 +759,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             String key = "$catchreleaseCrab" + Misc.ucFirst(ware.name().toLowerCase());
 
             local.set(key + "Owned", ware.isOwned(), 0);
+            local.set(key + "Offered", ware.isOffered(), 0);
             local.set(key + "Afford", ware.canAfford(), 0);
             local.set(key + "Price", Misc.getDGSCredits(ware.credits), 0);
             local.set(key + "Crabs", ware.crabs, 0);

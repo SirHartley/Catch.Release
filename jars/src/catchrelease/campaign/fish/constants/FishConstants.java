@@ -242,6 +242,8 @@ public class FishConstants {
     public static final float CELEBRATION_POP_OVERSHOOT = 0.25f;
 
     public static final String SOUND_CAUGHT = "catchrelease_minigame_success";
+    public static final String SOUND_CAUGHT_HORN = "catchrelease_minigame_crab_horn";
+    public static final String SOUND_CAUGHT_FANFARE = "catchrelease_minigame_crab_fanfare";
     public static final String SOUND_FAILED = "catchrelease_minigame_failure";
     public static final String SOUND_INDICATOR_CROSS = "catchrelease_minigame_bar_click";
     public static final float SOUND_INDICATOR_PITCH_MIN = 0.97f;
