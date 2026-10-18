@@ -13,13 +13,17 @@ todo / QA
 
 High prio
 
+
+
 low prio
 legendary haunt equipment prerequisites / readiness eval via fisherman?
 Fisherman impostor dialogue / fisherman (real) reaction / questioning
-allow handing legendary fish to kanta for protection
 
 SFX
-lantern jack mote consumption / dash animation + mote death "bubbles/crumbs" on hit
+
+when hunting for a mote to eat, lantern jack should - upon coming close to a target - slow down for 0.3s, then do a quick dash through the target mote. Upon hitting it, the mote should disassemble into randomly strewn-about "sub-motes", like an underwater bubble being popped, ejected perpendicular (circle) to the path of the dash, both sides.
+upon popping, play mote_pop.ogg (mono)
+
 Haunt soundtrack? Music?
 
 ---
