@@ -7,6 +7,7 @@ import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.RepLevel;
+import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Abilities;
@@ -255,7 +256,10 @@ public class HarpoonOffence {
         stopChasing(victim);
 
         FactionAPI faction = getOffendedFaction(victim);
-        if (faction != null) noteEvasion(faction.getId());
+        if (faction == null) return;
+
+        // the crew take the claim to a patrol; with nobody to take it to, it only costs standing
+        if (!HarpoonWitness.reportRefusal(victim, faction.getId())) noteEvasion(faction.getId());
     }
 
     public static void resolveAnsweredDemands() {
@@ -289,6 +293,16 @@ public class HarpoonOffence {
                 REASON, false, 0f);
 
         mem.unset(MemFlags.FLEET_DO_NOT_IGNORE_PLAYER);
+        mem.unset(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE);
+
+        // demand() replaced the route with this intercept; the flags alone leave it alongside
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        FleetAssignmentDataAPI current = victim.getCurrentAssignment();
+        if (current != null && current.getAssignment() == FleetAssignment.INTERCEPT
+                && current.getTarget() == player) {
+            victim.removeFirstAssignment();
+        }
+        if (victim.getCurrentAssignment() == null) Misc.giveStandardReturnToSourceAssignments(victim);
     }
 
     public static void turnHostile(CampaignFleetAPI victim) {
@@ -454,6 +468,7 @@ public class HarpoonOffence {
 
     public static void settle(String factionId, LocationAPI where) {
         getOutstanding().remove(ledgerKey(factionId, where));
+        HarpoonPatrolResponse.clearAlert(factionId, where);
     }
 
     public static boolean wasHarpooned(CampaignFleetAPI fleet) {
