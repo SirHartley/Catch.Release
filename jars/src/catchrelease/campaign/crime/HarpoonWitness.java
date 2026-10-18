@@ -22,6 +22,7 @@ public class HarpoonWitness implements EveryFrameScript {
     protected String originName;
     protected boolean explosive;
     protected boolean hitmanEligible;
+    protected boolean refusal;
     protected float daysSpent = 0f;
     protected boolean done = false;
 
@@ -77,6 +78,27 @@ public class HarpoonWitness implements EveryFrameScript {
                         victimName, originName, explosive, hitmanEligible));
     }
 
+    // A refused repair bill goes to the nearest patrol willing to collect for this faction, whether or not it can see the player yet.
+    public static boolean reportRefusal(CampaignFleetAPI victim, String factionId) {
+        if (victim == null || factionId == null) return false;
+
+        CampaignFleetAPI patrol = HarpoonPatrolResponse.findReportTarget(victim);
+        if (patrol == null) return false;
+
+        victim.getMemoryWithoutUpdate().set(REPORTING_FLAG, true, TRAVEL_DAYS);
+
+        victim.clearAssignments();
+        victim.addAssignment(FleetAssignment.GO_TO_LOCATION, patrol, TRAVEL_DAYS,
+                "reporting an incident");
+
+        HarpoonWitness witness = new HarpoonWitness(victim, patrol, factionId, false,
+                victim.getName(), null, false, false);
+        witness.refusal = true;
+        Global.getSector().addScript(witness);
+
+        return true;
+    }
+
     @Override
     public boolean isDone() {
         return done;
@@ -122,12 +144,15 @@ public class HarpoonWitness implements EveryFrameScript {
 
     protected void report() {
         HarpoonPatrolResponse.clearRetryWait(factionId, patrol.getContainingLocation());
+        if (refusal) HarpoonPatrolResponse.raiseAlert(factionId, patrol.getContainingLocation());
         HarpoonPatrolResponse.dispatch(patrol, factionId);
 
         release();
     }
 
     protected void giveUp() {
+        if (refusal) HarpoonOffence.noteEvasion(factionId);
+
         if (identified && hitmanEligible) {
             HarpoonHitman.send(factionId, victimName, originName, explosive, false);
         }

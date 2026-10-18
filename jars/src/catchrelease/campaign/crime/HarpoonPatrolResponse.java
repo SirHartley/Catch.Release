@@ -17,6 +17,7 @@ import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.Misc.FleetFilter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HarpoonPatrolResponse implements EveryFrameScript {
@@ -36,16 +37,18 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
     public static final String REPEAT_KEY = "$catchrelease_harpoonRepeat";
     public static final String COUNT_KEY = "$catchrelease_harpoonCount";
     public static final String RETRY_KEY = "$catchrelease_harpoonPatrolWait";
+    public static final String ALERT_KEY = "$catchrelease_harpoonAlert";
 
     public static final int FINE = 10000;
     public static final float SEARCH_RANGE = 2500f;
     public static final float CHASE_DAYS = 12f;
     public static final float RETRY_DAYS = 5f;
     public static final float DEALT_WITH_DAYS = HarpoonOffence.MEMORY_DAYS;
+    public static final float ALERT_DAYS = HarpoonOffence.MEMORY_DAYS;
 
     protected final IntervalUtil interval = new IntervalUtil(0.1f, 0.3f);
 
-    protected CampaignFleetAPI chasing = null;
+    protected final List<CampaignFleetAPI> chasing = new ArrayList<>();
 
     public static void register() {
         Global.getSector().addTransientScript(new HarpoonPatrolResponse());
@@ -66,29 +69,45 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
             HarpoonOffence.resolveAnsweredDemands();
         }
 
-        if (chasing != null) {
-            maintainChase();
-            return;
-        }
+        for (CampaignFleetAPI patrol : new ArrayList<>(chasing)) maintainChase(patrol);
 
         if (!tick) return;
 
-        chasing = reacquire();
-        if (chasing != null) return;
+        reacquire();
+        if (chasing.isEmpty()) beginChase();
 
-        beginChase();
+        answerAlerts();
     }
 
-    protected CampaignFleetAPI reacquire() {
+    // patrols flagged elsewhere (a witness's report, or before a load - this script is transient) are found by their flag
+    protected void reacquire() {
         for (LocationAPI location : Global.getSector().getAllLocations()) {
             for (CampaignFleetAPI fleet : location.getFleets()) {
-                if (!fleet.getMemoryWithoutUpdate().getBoolean(PATROL_FLAG)) continue;
-
-                return fleet;
+                if (fleet.getMemoryWithoutUpdate().getBoolean(PATROL_FLAG)
+                        && !chasing.contains(fleet)) chasing.add(fleet);
             }
         }
+    }
 
-        return null;
+    // a reported refusal puts the claim out to every patrol in the system that sees the player, not one collector
+    protected void answerAlerts() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || !player.isAlive()) return;
+        if (player.isInHyperspace() || player.isInHyperspaceTransition()) return;
+
+        LocationAPI here = player.getContainingLocation();
+        for (String factionId : HarpoonOffence.getOwedFactionsIn(here)) {
+            if (!isAlerted(factionId, here)) continue;
+
+            FactionAPI faction = Global.getSector().getFaction(factionId);
+            if (faction == null) continue;
+
+            for (CampaignFleetAPI curr : here.getFleets()) {
+                if (curr == player || !canBeSent(curr, faction, player)) continue;
+
+                send(curr, factionId);
+            }
+        }
     }
 
     protected void beginChase() {
@@ -114,6 +133,18 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
     protected static boolean canBeSent(CampaignFleetAPI curr, FactionAPI faction,
                                        CampaignFleetAPI player) {
+        if (!canCollectFor(curr, faction, player)) return false;
+
+        MemoryAPI mem = curr.getMemoryWithoutUpdate();
+        if (mem.getBoolean(PATROL_FLAG)) return false;
+
+        if (hasAnsweredEverything(curr, faction.getId())) return false;
+
+        return player.getVisibilityLevelTo(curr) != VisibilityLevel.NONE;
+    }
+
+    protected static boolean canCollectFor(CampaignFleetAPI curr, FactionAPI faction,
+                                           CampaignFleetAPI player) {
         FactionAPI patrolFaction = curr.getFaction();
         if (patrolFaction == null || patrolFaction.isHostileTo(faction)) return false;
 
@@ -134,13 +165,8 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
 
         if (curr.isHostileTo(player)) return false;
 
-        MemoryAPI mem = curr.getMemoryWithoutUpdate();
-        if (mem.getBoolean(PATROL_FLAG)) return false;
-
-        if (hasAnsweredEverything(curr, faction.getId())) return false;
-
         // patrols only - MEMORY_KEY_PATROL_FLEET is what the fleet AI's own pursuit support checks to decide whether a chase is sustained
-        if (!mem.getBoolean(MemFlags.MEMORY_KEY_PATROL_FLEET)) return false;
+        if (!curr.getMemoryWithoutUpdate().getBoolean(MemFlags.MEMORY_KEY_PATROL_FLEET)) return false;
 
         if (curr.getAI() instanceof ModularFleetAIAPI) {
             ModularFleetAIAPI ai = (ModularFleetAIAPI) curr.getAI();
@@ -148,7 +174,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
             if (curr.getInteractionTarget() instanceof CampaignFleetAPI) return false;
         }
 
-        return player.getVisibilityLevelTo(curr) != VisibilityLevel.NONE;
+        return true;
     }
 
     public static boolean callForHelp(CampaignFleetAPI victim) {
@@ -177,6 +203,30 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         for (CampaignFleetAPI curr : victim.getContainingLocation().getFleets()) {
             if (curr == victim || curr == player) continue;
             if (!canBeSent(curr, faction, player)) continue;
+
+            float distance = Misc.getDistance(victim.getLocation(), curr.getLocation());
+            if (distance >= best) continue;
+
+            best = distance;
+            nearest = curr;
+        }
+
+        return nearest;
+    }
+
+    public static CampaignFleetAPI findReportTarget(CampaignFleetAPI victim) {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (victim == null || player == null) return null;
+
+        FactionAPI faction = victim.getFaction();
+        if (faction == null || victim.getContainingLocation() == null) return null;
+
+        CampaignFleetAPI nearest = null;
+        float best = Float.MAX_VALUE;
+
+        for (CampaignFleetAPI curr : victim.getContainingLocation().getFleets()) {
+            if (curr == victim || curr == player) continue;
+            if (!canCollectFor(curr, faction, player)) continue;
 
             float distance = Misc.getDistance(victim.getLocation(), curr.getLocation());
             if (distance >= best) continue;
@@ -223,10 +273,31 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         Global.getSector().getMemoryWithoutUpdate().unset(retryKey(factionId, where));
     }
 
+    protected static String alertKey(String factionId, LocationAPI where) {
+        return ALERT_KEY + factionId + "_" + (where == null ? "unknown" : where.getId());
+    }
+
+    public static void raiseAlert(String factionId, LocationAPI where) {
+        Global.getSector().getMemoryWithoutUpdate().set(alertKey(factionId, where), true, ALERT_DAYS);
+    }
+
+    public static void clearAlert(String factionId, LocationAPI where) {
+        Global.getSector().getMemoryWithoutUpdate().unset(alertKey(factionId, where));
+    }
+
+    public static boolean isAlerted(String factionId, LocationAPI where) {
+        return Global.getSector().getMemoryWithoutUpdate().getBoolean(alertKey(factionId, where));
+    }
+
+    // a reported refusal is still the first claim served, so it gets the fine offer rather than the repeat-offence attack
+    protected static boolean isRepeat(String factionId, LocationAPI where) {
+        return HarpoonOffence.isRepeatOffence(factionId, where) && !isAlerted(factionId, where);
+    }
+
     protected void send(CampaignFleetAPI patrol, String factionId) {
         dispatch(patrol, factionId);
 
-        chasing = patrol;
+        if (!chasing.contains(patrol)) chasing.add(patrol);
     }
 
     protected static void dispatch(CampaignFleetAPI patrol, String factionId) {
@@ -242,76 +313,74 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         // computed here rather than in the rules-driven conversation, which can only read a number
         mem.set(FINE_KEY, FINE, CHASE_DAYS);
         mem.set(FINE_TEXT_KEY, Misc.getWithDGS(FINE), CHASE_DAYS);
-        mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId,
-                patrol.getContainingLocation()), CHASE_DAYS);
+        mem.set(REPEAT_KEY, isRepeat(factionId, patrol.getContainingLocation()), CHASE_DAYS);
         mem.set(COUNT_KEY, HarpoonOffence.getIncidentCount(factionId,
                 patrol.getContainingLocation()), CHASE_DAYS);
     }
 
-    protected void maintainChase() {
+    protected void maintainChase(CampaignFleetAPI patrol) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        MemoryAPI mem = chasing.getMemoryWithoutUpdate();
+        MemoryAPI mem = patrol.getMemoryWithoutUpdate();
 
         if (mem.getBoolean(DEALT_WITH_KEY)) {
-            collect();
-            endChase();
+            collect(patrol);
+            endChase(patrol);
             return;
         }
 
-        if (!chasing.isAlive() || player == null) {
-            endChase();
+        if (!patrol.isAlive() || player == null) {
+            endChase(patrol);
             return;
         }
 
         if (!mem.getBoolean(PATROL_FLAG)) {
-            endChase();
+            endChase(patrol);
             return;
         }
 
         if (player.isInHyperspace() || player.isInHyperspaceTransition()) {
-            endChase();
+            endChase(patrol);
             return;
         }
 
         // a gate can leave the patrol in a different system without either side giving up
-        if (chasing.getContainingLocation() != player.getContainingLocation()) {
-            endChase();
+        if (patrol.getContainingLocation() != player.getContainingLocation()) {
+            endChase(patrol);
             return;
         }
 
         String factionId = mem.getString(PATROL_FACTION_KEY);
         if (factionId == null || !HarpoonOffence.isOutstanding(factionId,
-                chasing.getContainingLocation())) {
-            endChase();
+                patrol.getContainingLocation())) {
+            endChase(patrol);
             return;
         }
 
-        mem.set(REPEAT_KEY, HarpoonOffence.isRepeatOffence(factionId,
-                chasing.getContainingLocation()), CHASE_DAYS);
+        mem.set(REPEAT_KEY, isRepeat(factionId, patrol.getContainingLocation()), CHASE_DAYS);
         mem.set(COUNT_KEY, HarpoonOffence.getIncidentCount(factionId,
-                chasing.getContainingLocation()), CHASE_DAYS);
+                patrol.getContainingLocation()), CHASE_DAYS);
 
-        if (chasing.isHostileTo(player)) {
-            endChase();
+        if (patrol.isHostileTo(player)) {
+            endChase(patrol);
             return;
         }
 
-        if (player.getVisibilityLevelTo(chasing) != VisibilityLevel.NONE) {
+        if (player.getVisibilityLevelTo(patrol) != VisibilityLevel.NONE) {
             Misc.setFlagWithReason(mem, MemFlags.MEMORY_KEY_PURSUE_PLAYER, REASON, true, 1f);
         }
     }
 
-    protected void collect() {
-        MemoryAPI mem = chasing.getMemoryWithoutUpdate();
+    protected void collect(CampaignFleetAPI patrol) {
+        MemoryAPI mem = patrol.getMemoryWithoutUpdate();
 
         String factionId = mem.getString(PATROL_FACTION_KEY);
         if (factionId == null) return;
 
         // set before settle() clears what's owed, so it still reflects everything answered for
         mem.set(ANSWERED_KEY, HarpoonOffence.getIncidentCount(factionId,
-                chasing.getContainingLocation()), DEALT_WITH_DAYS);
+                patrol.getContainingLocation()), DEALT_WITH_DAYS);
 
-        HarpoonOffence.settle(factionId, chasing.getContainingLocation());
+        HarpoonOffence.settle(factionId, patrol.getContainingLocation());
 
         if (mem.getBoolean(PAID_KEY)) {
             mem.unset(PAID_KEY);
@@ -327,22 +396,20 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         HarpoonOffence.noteEvasion(factionId);
     }
 
-    protected void endChase() {
-        if (chasing == null) return;
-
+    protected void endChase(CampaignFleetAPI patrol) {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        MemoryAPI mem = chasing.getMemoryWithoutUpdate();
+        MemoryAPI mem = patrol.getMemoryWithoutUpdate();
 
-        FleetAssignmentDataAPI assignment = chasing.getCurrentAssignment();
+        FleetAssignmentDataAPI assignment = patrol.getCurrentAssignment();
         if (assignment != null && assignment.getAssignment() == FleetAssignment.INTERCEPT
                 && assignment.getTarget() == player) {
-            chasing.removeFirstAssignmentIfItIs(assignment.getAssignment());
+            patrol.removeFirstAssignmentIfItIs(assignment.getAssignment());
         }
 
-        chasing.setInteractionTarget(null);
+        patrol.setInteractionTarget(null);
 
-        if (chasing.getAI() instanceof ModularFleetAIAPI) {
-            ModularFleetAIAPI ai = (ModularFleetAIAPI) chasing.getAI();
+        if (patrol.getAI() instanceof ModularFleetAIAPI) {
+            ModularFleetAIAPI ai = (ModularFleetAIAPI) patrol.getAI();
             if (ai.getTacticalModule().getTarget() == player) ai.getTacticalModule().setTarget(null);
         }
 
@@ -354,7 +421,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         String factionId = mem.getString(PATROL_FACTION_KEY);
         if (factionId != null) {
             Global.getSector().getMemoryWithoutUpdate().set(
-                    retryKey(factionId, chasing.getContainingLocation()), true, RETRY_DAYS);
+                    retryKey(factionId, patrol.getContainingLocation()), true, RETRY_DAYS);
         }
 
         // must be cleared, or the next patrol sent would read it as already dealt with
@@ -366,7 +433,7 @@ public class HarpoonPatrolResponse implements EveryFrameScript {
         mem.unset(FINE_TEXT_KEY);
         mem.unset(REPEAT_KEY);
 
-        chasing = null;
+        chasing.remove(patrol);
     }
 
     @Override
