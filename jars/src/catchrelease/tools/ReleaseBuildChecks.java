@@ -72,9 +72,17 @@ public final class ReleaseBuildChecks {
     private static void metadata() {
         check(ReleaseBuild.stampInfo("{\"version\": \"1.0.1\", \"gameVersion\": \"0.98a\",}", "2.3.f")
                 .equals("{\"version\": \"2.3.f\", \"gameVersion\": \"0.98a\",}"), "Version stamp preserves game version");
-        String text = "{# comment\n\"major\":1,\"minor\":0,\"patch\":\"a\",}";
+        String links = "\"masterVersionFile\":\"\",\"directDownloadURL\":\"\",\"changelogURL\":\"\"";
+        String text = "{# comment\n\"major\":1,\"minor\":0,\"patch\":\"a\"," + links + ",}";
+        String releases = ReleaseBuild.RELEASES;
         check(ReleaseBuild.stampVersion(text, "12.10.z")
-                .equals("{# comment\n\"major\":12,\"minor\":10,\"patch\":\"z\",}"), "Version checker stamp");
+                .equals("{# comment\n\"major\":12,\"minor\":10,\"patch\":\"z\","
+                        + "\"masterVersionFile\":\"" + releases + "/latest/download/catchrelease.version\","
+                        + "\"directDownloadURL\":\"" + releases + "/download/12.10.z/Catch.Release-12.10.z.zip\","
+                        + "\"changelogURL\":\"" + releases + "/download/12.10.z/changelog.txt\",}"),
+                "Version checker stamp and release links");
+        check(ReleaseBuild.versionCheckerChangelog("--- Notes ---\nNone\n\n1.0.b\nFixed - x\n\n1.0.a\nAdded - y\n")
+                .equals("Version 1.0.b\nFixed - x\n\nVersion 1.0.a\nAdded - y\n"), "Version checker changelog");
         fails(() -> ReleaseBuild.stampInfo("{}", "1.0.a"), "Missing version field");
         fails(() -> ReleaseBuild.stampInfo("{\"version\":\"a\",\"version\":\"b\"}", "1.0.a"),
                 "Duplicate version field");

@@ -47,6 +47,12 @@ public final class ReleaseBuild {
             "sounds", Set.of("ogg", "wav"));
     static final LocalDateTime ZIP_TIME = LocalDateTime.of(2000, 1, 1, 0, 0);
 
+    // Version Checker reads masterVersionFile from the installed copy; the release workflow uploads the stamped
+    // version file and changelog as assets of each release, so "latest" always resolves to the newest one.
+    static final String RELEASES = "https://github.com/SirHartley/Catch.Release/releases";
+    static final String VERSION_FILE = "catchrelease.version";
+    static final String CHANGELOG_ASSET = "changelog.txt";
+
     record Notes(String version, boolean unreleased, String text) {
 
     }
@@ -154,11 +160,12 @@ public final class ReleaseBuild {
         entries.put("Catch.Release/jars/catchrelease.jar", Files.readAllBytes(root.resolve(JAR)));
         entries.put("Catch.Release/mod_info.json", stampInfo(Files.readString(root.resolve("mod_info.json")),
                 notes.version()).getBytes(StandardCharsets.UTF_8));
-        entries.put("Catch.Release/catchrelease.version",
-                stampVersion(Files.readString(root.resolve("catchrelease.version")), notes.version())
-                        .getBytes(StandardCharsets.UTF_8));
+        String versionFile = stampVersion(Files.readString(root.resolve(VERSION_FILE)), notes.version());
+        entries.put("Catch.Release/" + VERSION_FILE, versionFile.getBytes(StandardCharsets.UTF_8));
         Path output = root.resolve("out/release");
         Files.createDirectories(output);
+        Files.writeString(output.resolve(VERSION_FILE), versionFile);
+        Files.writeString(output.resolve(CHANGELOG_ASSET), versionCheckerChangelog(changelog));
         Path zip = output.resolve("Catch.Release-" + notes.version() + ".zip");
         writeZip(zip, entries);
         // Keep the changelog's plain-text layout on GitHub, including category headings.
@@ -217,7 +224,25 @@ public final class ReleaseBuild {
         String[] parts = version.split("\\.");
         text = replaceField(text, "major", parts[0]);
         text = replaceField(text, "minor", parts[1]);
-        return replaceField(text, "patch", "\"" + parts[2] + "\"");
+        text = replaceField(text, "patch", "\"" + parts[2] + "\"");
+        text = replaceField(text, "masterVersionFile", "\"" + RELEASES + "/latest/download/" + VERSION_FILE + "\"");
+        text = replaceField(text, "directDownloadURL",
+                "\"" + RELEASES + "/download/" + version + "/Catch.Release-" + version + ".zip\"");
+        return replaceField(text, "changelogURL",
+                "\"" + RELEASES + "/download/" + version + "/" + CHANGELOG_ASSET + "\"");
+    }
+
+    // The version sections only, with each heading as "Version x.y.z": LunaLib's update screen highlights those lines.
+    static String versionCheckerChangelog(String changelog) {
+        List<String> lines = changelog.replace("\r\n", "\n").lines().toList();
+        int start = 0;
+        while (start < lines.size() && !HEADING.matcher(lines.get(start)).matches()) start++;
+        require(start < lines.size(), "Changelog has no version heading.");
+        StringBuilder out = new StringBuilder();
+        for (String line : lines.subList(start, lines.size())) {
+            out.append(HEADING.matcher(line).matches() ? "Version " + line : line).append('\n');
+        }
+        return out.toString();
     }
 
     static String replaceField(String text, String key, String value) {
