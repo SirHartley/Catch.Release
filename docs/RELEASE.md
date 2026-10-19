@@ -26,21 +26,30 @@ not edit the working files or commit version changes back to master.
 ### Version Checker
 
 `catchrelease.version` (registered in `data/config/version/version_files.csv`) is read by
-Version Checker and by LunaLib's bundled checker. Because master's copy is never bumped,
-`masterVersionFile` points at the latest GitHub release's asset,
-`releases/latest/download/catchrelease.version`. Both checkers fetch with
-`new URL(...).openStream()`, which follows GitHub's HTTPS redirect.
+Version Checker, LunaLib's bundled checker and mod managers such as triOS. **Every link in
+the online version file must point at the latest release, never at a fixed version**:
 
-Packaging stamps the version numbers and three links into the ZIP's copy:
-- `masterVersionFile`: the latest-release link above;
-- `directDownloadURL`: this release's ZIP;
-- `changelogURL`: this release's `changelog.txt`.
+- `masterVersionFile`: `releases/latest/download/catchrelease.version`;
+- `directDownloadURL`: `releases/latest/download/Catch.Release.zip`;
+- `changelogURL`: `releases/latest/download/changelog.txt`.
 
-Packaging also writes both files to `out/release/`. The `changelog.txt` file holds the
-Changelog's version sections with each heading prefixed `Version `, which LunaLib
-highlights. The release action uploads both as release assets beside the ZIP. A release
-without them breaks update checks for every installed copy. There is no forum thread yet;
-add `modThreadId` to the working file when one exists.
+triOS and LunaLib take the download and changelog from the newest release's copy of the
+file. A link naming one version would keep serving that version after the next release.
+Master's copy is never version-bumped, which is why the file is hosted as a release asset
+rather than read raw from master. Both checkers fetch with `new URL(...).openStream()`,
+which follows GitHub's HTTPS redirect.
+
+Packaging stamps the version numbers and these three links into the ZIP's copy. It also
+writes the following to `out/release/`:
+- the stamped `catchrelease.version`;
+- `changelog.txt`: the Changelog's version sections, each heading prefixed `Version `,
+  which LunaLib highlights;
+- `Catch.Release.zip`: a fixed-name copy of the versioned ZIP.
+
+The release action refuses to publish unless all three assets exist and the version file
+carries the three latest-release links. It uploads them beside the versioned ZIP. A release
+without them breaks update checks, downloads and changelogs for every installed copy. There
+is no forum thread yet; add `modThreadId` to the working file when one exists.
 
 ## Build
 
