@@ -21,35 +21,30 @@ the newest, unreleased changelog section until a release is requested.
 
 The tag is the released version. Packaging copies it into `mod_info.json` and
 the major/minor/patch fields of `catchrelease.version` inside the ZIP. It does
-not edit the working files or commit version changes back to master.
+not edit the working files. The only change committed back to master is the
+version file update described under [Version Checker](#version-checker).
 
 ### Version Checker
 
 `catchrelease.version` (registered in `data/config/version/version_files.csv`) is read by
-Version Checker, LunaLib's bundled checker and mod managers such as triOS. **Every link in
-the online version file must point at the latest release, never at a fixed version**:
+Version Checker, LunaLib's bundled checker and mod managers such as triOS. It follows
+[Industrial Evolution's setup](https://github.com/SirHartley/Industrial.Evolution/blob/master/IndEvo.version):
+**master's copy is the online version file**, and it must always name the newest release.
 
-- `masterVersionFile`: `releases/latest/download/catchrelease.version`;
-- `directDownloadURL`: `releases/latest/download/Catch.Release.zip`;
-- `changelogURL`: `releases/latest/download/changelog.txt`.
+- `masterVersionFile`: the raw master file, `raw.githubusercontent.com/SirHartley/Catch.Release/master/catchrelease.version`;
+- `modVersion`: the newest released version;
+- `directDownloadURL`: that release's ZIP, `releases/download/<version>/Catch.Release-<version>.zip`;
+- `changelogURL`: the raw master `Changelog`.
 
-triOS and LunaLib take the download and changelog from the newest release's copy of the
-file. A link naming one version would keep serving that version after the next release.
-Master's copy is never version-bumped, which is why the file is hosted as a release asset
-rather than read raw from master. Both checkers fetch with `new URL(...).openStream()`,
-which follows GitHub's HTTPS redirect.
+Packaging stamps the version numbers and `directDownloadURL` into the ZIP's copy, and
+writes the same stamped file to `out/release/catchrelease.version`. After the release
+action creates the GitHub release for a tag, it commits that stamped file to master as
+"Update the version file to <version>". Master therefore advertises a version only once
+its download exists. Do not bump this file by hand for unreleased work. If the commit
+step fails, for example because branch protection blocks the action, commit the stamped
+file to master manually; until then, installed copies are not told about the release.
 
-Packaging stamps the version numbers and these three links into the ZIP's copy. It also
-writes the following to `out/release/`:
-- the stamped `catchrelease.version`;
-- `changelog.txt`: the Changelog's version sections, each heading prefixed `Version `,
-  which LunaLib highlights;
-- `Catch.Release.zip`: a fixed-name copy of the versioned ZIP.
-
-The release action refuses to publish unless all three assets exist and the version file
-carries the three latest-release links. It uploads them beside the versioned ZIP. A release
-without them breaks update checks, downloads and changelogs for every installed copy. There
-is no forum thread yet; add `modThreadId` to the working file when one exists.
+There is no forum thread yet; add `modThreadId` when one exists.
 
 ## Build
 
