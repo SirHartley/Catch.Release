@@ -1,18 +1,18 @@
 {
-    # All three links must stay releases/latest/download links (triOS and LunaLib read them from the online file).
-    # Packaging stamps the version and these links into each release; the release action uploads the named assets.
-    "masterVersionFile":"https://github.com/SirHartley/Catch.Release/releases/latest/download/catchrelease.version",
+    # Master's copy is the online version file. The release action commits the stamped copy back to master,
+    # so it always names the newest release and its download.
+    "masterVersionFile":"https://raw.githubusercontent.com/SirHartley/Catch.Release/master/catchrelease.version",
     "modName":"Catch.Release",
     "modVersion":
     {
         "major":1,
         "minor":0,
-        "patch":"a"
+        "patch":"c"
     },
 
-    # Newest release ZIP, uploaded under a fixed name
-    "directDownloadURL":"https://github.com/SirHartley/Catch.Release/releases/latest/download/Catch.Release.zip",
+    #Link towards a direct download, fetched from the online version file
+    "directDownloadURL":"https://github.com/SirHartley/Catch.Release/releases/download/1.0.c/Catch.Release-1.0.c.zip",
 
-    # Newest release's plain-text changelog
-    "changelogURL":"https://github.com/SirHartley/Catch.Release/releases/latest/download/changelog.txt",
+    #Link towards a directly accessible text file, which can be used to display a changelog ingame, is fetched from the online version file.
+    "changelogURL":"https://raw.githubusercontent.com/SirHartley/Catch.Release/refs/heads/master/Changelog",
 }

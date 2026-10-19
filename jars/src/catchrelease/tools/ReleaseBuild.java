@@ -47,14 +47,10 @@ public final class ReleaseBuild {
             "sounds", Set.of("ogg", "wav"));
     static final LocalDateTime ZIP_TIME = LocalDateTime.of(2000, 1, 1, 0, 0);
 
-    // Every link in the online version file must be a releases/latest/download link to a fixed-name asset: mod
-    // managers such as triOS read the download and changelog from the newest release's file, so a link naming one
-    // version would go stale the moment the next release ships. The release action uploads these exact names.
+    // The online version file is master's catchrelease.version (Industrial Evolution's scheme). Packaging stamps the
+    // version and this release's download into it; the release action commits that stamped file back to master.
     static final String RELEASES = "https://github.com/SirHartley/Catch.Release/releases";
-    static final String LATEST = RELEASES + "/latest/download/";
     static final String VERSION_FILE = "catchrelease.version";
-    static final String CHANGELOG_ASSET = "changelog.txt";
-    static final String LATEST_ZIP = "Catch.Release.zip";
 
     record Notes(String version, boolean unreleased, String text) {
 
@@ -168,10 +164,8 @@ public final class ReleaseBuild {
         Path output = root.resolve("out/release");
         Files.createDirectories(output);
         Files.writeString(output.resolve(VERSION_FILE), versionFile);
-        Files.writeString(output.resolve(CHANGELOG_ASSET), versionCheckerChangelog(changelog));
         Path zip = output.resolve("Catch.Release-" + notes.version() + ".zip");
         writeZip(zip, entries);
-        Files.copy(zip, output.resolve(LATEST_ZIP), StandardCopyOption.REPLACE_EXISTING);
         // Keep the changelog's plain-text layout on GitHub, including category headings.
         Files.writeString(output.resolve("release-notes.md"), "```text\n" + notes.text() + "\n```\n");
         Files.writeString(output.resolve("version.txt"), notes.version() + "\n");
@@ -229,22 +223,8 @@ public final class ReleaseBuild {
         text = replaceField(text, "major", parts[0]);
         text = replaceField(text, "minor", parts[1]);
         text = replaceField(text, "patch", "\"" + parts[2] + "\"");
-        text = replaceField(text, "masterVersionFile", "\"" + LATEST + VERSION_FILE + "\"");
-        text = replaceField(text, "directDownloadURL", "\"" + LATEST + LATEST_ZIP + "\"");
-        return replaceField(text, "changelogURL", "\"" + LATEST + CHANGELOG_ASSET + "\"");
-    }
-
-    // The version sections only, with each heading as "Version x.y.z": LunaLib's update screen highlights those lines.
-    static String versionCheckerChangelog(String changelog) {
-        List<String> lines = changelog.replace("\r\n", "\n").lines().toList();
-        int start = 0;
-        while (start < lines.size() && !HEADING.matcher(lines.get(start)).matches()) start++;
-        require(start < lines.size(), "Changelog has no version heading.");
-        StringBuilder out = new StringBuilder();
-        for (String line : lines.subList(start, lines.size())) {
-            out.append(HEADING.matcher(line).matches() ? "Version " + line : line).append('\n');
-        }
-        return out.toString();
+        return replaceField(text, "directDownloadURL",
+                "\"" + RELEASES + "/download/" + version + "/Catch.Release-" + version + ".zip\"");
     }
 
     static String replaceField(String text, String key, String value) {
