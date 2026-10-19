@@ -1,7 +1,7 @@
 {
-    "masterVersionFile":"",
+    # The latest GitHub release's copy of this file; packaging stamps the version and links below into each release.
+    "masterVersionFile":"https://github.com/SirHartley/Catch.Release/releases/latest/download/catchrelease.version",
     "modName":"Catch.Release",
-    "modThreadId":00000,
     "modVersion":
     {
         "major":1,
@@ -9,9 +9,9 @@
         "patch":"a"
     },
 
-    #Link towards a direct download, fetched from the online version file
-    	"directDownloadURL":"",
+    # Direct download of this release's ZIP, read from the online version file (LunaLib's update screen)
+    "directDownloadURL":"",
 
-    #Link towards a directly accessible text file, which can be used to display a changelog ingame, is fetched from the online version file.
+    # Plain-text changelog asset of this release, read from the online version file (LunaLib's update screen)
     "changelogURL":"",
 }

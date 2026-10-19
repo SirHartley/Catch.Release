@@ -23,6 +23,25 @@ The tag is the released version. Packaging copies it into `mod_info.json` and
 the major/minor/patch fields of `catchrelease.version` inside the ZIP. It does
 not edit the working files or commit version changes back to master.
 
+### Version Checker
+
+`catchrelease.version` (registered in `data/config/version/version_files.csv`) is read by
+Version Checker and by LunaLib's bundled checker. Because master's copy is never bumped,
+`masterVersionFile` points at the latest GitHub release's asset,
+`releases/latest/download/catchrelease.version`. Both checkers fetch with
+`new URL(...).openStream()`, which follows GitHub's HTTPS redirect.
+
+Packaging stamps the version numbers and three links into the ZIP's copy:
+- `masterVersionFile`: the latest-release link above;
+- `directDownloadURL`: this release's ZIP;
+- `changelogURL`: this release's `changelog.txt`.
+
+Packaging also writes both files to `out/release/`. The `changelog.txt` file holds the
+Changelog's version sections with each heading prefixed `Version `, which LunaLib
+highlights. The release action uploads both as release assets beside the ZIP. A release
+without them breaks update checks for every installed copy. There is no forum thread yet;
+add `modThreadId` to the working file when one exists.
+
 ## Build
 
 Use JDK 17 from the task checkout. The game and Console Commands paths are

@@ -50,6 +50,8 @@ jobs:
           path: |
             out/release/Catch.Release-*.zip
             out/release/release-notes.md
+            out/release/catchrelease.version
+            out/release/changelog.txt
           if-no-files-found: error
           retention-days: 14
 
@@ -74,5 +76,6 @@ jobs:
             exit 1
           fi
           gh release create "$VERSION" "release/Catch.Release-$VERSION.zip" \
+            release/catchrelease.version release/changelog.txt \
             --repo "$GH_REPO" --verify-tag --title "Catch.Release $VERSION" \
             --notes-file release/release-notes.md
