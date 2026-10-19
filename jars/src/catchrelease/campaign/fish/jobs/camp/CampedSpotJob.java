@@ -8,11 +8,14 @@ import catchrelease.campaign.fish.jobs.QuestRewards;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BattleAPI;
+import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.ids.Voices;
@@ -27,7 +30,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import java.util.List;
 import java.util.Map;
 
-public abstract class CampedSpotJob extends FishJob {
+public abstract class CampedSpotJob extends FishJob implements FleetEventListener {
 
     protected enum Update {
 
@@ -94,6 +97,7 @@ public abstract class CampedSpotJob extends FishJob {
 
         camper = CampedSpot.spawn(getType(), size, pond, random());
         if (camper == null) return;
+        camper.addEventListener(this);
 
         setReceiptAsk();
         CampedSpot.setPondBlocked(pond, true);
@@ -218,9 +222,26 @@ public abstract class CampedSpotJob extends FishJob {
         QuestPond.release(pond, REF_KEY);
     }
 
+    // Losing a fight to the player ends the claim, the same as a bribe or a scare. Without this the beaten camp
+    // returns to its passive orbit and holds the rupture until destroyed.
+    @Override
+    public void reportBattleOccurred(CampaignFleetAPI fleet, CampaignFleetAPI primaryWinner, BattleAPI battle) {
+        if (fleet != camper || camper == null || battle == null || primaryWinner == null) return;
+        if (!battle.isPlayerInvolved() || !battle.isOnPlayerSide(primaryWinner)) return;
+
+        camper.getMemoryWithoutUpdate().set(CampedSpot.CLEARED_FLAG, true);
+    }
+
+    @Override
+    public void reportFleetDespawnedToListener(CampaignFleetAPI fleet, CampaignEventListener.FleetDespawnReason reason,
+                                               Object param) {
+    }
+
     @Override
     public SectorEntityToken getMapLocation(SectorMapAPI map) {
         if (camper != null && !camper.isExpired()) return camper;
+        // with the camp gone and the proof aboard, the next stop is the giver, not the rupture
+        if (cleared && receiptAboard) return super.getMapLocation(map);
         if (pond != null && !pond.isExpired()) return pond;
 
         return super.getMapLocation(map);
@@ -271,7 +292,7 @@ public abstract class CampedSpotJob extends FishJob {
         MarketAPI market = getGiverMarket();
         if (getPerson() == null || market == null) return "Return to the fisher for payment.";
 
-        return "Return to " + getPerson().getNameString() + " on " + market.getName()
+        return "Return to " + getPerson().getNameString() + " on " + describePlace(market)
                 + " for payment.";
     }
 

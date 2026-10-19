@@ -835,8 +835,14 @@ public abstract class FishJob extends HubMissionWithBarEvent
         MarketAPI market = getGiverMarket();
 
         if (person != null && market != null) {
-            info.addPara("%s is waiting on %s for the catch.", opad, highlight,
-                    person.getNameString(), market.getName());
+            String system = getSystemName(market);
+            if (system == null) {
+                info.addPara("%s is waiting on %s for the catch.", opad, highlight,
+                        person.getNameString(), market.getName());
+            } else {
+                info.addPara("%s is waiting on %s in %s for the catch.", opad, highlight,
+                        person.getNameString(), market.getName(), system);
+            }
         }
 
         String specialTerms = getIntelSpecialTerms();
@@ -918,6 +924,25 @@ public abstract class FishJob extends HubMissionWithBarEvent
             if (days > 0f) addDays(info, "remaining", getDaysLeft(), text, 0f);
             else info.addPara("No deadline.", text, 0f);
         }
+
+        // several givers of one faction look alike in the intel list; the place is what tells them apart
+        PersonAPI person = getPerson();
+        MarketAPI market = getGiverMarket();
+        if (person != null && market != null) {
+            String place = describePlace(market);
+            info.addPara((isSatisfied() ? "Return to " : "Deliver to ") + "%s on %s", 0f, text,
+                    Misc.getHighlightColor(), person.getNameString(), place);
+        }
+    }
+
+    protected static String describePlace(MarketAPI market) {
+        String system = getSystemName(market);
+        return system == null ? market.getName() : market.getName() + ", " + system;
+    }
+
+    protected static String getSystemName(MarketAPI market) {
+        return market == null || market.getStarSystem() == null ? null
+                : market.getStarSystem().getNameWithNoType();
     }
 
     @Override
@@ -930,7 +955,7 @@ public abstract class FishJob extends HubMissionWithBarEvent
         if (person == null || market == null) return "Supply " + describeAsks() + ".";
 
         return "Deliver " + describeAsks() + " to " + person.getNameString()
-                + " on " + market.getName() + ".";
+                + " on " + describePlace(market) + ".";
     }
 
     @Override
