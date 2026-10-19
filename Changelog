@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
+Fixed - Job intel names the market and star system to deliver to, and switches to "Return to" once you have the catch; a cleared camp job points back to the fisher once the proof is aboard
 Added - Neutrino Lens module for the Lens Array. Shows rare, epic and legendary patterns as rarity-coloured Neutrino Detector spikes. Grants the detector if missing.
 Changed - Recovered treasure now has aligned quantities; range data displays as "Range data: <fish>".
 Changed - Contract hunters respond less often to single harpoon hits, but may pursue unpaid repair bills or fleeing after identification following a dark hit. Paying the fine calls them off.

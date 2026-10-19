@@ -221,6 +221,8 @@ public abstract class CampedSpotJob extends FishJob {
     @Override
     public SectorEntityToken getMapLocation(SectorMapAPI map) {
         if (camper != null && !camper.isExpired()) return camper;
+        // with the camp gone and the proof aboard, the next stop is the giver, not the rupture
+        if (cleared && receiptAboard) return super.getMapLocation(map);
         if (pond != null && !pond.isExpired()) return pond;
 
         return super.getMapLocation(map);
@@ -271,7 +273,7 @@ public abstract class CampedSpotJob extends FishJob {
         MarketAPI market = getGiverMarket();
         if (getPerson() == null || market == null) return "Return to the fisher for payment.";
 
-        return "Return to " + getPerson().getNameString() + " on " + market.getName()
+        return "Return to " + getPerson().getNameString() + " on " + describePlace(market)
                 + " for payment.";
     }
 
