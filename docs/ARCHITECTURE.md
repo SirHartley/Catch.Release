@@ -268,6 +268,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 `$catchreleaseDeadline` and `$catchreleaseDeadlineLeft`; unlimited jobs say so
 explicitly in dialogue and intel.
 Intel names the giver's market and star system in the description, the list bullets and the next step; the bullet reads "Return to" once the asks are satisfied. A camp job's map target is the camper, then the rupture until the proof is aboard after clearing, then the giver.
+Camp jobs register as a `FleetEventListener` on their camper: when the player's side wins a battle with it, `CampedSpot.CLEARED_FLAG` is set and the next advance sends the fleet home, the same as a bribe or scare. A beaten camp no longer returns to its orbit.
 Contact reopening and round changes refresh the tokens. Intel contact names use
 display post, then display rank, then name alone.
 
