@@ -10,27 +10,23 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.c - UNRELEASED
-Added - Neutrino Lens, a Lens Array module: while the Neutrino Detector is on, rare, epic and legendary patterns in the system show as detector spikes in their rarity colours; it grants the Neutrino Detector if you do not have it
-Changed - The catch screen's recovered-treasure list lines every item up the same way, with its quantity on the right, and range data reads "Range data: <fish>"
-Changed - Contract hunters are sent less often for a single harpoon hit, but refusing a repair bill can now bring them; paying the patrol later calls them off, and being seen with your transponder on after a dark hit and then running can bring them too
-Changed - Refusing a harpooned crew's repair bill no longer makes them chase you; they report you to a local patrol, and every patrol in that system that sees you then demands the fine until it is paid
-Added - Crablobab sells a Party Horn once you own Celebration Charges, then a Crab Fanfare; each replaces the catch sound, switches in the Outfitter, and can be heard on its offer screen first
-Removed - A failed Quorum catch no longer scatters twelve extra decoys around the shell game
-Fixed - Needle Sensor ripples are brighter, larger and stay visible when zoomed out to where buried fish swim
-Fixed - Lantern Jack's feeding dash now runs through the mote and out the other side, and the burst it leaves is clearly visible
-Fixed - Dormant legendaries and epics leave their trail where breach lights catch them, not only after they are provoked
-Added - Uncommon fishing chests have a 25% chance to include previously unknown range data alongside their normal loot, including when using a Lifting Rig
-Fixed - Loading a save with Lantern Jack surfaced in the current system no longer crashes the game
-Fixed - Legendary and epic trails under breach lights no longer cost a large share of frame time
-Fixed - Automatic payments for jobs and the Outfitter never use a legendary catch; you can still choose one yourself in the hand-in picker
-Removed - Legendary tribute at Kanta's Den is disabled until its placeholder dialogue is replaced
-Fixed - 13 species, including the Dopefish and several legendaries, now face the way they swim in aquarium tanks
-Adjusted - Harpoon hits on shields no longer cause harpoon catch sfx to fire
-
-Legendaries
-Fixed - Legendary notices use their shield or mote colour instead of a generic UI highlight
-Added - Lantern Jack now coils for 0.3 seconds within 300 units of a mote, then dashes through it to feed
-Added - A mote swallowed by Lantern Jack bursts into sub-motes thrown out to both sides of the dash, with a new pop sound
+Added - Neutrino Lens module for the Lens Array. Shows rare, epic and legendary patterns as rarity-coloured Neutrino Detector spikes. Grants the detector if missing.
+Changed - Recovered treasure now has aligned quantities; range data displays as "Range data: <fish>".
+Changed - Contract hunters respond less often to single harpoon hits, but may pursue unpaid repair bills or fleeing after identification following a dark hit. Paying the fine calls them off.
+Changed - Crews with unpaid repair bills now report you to local patrols instead of chasing you. All patrols in the system demand payment on sight until the fine is paid.
+Added - Crablobab sells Party Horn after acquiring Celebration Charges, followed by Crab Fanfare. Both replace the catch sound and can be previewed before purchase and selected in the Outfitter.
+Removed - Failed Quorum catches no longer spawn 12 extra decoys.
+Fixed - Needle Sensor ripples are larger, brighter and visible at greater zoom distances.
+Fixed - Dormant epics and legendaries now leave trails under breach lights.
+Added - Uncommon fishing chests have a 25% chance to contain unknown range data alongside normal loot, including with the Lifting Rig.
+Fixed - Loading saves with Lantern Jack surfaced in the current system no longer crashes.
+Fixed - Reduced performance cost of epic and legendary trails under breach lights.
+Fixed - Automatic job and Outfitter payments no longer consume legendary fish.
+Removed - Disabled legendary tribute at Kanta's Den pending dialogue replacement.
+Fixed - Corrected aquarium swimming orientation for 13 species, including Dopefish and several legendaries.
+Adjusted - Harpoons hitting shields no longer play the catch sound.
+Fixed - Legendary floating text use shield or mote colour instead of a generic UI highlight
+Added - Lantern Jack now coils for 0.3 seconds within 300 units of a mote, then dashes through it to feed (also: added vfx)
 
 1.0.b
 
