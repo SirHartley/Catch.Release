@@ -47,11 +47,14 @@ public final class ReleaseBuild {
             "sounds", Set.of("ogg", "wav"));
     static final LocalDateTime ZIP_TIME = LocalDateTime.of(2000, 1, 1, 0, 0);
 
-    // Version Checker reads masterVersionFile from the installed copy; the release workflow uploads the stamped
-    // version file and changelog as assets of each release, so "latest" always resolves to the newest one.
+    // Every link in the online version file must be a releases/latest/download link to a fixed-name asset: mod
+    // managers such as triOS read the download and changelog from the newest release's file, so a link naming one
+    // version would go stale the moment the next release ships. The release action uploads these exact names.
     static final String RELEASES = "https://github.com/SirHartley/Catch.Release/releases";
+    static final String LATEST = RELEASES + "/latest/download/";
     static final String VERSION_FILE = "catchrelease.version";
     static final String CHANGELOG_ASSET = "changelog.txt";
+    static final String LATEST_ZIP = "Catch.Release.zip";
 
     record Notes(String version, boolean unreleased, String text) {
 
@@ -168,6 +171,7 @@ public final class ReleaseBuild {
         Files.writeString(output.resolve(CHANGELOG_ASSET), versionCheckerChangelog(changelog));
         Path zip = output.resolve("Catch.Release-" + notes.version() + ".zip");
         writeZip(zip, entries);
+        Files.copy(zip, output.resolve(LATEST_ZIP), StandardCopyOption.REPLACE_EXISTING);
         // Keep the changelog's plain-text layout on GitHub, including category headings.
         Files.writeString(output.resolve("release-notes.md"), "```text\n" + notes.text() + "\n```\n");
         Files.writeString(output.resolve("version.txt"), notes.version() + "\n");
@@ -225,11 +229,9 @@ public final class ReleaseBuild {
         text = replaceField(text, "major", parts[0]);
         text = replaceField(text, "minor", parts[1]);
         text = replaceField(text, "patch", "\"" + parts[2] + "\"");
-        text = replaceField(text, "masterVersionFile", "\"" + RELEASES + "/latest/download/" + VERSION_FILE + "\"");
-        text = replaceField(text, "directDownloadURL",
-                "\"" + RELEASES + "/download/" + version + "/Catch.Release-" + version + ".zip\"");
-        return replaceField(text, "changelogURL",
-                "\"" + RELEASES + "/download/" + version + "/" + CHANGELOG_ASSET + "\"");
+        text = replaceField(text, "masterVersionFile", "\"" + LATEST + VERSION_FILE + "\"");
+        text = replaceField(text, "directDownloadURL", "\"" + LATEST + LATEST_ZIP + "\"");
+        return replaceField(text, "changelogURL", "\"" + LATEST + CHANGELOG_ASSET + "\"");
     }
 
     // The version sections only, with each heading as "Version x.y.z": LunaLib's update screen highlights those lines.

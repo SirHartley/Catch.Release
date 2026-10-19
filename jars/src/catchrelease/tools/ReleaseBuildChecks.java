@@ -78,9 +78,9 @@ public final class ReleaseBuildChecks {
         check(ReleaseBuild.stampVersion(text, "12.10.z")
                 .equals("{# comment\n\"major\":12,\"minor\":10,\"patch\":\"z\","
                         + "\"masterVersionFile\":\"" + releases + "/latest/download/catchrelease.version\","
-                        + "\"directDownloadURL\":\"" + releases + "/download/12.10.z/Catch.Release-12.10.z.zip\","
-                        + "\"changelogURL\":\"" + releases + "/download/12.10.z/changelog.txt\",}"),
-                "Version checker stamp and release links");
+                        + "\"directDownloadURL\":\"" + releases + "/latest/download/Catch.Release.zip\","
+                        + "\"changelogURL\":\"" + releases + "/latest/download/changelog.txt\",}"),
+                "Version checker stamp uses latest-release links");
         check(ReleaseBuild.versionCheckerChangelog("--- Notes ---\nNone\n\n1.0.b\nFixed - x\n\n1.0.a\nAdded - y\n")
                 .equals("Version 1.0.b\nFixed - x\n\nVersion 1.0.a\nAdded - y\n"), "Version checker changelog");
         fails(() -> ReleaseBuild.stampInfo("{}", "1.0.a"), "Missing version field");

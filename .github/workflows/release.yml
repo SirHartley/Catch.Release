@@ -50,6 +50,7 @@ jobs:
           path: |
             out/release/Catch.Release-*.zip
             out/release/release-notes.md
+            out/release/Catch.Release.zip
             out/release/catchrelease.version
             out/release/changelog.txt
           if-no-files-found: error
@@ -75,7 +76,22 @@ jobs:
             echo "::error::Release $VERSION already exists; published releases are never overwritten."
             exit 1
           fi
+          # Version file contract: triOS and LunaLib follow the online catchrelease.version's links, which all point at
+          # releases/latest/download/. Every release must carry these fixed-name assets, or update checks,
+          # downloads and changelogs break for every installed copy.
+          for asset in Catch.Release.zip catchrelease.version changelog.txt; do
+            if [ ! -s "release/$asset" ]; then
+              echo "::error::Missing release asset $asset required by the version file links."
+              exit 1
+            fi
+          done
+          if ! grep -q '"directDownloadURL":"https://github.com/[^"]*/releases/latest/download/Catch.Release.zip"' release/catchrelease.version \
+              || ! grep -q '"changelogURL":"https://github.com/[^"]*/releases/latest/download/changelog.txt"' release/catchrelease.version \
+              || ! grep -q '"masterVersionFile":"https://github.com/[^"]*/releases/latest/download/catchrelease.version"' release/catchrelease.version; then
+            echo "::error::catchrelease.version must link the latest download, changelog and version file."
+            exit 1
+          fi
           gh release create "$VERSION" "release/Catch.Release-$VERSION.zip" \
-            release/catchrelease.version release/changelog.txt \
+            release/Catch.Release.zip release/catchrelease.version release/changelog.txt \
             --repo "$GH_REPO" --verify-tag --title "Catch.Release $VERSION" \
             --notes-file release/release-notes.md
