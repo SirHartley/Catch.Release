@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.d - UNRELEASED
+Changed - Every epic fish now comes up only under Breach Lights; ruptures fished with the ROD no longer hold them
 Changed - Epic fish are now hunted in two stages: they drift slowly until a harpoon hit wakes them, then raise a one-charge shield and swim more erratically; losing them past 3,000 units sends them back to drifting, and an awake epic is gone once you leave the system
 Added - Version Checker support: update notices, plus the changelog and direct download for LunaLib's update screen and mod managers such as triOS
 
