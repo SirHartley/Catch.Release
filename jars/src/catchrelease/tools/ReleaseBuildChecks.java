@@ -127,6 +127,7 @@ public final class ReleaseBuildChecks {
         ReleaseBuild.checkJar(jar, "expected");
         checks++;
         fails(() -> ReleaseBuild.checkJar(jar, "stale"), "Stale jar");
+        check(!ReleaseBuild.checkJar(jar, "stale", false), "A preview accepts a stale jar");
         Path same = work.resolve("same.jar");
         ReleaseBuild.writeZip(same, entries);
         check(Files.mismatch(jar, same) == -1, "Reproducible archive");

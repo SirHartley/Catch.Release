@@ -137,8 +137,8 @@ public final class AbilityTooltipCheck {
         TackleManager.own(Tackle.BREACH_COUPLER);
         includes(f.rod(), "Turn off the breach lamps", "430 units from the selected spot");
         TackleManager.fit(Tackle.Fit.DRONE, Tackle.BREACH_COUPLER);
-        includes(f.rod(), "2140 units from your fleet", "drones follow the fleet");
-        excludes(f.rod(), "No rupture in range.", "Turn off the breach lamps");
+        includes(f.rod(), "Turn off the breach lamps");
+        excludes(f.rod(), "drones follow the fleet", "requires a Breach Coupler");
         f.scripts.add(new FishingDroneSwarmScript(null, null));
         includes(f.rod(), "Waiting for all drones to return.");
         excludes(f.rod(), "No rupture in range.");

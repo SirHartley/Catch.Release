@@ -145,7 +145,9 @@ public final class ReleaseBuild {
     static void pack(Path root, String tag) throws Exception {
         String changelog = Files.readString(root.resolve("Changelog"));
         Notes notes = notes(changelog, tag);
-        checkJar(root.resolve(JAR), sourceHash(root));
+        // the jar is rebuilt only on request, so only a tagged release has to carry a fresh one
+        boolean fresh = checkJar(root.resolve(JAR), sourceHash(root), tag != null);
+        if (!fresh) System.out.println("Preview packages a stale release jar; rebuild it before tagging.");
         Map<String, byte[]> entries = new TreeMap<>();
         for (String name : trackedFiles(root)) {
             if (releaseFile(name)) entries.put("Catch.Release/" + name, Files.readAllBytes(root.resolve(name)));
@@ -254,11 +256,16 @@ public final class ReleaseBuild {
     }
 
     static void checkJar(Path file, String hash) throws IOException {
+        checkJar(file, hash, true);
+    }
+
+    static boolean checkJar(Path file, String hash, boolean requireFresh) throws IOException {
         require(Files.isRegularFile(file), "Missing " + file + "; run ReleaseBuild build.");
+        boolean fresh;
         try (JarFile jar = new JarFile(file.toFile())) {
             Manifest manifest = jar.getManifest();
-            require(manifest != null && hash.equals(manifest.getMainAttributes().getValue("Source-SHA256")),
-                    "Release jar is stale. Run ReleaseBuild build, then commit " + JAR + ".");
+            fresh = manifest != null && hash.equals(manifest.getMainAttributes().getValue("Source-SHA256"));
+            require(fresh || !requireFresh, "Release jar is stale. Run ReleaseBuild build, then commit " + JAR + ".");
             require(jar.getEntry("catchrelease/ModPlugin.class") != null, "Release jar has no ModPlugin.");
             require(jar.getEntry("catchrelease/commands/AllFish.class") != null, "Release jar lacks Console Commands.");
             for (ZipEntry entry : jar.stream().toList()) {
@@ -271,6 +278,7 @@ public final class ReleaseBuild {
                 }
             }
         }
+        return fresh;
     }
 
     static String sourceHash(Path root) throws Exception {

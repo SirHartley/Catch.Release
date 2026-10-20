@@ -62,11 +62,13 @@ all Java sources there. It checks that the game JSON library has the expected
 checked exception type. Release builds require Console Commands so its optional
 in-game commands are included.
 
-Commit the generated `jars/release/catchrelease.jar` with changes to runtime Java,
-the build tool or bundled compile dependencies. Its manifest records a hash of
-those inputs. Packaging rejects a missing or stale jar. Other authoring-tool,
-data, artwork and documentation changes do not require a new jar; they still
-need the compile gate in [CLAUDE.md](../CLAUDE.md#building) where applicable.
+Rebuild and commit `jars/release/catchrelease.jar` only when the user explicitly
+asks, normally before a release. Ordinary changes to runtime Java, the build tool
+or dependencies leave the committed jar stale; they still need the compile gate in
+[CLAUDE.md](../CLAUDE.md#building). The jar's manifest records a hash of those
+inputs. Packaging a tagged release rejects a missing or stale jar. A preview
+(branch push, pull request or local run without a version) accepts a stale jar
+and prints a warning, so it packages the last rebuilt runtime.
 
 The release jar is separate from IntelliJ's ignored `jars/catchrelease.jar`.
 An ordinary IDE build cannot accidentally replace it with tool classes.

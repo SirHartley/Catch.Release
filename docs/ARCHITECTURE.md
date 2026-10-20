@@ -532,7 +532,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | `LonglinerShield.java` | Six rotating, independently breakable sections; swept harpoon collision closes the decorative separators and guards intact sectors from inside-ring contacts. First body hit raises the shield and starts the haunt. Normal hits break one section; explosive hits also break its neighbours. `Chase.longlinerBroken/longlinerRotation` persist until encounter reset. Rendering is covered in [UI.md](UI.md#drawing-gotchas). |
 | `LonglinerSchoolModule.java` | The real fish and eighteen phantoms circle a drifting center with individual velocities, changing radii and neighbour avoidance. Movement runs from the real mote's callback, as Quorum's shell game does; the haunt callback owns replenishment. Shared dive visibility, reversed shield rotation and shared section damage remain. Cleanup removes copies on replacement, failure, capture or departure. |
 | `LegendaryShields.java` | Defense dispatch and render state: Longliner sections, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. `say` resolves shield colours for fish anchors; explicit colour arguments preserve shield/mote colours on mine and fleet anchors. See [floating notices](UI.md#drawing-gotchas). |
-| `EpicHunt.java` | Two-stage epic hunts, routed through `LegendaryShields`' harpoon-contact, failed-catch, `isShielded`, colour and speed entry points. Epics drift at `LAZY_SPEED_MULT` until a harpoon hit wakes them; that hit is deflected and raises a single purple shield charge that never regenerates. Awake epics swim at full speed with 1.6x wander, take new legs instead of fading at their target, and stay in play after a failed catch. More than 3,000 units from the player (or in another location) resets the fish to drifting, and the next wake raises a fresh shield. State is per fish (`FishEntityPlugin.epicActive`, `epicShieldSpent`), not the species ledger. Phantoms, decoys and escorts are excluded. Drone catches never wake an epic. |
+| `EpicHunt.java` | Two-stage epic hunts, routed through `LegendaryShields`' harpoon-contact, failed-catch, `isShielded`, colour and speed entry points. Epics drift at `LAZY_SPEED_MULT` until a harpoon hit wakes them; that hit is deflected and raises a single purple shield charge that never regenerates. Awake epics swim at full speed with 1.6x wander, take new legs instead of fading at their target, and stay in play after a failed catch. More than 3,000 units from the player resets the fish to drifting, and the next wake raises a fresh shield. State is per fish (`FishEntityPlugin.epicActive`, `epicShieldSpent`), not the species ledger. A transient `CurrentLocationChangedListener` (`EpicHunt.DepartureCleanup`, registered on game load) removes every awake epic from the system the player leaves, because awake epics never fade at their target. Phantoms, decoys and escorts are excluded. Drone catches never wake an epic. |
 | `KantaTribute.java` | Dormant legendary tribute support. All 23 `catchrelease_kp*` rules are commented out, including gift options, hand-in handlers, reactions, verdicts and the market trophy description. Their dialogue is placeholder pending replacement; keep the whole block disabled until replaced. The unused `CatchReleaseCMD kantaHasLegendary`/`kantaGiftTokens`/`kantaGiveLegendary` verbs remain for reactivation. Vanilla gifts and legendary automatic-payment safeguards are unaffected. |
 
 Quorum shield escorts use a 70-unit orbit with at least 60 units between centers.
@@ -810,10 +810,10 @@ charges, moving couriers, notice placement, pause and cleanup.
 | File | Owner / connection |
 |---|---|
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge pool for charged abilities. |
-| `rod/ability/PondInteractionAbilityPlugin.java` | Opens ponds, launches and recalls drones, and supports lamp fishing with Breach Coupler. |
+| `rod/ability/PondInteractionAbilityPlugin.java` | Opens ponds, launches and recalls drones, and supports lamp fishing with the Breach Coupler (currently disabled; see below). |
 | `rod/entities/FishingDroneEntityPlugin.java` | Drone launch, orbit, timed chase, catch, and return. |
 | `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast, staggered launches, recall, target assignment, hit cues, and reachability checks. |
-| `rod/scripts/RoamingDroneSwarmScript.java` | Pondless Breach Coupler swarm. |
+| `rod/scripts/RoamingDroneSwarmScript.java` | Pondless Breach Coupler swarm; dormant while the Coupler is disabled. |
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Charged manual targeting and tow-line cutting. |
 | `harpoon/entities/HarpoonEntityPlugin.java` | Flight, collision, shields, mines, hauling, fleet contact, rope, catch, and return. |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | Breach Lights activation, spool, slow, detection penalty, and all beam renderers. |
@@ -927,7 +927,8 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - `difficulty` is also the player-facing rating. `FishCodexEntry` labels it, and `FishermanQuest.isChartRequest()` routes a species rated 65 or more to a chart request. Keep main-sheet Commons below 65 and every other row at or above it.
 - Species that share a rarity and `motion` differ in at least one of `motionSpeed`, `restlessness`, or `jitter`, so players can learn them apart.
 - Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` and a species' random moves may still roll either for one move.
-- `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
+- `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Every EPIC row is `BREACH_LAMP`, so epics are lamp hunts only. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
+- The Breach Coupler is disabled for now: `Tackle.BREACH_COUPLER` has its `breachCoupling = true` line commented out and is unstocked, so it is not sold, rolled as a reward or unlocked by dev grants. Its dependents (`ShopFishPayments`' coupled payments, the ROD tooltip hint, the roaming swarm) read `breachCoupling` and stay off. The constant remains because saves store fitted tackle by value; restoring that line and its stocking re-enables everything.
 - A legendary has one host, one permanent catch, and no range data or job asks. All six legendaries are lamp-only. Lantern Jack, Slipstream Moray, Quorum, False Dawn and the Imposter are non-Abyssal; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
 - False Dawn selects the largest-radius usable corona star across chartable systems, regardless of coherence; its haunt supplies the coherence change. Its old regional sheet preference does not limit this selection. Equal-largest hosts can alternate; a sole largest host is retained. If no usable corona exists, no natural host is assigned. A host that becomes unsuitable is replaced only while the player is elsewhere; new natural spawns are gated immediately. `SpawnFish` still overrides the host for testing but places the fish in the largest usable local corona.
@@ -938,7 +939,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 | Drones at a natural rupture | `DRONE` | `POND` |
 | Harpoon catch of a fish from a pond | `HARPOON` | `POND` |
 | Harpoon catch at a Breach Lamp | `HARPOON` | `BREACH_LAMP` |
-| Drones at a Breach Lamp with the Breach Coupler | `DRONE` | `BREACH_LAMP` |
+| Drones at a Breach Lamp with the Breach Coupler (disabled for now) | `DRONE` | `BREACH_LAMP` |
 
 ### Coherence model
 

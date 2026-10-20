@@ -48,7 +48,8 @@ public class ShopFishPayments {
         boolean harpoon = fleet.hasAbility(StatIds.HARPOON_ABILITY);
         if (!drone && !harpoon) return Collections.emptyList();
         boolean lamps = fleet.hasAbility(StatIds.LAMPS_ABILITY);
-        boolean coupled = drone && lamps && TackleManager.isOwned(Tackle.BREACH_COUPLER);
+        boolean coupled = drone && lamps && Tackle.BREACH_COUPLER.breachCoupling
+                && TackleManager.isOwned(Tackle.BREACH_COUPLER);
         Map<String, Opportunity> catches = new LinkedHashMap<>();
         List<FishSpec> specs = FishSpecLoader.getAllFishSpecs();
 

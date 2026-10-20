@@ -5,6 +5,7 @@ import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
 import catchrelease.campaign.crime.LampPatrolResponse;
 import catchrelease.campaign.fish.codex.FishCodex;
+import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.campaign.fish.legendary.LonglinerDecoy;
@@ -65,6 +66,7 @@ public class ModPlugin extends BaseModPlugin {
         PlayerSettings.install();
 
         OnJumpPondSpawner.register();
+        EpicHunt.register();
         BuriedMoteSpawner.register();
         ChargeManager.register();
 
