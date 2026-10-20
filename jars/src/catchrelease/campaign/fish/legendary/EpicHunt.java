@@ -18,6 +18,7 @@ import java.util.ArrayList;
 public final class EpicHunt {
 
     public static final float RESET_RANGE = 3000f;
+    public static final float DRIFT_OFF_DISTANCE = 500f;
     public static final float ACTIVE_WANDER_MULT = 1.2f;
 
     // Awake epics never fade at their swim target, so the ones left behind when the player departs are removed.
@@ -53,8 +54,11 @@ public final class EpicHunt {
         return applies(fish) && fish.isEpicActive();
     }
 
-    // The waking hit is deflected and leaves the one-charge shield intact; the next hit spends it for good.
+    // The waking hit is deflected and leaves the one-charge shield intact; the next hit spends it for good, and a
+    // reset never restores it.
     public static LegendaryShields.HitResult onHarpoonContact(FishEntityPlugin fish) {
+        if (fish.isEpicShieldSpent()) return LegendaryShields.HitResult.NONE;
+
         SectorEntityToken mote = fish.getMote();
 
         if (!fish.isEpicActive()) {
@@ -63,8 +67,6 @@ public final class EpicHunt {
             LegendaryShields.say(mote, "Deflected - Now awake");
             return LegendaryShields.HitResult.DEFLECTED;
         }
-
-        if (fish.isEpicShieldSpent()) return LegendaryShields.HitResult.NONE;
 
         fish.setEpicStage(true, true);
         fish.flashShield();
@@ -90,8 +92,9 @@ public final class EpicHunt {
         return fish.isEpicActive() ? ACTIVE_WANDER_MULT : LegendaryShields.LAZY_SPEED_MULT;
     }
 
-    // Outdistancing the player ends the hunt: back to drifting, and the next wake raises a fresh shield. An awake
-    // epic in a system the player has left is removed instead, like DepartureCleanup does.
+    // Outdistancing the player ends the hunt: back to drifting, with the shield as it was, on an awake leg cut short
+    // so the fish fades at its end. An awake epic in a system the player has left is removed instead, like
+    // DepartureCleanup does.
     public static void advance(FishEntityPlugin fish) {
         if (!isActive(fish)) return;
 
@@ -102,7 +105,8 @@ public final class EpicHunt {
         if (mote.getContainingLocation() != player.getContainingLocation()) {
             mote.setExpired(true);
         } else if (Misc.getDistance(mote.getLocation(), player.getLocation()) > RESET_RANGE) {
-            fish.setEpicStage(false, false);
+            fish.setEpicStage(false, fish.isEpicShieldSpent());
+            fish.shortenSwim(DRIFT_OFF_DISTANCE);
         }
     }
 }

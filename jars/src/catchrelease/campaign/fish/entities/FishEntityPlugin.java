@@ -665,6 +665,14 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.target = target;
     }
 
+    // Keeps the heading; a fish without a held station fades where the shortened swim ends.
+    public void shortenSwim(float maxDistance) {
+        Vector2f at = entity.getLocation();
+        if (target == null || Misc.getDistance(at, target) <= maxDistance) return;
+
+        target = MathUtils.getPointOnCircumference(at, maxDistance, Misc.getAngleInDegrees(at, target));
+    }
+
     protected void moveTo(Vector2f next) {
         if (mantaFormation != null && !phantom) {
             mantaFormation.move(next);
