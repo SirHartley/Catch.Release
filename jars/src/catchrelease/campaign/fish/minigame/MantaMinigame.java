@@ -36,7 +36,11 @@ public class MantaMinigame extends FishingMinigame {
     }
 
     public MantaMinigame(FishSpec fish, Tackle tackle, LocationAPI location, int scars) {
-        super(fish, tackle, location, scars);
+        this(fish, tackle, location, scars, 1f);
+    }
+
+    public MantaMinigame(FishSpec fish, Tackle tackle, LocationAPI location, int scars, float lampTreasureMult) {
+        super(fish, tackle, location, scars, lampTreasureMult);
         decoys = List.of(new Decoy(fish, tackle, location, scars),
                 new Decoy(fish, tackle, location, scars));
         placeOpeningMarkers();

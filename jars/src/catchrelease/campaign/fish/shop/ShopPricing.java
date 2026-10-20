@@ -79,7 +79,7 @@ public class ShopPricing {
 
         return switch (tackle) {
             case NONE -> 0;
-            case NEEDLE_SENSOR, NEUTRINO_LENS, STASIS_CRADLE, SHORING_HEAD -> 20000;
+            case NEEDLE_SENSOR, NEUTRINO_LENS, GLITTER_LENS, STASIS_CRADLE, SHORING_HEAD -> 20000;
             case CALIBRATED_GRADER, TRACKING_GIMBAL -> 25000;
             case SALVAGE_TRAWL, BAITED_RESONATOR, FANNED_ARRAY,
                     FATHOM_HEAD, RETRIEVAL_HEAD -> 30000;

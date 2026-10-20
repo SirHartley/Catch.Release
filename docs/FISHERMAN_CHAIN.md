@@ -59,15 +59,15 @@ T2 and T3 build on this; T2's failure condition is the reset.
 
 **Rewards**
 - Equipment: the **Glitter Lens** schematic. It is a Lens Array module that raises the treasure chance for catches made under Breach Lights only, using the same catch-method distinction as the rest of the shop.
-  - Proposed tuning, to adjust freely: treasure chance ×2 for lamp catches, against the Salvage Trawl's ×3 for the ROD.
-  - Price: 20,000 credits, the lowest module tier in `ShopPricing`, plus its generated fish payment.
+  - Implemented: `Tackle.GLITTER_LENS`, treasure chance ×2 for lamp catches (the Salvage Trawl gives ×3 on the ROD).
+  - Price: the lowest module tier in `ShopPricing`, plus its generated fish payment.
 - The means to buy it: the exact fish specimens that satisfy the Glitter Lens's saved fish payment (`ShopPricing` caches each module's payment), plus its credit price.
 
 **Follow-up: buy the Glitter Lens.** Completes when the module is owned. The Fisherman then says the system's raised treasure chance will hold for another two months.
 
 **Work**
 - The rumour can reuse the `FishRumors` `LOOT` kind pinned to the target system. Extending it by 60 days after the purchase needs a quest-owned duration, so the normal rumour rotation does not replace it.
-- New: the golden chest treasure, its pity counter, the compass item row, the Glitter Lens `Tackle` entry and its lamp-only treasure effect.
+- New: the golden chest treasure, its pity counter and the compass item row. The Glitter Lens already exists.
 - The reward specimens must be generated from the cached payment at grant time, so they always match.
 
 ## T2: The captain's fleet
@@ -153,12 +153,11 @@ None of the hulls exist yet. T2 and T3 can ship with placeholder text, but the N
 ## Open questions
 
 1. **Ship built-ins** for the Breach Light ship and the ROD ship.
-2. **Glitter Lens tuning.** The proposed ×2 and 20,000 credits stand until changed.
 
 ## Suggested order
 
 1. Two-stage epics (done).
-2. Compass item, golden chest and Glitter Lens, then T1 and its follow-up.
+2. Compass item and golden chest, then T1 and its follow-up. The Glitter Lens is done.
 3. Harpoon ship hull and the Needle Sensor hullmod (placeholders acceptable for T2 text).
 4. T2, then the Fisherman debrief and lore questions.
 5. T3 and the Breach Light ship blueprint.

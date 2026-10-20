@@ -111,6 +111,13 @@ public enum Tackle {
     NEEDLE_SENSOR("Needle Sensor", Fit.SEARCHLIGHT,
             "While Breach Lights are off, hidden rare and epic patterns and dormant legendaries"
                     + " occasionally produce faint ripple rings."),
+    GLITTER_LENS("Glitter Lens", Fit.SEARCHLIGHT,
+            "Doubles the chance that a catch includes bycatch when the fish was caught under Breach"
+                    + " Lights. Catches from ruptures are unaffected.") {
+        {
+            lampTreasureChanceMult = 2f;
+        }
+    },
     NEUTRINO_LENS("Neutrino Lens", Fit.SEARCHLIGHT,
             "While the Neutrino Detector and Breach Lights are both on, rare, epic and legendary patterns in the system show"
                     + " as spikes in their rarity colours on its ring. Grants the Neutrino Detector if you"
@@ -156,6 +163,8 @@ public enum Tackle {
     public float progressMult = 1f;
     public float escapeMult = 1f;
     public float treasureChanceMult = 1f;
+    // Lens Array tackle: applies only to catches made under Breach Lights, whichever rig landed them
+    public float lampTreasureChanceMult = 1f;
     public float rarityBias = 1f;
     public float qualityBias = 0f;
 
