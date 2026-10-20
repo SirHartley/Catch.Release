@@ -11,16 +11,13 @@ scrapped
 
 todo / QA
 
-use patchlib to amend the neutrino detector to show a blue, red or purple spike to find rares, epics and legendaries respectively
+Fight night "take the REWARDS LIST" button should just read "Take the rewards" with the rewards listed in option tooltip
 
-Minigame
-Treasure display list is still rather terrible - should all have the same format:
-Left aligned: Icon + Name
-Right aligned: Quantity (if 1; show 1x)
-If name text > column size the quantity number should be in the first line
+an accomplished fisher having the option of bringing a harpoon to the usurpers meeting, and the church quests would be fun
+you were obviously going fishing after the meeting
 
-Range data for treasure display should show as "Range data: FishName"
-
+draw the crab orchestra and the crab party trumpet to place on the minigame frame top right reward panel
+animate?
 
 Legendary Fish introductions
 - The fisherman needs to help with getting to those they are the most interesting part of the mod - best to have him give out exposition and a quest for them?
@@ -44,10 +41,7 @@ Haunt soundtrack? Music?
 Crime needs another audit
 
 Placeholder art
-15 fish
-industry
 item box
-crabolabob fanfare and funny toot (sfx in files)
 
 Fish requests
 - melon fish
@@ -55,7 +49,7 @@ Fish requests
 
 New quest type that can show up whenever fitting: Treasure hauling.
 - Requirement: Fish until you find a specific treasure (assign spawn chance, quest yellow bg on treasure)
-- treasure contains a "treasure" placeholder icon (rig in settings)
+- treasure contains a "treasure map" placeholder icon (rig in settings)
 - bring that back for reward
 
 ---------------------
