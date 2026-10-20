@@ -18,6 +18,7 @@ import java.util.ArrayList;
 public final class EpicHunt {
 
     public static final float RESET_RANGE = 3000f;
+    public static final float DRIFT_OFF_DISTANCE = 500f;
     public static final float ACTIVE_WANDER_MULT = 1.2f;
 
     // Awake epics never fade at their swim target, so the ones left behind when the player departs are removed.
@@ -91,8 +92,9 @@ public final class EpicHunt {
         return fish.isEpicActive() ? ACTIVE_WANDER_MULT : LegendaryShields.LAZY_SPEED_MULT;
     }
 
-    // Outdistancing the player ends the hunt: back to drifting, with the shield as it was. An awake epic in a
-    // system the player has left is removed instead, like DepartureCleanup does.
+    // Outdistancing the player ends the hunt: back to drifting, with the shield as it was, on an awake leg cut short
+    // so the fish fades at its end. An awake epic in a system the player has left is removed instead, like
+    // DepartureCleanup does.
     public static void advance(FishEntityPlugin fish) {
         if (!isActive(fish)) return;
 
@@ -104,6 +106,7 @@ public final class EpicHunt {
             mote.setExpired(true);
         } else if (Misc.getDistance(mote.getLocation(), player.getLocation()) > RESET_RANGE) {
             fish.setEpicStage(false, fish.isEpicShieldSpent());
+            fish.shortenSwim(DRIFT_OFF_DISTANCE);
         }
     }
 }
