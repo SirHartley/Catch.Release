@@ -101,12 +101,4 @@ public final class EpicHunt {
             fish.setEpicStage(false, false);
         }
     }
-
-    // A slipped hook leaves the epic awake and in play, as with legendaries; the spent shield stays spent.
-    public static boolean onFailedCatch(FishEntityPlugin fish) {
-        if (!isActive(fish)) return false;
-
-        fish.setHeld(false);
-        return true;
-    }
 }

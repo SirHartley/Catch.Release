@@ -20,7 +20,7 @@ Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 
 - Every epic is a Breach Light catch, never a rupture catch.
 - It drifts slowly until a harpoon hit wakes it. That hit is deflected and raises a single purple shield charge that never regenerates.
-- The awake epic swims at full speed and more erratically. It stays in play after a failed catch.
+- The awake epic swims at full speed and more erratically. A failed catch loses it, like any other fish.
 - More than 3,000 units from the player resets it to drifting; waking it again raises a fresh shield.
 - Awake epics are removed when the player leaves the system.
 
