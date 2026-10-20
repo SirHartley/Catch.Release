@@ -53,7 +53,7 @@ The dictionaries distinguish checked recipes from extracted names, expressions a
 - Keep each commit message to one short, plain-English summary. Do not include testing notes, agent or model names, co-author trailers, session metadata, links, formatting, or session URLs.
 - Update the affected documentation in the same commit, following [Documentation upkeep](#documentation-upkeep). Do this without a separate user request.
 - Update `Changelog` in the same commit, using [CHANGELOG.md](docs/CHANGELOG.md). Agents write the change notes; do not leave that work for the user.
-- Rebuild and commit `jars/release/catchrelease.jar` when runtime Java, the release builder or bundled compile dependencies change; follow [RELEASE.md](docs/RELEASE.md). Never replace it with the IDE artifact.
+- Rebuild and commit `jars/release/catchrelease.jar`, and publish a release, only when the user explicitly asks; follow [RELEASE.md](docs/RELEASE.md). Ordinary changes, including runtime Java, do not rebuild the jar. Never replace it with the IDE artifact.
 - Work only in the current task checkout. A live mod installation, including `C:\Modding\mods\Catch.Release`, and every unrelated checkout are read-only unless the user explicitly asks you to change them.
 - Do not deploy or synchronize the mod after merge unless the user explicitly requests it.
 - Until release, cross-version campaign saves are unsupported. Remove obsolete upgrades, saved payloads and migrations instead of retaining compatibility scaffolding. Preserve normal save/load within the current version, transient-state restoration and live runtime safeguards.
