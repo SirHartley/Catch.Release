@@ -79,13 +79,14 @@ public class ShopPricing {
 
         return switch (tackle) {
             case NONE -> 0;
-            case NEEDLE_SENSOR, NEUTRINO_LENS, STASIS_CRADLE, SHORING_HEAD -> 20000;
-            case CALIBRATED_GRADER, TRACKING_GIMBAL -> 25000;
+            // the lowest tier is 25000, so every module's fish payment reaches past Common-only band 0
+            case NEEDLE_SENSOR, NEUTRINO_LENS, GLITTER_LENS, STASIS_CRADLE, SHORING_HEAD -> 25000;
+            case CALIBRATED_GRADER, TRACKING_GIMBAL -> 30000;
             case SALVAGE_TRAWL, BAITED_RESONATOR, FANNED_ARRAY,
-                    FATHOM_HEAD, RETRIEVAL_HEAD -> 30000;
-            case SPOOL_GOVERNOR, INERTIAL_DAMPER, LIFTING_RIG -> 35000;
+                    FATHOM_HEAD, RETRIEVAL_HEAD -> 35000;
+            case SPOOL_GOVERNOR, INERTIAL_DAMPER, LIFTING_RIG -> 40000;
             case BARBED_HEAD, HOLDFAST_CLAMP, BREACH_COUPLER,
-                    SONAR_HEAD, EXPLOSIVE_HEAD -> 40000;
+                    SONAR_HEAD, EXPLOSIVE_HEAD -> 45000;
         };
     }
 

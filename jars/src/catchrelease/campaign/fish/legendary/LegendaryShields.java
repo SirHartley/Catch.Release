@@ -204,9 +204,6 @@ public class LegendaryShields {
 
     public static boolean onFailedCatch(SectorEntityToken mote) {
         if (mote == null || mote.isExpired() || mote.getContainingLocation() == null) return false;
-        if (mote.getCustomPlugin() instanceof FishEntityPlugin epic && EpicHunt.applies(epic)) {
-            return EpicHunt.onFailedCatch(epic);
-        }
         FishEntityPlugin fish = asLegendaryMote(mote);
         if (fish == null || fish.isDecoy()) return false;
 

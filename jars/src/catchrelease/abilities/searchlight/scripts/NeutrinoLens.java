@@ -8,6 +8,7 @@ import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.legendary.LonglinerDecoy;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.memory.upgrades.StatIds;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -262,11 +263,17 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
         Global.getSoundPlayer().playSound(PING_SOUND, 1f, 1f, at, new Vector2f());
     }
 
+    // The lens works through the Breach Lights, so it needs both the detector and the lamps running.
     protected float getDetectorLevel() {
         CampaignFleetAPI player = Global.getSector().getPlayerFleet();
-        AbilityPlugin detector = player == null ? null : player.getAbility(Abilities.GRAVITIC_SCAN);
+        if (player == null) return 0f;
 
-        return detector == null ? 0f : Math.max(0f, Math.min(1f, detector.getProgressFraction()));
+        return getProgress(player.getAbility(Abilities.GRAVITIC_SCAN))
+                * getProgress(player.getAbility(StatIds.LAMPS_ABILITY));
+    }
+
+    protected static float getProgress(AbilityPlugin ability) {
+        return ability == null ? 0f : Math.max(0f, Math.min(1f, ability.getProgressFraction()));
     }
 
     // null when the mote should not show: the Needle Sensor's exclusions, without its lamp conditions

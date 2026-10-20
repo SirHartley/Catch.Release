@@ -290,9 +290,12 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         Tackle tackle = TackleManager.get(method);
         LocationAPI location = anchor == null ? null : anchor.getContainingLocation();
         int scars = isLegendaryAttempt() ? LegendaryChases.getState(fish.id).scars : 0;
+        // the lens works on what came up under the lamps, whichever rig landed it
+        float lampTreasure = CatchImplement.of(anchor) == CatchImplement.BREACH_LAMP
+                ? TackleManager.get(Tackle.Fit.SEARCHLIGHT).lampTreasureChanceMult : 1f;
         this.minigame = catchrelease.campaign.fish.legendary.MantaFormationModule.SPECIES.equals(fish.id)
-                ? new MantaMinigame(fish, tackle, location, scars)
-                : new FishingMinigame(fish, tackle, location, scars);
+                ? new MantaMinigame(fish, tackle, location, scars, lampTreasure)
+                : new FishingMinigame(fish, tackle, location, scars, lampTreasure);
         this.minigame.setPresentedColor(catchrelease.campaign.fish.legendary
                 .LegendaryShields.getPresentedColor(fish, catchTarget));
 

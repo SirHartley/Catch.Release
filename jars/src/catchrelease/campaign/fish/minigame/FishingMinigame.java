@@ -77,6 +77,7 @@ public class FishingMinigame {
     protected java.awt.Color presentedColor;
 
     protected final float rumorLootMult;
+    protected final float lampTreasureMult;
     protected final float rumorLootRarityBias;
 
     protected float timeHeld = 0f;
@@ -95,8 +96,13 @@ public class FishingMinigame {
     }
 
     public FishingMinigame(FishSpec fish, Tackle tackle, LocationAPI location, int scars) {
+        this(fish, tackle, location, scars, 1f);
+    }
+
+    public FishingMinigame(FishSpec fish, Tackle tackle, LocationAPI location, int scars, float lampTreasureMult) {
         this.fish = fish;
         this.tackle = tackle == null ? Tackle.NONE : tackle;
+        this.lampTreasureMult = lampTreasureMult;
 
         boolean legendary = fish.rarity == FishRarity.LEGENDARY;
         this.scars = legendary ? Math.max(0, Math.min(LegendaryChases.MAX_SCARS, scars)) : 0;
@@ -165,7 +171,7 @@ public class FishingMinigame {
             return;
         }
         treasuresLeft = TreasureRoller.rollCount(
-                tackle.treasureChanceMult * rumorLootMult);
+                tackle.treasureChanceMult * rumorLootMult * lampTreasureMult);
 
         if (fish.rarity == FishRarity.LEGENDARY) {
             treasuresLeft = Math.max(3, treasuresLeft);

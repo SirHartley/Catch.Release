@@ -143,7 +143,7 @@ public final class NeedleSensorChecks {
                     "new module enters the ordinary schematic reward pool");
             ShopSchematics.unlock(sensor);
             check(!entry.isPurchaseLocked(), "schematic exposes purchase");
-            check(ShopPricing.getPrice(sensor).credits == 20000, "same credit tier as the other late lamp modules");
+            check(ShopPricing.getPrice(sensor).credits == 25000, "same credit tier as the other late lamp modules");
             f.fit();
             check(entry.isOwned() && entry.isFitted(), "grant owns and fits");
             TackleManager.fit(Tackle.Fit.SEARCHLIGHT, Tackle.FANNED_ARRAY);
