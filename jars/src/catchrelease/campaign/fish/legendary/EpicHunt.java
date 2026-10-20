@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public final class EpicHunt {
 
     public static final float RESET_RANGE = 3000f;
-    public static final float ACTIVE_WANDER_MULT = 1.6f;
+    public static final float ACTIVE_WANDER_MULT = 1.2f;
 
     // Awake epics never fade at their swim target, so the ones left behind when the player departs are removed.
     public static class DepartureCleanup implements CurrentLocationChangedListener {
@@ -82,8 +82,12 @@ public final class EpicHunt {
         return fish.isEpicActive() ? 1f : LegendaryShields.LAZY_SPEED_MULT;
     }
 
+    // Wander swings the heading on a clock, not per distance travelled: at drift speed the full swing would curl the
+    // path into loops, so a dormant epic's swing shrinks with its speed.
     public static float getWanderMult(FishEntityPlugin fish) {
-        return isActive(fish) ? ACTIVE_WANDER_MULT : 1f;
+        if (!applies(fish)) return 1f;
+
+        return fish.isEpicActive() ? ACTIVE_WANDER_MULT : LegendaryShields.LAZY_SPEED_MULT;
     }
 
     // Outdistancing the player ends the hunt: back to drifting, and the next wake raises a fresh shield. An awake
