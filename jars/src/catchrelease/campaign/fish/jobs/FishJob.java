@@ -11,6 +11,7 @@ import catchrelease.dialogue.rules.QuestDialogMap;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.OptionPanelAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemKeys;
@@ -417,6 +418,13 @@ public abstract class FishJob extends HubMissionWithBarEvent
             return true;
         }
 
+        if ("rewardTooltip".equals(action)) {
+            if (params.size() < 2) return false;
+            addRewardTooltip(dialog, params.get(1).getString(memoryMap));
+
+            return true;
+        }
+
         if ("showRewardReceipts".equals(action)) {
             showRewardReceipts(dialog);
 
@@ -459,6 +467,27 @@ public abstract class FishJob extends HubMissionWithBarEvent
         }
 
         if (tooltip != null) dialog.getTextPanel().addTooltip();
+    }
+
+    protected void addRewardTooltip(InteractionDialogAPI dialog, String optionId) {
+        if (dialog == null || dialog.getOptionPanel() == null || optionId == null) return;
+
+        final List<String> lines = new ArrayList<>();
+        for (FishReward reward : rewards) lines.add(Misc.ucFirst(reward.describe()));
+
+        dialog.getOptionPanel().addOptionTooltipAppender(optionId, new OptionPanelAPI.OptionTooltipCreator() {
+            @Override
+            public void createTooltip(TooltipMakerAPI tooltip, boolean hadOtherText) {
+                float pad = hadOtherText ? 10f : 0f;
+
+                bullet(tooltip);
+                for (String line : lines) {
+                    FishRequirement.highlightFishNames(tooltip.addPara(line, pad), line);
+                    pad = 0f;
+                }
+                unindent(tooltip);
+            }
+        });
     }
 
     protected void showAutoHandOver(final InteractionDialogAPI dialog,

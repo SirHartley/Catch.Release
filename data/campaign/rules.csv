@@ -834,7 +834,8 @@ People leave their drinks to inspect the board. By the time the Commissioner ask
 catchrelease_ringAssignmentOptions,CatchReleaseRingWagerOptions,"$missionId == catchrelease_ring
 $catchreleaseRingSelectionReady","SetOptionColor catchrelease_ringFlat highlight
 SetOptionColor catchrelease_ringLeft highlight
-SetOptionColor catchrelease_ringRight highlight",,"catchrelease_ringFlat:Take the $catchreleaseReward supplier fee.
+SetOptionColor catchrelease_ringRight highlight
+Call $catchrelease_jobRef rewardTooltip catchrelease_ringFlat",,"catchrelease_ringFlat:Take the rewards.
 catchrelease_ringLeft:Back $catchreleaseLeft at $catchreleaseLeftOdds.
 catchrelease_ringRight:Back $catchreleaseRight at $catchreleaseRightOdds.
 catchrelease_ringReselect:Choose another pair.
