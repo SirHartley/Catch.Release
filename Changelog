@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.d - UNRELEASED
+Changed - Every equipment module costs one price tier more (25,000 to 45,000 credits), and none can be paid for with common fish alone
 Added - Glitter Lens, a Lens Array module that doubles the chance of bycatch on catches made under Breach Lights
 Changed - The Neutrino Lens only shows its spikes while the Breach Lights are on as well as the Neutrino Detector
 Removed - The Breach Coupler is withdrawn for now: it is no longer sold or awarded, and one already fitted does nothing; ROD drones fish ruptures only

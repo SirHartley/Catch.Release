@@ -272,7 +272,7 @@ public final class ShopPricingChecks {
         QuestRewards.valueOf(new FishReward.TackleSchematic(Tackle.SONAR_HEAD));
         require(!f.data.containsKey(ShopPricing.PAYMENTS_KEY), "quest valuation does not generate shop recipes");
         ShopPricing.Price first = ShopPricing.getPrice(Tackle.SONAR_HEAD);
-        require(first.credits == 40000 && first.fish != null, "Sonar has top price and fish payment");
+        require(first.credits == 45000 && first.fish != null, "Sonar has top price and fish payment");
         f.systems.clear();
         f.abilities.clear();
         require(ShopPricing.getPrice(Tackle.SONAR_HEAD).fish == first.fish, "saved recipe survives availability changes");
@@ -338,13 +338,14 @@ public final class ShopPricingChecks {
         for (Tackle tackle : Tackle.values()) {
             if (tackle == Tackle.NONE) continue;
             int credits = ShopPricing.getCredits(tackle);
-            require(credits >= 20000 && credits <= 40000, "module price bounds: " + tackle);
+            // 25000 is band 1: no module is paid for with Common-only fish
+            require(credits >= 25000 && credits <= 45000, "module price bounds: " + tackle);
             if (tackle.barSizeMult != 1f || tackle.barGravityMult != 1f
                     || tackle.escapeMult != 1f || tackle.progressMult != 1f) {
-                require(credits >= 35000, "minigame difficulty premium: " + tackle);
+                require(credits >= 40000, "minigame difficulty premium: " + tackle);
             }
         }
-        require(ShopPricing.getCredits(Tackle.SONAR_HEAD) == 40000, "Sonar top bracket");
+        require(ShopPricing.getCredits(Tackle.SONAR_HEAD) == 45000, "Sonar top bracket");
         require(ShopPricing.getCredits(Tackle.NONE) == 0, "empty slot stays free");
     }
 
@@ -372,7 +373,7 @@ public final class ShopPricingChecks {
                     && price.fish.implement == CatchImplement.POND, "payment modifiers survive scaling");
             require(ShopPricing.getPrice(stat, 1).fish.count == 5, "refresh cannot compound the multiplier");
             require(ShopPricing.getCredits(stat, 1) == 5000, "reward valuation retains base prices");
-            require(ShopPricing.getPrice(Tackle.SONAR_HEAD).credits == 10000, "configured module credits");
+            require(ShopPricing.getPrice(Tackle.SONAR_HEAD).credits == 11250, "configured module credits");
             values.put(Setting.UPGRADE_FISH, 25d);
             PlayerSettingsChecks.use(values);
             require(ShopPricing.getPrice(stat, 1).fish.count == 1, "fish payment rounds up to at least one");
