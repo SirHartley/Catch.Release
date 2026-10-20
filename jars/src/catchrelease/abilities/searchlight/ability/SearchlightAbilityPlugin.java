@@ -545,7 +545,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         } else if (fitted == Tackle.NEEDLE_SENSOR) {
             tooltip.addPara("Passive sensor: occasional ripples while lamps are off.", 3f);
         } else if (fitted == Tackle.NEUTRINO_LENS) {
-            tooltip.addPara("Neutrino Detector: coloured spikes for rare, epic and legendary patterns.", 3f);
+            tooltip.addPara("With the Neutrino Detector on: coloured spikes for rare, epic and legendary patterns.", 3f);
         }
     }
 

@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.d - UNRELEASED
+Changed - The Neutrino Lens only shows its spikes while the Breach Lights are on as well as the Neutrino Detector
 Removed - The Breach Coupler is withdrawn for now: it is no longer sold or awarded, and one already fitted does nothing; ROD drones fish ruptures only
 Changed - Every epic fish now comes up only under Breach Lights; ruptures fished with the ROD no longer hold them
 Changed - Epic fish are now hunted in two stages: they drift slowly until a harpoon hit wakes them, then raise a one-charge shield and swim more erratically; losing them past 3,000 units sends them back to drifting, and an awake epic is gone once you leave the system

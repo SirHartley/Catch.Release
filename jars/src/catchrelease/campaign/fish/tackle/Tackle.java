@@ -112,7 +112,7 @@ public enum Tackle {
             "While Breach Lights are off, hidden rare and epic patterns and dormant legendaries"
                     + " occasionally produce faint ripple rings."),
     NEUTRINO_LENS("Neutrino Lens", Fit.SEARCHLIGHT,
-            "While the Neutrino Detector is on, rare, epic and legendary patterns in the system show"
+            "While the Neutrino Detector and Breach Lights are both on, rare, epic and legendary patterns in the system show"
                     + " as spikes in their rarity colours on its ring. Grants the Neutrino Detector if you"
                     + " don't have it."),
     TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
