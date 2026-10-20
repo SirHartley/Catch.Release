@@ -201,7 +201,7 @@ The third party may become the personal focus of the final decision. A female ch
 
 Procedural catch requests can provide money, equipment and resources that make the legendary hunts reasonably achievable. Fixed conversations and recurring people give those jobs narrative continuity. Already-prepared players need not be forced through long supply grinds.
 
-Three unimplemented fishing ships are available as rewards. Their allocation is unresolved. Earlier suggestions placed them after hunts two, four and six, but those milestones remain optional. The ships can support progression without being equivalent to the final reality-bending power offer.
+Three unimplemented fishing ships are available as rewards. Earlier suggestions placed them after hunts two, four and six. Their allocation has since been decided in the [Fisherman follow-up chain](FISHERMAN_CHAIN.md#ships): the harpoon ship after the captain's epic hunt, the Breach Light ship's blueprint after the wounded epic, and the ROD ship for the first legendary. The ships can support progression without being equivalent to the final reality-bending power offer.
 
 ## 7. Six legendary subjects - a provisional use
 

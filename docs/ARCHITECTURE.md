@@ -9,6 +9,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | [CHANGELOG.md](CHANGELOG.md) | Change-note format and upkeep for every implementation task |
 | [DIALOGUE.md](DIALOGUE.md) | All player-facing text, rules or Java: workflow, shared text presentation and dialogue flow; prose constraints in LORE.md |
 | [LORE.md](LORE.md) | Setting facts, knowledge limits, character voices and source-labelled prose examples |
+| [Fisherman follow-up chain](FISHERMAN_CHAIN.md) | Approved design for the post-tutorial quest chain and ship allocation; not yet implemented |
 | [Needle quest concept](NEEDLE_QUEST_CONCEPT.md#overview) | Deferred narrative plan, with a short theme, philosophy and content overview; not current canon or implementation |
 | [RULES.md](RULES.md) | Rules syntax, execution and project routing contracts |
 | [RULES_WRITING.md](RULES_WRITING.md) | Writing process and structure of rules content: plain chains, `FireAll` menus, `FireBest` picks, entry points, state, text, options and exits |
