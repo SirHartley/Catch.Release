@@ -72,6 +72,10 @@ public class LegendaryShields {
     }
 
     public static HitResult onHarpoonContact(SectorEntityToken mote, boolean explosive, int section) {
+        if (mote != null && mote.getCustomPlugin() instanceof FishEntityPlugin epic && EpicHunt.applies(epic)) {
+            return EpicHunt.onHarpoonContact(epic);
+        }
+
         FishEntityPlugin fish = asLegendaryMote(mote);
         if (fish == null) return HitResult.NONE;
         if (fish.isMantaSwitching()) return HitResult.DEFLECTED;
@@ -200,6 +204,9 @@ public class LegendaryShields {
 
     public static boolean onFailedCatch(SectorEntityToken mote) {
         if (mote == null || mote.isExpired() || mote.getContainingLocation() == null) return false;
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin epic && EpicHunt.applies(epic)) {
+            return EpicHunt.onFailedCatch(epic);
+        }
         FishEntityPlugin fish = asLegendaryMote(mote);
         if (fish == null || fish.isDecoy()) return false;
 
@@ -224,6 +231,7 @@ public class LegendaryShields {
     }
 
     public static boolean isShielded(FishEntityPlugin fish) {
+        if (EpicHunt.applies(fish)) return EpicHunt.isShielded(fish);
         if (asLegendaryMote(fish) == null) return false;
 
         String id = fish.getFishSpec().id;
@@ -249,6 +257,8 @@ public class LegendaryShields {
 
     public static Color getShieldColor(FishEntityPlugin fish) {
         if (fish == null) return SHIELD_RED;
+        // the shared colour of one-charge, non-regenerating shields
+        if (EpicHunt.applies(fish)) return SHIELD_ORANGE;
 
         String id = fish.getFishSpec().id;
 

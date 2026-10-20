@@ -1,0 +1,149 @@
+# Fisherman follow-up chain
+
+**Status: approved design, not yet implemented.** This document records the author's decisions for the quest chain that follows the tutorial, plus the open questions and the work each step needs. Read it before implementing or revising any of these quests.
+
+It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains the authority on facts, knowledge limits and voice. [DIALOGUE.md](DIALOGUE.md) owns the text workflow, and [RULES_WRITING.md](RULES_WRITING.md) owns conversation structure. Text described here is a brief, not approved dialogue. The deferred [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) follows after this chain; see [Ships](#ships).
+
+## Framing
+
+- The tutorial still ends where it does today. `FishingIntro.isComplete()` keeps its current meaning, and everything gated on it (legendary spawns and the shop) is unchanged.
+- The Fisherman offers T1 straight after the tutorial's last hand-in. The chain is not presented as more tutorial: the tutorial should feel short, and this reads as ordinary work.
+- Each step teaches one thing:
+  - T1: lamp catches pay better than pond catches.
+  - T2: fleets can have work for you, and epics are hunted.
+  - T3: equipment is how you win hunts.
+  - T4: legendaries need serious gear.
+
+## Shared mechanic: two-stage epics
+
+Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)). Every epic drifts slowly until a harpoon hit wakes it. That hit is deflected and raises a single purple shield charge that never regenerates. The awake epic swims at full speed and more erratically. More than 3,000 units from the player resets it to drifting, and waking it again raises a fresh shield. T2 and T3 build on this; T2's failure condition is that reset.
+
+## T1: The treasure rumour
+
+**Premise.** Word goes round that retrievals in a nearby system are bringing up far more bycatch than usual. The Fisherman knows of one particular find there and wants it.
+
+**Steps**
+1. The Fisherman names the system and asks for one specific treasure: a golden chest.
+2. The player fishes there under Breach Lights. Each **lamp catch** may produce the golden chest in the minigame. Pond catches never do.
+3. The chest holds a compass. The player brings it to the Fisherman, who takes it.
+4. Rewards are granted (below), and the follow-up quest starts immediately.
+
+**Golden chest**
+- A quest-only minigame treasure, separate from the Salvage, Wreckage, Cache and Relic tiers.
+- Chance: 30% on each lamp-method catch in the target system while the quest is active.
+- Frustration gate: guaranteed on the 4th lamp catch, then on every 2nd catch after that until the player pulls it.
+- The player still has to take it in the minigame like any treasure. A missed chest counts as not pulled.
+
+**Compass**
+- Special item using the icon `graphics/catchrelease/icon/compass.png`, base value 1 credit, cosmetic.
+- Plugin: vanilla's plain `com.fs.starfarer.api.campaign.impl.items.BaseSpecialItemPlugin`, as used by its Topographic Data and Planetkiller rows. There is no `DefaultSpecialItemPlugin` class.
+- It must never be cleared from markets. Nothing extra is needed: vanilla restocks never remove special items, and `SoldFishRestock` only removes catch items.
+- The Fisherman takes it at hand-in, possibly as a keepsake of his own. See [open questions](#open-questions).
+
+**Rewards**
+- Equipment: the **Glitter Lens** schematic. It is a Lens Array module that raises the treasure chance for catches made under Breach Lights only, using the same catch-method distinction as the rest of the shop.
+- The means to buy it: the exact fish specimens that satisfy the Glitter Lens's saved fish payment (`ShopPricing` caches each module's payment), plus its credit price.
+
+**Follow-up: buy the Glitter Lens.** Completes when the module is owned. The Fisherman then says the system's raised treasure chance will hold for another two months.
+
+**Work**
+- The rumour can reuse the `FishRumors` `LOOT` kind pinned to the target system. Extending it by 60 days after the purchase needs a quest-owned duration, so the normal rumour rotation does not replace it.
+- New: the golden chest treasure, its pity counter, the compass item row, the Glitter Lens `Tackle` entry and its lamp-only treasure effect.
+- The reward specimens must be generated from the cached payment at grant time, so they always match.
+
+## T2: The captain's fleet
+
+**Premise.** "A former worker of mine, on another fleet now, asked me to help out with something." This introduces fleets that offer work.
+
+**The fleet**
+- Spawned in a nearby system with **zero markets and no colonies**, preferably adjacent.
+- It is following a rumour of an epic seen in that system. The target is an **existing epic species** whose range includes that system. It is not Lantern Jack or any other legendary.
+- Their Breach Lights have malfunctioned, so they cannot find it.
+
+**The captain**
+- An old, grizzled independent skipper, portrait `portrait30.png` (a vanilla portrait; confirm the path in the target game install).
+- Speaks with a stereotypical Scottish accent and slang. He needs a voice entry in `LORE.md` before any lines are drafted.
+- Tells a personal encounter with the epic that fits any species, for example that it took his leg. The tale must not establish species-specific mechanics.
+
+**Steps**
+1. The captain asks the player to circle within sight of the system's star with lamps on.
+2. After 15 seconds of searching, the epic's buried mote is placed in the path of the player's lamp beam.
+3. The player is told to harpoon it if found, and the two-stage epic hunt begins.
+4. If the epic resets (more than 3,000 units from the player), the hunt fails. A notification sends the player back to the captain.
+
+**Outcomes**
+- **Caught (unexpected).** The captain is overjoyed; he has hunted it for years and can retire now.
+  - Extra rewards: one harpoon module schematic, or any module schematic if all harpoon ones are unlocked, plus three range-data entries.
+- **Not caught (expected).** The captain talks about his years-long chase and says it got away again, but he'll get it next time. He is grateful for the data the player gathered.
+- **Both outcomes:** the harpoon fishing ship (see [Ships](#ships)). Until the hull exists, its text is marked as a placeholder.
+
+**Return to the Fisherman.** He thanks the player and explains how epics and legendaries behave when hunted. Optional questions add some background lore, which the mod is currently light on. His answers stay within his knowledge limits and his habit of not over-explaining (`LORE.md`).
+
+**Work**
+- Quest fleet: an independent fleet with a contact person, using the existing fleet-quest spawning and contact patterns where possible.
+- Choosing the target: an epic species whose range matches the zero-market system. If none qualifies, choose another system rather than a species from elsewhere.
+- Placing the mote:
+  - count lamp-on time within a set distance of the star;
+  - then put a buried mote of the target species ahead of the beam sweep;
+  - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
+- Failure: watch the quest fish's `EpicHunt` reset.
+- The harpoon ship's built-in **Needle Sensor** needs a hullmod that enables the sensor whatever lens is fitted. Today it only runs when fitted in the Lens Array slot.
+
+## T3: The wounded epic
+
+**Premise.** The Fisherman points the player at a nearby system with epics. One has been wounded and is recovering, circling a planet at about 1,000 units.
+
+**Steps**
+1. The player uses the harpoon ship's Needle Sensor to locate it.
+2. It has the usual epic shield but moves slower than a normal epic hunt.
+3. If it gets too far away (the hunt resets), it despawns and respawns at the planet with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
+4. The player is expected to hunt it until caught, then return to the Fisherman.
+
+**Rewards**
+- The blueprint for the second fishing ship (the Breach Light ship).
+- Range data on an epic.
+
+**Follow-up: have the ship built.** The player works out how; the Fisherman does not build it. Completes when the player owns a ship of that hull.
+
+**Closing conversation**
+- Bar rumours about legendary fish are generally worth following, once the player has the gear for it, and the gear level needed is very high.
+- Epics are not unique, but they are rare enough that they might as well be.
+
+**Work**
+- **The circling must not use `orbitAnchor`.** `NeedleSensor.isEligible` and `EpicHunt.applies` both exclude orbit-anchored fish (that field marks shield escorts), so the sensor would never see it and it would never wake. Drive the circling with swim targets around the planet, or add a quest flag both checks respect.
+- Slower movement: a per-fish speed multiplier applied on top of `EpicHunt`'s.
+- Respawn: on the quest fish's reset, expire it and spawn a fresh one at the planet.
+
+## T4: The first legendary
+
+**Direction (decided):** the Fisherman sends the player to upgrade their gear and catch a legendary, any species, starting from the bar rumours. The reward is the third fishing ship, the ROD ship.
+
+**Open:** this may need to be a long-term quest: persistent intel with no deadline that completes on the first legendary catch whenever it happens. A gear checkpoint (specific upgrades bought before the Fisherman gives the lead) could make "the appropriate gear level" concrete instead of just advice.
+
+## Ships
+
+| Ship | Rig | Given by | Built-in |
+|---|---|---|---|
+| Harpoon fishing ship | Harpoon | T2, either outcome | Needle Sensor |
+| Breach Light ship | Breach Lights | T3 blueprint; the player builds it | Not decided |
+| ROD ship | ROD drones | T4, first legendary | Not decided |
+
+None of the hulls exist yet. T2 and T3 can ship with placeholder text, but the Needle Sensor hullmod is needed before T3 plays as designed. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
+
+## Open questions
+
+1. **T1 compass.** The Fisherman takes it. If the player sells it before handing it in, can they still finish (for example, completion on pulling the chest, with the hand-in as dialogue only), or should it be unsellable?
+2. **T1 Glitter Lens.** Size of the treasure bonus, and its credit price tier.
+3. **T2 search.** Distance from the star that counts as "within sight", and whether the 15 seconds must be continuous.
+4. **T3 pace.** How much slower than a normal epic.
+5. **T4.** A long-term quest or not, and whether there is a gear checkpoint.
+6. **Ship built-ins** for the Breach Light ship and the ROD ship.
+
+## Suggested order
+
+1. Two-stage epics (done).
+2. Compass item, golden chest and Glitter Lens, then T1 and its follow-up.
+3. Harpoon ship hull and the Needle Sensor hullmod (placeholders acceptable for T2 text).
+4. T2, then the Fisherman debrief and lore questions.
+5. T3 and the Breach Light ship blueprint.
+6. T4 and the ROD ship.
