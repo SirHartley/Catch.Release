@@ -810,10 +810,10 @@ charges, moving couriers, notice placement, pause and cleanup.
 | File | Owner / connection |
 |---|---|
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge pool for charged abilities. |
-| `rod/ability/PondInteractionAbilityPlugin.java` | Opens ponds, launches and recalls drones, and supports lamp fishing with Breach Coupler. |
+| `rod/ability/PondInteractionAbilityPlugin.java` | Opens ponds, launches and recalls drones, and supports lamp fishing with the Breach Coupler (currently disabled; see below). |
 | `rod/entities/FishingDroneEntityPlugin.java` | Drone launch, orbit, timed chase, catch, and return. |
 | `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast, staggered launches, recall, target assignment, hit cues, and reachability checks. |
-| `rod/scripts/RoamingDroneSwarmScript.java` | Pondless Breach Coupler swarm. |
+| `rod/scripts/RoamingDroneSwarmScript.java` | Pondless Breach Coupler swarm; dormant while the Coupler is disabled. |
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Charged manual targeting and tow-line cutting. |
 | `harpoon/entities/HarpoonEntityPlugin.java` | Flight, collision, shields, mines, hauling, fleet contact, rope, catch, and return. |
 | `searchlight/ability/SearchlightAbilityPlugin.java` | Breach Lights activation, spool, slow, detection penalty, and all beam renderers. |
@@ -928,6 +928,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - Species that share a rarity and `motion` differ in at least one of `motionSpeed`, `restlessness`, or `jitter`, so players can learn them apart.
 - Weaver is not assigned above Uncommon, and Lunger is not assigned to Common. `MIXED` and a species' random moves may still roll either for one move.
 - `reachedBy` uses `POND`, `BREACH_LAMP`, or blank for either. Every EPIC row is `BREACH_LAMP`, so epics are lamp hunts only. Check both the catch method and its origin; drones can also catch at Breach Lamps with the Breach Coupler. See the combinations below when rolling equipment requirements.
+- The Breach Coupler is disabled for now: `Tackle.BREACH_COUPLER` has its `breachCoupling = true` line commented out and is unstocked, so it is not sold, rolled as a reward or unlocked by dev grants. Its dependents (`ShopFishPayments`' coupled payments, the ROD tooltip hint, the roaming swarm) read `breachCoupling` and stay off. The constant remains because saves store fitted tackle by value; restoring that line and its stocking re-enables everything.
 - A legendary has one host, one permanent catch, and no range data or job asks. All six legendaries are lamp-only. Lantern Jack, Slipstream Moray, Quorum, False Dawn and the Imposter are non-Abyssal; the manta is Abyssal.
 - Legendary hosts and motes remain disabled until tutorial graduation. A sighting starts the 90-day relocation timer; the fish never relocates while the player is in-system and never returns after landing.
 - False Dawn selects the largest-radius usable corona star across chartable systems, regardless of coherence; its haunt supplies the coherence change. Its old regional sheet preference does not limit this selection. Equal-largest hosts can alternate; a sole largest host is retained. If no usable corona exists, no natural host is assigned. A host that becomes unsuitable is replaced only while the player is elsewhere; new natural spawns are gated immediately. `SpawnFish` still overrides the host for testing but places the fish in the largest usable local corona.
@@ -938,7 +939,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 | Drones at a natural rupture | `DRONE` | `POND` |
 | Harpoon catch of a fish from a pond | `HARPOON` | `POND` |
 | Harpoon catch at a Breach Lamp | `HARPOON` | `BREACH_LAMP` |
-| Drones at a Breach Lamp with the Breach Coupler | `DRONE` | `BREACH_LAMP` |
+| Drones at a Breach Lamp with the Breach Coupler (disabled for now) | `DRONE` | `BREACH_LAMP` |
 
 ### Coherence model
 

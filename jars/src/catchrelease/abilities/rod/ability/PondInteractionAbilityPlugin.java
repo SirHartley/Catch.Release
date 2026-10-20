@@ -216,7 +216,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
         if (fitted != Tackle.NONE) tooltip.addPara("Fitted: %s", pad, highlight, fitted.name);
         if (hasBreachCoupler()) {
             tooltip.addPara("With breach lamps on, drones follow the fleet and catch illuminated fish.", 3f);
-        } else {
+        } else if (Tackle.BREACH_COUPLER.breachCoupling) {
             tooltip.addPara("Using drones with breach lamps requires a %s.", pad, highlight,
                     Tackle.BREACH_COUPLER.name);
         }

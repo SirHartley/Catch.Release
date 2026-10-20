@@ -259,8 +259,8 @@ public final class ShopPricingChecks {
         f.abilities.add(StatIds.LAMPS_ABILITY);
         require(Payments.available().stream().noneMatch(option -> option.implement() == CatchImplement.BREACH_LAMP), "lamps alone do not grant coupling");
         TackleManager.own(Tackle.BREACH_COUPLER);
-        require(Payments.available().stream().anyMatch(option -> option.method() == FishLogEntry.Method.DRONE
-                && option.implement() == CatchImplement.BREACH_LAMP), "owned coupling allows lamp drones");
+        require(Payments.available().stream().noneMatch(option -> option.method() == FishLogEntry.Method.DRONE
+                && option.implement() == CatchImplement.BREACH_LAMP), "the disabled coupler allows no lamp drones");
         f.data.remove(TackleManager.OWNED_KEY);
         f.abilities.add(StatIds.HARPOON_ABILITY);
         require(Payments.available().stream().anyMatch(option -> option.method() == FishLogEntry.Method.HARPOON

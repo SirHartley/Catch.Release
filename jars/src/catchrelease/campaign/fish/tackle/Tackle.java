@@ -51,11 +51,14 @@ public enum Tackle {
             rarityBias = 1.6f;
         }
     },
+    // Disabled for now: drones fishing under Breach Lights undercut the lamp hunts. Restoring the commented line
+    // and the stocking re-enables every dependent; the constant stays because saves store fitted tackle by value.
     BREACH_COUPLER("Breach Coupler", Fit.DRONE,
             "Lets ROD drones fish outside ruptures while Breach Lights are on. They can only"
                     + " pursue patterns exposed by the lamps.") {
         {
-            breachCoupling = true;
+            // breachCoupling = true;
+            stocked = false;
         }
     },
     CALIBRATED_GRADER("Calibrated Grader", Fit.BOTH,
