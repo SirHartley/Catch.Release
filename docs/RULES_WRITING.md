@@ -154,7 +154,7 @@ Java must not print prose. It may print short receipt lines in the vanilla recei
 
 Options that change with data are a Java job only when the count or labels cannot be known in advance, such as one option per ship. Lines that change with data work the same way: for a list of unknown length, the command writes each item's tokens and fires a line trigger once per item with `FireBest`, so each line's wording and style stay in a row. A fixed set of options belongs in rows, even when Java decides whether each is available: expose that decision as a condition verb.
 
-A row may still ask Java to decorate an option it added when the decoration needs data rows cannot hold, such as a tooltip that lists every fish a sale would include (`CatchReleaseCMD sellTooltip`) or a cost tooltip built from item data (`CatchReleaseCMD crabTooltip`). Call it from the Script of the row that adds the option.
+A row may still ask Java to decorate an option it added when the decoration needs data rows cannot hold, such as a tooltip that lists every fish a sale would include (`CatchReleaseCMD sellTooltip`) a cost tooltip built from item data (`CatchReleaseCMD crabTooltip`), or a job's reward list (`Call $catchrelease_jobRef rewardTooltip <option id>`). Call it from the Script of the row that adds the option.
 
 Paging follows the same split. Before the Fisherman question menu's `FireAll`, `CatchReleaseCMD fisherQuestions` lists the visible question rows with `getAllMatching` and stores the current page's row ids for the dialog; each question row's last condition, `CatchReleaseCMD fisherAskOnPage`, only reads that list. The rows keep the labels, order, colour and Previous, Next and Back options.
 

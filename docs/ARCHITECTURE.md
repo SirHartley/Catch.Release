@@ -254,7 +254,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 
 | File | Owner / connection |
 |---|---|
-| `FishJob.java` | Mission base -> FishRequirement/FishCurrency -> picker -> QuestRewards -> intel. Shared acceptance-time restriction; progress compares capped displayed counts; selected specimens reach rewards before the next round rolls. |
+| `FishJob.java` | Mission base -> FishRequirement/FishCurrency -> picker -> QuestRewards -> intel. Shared acceptance-time restriction; progress compares capped displayed counts; selected specimens reach rewards before the next round rolls. The `rewardTooltip <option id>` action lists the current rewards in an option tooltip, in the intel's reward-line format; Fight Night's take-the-fee option uses it. |
 | `ChefJob.java` | Three ingredient types and a saved dish; supplies `$catchreleaseDish` to the chef's rules dialogue. |
 | `TuberJob.java` | Two paid deliveries: a Fine Uncommon/Rare specimen, then a low-coherence catch. Rules disclose both before acceptance; follow-up and camera questions return to the offer without changing mission state. |
 | `DemandScore.java` | Scores actual requirements (unmodified Common = 10), including diminishing extra specimens and cheapest anyOf branch; supplies ambition/count helpers and EASY/MEDIUM/HARD/SEVERE reward tiers. |
