@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.FalseDawnOrbit;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
@@ -210,6 +211,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     // the base shell: spent by a deflection, back when this reaches zero
     private float baseShieldRegen;
 
+    // EpicHunt's two stages; saved so a hunt in progress survives a reload
+    private boolean epicActive;
+    private boolean epicShieldSpent;
+
     // the Lantern Jack's prowl: sweeping legs between hunts, sharp jinks when struck
     private transient float prowlLeft;
     private transient float evasiveLeft;
@@ -348,6 +353,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             LegendaryStarAvoidance.confine(entity, getFishSpec(), patrolClearance());
         }
         advanceFish(amount);
+        EpicHunt.advance(this);
         LegendaryShields.maintainSatellites(this, amount);
         LonglinerShield.advance(this, amount);
         if (!held && !phantom && !FalseDawnOrbit.confine(entity, fishId)) entity.setExpired(true);
@@ -431,14 +437,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         // Submerged fish keep a straight course at cruise speed.
         float step = MOVE_SPEED * getSpeedMult() * getSlowMult()
-                * LegendaryShields.getSpeedMult(this) * getLureSpeedMult()
+                * LegendaryShields.getSpeedMult(this) * EpicHunt.getSpeedMult(this) * getLureSpeedMult()
                 * motionMult * amount;
         // A submerged False Dawn follows the corona too; straight dive headings can cross the star.
         if (!phantom && FalseDawnOrbit.advance(entity, fishId, step, time)) return;
         float distance = Misc.getDistance(entity.getLocation(), target);
 
         if (step >= distance) {
-            if (isRealLegendary()) {
+            // an awake epic keeps swimming like a legendary until the hunt resets
+            if (isRealLegendary() || EpicHunt.isActive(this)) {
                 float heading = Misc.getAngleInDegrees(entity.getLocation(), target);
                 target = MathUtils.getPointOnCircumference(entity.getLocation(), FLEE_LEG, heading);
                 return;
@@ -506,7 +513,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         float extra = (float) Math.sin(time * 2.63f + sineVariance) * sineVariance * 0.6f;
 
         return ((wander + extra * (wanderMult - 1f)) * wanderMult + getModeWander())
-                * getJackAgilityMult();
+                * getJackAgilityMult() * EpicHunt.getWanderMult(this);
     }
 
     protected float advanceMode(float amount) {
@@ -751,6 +758,19 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public SectorEntityToken getDecoyAnchor() {
         return decoyAnchor;
+    }
+
+    public boolean isEpicActive() {
+        return epicActive;
+    }
+
+    public boolean isEpicShieldSpent() {
+        return epicShieldSpent;
+    }
+
+    public void setEpicStage(boolean active, boolean shieldSpent) {
+        epicActive = active;
+        epicShieldSpent = shieldSpent;
     }
 
     /** The base shell: up when the countdown has run out, spent for ten seconds by a
