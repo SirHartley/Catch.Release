@@ -16,7 +16,15 @@ It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains th
 
 ## Shared mechanic: two-stage epics
 
-Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)). Every epic drifts slowly until a harpoon hit wakes it. That hit is deflected and raises a single purple shield charge that never regenerates. The awake epic swims at full speed and more erratically. More than 3,000 units from the player resets it to drifting, and waking it again raises a fresh shield. T2 and T3 build on this; T2's failure condition is that reset.
+Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)).
+
+- Every epic is a Breach Light catch, never a rupture catch.
+- It drifts slowly until a harpoon hit wakes it. That hit is deflected and raises a single purple shield charge that never regenerates.
+- The awake epic swims at full speed and more erratically. It stays in play after a failed catch.
+- More than 3,000 units from the player resets it to drifting; waking it again raises a fresh shield.
+- Awake epics are removed when the player leaves the system.
+
+T2 and T3 build on this; T2's failure condition is the reset.
 
 ## T1: The treasure rumour
 
@@ -38,10 +46,21 @@ Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)). Every epic d
 - Special item using the icon `graphics/catchrelease/icon/compass.png`, base value 1 credit, cosmetic.
 - Plugin: vanilla's plain `com.fs.starfarer.api.campaign.impl.items.BaseSpecialItemPlugin`, as used by its Topographic Data and Planetkiller rows. There is no `DefaultSpecialItemPlugin` class.
 - It must never be cleared from markets. Nothing extra is needed: vanilla restocks never remove special items, and `SoldFishRestock` only removes catch items.
-- The Fisherman takes it at hand-in, possibly as a keepsake of his own. See [open questions](#open-questions).
+- The Fisherman takes it at hand-in, possibly as a keepsake of his own.
+
+**A lost compass.** The quest is about getting the compass, not about handing it in, so losing it must not block the player.
+
+- While the quest is active, a `CampaignEventListener` (`reportPlayerMarketTransaction`) watches for the compass leaving the player's cargo. It records the market where it was last sold; a free-transfer submarket counts as storage, not a sale. The quest removes the listener when it concludes.
+- If the compass is not in the player's cargo at hand-in, the player can tell the Fisherman "I lost it". He asks "Are you sure?" When the player confirms:
+  - **Sold:** he's pretty sure he saw it on sale at that market, and the player had better go and get it. The quest continues.
+  - **Not sold:** check, once, every unlocked storage and colony submarket.
+    - Found in storage: he tells the player to fetch it from there. The quest continues.
+    - Not found anywhere: the quest concludes and the player still gets the rewards.
 
 **Rewards**
 - Equipment: the **Glitter Lens** schematic. It is a Lens Array module that raises the treasure chance for catches made under Breach Lights only, using the same catch-method distinction as the rest of the shop.
+  - Proposed tuning, to adjust freely: treasure chance ×2 for lamp catches, against the Salvage Trawl's ×3 for the ROD.
+  - Price: 20,000 credits, the lowest module tier in `ShopPricing`, plus its generated fish payment.
 - The means to buy it: the exact fish specimens that satisfy the Glitter Lens's saved fish payment (`ShopPricing` caches each module's payment), plus its credit price.
 
 **Follow-up: buy the Glitter Lens.** Completes when the module is owned. The Fisherman then says the system's raised treasure chance will hold for another two months.
@@ -67,7 +86,7 @@ Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)). Every epic d
 
 **Steps**
 1. The captain asks the player to circle within sight of the system's star with lamps on.
-2. After 15 seconds of searching, the epic's buried mote is placed in the path of the player's lamp beam.
+2. After 15 continuous seconds with Breach Lights on within 6,000 units of the star, the epic's buried mote is placed in the path of the player's lamp beam. Leaving that range or turning the lamps off restarts the count.
 3. The player is told to harpoon it if found, and the two-stage epic hunt begins.
 4. If the epic resets (more than 3,000 units from the player), the hunt fails. A notification sends the player back to the captain.
 
@@ -83,7 +102,7 @@ Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)). Every epic d
 - Quest fleet: an independent fleet with a contact person, using the existing fleet-quest spawning and contact patterns where possible.
 - Choosing the target: an epic species whose range matches the zero-market system. If none qualifies, choose another system rather than a species from elsewhere.
 - Placing the mote:
-  - count lamp-on time within a set distance of the star;
+  - count continuous lamp-on time within 6,000 units of the star;
   - then put a buried mote of the target species ahead of the beam sweep;
   - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
 - Failure: watch the quest fish's `EpicHunt` reset.
@@ -95,7 +114,7 @@ Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)). Every epic d
 
 **Steps**
 1. The player uses the harpoon ship's Needle Sensor to locate it.
-2. It has the usual epic shield but moves slower than a normal epic hunt.
+2. It has the usual epic shield and stages. Asleep, it drifts at the normal epic drift speed; awake, it moves 50% slower than a normal awake epic.
 3. If it gets too far away (the hunt resets), it despawns and respawns at the planet with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
 4. The player is expected to hunt it until caught, then return to the Fisherman.
 
@@ -111,14 +130,15 @@ Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)). Every epic d
 
 **Work**
 - **The circling must not use `orbitAnchor`.** `NeedleSensor.isEligible` and `EpicHunt.applies` both exclude orbit-anchored fish (that field marks shield escorts), so the sensor would never see it and it would never wake. Drive the circling with swim targets around the planet, or add a quest flag both checks respect.
-- Slower movement: a per-fish speed multiplier applied on top of `EpicHunt`'s.
+- Slower movement: a per-fish multiplier of 0.5, applied only while awake, on top of `EpicHunt`'s speed.
 - Respawn: on the quest fish's reset, expire it and spawn a fresh one at the planet.
 
 ## T4: The first legendary
 
-**Direction (decided):** the Fisherman sends the player to upgrade their gear and catch a legendary, any species, starting from the bar rumours. The reward is the third fishing ship, the ROD ship.
-
-**Open:** this may need to be a long-term quest: persistent intel with no deadline that completes on the first legendary catch whenever it happens. A gear checkpoint (specific upgrades bought before the Fisherman gives the lead) could make "the appropriate gear level" concrete instead of just advice.
+**Decided**
+- The Fisherman sends the player to upgrade their gear and catch a legendary, any species, starting from the bar rumours. The reward is the third fishing ship, the ROD ship.
+- It is a long-term quest: persistent intel with no deadline that completes on the first legendary catch, whenever it happens.
+- There is no gear checkpoint. Player skill is part of how hard a legendary is.
 
 ## Ships
 
@@ -132,12 +152,8 @@ None of the hulls exist yet. T2 and T3 can ship with placeholder text, but the N
 
 ## Open questions
 
-1. **T1 compass.** The Fisherman takes it. If the player sells it before handing it in, can they still finish (for example, completion on pulling the chest, with the hand-in as dialogue only), or should it be unsellable?
-2. **T1 Glitter Lens.** Size of the treasure bonus, and its credit price tier.
-3. **T2 search.** Distance from the star that counts as "within sight", and whether the 15 seconds must be continuous.
-4. **T3 pace.** How much slower than a normal epic.
-5. **T4.** A long-term quest or not, and whether there is a gear checkpoint.
-6. **Ship built-ins** for the Breach Light ship and the ROD ship.
+1. **Ship built-ins** for the Breach Light ship and the ROD ship.
+2. **Glitter Lens tuning.** The proposed ×2 and 20,000 credits stand until changed.
 
 ## Suggested order
 
