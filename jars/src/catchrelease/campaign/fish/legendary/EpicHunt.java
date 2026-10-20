@@ -5,8 +5,13 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
+import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.util.Misc;
+
+import java.util.ArrayList;
 
 // Epics hunt in two stages through the legendary shield entry points. State lives on each fish because epics,
 // unlike legendaries, are not unique and have no chase ledger.
@@ -15,7 +20,26 @@ public final class EpicHunt {
     public static final float RESET_RANGE = 3000f;
     public static final float ACTIVE_WANDER_MULT = 1.6f;
 
+    // Awake epics never fade at their swim target, so the ones left behind when the player departs are removed.
+    public static class DepartureCleanup implements CurrentLocationChangedListener {
+
+        @Override
+        public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
+            if (prev == null || prev == curr) return;
+
+            for (SectorEntityToken mote : new ArrayList<>(prev.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG))) {
+                if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && isActive(fish)) mote.setExpired(true);
+            }
+        }
+    }
+
     private EpicHunt() {
+    }
+
+    public static void register() {
+        ListenerManagerAPI listeners = Global.getSector().getListenerManager();
+        listeners.removeListenerOfClass(DepartureCleanup.class);
+        listeners.addListener(new DepartureCleanup(), true);
     }
 
     public static boolean applies(FishEntityPlugin fish) {
@@ -62,14 +86,18 @@ public final class EpicHunt {
         return isActive(fish) ? ACTIVE_WANDER_MULT : 1f;
     }
 
-    // Leaving the player behind ends the hunt: back to drifting, and the next wake raises a fresh shield.
+    // Outdistancing the player ends the hunt: back to drifting, and the next wake raises a fresh shield. An awake
+    // epic in a system the player has left is removed instead, like DepartureCleanup does.
     public static void advance(FishEntityPlugin fish) {
         if (!isActive(fish)) return;
 
         SectorEntityToken mote = fish.getMote();
         CampaignFleetAPI player = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
-        if (mote == null || player == null || mote.getContainingLocation() != player.getContainingLocation()
-                || Misc.getDistance(mote.getLocation(), player.getLocation()) > RESET_RANGE) {
+        if (mote == null || player == null) return;
+
+        if (mote.getContainingLocation() != player.getContainingLocation()) {
+            mote.setExpired(true);
+        } else if (Misc.getDistance(mote.getLocation(), player.getLocation()) > RESET_RANGE) {
             fish.setEpicStage(false, false);
         }
     }
