@@ -169,7 +169,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 **Follow-up: have the ship built.** The player works out how; the Fisherman does not build it. Completes when the player owns a ship of that hull.
 
 **Closing conversation**
-- Bar rumours about legendary fish are generally worth following, once the player has the gear for it, and the gear level needed is very high.
+- Gist: "Rumours about the stranger fish are worth following once your gear is very good." He does not name legendaries, so T4 stays vague.
 - Epics are not unique, but they are rare enough that they might as well be.
 
 **Work**
