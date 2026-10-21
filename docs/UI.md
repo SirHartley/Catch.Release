@@ -207,7 +207,9 @@ The ROD, Harpoon and Breach Lamps use ordinary body text at vanilla's 350-unit
 width. Keep the purpose paragraph short, group live stats with pad 3, and separate
 blocks with pad 10. Highlight values in the normal highlight colour; reserve red
 for current failures or explosive-head danger. Do not append module descriptions
-from the shop. Show the fitted module and any change to targeting or operation.
+from the shop. Show the fitted modules in one `Fitted:` line, in slot order, and each
+module's change to targeting or operation on its own line, read from the rig's
+combined `TackleEffects`.
 Codex mode omits the repeated title and transient availability notices.
 
 Read current values through `UpgradeManager` and the runtime getters. ROD pursuit

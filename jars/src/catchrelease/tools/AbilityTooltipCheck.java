@@ -117,6 +117,7 @@ public final class AbilityTooltipCheck {
         includes(f.lamps(), "Fitted: Needle Sensor", "Passive sensor: occasional ripples while lamps are off.");
         TackleManager.fit(Tackle.Fit.DRONE, Tackle.BAITED_RESONATOR);
         includes(f.lamps(), "x1.80");
+        checkSecondSlot(f);
 
         TackleManager.fit(Tackle.Fit.HARPOON, Tackle.EXPLOSIVE_HEAD);
         includes(f.harpoon(), "Consumed on detonation", "immediate hostility");
@@ -127,6 +128,28 @@ public final class AbilityTooltipCheck {
         excludes(f.rod(), "TITLE:", "No rupture in range.");
         excludes(f.lamps(), "TITLE:");
         Global.CODEX_TOOLTIP_MODE = false;
+    }
+
+    // Both slots show in one Fitted line and each module keeps its own line; fit rules apply within one rig only.
+    private static void checkSecondSlot(Fixture f) {
+        TackleManager.fit(Tackle.Fit.HARPOON, Tackle.FATHOM_HEAD);
+        require(TackleManager.fit(Tackle.Fit.HARPOON, 1, Tackle.RETRIEVAL_HEAD), "second harpoon slot fits");
+        includes(f.harpoon(), "Fitted: Fathom Head, Retrieval Head", "Can also hit diving fish", "A fish hit restores");
+        TackleManager.fit(Tackle.Fit.SEARCHLIGHT, Tackle.TRACKING_GIMBAL);
+        require(TackleManager.fit(Tackle.Fit.SEARCHLIGHT, 1, Tackle.FANNED_ARRAY), "second lamp slot fits");
+        includes(f.lamps(), "Fitted: Tracking Gimbal, Fanned Array", "4 seconds; 4 seconds between locks",
+                "Fan beams weaken");
+
+        require(!TackleManager.fit(Tackle.Fit.HARPOON, 1, Tackle.FATHOM_HEAD), "no module twice on one rig");
+        TackleManager.fit(Tackle.Fit.DRONE, Tackle.SPOOL_GOVERNOR);
+        require(!TackleManager.fit(Tackle.Fit.DRONE, 1, Tackle.INERTIAL_DAMPER), "exclusion group refused");
+        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.NONE, "refused fit leaves the slot");
+        TackleManager.fit(Tackle.Fit.DRONE, Tackle.BARBED_HEAD);
+        require(TackleManager.fit(Tackle.Fit.HARPOON, 1, Tackle.BARBED_HEAD), "rigs are checked separately");
+
+        TackleManager.fit(Tackle.Fit.HARPOON, 1, Tackle.NONE);
+        TackleManager.fit(Tackle.Fit.SEARCHLIGHT, 1, Tackle.NONE);
+        TackleManager.fit(Tackle.Fit.DRONE, Tackle.BAITED_RESONATOR);
     }
 
     private static void checkStatus(Fixture f) {

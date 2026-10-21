@@ -838,7 +838,8 @@ and location changes.
 The three ability plugins own their tooltips and read current upgrades and fitted
 modules when opened. Display contracts are in [UI.md](UI.md#ability-tooltips).
 `tools/AbilityTooltipCheck.java` checks their text, highlights, upgraded values,
-equipment and availability notices against `UpgradeData.csv` in a separate JVM.
+equipment in both slots, the rig fit rules and availability notices against
+`UpgradeData.csv` in a separate JVM.
 
 ### `memory`, `helper`, `reflection`, and `testing`
 
