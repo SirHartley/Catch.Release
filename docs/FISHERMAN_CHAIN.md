@@ -7,7 +7,7 @@ It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains th
 ## Framing
 
 - The tutorial still ends where it does today. `FishingIntro.isComplete()` keeps its current meaning, and everything gated on it (legendary spawns and the shop) is unchanged.
-- The Fisherman offers T1 straight after the tutorial's last hand-in. The chain is not presented as more tutorial: the tutorial should feel short, and this reads as ordinary work.
+- The Fisherman offers T1 straight after the tutorial's last hand-in. After a skipped tutorial, which has no last hand-in, he offers it on the next visit. The chain is not presented as more tutorial: the tutorial should feel short, and this reads as ordinary work.
 - Each step teaches one thing:
   - T1: lamp catches pay better than pond catches.
   - T2: fleets can have work for you, and epics are hunted.
@@ -82,6 +82,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - A quest-only minigame treasure, separate from the Salvage, Wreckage, Cache and Relic tiers.
 - Chance: 30% on each lamp-method catch in the target system while the quest is active.
 - Frustration gate: guaranteed on the 4th lamp catch, then on every 2nd catch after that until the player pulls it.
+- What counts: every minigame opened on a lamp-method, non-legendary fish in the target system. The chest only pays out on a won minigame, like all treasure.
 - The player still has to take it in the minigame like any treasure. A missed chest counts as not pulled.
 
 **Compass**
@@ -118,7 +119,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 **Premise.** "A former worker of mine, on another fleet now, asked me to help out with something." This introduces fleets that offer work.
 
 **The fleet**
-- Spawned in a nearby system with **zero markets and no colonies**, preferably adjacent.
+- Spawned in a nearby system with **zero markets and no colonies**, preferably adjacent. The system must have a star; nebulae are never chosen.
 - It is following a rumour of an epic seen in that system. The target is an **existing epic species** whose range includes that system. It is not Lantern Jack or any other legendary.
 - Their Breach Lights have malfunctioned, so they cannot find it.
 
@@ -129,9 +130,9 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **Steps**
 1. The captain asks the player to circle within sight of the system's star with lamps on.
-2. After 15 continuous seconds with Breach Lights on within 6,000 units of the star, the epic's buried mote is placed in the path of the player's lamp beam. Leaving that range or turning the lamps off restarts the count.
+2. After 15 continuous seconds with Breach Lights on within 6,000 units of the star's surface, the epic's buried mote is placed in the path of the player's lamp beam. Leaving that range or turning the lamps off restarts the count.
 3. The player is told to harpoon it if found, and the two-stage epic hunt begins.
-4. If the epic resets (more than 3,000 units from the player), the hunt fails. A notification sends the player back to the captain.
+4. The hunt fails if the epic resets (more than 3,000 units from the player), a catch attempt fails, or an Explosive Head blast destroys it once the shield is down. A notification sends the player back to the captain.
 
 **Outcomes**
 - **Caught (unexpected).** The captain is overjoyed; he has hunted it for years and can retire now.
@@ -150,7 +151,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
   - count continuous lamp-on time within 6,000 units of the star;
   - then put a buried mote of the target species ahead of the beam sweep;
   - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
-- Failure: a hook in `EpicHunt`'s reset branch for quest-owned fish (see [Implementation plan](#implementation-plan)).
+- Failure: the quest-epic hooks for reset, failed catch and blast (see [Implementation plan](#implementation-plan)).
 - Needle Sensor follow-up: grant the schematic through `FishReward.tackleSchematic`. Advance the intel to its return step when the Outfitter closes and the module is owned, not from `ShopEntry.grant`: the Outfitter's undo refunds a purchase through `TackleManager.consume` without passing through `ShopEntry`.
 
 ## T3: The wounded epic
@@ -193,6 +194,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Each rumour the player hears about a legendary turns its question marks into the last known name: the name the teller used. A bar teller can give a folk name or the wrong one, so an entry can stay wrong until the catch.
 - Every rumour fills in a name. A telling that names nothing gives either a wrong name or one taken from its story, for example "World Serpent" for an eel that lies curled with its tail in its mouth.
 - Catching a legendary changes its entry to the species' real name.
+- The existing legendary rumour intel shows the told name too, not the species' real name (`FishRumors.getStrangerDisplayName` today).
 - The intel concludes once every legendary has been caught (six today). What happens then is decided later.
 
 **Work**
@@ -217,14 +219,9 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 1. **What concluding "Hunting the legendary fish" brings.** It ends once every legendary is caught; the payoff is decided later.
 
-The research for the implementation plan turned up these gaps in the design. Each has a suggested default that the plan assumes until decided:
+The research for the implementation plan also turned up this gap. Its suggested default is assumed until decided:
 
-2. **What counts as a lamp catch for the golden chest's pity gate.** Suggested: every minigame opened on a lamp-method, non-legendary fish in the target system counts. The chest still only pays out on a won minigame, like all treasure.
-3. **T1 after a skipped tutorial.** Skipping has no last hand-in. Suggested: the Fisherman offers T1 on the next visit.
-4. **T2 failures other than the reset.** A failed catch, or an Explosive Head blast once the shield is down, also removes the epic. Suggested: both fail the hunt like a reset.
-5. **T2's 6,000 units.** Suggested: measured from the star's surface, as the existing legendary code measures; systems without a star (nebulae) are never chosen.
-6. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
-7. **Legendary rumour intel names.** The existing legendary rumour intel shows the species' real name (`FishRumors.getStrangerDisplayName`), which contradicts T4's told names. Suggested: it shows the told name too.
+2. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
 
 ## Implementation plan
 
