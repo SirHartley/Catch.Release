@@ -12,7 +12,7 @@ It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains th
   - T1: lamp catches pay better than pond catches.
   - T2: fleets can have work for you, and epics are hunted.
   - T3: equipment is how you win hunts.
-  - T4: legendaries need serious gear.
+  - T4: there is more out there, and rumours lead to it.
 
 ## Shared mechanic: two-stage epics
 
@@ -148,12 +148,29 @@ Not implemented. Each fishing ship carries one rig module built in (see [Ships](
 - Slower movement: a per-fish multiplier of 0.5, applied only while awake, on top of `EpicHunt`'s speed.
 - Respawn: on the quest fish's reset, expire it and spawn a fresh one at the planet.
 
-## T4: The first legendary
+## T4: Listen for rumours
 
 **Decided**
-- The Fisherman sends the player to upgrade their gear and catch a legendary, any species, starting from the bar rumours. The reward is the third fishing ship, the ROD ship (drone carrier).
-- It is a long-term quest: persistent intel with no deadline that completes on the first legendary catch, whenever it happens.
+- The Fisherman tells the player to improve their gear and listen for rumours. He stays vague about *what* they are hunting.
+- The intel's title is along the lines of "Listen for rumours". It is a permanent reminder that there is more to find. Neither it nor the Fisherman mentions a reward or names legendaries.
+- It is a long-term quest: no deadline. It completes on the first legendary catch, whenever that happens.
 - There is no gear checkpoint. Player skill is part of how hard a legendary is.
+- The ROD ship (drone carrier) is still the reward on completion. Nothing announces it beforehand.
+
+**After the first legendary: hunting the legendary fish**
+- When T4 completes, the player learns there is more than one legendary. The intel changes to "Hunting the legendary fish".
+- It lists one entry per legendary species, each shown as question marks until known, so the list shows how many there are.
+- Each rumour the player hears about a legendary turns its question marks into the last known name: the name the teller used. A bar teller can give a folk name or the wrong one, so an entry can stay wrong until the catch.
+- Catching a legendary changes its entry to the species' real name.
+- The conclusion of this intel is not decided.
+
+**Work**
+- Count the entries from the legendary rows in `fish.csv` (six today), not a constant.
+- Record each species' told name whenever a legendary rumour is heard, including before the list appears. There are two sources:
+  - the Fisherman's monthly lead (`FishRumors`);
+  - the bar spacer's report (`RatingBarEvent`, `CatchReleaseRatingLegendaryReport` rows).
+- Today's spacer tellings name some legendaries ("Lantern Jack", "The Moray", "The Imposter") and give no name for the Quorum, False Dawn and Ghost Manta. None gives a deliberately wrong name. Each rumour therefore needs an explicit told name.
+- Catches: `LegendaryChases.isCaught`. A legendary caught before T4 starts completes it at once.
 
 ## Ships
 
@@ -169,6 +186,8 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 1. **Name of the drone carrier's redeploy module.**
 2. **How T3 opens.** It starts once the Needle Sensor is built, but whether the Fisherman's direction to the wounded epic arrives as a message, as intel, or on a return visit is not decided.
+3. **Unnamed rumours.** What a legendary's entry shows after a rumour that gives no name.
+4. **The conclusion of "Hunting the legendary fish".**
 
 ## Suggested order
 
@@ -177,4 +196,4 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 3. Ship-bound equipment in the Outfitter, the Nebula placeholder hulls, and moving the Retrieval Head and Fanned Array out of the shop.
 4. T2 with the harpoon ship, then the Fisherman debrief, lore questions and the Needle Sensor follow-up.
 5. T3 and the Breach Light ship blueprint.
-6. The drone redeploy module, then T4 and the ROD ship.
+6. The drone redeploy module, then T4, the ROD ship and the legendary-hunt intel.
