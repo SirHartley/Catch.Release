@@ -223,13 +223,14 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             if (handleShieldContact(hit)) return;
             playMoteHitSound();
 
-            if (owner == null && TackleManager.effects(Tackle.Fit.HARPOON).retrievesCharge) {
-                HarpoonAbilityPlugin.retrieveCharge();
-            }
-
+            // a blast spends its charge even with the Retrieval Head fitted
             if (owner == null && isExplosive()) {
                 blastMote(hit);
                 return;
+            }
+
+            if (owner == null && TackleManager.effects(Tackle.Fit.HARPOON).retrievesCharge) {
+                HarpoonAbilityPlugin.retrieveCharge();
             }
 
             hooked = hit;

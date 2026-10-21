@@ -309,4 +309,4 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [ ] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
 - [ ] 5.7 Text through the Editor process, then the dialogue and rules checks.
 
-**Behaviour to keep in mind.** With the Retrieval Head and the Explosive Head both fitted, a blast refunds the harpoon charge; the head itself is still consumed. The Tracking Gimbal locks onto quest motes like any buried pattern.
+**Behaviour to keep in mind.** With the Retrieval Head and the Explosive Head both fitted, a blast does not refund the harpoon charge, and the head is consumed. The Retrieval Head's shop description does not mention this yet; add it with the Stage 2 Outfitter text. The Tracking Gimbal locks onto quest motes like any buried pattern.

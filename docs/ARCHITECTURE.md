@@ -910,7 +910,7 @@ Cross-version campaign saves are unsupported during development; see [workflow](
 - ROD chase duration and rarity priority are progressive stats: every purchased tier must affect runtime behavior.
 - `drone_catch_area` is commented out in `UpgradeData.csv`. New campaigns omit it from shops, schematic rewards and dev grants; `FishingDroneSwarmScript.getRingRadius()` uses the 150-unit fallback. Its stat ID and runtime hook remain. Existing saves retain their saved upgrade registry; this CSV change does not migrate them.
 - `drone_acceleration` is a steering response time in seconds: upgrades reduce it. `tools/DroneSteeringCheck` checks acceleration, turning and return approach across every tier at 30/60/144 Hz.
-- Retrieval Head refunds one charge only after a confirmed player mote collision. It preserves fractional recharge progress, respects the cap, and uses the ordinary charge-ready callback.
+- Retrieval Head refunds one charge only after a confirmed player mote collision that hooks the pattern; an Explosive Head blast and a shield deflection refund nothing. It preserves fractional recharge progress, respects the cap, and uses the ordinary charge-ready callback.
 - Explosive Head never lands a fish. Its blast state is terminal, consumes the head, and can immediately make a fleet hostile. Vanilla's explosion entity supplies fleet damage, visuals, and sound.
 - An industry blueprint is `industry_bp` with the industry ID as item data. The industry must still override availability and `showWhenUnavailable` against `knowsIndustry()`; the blueprint item alone does not gate construction.
 
