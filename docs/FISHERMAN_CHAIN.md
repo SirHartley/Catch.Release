@@ -124,7 +124,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Their Breach Lights have malfunctioned, so they cannot find it.
 
 **The captain**
-- An old, grizzled independent skipper, portrait `portrait30.png` (a vanilla portrait; confirm the path in the target game install).
+- An old, grizzled independent skipper, portrait `graphics/portraits/portrait30.png` (vanilla; listed in `independent.faction`).
 - Speaks with Scottish-style speech patterns: accent, dialect and slang. That is only how he talks. Scotland, Earth and their places do not exist in the setting, which stays fully vanilla ([LORE.md](LORE.md#canon-sources)). He never names them, and nothing explains his speech by an origin outside the vanilla Sector. He needs a voice entry in `LORE.md` before any lines are drafted.
 - Tells a personal encounter with the epic that fits any species, for example that it took his leg. The tale must not establish species-specific mechanics.
 
