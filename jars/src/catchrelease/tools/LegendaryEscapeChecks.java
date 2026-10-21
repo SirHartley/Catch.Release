@@ -90,6 +90,7 @@ public final class LegendaryEscapeChecks {
             }
             MemoryAPI moteMemory = api(MemoryAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getBoolean" -> quest && catchrelease.campaign.fish.jobs.QuestPond.QUEST_MOTE_FLAG.equals(a[0]);
+                case "getKeys" -> List.of();
                 default -> throw new AssertionError(m);
             });
             entity = api(TextMote.class, (p, m, a) -> switch (m.getName()) {
