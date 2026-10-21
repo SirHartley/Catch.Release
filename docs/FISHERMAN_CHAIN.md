@@ -94,7 +94,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **A lost compass.** The quest is about getting the compass, not about handing it in, so losing it must not block the player.
 
-- While the quest is active, a `CampaignEventListener` (`reportPlayerMarketTransaction`) watches for the compass leaving the player's cargo. It records the market where it was last sold; a free-transfer submarket counts as storage, not a sale. The quest removes the listener when it concludes.
+- While the quest is active, a `ColonyInteractionListener` (`reportPlayerMarketTransaction`) watches for the compass leaving the player's cargo. It records the market where it was last sold; a free-transfer submarket counts as storage, not a sale. The quest removes the listener when it concludes.
 - If the compass is not in the player's cargo at hand-in, the player can tell the Fisherman "I lost it". He asks "Are you sure?" When the player confirms:
   - **Sold:** he's pretty sure he saw it on sale at that market, and the player had better go and get it. The quest continues.
   - **Not sold:** check, once, every unlocked storage and colony submarket.
