@@ -7,7 +7,7 @@ It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains th
 ## Framing
 
 - The tutorial still ends where it does today. `FishingIntro.isComplete()` keeps its current meaning, and everything gated on it (legendary spawns and the shop) is unchanged.
-- The Fisherman offers T1 straight after the tutorial's last hand-in. The chain is not presented as more tutorial: the tutorial should feel short, and this reads as ordinary work.
+- The Fisherman offers T1 straight after the tutorial's last hand-in. After a skipped tutorial, which has no last hand-in, he offers it on the next visit. The chain is not presented as more tutorial: the tutorial should feel short, and this reads as ordinary work.
 - Each step teaches one thing:
   - T1: lamp catches pay better than pond catches.
   - T2: fleets can have work for you, and epics are hunted.
@@ -220,7 +220,6 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 The research for the implementation plan turned up these gaps in the design. Each has a suggested default that the plan assumes until decided:
 
-3. **T1 after a skipped tutorial.** Skipping has no last hand-in. Suggested: the Fisherman offers T1 on the next visit.
 4. **T2 failures other than the reset.** A failed catch, or an Explosive Head blast once the shield is down, also removes the epic. Suggested: both fail the hunt like a reset.
 5. **T2's 6,000 units.** Suggested: measured from the star's surface, as the existing legendary code measures; systems without a star (nebulae) are never chosen.
 6. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
