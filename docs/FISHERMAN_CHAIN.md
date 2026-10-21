@@ -148,7 +148,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Quest fleet: an independent fleet with a contact person, using the existing fleet-quest spawning and contact patterns where possible.
 - Choosing the target: an epic species whose range matches the zero-market system. If none qualifies, choose another system rather than a species from elsewhere.
 - Placing the mote:
-  - count continuous lamp-on time within 6,000 units of the star;
+  - count continuous lamp-on time within 6,000 units of the star's surface;
   - then put a buried mote of the target species ahead of the beam sweep;
   - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
 - Failure: the quest-epic hooks for reset, failed catch and blast (see [Implementation plan](#implementation-plan)).
