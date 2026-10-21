@@ -132,7 +132,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 1. The captain asks the player to circle within sight of the system's star with lamps on.
 2. After 15 continuous seconds with Breach Lights on within 6,000 units of the star, the epic's buried mote is placed in the path of the player's lamp beam. Leaving that range or turning the lamps off restarts the count.
 3. The player is told to harpoon it if found, and the two-stage epic hunt begins.
-4. If the epic resets (more than 3,000 units from the player), the hunt fails. A notification sends the player back to the captain.
+4. The hunt fails if the epic resets (more than 3,000 units from the player), a catch attempt fails, or an Explosive Head blast destroys it once the shield is down. A notification sends the player back to the captain.
 
 **Outcomes**
 - **Caught (unexpected).** The captain is overjoyed; he has hunted it for years and can retire now.
@@ -151,7 +151,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
   - count continuous lamp-on time within 6,000 units of the star;
   - then put a buried mote of the target species ahead of the beam sweep;
   - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
-- Failure: a hook in `EpicHunt`'s reset branch for quest-owned fish (see [Implementation plan](#implementation-plan)).
+- Failure: the quest-epic hooks for reset, failed catch and blast (see [Implementation plan](#implementation-plan)).
 - Needle Sensor follow-up: grant the schematic through `FishReward.tackleSchematic`. Advance the intel to its return step when the Outfitter closes and the module is owned, not from `ShopEntry.grant`: the Outfitter's undo refunds a purchase through `TackleManager.consume` without passing through `ShopEntry`.
 
 ## T3: The wounded epic
@@ -220,7 +220,6 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 The research for the implementation plan turned up these gaps in the design. Each has a suggested default that the plan assumes until decided:
 
-4. **T2 failures other than the reset.** A failed catch, or an Explosive Head blast once the shield is down, also removes the epic. Suggested: both fail the hunt like a reset.
 5. **T2's 6,000 units.** Suggested: measured from the star's surface, as the existing legendary code measures; systems without a star (nebulae) are never chosen.
 6. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
 7. **Legendary rumour intel names.** The existing legendary rumour intel shows the species' real name (`FishRumors.getStrangerDisplayName`), which contradicts T4's told names. Suggested: it shows the told name too.
