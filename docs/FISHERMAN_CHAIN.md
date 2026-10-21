@@ -39,8 +39,8 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 - **Two modules on one rig.**
   - Effects apply in slot order: slot 1, then slot 2.
   - No module takes up two slots.
-  - Every module can be fitted in only one slot at a time, across all rigs. In the Outfitter it is greyed out in every other slot, and its hover says where it is fitted.
-    - This changes today's behaviour for the three modules that fit both the ROD and the Harpoon (Calibrated Grader, Barbed Head, Sonar Head). They can currently sit on both rigs at once.
+  - A module cannot fill both slots of one rig. In the Outfitter it is greyed out in the rig's other slot, and its hover says it is already fitted there.
+  - Rigs do not block each other. The three modules that fit both the ROD and the Harpoon (Calibrated Grader, Barbed Head, Sonar Head) can still be fitted to both rigs at once, as today.
   - Modules with similar or opposing effects cannot share a rig. Two modules that change the same value count as similar. The pairs are listed under [Incompatible pairs](#incompatible-pairs).
   - In the Outfitter, a module that conflicts with the one in the rig's other slot is greyed out for that slot and cannot be fitted there. Its hover names the conflicting module.
 - **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module, the Reployment Bays, is new.
@@ -237,7 +237,7 @@ Six phases, each its own pull request. Phase 0 changes no visible behaviour; it 
 | Chain state | New `campaign/fish/fisherman/chain/FishermanChain` | Saved stage per quest (T1–T4 and follow-ups) in sector persistent data, as `FishermanQuest` stores its `STATE_KEY`. Entry points are `CatchReleaseCMD` verbs. A `tokens` Boolean per offer gates the `CatchReleaseFisherOptions` rows. Registers its transient listeners on load. |
 | Chain intel | New `BaseIntelPlugin` subclasses in the same package | One intel per quest: lost compass, Needle Sensor build, wounded epic, and the rumour hunt (title and body switch after the first legendary, as `FishingIntro.IntroIntel` switches by stage). Created through `FishIntelNotifications.queue`. |
 | T2 mission | New `BaseHubMission` subclass | Needs a contact person and a fleet, and `BaseHubMission` supplies both and ticks `advanceImpl`. Fleet spawning follows `CampedSpot.spawn`; holding and friendliness reuse `FleetQuest.hold`/`keepStanding`; comms reuse the `catchrelease_fleetQuestHail` pattern. Not a `FishJob`: no fish are delivered. |
-| Rig slots | `TackleManager`, new `RigLoadout` and `TackleEffects` | Two slots per rig. `TackleEffects` combines slot 1 then slot 2 (multipliers multiply, flags OR). It replaces every single-`Tackle` read: the minigame constructors, `NeedleSensor`, `NeutrinoLens`, `Searchlight`, `HarpoonEntityPlugin`, the ability tooltips and `PondFishSpawner`. Fit-once and incompatibility are enforced in `TackleManager.fit`. |
+| Rig slots | `TackleManager`, new `RigLoadout` and `TackleEffects` | Two slots per rig. `TackleEffects` combines slot 1 then slot 2 (multipliers multiply, flags OR). It replaces every single-`Tackle` read: the minigame constructors, `NeedleSensor`, `NeutrinoLens`, `Searchlight`, `HarpoonEntityPlugin`, the ability tooltips and `PondFishSpawner`. The no-repeat rule within a rig and incompatibility are enforced in `TackleManager.fit`. |
 | Incompatibility | `Tackle` | An exclusion group per effect (catch-window rise, bycatch chance, catch progress), declared on the constant. |
 | Ships | New `campaign/fish/ships/FishingShips` | Hull id → rig → ship module. `reconcile()` compares fleet presence with slot 2 and applies the leave/rejoin rules. Ship modules are available while their ship is present, never added to the owned set, and have no price. |
 | Fleet presence | `FishingShips` listeners | Vanilla has no fleet-membership callback (`FleetData.addFleetMember` reports nothing). Covered: `reportPlayerMarketTransaction` (buy, sell, storage), `FleetEventListener.reportBattleOccurred` (losses), `ShipRecoveryListener`, `onGameLoad`, and quest grants calling `reconcile()` directly. Not covered: scuttling and changes made by other code. A member-count comparison in the rig abilities' existing `advance` covers those. It is a documented polling exception, with `reconcile()` also run when the Outfitter opens or an ability activates. |
@@ -254,7 +254,7 @@ Six phases, each its own pull request. Phase 0 changes no visible behaviour; it 
 
 **Phase 0: groundwork.**
 1. `TackleEffects` and the two-slot `TackleManager` API with slot 2 always empty. Move every single-module read to it.
-2. Enforce fit-once. This changes Calibrated Grader, Barbed Head and Sonar Head, which can sit on both rigs today.
+2. Enforce the no-repeat rule within a rig. Fitting a module to one rig never affects another rig.
 3. Quest-mote fixes: the unearth claim copy and the spawner skips.
 4. Epic quest hooks.
 5. `FishReward.ship`.
