@@ -119,7 +119,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 **Premise.** "A former worker of mine, on another fleet now, asked me to help out with something." This introduces fleets that offer work.
 
 **The fleet**
-- Spawned in a nearby system with **zero markets and no colonies**, preferably adjacent.
+- Spawned in a nearby system with **zero markets and no colonies**, preferably adjacent. The system must have a star; nebulae are never chosen.
 - It is following a rumour of an epic seen in that system. The target is an **existing epic species** whose range includes that system. It is not Lantern Jack or any other legendary.
 - Their Breach Lights have malfunctioned, so they cannot find it.
 
@@ -130,7 +130,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **Steps**
 1. The captain asks the player to circle within sight of the system's star with lamps on.
-2. After 15 continuous seconds with Breach Lights on within 6,000 units of the star, the epic's buried mote is placed in the path of the player's lamp beam. Leaving that range or turning the lamps off restarts the count.
+2. After 15 continuous seconds with Breach Lights on within 6,000 units of the star's surface, the epic's buried mote is placed in the path of the player's lamp beam. Leaving that range or turning the lamps off restarts the count.
 3. The player is told to harpoon it if found, and the two-stage epic hunt begins.
 4. The hunt fails if the epic resets (more than 3,000 units from the player), a catch attempt fails, or an Explosive Head blast destroys it once the shield is down. A notification sends the player back to the captain.
 
@@ -220,7 +220,6 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 The research for the implementation plan turned up these gaps in the design. Each has a suggested default that the plan assumes until decided:
 
-5. **T2's 6,000 units.** Suggested: measured from the star's surface, as the existing legendary code measures; systems without a star (nebulae) are never chosen.
 6. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
 7. **Legendary rumour intel names.** The existing legendary rumour intel shows the species' real name (`FishRumors.getStrangerDisplayName`), which contradicts T4's told names. Suggested: it shows the told name too.
 
