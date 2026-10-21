@@ -514,8 +514,8 @@ public abstract class FishReward {
             return new Receipt(member == null ? null : member.getVariant().getFullDesignationWithHullNameForShip());
         }
 
-        // Named and crewed to full readiness the way FleetFactoryV3 adds a member; the empty hull variant is generated
-        // by the game for every hull, skins included.
+        // Named and at full readiness the way FleetFactoryV3 adds a member; the game generates the empty _Hull variant
+        // for every hull.
         protected FleetMemberAPI addToPlayerFleet() {
             CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
             if (fleet == null || getSpec() == null) return null;
