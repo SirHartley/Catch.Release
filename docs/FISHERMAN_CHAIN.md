@@ -222,7 +222,7 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 ## Implementation plan
 
-Six phases, each its own pull request. Phase 0 changes no visible behaviour; it removes the obstacles the research found. Write all player-facing text through [DIALOGUE.md](DIALOGUE.md) and [LORE.md](LORE.md). Route UI scoping to the UI subagent ([CLAUDE.md](../CLAUDE.md#claude-model-assignments)).
+Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible behaviour; it removes the obstacles the research found. Write all player-facing text through [DIALOGUE.md](DIALOGUE.md) and [LORE.md](LORE.md). Route UI scoping to the UI subagent ([CLAUDE.md](../CLAUDE.md#claude-model-assignments)).
 
 ### Architecture
 
@@ -244,49 +244,69 @@ Six phases, each its own pull request. Phase 0 changes no visible behaviour; it 
 | Rumours | `FishRumors` | T1's quest-owned `LOOT` rumour takes the graduation lead's place, including starting the shared 30-day cooldown as that lead does. The chain extends its `duration`. `publish` is the single choke point where T4 records told names. |
 | Legendary list | `LegendaryChases`, `FishSpecLoader` | Rows from `getAllFishSpecs()` with `rarity == LEGENDARY` and `spawnWeight > 0`. Caught state from `isCaught`; completion from `noteCaught`. |
 
-### Phases
+### Stages
 
-**Phase 0: groundwork.**
-1. `TackleEffects` and the two-slot `TackleManager` API with slot 2 always empty. Move every single-module read to it.
-2. Enforce the no-repeat rule within a rig. Fitting a module to one rig never affects another rig.
-3. Quest-mote fixes: the unearth claim copy and the spawner skips.
-4. Epic quest hooks.
-5. `FishReward.ship`.
-6. Update the checks that fit single modules: `AbilityTooltipCheck`, `HarpoonAbilityChecks`, `HarpoonAimCheck`, `PondProximityChecks`, `LegendaryTrailChecks`, `NeedleSensorChecks`, `DevShortcutChecks`.
+Each stage is one pull request and depends on the stages before it. Within a stage, do the subtasks in order, one commit each. Tick a subtask when it is merged. Every stage finishes with the compile gate, the checks named in it, its Changelog entries, and its `ARCHITECTURE.md` routes. A finished stage's technical detail then moves from this document to `ARCHITECTURE.md`.
 
-**Phase 1: T1.**
-- The compass `special_items.csv` row (`BaseSpecialItemPlugin`).
-- The golden chest and its pity counter.
-- The quest-owned rumour.
-- The lost-compass listener: a `ColonyInteractionListener`, registered as `RatingBarEvent.VisitCounter` does, removing the old copy first.
-- The reward specimens, built from `ShopPricing.getPrice(Tackle.GLITTER_LENS)` with a new helper that creates a `FishCatch` satisfying a `FishRequirement` (none exists). If no payment can be generated, only credits are given.
-- The Glitter Lens follow-up, checked when the Outfitter closes.
-- The T1 offer after the last hand-in, and its route for skipped tutorials.
+**Stage 0: groundwork.** No visible change.
+- [ ] 0.1 Two-slot loadout: `RigLoadout` and `TackleEffects`, with `TackleManager` storing two slots per rig and slot 2 always empty.
+- [ ] 0.2 Move every single-module read to `TackleEffects`: the minigame constructors, `FishingMinigameDialogPlugin`, `NeedleSensor`, `NeutrinoLens`, `Searchlight`, `HarpoonEntityPlugin`, the ability tooltips, `PondFishSpawner` and the shop. Done when behaviour is unchanged.
+- [ ] 0.3 Fit rules in `TackleManager.fit`: no repeat within a rig, and the exclusion groups declared on `Tackle` for the [incompatible pairs](#incompatible-pairs). They only take effect once slot 2 exists.
+- [ ] 0.4 Quest motes: `unearth()` copies the quest claim and any per-fish quest fields to the surfaced fish. `BuriedMoteSpawner` neither counts nor culls quest motes.
+- [ ] 0.5 Epic quest hooks: a listener for a quest-owned epic's reset, failed catch, blast and catch.
+- [ ] 0.6 `FishReward.ship(hullId)`, which adds a ship to the player fleet.
+- [ ] 0.7 Move the checks that fit single modules to the new API: `AbilityTooltipCheck`, `HarpoonAbilityChecks`, `HarpoonAimCheck`, `PondProximityChecks`, `LegendaryTrailChecks`, `NeedleSensorChecks`, `DevShortcutChecks`.
 
-**Phase 2: ship slots.**
-- Skins and descriptions.
-- `FishingShips` with its listeners and the documented fallback check.
-- The Outfitter's second slot, greyed rows and hovers.
-- Retrieval Head and Fanned Array set to `stocked = false`.
-- A check for the reconcile rules and the incompatibility matrix.
+**Stage 1: T1, the treasure rumour.**
+- [ ] 1.1 `FishermanChain`: saved chain state, its `CatchReleaseCMD` verbs, and a `tokens` Boolean that gates each offer row. Every later quest builds on it.
+- [ ] 1.2 The compass `special_items.csv` row (`BaseSpecialItemPlugin`).
+- [ ] 1.3 The quest-owned `LOOT` rumour in a nearby system. It replaces the graduation lead: `FishingIntro.finish` and `skip` stop calling `ensureTutorialLead()`. It starts the shared cooldown as that lead did.
+- [ ] 1.4 The offer: "Heard of anywhere worth fishing?" after the last hand-in leads into T1, and after a skipped tutorial the Fisherman offers it on the next visit. Then the lost-compass intel.
+- [ ] 1.5 The golden chest: a flagged `MinigameTreasure` whose "chest due" is decided in `FishingMinigameDialogPlugin.init`, with the pity counter updated in `resolve()` and the compass granted on a win.
+- [ ] 1.6 The lost-compass listener (`ColonyInteractionListener`, registered as `RatingBarEvent.VisitCounter` does) and the "I lost it" branches, including the storage search.
+- [ ] 1.7 Hand-in and rewards: the Glitter Lens schematic, credits, and the reward specimens from a new helper that builds a `FishCatch` satisfying a `FishRequirement`. If no payment can be generated, only credits are given.
+- [ ] 1.8 The follow-up: buy the Glitter Lens, checked when the Outfitter closes; then the rumour is extended by 60 days.
+- [ ] 1.9 Text through the Editor process, then the dialogue and rules checks.
 
-**Phase 3: T2.**
-- The captain's voice entry in `LORE.md` first.
-- The hunt mission and fleet.
-- The lamp timer in `SearchlightAbilityPlugin.advance`, which already ticks every frame (the Needle Sensor runs there).
-- A `Searchlight` accessor for a point ahead of the sweep; `arc`, `baseArcAngle` and `travelDirection` are private today.
-- The outcomes, the harpoon ship grant, the Fisherman debrief and the Needle Sensor intel.
+**Stage 2: ship slots.**
+- [ ] 2.1 Three `nebula` skins, each with its own `skinHullId`, name and description.
+- [ ] 2.2 `FishingShips`: the hull → rig → module registry and `reconcile()`, covering once per rig, emptying on leave and resetting on rejoin.
+- [ ] 2.3 Fleet presence: market, battle and recovery listeners, `onGameLoad`, direct calls from quest grants, and the documented fallback check in the rig abilities' `advance`.
+- [ ] 2.4 Ship modules: Retrieval Head and Fanned Array set to `stocked = false`. Availability comes from ship presence, never ownership, and has no price.
+- [ ] 2.5 Outfitter: second slot per rig, a disabled row state, hovers naming the conflict or where a module is fitted, undo per slot, and the "one slot" text. UI scoping goes to the UI subagent.
+- [ ] 2.6 A check covering the reconcile rules and the incompatibility matrix.
 
-**Phase 4: T3.**
-- The circling heading rule on the quest's buried mote (`BuriedMoteEntityPlugin.advanceFish`).
-- The awake 0.5 multiplier in `EpicHunt.getSpeedMult`.
-- Respawn on reset and on arrival in the system.
-- The blueprint.
-- The build follow-up through `FishingShips.reconcile()`.
+**Stage 3: T2, the captain's fleet.**
+- [ ] 3.1 The captain's voice entry in `LORE.md`.
+- [ ] 3.2 System and species selection: zero markets and colonies, a star, nearby, and an epic species in range.
+- [ ] 3.3 The T2 hub mission: spawn and hold the fleet, the captain with his portrait, the map marker and the comms rows.
+- [ ] 3.4 The lamp timer in `SearchlightAbilityPlugin.advance`: 15 continuous seconds within 6,000 units of the star's surface.
+- [ ] 3.5 A `Searchlight` accessor for a point ahead of the sweep, then placing the quest's buried epic there.
+- [ ] 3.6 The hunt through the Stage 0 hooks: a catch, or a failure on reset, failed catch or blast with a notification back to the captain.
+- [ ] 3.7 Outcomes: the harpoon ship through `FishReward.ship` for both, plus the extra rewards on a catch.
+- [ ] 3.8 The Fisherman debrief, its lore questions and the Needle Sensor schematic.
+- [ ] 3.9 The Needle Sensor intel: buy it (checked when the Outfitter closes), then return to the Fisherman.
+- [ ] 3.10 Text through the Editor process, then the dialogue and rules checks.
 
-**Phase 5: T4.**
-- Reployment Bays at the swarm's "every drone returned" branch in `FishingDroneSwarmScript.advance`, after re-checking `shouldRecall()`; never after a manual recall. It needs a `ShopPricing.getCredits` case: the switch is exhaustive, but the module is never sold.
-- The rumour hunt intel, told names recorded in `FishRumors.publish`, and the T4 completion hook.
-- The ROD ship grant.
+**Stage 4: T3, the wounded epic.**
+- [ ] 4.1 The circling heading rule on the quest's buried mote (`BuriedMoteEntityPlugin.advanceFish`).
+- [ ] 4.2 The awake 0.5 multiplier in `EpicHunt.getSpeedMult`, carried to the surfaced fish by `unearth()`.
+- [ ] 4.3 Spawning at the planet, plus respawn on reset and on arrival in the system, with the campaign message.
+- [ ] 4.4 The T3 offer in the Needle Sensor return conversation, and its intel.
+- [ ] 4.5 Hand-in: the Breach Light ship blueprint and range data on an epic.
+- [ ] 4.6 The build follow-up, completed through `FishingShips.reconcile()`.
+- [ ] 4.7 The closing conversation; text through the Editor process, then the dialogue and rules checks.
+
+**Stage 5: T4 and the legendary hunt.**
+- [ ] 5.1 Reployment Bays:
+  - an unstocked `Tackle` constant;
+  - a `ShopPricing.getCredits` case, because the switch is exhaustive;
+  - redeploying at the swarm's "every drone returned" branch in `FishingDroneSwarmScript.advance`, after re-checking `shouldRecall()`, and never after a manual recall.
+- [ ] 5.2 Told names: one per rumour, including the story-drawn names, recorded in `FishRumors.publish`.
+- [ ] 5.3 The existing legendary rumour intel shows the told name.
+- [ ] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
+- [ ] 5.5 The ROD ship grant.
+- [ ] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
+- [ ] 5.7 Text through the Editor process, then the dialogue and rules checks.
 
 **Behaviour to keep in mind.** With the Retrieval Head and the Explosive Head both fitted, a blast refunds the harpoon charge; the head itself is still consumed. The Tracking Gimbal locks onto quest motes like any buried pattern.
