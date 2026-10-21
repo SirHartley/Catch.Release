@@ -314,8 +314,8 @@ public final class HarpoonAimCheck {
         for (float zoom : new float[]{.5f, 1f, 3f}) for (int level = 0; level <= 2; level++) {
             f.zoom = zoom;
             f.level(StatIds.HARPOON_AIM_ASSIST, level);
-            require(UpgradeManager.getValue(assist.id, -1f) == level * 2f, "Two pixels per tier");
-            float radius = HarpoonConstants.CATCH_RADIUS + level * 2f * zoom;
+            require(UpgradeManager.getValue(assist.id, -1f) == level * 3f, "Three pixels per tier");
+            float radius = HarpoonConstants.CATCH_RADIUS + level * 3f * zoom;
             for (String tag : new String[]{FishEntityPlugin.MOTE_TAG, BuriedMoteEntityPlugin.BURIED_TAG}) {
                 for (float side : new float[]{-1f, 1f}) for (float offset : new float[]{-.1f, .1f}) {
                     Token target = f.token(tag, 600f, side * (radius + offset));
@@ -530,8 +530,8 @@ public final class HarpoonAimCheck {
         head = f.token(null, 0f, 0f);
         shot = new Shot(head, atAngle(0f));
         shot.step(0.1f);
-        require(shot.getState() == HarpoonEntityPlugin.State.RETURNING && shot.sounds == 1
-                        && shot.deflects == 1, "Shield contact still deflects once, with one deflect sound");
+        require(shot.getState() == HarpoonEntityPlugin.State.RETURNING && shot.sounds == 0
+                        && shot.deflects == 1, "Shield contact deflects once, with only the deflect sound");
         same(head.at, new Vector2f(100f - LegendaryShields.SHIELD_RADIUS, 0f), "Shield boundary");
         require(!legendary.isHeld(), "Shield does not hook fish");
         require(LegendaryShields.getStackedRings(legendary) == 2 && LegendaryChases.isProvoked("lantern_jack"),
@@ -542,7 +542,7 @@ public final class HarpoonAimCheck {
             head = f.token(null, 0f, 0f);
             shot = new Shot(head, atAngle(0f));
             shot.step(0.1f);
-            require(minePlugin.detonations == 0 && shot.sounds == 1, "Shield stops shot before mine");
+            require(minePlugin.detonations == 0 && shot.sounds == 0 && shot.deflects == 1, "Shield stops shot before mine");
             require(LegendaryShields.getStackedRings(legendary) == remaining, "Follow-up hit spends one charge");
         }
         require(legendary.calls == 1 && LegendaryShields.getStackedRings(legendary) == 0,
