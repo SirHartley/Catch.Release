@@ -123,7 +123,7 @@ public enum Tackle {
                     + " as spikes in their rarity colours on its ring. Grants the Neutrino Detector if you"
                     + " don't have it."),
     TRACKING_GIMBAL("Tracking Gimbal", Fit.SEARCHLIGHT,
-            "Makes each Breach Light pause its sweep to follow a buried pattern briefly."
+            "Makes each Breach Light pause its sweep to briefly follow a pattern it exposes."
                     + " It then resumes sweeping and must cool down before locking on again.") {
         {
             lockTime = 4f;

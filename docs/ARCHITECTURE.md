@@ -93,7 +93,7 @@ The same [LunaLib UI contract](UI.md#lunalib-settings) defines CSV paragraph esc
 | Hunts | `FishSpec`, haunt modules and `LegendaryShields` consume movement, hazard, recovery and species-specific settings. Easier hunting does not reduce rewards. |
 | Quests | `QuestDuration` and `QuestRewards` scale newly generated offers; accepted terms stay fixed. The listener scales this mod's bar weights from captured base weights. Fleet and distress providers scale only their own natural rolls. |
 | Markers | `FleetQuest.ensureMarked()`, `FleetMapVisibility` and `QuestPond.refreshMarkers()` hide presentation only. Quest memory, claims, routing and completion stay active. The settings callback refreshes loaded owners without a polling script. |
-| Exploration | `PondCreator` stores each system's target count on first initialization; existing systems are not reseeded by slider edits. Ordinary mote population and replenishment exclude legendary residency. |
+| Exploration | `PondCreator` stores each system's target count on first initialization; existing systems are not reseeded by slider edits. Ordinary mote population and replenishment exclude legendary residency. `LAMP_SURFACING` is read by each buried mote's own `advance`, and `LAMP_FISH_SPEED` by each lamp-surfaced fish's movement step, so both apply at once. |
 | Outfitter | `ShopPricing`, `ShopTabPlugin` and `FishermanShelf` scale prices, retaining fish minima and saved purchase receipts. Stock is permanent; there is no restock setting. Upgrade fish-count scaling uses a copy of the saved base requirement, so refreshes cannot compound it. Quest valuation keeps base credit prices. |
 | Presentation | Aquarium and campaign renderers scale their own effects; shared fish icons are untouched. `FishingSounds` applies mod/group volumes to existing sound calls. Music ducking restores the previous music setting on dialogue close. |
 
@@ -449,8 +449,8 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 
 | File | Owner / connection |
 |---|---|
-| `FishEntityPlugin.java` | World fish mote: per-species movement, straight-line dives, held and stunned states, glow, source rupture, and legendary behavior. |
-| `BuriedMoteEntityPlugin.java` | Invisible open-water fish; drifts with its species' campaign pace and wander. |
+| `FishEntityPlugin.java` | World fish mote: per-species movement, straight-line dives, held and stunned states, glow, source rupture, and legendary behavior. A saved `lampSurfaced` flag marks fish the player's lamps surfaced: they swim from the `LAMP_FISH_SPEED` base (default 55, the buried pace) instead of `MOVE_SPEED` 90, they are lamp-bound whatever their `reachedBy`, and their lamp visibility decays like a buried mote's lamp mark, so `searchlight_track_time` holds them in view and in harpoon reach. |
+| `BuriedMoteEntityPlugin.java` | Invisible open-water fish; drifts with its species' campaign pace and wander. While `Setting.LAMP_SURFACING` is on, a non-epic, non-legendary mote in the player's location surfaces through `unearth(true)` the moment any player beam reaches it (`SearchlightAbilityPlugin.getBeamStrengthAt` > 0), checked in its own `advance`. It then swims its 900-unit surface run with full species movement and fades at the end. Epics and legendaries stay buried until harpooned. `BuriedMoteSpawner` counts lamp-surfaced fish toward the population, and the Tracking Gimbal (`Searchlight.acquire`) locks onto them as well as buried motes. |
 | `PondFishSpawner.java` | Selects species by habitat, range, implement, weights, tackle, and rumor effects. |
 
 ### `campaign/fish/shop`

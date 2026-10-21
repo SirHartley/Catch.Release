@@ -8,6 +8,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import catchrelease.helper.math.TrigHelper;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -313,15 +314,23 @@ public class Searchlight implements EveryFrameScript {
         SectorEntityToken best = null;
         float bestLit = 0f;
 
-        // best lit, not nearest - under a fan those differ (centre line beats off-axis)
-        for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-            if (buried.isExpired()) continue;
+        // fish the lamps surfaced are still the gimbal's contacts
+        List<SectorEntityToken> contacts = new ArrayList<>(location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG));
+        for (SectorEntityToken mote : location.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && fish.isLampSurfaced() && !fish.isHeld()) {
+                contacts.add(mote);
+            }
+        }
 
-            float lit = getLitStrength(buried.getLocation());
+        // best lit, not nearest - under a fan those differ (centre line beats off-axis)
+        for (SectorEntityToken contact : contacts) {
+            if (contact.isExpired()) continue;
+
+            float lit = getLitStrength(contact.getLocation());
             if (lit <= bestLit) continue;
 
             bestLit = lit;
-            best = buried;
+            best = contact;
         }
 
         if (best == null) return;

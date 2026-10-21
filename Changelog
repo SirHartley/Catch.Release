@@ -10,6 +10,9 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.d - UNRELEASED
+Added - "Surfaced lamp-fish base speed" setting in Ruptures & Exploration. Fish that surface in your Breach Lights keep the slower pace of hidden fish (55 by default, against 90 for fish in ruptures) so they can still be chased down
+Changed - Ordinary fish now surface as soon as your Breach Lights reach them and swim in their own style until caught or gone; epic and legendary fish still stay hidden until harpooned. Turn this off with "Surface fish in breach lights" in the Ruptures & Exploration settings
+Changed - The Tracking Gimbal also follows fish your Breach Lights have surfaced, and the tracking upgrade keeps them visible and in reach after the beam moves on
 Changed - Fight Night's fee option now reads "Take the rewards." and lists the rewards in its tooltip
 Changed - Every equipment module costs one price tier more (25,000 to 45,000 credits), and none can be paid for with common fish alone
 Added - Glitter Lens, a Lens Array module that doubles the chance of bycatch on catches made under Breach Lights

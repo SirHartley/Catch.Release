@@ -18,6 +18,8 @@ import catchrelease.campaign.fish.legendary.QuorumShellGame;
 import catchrelease.rendering.helper.Disc;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.loading.FishSpecLoader;
+import catchrelease.memory.upgrades.StatIds;
+import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -245,6 +247,10 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     private transient SectorEntityToken lureTarget;
     private transient float lureLeft;
 
+    // surfaced by the player's Breach Lights: seen only in the light, and held there by the tracking upgrade
+    private boolean lampSurfaced;
+    private transient float lampHold;
+
     // lamp-bound extras fade with the player's beam; the shield gets a lens on top
     private transient float lampFade;
     private transient org.dark.shaders.distortion.WaveDistortion shieldLens;
@@ -258,6 +264,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         public SectorEntityToken orbitAnchor;
         public SectorEntityToken decoyAnchor;
         public float movementDelay;
+        public boolean lampSurfaced;
 
         public Params(Vector2f target, String fishId) {
             this(target, fishId, null);
@@ -276,6 +283,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     public boolean isFromPond() {
         return pond != null;
+    }
+
+    public boolean isLampSurfaced() {
+        return lampSurfaced;
+    }
+
+    // lamp fish keep the slower buried pace so they can still be chased down under the beam
+    protected float getBaseSpeed() {
+        return lampSurfaced ? Setting.LAMP_FISH_SPEED.value() : MOVE_SPEED;
     }
 
     public SectorEntityToken getPond() {
@@ -328,6 +344,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.phantom = p.phantom;
         this.orbitAnchor = p.orbitAnchor;
         this.decoyAnchor = p.decoyAnchor;
+        this.lampSurfaced = p.lampSurfaced;
         this.stunLeft = Math.max(0f, p.movementDelay);
         this.color = resolveColor();
         this.sineVariance = MathUtils.getRandomNumberInRange(
@@ -436,7 +453,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         // Submerged fish keep a straight course at cruise speed.
-        float step = MOVE_SPEED * getSpeedMult() * getSlowMult()
+        float step = getBaseSpeed() * getSpeedMult() * getSlowMult()
                 * LegendaryShields.getSpeedMult(this) * EpicHunt.getSpeedMult(this) * getLureSpeedMult()
                 * motionMult * amount;
         // A submerged False Dawn follows the corona too; straight dive headings can cross the star.
@@ -986,7 +1003,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
         float remaining = distance - LegendaryShields.LURE_RELEASE_RANGE;
         float step = Math.min(remaining,
-                MOVE_SPEED * getSpeedMult() * getSlowMult() * LURE_SPEED_MULT * amount);
+                getBaseSpeed() * getSpeedMult() * getSlowMult() * LURE_SPEED_MULT * amount);
         if (step > 0f) {
             moveTo(MathUtils.getPointOnCircumference(entity.getLocation(), step,
                     Misc.getAngleInDegrees(entity.getLocation(), at)));
@@ -1068,7 +1085,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     protected boolean isLampBound() {
         FishSpec spec = getFishSpec();
 
-        return phantom || decoyAnchor != null || orbitAnchor != null
+        return phantom || decoyAnchor != null || orbitAnchor != null || lampSurfaced
                 || (spec != null && spec.reachedBy.size() == 1
                 && spec.reachedBy.contains(CatchImplement.BREACH_LAMP));
     }
@@ -1081,6 +1098,15 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         // the raw beam falloff is squared; widened so most of the beam reads as lit
         float target = Math.min(1f, catchrelease.abilities.searchlight.ability
                 .SearchlightAbilityPlugin.getBeamStrengthAt(entity.getLocation()) * 3f);
+
+        // decays like a buried pattern's lamp mark (SearchlightImpressionRenderer.advanceMarks), so the tracking
+        // upgrade keeps a surfaced lamp fish in view and within reach for as long as it would a buried one
+        if (lampSurfaced) {
+            float trackTime = UpgradeManager.getValue(StatIds.SEARCHLIGHT_TRACK_TIME, 0f);
+            lampHold = trackTime > 0f ? Math.max(target, lampHold - amount / trackTime) : target;
+            target = lampHold;
+        }
+
         lampFade += (target - lampFade) * Math.min(1f, amount * 4f);
     }
 
