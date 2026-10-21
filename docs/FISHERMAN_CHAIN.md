@@ -12,7 +12,7 @@ It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains th
   - T1: lamp catches pay better than pond catches.
   - T2: fleets can have work for you, and epics are hunted.
   - T3: equipment is how you win hunts.
-  - T4: legendaries need serious gear.
+  - T4: there is more out there, and rumours lead to it.
 
 ## Shared mechanic: two-stage epics
 
@@ -28,15 +28,19 @@ T2 and T3 build on this; T2's failure condition is the reset.
 
 ## Shared mechanic: ship-bound equipment
 
-Not implemented. Each fishing ship carries one rig module built in (see [Ships](#ships)).
+Not implemented. Each fishing ship belongs to one rig and carries one module for it (see [Ships](#ships)). The harpoon ship goes with the Harpoon (Harpoon Tips), the Breach Light ship with the Breach Lights (Lens Arrays) and the drone carrier with the ROD (Drone Cores).
 
-- While a ship of that hull is in the player's fleet, its module appears in the Outfitter and can be switched on or off there. Without the ship, the module is unavailable.
-- A ship-bound module does not take an equipment slot. It works alongside whatever module is fitted in its category.
-- A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module is new.
+- **Second slot.** While a ship of that kind is in the fleet, its rig gets a second equipment slot, and the ship's module becomes available.
+  - This happens once per rig. Two harpoon ships still give one extra harpoon slot.
+- **Fitting.** The second slot works like the first. The player can swap the ship's module out for any other module they own.
+  - While the ship is in the fleet, its module can be fitted in either slot.
+- **Ship leaves the fleet.** When the last ship of that kind leaves, the second slot is emptied at once. The ship's module is unfitted wherever it sits, because it is only available with the ship.
+- **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
+- **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module is new.
 
 **Work**
-- Effect checks currently read one fitted module per category (`TackleManager.get(Fit)`). They need to read the fitted module and any switched-on ship-bound module together.
-- Fleet presence: look for a fleet or cargo callback before adding a fleet scan; see [CLAUDE.md](../CLAUDE.md#make-and-record-changes) on polling.
+- Fitted state is one module per rig today (`TackleManager.getFitted()`, read through `TackleManager.get(Fit)`). It needs a second slot per rig, and every effect check must read both slots.
+- Fleet presence: look for a fleet or cargo callback before adding a fleet scan; see [CLAUDE.md](../CLAUDE.md#make-and-record-changes) on polling. A save loaded without the ship must still empty the second slot.
 - Removing a module from the shop: `stocked = false`, keeping the `Tackle` constant, as with the Breach Coupler.
 
 ## T1: The treasure rumour
@@ -94,7 +98,7 @@ Not implemented. Each fishing ship carries one rig module built in (see [Ships](
 
 **The captain**
 - An old, grizzled independent skipper, portrait `portrait30.png` (a vanilla portrait; confirm the path in the target game install).
-- Speaks with a stereotypical Scottish accent and slang. He needs a voice entry in `LORE.md` before any lines are drafted.
+- Speaks with Scottish-style speech patterns: accent, dialect and slang. That is only how he talks. Scotland, Earth and their places do not exist in the setting, which stays fully vanilla ([LORE.md](LORE.md#canon-sources)). He never names them, and nothing explains his speech by an origin outside the vanilla Sector. He needs a voice entry in `LORE.md` before any lines are drafted.
 - Tells a personal encounter with the epic that fits any species, for example that it took his leg. The tale must not establish species-specific mechanics.
 
 **Steps**
@@ -105,9 +109,9 @@ Not implemented. Each fishing ship carries one rig module built in (see [Ships](
 
 **Outcomes**
 - **Caught (unexpected).** The captain is overjoyed; he has hunted it for years and can retire now.
-  - Extra rewards: one harpoon module schematic, or any module schematic if all harpoon ones are unlocked, plus three range-data entries. Ship-bound modules are never offered.
+  - Extra rewards: one harpoon module schematic, or any module schematic if all harpoon ones are unlocked, plus three range-data entries. Ship modules are never offered.
 - **Not caught (expected).** The captain talks about his years-long chase and says it got away again, but he'll get it next time. He is grateful for the data the player gathered.
-- **Both outcomes:** the harpoon fishing ship, with the Retrieval Head built in (see [Ships](#ships)).
+- **Both outcomes:** the harpoon fishing ship. It brings a second Harpoon slot and the Retrieval Head (see [ship-bound equipment](#shared-mechanic-ship-bound-equipment)).
 
 **Return to the Fisherman.** He thanks the player and explains how epics and legendaries behave when hunted. Optional questions add some background lore, which the mod is currently light on. His answers stay within his knowledge limits and his habit of not over-explaining (`LORE.md`). He gives the player the **Needle Sensor** schematic and tells them to build it.
 
@@ -134,7 +138,7 @@ Not implemented. Each fishing ship carries one rig module built in (see [Ships](
 4. The player is expected to hunt it until caught, then return to the Fisherman.
 
 **Rewards**
-- The blueprint for the second fishing ship (the Breach Light ship, with the Fanned Array built in).
+- The blueprint for the second fishing ship, the Breach Light ship. It brings a second Lens Array slot and the Fanned Array.
 - Range data on an epic.
 
 **Follow-up: have the ship built.** The player works out how; the Fisherman does not build it. Completes when the player owns a ship of that hull.
@@ -148,33 +152,56 @@ Not implemented. Each fishing ship carries one rig module built in (see [Ships](
 - Slower movement: a per-fish multiplier of 0.5, applied only while awake, on top of `EpicHunt`'s speed.
 - Respawn: on the quest fish's reset, expire it and spawn a fresh one at the planet.
 
-## T4: The first legendary
+## T4: Listen for rumours
 
 **Decided**
-- The Fisherman sends the player to upgrade their gear and catch a legendary, any species, starting from the bar rumours. The reward is the third fishing ship, the ROD ship (drone carrier).
-- It is a long-term quest: persistent intel with no deadline that completes on the first legendary catch, whenever it happens.
+- The Fisherman tells the player to improve their gear and listen for rumours. He stays vague about *what* they are hunting.
+- The intel's title is along the lines of "Listen for rumours". It is a permanent reminder that there is more to find. Neither it nor the Fisherman mentions a reward or names legendaries.
+- It is a long-term quest: no deadline. It completes on the first legendary catch, whenever that happens.
 - There is no gear checkpoint. Player skill is part of how hard a legendary is.
+- The ROD ship (drone carrier) is still the reward on completion. Nothing announces it beforehand.
+
+**After the first legendary: hunting the legendary fish**
+- When T4 completes, the player learns there is more than one legendary. The intel changes to "Hunting the legendary fish".
+- It lists one entry per legendary species, each shown as question marks until known, so the list shows how many there are.
+- Each rumour the player hears about a legendary turns its question marks into the last known name: the name the teller used. A bar teller can give a folk name or the wrong one, so an entry can stay wrong until the catch.
+- Catching a legendary changes its entry to the species' real name.
+- The conclusion of this intel is not decided.
+
+**Work**
+- Count the entries from the legendary rows in `fish.csv` (six today), not a constant.
+- Record each species' told name whenever a legendary rumour is heard, including before the list appears. There are two sources:
+  - the Fisherman's monthly lead (`FishRumors`);
+  - the bar spacer's report (`RatingBarEvent`, `CatchReleaseRatingLegendaryReport` rows).
+- Today's spacer tellings name some legendaries ("Lantern Jack", "The Moray", "The Imposter") and give no name for the Quorum, False Dawn and Ghost Manta. None gives a deliberately wrong name. Each rumour therefore needs an explicit told name.
+- Catches: `LegendaryChases.isCaught`. A legendary caught before T4 starts completes it at once.
 
 ## Ships
 
-| Ship | Rig | Given by | Built-in ([ship-bound](#shared-mechanic-ship-bound-equipment)) |
+| Ship | Rig | Given by | Ship module ([second slot](#shared-mechanic-ship-bound-equipment)) |
 |---|---|---|---|
 | Harpoon fishing ship | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
 | Breach Light ship | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
 | ROD ship (drone carrier) | ROD drones | T4, first legendary | New drone module: once every drone has returned, the drones deploy again to the same area |
 
-None of the hulls exist yet. Until they do, each ship is a placeholder built on the vanilla Nebula hull (`nebula`, a civilian transport). Give each placeholder its own hull id, for example a `data/hulls/skins/*.skin` of `nebula` with its own `skinHullId` and name. Otherwise three Nebulas cannot be told apart, and the ship-bound check would not know which module a ship carries. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
+None of the hulls exist yet. Until they do, each ship is a placeholder built on the vanilla Nebula hull (`nebula`, a civilian transport). Give each placeholder its own hull id, for example a `data/hulls/skins/*.skin` of `nebula` with its own `skinHullId` and name. Otherwise three Nebulas cannot be told apart, and the fleet check would not know which rig gets the second slot. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 
 ## Open questions
 
 1. **Name of the drone carrier's redeploy module.**
 2. **How T3 opens.** It starts once the Needle Sensor is built, but whether the Fisherman's direction to the wounded epic arrives as a message, as intel, or on a return visit is not decided.
+3. **Module combinations.** Two slots let one rig carry two modules, which has not been possible before. Undecided:
+   - how their effects stack;
+   - whether any pairs must be refused, such as the single-use Explosive Head with another tip;
+   - whether one module may sit in both slots. Today a module that fits both Drone and Harpoon can be fitted to both rigs at once.
+4. **Unnamed rumours.** What a legendary's entry shows after a rumour that gives no name.
+5. **The conclusion of "Hunting the legendary fish".**
 
 ## Suggested order
 
 1. Two-stage epics (done).
 2. Compass item and golden chest, then T1 and its follow-up. The Glitter Lens is done.
-3. Ship-bound equipment in the Outfitter, the Nebula placeholder hulls, and moving the Retrieval Head and Fanned Array out of the shop.
+3. Second equipment slots in the Outfitter, the Nebula placeholder hulls, and moving the Retrieval Head and Fanned Array out of the shop.
 4. T2 with the harpoon ship, then the Fisherman debrief, lore questions and the Needle Sensor follow-up.
 5. T3 and the Breach Light ship blueprint.
-6. The drone redeploy module, then T4 and the ROD ship.
+6. The drone redeploy module, then T4, the ROD ship and the legendary-hunt intel.
