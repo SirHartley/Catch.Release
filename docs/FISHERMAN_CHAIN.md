@@ -60,10 +60,10 @@ Every module was checked against the others that fit the same rig.
 | ROD | Salvage Trawl + Lifting Rig | Both raise the bycatch chance (`treasureChanceMult`). |
 | ROD | Holdfast Clamp + Barbed Head | Both work on catch progress: one slows its loss, the other speeds its gain. |
 | Harpoon | Explosive Head + Barbed Head, Sonar Head, Calibrated Grader or Shoring Head | The blast destroys the catch those tips improve. |
-| Lens Array | Needle Sensor + Neutrino Lens | Both point out hidden rare, epic and legendary patterns. |
 
-Every other pair is compatible. Two of them were checked specifically:
+Every other pair is compatible. These were checked specifically:
 - **Retrieval Head + Explosive Head:** the Retrieval Head returns harpoon charges and does nothing to the catch.
+- **Needle Sensor + Neutrino Lens:** the Needle Sensor only runs with the Breach Lights off and the Neutrino Lens only with them on, so they never act together.
 - **Fanned Array + Tracking Gimbal:** one sets the beam's shape and sweep speed, the other pauses the sweep on a pattern. `Searchlight.acquire` already picks the best-lit pattern under a fan.
 
 Because no ship module is in a pair, the reset when a ship rejoins never meets a conflicting slot 1. The disabled Breach Coupler is not assessed; check it if it returns.
