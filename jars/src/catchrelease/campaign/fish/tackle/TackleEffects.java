@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// The combined effect of one rig's fitted modules, applied slot 1 then slot 2: multipliers multiply, bonuses add,
+// The combined effect of one rig's fitted modules, applied first slot then second: multipliers multiply, bonuses add,
 // flags combine and the longest lock wins. Every effect read goes through this, never a single slot's Tackle.
 public final class TackleEffects {
 

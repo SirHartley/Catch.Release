@@ -37,7 +37,7 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 - **Ship leaves the fleet.** When the last ship of that kind leaves, the second slot is emptied at once. The ship's module is unfitted wherever it sits, because it is only available with the ship.
 - **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
 - **Two modules on one rig.**
-  - Effects apply in slot order: slot 1, then slot 2.
+  - Effects apply in slot order: the first slot, then the second.
   - No module takes up two slots.
   - A module cannot fill both slots of one rig. In the Outfitter it is greyed out in the rig's other slot, and its hover says it is already fitted there.
   - Rigs do not block each other. The three modules that fit both the ROD and the Harpoon (Calibrated Grader, Barbed Head, Sonar Head) can still be fitted to both rigs at once, as today.
@@ -46,7 +46,7 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 - **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module, the Reployment Bays, is new.
 
 **Work**
-- Fitted state is a two-slot `RigLoadout` per rig, and every effect check reads the combined `TackleManager.effects(rig)` (Stage 0). Ship slots only need to fill and empty slot 1.
+- Fitted state is a two-slot `RigLoadout` per rig, and every effect check reads the combined `TackleManager.effects(rig)` (Stage 0). Ship slots only need to fill and empty the second slot (`RigLoadout` index 1).
 - Fleet presence: look for a fleet or cargo callback before adding a fleet scan; see [CLAUDE.md](../CLAUDE.md#make-and-record-changes) on polling. A save loaded without the ship must still empty the second slot.
 - Removing a module from the shop: `stocked = false`, keeping the `Tackle` constant, as with the Breach Coupler.
 - Declare incompatibility on `Tackle`, for example as a shared exclusion group per effect, rather than as pairs in the Outfitter code, so a new module is checked against every other.
@@ -66,7 +66,7 @@ Every other pair is compatible. These were checked specifically:
 - **Needle Sensor + Neutrino Lens:** the Needle Sensor only runs with the Breach Lights off and the Neutrino Lens only with them on, so they never act together.
 - **Fanned Array + Tracking Gimbal:** one sets the beam's shape and sweep speed, the other pauses the sweep on a pattern. `Searchlight.acquire` already picks the best-lit pattern under a fan.
 
-Because no ship module is in a pair, the reset when a ship rejoins never meets a conflicting slot 1. The disabled Breach Coupler is not assessed; check it if it returns.
+Because no ship module is in a pair, the reset when a ship rejoins never meets a conflicting first slot. The disabled Breach Coupler is not assessed; check it if it returns.
 
 ## T1: The treasure rumour
 
@@ -233,7 +233,7 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 | T2 mission | New `BaseHubMission` subclass | Needs a contact person and a fleet, and `BaseHubMission` supplies both and ticks `advanceImpl`. Fleet spawning follows `CampedSpot.spawn`; holding and friendliness reuse `FleetQuest.hold`/`keepStanding`; comms reuse the `catchrelease_fleetQuestHail` pattern. Not a `FishJob`: no fish are delivered. |
 | Rig slots | `TackleManager`, `RigLoadout`, `TackleEffects` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Incompatibility | `Tackle.Exclusion` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
-| Ships | New `campaign/fish/ships/FishingShips` | Hull id → rig → ship module. `reconcile()` compares fleet presence with slot 2 and applies the leave/rejoin rules. Ship modules are available while their ship is present, never added to the owned set, and have no price. |
+| Ships | New `campaign/fish/ships/FishingShips` | Hull id → rig → ship module. `reconcile()` compares fleet presence with the second slot and applies the leave/rejoin rules. Ship modules are available while their ship is present, never added to the owned set, and have no price. |
 | Fleet presence | `FishingShips` listeners | Vanilla has no fleet-membership callback (`FleetData.addFleetMember` reports nothing). Covered: `reportPlayerMarketTransaction` (buy, sell, storage), `FleetEventListener.reportBattleOccurred` (losses), `ShipRecoveryListener`, `onGameLoad`, and quest grants calling `reconcile()` directly. Not covered: scuttling and changes made by other code. A member-count comparison in the rig abilities' existing `advance` covers those. It is a documented polling exception, with `reconcile()` also run when the Outfitter opens or an ability activates. |
 | Hull ids | Skins of `nebula` | `FleetMemberAPI.getHullId()` returns the skin id. A D-modded ship becomes `<id>_default_D`, so match `spec.isDefaultDHull() ? spec.getDParentHullId() : spec.getHullId()`. No `ship_data.csv` rows are needed. |
 | Outfitter | `FishShopDialog`, `ShopRowPlugin`, `ShopEntry`, `ShopDetailHeaderPlugin` | Second slot per rig, a disabled row state (rows have none today), and row hovers naming the conflict or where a module is fitted. Undo restores per slot. The "one slot" text changes. |
@@ -249,9 +249,9 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 Each stage is one pull request and depends on the stages before it. Within a stage, do the subtasks in order, one commit each. Tick a subtask when it is merged. Every stage finishes with the compile gate, the checks named in it, its Changelog entries, and its `ARCHITECTURE.md` routes. A finished stage's technical detail then moves from this document to `ARCHITECTURE.md`.
 
 **Stage 0: groundwork.** No visible change.
-- [x] 0.1 Two-slot loadout: `RigLoadout` and `TackleEffects`, with `TackleManager` storing two slots per rig and slot 2 always empty.
+- [x] 0.1 Two-slot loadout: `RigLoadout` and `TackleEffects`, with `TackleManager` storing two slots per rig and the second slot always empty.
 - [x] 0.2 Move every single-module read to `TackleEffects`: the minigame constructors, `FishingMinigameDialogPlugin`, `NeedleSensor`, `NeutrinoLens`, `Searchlight`, `HarpoonEntityPlugin`, the ability tooltips, `PondFishSpawner` and the shop. Done when behaviour is unchanged.
-- [x] 0.3 Fit rules in `TackleManager.fit`: no repeat within a rig, and the exclusion groups declared on `Tackle` for the [incompatible pairs](#incompatible-pairs). They only take effect once slot 2 exists.
+- [x] 0.3 Fit rules in `TackleManager.fit`: no repeat within a rig, and the exclusion groups declared on `Tackle` for the [incompatible pairs](#incompatible-pairs). They only take effect once the second slot exists.
 - [x] 0.4 Quest motes: `unearth()` copies the quest claim and any per-fish quest fields to the surfaced fish. `BuriedMoteSpawner` neither counts nor culls quest motes.
 - [x] 0.5 Epic quest hooks: a listener for a quest-owned epic's reset, failed catch, blast and catch.
 - [x] 0.6 `FishReward.ship(hullId)`, which adds a ship to the player fleet.

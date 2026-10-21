@@ -488,8 +488,8 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 
 | File | Owner / connection |
 |---|---|
-| `TackleManager.java` | Separates module ownership from the modules fitted to each rig. Each rig is a saved `RigLoadout` of two slots under `$catchrelease_tackle`; slot 0 is the rig's own and slot 1 the fishing ship's, empty until ship slots exist. `effects(rig)` returns the rig's combined `TackleEffects`; `getSlot` reads one slot for the Outfitter. `fit` refuses a slot through `canFit`: a module that does not fit the rig, the same module in the rig's other slot, or one sharing its `Tackle.Exclusion` group. Rigs are checked separately, so a module that fits both the ROD and the Harpoon can sit on each. |
-| `TackleEffects.java` | Combined effect of one rig's fitted modules, slot 1 then slot 2: multipliers multiply, quality and coherence bonuses add, flags combine and the longest lock wins. `has(Tackle)` replaces identity checks against a single fitted module. |
+| `TackleManager.java` | Separates module ownership from the modules fitted to each rig. Each rig is a saved `RigLoadout` of two slots under `$catchrelease_tackle`; the first slot (index 0) is the rig's own and the second (index 1) the fishing ship's, empty until ship slots exist. `effects(rig)` returns the rig's combined `TackleEffects`; `getSlot` reads one slot for the Outfitter. `fit` refuses a slot through `canFit`: a module that does not fit the rig, the same module in the rig's other slot, or one sharing its `Tackle.Exclusion` group. Rigs are checked separately, so a module that fits both the ROD and the Harpoon can sit on each. |
+| `TackleEffects.java` | Combined effect of one rig's fitted modules, first slot then second: multipliers multiply, quality and coherence bonuses add, flags combine and the longest lock wins. `has(Tackle)` replaces identity checks against a single fitted module. |
 
 ### `campaign/fish/map`
 

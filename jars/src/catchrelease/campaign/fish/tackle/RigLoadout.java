@@ -1,6 +1,6 @@
 package catchrelease.campaign.fish.tackle;
 
-// One rig's equipment slots, saved by value in sector persistent data. Slot 0 is the rig's own slot; slot 1 is the
+// One rig's equipment slots, saved by value in sector persistent data. Index 0 is the rig's own slot; index 1 is the
 // second slot a fishing ship provides.
 public class RigLoadout {
 
