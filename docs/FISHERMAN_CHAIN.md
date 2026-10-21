@@ -238,7 +238,7 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 | Hull ids | Skins of `nebula` | `FleetMemberAPI.getHullId()` returns the skin id. A D-modded ship becomes `<id>_default_D`, so match `spec.isDefaultDHull() ? spec.getDParentHullId() : spec.getHullId()`. No `ship_data.csv` rows are needed. |
 | Outfitter | `FishShopDialog`, `ShopRowPlugin`, `ShopEntry`, `ShopDetailHeaderPlugin` | Second slot per rig, a disabled row state (rows have none today), and row hovers naming the conflict or where a module is fitted. Undo restores per slot. The "one slot" text changes. |
 | Quest motes | `BuriedMoteEntityPlugin`, `BuriedMoteSpawner`, `QuestPond` | `unearth()` copies the quest claim (`QuestPond.markPlanted` memory). The spawner's population count and `cullDistant` skip quest motes. |
-| Epic hooks | `EpicHunt`, `HarpoonEntityPlugin` | A listener interface for quest-owned epics: reset (the branch in `EpicHunt.advance`), failed catch (the harpoon's `onCatchResolved` path, where epics currently fade unreported), blast and catch (`FishItems.addToPlayerCargo` hooks with `questTargetId`). A saved per-fish awake speed multiplier, which `unearth()` passes from buried mote to surfaced fish. |
+| Epic hooks | `QuestEpicListener`, `EpicHunt` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). Still to add: a per-fish awake speed multiplier saved under a `$catchrelease_` memory key, which `unearth()` already copies from buried mote to surfaced fish. |
 | Ship rewards | `FishReward` | New `ship(hullId)` reward that adds a fleet member to the player fleet; there is none today. `shipBlueprint` already exists. |
 | Golden chest | `FishingMinigameDialogPlugin`, `FishingMinigame`, `TreasureRoller` | `init` decides "chest due" from chain state, the system and `CatchImplement.BREACH_LAMP`, as `FishingIntro.applyCatchTargetProtection` does. The chest is a flagged `MinigameTreasure`, not a new `TreasureRarity`, so `rollRarity` never draws it. It is granted on a win and counted in `resolve()`. |
 | Rumours | `FishRumors` | T1's quest-owned `LOOT` rumour takes the graduation lead's place, including starting the shared 30-day cooldown as that lead does. The chain extends its `duration`. `publish` is the single choke point where T4 records told names. |
@@ -253,7 +253,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 0.2 Move every single-module read to `TackleEffects`: the minigame constructors, `FishingMinigameDialogPlugin`, `NeedleSensor`, `NeutrinoLens`, `Searchlight`, `HarpoonEntityPlugin`, the ability tooltips, `PondFishSpawner` and the shop. Done when behaviour is unchanged.
 - [x] 0.3 Fit rules in `TackleManager.fit`: no repeat within a rig, and the exclusion groups declared on `Tackle` for the [incompatible pairs](#incompatible-pairs). They only take effect once slot 2 exists.
 - [x] 0.4 Quest motes: `unearth()` copies the quest claim and any per-fish quest fields to the surfaced fish. `BuriedMoteSpawner` neither counts nor culls quest motes.
-- [ ] 0.5 Epic quest hooks: a listener for a quest-owned epic's reset, failed catch, blast and catch.
+- [x] 0.5 Epic quest hooks: a listener for a quest-owned epic's reset, failed catch, blast and catch.
 - [ ] 0.6 `FishReward.ship(hullId)`, which adds a ship to the player fleet.
 - [ ] 0.7 Move the checks that fit single modules to the new API: `AbilityTooltipCheck`, `HarpoonAbilityChecks`, `HarpoonAimCheck`, `PondProximityChecks`, `LegendaryTrailChecks`, `NeedleSensorChecks`, `DevShortcutChecks`.
 

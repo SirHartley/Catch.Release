@@ -17,6 +17,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.entities.HauntMineEntityPlugin;
 import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
 import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.campaign.fish.legendary.LonglinerShield;
@@ -322,7 +323,10 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         CrabWares.recordExplosiveUse(targetName);
 
         // a legendary dives and resurfaces far away instead; everything else is just gone
-        if (!LegendaryShields.onExplosiveStrike(mote)) Misc.fadeAndExpire(mote, 0.2f);
+        if (!LegendaryShields.onExplosiveStrike(mote)) {
+            Misc.fadeAndExpire(mote, 0.2f);
+            EpicHunt.reportBlasted(mote);
+        }
 
         detonate(ExplosionFleetDamage.NONE);
     }

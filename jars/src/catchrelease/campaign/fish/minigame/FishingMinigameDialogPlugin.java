@@ -441,6 +441,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         if (!dismissed && delegate != null) delegate.dismissPanel();
         if (dialog != null) dialog.dismiss();
         if (callback != null) callback.onCatchResolved(caught ? specimen : null);
+        catchrelease.campaign.fish.legendary.EpicHunt.reportResolved(catchTarget, caught ? specimen : null);
     }
 
     @Override

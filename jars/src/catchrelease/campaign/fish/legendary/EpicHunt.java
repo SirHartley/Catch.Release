@@ -1,8 +1,10 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -12,6 +14,7 @@ import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 
 // Epics hunt in two stages through the legendary shield entry points. State lives on each fish because epics,
 // unlike legendaries, are not unique and have no chase ledger.
@@ -29,7 +32,10 @@ public final class EpicHunt {
             if (prev == null || prev == curr) return;
 
             for (SectorEntityToken mote : new ArrayList<>(prev.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG))) {
-                if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && isActive(fish)) mote.setExpired(true);
+                if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish) || !isActive(fish)) continue;
+
+                mote.setExpired(true);
+                reportReset(mote);
             }
         }
     }
@@ -104,9 +110,38 @@ public final class EpicHunt {
 
         if (mote.getContainingLocation() != player.getContainingLocation()) {
             mote.setExpired(true);
+            reportReset(mote);
         } else if (Misc.getDistance(mote.getLocation(), player.getLocation()) > RESET_RANGE) {
             fish.setEpicStage(false, fish.isEpicShieldSpent());
             fish.shortenSwim(DRIFT_OFF_DISTANCE);
+            reportReset(mote);
+        }
+    }
+
+    public static void reportReset(SectorEntityToken mote) {
+        report(mote, (listener, planter) -> listener.reportQuestEpicReset(mote, planter));
+    }
+
+    public static void reportResolved(SectorEntityToken mote, FishCatch caught) {
+        if (caught == null) {
+            report(mote, (listener, planter) -> listener.reportQuestEpicEscaped(mote, planter));
+        } else {
+            report(mote, (listener, planter) -> listener.reportQuestEpicCaught(mote, planter, caught));
+        }
+    }
+
+    public static void reportBlasted(SectorEntityToken mote) {
+        report(mote, (listener, planter) -> listener.reportQuestEpicBlasted(mote, planter));
+    }
+
+    protected static void report(SectorEntityToken mote, BiConsumer<QuestEpicListener, String> event) {
+        if (mote == null || !(mote.getCustomPlugin() instanceof FishEntityPlugin fish) || !applies(fish)) return;
+        if (!QuestPond.isQuestMote(mote) || Global.getSector() == null) return;
+
+        String planter = QuestPond.getPlanter(mote);
+        for (QuestEpicListener listener
+                : Global.getSector().getListenerManager().getListeners(QuestEpicListener.class)) {
+            event.accept(listener, planter);
         }
     }
 }
