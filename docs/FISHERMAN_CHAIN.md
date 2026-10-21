@@ -26,6 +26,19 @@ Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 
 T2 and T3 build on this; T2's failure condition is the reset.
 
+## Shared mechanic: ship-bound equipment
+
+Not implemented. Each fishing ship carries one rig module built in (see [Ships](#ships)).
+
+- While a ship of that hull is in the player's fleet, its module appears in the Outfitter and can be switched on or off there. Without the ship, the module is unavailable.
+- A ship-bound module does not take an equipment slot. It works alongside whatever module is fitted in its category.
+- A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module is new.
+
+**Work**
+- Effect checks currently read one fitted module per category (`TackleManager.get(Fit)`). They need to read the fitted module and any switched-on ship-bound module together.
+- Fleet presence: look for a fleet or cargo callback before adding a fleet scan; see [CLAUDE.md](../CLAUDE.md#make-and-record-changes) on polling.
+- Removing a module from the shop: `stocked = false`, keeping the `Tackle` constant, as with the Breach Coupler.
+
 ## T1: The treasure rumour
 
 **Premise.** Word goes round that retrievals in a nearby system are bringing up far more bycatch than usual. The Fisherman knows of one particular find there and wants it.
@@ -92,11 +105,13 @@ T2 and T3 build on this; T2's failure condition is the reset.
 
 **Outcomes**
 - **Caught (unexpected).** The captain is overjoyed; he has hunted it for years and can retire now.
-  - Extra rewards: one harpoon module schematic, or any module schematic if all harpoon ones are unlocked, plus three range-data entries.
+  - Extra rewards: one harpoon module schematic, or any module schematic if all harpoon ones are unlocked, plus three range-data entries. Ship-bound modules are never offered.
 - **Not caught (expected).** The captain talks about his years-long chase and says it got away again, but he'll get it next time. He is grateful for the data the player gathered.
-- **Both outcomes:** the harpoon fishing ship (see [Ships](#ships)). Until the hull exists, its text is marked as a placeholder.
+- **Both outcomes:** the harpoon fishing ship, with the Retrieval Head built in (see [Ships](#ships)).
 
-**Return to the Fisherman.** He thanks the player and explains how epics and legendaries behave when hunted. Optional questions add some background lore, which the mod is currently light on. His answers stay within his knowledge limits and his habit of not over-explaining (`LORE.md`).
+**Return to the Fisherman.** He thanks the player and explains how epics and legendaries behave when hunted. Optional questions add some background lore, which the mod is currently light on. His answers stay within his knowledge limits and his habit of not over-explaining (`LORE.md`). He gives the player the **Needle Sensor** schematic and tells them to build it.
+
+**Follow-up: build the Needle Sensor.** A short intel quest that completes when the player owns the Needle Sensor, bought at the Outfitter with the schematic. It is the prerequisite for T3, which starts once the sensor is built. If the player already owns one, the step completes at once.
 
 **Work**
 - Quest fleet: an independent fleet with a contact person, using the existing fleet-quest spawning and contact patterns where possible.
@@ -106,20 +121,20 @@ T2 and T3 build on this; T2's failure condition is the reset.
   - then put a buried mote of the target species ahead of the beam sweep;
   - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
 - Failure: watch the quest fish's `EpicHunt` reset.
-- The harpoon ship's built-in **Needle Sensor** needs a hullmod that enables the sensor whatever lens is fitted. Today it only runs when fitted in the Lens Array slot.
+- Needle Sensor follow-up: grant the schematic through `FishReward.tackleSchematic`, and complete the follow-up from the purchase (`ShopEntry.grant`) rather than by polling ownership.
 
 ## T3: The wounded epic
 
 **Premise.** The Fisherman points the player at a nearby system with epics. One has been wounded and is recovering, circling a planet at about 1,000 units.
 
 **Steps**
-1. The player uses the harpoon ship's Needle Sensor to locate it.
+1. The player uses the Needle Sensor built after T2 to locate it.
 2. It has the usual epic shield and stages. Asleep, it drifts at the normal epic drift speed; awake, it moves 50% slower than a normal awake epic.
 3. If it gets too far away (the hunt resets), it despawns and respawns at the planet with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
 4. The player is expected to hunt it until caught, then return to the Fisherman.
 
 **Rewards**
-- The blueprint for the second fishing ship (the Breach Light ship).
+- The blueprint for the second fishing ship (the Breach Light ship, with the Fanned Array built in).
 - Range data on an epic.
 
 **Follow-up: have the ship built.** The player works out how; the Fisherman does not build it. Completes when the player owns a ship of that hull.
@@ -136,29 +151,30 @@ T2 and T3 build on this; T2's failure condition is the reset.
 ## T4: The first legendary
 
 **Decided**
-- The Fisherman sends the player to upgrade their gear and catch a legendary, any species, starting from the bar rumours. The reward is the third fishing ship, the ROD ship.
+- The Fisherman sends the player to upgrade their gear and catch a legendary, any species, starting from the bar rumours. The reward is the third fishing ship, the ROD ship (drone carrier).
 - It is a long-term quest: persistent intel with no deadline that completes on the first legendary catch, whenever it happens.
 - There is no gear checkpoint. Player skill is part of how hard a legendary is.
 
 ## Ships
 
-| Ship | Rig | Given by | Built-in |
+| Ship | Rig | Given by | Built-in ([ship-bound](#shared-mechanic-ship-bound-equipment)) |
 |---|---|---|---|
-| Harpoon fishing ship | Harpoon | T2, either outcome | Needle Sensor |
-| Breach Light ship | Breach Lights | T3 blueprint; the player builds it | Not decided |
-| ROD ship | ROD drones | T4, first legendary | Not decided |
+| Harpoon fishing ship | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
+| Breach Light ship | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
+| ROD ship (drone carrier) | ROD drones | T4, first legendary | New drone module: once every drone has returned, the drones deploy again to the same area |
 
-None of the hulls exist yet. T2 and T3 can ship with placeholder text, but the Needle Sensor hullmod is needed before T3 plays as designed. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
+None of the hulls exist yet. Until they do, each ship is a placeholder built on the vanilla Nebula hull (`nebula`, a civilian transport). Give each placeholder its own hull id, for example a `data/hulls/skins/*.skin` of `nebula` with its own `skinHullId` and name. Otherwise three Nebulas cannot be told apart, and the ship-bound check would not know which module a ship carries. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 
 ## Open questions
 
-1. **Ship built-ins** for the Breach Light ship and the ROD ship.
+1. **Name of the drone carrier's redeploy module.**
+2. **How T3 opens.** It starts once the Needle Sensor is built, but whether the Fisherman's direction to the wounded epic arrives as a message, as intel, or on a return visit is not decided.
 
 ## Suggested order
 
 1. Two-stage epics (done).
 2. Compass item and golden chest, then T1 and its follow-up. The Glitter Lens is done.
-3. Harpoon ship hull and the Needle Sensor hullmod (placeholders acceptable for T2 text).
-4. T2, then the Fisherman debrief and lore questions.
+3. Ship-bound equipment in the Outfitter, the Nebula placeholder hulls, and moving the Retrieval Head and Fanned Array out of the shop.
+4. T2 with the harpoon ship, then the Fisherman debrief, lore questions and the Needle Sensor follow-up.
 5. T3 and the Breach Light ship blueprint.
-6. T4 and the ROD ship.
+6. The drone redeploy module, then T4 and the ROD ship.
