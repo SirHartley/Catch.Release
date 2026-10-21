@@ -38,8 +38,9 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 - **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
 - **Two modules on one rig.**
   - Effects apply in slot order: slot 1, then slot 2.
-  - No module takes up two slots, and one module cannot fill both slots of a rig.
-  - A rig's modules never block another rig's slots. A module that fits both the ROD and the Harpoon can still be fitted to both, as today.
+  - No module takes up two slots.
+  - Every module can be fitted in only one slot at a time, across all rigs. In the Outfitter it is greyed out in every other slot, and its hover says where it is fitted.
+    - This changes today's behaviour for the three modules that fit both the ROD and the Harpoon (Calibrated Grader, Barbed Head, Sonar Head). They can currently sit on both rigs at once.
   - Modules with similar or opposing effects cannot share a rig. Two modules that change the same value count as similar. The pairs are listed under [Incompatible pairs](#incompatible-pairs).
   - In the Outfitter, a module that conflicts with the one in the rig's other slot is greyed out for that slot and cannot be fitted there. Its hover names the conflicting module.
 - **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module, the Reployment Bays, is new.
