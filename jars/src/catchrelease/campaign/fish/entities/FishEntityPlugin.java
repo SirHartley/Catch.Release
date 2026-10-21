@@ -289,6 +289,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         return lampSurfaced;
     }
 
+    // lamp fish keep the slower buried pace so they can still be chased down under the beam
+    protected float getBaseSpeed() {
+        return lampSurfaced ? Setting.LAMP_FISH_SPEED.value() : MOVE_SPEED;
+    }
+
     public SectorEntityToken getPond() {
         return pond;
     }
@@ -448,7 +453,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         // Submerged fish keep a straight course at cruise speed.
-        float step = MOVE_SPEED * getSpeedMult() * getSlowMult()
+        float step = getBaseSpeed() * getSpeedMult() * getSlowMult()
                 * LegendaryShields.getSpeedMult(this) * EpicHunt.getSpeedMult(this) * getLureSpeedMult()
                 * motionMult * amount;
         // A submerged False Dawn follows the corona too; straight dive headings can cross the star.
@@ -998,7 +1003,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
         float remaining = distance - LegendaryShields.LURE_RELEASE_RANGE;
         float step = Math.min(remaining,
-                MOVE_SPEED * getSpeedMult() * getSlowMult() * LURE_SPEED_MULT * amount);
+                getBaseSpeed() * getSpeedMult() * getSlowMult() * LURE_SPEED_MULT * amount);
         if (step > 0f) {
             moveTo(MathUtils.getPointOnCircumference(entity.getLocation(), step,
                     Misc.getAngleInDegrees(entity.getLocation(), at)));

@@ -86,6 +86,7 @@ public enum Setting {
     FISH_POPULATION("catchrelease_fish_population", 100d, 25d, 300d),
     FISH_REPLENISH("catchrelease_fish_replenish", 100d, 25d, 300d),
     LAMP_SURFACING("catchrelease_lamp_surfacing", true),
+    LAMP_FISH_SPEED("catchrelease_lamp_fish_speed", 55d, 20d, 120d),
     POND_ABUNDANCE("catchrelease_pond_abundance", 100d, 25d, 300d),
     LAMP_PATROLS("catchrelease_lamp_patrols", true),
     LAMP_ESCALATION("catchrelease_lamp_escalation", 100d, 25d, 300d),
