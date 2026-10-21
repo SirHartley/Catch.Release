@@ -160,9 +160,10 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **Steps**
 1. The player uses the Needle Sensor built after T2 to locate it.
-2. It has the usual epic shield and stages. Asleep, it drifts at the normal epic drift speed; awake, it moves 50% slower than a normal awake epic.
-3. If it gets too far away (the hunt resets), it despawns and respawns at the planet with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
-4. The player is expected to hunt it until caught, then return to the Fisherman.
+2. Asleep, it behaves like any epic: buried, drifting at the normal buried speed, and visible under the Breach Lights. The difference is that its drift circles the planet at about 1,000 units.
+3. A harpoon hit wakes it as usual: the hit is deflected, the fish surfaces and its shield charge goes up. It stops circling and runs the normal epic hunt, at half the speed of a normal awake epic.
+4. If the hunt resets (more than 3,000 units from the player), it despawns and respawns at the planet, buried and circling again, with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
+5. The player is expected to hunt it until caught, then return to the Fisherman.
 
 **Rewards**
 - The blueprint for the second fishing ship, the Breach Light ship. It brings a second Lens Array slot and the Fanned Array.
@@ -175,9 +176,9 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Epics are not unique, but they are rare enough that they might as well be.
 
 **Work**
-- **The circling must not use `orbitAnchor`.** `NeedleSensor.isEligible` and `EpicHunt.applies` both exclude orbit-anchored fish (that field marks shield escorts), so the sensor would never see it and it would never wake. Drive the circling with swim targets around the planet, or add a quest flag both checks respect.
-- Slower movement: a per-fish multiplier of 0.5, applied only while awake, on top of `EpicHunt`'s speed.
-- Respawn: on the quest fish's reset, expire it and spawn a fresh one at the planet.
+- Circling: a heading rule for the quest's buried mote in `BuriedMoteEntityPlugin`, which today wanders on random headings. Only the buried stage circles, so the surfaced fish needs no route. Do not use `orbitAnchor`: it marks surfaced shield escorts, which `NeedleSensor.isEligible` and `EpicHunt.applies` exclude.
+- Slower movement: a per-fish multiplier of 0.5 on top of `EpicHunt`'s awake speed. The buried mote carries it, and `unearth()` passes it to the surfaced fish along with the quest claim.
+- Respawn: on the quest fish's reset, expire it and spawn a fresh buried, circling mote at the planet.
 
 ## T4: Listen for rumours
 
@@ -219,10 +220,6 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 1. **What concluding "Hunting the legendary fish" brings.** It ends once every legendary is caught; the payoff is decided later.
 
-The research for the implementation plan also turned up this gap. Its suggested default is assumed until decided:
-
-2. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
-
 ## Implementation plan
 
 Six phases, each its own pull request. Phase 0 changes no visible behaviour; it removes the obstacles the research found. Write all player-facing text through [DIALOGUE.md](DIALOGUE.md) and [LORE.md](LORE.md). Route UI scoping to the UI subagent ([CLAUDE.md](../CLAUDE.md#claude-model-assignments)).
@@ -241,7 +238,7 @@ Six phases, each its own pull request. Phase 0 changes no visible behaviour; it 
 | Hull ids | Skins of `nebula` | `FleetMemberAPI.getHullId()` returns the skin id. A D-modded ship becomes `<id>_default_D`, so match `spec.isDefaultDHull() ? spec.getDParentHullId() : spec.getHullId()`. No `ship_data.csv` rows are needed. |
 | Outfitter | `FishShopDialog`, `ShopRowPlugin`, `ShopEntry`, `ShopDetailHeaderPlugin` | Second slot per rig, a disabled row state (rows have none today), and row hovers naming the conflict or where a module is fitted. Undo restores per slot. The "one slot" text changes. |
 | Quest motes | `BuriedMoteEntityPlugin`, `BuriedMoteSpawner`, `QuestPond` | `unearth()` copies the quest claim (`QuestPond.markPlanted` memory). The spawner's population count and `cullDistant` skip quest motes. |
-| Epic hooks | `EpicHunt`, `HarpoonEntityPlugin` | A listener interface for quest-owned epics: reset (the branch in `EpicHunt.advance`), failed catch (the harpoon's `onCatchResolved` path, where epics currently fade unreported), blast and catch (`FishItems.addToPlayerCargo` hooks with `questTargetId`). Saved per-fish fields for an awake speed multiplier and a circle route. |
+| Epic hooks | `EpicHunt`, `HarpoonEntityPlugin` | A listener interface for quest-owned epics: reset (the branch in `EpicHunt.advance`), failed catch (the harpoon's `onCatchResolved` path, where epics currently fade unreported), blast and catch (`FishItems.addToPlayerCargo` hooks with `questTargetId`). A saved per-fish awake speed multiplier, which `unearth()` passes from buried mote to surfaced fish. |
 | Ship rewards | `FishReward` | New `ship(hullId)` reward that adds a fleet member to the player fleet; there is none today. `shipBlueprint` already exists. |
 | Golden chest | `FishingMinigameDialogPlugin`, `FishingMinigame`, `TreasureRoller` | `init` decides "chest due" from chain state, the system and `CatchImplement.BREACH_LAMP`, as `FishingIntro.applyCatchTargetProtection` does. The chest is a flagged `MinigameTreasure`, not a new `TreasureRarity`, so `rollRarity` never draws it. It is granted on a win and counted in `resolve()`. |
 | Rumours | `FishRumors` | T1 publishes a quest-owned `LOOT` rumour without starting the shared cooldown. The chain extends its `duration`. `publish` is the single choke point where T4 records told names. |
@@ -281,7 +278,7 @@ Six phases, each its own pull request. Phase 0 changes no visible behaviour; it 
 - The outcomes, the harpoon ship grant, the Fisherman debrief and the Needle Sensor intel.
 
 **Phase 4: T3.**
-- The circle route as a saved per-fish swim rule next to the `holdsStation()` branch in `FishEntityPlugin`.
+- The circling heading rule on the quest's buried mote (`BuriedMoteEntityPlugin.advanceFish`).
 - The awake 0.5 multiplier in `EpicHunt.getSpeedMult`.
 - Respawn on reset and on arrival in the system.
 - The blueprint.
