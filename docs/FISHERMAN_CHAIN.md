@@ -251,7 +251,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 **Stage 0: groundwork.** No visible change.
 - [x] 0.1 Two-slot loadout: `RigLoadout` and `TackleEffects`, with `TackleManager` storing two slots per rig and slot 2 always empty.
 - [x] 0.2 Move every single-module read to `TackleEffects`: the minigame constructors, `FishingMinigameDialogPlugin`, `NeedleSensor`, `NeutrinoLens`, `Searchlight`, `HarpoonEntityPlugin`, the ability tooltips, `PondFishSpawner` and the shop. Done when behaviour is unchanged.
-- [ ] 0.3 Fit rules in `TackleManager.fit`: no repeat within a rig, and the exclusion groups declared on `Tackle` for the [incompatible pairs](#incompatible-pairs). They only take effect once slot 2 exists.
+- [x] 0.3 Fit rules in `TackleManager.fit`: no repeat within a rig, and the exclusion groups declared on `Tackle` for the [incompatible pairs](#incompatible-pairs). They only take effect once slot 2 exists.
 - [ ] 0.4 Quest motes: `unearth()` copies the quest claim and any per-fish quest fields to the surfaced fish. `BuriedMoteSpawner` neither counts nor culls quest motes.
 - [ ] 0.5 Epic quest hooks: a listener for a quest-owned epic's reset, failed catch, blast and catch.
 - [ ] 0.6 `FishReward.ship(hullId)`, which adds a ship to the player fleet.

@@ -42,10 +42,22 @@ public class TackleManager {
     }
 
     public static boolean fit(Tackle.Fit rig, int slot, Tackle tackle) {
+        if (!canFit(rig, slot, tackle)) return false;
+
+        getLoadout(rig, true).set(slot, tackle);
+
+        return true;
+    }
+
+    // A module fills one slot of a rig at most and never shares the rig with one of its exclusion group; other rigs
+    // are never consulted, so a module that fits both the ROD and the Harpoon can sit on each.
+    public static boolean canFit(Tackle.Fit rig, int slot, Tackle tackle) {
         if (rig == null || tackle == null || slot < 0 || slot >= RigLoadout.SLOTS) return false;
         if (!tackle.fits(rig)) return false;
 
-        getLoadout(rig, true).set(slot, tackle);
+        for (int other = 0; other < RigLoadout.SLOTS; other++) {
+            if (other != slot && tackle.conflictsWith(getSlot(rig, other))) return false;
+        }
 
         return true;
     }

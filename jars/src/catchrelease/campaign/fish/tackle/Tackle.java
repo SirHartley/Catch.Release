@@ -8,6 +8,7 @@ public enum Tackle {
             "Enlarges the catch window but slows its upward movement.") {
         {
             barSizeMult = 1.35f;
+            exclusion = Exclusion.CATCH_WINDOW_RISE;
             barLiftMult = 0.85f;
         }
     },
@@ -15,6 +16,7 @@ public enum Tackle {
             "Slows both the rise and fall of the catch window.") {
         {
             barGravityMult = 0.7f;
+            exclusion = Exclusion.CATCH_WINDOW_RISE;
             barLiftMult = 0.8f;
         }
     },
@@ -22,6 +24,7 @@ public enum Tackle {
             "Slows the loss of catch progress while the catch window is not covering the pattern.") {
         {
             escapeMult = 0.6f;
+            exclusion = Exclusion.CATCH_PROGRESS;
         }
     },
     SALVAGE_TRAWL("Salvage Trawl", Fit.DRONE,
@@ -29,6 +32,7 @@ public enum Tackle {
                     + " bycatch contains.") {
         {
             treasureChanceMult = 3f;
+            exclusion = Exclusion.BYCATCH_CHANCE;
         }
     },
     LIFTING_RIG("Lifting Rig", Fit.DRONE,
@@ -36,6 +40,7 @@ public enum Tackle {
                     + " hulls instead of normal loot. Rarer finds can produce larger hulls.") {
         {
             treasureChanceMult = 1.4f;
+            exclusion = Exclusion.BYCATCH_CHANCE;
             shipTackle = true;
         }
     },
@@ -72,6 +77,7 @@ public enum Tackle {
             "Makes catch progress build faster while the catch window covers the pattern.") {
         {
             progressMult = 1.35f;
+            exclusion = Exclusion.CATCH_PROGRESS;
         }
     },
     SONAR_HEAD("Sonar Head", Fit.BOTH,
@@ -137,6 +143,14 @@ public enum Tackle {
         }
     };
 
+    // Modules with similar or opposing effects on one rig; two of the same group cannot share it.
+    public enum Exclusion {
+
+        CATCH_WINDOW_RISE,
+        BYCATCH_CHANCE,
+        CATCH_PROGRESS
+    }
+
     public enum Fit {
 
         DRONE,
@@ -178,6 +192,7 @@ public enum Tackle {
     public boolean stocked = true;
     public float lockTime = 0f;
     public boolean fanBeam = false;
+    public Exclusion exclusion;
 
     Tackle(String name, Fit fit, String description) {
         this(name, fit, description, null);
@@ -188,6 +203,12 @@ public enum Tackle {
         this.fit = fit;
         this.description = description;
         this.icon = icon;
+    }
+
+    public boolean conflictsWith(Tackle other) {
+        if (this == NONE || other == null || other == NONE) return false;
+
+        return other == this || exclusion != null && exclusion == other.exclusion;
     }
 
     public boolean fits(Fit rig) {
