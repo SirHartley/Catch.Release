@@ -46,6 +46,7 @@ public final class ReleaseBuildChecks {
     private static void files() {
         for (String name : List.of("mod_info.json", "catchrelease.version", "Changelog",
                 "data/campaign/fish.csv", "data/catchrelease/shaders/aquarium.shader",
+                "data/hulls/catchrelease_rod_ship.ship",
                 "graphics/catchrelease/fish/test.PNG", "sounds/catchrelease/test.ogg", "LICENSE.md",
                 "graphics/catchrelease/fish/AA_LICENSED ICONS look inside.txt")) {
             check(ReleaseBuild.releaseFile(name), "Include " + name);

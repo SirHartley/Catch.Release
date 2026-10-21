@@ -32,7 +32,8 @@ public final class EpicHunt {
             if (prev == null || prev == curr) return;
 
             for (SectorEntityToken mote : new ArrayList<>(prev.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG))) {
-                if (!(mote.getCustomPlugin() instanceof FishEntityPlugin fish) || !isActive(fish)) continue;
+                if (mote.isExpired() || !(mote.getCustomPlugin() instanceof FishEntityPlugin fish)
+                        || !isActive(fish)) continue;
 
                 mote.setExpired(true);
                 reportReset(mote);
@@ -100,13 +101,14 @@ public final class EpicHunt {
 
     // Outdistancing the player ends the hunt: back to drifting, with the shield as it was, on an awake leg cut short
     // so the fish fades at its end. An awake epic in a system the player has left is removed instead, like
-    // DepartureCleanup does.
+    // DepartureCleanup does. Whichever of the two sees the departure first removes the fish; the other skips the
+    // expired mote, so the reset is reported once.
     public static void advance(FishEntityPlugin fish) {
         if (!isActive(fish)) return;
 
         SectorEntityToken mote = fish.getMote();
         CampaignFleetAPI player = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
-        if (mote == null || player == null) return;
+        if (mote == null || mote.isExpired() || player == null) return;
 
         if (mote.getContainingLocation() != player.getContainingLocation()) {
             mote.setExpired(true);
