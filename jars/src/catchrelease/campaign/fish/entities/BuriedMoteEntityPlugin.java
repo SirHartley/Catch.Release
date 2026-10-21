@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.entities;
 
+import catchrelease.config.Setting;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -89,6 +90,18 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
         velocityX = (entity.getLocation().x - x) / amount;
         velocityY = (entity.getLocation().y - y) / amount;
         advanceTrail();
+
+        if (surfacesInBeam()) unearth(true);
+    }
+
+    // Epics and legendaries keep their buried stage until harpooned; everything else surfaces where the lamps reach.
+    protected boolean surfacesInBeam() {
+        if (!Setting.LAMP_SURFACING.enabled() || !entity.isInCurrentLocation()) return false;
+
+        FishRarity rarity = getRarity();
+        if (rarity == FishRarity.EPIC || rarity == FishRarity.LEGENDARY) return false;
+
+        return SearchlightAbilityPlugin.getBeamStrengthAt(entity.getLocation()) > 0f;
     }
 
     // Only lit stretches are recorded: a buried mote is unseen, so the lamps show where it swims, not where it swam.
@@ -132,14 +145,20 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public SectorEntityToken unearth() {
+        return unearth(false);
+    }
+
+    protected SectorEntityToken unearth(boolean byLamps) {
         if (entity == null || entity.isExpired()) return null;
 
         Vector2f loc = new Vector2f(entity.getLocation());
         Vector2f swimTo = MathUtils.getPointOnCircumference(loc, FishConstants.BURIED_SURFACE_RUN, heading);
 
+        FishEntityPlugin.Params params = new FishEntityPlugin.Params(swimTo, fishId);
+        params.lampSurfaced = byLamps;
+
         SectorEntityToken mote = entity.getContainingLocation().addCustomEntity(
-                Misc.genUID(), "Mote", "catchrelease_Mote", null,
-                new FishEntityPlugin.Params(swimTo, fishId));
+                Misc.genUID(), "Mote", "catchrelease_Mote", null, params);
 
         mote.setLocation(loc.x, loc.y);
         if (!LegendaryStarAvoidance.confine(mote, getFishSpec())) mote.setExpired(true);

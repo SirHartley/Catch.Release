@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -87,6 +88,14 @@ public class BuriedMoteSpawner implements EveryFrameScript {
             if (Misc.getDistance(around, buried.getLocation()) <= getPopulationRange()) {
                 nearby.add(buried);
             }
+        }
+
+        // a fish the lamps surfaced still belongs to this population until it fades, or every sweep would add more
+        for (SectorEntityToken mote : location.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
+            if (mote.isExpired() || !(mote.getCustomPlugin() instanceof FishEntityPlugin fish)
+                    || !fish.isLampSurfaced()) continue;
+
+            if (Misc.getDistance(around, mote.getLocation()) <= getPopulationRange()) nearby.add(mote);
         }
 
         return nearby;
