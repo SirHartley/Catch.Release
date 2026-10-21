@@ -68,7 +68,7 @@ public class PondFishSpawner {
     }
 
     protected static float getRarityWeight(FishSpec spec, float extraBias) {
-        float bias = TackleManager.get(Tackle.Fit.DRONE).rarityBias + extraBias;
+        float bias = TackleManager.effects(Tackle.Fit.DRONE).rarityBias + extraBias;
         if (bias == 1f || spec.rarity == null) return 1f;
 
         return (float) Math.pow(bias, spec.rarity.rank);

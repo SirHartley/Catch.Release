@@ -20,24 +20,44 @@ public class TackleManager {
         return method == FishLogEntry.Method.HARPOON ? Tackle.Fit.HARPOON : Tackle.Fit.DRONE;
     }
 
-    public static Tackle get(Tackle.Fit rig) {
-        if (rig == null) return Tackle.NONE;
+    public static TackleEffects effects(Tackle.Fit rig) {
+        RigLoadout loadout = rig == null ? null : getLoadout(rig, false);
 
-        Tackle fitted = getFitted().get(rig.name());
-        if (fitted == null || !fitted.fits(rig)) return Tackle.NONE;
-
-        return fitted;
+        return loadout == null ? TackleEffects.NONE : loadout.getEffects(rig);
     }
 
-    public static Tackle get(FishLogEntry.Method method) {
-        return get(getRig(method));
+    public static TackleEffects effects(FishLogEntry.Method method) {
+        return effects(getRig(method));
+    }
+
+    public static Tackle getSlot(Tackle.Fit rig, int slot) {
+        RigLoadout loadout = rig == null ? null : getLoadout(rig, false);
+        Tackle fitted = loadout == null ? Tackle.NONE : loadout.get(slot);
+
+        return fitted.fits(rig) ? fitted : Tackle.NONE;
     }
 
     public static boolean fit(Tackle.Fit rig, Tackle tackle) {
-        if (rig == null || tackle == null) return false;
+        return fit(rig, 0, tackle);
+    }
+
+    public static boolean fit(Tackle.Fit rig, int slot, Tackle tackle) {
+        if (!canFit(rig, slot, tackle)) return false;
+
+        getLoadout(rig, true).set(slot, tackle);
+
+        return true;
+    }
+
+    // A module fills one slot of a rig at most and never shares the rig with one of its exclusion group; other rigs
+    // are never consulted, so a module that fits both the ROD and the Harpoon can sit on each.
+    public static boolean canFit(Tackle.Fit rig, int slot, Tackle tackle) {
+        if (rig == null || tackle == null || slot < 0 || slot >= RigLoadout.SLOTS) return false;
         if (!tackle.fits(rig)) return false;
 
-        getFitted().put(rig.name(), tackle);
+        for (int other = 0; other < RigLoadout.SLOTS; other++) {
+            if (other != slot && tackle.conflictsWith(getSlot(rig, other))) return false;
+        }
 
         return true;
     }
@@ -61,10 +81,14 @@ public class TackleManager {
         boolean changed = getOwned().remove(tackle.name());
 
         for (Tackle.Fit rig : Tackle.Fit.values()) {
-            if (!rig.isRig() || get(rig) != tackle) continue;
+            if (!rig.isRig()) continue;
 
-            getFitted().put(rig.name(), Tackle.NONE);
-            changed = true;
+            for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
+                if (getSlot(rig, slot) != tackle) continue;
+
+                getLoadout(rig, true).set(slot, Tackle.NONE);
+                changed = true;
+            }
         }
 
         return changed;
@@ -105,16 +129,28 @@ public class TackleManager {
         return owned;
     }
 
+    // Reads never write: an entry that is not a RigLoadout reads as empty and is only replaced when fitting.
     @SuppressWarnings("unchecked")
-    protected static Map<String, Tackle> getFitted() {
+    protected static RigLoadout getLoadout(Tackle.Fit rig, boolean create) {
         Map<String, Object> data = Global.getSector().getPersistentData();
 
         Object stored = data.get(KEY);
-        if (stored instanceof Map) return (Map<String, Tackle>) stored;
+        Map<String, Object> loadouts;
+        if (stored instanceof Map) {
+            loadouts = (Map<String, Object>) stored;
+        } else {
+            if (!create) return null;
+            loadouts = new HashMap<>();
+            data.put(KEY, loadouts);
+        }
 
-        Map<String, Tackle> fitted = new HashMap<>();
-        data.put(KEY, fitted);
+        Object loadout = loadouts.get(rig.name());
+        if (loadout instanceof RigLoadout rigLoadout) return rigLoadout;
+        if (!create) return null;
 
-        return fitted;
+        RigLoadout fresh = new RigLoadout();
+        loadouts.put(rig.name(), fresh);
+
+        return fresh;
     }
 }

@@ -7,6 +7,7 @@ import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -83,7 +84,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         List<SectorEntityToken> nearby = new ArrayList<>();
 
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-            if (buried.isExpired() || isLegendary(buried)) continue;
+            if (buried.isExpired() || isLegendary(buried) || QuestPond.isQuestMote(buried)) continue;
 
             if (Misc.getDistance(around, buried.getLocation()) <= getPopulationRange()) {
                 nearby.add(buried);
@@ -93,7 +94,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         // a fish the lamps surfaced still belongs to this population until it fades, or every sweep would add more
         for (SectorEntityToken mote : location.getEntitiesWithTag(FishEntityPlugin.MOTE_TAG)) {
             if (mote.isExpired() || !(mote.getCustomPlugin() instanceof FishEntityPlugin fish)
-                    || !fish.isLampSurfaced()) continue;
+                    || !fish.isLampSurfaced() || QuestPond.isQuestMote(mote)) continue;
 
             if (Misc.getDistance(around, mote.getLocation()) <= getPopulationRange()) nearby.add(mote);
         }
@@ -103,7 +104,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
 
     protected void cullDistant(LocationAPI location, Vector2f around) {
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
-            if (buried.isExpired() || isLegendary(buried)) continue;
+            if (buried.isExpired() || isLegendary(buried) || QuestPond.isQuestMote(buried)) continue;
 
             if (Misc.getDistance(around, buried.getLocation()) > FishConstants.BURIED_CULL_RANGE) {
                 // removeEntity does not expire it, and an epic's trail renderer retires on expiry

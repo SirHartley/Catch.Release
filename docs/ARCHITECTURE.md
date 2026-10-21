@@ -261,7 +261,7 @@ Folders contain related renderers, constants, widgets and helpers; use `rg --fil
 | `QuestRewards.java` | Shared reward budget: score × 600 credits × 0.75–1.35; fixed rewards, tier-gated extras, remaining guaranteed credits, saved hand-in value multiplier. Later cash stages guarantee ≥20% total and ≥25% base-credit growth, each ≥2,000; multiplier cannot decrease. |
 | `QuestDuration.java` | Satisfiability gate and deadline: nearest valid range + round-trip fleet travel + work, rounded to 30/60/90/120/180 days or unlimited; +30 for required Rare/Epic and +30 for post-acceptance catch. |
 | `FishHandoffPicker.java` | Validates non-overlapping specimen assignments; autoSelect takes the minimum valid set, worst first. Invalid confirmation reopens next frame after modal release; preserves container ID when repacking. |
-| `FishReward.java` | Reward values, grants and actual grant results; quest credits use the exact selected specimens. Known range grants convert to stored credit fallback. Equipment rewards unlock schematics, not purchased tiers or modules. |
+| `FishReward.java` | Reward values, grants and actual grant results; quest credits use the exact selected specimens. Known range grants convert to stored credit fallback. Equipment rewards unlock schematics, not purchased tiers or modules. `ship(hullId)` adds the hull's empty `_Hull` variant to the player fleet, named by `pickShipName` and at maximum CR; its receipt is the vanilla full designation. It has no `QuestRewards.valueOf` case because only quests grant it. |
 | `FishRewardRoller.java` | Tier/ownership/active-job exclusions; distinct chart reservations; 3–10× fish-value multiplier (10× = 0.5%). Backdrop rolls require conservatory plans. |
 | `QuestPond.java` | Claims ponds by a set of job IDs, adds vanilla mission importance, plants identified quest motes, and releases claims and motes. |
 
@@ -450,7 +450,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | File | Owner / connection |
 |---|---|
 | `FishEntityPlugin.java` | World fish mote: per-species movement, straight-line dives, held and stunned states, glow, source rupture, and legendary behavior. A saved `lampSurfaced` flag marks fish the player's lamps surfaced: they swim from the `LAMP_FISH_SPEED` base (default 55, the buried pace) instead of `MOVE_SPEED` 90, they are lamp-bound whatever their `reachedBy`, and their lamp visibility decays like a buried mote's lamp mark, so `searchlight_track_time` holds them in view and in harpoon reach. |
-| `BuriedMoteEntityPlugin.java` | Invisible open-water fish; drifts with its species' campaign pace and wander. While `Setting.LAMP_SURFACING` is on, a non-epic, non-legendary mote in the player's location surfaces through `unearth(true)` the moment any player beam reaches it (`SearchlightAbilityPlugin.getBeamStrengthAt` > 0), checked in its own `advance`. It then swims its 900-unit surface run with full species movement and fades at the end. Epics and legendaries stay buried until harpooned. `BuriedMoteSpawner` counts lamp-surfaced fish toward the population, and the Tracking Gimbal (`Searchlight.acquire`) locks onto them as well as buried motes. |
+| `BuriedMoteEntityPlugin.java` | Invisible open-water fish; drifts with its species' campaign pace and wander. While `Setting.LAMP_SURFACING` is on, a non-epic, non-legendary mote in the player's location surfaces through `unearth(true)` the moment any player beam reaches it (`SearchlightAbilityPlugin.getBeamStrengthAt` > 0), checked in its own `advance`. It then swims its 900-unit surface run with full species movement and fades at the end. Epics and legendaries stay buried until harpooned. `unearth()` copies every `$catchrelease_` memory key, with its expiry, to the surfaced fish, so quest claims (`QuestPond.markPlanted`) and per-fish quest fields survive surfacing; vanilla keys stay behind. `BuriedMoteSpawner` counts lamp-surfaced fish toward the population but neither counts nor culls quest motes, and the Tracking Gimbal (`Searchlight.acquire`) locks onto them as well as buried motes. |
 | `PondFishSpawner.java` | Selects species by habitat, range, implement, weights, tackle, and rumor effects. |
 
 ### `campaign/fish/shop`
@@ -488,7 +488,8 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 
 | File | Owner / connection |
 |---|---|
-| `TackleManager.java` | Separates module ownership from the module fitted to each rig. |
+| `TackleManager.java` | Separates module ownership from the modules fitted to each rig. Each rig is a saved `RigLoadout` of two slots under `$catchrelease_tackle`; slot 0 is the rig's own and slot 1 the fishing ship's, empty until ship slots exist. `effects(rig)` returns the rig's combined `TackleEffects`; `getSlot` reads one slot for the Outfitter. `fit` refuses a slot through `canFit`: a module that does not fit the rig, the same module in the rig's other slot, or one sharing its `Tackle.Exclusion` group. Rigs are checked separately, so a module that fits both the ROD and the Harpoon can sit on each. |
+| `TackleEffects.java` | Combined effect of one rig's fitted modules, slot 1 then slot 2: multipliers multiply, quality and coherence bonuses add, flags combine and the longest lock wins. `has(Tackle)` replaces identity checks against a single fitted module. |
 
 ### `campaign/fish/map`
 
@@ -533,6 +534,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | `LonglinerSchoolModule.java` | The real fish and eighteen phantoms circle a drifting center with individual velocities, changing radii and neighbour avoidance. Movement runs from the real mote's callback, as Quorum's shell game does; the haunt callback owns replenishment. Shared dive visibility, reversed shield rotation and shared section damage remain. Cleanup removes copies on replacement, failure, capture or departure. |
 | `LegendaryShields.java` | Defense dispatch and render state: Longliner sections, Quorum escort/regeneration, Lantern Jack stored shells/prey lure, False Dawn mine-fed charges, Moray's one-off shield, regenerating base shields and provocation. `say` resolves shield colours for fish anchors; explicit colour arguments preserve shield/mote colours on mine and fleet anchors. See [floating notices](UI.md#drawing-gotchas). |
 | `EpicHunt.java` | Two-stage epic hunts, routed through `LegendaryShields`' harpoon-contact, `isShielded`, colour and speed entry points. Epics drift at `LAZY_SPEED_MULT`, with wander scaled down by the same factor so the slow path does not curl into loops, until a harpoon hit wakes them; that hit is deflected and raises a single purple shield charge that never regenerates. Awake epics swim at full speed with 1.2x wander and take new legs instead of fading at their target. A failed catch fades the epic like any other fish. More than 3,000 units from the player resets the fish to drifting with its shield as it was; a spent shield never returns, and any later hit lands. The reset cuts its swim to `EpicHunt.DRIFT_OFF_DISTANCE` (500 units) through `FishEntityPlugin.shortenSwim`, so it fades at the end like other fish unless a hit wakes it first. State is per fish (`FishEntityPlugin.epicActive`, `epicShieldSpent`), not the species ledger. A transient `CurrentLocationChangedListener` (`EpicHunt.DepartureCleanup`, registered on game load) removes every awake epic from the system the player leaves, because awake epics never fade at their target. Phantoms, decoys and escorts are excluded. Drone catches never wake an epic. |
+| `QuestEpicListener.java` | Sector `ListenerManager` interface for the end of a quest-owned epic's hunt: reset (both `EpicHunt.advance` branches and `DepartureCleanup`), escaped and caught (`FishingMinigameDialogPlugin.resolve`, after the rig's callback, so ROD and Harpoon catches both report), and blasted (`HarpoonEntityPlugin.blastMote`). `EpicHunt.report*` dispatch only for motes that `EpicHunt.applies` to and `QuestPond.isQuestMote` marks, passing the `QuestPond.getPlanter` id. |
 | `KantaTribute.java` | Dormant legendary tribute support. All 23 `catchrelease_kp*` rules are commented out, including gift options, hand-in handlers, reactions, verdicts and the market trophy description. Their dialogue is placeholder pending replacement; keep the whole block disabled until replaced. The unused `CatchReleaseCMD kantaHasLegendary`/`kantaGiftTokens`/`kantaGiveLegendary` verbs remain for reactivation. Vanilla gifts and legendary automatic-payment safeguards are unaffected. |
 
 Quorum shield escorts use a 70-unit orbit with at least 60 units between centers.
@@ -836,7 +838,8 @@ and location changes.
 The three ability plugins own their tooltips and read current upgrades and fitted
 modules when opened. Display contracts are in [UI.md](UI.md#ability-tooltips).
 `tools/AbilityTooltipCheck.java` checks their text, highlights, upgraded values,
-equipment and availability notices against `UpgradeData.csv` in a separate JVM.
+equipment in both slots, the rig fit rules and availability notices against
+`UpgradeData.csv` in a separate JVM.
 
 ### `memory`, `helper`, `reflection`, and `testing`
 

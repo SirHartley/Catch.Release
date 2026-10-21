@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.campaign.CampaignEngineLayers;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.util.Misc;
@@ -20,6 +21,7 @@ import org.lwjgl.util.vector.Vector2f;
 public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
     public static final String BURIED_TAG = "catchrelease_buried_mote";
+    public static final String CLAIM_PREFIX = "$catchrelease_";
 
     protected String fishId;
     protected float heading = 0f;
@@ -161,11 +163,25 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
                 Misc.genUID(), "Mote", "catchrelease_Mote", null, params);
 
         mote.setLocation(loc.x, loc.y);
+        copyClaims(mote);
         if (!LegendaryStarAvoidance.confine(mote, getFishSpec())) mote.setExpired(true);
 
         entity.setExpired(true);
 
         return mote;
+    }
+
+    // Quest claims and per-fish quest fields live in the mote's memory under the mod prefix; vanilla keys such as $id
+    // belong to the buried entity and stay behind. The surfaced fish decides its colour at construction.
+    protected void copyClaims(SectorEntityToken mote) {
+        MemoryAPI from = entity.getMemoryWithoutUpdate();
+        MemoryAPI to = mote.getMemoryWithoutUpdate();
+
+        for (String key : from.getKeys()) {
+            if (key.startsWith(CLAIM_PREFIX)) to.set(key, from.get(key), from.getExpire(key));
+        }
+
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) fish.refreshColor();
     }
 
     @Override

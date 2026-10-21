@@ -138,7 +138,7 @@ public class NeedleSensor {
                 && player.getContainingLocation() != null
                 && player.getContainingLocation() == Global.getSector().getCurrentLocation()
                 && !player.isInHyperspace()
-                && TackleManager.get(Tackle.Fit.SEARCHLIGHT) == Tackle.NEEDLE_SENSOR;
+                && TackleManager.effects(Tackle.Fit.SEARCHLIGHT).has(Tackle.NEEDLE_SENSOR);
     }
 
     public boolean isEligible(SectorEntityToken mote) {

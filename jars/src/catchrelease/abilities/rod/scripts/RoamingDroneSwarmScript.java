@@ -97,7 +97,7 @@ public class RoamingDroneSwarmScript extends FishingDroneSwarmScript {
     protected boolean shouldRecall() {
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet == null || !SearchlightAbilityPlugin.isBreaching()) return true;
-        if (!TackleManager.get(Tackle.Fit.DRONE).breachCoupling) return true;
+        if (!TackleManager.effects(Tackle.Fit.DRONE).breachCoupling) return true;
 
         for (SectorEntityToken drone : drones) {
             if (drone.getContainingLocation() != fleet.getContainingLocation()) return true;

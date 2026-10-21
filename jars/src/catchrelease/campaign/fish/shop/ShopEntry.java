@@ -164,7 +164,7 @@ public class ShopEntry {
     }
 
     public boolean isFitted() {
-        return kind == Kind.TACKLE && TackleManager.get(rig) == tackle;
+        return kind == Kind.TACKLE && TackleManager.getSlot(rig, 0) == tackle;
     }
 
     public boolean isOwned() {

@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.minigame;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleEffects;
 import com.fs.starfarer.api.campaign.LocationAPI;
 
 import java.util.ArrayList;
@@ -15,7 +16,7 @@ public class MantaMinigame extends FishingMinigame {
 
     private static class Decoy extends FishingMinigame {
 
-        Decoy(FishSpec fish, Tackle tackle, LocationAPI location, int scars) {
+        Decoy(FishSpec fish, TackleEffects tackle, LocationAPI location, int scars) {
             super(fish, tackle, location, scars);
         }
 
@@ -40,6 +41,10 @@ public class MantaMinigame extends FishingMinigame {
     }
 
     public MantaMinigame(FishSpec fish, Tackle tackle, LocationAPI location, int scars, float lampTreasureMult) {
+        this(fish, TackleEffects.of(tackle), location, scars, lampTreasureMult);
+    }
+
+    public MantaMinigame(FishSpec fish, TackleEffects tackle, LocationAPI location, int scars, float lampTreasureMult) {
         super(fish, tackle, location, scars, lampTreasureMult);
         decoys = List.of(new Decoy(fish, tackle, location, scars),
                 new Decoy(fish, tackle, location, scars));

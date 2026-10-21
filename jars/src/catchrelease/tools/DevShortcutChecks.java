@@ -2,6 +2,8 @@ package catchrelease.tools;
 
 import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopSchematics;
+import catchrelease.campaign.fish.tackle.RigLoadout;
+import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -158,7 +160,9 @@ public final class DevShortcutChecks {
                 ShopMarks.mark(ShopMarks.getUpgradeMarkKey(stat.id, rung));
             }
         }
-        Object fitted = Map.of("test-rig", "test-module");
+        RigLoadout loadout = new RigLoadout();
+        loadout.set(0, Tackle.SPOOL_GOVERNOR);
+        Object fitted = new HashMap<>(Map.of(Tackle.Fit.DRONE.name(), loadout));
         f.data.put(TackleManager.KEY, fitted);
         Shortcut reloaded = new Shortcut();
         Key fourth = new Key('j', true);
