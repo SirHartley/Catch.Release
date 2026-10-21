@@ -267,7 +267,7 @@ public final class NeedleSensorChecks {
             Object restored = ReflectionUtils.get(f.lamps, "needleSensor", null, true);
             check(restored instanceof NeedleSensor sensor && sensor != f.sensor && sensor.isEnabled(),
                     "existing inactive-ability callback rebuilds passive sensor after load");
-            check(TackleManager.get(Tackle.Fit.SEARCHLIGHT) == Tackle.NEEDLE_SENSOR
+            check(TackleManager.getSlot(Tackle.Fit.SEARCHLIGHT, 0) == Tackle.NEEDLE_SENSOR
                     && TackleManager.isOwned(Tackle.NEEDLE_SENSOR), "load retains fitted and owned module");
         }
     }

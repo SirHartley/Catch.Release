@@ -10,6 +10,7 @@ import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleEffects;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -63,7 +64,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
     }
 
     protected boolean hasBreachCoupler() {
-        return TackleManager.get(Tackle.Fit.DRONE).breachCoupling;
+        return TackleManager.effects(Tackle.Fit.DRONE).breachCoupling;
     }
 
     public void unlockClosestPond() {
@@ -212,8 +213,8 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
                     Math.round(rare * 100f) + "%");
         }
 
-        Tackle fitted = TackleManager.get(Tackle.Fit.DRONE);
-        if (fitted != Tackle.NONE) tooltip.addPara("Fitted: %s", pad, highlight, fitted.name);
+        TackleEffects fitted = TackleManager.effects(Tackle.Fit.DRONE);
+        if (!fitted.isEmpty()) tooltip.addPara("Fitted: %s", pad, highlight, fitted.getNames());
         if (hasBreachCoupler()) {
             tooltip.addPara("With breach lamps on, drones follow the fleet and catch illuminated fish.", 3f);
         } else if (Tackle.BREACH_COUPLER.breachCoupling) {

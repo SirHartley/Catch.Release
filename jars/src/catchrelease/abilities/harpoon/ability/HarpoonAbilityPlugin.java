@@ -7,6 +7,7 @@ import catchrelease.abilities.harpoon.constants.HarpoonConstants;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleEffects;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.charges.ChargeManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -176,15 +177,16 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
                     Misc.getRoundedValue(assist) + " px");
         }
 
-        Tackle fitted = TackleManager.get(Tackle.Fit.HARPOON);
-        if (fitted != Tackle.NONE) tooltip.addPara("Fitted: %s", pad, highlight, fitted.name);
+        TackleEffects fitted = TackleManager.effects(Tackle.Fit.HARPOON);
+        if (!fitted.isEmpty()) tooltip.addPara("Fitted: %s", pad, highlight, fitted.getNames());
         if (fitted.explosive) {
             tooltip.addPara("Detonates instead of catching fish. Consumed on detonation;"
                     + " fleet hits cause damage and immediate hostility.", Misc.getNegativeHighlightColor(), 3f);
         } else {
             if (fitted.deepStrike) {
                 tooltip.addPara("Can also hit diving fish and unexposed lamp contacts.", 3f);
-            } else if (fitted.retrievesCharge) {
+            }
+            if (fitted.retrievesCharge) {
                 tooltip.addPara("A fish hit restores %s.", 3f, highlight, "1 charge");
             }
             tooltip.addPara("Fleet hits pull the weaker fleet toward the stronger one and can damage relations."

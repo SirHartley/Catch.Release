@@ -134,7 +134,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 tackleOwned = entry.kind == ShopEntry.Kind.TACKLE
                         && TackleManager.isOwned(entry.tackle);
                 fitted = entry.kind == ShopEntry.Kind.TACKLE
-                        ? TackleManager.get(entry.rig) : null;
+                        ? TackleManager.getSlot(entry.rig, 0) : null;
             }
         }
 
@@ -651,7 +651,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             }
 
             if (entry.kind == ShopEntry.Kind.TACKLE && !entry.isFitted()) {
-                Tackle fitted = TackleManager.get(entry.rig);
+                Tackle fitted = TackleManager.getSlot(entry.rig, 0);
 
                 if (fitted != entry.tackle && fitted != Tackle.NONE) {
                     info.addPara("Replaces %s. You keep the removed equipment.", 12f, Misc.getGrayColor(),

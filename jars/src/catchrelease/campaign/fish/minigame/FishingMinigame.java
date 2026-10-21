@@ -5,6 +5,7 @@ import catchrelease.config.PlayerSettings;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleEffects;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
@@ -71,7 +72,7 @@ public class FishingMinigame {
     protected final List<MinigameTreasure> takenTreasures = new ArrayList<>();
     protected int treasuresLeft = 0;
     protected float treasureClock = 0f;
-    protected Tackle tackle = Tackle.NONE;
+    protected TackleEffects tackle = TackleEffects.NONE;
     protected State state = State.RUNNING;
     protected boolean cannotLose = false;
     protected java.awt.Color presentedColor;
@@ -100,8 +101,16 @@ public class FishingMinigame {
     }
 
     public FishingMinigame(FishSpec fish, Tackle tackle, LocationAPI location, int scars, float lampTreasureMult) {
+        this(fish, TackleEffects.of(tackle), location, scars, lampTreasureMult);
+    }
+
+    public FishingMinigame(FishSpec fish, TackleEffects tackle, LocationAPI location, int scars) {
+        this(fish, tackle, location, scars, 1f);
+    }
+
+    public FishingMinigame(FishSpec fish, TackleEffects tackle, LocationAPI location, int scars, float lampTreasureMult) {
         this.fish = fish;
-        this.tackle = tackle == null ? Tackle.NONE : tackle;
+        this.tackle = tackle == null ? TackleEffects.NONE : tackle;
         this.lampTreasureMult = lampTreasureMult;
 
         boolean legendary = fish.rarity == FishRarity.LEGENDARY;
@@ -383,7 +392,7 @@ public class FishingMinigame {
         if (treasureClock <= 0f) treasures.add(spawnTreasure());
     }
 
-    public Tackle getTackle() {
+    public TackleEffects getTackle() {
         return tackle;
     }
 

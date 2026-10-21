@@ -304,7 +304,7 @@ public class Searchlight implements EveryFrameScript {
     }
 
     protected void acquire() {
-        float lockTime = TackleManager.get(Tackle.Fit.SEARCHLIGHT).lockTime;
+        float lockTime = TackleManager.effects(Tackle.Fit.SEARCHLIGHT).lockTime;
         if (lockTime <= 0f) return;
 
         if (Global.getSector() == null) return;
@@ -436,7 +436,7 @@ public class Searchlight implements EveryFrameScript {
     }
 
     public static boolean isFanned() {
-        return TackleManager.get(Tackle.Fit.SEARCHLIGHT).fanBeam;
+        return TackleManager.effects(Tackle.Fit.SEARCHLIGHT).fanBeam;
     }
 
     public static float getFanHalfAngle() {

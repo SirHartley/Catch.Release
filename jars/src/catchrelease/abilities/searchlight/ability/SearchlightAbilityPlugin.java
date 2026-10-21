@@ -13,6 +13,7 @@ import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.abilities.searchlight.scripts.NeedleSensor;
 import catchrelease.abilities.searchlight.scripts.NeutrinoLens;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleEffects;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import lunalib.lunaUtil.campaign.LunaCampaignRenderer;
 import com.fs.starfarer.api.Global;
@@ -212,7 +213,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         refreshPondProximity(getFleet());
         super.advance(amount);
         if (needleSensor == null && getFleet() == Global.getSector().getPlayerFleet()
-                && TackleManager.get(Tackle.Fit.SEARCHLIGHT) == Tackle.NEEDLE_SENSOR) {
+                && TackleManager.effects(Tackle.Fit.SEARCHLIGHT).has(Tackle.NEEDLE_SENSOR)) {
             needleSensor = new NeedleSensor(this);
         }
         if (needleSensor != null) needleSensor.advance(amount);
@@ -493,7 +494,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     protected void addUpgradesToTooltip(TooltipMakerAPI tooltip, float pad) {
         Color highlight = Misc.getHighlightColor();
 
-        Tackle fitted = TackleManager.get(Tackle.Fit.SEARCHLIGHT);
+        TackleEffects fitted = TackleManager.effects(Tackle.Fit.SEARCHLIGHT);
         float area = Searchlight.getArea();
         float speed = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SPEED, 30f);
         if (fitted.fanBeam) speed *= Searchlight.FAN_SWEEP_MULT;
@@ -522,7 +523,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                     3f, highlight, Misc.getRoundedValueOneAfterDecimalIfNotWhole(track) + " seconds");
         }
 
-        float rarityWeight = TackleManager.get(Tackle.Fit.DRONE).rarityBias
+        float rarityWeight = TackleManager.effects(Tackle.Fit.DRONE).rarityBias
                 + UpgradeManager.getValue(StatIds.SEARCHLIGHT_RARE_CHANCE, 0f);
         if (rarityWeight != 1f) {
             tooltip.addPara("Equipment rarity weighting: %s per tier above common.", 3f, highlight,
@@ -535,19 +536,23 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
                     Math.round(slow * 100f) + "%");
         }
 
-        if (fitted != Tackle.NONE) tooltip.addPara("Fitted: %s", pad, highlight, fitted.name);
+        if (!fitted.isEmpty()) tooltip.addPara("Fitted: %s", pad, highlight, fitted.getNames());
         if (fitted.lockTime > 0f) {
             tooltip.addPara("Tracks each contact for %s; %s between locks.", 3f, highlight,
                     Misc.getRoundedValueOneAfterDecimalIfNotWhole(fitted.lockTime) + " seconds",
                     Misc.getRoundedValueOneAfterDecimalIfNotWhole(Searchlight.LOCK_COOLDOWN) + " seconds");
-        } else if (fitted.fanBeam) {
+        }
+        if (fitted.fanBeam) {
             tooltip.addPara("Fan beams weaken toward their edges and tips.", 3f);
-        } else if (fitted == Tackle.NEEDLE_SENSOR) {
+        }
+        if (fitted.has(Tackle.NEEDLE_SENSOR)) {
             tooltip.addPara("Passive sensor: occasional ripples while lamps are off.", 3f);
-        } else if (fitted.lampTreasureChanceMult != 1f) {
+        }
+        if (fitted.lampTreasureChanceMult != 1f) {
             tooltip.addPara("Bycatch chance on lamp catches: %s.", 3f, highlight,
                     "x" + Misc.getRoundedValueOneAfterDecimalIfNotWhole(fitted.lampTreasureChanceMult));
-        } else if (fitted == Tackle.NEUTRINO_LENS) {
+        }
+        if (fitted.has(Tackle.NEUTRINO_LENS)) {
             tooltip.addPara("With the Neutrino Detector on: coloured spikes for rare, epic and legendary patterns.", 3f);
         }
     }

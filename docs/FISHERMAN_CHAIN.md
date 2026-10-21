@@ -46,7 +46,7 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 - **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module, the Reployment Bays, is new.
 
 **Work**
-- Fitted state is one module per rig today (`TackleManager.getFitted()`, read through `TackleManager.get(Fit)`). It needs a second slot per rig, and every effect check must read both slots.
+- Fitted state is a two-slot `RigLoadout` per rig, and every effect check reads the combined `TackleManager.effects(rig)` (Stage 0). Ship slots only need to fill and empty slot 1.
 - Fleet presence: look for a fleet or cargo callback before adding a fleet scan; see [CLAUDE.md](../CLAUDE.md#make-and-record-changes) on polling. A save loaded without the ship must still empty the second slot.
 - Removing a module from the shop: `stocked = false`, keeping the `Tackle` constant, as with the Breach Coupler.
 - Declare incompatibility on `Tackle`, for example as a shared exclusion group per effect, rather than as pairs in the Outfitter code, so a new module is checked against every other.
@@ -249,8 +249,8 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 Each stage is one pull request and depends on the stages before it. Within a stage, do the subtasks in order, one commit each. Tick a subtask when it is merged. Every stage finishes with the compile gate, the checks named in it, its Changelog entries, and its `ARCHITECTURE.md` routes. A finished stage's technical detail then moves from this document to `ARCHITECTURE.md`.
 
 **Stage 0: groundwork.** No visible change.
-- [ ] 0.1 Two-slot loadout: `RigLoadout` and `TackleEffects`, with `TackleManager` storing two slots per rig and slot 2 always empty.
-- [ ] 0.2 Move every single-module read to `TackleEffects`: the minigame constructors, `FishingMinigameDialogPlugin`, `NeedleSensor`, `NeutrinoLens`, `Searchlight`, `HarpoonEntityPlugin`, the ability tooltips, `PondFishSpawner` and the shop. Done when behaviour is unchanged.
+- [x] 0.1 Two-slot loadout: `RigLoadout` and `TackleEffects`, with `TackleManager` storing two slots per rig and slot 2 always empty.
+- [x] 0.2 Move every single-module read to `TackleEffects`: the minigame constructors, `FishingMinigameDialogPlugin`, `NeedleSensor`, `NeutrinoLens`, `Searchlight`, `HarpoonEntityPlugin`, the ability tooltips, `PondFishSpawner` and the shop. Done when behaviour is unchanged.
 - [ ] 0.3 Fit rules in `TackleManager.fit`: no repeat within a rig, and the exclusion groups declared on `Tackle` for the [incompatible pairs](#incompatible-pairs). They only take effect once slot 2 exists.
 - [ ] 0.4 Quest motes: `unearth()` copies the quest claim and any per-fish quest fields to the surfaced fish. `BuriedMoteSpawner` neither counts nor culls quest motes.
 - [ ] 0.5 Epic quest hooks: a listener for a quest-owned epic's reset, failed catch, blast and catch.

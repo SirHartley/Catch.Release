@@ -78,7 +78,7 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
     }
 
     public static boolean isFitted() {
-        return TackleManager.get(Tackle.Fit.SEARCHLIGHT) == Tackle.NEUTRINO_LENS;
+        return TackleManager.effects(Tackle.Fit.SEARCHLIGHT).has(Tackle.NEUTRINO_LENS);
     }
 
     @Override

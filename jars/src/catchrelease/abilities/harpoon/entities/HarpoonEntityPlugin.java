@@ -222,7 +222,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             if (handleShieldContact(hit)) return;
             playMoteHitSound();
 
-            if (owner == null && TackleManager.get(Tackle.Fit.HARPOON).retrievesCharge) {
+            if (owner == null && TackleManager.effects(Tackle.Fit.HARPOON).retrievesCharge) {
                 HarpoonAbilityPlugin.retrieveCharge();
             }
 
@@ -310,7 +310,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public static boolean isExplosive() {
-        return TackleManager.get(Tackle.Fit.HARPOON).explosive;
+        return TackleManager.effects(Tackle.Fit.HARPOON).explosive;
     }
 
     protected void blastMote(SectorEntityToken mote) {
@@ -782,7 +782,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     public static boolean reachesUnder() {
-        return TackleManager.get(Tackle.Fit.HARPOON).deepStrike;
+        return TackleManager.effects(Tackle.Fit.HARPOON).deepStrike;
     }
 
     protected SectorEntityToken findMote(Vector2f from, Vector2f to, float distance) {

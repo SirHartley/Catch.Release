@@ -14,6 +14,7 @@ import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleEffects;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -287,12 +288,12 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
     public void init(InteractionDialogAPI dialog) {
         this.dialog = dialog;
         // tackle sizes the window and rolls treasure; read once before anything is rolled
-        Tackle tackle = TackleManager.get(method);
+        TackleEffects tackle = TackleManager.effects(method);
         LocationAPI location = anchor == null ? null : anchor.getContainingLocation();
         int scars = isLegendaryAttempt() ? LegendaryChases.getState(fish.id).scars : 0;
         // the lens works on what came up under the lamps, whichever rig landed it
         float lampTreasure = CatchImplement.of(anchor) == CatchImplement.BREACH_LAMP
-                ? TackleManager.get(Tackle.Fit.SEARCHLIGHT).lampTreasureChanceMult : 1f;
+                ? TackleManager.effects(Tackle.Fit.SEARCHLIGHT).lampTreasureChanceMult : 1f;
         this.minigame = catchrelease.campaign.fish.legendary.MantaFormationModule.SPECIES.equals(fish.id)
                 ? new MantaMinigame(fish, tackle, location, scars, lampTreasure)
                 : new FishingMinigame(fish, tackle, location, scars, lampTreasure);

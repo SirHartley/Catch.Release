@@ -30,14 +30,6 @@ public class TackleManager {
         return effects(getRig(method));
     }
 
-    public static Tackle get(Tackle.Fit rig) {
-        return getSlot(rig, 0);
-    }
-
-    public static Tackle get(FishLogEntry.Method method) {
-        return get(getRig(method));
-    }
-
     public static Tackle getSlot(Tackle.Fit rig, int slot) {
         RigLoadout loadout = rig == null ? null : getLoadout(rig, false);
         Tackle fitted = loadout == null ? Tackle.NONE : loadout.get(slot);
