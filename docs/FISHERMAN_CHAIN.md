@@ -7,7 +7,7 @@ It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains th
 ## Framing
 
 - The tutorial still ends where it does today. `FishingIntro.isComplete()` keeps its current meaning, and everything gated on it (legendary spawns and the shop) is unchanged.
-- The Fisherman offers T1 straight after the tutorial's last hand-in. After a skipped tutorial, which has no last hand-in, he offers it on the next visit. The chain is not presented as more tutorial: the tutorial should feel short, and this reads as ordinary work.
+- The Fisherman offers T1 straight after the tutorial's last hand-in. After a skipped tutorial, which has no last hand-in, he offers it on the next visit. T1 replaces the free rumour the tutorial gives today on both paths. The chain is not presented as more tutorial: the tutorial should feel short, and this reads as ordinary work.
 - Each step teaches one thing:
   - T1: lamp catches pay better than pond catches.
   - T2: fleets can have work for you, and epics are hunted.
@@ -110,7 +110,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 **Follow-up: buy the Glitter Lens.** Completes when the module is owned. The Fisherman then says the system's raised treasure chance will hold for another two months.
 
 **Work**
-- The rumour can reuse the `FishRumors` `LOOT` kind pinned to the target system. Extending it by 60 days after the purchase needs a quest-owned duration, so the normal rumour rotation does not replace it.
+- The rumour can reuse the `FishRumors` `LOOT` kind pinned to the target system. It replaces the graduation lead: `FishingIntro.finish` and `FishingIntro.skip` stop calling `FishRumors.ensureTutorialLead()`, and the graduation option "Heard of anywhere worth fishing?" (`catchrelease_introGetFreeRumor`) leads into T1 instead of a random rumour. Extending it by 60 days after the purchase needs a quest-owned duration, so the normal rumour rotation does not replace it.
 - New: the golden chest treasure, its pity counter and the compass item row. The Glitter Lens already exists.
 - The reward specimens must be generated from the cached payment at grant time, so they always match.
 
@@ -241,7 +241,7 @@ Six phases, each its own pull request. Phase 0 changes no visible behaviour; it 
 | Epic hooks | `EpicHunt`, `HarpoonEntityPlugin` | A listener interface for quest-owned epics: reset (the branch in `EpicHunt.advance`), failed catch (the harpoon's `onCatchResolved` path, where epics currently fade unreported), blast and catch (`FishItems.addToPlayerCargo` hooks with `questTargetId`). A saved per-fish awake speed multiplier, which `unearth()` passes from buried mote to surfaced fish. |
 | Ship rewards | `FishReward` | New `ship(hullId)` reward that adds a fleet member to the player fleet; there is none today. `shipBlueprint` already exists. |
 | Golden chest | `FishingMinigameDialogPlugin`, `FishingMinigame`, `TreasureRoller` | `init` decides "chest due" from chain state, the system and `CatchImplement.BREACH_LAMP`, as `FishingIntro.applyCatchTargetProtection` does. The chest is a flagged `MinigameTreasure`, not a new `TreasureRarity`, so `rollRarity` never draws it. It is granted on a win and counted in `resolve()`. |
-| Rumours | `FishRumors` | T1 publishes a quest-owned `LOOT` rumour without starting the shared cooldown. The chain extends its `duration`. `publish` is the single choke point where T4 records told names. |
+| Rumours | `FishRumors` | T1's quest-owned `LOOT` rumour takes the graduation lead's place, including starting the shared 30-day cooldown as that lead does. The chain extends its `duration`. `publish` is the single choke point where T4 records told names. |
 | Legendary list | `LegendaryChases`, `FishSpecLoader` | Rows from `getAllFishSpecs()` with `rarity == LEGENDARY` and `spawnWeight > 0`. Caught state from `isCaught`; completion from `noteCaught`. |
 
 ### Phases
