@@ -94,7 +94,7 @@ Not implemented. Each fishing ship carries one rig module built in (see [Ships](
 
 **The captain**
 - An old, grizzled independent skipper, portrait `portrait30.png` (a vanilla portrait; confirm the path in the target game install).
-- Speaks with a stereotypical Scottish accent and slang. He needs a voice entry in `LORE.md` before any lines are drafted.
+- Speaks with Scottish-style speech patterns: accent, dialect and slang. That is only how he talks. Scotland, Earth and their places do not exist in the setting, which stays fully vanilla ([LORE.md](LORE.md#canon-sources)). He never names them, and nothing explains his speech by an origin outside the vanilla Sector. He needs a voice entry in `LORE.md` before any lines are drafted.
 - Tells a personal encounter with the epic that fits any species, for example that it took his leg. The tale must not establish species-specific mechanics.
 
 **Steps**
