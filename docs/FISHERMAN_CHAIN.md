@@ -36,21 +36,46 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
   - While the ship is in the fleet, its module can be fitted in either slot.
 - **Ship leaves the fleet.** When the last ship of that kind leaves, the second slot is emptied at once. The ship's module is unfitted wherever it sits, because it is only available with the ship.
 - **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
+- **Two modules on one rig.**
+  - Effects apply in slot order: slot 1, then slot 2.
+  - No module takes up two slots, and one module cannot fill both slots of a rig.
+  - A rig's modules never block another rig's slots. A module that fits both the ROD and the Harpoon can still be fitted to both, as today.
+  - Modules with similar or opposing effects cannot share a rig. Two modules that change the same value count as similar. The pairs are listed under [Incompatible pairs](#incompatible-pairs).
+  - In the Outfitter, a module that conflicts with the one in the rig's other slot is greyed out for that slot and cannot be fitted there. Its hover names the conflicting module.
 - **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module, the Reployment Bays, is new.
 
 **Work**
 - Fitted state is one module per rig today (`TackleManager.getFitted()`, read through `TackleManager.get(Fit)`). It needs a second slot per rig, and every effect check must read both slots.
 - Fleet presence: look for a fleet or cargo callback before adding a fleet scan; see [CLAUDE.md](../CLAUDE.md#make-and-record-changes) on polling. A save loaded without the ship must still empty the second slot.
 - Removing a module from the shop: `stocked = false`, keeping the `Tackle` constant, as with the Breach Coupler.
+- Declare incompatibility on `Tackle`, for example as a shared exclusion group per effect, rather than as pairs in the Outfitter code, so a new module is checked against every other.
+
+### Incompatible pairs
+
+Every module was checked against the others that fit the same rig.
+
+| Rig | Pair | Why |
+|---|---|---|
+| ROD | Spool Governor + Inertial Damper | Both change how fast the catch window rises (`barLiftMult`). |
+| ROD | Salvage Trawl + Lifting Rig | Both raise the bycatch chance (`treasureChanceMult`). |
+| ROD | Holdfast Clamp + Barbed Head | Both work on catch progress: one slows its loss, the other speeds its gain. |
+| Harpoon | Explosive Head + Barbed Head, Sonar Head, Calibrated Grader or Shoring Head | The blast destroys the catch those tips improve. |
+| Lens Array | Needle Sensor + Neutrino Lens | Both point out hidden rare, epic and legendary patterns. |
+
+Every other pair is compatible. Two of them were checked specifically:
+- **Retrieval Head + Explosive Head:** the Retrieval Head returns harpoon charges and does nothing to the catch.
+- **Fanned Array + Tracking Gimbal:** one sets the beam's shape and sweep speed, the other pauses the sweep on a pattern. `Searchlight.acquire` already picks the best-lit pattern under a fan.
+
+Because no ship module is in a pair, the reset when a ship rejoins never meets a conflicting slot 1. The disabled Breach Coupler is not assessed; check it if it returns.
 
 ## T1: The treasure rumour
 
-**Premise.** Word goes round that retrievals in a nearby system are bringing up far more bycatch than usual. The Fisherman knows of one particular find there and wants it.
+**Premise.** Word goes round that retrievals in a nearby system are bringing up far more bycatch than usual. The Fisherman appears to have lost something and is sure it is there. That is all he says about it.
 
 **Steps**
 1. The Fisherman names the system and asks for one specific treasure: a golden chest.
 2. The player fishes there under Breach Lights. Each **lamp catch** may produce the golden chest in the minigame. Pond catches never do.
-3. The chest holds a compass. The player brings it to the Fisherman, who takes it.
+3. The chest holds his compass. The player brings it back to him.
 4. Rewards are granted (below), and the follow-up quest starts immediately.
 
 **Golden chest**
@@ -63,7 +88,8 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 - Special item using the icon `graphics/catchrelease/icon/compass.png`, base value 1 credit, cosmetic.
 - Plugin: vanilla's plain `com.fs.starfarer.api.campaign.impl.items.BaseSpecialItemPlugin`, as used by its Topographic Data and Planetkiller rows. There is no `DefaultSpecialItemPlugin` class.
 - It must never be cleared from markets. Nothing extra is needed: vanilla restocks never remove special items, and `SoldFishRestock` only removes catch items.
-- The Fisherman takes it at hand-in, possibly as a keepsake of his own.
+- It is the Fisherman's own. He takes it back at hand-in and does not explain how it got there or how he knew where it was.
+- Nobody remarks on its needle, and it does nothing unusual. The needle stays a writer's metaphor ([LORE.md](LORE.md#origin-and-nature), [Needle quest concept](NEEDLE_QUEST_CONCEPT.md)).
 
 **A lost compass.** The quest is about getting the compass, not about handing it in, so losing it must not block the player.
 
@@ -144,7 +170,7 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 **Follow-up: have the ship built.** The player works out how; the Fisherman does not build it. Completes when the player owns a ship of that hull.
 
 **Closing conversation**
-- Bar rumours about legendary fish are generally worth following, once the player has the gear for it, and the gear level needed is very high.
+- Gist: "Rumours about the stranger fish are worth following once your gear is very good." He does not name legendaries, so T4 stays vague.
 - Epics are not unique, but they are rare enough that they might as well be.
 
 **Work**
@@ -165,15 +191,16 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 - When T4 completes, the player learns there is more than one legendary. The intel changes to "Hunting the legendary fish".
 - It lists one entry per legendary species, each shown as question marks until known, so the list shows how many there are.
 - Each rumour the player hears about a legendary turns its question marks into the last known name: the name the teller used. A bar teller can give a folk name or the wrong one, so an entry can stay wrong until the catch.
+- Every rumour fills in a name. A telling that names nothing gives either a wrong name or one taken from its story, for example "World Serpent" for an eel that lies curled with its tail in its mouth.
 - Catching a legendary changes its entry to the species' real name.
-- The conclusion of this intel is not decided.
+- The intel concludes once every legendary has been caught (six today). What happens then is decided later.
 
 **Work**
 - Count the entries from the legendary rows in `fish.csv` (six today), not a constant.
 - Record each species' told name whenever a legendary rumour is heard, including before the list appears. There are two sources:
   - the Fisherman's monthly lead (`FishRumors`);
   - the bar spacer's report (`RatingBarEvent`, `CatchReleaseRatingLegendaryReport` rows).
-- Today's spacer tellings name some legendaries ("Lantern Jack", "The Moray", "The Imposter") and give no name for the Quorum, False Dawn and Ghost Manta. None gives a deliberately wrong name. Each rumour therefore needs an explicit told name.
+- Today's spacer tellings name some legendaries ("Lantern Jack", "The Moray", "The Imposter") and give no name for the Quorum, False Dawn and Ghost Manta. None gives a deliberately wrong name. Each rumour therefore needs an explicit told name, following the rule above. The tellings' dialogue can keep saying no name was given; the intel's name comes from the story.
 - Catches: `LegendaryChases.isCaught`. A legendary caught before T4 starts completes it at once.
 
 ## Ships
@@ -188,12 +215,7 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 ## Open questions
 
-1. **Module combinations.** Two slots let one rig carry two modules, which has not been possible before. Undecided:
-   - how their effects stack;
-   - whether any pairs must be refused, such as the single-use Explosive Head with another tip;
-   - whether one module may sit in both slots. Today a module that fits both Drone and Harpoon can be fitted to both rigs at once.
-2. **Unnamed rumours.** What a legendary's entry shows after a rumour that gives no name.
-3. **The conclusion of "Hunting the legendary fish".**
+1. **What concluding "Hunting the legendary fish" brings.** It ends once every legendary is caught; the payoff is decided later.
 
 ## Suggested order
 
