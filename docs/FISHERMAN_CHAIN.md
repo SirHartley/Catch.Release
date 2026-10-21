@@ -38,8 +38,9 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 - **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
 - **Two modules on one rig.**
   - Effects apply in slot order: slot 1, then slot 2.
-  - No module takes up two slots, and one module cannot fill both slots of a rig.
-  - A rig's modules never block another rig's slots. A module that fits both the ROD and the Harpoon can still be fitted to both, as today.
+  - No module takes up two slots.
+  - Every module can be fitted in only one slot at a time, across all rigs. In the Outfitter it is greyed out in every other slot, and its hover says where it is fitted.
+    - This changes today's behaviour for the three modules that fit both the ROD and the Harpoon (Calibrated Grader, Barbed Head, Sonar Head). They can currently sit on both rigs at once.
   - Modules with similar or opposing effects cannot share a rig. Two modules that change the same value count as similar. The pairs are listed under [Incompatible pairs](#incompatible-pairs).
   - In the Outfitter, a module that conflicts with the one in the rig's other slot is greyed out for that slot and cannot be fitted there. Its hover names the conflicting module.
 - **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module, the Reployment Bays, is new.
@@ -59,11 +60,10 @@ Every module was checked against the others that fit the same rig.
 | ROD | Spool Governor + Inertial Damper | Both change how fast the catch window rises (`barLiftMult`). |
 | ROD | Salvage Trawl + Lifting Rig | Both raise the bycatch chance (`treasureChanceMult`). |
 | ROD | Holdfast Clamp + Barbed Head | Both work on catch progress: one slows its loss, the other speeds its gain. |
-| Harpoon | Explosive Head + Barbed Head, Sonar Head, Calibrated Grader or Shoring Head | The blast destroys the catch those tips improve. |
-| Lens Array | Needle Sensor + Neutrino Lens | Both point out hidden rare, epic and legendary patterns. |
 
-Every other pair is compatible. Two of them were checked specifically:
-- **Retrieval Head + Explosive Head:** the Retrieval Head returns harpoon charges and does nothing to the catch.
+Every other pair is compatible. These were checked specifically:
+- **Explosive Head with any tip:** the blast destroys the pattern anyway, so pairing it changes nothing.
+- **Needle Sensor + Neutrino Lens:** the Needle Sensor only runs with the Breach Lights off and the Neutrino Lens only with them on, so they never act together.
 - **Fanned Array + Tracking Gimbal:** one sets the beam's shape and sweep speed, the other pauses the sweep on a pattern. `Searchlight.acquire` already picks the best-lit pattern under a fan.
 
 Because no ship module is in a pair, the reset when a ship rejoins never meets a conflicting slot 1. The disabled Breach Coupler is not assessed; check it if it returns.
@@ -150,8 +150,8 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
   - count continuous lamp-on time within 6,000 units of the star;
   - then put a buried mote of the target species ahead of the beam sweep;
   - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
-- Failure: watch the quest fish's `EpicHunt` reset.
-- Needle Sensor follow-up: grant the schematic through `FishReward.tackleSchematic`. Advance the intel to its return step from the purchase (`ShopEntry.grant`) rather than by polling ownership.
+- Failure: a hook in `EpicHunt`'s reset branch for quest-owned fish (see [Implementation plan](#implementation-plan)).
+- Needle Sensor follow-up: grant the schematic through `FishReward.tackleSchematic`. Advance the intel to its return step when the Outfitter closes and the module is owned, not from `ShopEntry.grant`: the Outfitter's undo refunds a purchase through `TackleManager.consume` without passing through `ShopEntry`.
 
 ## T3: The wounded epic
 
@@ -217,11 +217,82 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 1. **What concluding "Hunting the legendary fish" brings.** It ends once every legendary is caught; the payoff is decided later.
 
-## Suggested order
+The research for the implementation plan turned up these gaps in the design. Each has a suggested default that the plan assumes until decided:
 
-1. Two-stage epics (done).
-2. Compass item and golden chest, then T1 and its follow-up. The Glitter Lens is done.
-3. Second equipment slots in the Outfitter, the Nebula placeholder hulls, and moving the Retrieval Head and Fanned Array out of the shop.
-4. T2 with the harpoon ship, then the Fisherman debrief, lore questions and the Needle Sensor follow-up.
-5. T3 and the Breach Light ship blueprint.
-6. The Reployment Bays, then T4, the ROD ship and the legendary-hunt intel.
+2. **What counts as a lamp catch for the golden chest's pity gate.** Suggested: every minigame opened on a lamp-method, non-legendary fish in the target system counts. The chest still only pays out on a won minigame, like all treasure.
+3. **T1 after a skipped tutorial.** Skipping has no last hand-in. Suggested: the Fisherman offers T1 on the next visit.
+4. **T2 failures other than the reset.** A failed catch, or an Explosive Head blast once the shield is down, also removes the epic. Suggested: both fail the hunt like a reset.
+5. **T2's 6,000 units.** Suggested: measured from the star's surface, as the existing legendary code measures; systems without a star (nebulae) are never chosen.
+6. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
+7. **Legendary rumour intel names.** The existing legendary rumour intel shows the species' real name (`FishRumors.getStrangerDisplayName`), which contradicts T4's told names. Suggested: it shows the told name too.
+
+## Implementation plan
+
+Six phases, each its own pull request. Phase 0 changes no visible behaviour; it removes the obstacles the research found. Write all player-facing text through [DIALOGUE.md](DIALOGUE.md) and [LORE.md](LORE.md). Route UI scoping to the UI subagent ([CLAUDE.md](../CLAUDE.md#claude-model-assignments)).
+
+### Architecture
+
+| Area | Owner (new or changed) | Role |
+|---|---|---|
+| Chain state | New `campaign/fish/fisherman/chain/FishermanChain` | Saved stage per quest (T1–T4 and follow-ups) in sector persistent data, as `FishermanQuest` stores its `STATE_KEY`. Entry points are `CatchReleaseCMD` verbs. A `tokens` Boolean per offer gates the `CatchReleaseFisherOptions` rows. Registers its transient listeners on load. |
+| Chain intel | New `BaseIntelPlugin` subclasses in the same package | One intel per quest: lost compass, Needle Sensor build, wounded epic, and the rumour hunt (title and body switch after the first legendary, as `FishingIntro.IntroIntel` switches by stage). Created through `FishIntelNotifications.queue`. |
+| T2 mission | New `BaseHubMission` subclass | Needs a contact person and a fleet, and `BaseHubMission` supplies both and ticks `advanceImpl`. Fleet spawning follows `CampedSpot.spawn`; holding and friendliness reuse `FleetQuest.hold`/`keepStanding`; comms reuse the `catchrelease_fleetQuestHail` pattern. Not a `FishJob`: no fish are delivered. |
+| Rig slots | `TackleManager`, new `RigLoadout` and `TackleEffects` | Two slots per rig. `TackleEffects` combines slot 1 then slot 2 (multipliers multiply, flags OR). It replaces every single-`Tackle` read: the minigame constructors, `NeedleSensor`, `NeutrinoLens`, `Searchlight`, `HarpoonEntityPlugin`, the ability tooltips and `PondFishSpawner`. Fit-once and incompatibility are enforced in `TackleManager.fit`. |
+| Incompatibility | `Tackle` | An exclusion group per effect (catch-window rise, bycatch chance, catch progress), declared on the constant. |
+| Ships | New `campaign/fish/ships/FishingShips` | Hull id → rig → ship module. `reconcile()` compares fleet presence with slot 2 and applies the leave/rejoin rules. Ship modules are available while their ship is present, never added to the owned set, and have no price. |
+| Fleet presence | `FishingShips` listeners | Vanilla has no fleet-membership callback (`FleetData.addFleetMember` reports nothing). Covered: `reportPlayerMarketTransaction` (buy, sell, storage), `FleetEventListener.reportBattleOccurred` (losses), `ShipRecoveryListener`, `onGameLoad`, and quest grants calling `reconcile()` directly. Not covered: scuttling and changes made by other code. A member-count comparison in the rig abilities' existing `advance` covers those. It is a documented polling exception, with `reconcile()` also run when the Outfitter opens or an ability activates. |
+| Hull ids | Skins of `nebula` | `FleetMemberAPI.getHullId()` returns the skin id. A D-modded ship becomes `<id>_default_D`, so match `spec.isDefaultDHull() ? spec.getDParentHullId() : spec.getHullId()`. No `ship_data.csv` rows are needed. |
+| Outfitter | `FishShopDialog`, `ShopRowPlugin`, `ShopEntry`, `ShopDetailHeaderPlugin` | Second slot per rig, a disabled row state (rows have none today), and row hovers naming the conflict or where a module is fitted. Undo restores per slot. The "one slot" text changes. |
+| Quest motes | `BuriedMoteEntityPlugin`, `BuriedMoteSpawner`, `QuestPond` | `unearth()` copies the quest claim (`QuestPond.markPlanted` memory). The spawner's population count and `cullDistant` skip quest motes. |
+| Epic hooks | `EpicHunt`, `HarpoonEntityPlugin` | A listener interface for quest-owned epics: reset (the branch in `EpicHunt.advance`), failed catch (the harpoon's `onCatchResolved` path, where epics currently fade unreported), blast and catch (`FishItems.addToPlayerCargo` hooks with `questTargetId`). Saved per-fish fields for an awake speed multiplier and a circle route. |
+| Ship rewards | `FishReward` | New `ship(hullId)` reward that adds a fleet member to the player fleet; there is none today. `shipBlueprint` already exists. |
+| Golden chest | `FishingMinigameDialogPlugin`, `FishingMinigame`, `TreasureRoller` | `init` decides "chest due" from chain state, the system and `CatchImplement.BREACH_LAMP`, as `FishingIntro.applyCatchTargetProtection` does. The chest is a flagged `MinigameTreasure`, not a new `TreasureRarity`, so `rollRarity` never draws it. It is granted on a win and counted in `resolve()`. |
+| Rumours | `FishRumors` | T1 publishes a quest-owned `LOOT` rumour without starting the shared cooldown. The chain extends its `duration`. `publish` is the single choke point where T4 records told names. |
+| Legendary list | `LegendaryChases`, `FishSpecLoader` | Rows from `getAllFishSpecs()` with `rarity == LEGENDARY` and `spawnWeight > 0`. Caught state from `isCaught`; completion from `noteCaught`. |
+
+### Phases
+
+**Phase 0: groundwork.**
+1. `TackleEffects` and the two-slot `TackleManager` API with slot 2 always empty. Move every single-module read to it.
+2. Enforce fit-once. This changes Calibrated Grader, Barbed Head and Sonar Head, which can sit on both rigs today.
+3. Quest-mote fixes: the unearth claim copy and the spawner skips.
+4. Epic quest hooks.
+5. `FishReward.ship`.
+6. Update the checks that fit single modules: `AbilityTooltipCheck`, `HarpoonAbilityChecks`, `HarpoonAimCheck`, `PondProximityChecks`, `LegendaryTrailChecks`, `NeedleSensorChecks`, `DevShortcutChecks`.
+
+**Phase 1: T1.**
+- The compass `special_items.csv` row (`BaseSpecialItemPlugin`).
+- The golden chest and its pity counter.
+- The quest-owned rumour.
+- The lost-compass listener: a `ColonyInteractionListener`, registered as `RatingBarEvent.VisitCounter` does, removing the old copy first.
+- The reward specimens, built from `ShopPricing.getPrice(Tackle.GLITTER_LENS)` with a new helper that creates a `FishCatch` satisfying a `FishRequirement` (none exists). If no payment can be generated, only credits are given.
+- The Glitter Lens follow-up, checked when the Outfitter closes.
+- The T1 offer after the last hand-in, and its route for skipped tutorials.
+
+**Phase 2: ship slots.**
+- Skins and descriptions.
+- `FishingShips` with its listeners and the documented fallback check.
+- The Outfitter's second slot, greyed rows and hovers.
+- Retrieval Head and Fanned Array set to `stocked = false`.
+- A check for the reconcile rules and the incompatibility matrix.
+
+**Phase 3: T2.**
+- The captain's voice entry in `LORE.md` first.
+- The hunt mission and fleet.
+- The lamp timer in `SearchlightAbilityPlugin.advance`, which already ticks every frame (the Needle Sensor runs there).
+- A `Searchlight` accessor for a point ahead of the sweep; `arc`, `baseArcAngle` and `travelDirection` are private today.
+- The outcomes, the harpoon ship grant, the Fisherman debrief and the Needle Sensor intel.
+
+**Phase 4: T3.**
+- The circle route as a saved per-fish swim rule next to the `holdsStation()` branch in `FishEntityPlugin`.
+- The awake 0.5 multiplier in `EpicHunt.getSpeedMult`.
+- Respawn on reset and on arrival in the system.
+- The blueprint.
+- The build follow-up through `FishingShips.reconcile()`.
+
+**Phase 5: T4.**
+- Reployment Bays at the swarm's "every drone returned" branch in `FishingDroneSwarmScript.advance`, after re-checking `shouldRecall()`; never after a manual recall. It needs a `ShopPricing.getCredits` case: the switch is exhaustive, but the module is never sold.
+- The rumour hunt intel, told names recorded in `FishRumors.publish`, and the T4 completion hook.
+- The ROD ship grant.
+
+**Behaviour to keep in mind.** With the Retrieval Head and the Explosive Head both fitted, a blast refunds the harpoon charge; the head itself is still consumed. The Tracking Gimbal locks onto quest motes like any buried pattern.
