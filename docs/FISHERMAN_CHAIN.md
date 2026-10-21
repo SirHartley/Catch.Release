@@ -254,7 +254,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 0.3 Fit rules in `TackleManager.fit`: no repeat within a rig, and the exclusion groups declared on `Tackle` for the [incompatible pairs](#incompatible-pairs). They only take effect once slot 2 exists.
 - [x] 0.4 Quest motes: `unearth()` copies the quest claim and any per-fish quest fields to the surfaced fish. `BuriedMoteSpawner` neither counts nor culls quest motes.
 - [x] 0.5 Epic quest hooks: a listener for a quest-owned epic's reset, failed catch, blast and catch.
-- [ ] 0.6 `FishReward.ship(hullId)`, which adds a ship to the player fleet.
+- [x] 0.6 `FishReward.ship(hullId)`, which adds a ship to the player fleet.
 - [ ] 0.7 Move the checks that fit single modules to the new API: `AbilityTooltipCheck`, `HarpoonAbilityChecks`, `HarpoonAimCheck`, `PondProximityChecks`, `LegendaryTrailChecks`, `NeedleSensorChecks`, `DevShortcutChecks`.
 
 **Stage 1: T1, the treasure rumour.**

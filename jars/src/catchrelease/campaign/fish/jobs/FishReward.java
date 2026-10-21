@@ -18,6 +18,7 @@ import catchrelease.memory.upgrades.UpgradeStat;
 import catchrelease.ui.FishIcons;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
@@ -25,6 +26,8 @@ import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -479,6 +482,64 @@ public abstract class FishReward {
         }
     }
 
+    public static class Ship extends FishReward {
+
+        public final String hullId;
+
+        public Ship(String hullId) {
+            this.hullId = hullId;
+        }
+
+        @Override
+        public String describe() {
+            ShipHullSpecAPI spec = getSpec();
+            if (spec == null) return "a ship";
+
+            String hull = spec.getHullNameWithDashClass();
+            String designation = spec.getDesignation();
+            String kind = designation == null || designation.isEmpty() ? "ship" : designation.toLowerCase();
+
+            return Misc.getAOrAnFor(hull) + " " + hull + " " + kind;
+        }
+
+        @Override
+        public void grant() {
+            addToPlayerFleet();
+        }
+
+        @Override
+        public Receipt grantWithReceipt() {
+            FleetMemberAPI member = addToPlayerFleet();
+
+            return new Receipt(member == null ? null : member.getVariant().getFullDesignationWithHullNameForShip());
+        }
+
+        // Named and crewed to full readiness the way FleetFactoryV3 adds a member; the empty hull variant is generated
+        // by the game for every hull, skins included.
+        protected FleetMemberAPI addToPlayerFleet() {
+            CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+            if (fleet == null || getSpec() == null) return null;
+
+            FleetMemberAPI member = Global.getFactory().createFleetMember(FleetMemberType.SHIP, hullId + "_Hull");
+            member.setShipName(fleet.getFleetData().pickShipName(member, null));
+            fleet.getFleetData().addFleetMember(member);
+            member.getRepairTracker().setCR(member.getRepairTracker().getMaxCR());
+
+            return member;
+        }
+
+        // getHullSpec throws for an unknown id instead of returning null
+        protected ShipHullSpecAPI getSpec() {
+            if (hullId == null) return null;
+
+            try {
+                return Global.getSettings().getHullSpec(hullId);
+            } catch (RuntimeException e) {
+                return null;
+            }
+        }
+    }
+
     public abstract String describe();
 
     public abstract void grant();
@@ -573,6 +634,10 @@ public abstract class FishReward {
 
     public static FishReward shipBlueprint(String hullId) {
         return new Blueprint(Items.SHIP_BP, hullId);
+    }
+
+    public static FishReward ship(String hullId) {
+        return new Ship(hullId);
     }
 
     public static FishReward specialItem(String itemId, String data) {
