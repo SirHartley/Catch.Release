@@ -70,12 +70,12 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 ## T1: The treasure rumour
 
-**Premise.** Word goes round that retrievals in a nearby system are bringing up far more bycatch than usual. The Fisherman knows of one particular find there and wants it.
+**Premise.** Word goes round that retrievals in a nearby system are bringing up far more bycatch than usual. The Fisherman appears to have lost something and is sure it is there. That is all he says about it.
 
 **Steps**
 1. The Fisherman names the system and asks for one specific treasure: a golden chest.
 2. The player fishes there under Breach Lights. Each **lamp catch** may produce the golden chest in the minigame. Pond catches never do.
-3. The chest holds a compass. The player brings it to the Fisherman, who takes it.
+3. The chest holds his compass. The player brings it back to him.
 4. Rewards are granted (below), and the follow-up quest starts immediately.
 
 **Golden chest**
@@ -88,7 +88,8 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Special item using the icon `graphics/catchrelease/icon/compass.png`, base value 1 credit, cosmetic.
 - Plugin: vanilla's plain `com.fs.starfarer.api.campaign.impl.items.BaseSpecialItemPlugin`, as used by its Topographic Data and Planetkiller rows. There is no `DefaultSpecialItemPlugin` class.
 - It must never be cleared from markets. Nothing extra is needed: vanilla restocks never remove special items, and `SoldFishRestock` only removes catch items.
-- The Fisherman takes it at hand-in, possibly as a keepsake of his own.
+- It is the Fisherman's own. He takes it back at hand-in and does not explain how it got there or how he knew where it was.
+- Nobody remarks on its needle, and it does nothing unusual. The needle stays a writer's metaphor ([LORE.md](LORE.md#origin-and-nature), [Needle quest concept](NEEDLE_QUEST_CONCEPT.md)).
 
 **A lost compass.** The quest is about getting the compass, not about handing it in, so losing it must not block the player.
 
