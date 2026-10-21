@@ -7,7 +7,7 @@ It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains th
 ## Framing
 
 - The tutorial still ends where it does today. `FishingIntro.isComplete()` keeps its current meaning, and everything gated on it (legendary spawns and the shop) is unchanged.
-- The Fisherman offers T1 straight after the tutorial's last hand-in. After a skipped tutorial, which has no last hand-in, he offers it on the next visit. The chain is not presented as more tutorial: the tutorial should feel short, and this reads as ordinary work.
+- The Fisherman offers T1 straight after the tutorial's last hand-in. After a skipped tutorial, which has no last hand-in, he offers it on the next visit. T1 replaces the free rumour the tutorial gives today on both paths. The chain is not presented as more tutorial: the tutorial should feel short, and this reads as ordinary work.
 - Each step teaches one thing:
   - T1: lamp catches pay better than pond catches.
   - T2: fleets can have work for you, and epics are hunted.
@@ -94,7 +94,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **A lost compass.** The quest is about getting the compass, not about handing it in, so losing it must not block the player.
 
-- While the quest is active, a `CampaignEventListener` (`reportPlayerMarketTransaction`) watches for the compass leaving the player's cargo. It records the market where it was last sold; a free-transfer submarket counts as storage, not a sale. The quest removes the listener when it concludes.
+- While the quest is active, a `ColonyInteractionListener` (`reportPlayerMarketTransaction`) watches for the compass leaving the player's cargo. It records the market where it was last sold; a free-transfer submarket counts as storage, not a sale. The quest removes the listener when it concludes.
 - If the compass is not in the player's cargo at hand-in, the player can tell the Fisherman "I lost it". He asks "Are you sure?" When the player confirms:
   - **Sold:** he's pretty sure he saw it on sale at that market, and the player had better go and get it. The quest continues.
   - **Not sold:** check, once, every unlocked storage and colony submarket.
@@ -110,7 +110,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 **Follow-up: buy the Glitter Lens.** Completes when the module is owned. The Fisherman then says the system's raised treasure chance will hold for another two months.
 
 **Work**
-- The rumour can reuse the `FishRumors` `LOOT` kind pinned to the target system. Extending it by 60 days after the purchase needs a quest-owned duration, so the normal rumour rotation does not replace it.
+- The rumour can reuse the `FishRumors` `LOOT` kind pinned to the target system. It replaces the graduation lead: `FishingIntro.finish` and `FishingIntro.skip` stop calling `FishRumors.ensureTutorialLead()`, and the graduation option "Heard of anywhere worth fishing?" (`catchrelease_introGetFreeRumor`) leads into T1 instead of a random rumour. Extending it by 60 days after the purchase needs a quest-owned duration, so the normal rumour rotation does not replace it.
 - New: the golden chest treasure, its pity counter and the compass item row. The Glitter Lens already exists.
 - The reward specimens must be generated from the cached payment at grant time, so they always match.
 
@@ -124,7 +124,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Their Breach Lights have malfunctioned, so they cannot find it.
 
 **The captain**
-- An old, grizzled independent skipper, portrait `portrait30.png` (a vanilla portrait; confirm the path in the target game install).
+- An old, grizzled independent skipper, portrait `graphics/portraits/portrait30.png` (vanilla; listed in `independent.faction`).
 - Speaks with Scottish-style speech patterns: accent, dialect and slang. That is only how he talks. Scotland, Earth and their places do not exist in the setting, which stays fully vanilla ([LORE.md](LORE.md#canon-sources)). He never names them, and nothing explains his speech by an origin outside the vanilla Sector. He needs a voice entry in `LORE.md` before any lines are drafted.
 - Tells a personal encounter with the epic that fits any species, for example that it took his leg. The tale must not establish species-specific mechanics.
 
@@ -148,7 +148,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Quest fleet: an independent fleet with a contact person, using the existing fleet-quest spawning and contact patterns where possible.
 - Choosing the target: an epic species whose range matches the zero-market system. If none qualifies, choose another system rather than a species from elsewhere.
 - Placing the mote:
-  - count continuous lamp-on time within 6,000 units of the star;
+  - count continuous lamp-on time within 6,000 units of the star's surface;
   - then put a buried mote of the target species ahead of the beam sweep;
   - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
 - Failure: the quest-epic hooks for reset, failed catch and blast (see [Implementation plan](#implementation-plan)).
@@ -160,9 +160,10 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **Steps**
 1. The player uses the Needle Sensor built after T2 to locate it.
-2. It has the usual epic shield and stages. Asleep, it drifts at the normal epic drift speed; awake, it moves 50% slower than a normal awake epic.
-3. If it gets too far away (the hunt resets), it despawns and respawns at the planet with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
-4. The player is expected to hunt it until caught, then return to the Fisherman.
+2. Asleep, it behaves like any epic: buried, drifting at the normal buried speed, and visible under the Breach Lights. The difference is that its drift circles the planet at about 1,000 units.
+3. A harpoon hit wakes it as usual: the hit is deflected, the fish surfaces and its shield charge goes up. It stops circling and runs the normal epic hunt, at half the speed of a normal awake epic.
+4. If the hunt resets (more than 3,000 units from the player), it despawns and respawns at the planet, buried and circling again, with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
+5. The player is expected to hunt it until caught, then return to the Fisherman.
 
 **Rewards**
 - The blueprint for the second fishing ship, the Breach Light ship. It brings a second Lens Array slot and the Fanned Array.
@@ -175,9 +176,9 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Epics are not unique, but they are rare enough that they might as well be.
 
 **Work**
-- **The circling must not use `orbitAnchor`.** `NeedleSensor.isEligible` and `EpicHunt.applies` both exclude orbit-anchored fish (that field marks shield escorts), so the sensor would never see it and it would never wake. Drive the circling with swim targets around the planet, or add a quest flag both checks respect.
-- Slower movement: a per-fish multiplier of 0.5, applied only while awake, on top of `EpicHunt`'s speed.
-- Respawn: on the quest fish's reset, expire it and spawn a fresh one at the planet.
+- Circling: a heading rule for the quest's buried mote in `BuriedMoteEntityPlugin`, which today wanders on random headings. Only the buried stage circles, so the surfaced fish needs no route. Do not use `orbitAnchor`: it marks surfaced shield escorts, which `NeedleSensor.isEligible` and `EpicHunt.applies` exclude.
+- Slower movement: a per-fish multiplier of 0.5 on top of `EpicHunt`'s awake speed. The buried mote carries it, and `unearth()` passes it to the surfaced fish along with the quest claim.
+- Respawn: on the quest fish's reset, expire it and spawn a fresh buried, circling mote at the planet.
 
 ## T4: Listen for rumours
 
@@ -219,10 +220,6 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 1. **What concluding "Hunting the legendary fish" brings.** It ends once every legendary is caught; the payoff is decided later.
 
-The research for the implementation plan also turned up this gap. Its suggested default is assumed until decided:
-
-2. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
-
 ## Implementation plan
 
 Six phases, each its own pull request. Phase 0 changes no visible behaviour; it removes the obstacles the research found. Write all player-facing text through [DIALOGUE.md](DIALOGUE.md) and [LORE.md](LORE.md). Route UI scoping to the UI subagent ([CLAUDE.md](../CLAUDE.md#claude-model-assignments)).
@@ -241,10 +238,10 @@ Six phases, each its own pull request. Phase 0 changes no visible behaviour; it 
 | Hull ids | Skins of `nebula` | `FleetMemberAPI.getHullId()` returns the skin id. A D-modded ship becomes `<id>_default_D`, so match `spec.isDefaultDHull() ? spec.getDParentHullId() : spec.getHullId()`. No `ship_data.csv` rows are needed. |
 | Outfitter | `FishShopDialog`, `ShopRowPlugin`, `ShopEntry`, `ShopDetailHeaderPlugin` | Second slot per rig, a disabled row state (rows have none today), and row hovers naming the conflict or where a module is fitted. Undo restores per slot. The "one slot" text changes. |
 | Quest motes | `BuriedMoteEntityPlugin`, `BuriedMoteSpawner`, `QuestPond` | `unearth()` copies the quest claim (`QuestPond.markPlanted` memory). The spawner's population count and `cullDistant` skip quest motes. |
-| Epic hooks | `EpicHunt`, `HarpoonEntityPlugin` | A listener interface for quest-owned epics: reset (the branch in `EpicHunt.advance`), failed catch (the harpoon's `onCatchResolved` path, where epics currently fade unreported), blast and catch (`FishItems.addToPlayerCargo` hooks with `questTargetId`). Saved per-fish fields for an awake speed multiplier and a circle route. |
+| Epic hooks | `EpicHunt`, `HarpoonEntityPlugin` | A listener interface for quest-owned epics: reset (the branch in `EpicHunt.advance`), failed catch (the harpoon's `onCatchResolved` path, where epics currently fade unreported), blast and catch (`FishItems.addToPlayerCargo` hooks with `questTargetId`). A saved per-fish awake speed multiplier, which `unearth()` passes from buried mote to surfaced fish. |
 | Ship rewards | `FishReward` | New `ship(hullId)` reward that adds a fleet member to the player fleet; there is none today. `shipBlueprint` already exists. |
 | Golden chest | `FishingMinigameDialogPlugin`, `FishingMinigame`, `TreasureRoller` | `init` decides "chest due" from chain state, the system and `CatchImplement.BREACH_LAMP`, as `FishingIntro.applyCatchTargetProtection` does. The chest is a flagged `MinigameTreasure`, not a new `TreasureRarity`, so `rollRarity` never draws it. It is granted on a win and counted in `resolve()`. |
-| Rumours | `FishRumors` | T1 publishes a quest-owned `LOOT` rumour without starting the shared cooldown. The chain extends its `duration`. `publish` is the single choke point where T4 records told names. |
+| Rumours | `FishRumors` | T1's quest-owned `LOOT` rumour takes the graduation lead's place, including starting the shared 30-day cooldown as that lead does. The chain extends its `duration`. `publish` is the single choke point where T4 records told names. |
 | Legendary list | `LegendaryChases`, `FishSpecLoader` | Rows from `getAllFishSpecs()` with `rarity == LEGENDARY` and `spawnWeight > 0`. Caught state from `isCaught`; completion from `noteCaught`. |
 
 ### Phases
@@ -281,7 +278,7 @@ Six phases, each its own pull request. Phase 0 changes no visible behaviour; it 
 - The outcomes, the harpoon ship grant, the Fisherman debrief and the Needle Sensor intel.
 
 **Phase 4: T3.**
-- The circle route as a saved per-fish swim rule next to the `holdsStation()` branch in `FishEntityPlugin`.
+- The circling heading rule on the quest's buried mote (`BuriedMoteEntityPlugin.advanceFish`).
 - The awake 0.5 multiplier in `EpicHunt.getSpeedMult`.
 - Respawn on reset and on arrival in the system.
 - The blueprint.
