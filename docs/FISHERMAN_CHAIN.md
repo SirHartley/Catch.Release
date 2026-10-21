@@ -59,10 +59,9 @@ Every module was checked against the others that fit the same rig.
 | ROD | Spool Governor + Inertial Damper | Both change how fast the catch window rises (`barLiftMult`). |
 | ROD | Salvage Trawl + Lifting Rig | Both raise the bycatch chance (`treasureChanceMult`). |
 | ROD | Holdfast Clamp + Barbed Head | Both work on catch progress: one slows its loss, the other speeds its gain. |
-| Harpoon | Explosive Head + Barbed Head, Sonar Head, Calibrated Grader or Shoring Head | The blast destroys the catch those tips improve. |
 
 Every other pair is compatible. These were checked specifically:
-- **Retrieval Head + Explosive Head:** the Retrieval Head returns harpoon charges and does nothing to the catch.
+- **Explosive Head with any tip:** the blast destroys the pattern anyway, so pairing it changes nothing.
 - **Needle Sensor + Neutrino Lens:** the Needle Sensor only runs with the Breach Lights off and the Neutrino Lens only with them on, so they never act together.
 - **Fanned Array + Tracking Gimbal:** one sets the beam's shape and sweep speed, the other pauses the sweep on a pattern. `Searchlight.acquire` already picks the best-lit pattern under a fan.
 
