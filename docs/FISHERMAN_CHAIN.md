@@ -194,6 +194,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Each rumour the player hears about a legendary turns its question marks into the last known name: the name the teller used. A bar teller can give a folk name or the wrong one, so an entry can stay wrong until the catch.
 - Every rumour fills in a name. A telling that names nothing gives either a wrong name or one taken from its story, for example "World Serpent" for an eel that lies curled with its tail in its mouth.
 - Catching a legendary changes its entry to the species' real name.
+- The existing legendary rumour intel shows the told name too, not the species' real name (`FishRumors.getStrangerDisplayName` today).
 - The intel concludes once every legendary has been caught (six today). What happens then is decided later.
 
 **Work**
@@ -218,10 +219,9 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 1. **What concluding "Hunting the legendary fish" brings.** It ends once every legendary is caught; the payoff is decided later.
 
-The research for the implementation plan turned up these gaps in the design. Each has a suggested default that the plan assumes until decided:
+The research for the implementation plan also turned up this gap. Its suggested default is assumed until decided:
 
-6. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
-7. **Legendary rumour intel names.** The existing legendary rumour intel shows the species' real name (`FishRumors.getStrangerDisplayName`), which contradicts T4's told names. Suggested: it shows the told name too.
+2. **T3's sleeping fish.** Today a sleeping epic is either a buried mote (no swim target) or a surfaced fish that fades at its target. Suggested: the wounded epic is surfaced from the start and circles on its own route, asleep or awake.
 
 ## Implementation plan
 
