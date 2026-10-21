@@ -36,7 +36,7 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
   - While the ship is in the fleet, its module can be fitted in either slot.
 - **Ship leaves the fleet.** When the last ship of that kind leaves, the second slot is emptied at once. The ship's module is unfitted wherever it sits, because it is only available with the ship.
 - **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
-- **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module is new.
+- **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module, the Reployment Bays, is new.
 
 **Work**
 - Fitted state is one module per rig today (`TackleManager.getFitted()`, read through `TackleManager.get(Fit)`). It needs a second slot per rig, and every effect check must read both slots.
@@ -115,7 +115,7 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 
 **Return to the Fisherman.** He thanks the player and explains how epics and legendaries behave when hunted. Optional questions add some background lore, which the mod is currently light on. His answers stay within his knowledge limits and his habit of not over-explaining (`LORE.md`). He gives the player the **Needle Sensor** schematic and tells them to build it.
 
-**Follow-up: build the Needle Sensor.** A short intel quest that completes when the player owns the Needle Sensor, bought at the Outfitter with the schematic. It is the prerequisite for T3, which starts once the sensor is built. If the player already owns one, the step completes at once.
+**Follow-up: build the Needle Sensor.** A tracked intel quest. Its first step is to buy the Needle Sensor at the Outfitter with the schematic. Once the player owns it, the intel tells them to go back and talk to the Fisherman, and T3 starts in that conversation. If the player already owns one, the intel starts at the return step.
 
 **Work**
 - Quest fleet: an independent fleet with a contact person, using the existing fleet-quest spawning and contact patterns where possible.
@@ -125,7 +125,7 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
   - then put a buried mote of the target species ahead of the beam sweep;
   - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
 - Failure: watch the quest fish's `EpicHunt` reset.
-- Needle Sensor follow-up: grant the schematic through `FishReward.tackleSchematic`, and complete the follow-up from the purchase (`ShopEntry.grant`) rather than by polling ownership.
+- Needle Sensor follow-up: grant the schematic through `FishReward.tackleSchematic`. Advance the intel to its return step from the purchase (`ShopEntry.grant`) rather than by polling ownership.
 
 ## T3: The wounded epic
 
@@ -182,20 +182,18 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
 |---|---|---|---|
 | Harpoon fishing ship | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
 | Breach Light ship | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
-| ROD ship (drone carrier) | ROD drones | T4, first legendary | New drone module: once every drone has returned, the drones deploy again to the same area |
+| ROD ship (drone carrier) | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): once every drone has returned, the drones deploy again to the same area |
 
 None of the hulls exist yet. Until they do, each ship is a placeholder built on the vanilla Nebula hull (`nebula`, a civilian transport). Give each placeholder its own hull id, for example a `data/hulls/skins/*.skin` of `nebula` with its own `skinHullId` and name. Otherwise three Nebulas cannot be told apart, and the fleet check would not know which rig gets the second slot. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 
 ## Open questions
 
-1. **Name of the drone carrier's redeploy module.**
-2. **How T3 opens.** It starts once the Needle Sensor is built, but whether the Fisherman's direction to the wounded epic arrives as a message, as intel, or on a return visit is not decided.
-3. **Module combinations.** Two slots let one rig carry two modules, which has not been possible before. Undecided:
+1. **Module combinations.** Two slots let one rig carry two modules, which has not been possible before. Undecided:
    - how their effects stack;
    - whether any pairs must be refused, such as the single-use Explosive Head with another tip;
    - whether one module may sit in both slots. Today a module that fits both Drone and Harpoon can be fitted to both rigs at once.
-4. **Unnamed rumours.** What a legendary's entry shows after a rumour that gives no name.
-5. **The conclusion of "Hunting the legendary fish".**
+2. **Unnamed rumours.** What a legendary's entry shows after a rumour that gives no name.
+3. **The conclusion of "Hunting the legendary fish".**
 
 ## Suggested order
 
@@ -204,4 +202,4 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 3. Second equipment slots in the Outfitter, the Nebula placeholder hulls, and moving the Retrieval Head and Fanned Array out of the shop.
 4. T2 with the harpoon ship, then the Fisherman debrief, lore questions and the Needle Sensor follow-up.
 5. T3 and the Breach Light ship blueprint.
-6. The drone redeploy module, then T4, the ROD ship and the legendary-hunt intel.
+6. The Reployment Bays, then T4, the ROD ship and the legendary-hunt intel.
