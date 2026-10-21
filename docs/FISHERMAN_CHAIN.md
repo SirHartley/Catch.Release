@@ -82,6 +82,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - A quest-only minigame treasure, separate from the Salvage, Wreckage, Cache and Relic tiers.
 - Chance: 30% on each lamp-method catch in the target system while the quest is active.
 - Frustration gate: guaranteed on the 4th lamp catch, then on every 2nd catch after that until the player pulls it.
+- What counts: every minigame opened on a lamp-method, non-legendary fish in the target system. The chest only pays out on a won minigame, like all treasure.
 - The player still has to take it in the minigame like any treasure. A missed chest counts as not pulled.
 
 **Compass**
@@ -219,7 +220,6 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 The research for the implementation plan turned up these gaps in the design. Each has a suggested default that the plan assumes until decided:
 
-2. **What counts as a lamp catch for the golden chest's pity gate.** Suggested: every minigame opened on a lamp-method, non-legendary fish in the target system counts. The chest still only pays out on a won minigame, like all treasure.
 3. **T1 after a skipped tutorial.** Skipping has no last hand-in. Suggested: the Fisherman offers T1 on the next visit.
 4. **T2 failures other than the reset.** A failed catch, or an Explosive Head blast once the shield is down, also removes the epic. Suggested: both fail the hunt like a reset.
 5. **T2's 6,000 units.** Suggested: measured from the star's surface, as the existing legendary code measures; systems without a star (nebulae) are never chosen.
