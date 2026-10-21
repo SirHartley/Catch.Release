@@ -36,12 +36,37 @@ Not implemented. Each fishing ship belongs to one rig and carries one module for
   - While the ship is in the fleet, its module can be fitted in either slot.
 - **Ship leaves the fleet.** When the last ship of that kind leaves, the second slot is emptied at once. The ship's module is unfitted wherever it sits, because it is only available with the ship.
 - **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
+- **Two modules on one rig.**
+  - Effects apply in slot order: slot 1, then slot 2.
+  - No module takes up two slots, and one module cannot fill both slots of a rig.
+  - A rig's modules never block another rig's slots. A module that fits both the ROD and the Harpoon can still be fitted to both, as today.
+  - Modules with similar or opposing effects cannot share a rig. Two modules that change the same value count as similar. The pairs are listed under [Incompatible pairs](#incompatible-pairs).
+  - In the Outfitter, a module that conflicts with the one in the rig's other slot is greyed out for that slot and cannot be fitted there. Its hover names the conflicting module.
 - **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module, the Reployment Bays, is new.
 
 **Work**
 - Fitted state is one module per rig today (`TackleManager.getFitted()`, read through `TackleManager.get(Fit)`). It needs a second slot per rig, and every effect check must read both slots.
 - Fleet presence: look for a fleet or cargo callback before adding a fleet scan; see [CLAUDE.md](../CLAUDE.md#make-and-record-changes) on polling. A save loaded without the ship must still empty the second slot.
 - Removing a module from the shop: `stocked = false`, keeping the `Tackle` constant, as with the Breach Coupler.
+- Declare incompatibility on `Tackle`, for example as a shared exclusion group per effect, rather than as pairs in the Outfitter code, so a new module is checked against every other.
+
+### Incompatible pairs
+
+Every module was checked against the others that fit the same rig.
+
+| Rig | Pair | Why |
+|---|---|---|
+| ROD | Spool Governor + Inertial Damper | Both change how fast the catch window rises (`barLiftMult`). |
+| ROD | Salvage Trawl + Lifting Rig | Both raise the bycatch chance (`treasureChanceMult`). |
+| ROD | Holdfast Clamp + Barbed Head | Both work on catch progress: one slows its loss, the other speeds its gain. |
+| Harpoon | Explosive Head + Barbed Head, Sonar Head, Calibrated Grader or Shoring Head | The blast destroys the catch those tips improve. |
+| Lens Array | Needle Sensor + Neutrino Lens | Both point out hidden rare, epic and legendary patterns. |
+
+Every other pair is compatible. Two of them were checked specifically:
+- **Retrieval Head + Explosive Head:** the Retrieval Head returns harpoon charges and does nothing to the catch.
+- **Fanned Array + Tracking Gimbal:** one sets the beam's shape and sweep speed, the other pauses the sweep on a pattern. `Searchlight.acquire` already picks the best-lit pattern under a fan.
+
+Because no ship module is in a pair, the reset when a ship rejoins never meets a conflicting slot 1. The disabled Breach Coupler is not assessed; check it if it returns.
 
 ## T1: The treasure rumour
 
@@ -188,12 +213,8 @@ None of the hulls exist yet. Until they do, each ship is a placeholder built on 
 
 ## Open questions
 
-1. **Module combinations.** Two slots let one rig carry two modules, which has not been possible before. Undecided:
-   - how their effects stack;
-   - whether any pairs must be refused, such as the single-use Explosive Head with another tip;
-   - whether one module may sit in both slots. Today a module that fits both Drone and Harpoon can be fitted to both rigs at once.
-2. **Unnamed rumours.** What a legendary's entry shows after a rumour that gives no name.
-3. **The conclusion of "Hunting the legendary fish".**
+1. **Unnamed rumours.** What a legendary's entry shows after a rumour that gives no name.
+2. **The conclusion of "Hunting the legendary fish".**
 
 ## Suggested order
 
