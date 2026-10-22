@@ -27,6 +27,12 @@ public final class FishermanChain {
     public static final String T1_SYSTEM = "$catchreleaseChainT1System";
     public static final String T1_PITCH = "$catchreleaseChainT1Pitch";
     public static final String T1_PLACED = "$catchreleaseChainT1Placed";
+    public static final String T1_HAS_COMPASS = "$catchreleaseChainT1HasCompass";
+    public static final String T1_PULLED = "$catchreleaseChainT1Pulled";
+    public static final String T1_LOST_SOLD = "$catchreleaseChainT1LostSold";
+    public static final String T1_LOST_STORED = "$catchreleaseChainT1LostStored";
+    public static final String T1_LOST_GONE = "$catchreleaseChainT1LostGone";
+    public static final String T1_LOST_MARKET = "$catchreleaseChainT1LostMarket";
 
     public static class Saved implements Serializable {
 
@@ -39,6 +45,11 @@ public final class FishermanChain {
         // T1 lamp minigames in the target system that could have shown the golden chest, and whether it was taken
         public int chestMinigames;
         public boolean compassPulled;
+        // where the compass was last sold (free-transfer storage does not count), and the answer to "I lost it"
+        public String soldMarketId;
+        public String soldMarketName;
+        public TreasureRumour.Lost lost;
+        public String lostMarketName;
     }
 
     private FishermanChain() {
@@ -63,6 +74,11 @@ public final class FishermanChain {
         if (getStage() == Stage.NONE) setStage(Stage.T1_OFFERED);
     }
 
+    // Transient listeners for whichever quest is under way; called on load and when a quest starts.
+    public static void register() {
+        TreasureRumour.CompassWatcher.register();
+    }
+
     // Display values for one dialog; expiry 0 as every CatchReleaseCMD token.
     public static void writeTokens(MemoryAPI local) {
         Saved saved = get(false);
@@ -74,6 +90,14 @@ public final class FishermanChain {
         local.set(T1_SYSTEM, saved == null || saved.systemName == null ? "" : saved.systemName, 0);
         local.set(T1_PITCH, stage == Stage.T1_OFFERED && saved != null && !saved.pitched, 0);
         local.set(T1_PLACED, saved != null && saved.systemName != null, 0);
+        local.set(T1_HAS_COMPASS, stage == Stage.T1_ACTIVE && TreasureRumour.isCarried(), 0);
+        local.set(T1_PULLED, saved != null && saved.compassPulled, 0);
+
+        TreasureRumour.Lost lost = saved == null ? null : saved.lost;
+        local.set(T1_LOST_SOLD, lost == TreasureRumour.Lost.SOLD, 0);
+        local.set(T1_LOST_STORED, lost == TreasureRumour.Lost.STORED, 0);
+        local.set(T1_LOST_GONE, lost == TreasureRumour.Lost.GONE, 0);
+        local.set(T1_LOST_MARKET, saved == null || saved.lostMarketName == null ? "" : saved.lostMarketName, 0);
     }
 
     public static Saved get(boolean create) {

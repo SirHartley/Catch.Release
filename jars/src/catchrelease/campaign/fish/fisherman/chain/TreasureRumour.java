@@ -18,11 +18,15 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.econ.SubmarketAPI;
+import com.fs.starfarer.api.campaign.listeners.ColonyInteractionListener;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.ui.IntelUIAPI;
@@ -38,6 +42,13 @@ import java.util.Set;
 // T1: the treasure rumour. The Fisherman's compass comes up as a golden chest in one system's lamp catches.
 public final class TreasureRumour {
 
+    public enum Lost {
+
+        SOLD,
+        STORED,
+        GONE
+    }
+
     public static final String COMPASS = "catchrelease_compass";
 
     public static final String COMPASS_ICON = "graphics/catchrelease/icon/compass.png";
@@ -51,6 +62,55 @@ public final class TreasureRumour {
     public static final int CHEST_GUARANTEED_EVERY = 2;
 
     private TreasureRumour() {
+    }
+
+    // Records where the compass was sold, so "I lost it" can name the market. Registered only while T1 is active.
+    public static class CompassWatcher implements ColonyInteractionListener {
+
+        public static void register() {
+            unregister();
+            if (FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE)) {
+                Global.getSector().getListenerManager().addListener(new CompassWatcher(), true);
+            }
+        }
+
+        public static void unregister() {
+            Global.getSector().getListenerManager().removeListenerOfClass(CompassWatcher.class);
+        }
+
+        @Override
+        public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
+            FishermanChain.Saved saved = FishermanChain.get(false);
+            if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE)) return;
+
+            boolean sold = transaction.getSold() != null
+                    && transaction.getSold().getQuantity(CargoAPI.CargoItemType.SPECIAL, compass()) > 0f;
+            boolean bought = transaction.getBought() != null
+                    && transaction.getBought().getQuantity(CargoAPI.CargoItemType.SPECIAL, compass()) > 0f;
+            if (!sold && !bought) return;
+
+            boolean storage = transaction.getSubmarket() != null && transaction.getSubmarket().getPlugin() != null
+                    && transaction.getSubmarket().getPlugin().isFreeTransfer();
+            boolean sale = sold && !storage && transaction.getMarket() != null;
+
+            saved.soldMarketId = sale ? transaction.getMarket().getId() : null;
+            saved.soldMarketName = sale ? transaction.getMarket().getName() : null;
+            saved.lost = null;
+            saved.lostMarketName = null;
+            updateIntel();
+        }
+
+        @Override
+        public void reportPlayerOpenedMarket(MarketAPI market) {
+        }
+
+        @Override
+        public void reportPlayerClosedMarket(MarketAPI market) {
+        }
+
+        @Override
+        public void reportPlayerOpenedMarketAndCargoUpdated(MarketAPI market) {
+        }
     }
 
     // One intel for the whole of T1; its title and lines follow the chain stage, as FishingIntro.IntroIntel does.
@@ -101,6 +161,8 @@ public final class TreasureRumour {
                         Tackle.GLITTER_LENS.name);
             } else if (isReturning()) {
                 info.addPara("Return to the nearest fishing boat", text, pad);
+            } else if (isMislaid()) {
+                addMislaidLine(info, text, pad);
             } else {
                 info.addPara("Lamp catches in %s", pad, text, Misc.getHighlightColor(), getSystemName());
                 info.addPara("Take the golden chest when it comes up", text, 0f);
@@ -131,6 +193,13 @@ public final class TreasureRumour {
                 return;
             }
 
+            if (isMislaid()) {
+                info.addPara("The chest held a compass, but it is no longer in your cargo. The Fisherman is "
+                        + "expecting it back.", opad);
+                addBulletPoints(info, ListInfoMode.IN_DESC);
+                return;
+            }
+
             info.addPara("The Fisherman has lost a golden chest in %s and is sure it is there.", opad, h,
                     getSystemName());
             info.addPara("It can come up with any catch made under Breach Lights in that system, never from a "
@@ -149,6 +218,26 @@ public final class TreasureRumour {
             if (FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
 
             super.buttonPressConfirmed(buttonId, ui);
+        }
+
+        protected static boolean isMislaid() {
+            FishermanChain.Saved saved = FishermanChain.get(false);
+
+            return FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE) && saved != null && saved.compassPulled
+                    && !isCarried();
+        }
+
+        protected void addMislaidLine(TooltipMakerAPI info, Color text, float pad) {
+            FishermanChain.Saved saved = FishermanChain.get(false);
+            Color h = Misc.getHighlightColor();
+
+            if (saved.soldMarketName != null) {
+                info.addPara("Buy it back at %s", pad, text, h, saved.soldMarketName);
+            } else if (saved.lost == Lost.STORED && saved.lostMarketName != null) {
+                info.addPara("Fetch it from storage at %s", pad, text, h, saved.lostMarketName);
+            } else {
+                info.addPara("Find it, or tell the Fisherman it is lost", text, pad);
+            }
         }
 
         protected String getSystemName() {
@@ -184,7 +273,7 @@ public final class TreasureRumour {
 
         @Override
         public SectorEntityToken getMapLocation(SectorMapAPI map) {
-            if (!FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE) || isReturning()) return null;
+            if (!FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE) || isReturning() || isMislaid()) return null;
 
             FishermanChain.Saved saved = FishermanChain.get(false);
             StarSystemAPI system = saved == null ? null : FishRumors.findSystem(saved.systemId);
@@ -223,6 +312,7 @@ public final class TreasureRumour {
         if (!isCandidate(system) || FishRumors.publishHeld(system, FishRumors.Kind.LOOT) == null) return false;
 
         FishermanChain.setStage(FishermanChain.Stage.T1_ACTIVE);
+        CompassWatcher.register();
         FishIntelNotifications.queue(new CompassIntel(), text);
 
         return true;
@@ -238,6 +328,54 @@ public final class TreasureRumour {
         FishermanChain.Saved saved = FishermanChain.get(false);
 
         return saved == null ? null : FishRumors.findActive(saved.systemId, FishRumors.Kind.LOOT);
+    }
+
+    // "I lost it": a recorded sale names that market; otherwise every storage and colony submarket the player can
+    // open is searched once. GONE ends the quest as if the compass had come back.
+    public static Lost checkLost() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved == null) return null;
+
+        if (saved.soldMarketId != null) {
+            saved.lost = Lost.SOLD;
+            saved.lostMarketName = saved.soldMarketName;
+        } else {
+            MarketAPI stored = findStored();
+            saved.lost = stored == null ? Lost.GONE : Lost.STORED;
+            saved.lostMarketName = stored == null ? null : stored.getName();
+        }
+
+        return saved.lost;
+    }
+
+    protected static MarketAPI findStored() {
+        for (MarketAPI market : Global.getSector().getEconomy().getMarketsCopy()) {
+            if (!market.isPlayerOwned() && !Misc.playerHasStorageAccess(market)) continue;
+
+            for (SubmarketAPI submarket : market.getSubmarketsCopy()) {
+                if (submarket.getPlugin() == null || !submarket.getPlugin().isFreeTransfer()) continue;
+                if (submarket.getCargo().getQuantity(CargoAPI.CargoItemType.SPECIAL, compass()) > 0f) return market;
+            }
+        }
+
+        return null;
+    }
+
+    // Ends the compass errand, with or without the compass: T1 moves on to buying the lens.
+    public static boolean complete(TextPanelAPI text) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE)) return false;
+
+        CargoAPI cargo = getPlayerCargo();
+        if (cargo != null) cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, compass(), 1f);
+
+        saved.lost = null;
+        saved.lostMarketName = null;
+        CompassWatcher.unregister();
+        FishermanChain.setStage(FishermanChain.Stage.T1_LENS);
+        updateIntel();
+
+        return true;
     }
 
     // Any won or lost minigame on a non-legendary lamp catch in the target system counts toward the guarantee.

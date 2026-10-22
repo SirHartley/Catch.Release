@@ -246,6 +246,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return true;
             case "t1Accept":
                 return TreasureRumour.start(text(dialog));
+            case "t1LostCheck":
+                return TreasureRumour.checkLost() != null;
+            case "t1Complete":
+                return TreasureRumour.complete(text(dialog));
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);

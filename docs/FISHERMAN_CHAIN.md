@@ -263,7 +263,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 1.3 The quest-owned `LOOT` rumour in a nearby system. It replaces the graduation lead: `FishingIntro.finish` and `skip` stop calling `ensureTutorialLead()`. It starts the shared cooldown as that lead did.
 - [x] 1.4 The offer: "Heard of anywhere worth fishing?" after the last hand-in leads into T1, and after a skipped tutorial the Fisherman offers it on the next visit. Then the lost-compass intel.
 - [x] 1.5 The golden chest: a flagged `MinigameTreasure` whose "chest due" is decided in `FishingMinigameDialogPlugin.init`, with the pity counter updated in `resolve()` and the compass granted on a win.
-- [ ] 1.6 The lost-compass listener (`ColonyInteractionListener`, registered as `RatingBarEvent.VisitCounter` does) and the "I lost it" branches, including the storage search.
+- [x] 1.6 The lost-compass listener (`ColonyInteractionListener`, registered as `RatingBarEvent.VisitCounter` does) and the "I lost it" branches, including the storage search.
 - [ ] 1.7 Hand-in and rewards: the Glitter Lens schematic, credits, and the reward specimens from a new helper that builds a `FishCatch` satisfying a `FishRequirement`. If no payment can be generated, only credits are given.
 - [ ] 1.8 The follow-up: buy the Glitter Lens, checked when the Outfitter closes; then the rumour is extended by 60 days.
 - [ ] 1.9 Text through the Editor process, then the dialogue and rules checks.
