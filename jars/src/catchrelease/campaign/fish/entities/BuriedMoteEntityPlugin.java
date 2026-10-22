@@ -23,6 +23,13 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
     public static final String BURIED_TAG = "catchrelease_buried_mote";
     public static final String CLAIM_PREFIX = "$catchrelease_";
 
+    // A quest mote that circles an entity instead of wandering. The keys carry the claim prefix, so the surfaced fish
+    // inherits them; only the buried stage reads them.
+    public static final String CIRCLE_ANCHOR_KEY = "$catchrelease_circleAnchor";
+    public static final String CIRCLE_RADIUS_KEY = "$catchrelease_circleRadius";
+    // how far the circling drift strays from the circle and back, in units
+    public static final float CIRCLE_WEAVE = 60f;
+
     protected String fishId;
     protected float heading = 0f;
     protected float headingLeft = 0f;
@@ -135,9 +142,42 @@ public class BuriedMoteEntityPlugin extends BaseCustomEntityPlugin {
 
         float step = FishConstants.BURIED_SPEED * getSpeedMult() * amount;
         if (FalseDawnOrbit.advance(entity, fishId, step, time)) return;
+        if (advanceCircle(step)) return;
 
         Vector2f next = MathUtils.getPointOnCircumference(entity.getLocation(), step, heading + weave);
         LegendaryStarAvoidance.move(entity, getFishSpec(), next, 0f);
+    }
+
+    public static void setCircle(SectorEntityToken mote, SectorEntityToken anchor, float radius) {
+        MemoryAPI memory = mote.getMemoryWithoutUpdate();
+        memory.set(CIRCLE_ANCHOR_KEY, anchor);
+        memory.set(CIRCLE_RADIUS_KEY, radius);
+    }
+
+    // Moves round the anchor at the buried speed, easing back to the circle when off it, with a slow in-and-out
+    // weave. The heading follows the tangent, so a harpooned fish surfaces swimming the way it was going.
+    protected boolean advanceCircle(float step) {
+        MemoryAPI memory = entity.getMemoryWithoutUpdate();
+        if (!(memory.get(CIRCLE_ANCHOR_KEY) instanceof SectorEntityToken anchor)) return false;
+        if (anchor.isExpired() || anchor.getContainingLocation() != entity.getContainingLocation()) return false;
+
+        float radius = memory.getFloat(CIRCLE_RADIUS_KEY);
+        if (radius <= 0f) return false;
+
+        Vector2f center = anchor.getLocation();
+        float distance = Math.max(1f, Misc.getDistance(center, entity.getLocation()));
+        float direction = entity.getId() == null || (entity.getId().hashCode() & 1) == 0 ? 1f : -1f;
+
+        float wanted = radius + (float) Math.sin(time * 0.2f * sineVariance) * CIRCLE_WEAVE;
+        float nextDistance = distance + MathUtils.clamp(wanted - distance, -step, step);
+        float angle = Misc.getAngleInDegrees(center, entity.getLocation())
+                + direction * (float) Math.toDegrees(step / distance);
+
+        heading = Misc.normalizeAngle(angle + 90f * direction);
+        LegendaryStarAvoidance.move(entity, getFishSpec(),
+                MathUtils.getPointOnCircumference(center, nextDistance, angle), 0f);
+
+        return true;
     }
 
     protected void pickHeadingTime() {

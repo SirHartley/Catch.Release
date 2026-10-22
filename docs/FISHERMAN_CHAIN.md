@@ -281,7 +281,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [ ] 3.10 Text through the Editor process, then the dialogue and rules checks.
 
 **Stage 4: T3, the wounded epic.**
-- [ ] 4.1 The circling heading rule on the quest's buried mote (`BuriedMoteEntityPlugin.advanceFish`).
+- [x] 4.1 The circling heading rule on the quest's buried mote (`BuriedMoteEntityPlugin.advanceFish`).
 - [ ] 4.2 The awake 0.5 multiplier in `EpicHunt.getSpeedMult`, carried to the surfaced fish by `unearth()`.
 - [ ] 4.3 Spawning at the planet, plus respawn on reset and on arrival in the system, with the campaign message.
 - [ ] 4.4 The T3 offer in the Needle Sensor return conversation, and its intel.
