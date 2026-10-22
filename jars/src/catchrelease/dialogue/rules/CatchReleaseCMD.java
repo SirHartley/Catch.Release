@@ -19,6 +19,7 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
+import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.camp.CampedSpotJob;
 import catchrelease.campaign.fish.legendary.KantaTribute;
@@ -735,6 +736,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         setRumorTokens(local, FishRumors.getActive());
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
+        FishermanChain.writeTokens(local);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
 
