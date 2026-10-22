@@ -367,7 +367,13 @@ public final class CaptainsFleet {
 
         StarSystemAPI system = pickSystem();
         FishSpec species = system == null ? null : pickSpecies(system);
-        if (species == null) return false;
+        if (species == null) {
+            // nothing qualifies any more: the offer must not name the old system
+            saved.t2SystemId = null;
+            saved.t2SystemName = null;
+            saved.t2SpeciesId = null;
+            return false;
+        }
 
         saved.t2SystemId = system.getId();
         saved.t2SystemName = system.getNameWithNoType();
