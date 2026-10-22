@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -27,6 +28,8 @@ public class ShopSchematics {
     public static boolean has(Tackle tackle) {
         if (tackle == null) return false;
         if (tackle == Tackle.NONE || TackleManager.isOwned(tackle)) return true;
+        // a ship module comes with its ship and needs no schematic
+        if (FishingShips.isShipModuleAvailable(tackle)) return true;
 
         return getKnown().contains(getKey(tackle));
     }

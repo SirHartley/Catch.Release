@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.shop;
 import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -171,6 +172,11 @@ public class ShopEntry {
         return kind == Kind.TACKLE && TackleManager.isOwned(tackle);
     }
 
+    // Fitted for free while its ship is in the fleet, never bought or owned. An owned copy is an ordinary module.
+    public boolean isShipModule() {
+        return kind == Kind.TACKLE && !isOwned() && FishingShips.isShipModuleAvailable(tackle);
+    }
+
     public boolean isLocked() {
         if (!isUpgrade()) return false;
 
@@ -185,7 +191,7 @@ public class ShopEntry {
     }
 
     public ShopPricing.Price getPrice() {
-        if (isOwned()) return null;
+        if (isOwned() || isShipModule()) return null;
 
         // a curio was paid for in a bar; the shop is only where the switch on it lives
         if (isCurio()) return null;
@@ -287,7 +293,7 @@ public class ShopEntry {
         }
 
         // own before fit - ownership is what was paid for; the slot can be swapped freely afterward
-        TackleManager.own(tackle);
+        if (!isShipModule()) TackleManager.own(tackle);
         TackleManager.fit(rig, tackle);
 
         if (tackle == Tackle.NEUTRINO_LENS) {

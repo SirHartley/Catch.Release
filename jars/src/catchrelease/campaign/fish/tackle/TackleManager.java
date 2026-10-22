@@ -103,7 +103,7 @@ public class TackleManager {
         for (Tackle tackle : Tackle.values()) {
             if (!tackle.fits(rig)) continue;
             if (!isUnlocked(tackle) && !isOwned(tackle)) continue;
-            if (!tackle.stocked && !isOwned(tackle)) continue;
+            if (!tackle.stocked && !isOwned(tackle) && !FishingShips.isShipModuleAvailable(tackle)) continue;
 
             out.add(tackle);
         }

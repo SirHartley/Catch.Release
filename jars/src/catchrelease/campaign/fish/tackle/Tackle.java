@@ -99,11 +99,14 @@ public enum Tackle {
             coherenceBonus = 0.25f;
         }
     },
+    // Ship modules: never sold or awarded, available only while their fishing ship is in the fleet (FishingShips).
     RETRIEVAL_HEAD("Retrieval Head", Fit.HARPOON,
             "Restores a spent harpoon charge immediately when a shot hits a valid pattern, up to"
-                    + " the rig's capacity. A miss still spends the charge.") {
+                    + " the rig's capacity. A miss still spends the charge, and so does an Explosive Head's"
+                    + " blast.") {
         {
             retrievesCharge = true;
+            stocked = false;
         }
     },
     EXPLOSIVE_HEAD("Explosive Head", Fit.HARPOON,
@@ -140,6 +143,7 @@ public enum Tackle {
                     + " more slowly, with weaker exposure at the edges and farther from the lamp.") {
         {
             fanBeam = true;
+            stocked = false;
         }
     };
 

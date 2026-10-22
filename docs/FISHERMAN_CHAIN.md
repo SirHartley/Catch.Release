@@ -272,7 +272,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 2.1 Three placeholder hulls, each a full copy of the vanilla `nebula` under its own hull id and name.
 - [x] 2.2 `FishingShips`: the hull → rig → module registry and `reconcile()`, covering once per rig, emptying on leave and resetting on rejoin.
 - [x] 2.3 Fleet presence: market, battle and recovery listeners, `onGameLoad`, direct calls from quest grants, and the documented fallback check in the rig abilities' `advance`.
-- [ ] 2.4 Ship modules: Retrieval Head and Fanned Array set to `stocked = false`. Availability comes from ship presence, never ownership, and has no price.
+- [x] 2.4 Ship modules: Retrieval Head and Fanned Array set to `stocked = false`. Availability comes from ship presence, never ownership, and has no price.
 - [ ] 2.5 Outfitter: second slot per rig, a disabled row state, hovers naming the conflict or where a module is fitted, undo per slot, and the "one slot" text. UI scoping goes to the UI subagent.
 - [ ] 2.6 A check covering the reconcile rules and the incompatibility matrix.
 
@@ -309,4 +309,4 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [ ] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
 - [ ] 5.7 Text through the Editor process, then the dialogue and rules checks.
 
-**Behaviour to keep in mind.** With the Retrieval Head and the Explosive Head both fitted, a blast does not refund the harpoon charge, and the head is consumed. The Retrieval Head's shop description does not mention this yet; add it with the Stage 2 Outfitter text. The Tracking Gimbal locks onto quest motes like any buried pattern.
+**Behaviour to keep in mind.** With the Retrieval Head and the Explosive Head both fitted, a blast does not refund the harpoon charge, and the head is consumed. The Retrieval Head's description says so. The Tracking Gimbal locks onto quest motes like any buried pattern.
