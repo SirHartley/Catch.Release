@@ -23,6 +23,8 @@ public final class EpicHunt {
     public static final float RESET_RANGE = 3000f;
     public static final float DRIFT_OFF_DISTANCE = 500f;
     public static final float ACTIVE_WANDER_MULT = 1.2f;
+    // A per-fish multiplier on the awake speed, set on the buried mote; the claim prefix carries it through unearth.
+    public static final String AWAKE_SPEED_KEY = "$catchrelease_epicAwakeSpeed";
 
     // Awake epics never fade at their swim target, so the ones left behind when the player departs are removed.
     public static class DepartureCleanup implements CurrentLocationChangedListener {
@@ -88,7 +90,14 @@ public final class EpicHunt {
     public static float getSpeedMult(FishEntityPlugin fish) {
         if (!applies(fish)) return 1f;
 
-        return fish.isEpicActive() ? 1f : LegendaryShields.LAZY_SPEED_MULT;
+        return fish.isEpicActive() ? getAwakeSpeedMult(fish) : LegendaryShields.LAZY_SPEED_MULT;
+    }
+
+    protected static float getAwakeSpeedMult(FishEntityPlugin fish) {
+        SectorEntityToken mote = fish.getMote();
+        if (mote == null || !mote.getMemoryWithoutUpdate().contains(AWAKE_SPEED_KEY)) return 1f;
+
+        return mote.getMemoryWithoutUpdate().getFloat(AWAKE_SPEED_KEY);
     }
 
     // Wander swings the heading on a clock, not per distance travelled: at drift speed the full swing would curl the
