@@ -431,6 +431,21 @@ public class Searchlight implements EveryFrameScript {
         return currentRenderLoc;
     }
 
+    // Where the unlocked sweep will put the beam's centre after the given seconds. It ignores the turn at the arc's
+    // end and any lock; over a lead of a few seconds the beam still passes over the point.
+    public Vector2f getPointAhead(float seconds) {
+        if (arc == null) return new Vector2f(currentRenderLoc);
+
+        float speed = UpgradeManager.getValue(StatIds.SEARCHLIGHT_SPEED, 30f);
+        if (isFanned()) speed *= FAN_SWEEP_MULT;
+
+        float angle = Misc.normalizeAngle(baseArcAngle
+                + arc.convertToDegreesPerSecond(speed) * seconds * travelDirection);
+        float offset = (float) Math.sin((oscillationTime + seconds) * OSCILLATION_TIME_MULT) * SINE_CADENCE;
+
+        return MathUtils.getPointOnCircumference(arc.getPointForAngle(angle), offset, angle + 90f);
+    }
+
     public Vector2f getOrigin() {
         return arc == null ? currentRenderLoc : arc.center;
     }

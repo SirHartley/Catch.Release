@@ -281,7 +281,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 3.2 System and species selection: zero markets and colonies, a star, nearby, and an epic species in range.
 - [x] 3.3 The T2 hub mission: spawn and hold the fleet, the captain with his portrait, the map marker and the comms rows.
 - [x] 3.4 The lamp timer in `SearchlightAbilityPlugin.advance`: 15 continuous seconds within 6,000 units of the star's surface.
-- [ ] 3.5 A `Searchlight` accessor for a point ahead of the sweep, then placing the quest's buried epic there.
+- [x] 3.5 A `Searchlight` accessor for a point ahead of the sweep, then placing the quest's buried epic there.
 - [ ] 3.6 The hunt through the Stage 0 hooks: a catch, or a failure on reset, failed catch or blast with a notification back to the captain.
 - [ ] 3.7 Outcomes: the harpoon ship through `FishReward.ship` for both, plus the extra rewards on a catch.
 - [ ] 3.8 The Fisherman debrief, its lore questions and the Needle Sensor schematic.

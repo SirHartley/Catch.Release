@@ -14,6 +14,7 @@ import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
@@ -70,6 +71,8 @@ public final class CaptainsFleet {
     public static final float LAMP_SECONDS = 15f;
     // measured from the star's surface, not its centre
     public static final float LAMP_RANGE = 6000f;
+    // how far ahead of the sweep the epic is placed, so the beam reaches it rather than starting on top of it
+    public static final float LEAD_SECONDS = 2f;
 
     private CaptainsFleet() {
     }
@@ -108,7 +111,7 @@ public final class CaptainsFleet {
 
             seconds = 0f;
             Searchlight beam = lamps.getFirstLitBeam();
-            if (beam != null) placeEpic(beam.getRenderLoc());
+            if (beam != null) placeEpic(beam.getPointAhead(LEAD_SECONDS));
         }
 
         protected boolean isCounting(SearchlightAbilityPlugin lamps) {
@@ -313,9 +316,10 @@ public final class CaptainsFleet {
         StarSystemAPI system = getSystem();
         if (saved == null || system == null || at == null) return;
 
+        Vector2f clear = LegendaryStarAvoidance.place(system, at, 0f);
         SectorEntityToken mote = system.addCustomEntity(Misc.genUID(), null, FishConstants.BURIED_ENTITY_ID, null,
                 new BuriedMoteEntityPlugin.Params(saved.t2SpeciesId));
-        mote.setLocation(at.x, at.y);
+        mote.setLocation(clear.x, clear.y);
         QuestPond.markPlanted(mote, PLANTER);
 
         FishermanChain.setStage(FishermanChain.Stage.T2_HUNT);
