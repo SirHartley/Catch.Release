@@ -27,8 +27,14 @@ public final class FishermanChain {
         T2_REPORT,
         T2_DEBRIEF,
         T2_SENSOR,
-        // T3 starts in the next Fisherman conversation
-        T2_SENSOR_BOUGHT
+        // T3 is offered from here
+        T2_SENSOR_BOUGHT,
+        T3_HUNT,
+        T3_CAUGHT,
+        T3_BUILD,
+        T3_BUILT,
+        // T4 is offered from here
+        T3_DONE
     }
 
     public static final String KEY = "$catchrelease_fisherChain";
@@ -85,6 +91,12 @@ public final class FishermanChain {
         // the point the fleet circles; removed with the fleet
         public SectorEntityToken t2Hold;
         public boolean t2Caught;
+
+        public String t3SystemId;
+        public String t3SystemName;
+        public String t3PlanetId;
+        public String t3PlanetName;
+        public String t3SpeciesId;
     }
 
     private FishermanChain() {
@@ -118,6 +130,7 @@ public final class FishermanChain {
     public static void register() {
         TreasureRumour.CompassWatcher.register();
         CaptainsFleet.register();
+        WoundedEpic.register();
     }
 
     // Display values for one dialog; expiry 0 as every CatchReleaseCMD token.

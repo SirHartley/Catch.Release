@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.config.Setting;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.jobs.camp.CampedSpot;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
@@ -185,6 +186,19 @@ public class QuestPond {
 
             Misc.fadeAndExpire(mote, 1f);
         }
+    }
+
+    // Surfaced and buried motes planted with this id; sweep and clearMotes only reach the surfaced ones.
+    public static List<SectorEntityToken> getPlanted(LocationAPI location, String jobId) {
+        List<SectorEntityToken> planted = new ArrayList<>();
+        if (location == null || jobId == null) return planted;
+
+        for (String tag : new String[]{FishEntityPlugin.MOTE_TAG, BuriedMoteEntityPlugin.BURIED_TAG}) {
+            for (SectorEntityToken mote : location.getEntitiesWithTag(tag)) {
+                if (!mote.isExpired() && jobId.equals(getPlanter(mote))) planted.add(mote);
+            }
+        }
+        return planted;
     }
 
     public static String getPlanter(SectorEntityToken mote) {
