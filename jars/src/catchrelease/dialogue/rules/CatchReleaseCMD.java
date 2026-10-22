@@ -22,6 +22,7 @@ import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
 import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.fisherman.chain.SensorBuild;
+import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.camp.CampedSpotJob;
@@ -270,6 +271,15 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return CaptainsFleet.complete(text(dialog));
             case "t2Debrief":
                 return SensorBuild.give(text(dialog));
+            case "t3Prepare":
+                return WoundedEpic.prepareOffer();
+            case "t3Accept":
+                return WoundedEpic.start(text(dialog));
+            case "t3Complete":
+                return WoundedEpic.complete(text(dialog));
+            case "t3Done":
+                WoundedEpic.finish();
+                return true;
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);

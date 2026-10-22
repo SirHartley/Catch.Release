@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.ships;
 
+import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -127,7 +128,18 @@ public final class FishingShips {
         Global.getSector().removeTransientScriptsOfClass(Watcher.class);
         Global.getSector().addTransientScript(new Watcher());
 
+        registerVariants();
         reconcile();
+    }
+
+    // Colony custom production builds a hull from its variant list (CoreScript.doCustomProduction). A hull with no
+    // listed variant gets the empty _Hull added on its first order, which is charged but builds nothing. Settings
+    // data is rebuilt on every launch, so this runs on every load.
+    protected static void registerVariants() {
+        for (Ship ship : Ship.values()) {
+            List<String> variants = Global.getSettings().getHullIdToVariantListMap().get(ship.hullId);
+            if (variants.isEmpty()) variants.add(ship.hullId + "_Hull");
+        }
     }
 
     public static boolean hasSecondSlot(Tackle.Fit rig) {
@@ -174,6 +186,8 @@ public final class FishingShips {
                 leave(ship);
             }
         }
+
+        WoundedEpic.checkBuilt();
     }
 
     // The second slot starts with the ship's module, never with what was fitted before the ship left. A module the

@@ -167,10 +167,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Gist: "Rumours about the stranger fish are worth following once your gear is very good." He does not name legendaries, so T4 stays vague.
 - Epics are not unique, but they are rare enough that they might as well be.
 
-**Work**
-- Circling: a heading rule for the quest's buried mote in `BuriedMoteEntityPlugin`, which today wanders on random headings. Only the buried stage circles, so the surfaced fish needs no route. Do not use `orbitAnchor`: it marks surfaced shield escorts, which `NeedleSensor.isEligible` and `EpicHunt.applies` exclude.
-- Slower movement: a per-fish multiplier of 0.5 on top of `EpicHunt`'s awake speed. The buried mote carries it, and `unearth()` passes it to the surfaced fish along with the quest claim.
-- Respawn: on the quest fish's reset, expire it and spawn a fresh buried, circling mote at the planet.
+**Work.** Implemented in Stage 4 (`WoundedEpic`, `BuriedMoteEntityPlugin` circling, `EpicHunt.AWAKE_SPEED_KEY`); see [ARCHITECTURE.md](ARCHITECTURE.md). Any hunt that does not land the epic returns it to the planet, so T3 cannot fail.
 
 ## T4: Listen for rumours
 
@@ -230,7 +227,7 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 | Hull ids | Placeholder hulls `catchrelease_harpoon_ship`, `catchrelease_lamp_ship`, `catchrelease_rod_ship` | Added; see [Ships](#ships). A D-modded ship becomes `<id>_default_D`, so match `spec.isDefaultDHull() ? spec.getDParentHullId() : spec.getHullId()`. |
 | Outfitter | `FishShopDialog`, `ShopSlotPlugin`, `ShopRowPlugin`, `ShopEntry`, `ShopDetailHeaderPlugin` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md) and [UI.md](UI.md#outfitter-second-slot). |
 | Quest motes | `BuriedMoteEntityPlugin`, `BuriedMoteSpawner` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
-| Epic hooks | `QuestEpicListener`, `EpicHunt` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). Still to add: a per-fish awake speed multiplier saved under a `$catchrelease_` memory key, which `unearth()` already copies from buried mote to surfaced fish. |
+| Epic hooks | `QuestEpicListener`, `EpicHunt` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Ship rewards | `FishReward.Ship` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Golden chest | `FishingMinigameDialogPlugin`, `FishingMinigame`, `TreasureRoller` | `init` decides "chest due" from chain state, the system and `CatchImplement.BREACH_LAMP`, as `FishingIntro.applyCatchTargetProtection` does. The chest is a flagged `MinigameTreasure`, not a new `TreasureRarity`, so `rollRarity` never draws it. It is granted on a win and counted in `resolve()`. |
 | Rumours | `FishRumors` | T1's quest-owned `LOOT` rumour takes the graduation lead's place, including starting the shared 30-day cooldown as that lead does. The chain extends its `duration`. `publish` is the single choke point where T4 records told names. |
@@ -281,13 +278,13 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [ ] 3.10 Text through the Editor process, then the dialogue and rules checks.
 
 **Stage 4: T3, the wounded epic.**
-- [ ] 4.1 The circling heading rule on the quest's buried mote (`BuriedMoteEntityPlugin.advanceFish`).
-- [ ] 4.2 The awake 0.5 multiplier in `EpicHunt.getSpeedMult`, carried to the surfaced fish by `unearth()`.
-- [ ] 4.3 Spawning at the planet, plus respawn on reset and on arrival in the system, with the campaign message.
-- [ ] 4.4 The T3 offer in the Needle Sensor return conversation, and its intel.
-- [ ] 4.5 Hand-in: the Breach Light ship blueprint and range data on an epic.
-- [ ] 4.6 The build follow-up, completed through `FishingShips.reconcile()`.
-- [ ] 4.7 The closing conversation; text through the Editor process, then the dialogue and rules checks.
+- [x] 4.1 The circling heading rule on the quest's buried mote (`BuriedMoteEntityPlugin.advanceFish`).
+- [x] 4.2 The awake 0.5 multiplier in `EpicHunt.getSpeedMult`, carried to the surfaced fish by `unearth()`.
+- [x] 4.3 Spawning at the planet, plus respawn on reset and on arrival in the system, with the campaign message.
+- [x] 4.4 The T3 offer in the Needle Sensor return conversation, and its intel.
+- [x] 4.5 Hand-in: the Breach Light ship blueprint and range data on an epic.
+- [x] 4.6 The build follow-up, completed through `FishingShips.reconcile()`.
+- [ ] 4.7 The closing conversation; text through the Editor process, then the dialogue and rules checks. The conversation and checks are done; the Editor pass is pending.
 
 **Stage 5: T4 and the legendary hunt.**
 - [ ] 5.1 Reployment Bays:

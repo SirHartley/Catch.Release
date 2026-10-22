@@ -2758,6 +2758,44 @@ CatchReleaseCMD t2Debrief","A deckhand brings up a data chip and passes it acros
 
 ""Needle Sensor. Fit it to your lights and leave them off, and it'll tell you where the rarer patterns are sitting. The Outfitter can build it. Come back and see me once you have it. I've something I'd like you to look at.""",catchrelease_fisherBack:Continue,
 ,,,,,,
+# fisherman chain T3: the wounded epic,,,,,,
+catchrelease_fisherOptT3,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT3Offer",SetOptionColor catchrelease_t3Ask highlight,,"36:catchrelease_t3Ask:""You said you had something for me to look at.""",
+catchrelease_t3Ask,DialogOptionSelected,$option == catchrelease_t3Ask,"CatchReleaseCMD t3Prepare
+CatchReleaseCMD tokens
+FireBest CatchReleaseT3Offer",,,
+catchrelease_t3Offer,CatchReleaseT3Offer,"$catchreleaseChainT3Offer
+$catchreleaseChainT3Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT3Species $catchreleaseChainT3System $catchreleaseChainT3Planet ""Needle Sensor"" $catchreleaseChainT3Planet ""blueprint for a lamp ship"" ""range data on another epic""","""I did. There's a $catchreleaseChainT3Species in $catchreleaseChainT3System that took a bad hit a while back. It has kept close to $catchreleaseChainT3Planet since, going round about a thousand out while it mends.""
+
+""Switch your lights off when you get there and let the Needle Sensor find it. Then light it up and put a harpoon in it. It's slower than it ought to be. Don't let it get far ahead of you, though, or it'll go straight back to $catchreleaseChainT3Planet.""
+
+""Land it and come and tell me. There's a blueprint for a lamp ship in it for you, and range data on another epic. Take your time.""","catchrelease_t3Accept:""I'll find it.""
+catchrelease_t3Decline:""Not right now.""",
+catchrelease_t3OfferNone,CatchReleaseT3Offer,,,"""Not yet. I'll need to look into it again. Ask me later.""",catchrelease_fisherBack:Continue,
+catchrelease_t3Accept,DialogOptionSelected,$option == catchrelease_t3Accept,"CatchReleaseCMD t3Accept
+CatchReleaseCMD tokens
+FireBest CatchReleaseT3Accepted",,,
+catchrelease_t3Accepted,CatchReleaseT3Accepted,$catchreleaseChainT3Hunt,,"""Good. Keep your lights off until the sensor has found it.""",catchrelease_fisherBack:Continue,
+catchrelease_t3AcceptFailed,CatchReleaseT3Accepted,,,"""Hm. It's moved on from there. Ask me again later and I'll see where it went.""",catchrelease_fisherBack:Continue,
+catchrelease_t3Decline,DialogOptionSelected,$option == catchrelease_t3Decline,,"""It'll keep. It isn't going far.""",catchrelease_fisherBack:Continue,
+catchrelease_fisherOptT3HandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT3Caught",SetOptionColor catchrelease_t3HandIn highlight,,"36:catchrelease_t3HandIn:""I landed your wounded epic.""",
+catchrelease_t3HandIn,DialogOptionSelected,$option == catchrelease_t3HandIn,"CatchReleaseCMD highlightFishText ""lamp ship"" ""second lens array"" ""range data""
+CatchReleaseCMD t3Complete","""Did you, now? Good work. That one would have kept a lesser crew busy for months.""
+
+He sends a deckhand below for two chips and hands them across himself.
+
+""The first is a blueprint for a lamp ship. Bigger lights, and room for a second lens array. You'll have to find someone who can build it; I don't run a yard. The other is range data. Somewhere to go next.""",catchrelease_fisherBack:Continue,
+catchrelease_fisherOptT3Built,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT3Built",SetOptionColor catchrelease_t3Built highlight,,"36:catchrelease_t3Built:""The lamp ship's built.""",
+catchrelease_t3Built,DialogOptionSelected,$option == catchrelease_t3Built,CatchReleaseCMD t3Done,"The Fisherman looks the ship over on his display for longer than he needs to.
+
+""She'll do. Put the fan array on her lights and your lamps will cover a good deal more ground.""
+
+""You've landed an epic now. There are others out there like it, but not many. You'll go a long while between them, and some crews never see one.""
+
+""There are stranger things than epics, too. Talk gets round about them, and most of it is nonsense. Once your gear is good, very good, it's worth following anyway.""",catchrelease_fisherBack:Continue,
+,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,
 catchrelease_fisherOptAsk,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher

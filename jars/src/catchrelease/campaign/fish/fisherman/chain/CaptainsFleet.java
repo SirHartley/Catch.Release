@@ -507,13 +507,7 @@ public final class CaptainsFleet {
     }
 
     protected static List<SectorEntityToken> getEpics(StarSystemAPI system) {
-        List<SectorEntityToken> epics = new ArrayList<>();
-        for (String tag : new String[]{FishEntityPlugin.MOTE_TAG, BuriedMoteEntityPlugin.BURIED_TAG}) {
-            for (SectorEntityToken mote : system.getEntitiesWithTag(tag)) {
-                if (!mote.isExpired() && PLANTER.equals(QuestPond.getPlanter(mote))) epics.add(mote);
-            }
-        }
-        return epics;
+        return QuestPond.getPlanted(system, PLANTER);
     }
 
     // The captain's epic, buried and quest-marked so spawners, culls and Lantern Jack leave it alone.
