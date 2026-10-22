@@ -67,6 +67,13 @@ public final class FishermanChain {
     public static final String T2_LANDED = "$catchreleaseChainT2Landed";
     public static final String T2_HAS_SENSOR = "$catchreleaseChainT2HasSensor";
 
+    public static final String T3_OFFER = "$catchreleaseChainT3Offer";
+    public static final String T3_PLACED = "$catchreleaseChainT3Placed";
+    public static final String T3_SYSTEM = "$catchreleaseChainT3System";
+    public static final String T3_PLANET = "$catchreleaseChainT3Planet";
+    public static final String T3_SPECIES = "$catchreleaseChainT3Species";
+    public static final String T3_HUNT = "$catchreleaseChainT3Hunt";
+
     public static class Saved implements Serializable {
 
         public Stage stage = Stage.NONE;
@@ -166,6 +173,13 @@ public final class FishermanChain {
         local.set(T2_DEBRIEF, stage == Stage.T2_DEBRIEF, 0);
         local.set(T2_LANDED, stage == Stage.T2_DEBRIEF && saved != null && saved.t2Caught, 0);
         local.set(T2_HAS_SENSOR, SensorBuild.isOwned(), 0);
+
+        local.set(T3_OFFER, stage == Stage.T2_SENSOR_BOUGHT, 0);
+        local.set(T3_PLACED, saved != null && saved.t3PlanetName != null, 0);
+        local.set(T3_SYSTEM, saved == null || saved.t3SystemName == null ? "" : saved.t3SystemName, 0);
+        local.set(T3_PLANET, saved == null || saved.t3PlanetName == null ? "" : saved.t3PlanetName, 0);
+        local.set(T3_SPECIES, WoundedEpic.getSpeciesName(), 0);
+        local.set(T3_HUNT, stage == Stage.T3_HUNT, 0);
     }
 
     public static Saved get(boolean create) {

@@ -2,27 +2,44 @@ package catchrelease.campaign.fish.fisherman.chain;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.fisherman.FishRumors;
+import catchrelease.campaign.fish.fisherman.FishermanConstants;
+import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
+import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.campaign.fish.legendary.QuestEpicListener;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.TextPanelAPI;
+import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
+import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
+import com.fs.starfarer.api.ui.IntelUIAPI;
+import com.fs.starfarer.api.ui.SectorMapAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
+
+import java.awt.Color;
+import java.util.Set;
 
 // T3: the wounded epic. It circles a planet while buried and hunts at half speed once woken; any hunt that does not
 // land it sends it back to the planet, so the quest cannot be lost.
@@ -83,6 +100,142 @@ public final class WoundedEpic {
         }
     }
 
+    // One intel for all of T3; its title, lines and map target follow the stage.
+    public static class WoundedIntel extends BaseIntelPlugin {
+
+        protected static boolean isReturning() {
+            return FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT);
+        }
+
+        @Override
+        public boolean shouldRemoveIntel() {
+            if (isEnded()) return true;
+            if (!isHunting() && !isReturning()) endImmediately();
+
+            return isEnded();
+        }
+
+        @Override
+        public String getName() {
+            return isReturning() ? "The wounded epic: report to the Fisherman" : "The wounded epic";
+        }
+
+        @Override
+        public String getSmallDescriptionTitle() {
+            return getName();
+        }
+
+        @Override
+        public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
+            info.addPara(getName(), getTitleColor(mode), 0f);
+
+            addBulletPoints(info, mode);
+        }
+
+        @Override
+        protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+            Color text = getBulletColorForMode(mode);
+            Color h = Misc.getHighlightColor();
+            float pad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+
+            bullet(info);
+            if (isReturning()) {
+                info.addPara("Return to the nearest fishing boat", text, pad);
+            } else {
+                info.addPara("Find the %s circling %s in %s", pad, text, h, getSpeciesName(), getPlanetName(),
+                        getSystemName()).setHighlightColors(FishRarity.EPIC.color, h, h);
+                info.addPara("The %s finds it while the Breach Lights are off", 0f, text, h,
+                        Tackle.NEEDLE_SENSOR.name);
+                info.addPara("Harpoon it and land it; if you get more than %s from it, it returns to %s", 0f, text,
+                        h, Misc.getWithDGS(EpicHunt.RESET_RANGE) + " units", getPlanetName());
+            }
+            unindent(info);
+        }
+
+        @Override
+        public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
+            float opad = 10f;
+            Color h = Misc.getHighlightColor();
+            FactionAPI faction = Global.getSector().getFaction(FishermanConstants.FACTION);
+
+            info.addImages(width, 128, opad, opad, FishermanIdentity.getPortrait(0f), faction.getCrest());
+
+            if (isReturning()) {
+                info.addPara("You landed the wounded %s. The Fisherman will want to hear about it.", opad,
+                        FishRarity.EPIC.color, getSpeciesName());
+                addBulletPoints(info, ListInfoMode.IN_DESC);
+                FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
+                return;
+            }
+
+            info.addPara("A wounded %s is circling %s in %s, about %s out. It swims slower than it should once "
+                    + "woken.", opad, new Color[]{FishRarity.EPIC.color, h, h, h}, getSpeciesName(),
+                    getPlanetName(), getSystemName(), Misc.getWithDGS(CIRCLE_RADIUS) + " units");
+            info.addPara("Reward: the blueprint for a Breach Light ship, and range data on an epic. There is no "
+                    + "deadline.", opad, h, "the blueprint for a Breach Light ship", "range data on an epic");
+            addBulletPoints(info, ListInfoMode.IN_DESC);
+            FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
+        }
+
+        @Override
+        public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
+            if (isReturning() && FishIntelMapButton.handleSetAutopilot(buttonId, FishingIntro.getNearestBoat())) {
+                return;
+            }
+            if (FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
+
+            super.buttonPressConfirmed(buttonId, ui);
+        }
+
+        @Override
+        public String getIcon() {
+            return FishermanIdentity.getPortrait(0f);
+        }
+
+        @Override
+        public String getSortString() {
+            return getSortStringNewestFirst();
+        }
+
+        @Override
+        public FactionAPI getFactionForUIColors() {
+            return Global.getSector().getPlayerFaction();
+        }
+
+        @Override
+        public Set<String> getIntelTags(SectorMapAPI map) {
+            Set<String> tags = super.getIntelTags(map);
+            tags.add(Tags.INTEL_MISSIONS);
+            tags.add(Tags.INTEL_ACCEPTED);
+            tags.add(FishermanConstants.FACTION);
+
+            return tags;
+        }
+
+        @Override
+        public SectorEntityToken getMapLocation(SectorMapAPI map) {
+            if (!isHunting()) return null;
+
+            PlanetAPI planet = getPlanet();
+            if (planet != null) return planet;
+
+            StarSystemAPI system = getSystem();
+            return system == null ? null : system.getHyperspaceAnchor();
+        }
+
+        protected static String getSystemName() {
+            FishermanChain.Saved saved = FishermanChain.get(false);
+
+            return saved == null || saved.t3SystemName == null ? "the system" : saved.t3SystemName;
+        }
+
+        protected static String getPlanetName() {
+            FishermanChain.Saved saved = FishermanChain.get(false);
+
+            return saved == null || saved.t3PlanetName == null ? "the planet" : saved.t3PlanetName;
+        }
+    }
+
     public static void register() {
         Arrival.register();
         Hunt.register();
@@ -130,6 +283,29 @@ public final class WoundedEpic {
         return true;
     }
 
+    public static boolean start(TextPanelAPI text) {
+        if (!FishermanChain.isAt(FishermanChain.Stage.T2_SENSOR_BOUGHT)) return false;
+
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        StarSystemAPI system = getSystem();
+        if (saved == null || !isCandidate(system) || !isHost(system, getPlanet())
+                || !CaptainsFleet.isTarget(FishSpecLoader.getFishSpec(saved.t3SpeciesId), system)) {
+            return false;
+        }
+
+        FishermanChain.setStage(FishermanChain.Stage.T3_HUNT);
+        register();
+        FishIntelNotifications.queue(new WoundedIntel(), text);
+
+        return true;
+    }
+
+    public static void updateIntel() {
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel(WoundedIntel.class)) {
+            FishIntelNotifications.update((WoundedIntel) intel, null);
+        }
+    }
+
     public static StarSystemAPI getSystem() {
         FishermanChain.Saved saved = FishermanChain.get(false);
 
@@ -168,6 +344,7 @@ public final class WoundedEpic {
         clearEpic();
         FishermanChain.setStage(FishermanChain.Stage.T3_CAUGHT);
         register();
+        updateIntel();
     }
 
     protected static void ensureEpic() {
