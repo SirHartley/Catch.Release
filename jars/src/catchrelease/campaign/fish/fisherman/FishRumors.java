@@ -75,7 +75,6 @@ public class FishRumors {
 
     public static final String ACTIVE_KEY = "$catchrelease_rumors_active";
     public static final String LAST_ASKED_KEY = "$catchrelease_rumor_last";
-    public static final String TUTORIAL_LEAD_KEY = "$catchrelease_tutorial_rumor";
 
     public static final int TYPE_RARITY = 0;
     public static final int TYPE_LOOT = 1;
@@ -99,6 +98,8 @@ public class FishRumors {
         public int residency;
         public long started;
         public float duration = Setting.RUMOR_DURATION.value();
+        // a quest's rumour: its lifetime does not run until the quest releases it
+        public boolean held;
     }
 
     public static class RumorIntel extends BaseIntelPlugin {
@@ -158,6 +159,8 @@ public class FishRumors {
             Color tc = getBulletColorForMode(mode);
 
             float initPad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+
+            if (rumor.held) return;
 
             bullet(info);
 
@@ -296,7 +299,7 @@ public class FishRumors {
 
     public static boolean isExpired(Saved rumor) {
         return rumor == null || Global.getSector() == null
-                || Global.getSector().getClock().getElapsedDaysSince(rumor.started)
+                || !rumor.held && Global.getSector().getClock().getElapsedDaysSince(rumor.started)
                 >= rumor.duration
                 || getKind(rumor) == Kind.LEGENDARY
                 && (!LegendaryChases.isCurrentResidency(rumor.legendaryId, rumor.systemId, rumor.residency)
@@ -499,22 +502,41 @@ public class FishRumors {
         return null;
     }
 
-    public static Saved ensureTutorialLead() {
-        if (Global.getSector() == null) return null;
+    // Published like any rumour, so it starts the shared cooldown, but held until the quest calls release.
+    public static Saved publishHeld(StarSystemAPI system, Kind kind) {
+        if (system == null || kind == null || Global.getSector() == null) return null;
 
-        if (Global.getSector().getPersistentData().get(TUTORIAL_LEAD_KEY) instanceof Boolean
-                && (Boolean) Global.getSector().getPersistentData().get(TUTORIAL_LEAD_KEY)) {
-            return getActive();
+        Saved rumor = new Saved();
+        rumor.systemId = system.getId();
+        rumor.systemName = system.getNameWithNoType();
+        rumor.kindId = kind.id;
+        rumor.started = Global.getSector().getClock().getTimestamp();
+        rumor.held = true;
+
+        return publish(rumor);
+    }
+
+    // The saved list and the rumour's intel share this object, so the new lifetime shows at once.
+    public static void release(Saved rumor, float days) {
+        if (rumor == null || !rumor.held || Global.getSector() == null) return;
+
+        rumor.held = false;
+        rumor.started = Global.getSector().getClock().getTimestamp();
+        rumor.duration = days;
+    }
+
+    public static Saved findActive(String systemId, Kind kind) {
+        if (systemId == null || kind == null) return null;
+
+        for (Saved rumor : getActiveRumors()) {
+            if (systemId.equals(rumor.systemId) && kind.id.equals(rumor.kindId)) return rumor;
         }
 
-        Saved rumor = getActive();
-        if (rumor == null) rumor = create();
+        return null;
+    }
 
-        if (rumor != null) {
-            Global.getSector().getPersistentData().put(TUTORIAL_LEAD_KEY, true);
-        }
-
-        return rumor;
+    public static boolean isOccupied(String systemId) {
+        return systemId != null && getActiveRumors().stream().anyMatch(r -> systemId.equals(r.systemId));
     }
 
     protected static StarSystemAPI pickSystem(Kind kind) {

@@ -19,6 +19,8 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
+import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
+import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.camp.CampedSpotJob;
 import catchrelease.campaign.fish.legendary.KantaTribute;
@@ -235,6 +237,21 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return FishingIntro.takeTarget();
             case "skipIntro":
                 FishingIntro.skip(text(dialog));
+                return true;
+
+            case "t1Prepare":
+                return TreasureRumour.prepareOffer();
+            case "t1Pitched":
+                TreasureRumour.markPitched();
+                return true;
+            case "t1Accept":
+                return TreasureRumour.start(text(dialog));
+            case "t1LostCheck":
+                return TreasureRumour.checkLost() != null;
+            case "t1Complete":
+                return TreasureRumour.complete(text(dialog));
+            case "t1Done":
+                TreasureRumour.finish();
                 return true;
 
             case "rescueCastaway":
@@ -735,6 +752,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
 
         setRumorTokens(local, FishRumors.getActive());
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
+        FishermanChain.writeTokens(local);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
 

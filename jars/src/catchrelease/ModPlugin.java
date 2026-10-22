@@ -13,6 +13,7 @@ import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.coherence.CoherenceOverlayScript;
 import catchrelease.campaign.fish.colony.AquariumTankScript;
 import catchrelease.campaign.fish.colony.ConservatoryOptionProvider;
+import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.fisherman.CoreFisherSpawner;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.jobs.FishJob;
@@ -84,6 +85,7 @@ public class ModPlugin extends BaseModPlugin {
 
         TutorialWreck.Watcher.register();
         RatingBarEvent.VisitCounter.register();
+        FishermanChain.register();
         SoldFishRestock.register();
         FishermanInterception.register();
         FishingIntro.Keeper.register();

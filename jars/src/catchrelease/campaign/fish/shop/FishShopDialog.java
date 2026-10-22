@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
+import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -1123,6 +1124,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         // the New! tags are first-visit news, and this visit has now seen them
         ShopSchematics.clearAllFresh();
+        // ownership is final here: undo works only inside the session
+        TreasureRumour.checkLensBought();
 
         if (onClose == null) {
             dialog.dismiss();

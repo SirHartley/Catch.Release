@@ -2,11 +2,16 @@ package catchrelease.campaign.fish.treasure;
 
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.config.Setting;
+import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
+
+import java.awt.Color;
 
 public class MinigameTreasure {
 
     public final TreasureRarity rarity;
+    // a quest's own chest (TreasureRumour): drawn in the quest highlight and never rolled from a rarity
+    public final boolean golden;
     public final float position;
     protected float lifetime;
     protected float elapsed = 0f;
@@ -16,7 +21,12 @@ public class MinigameTreasure {
     protected final float decay = FishConstants.TREASURE_HOLD_DECAY * Setting.TREASURE_DECAY.mult();
 
     public MinigameTreasure(TreasureRarity rarity) {
+        this(rarity, false);
+    }
+
+    public MinigameTreasure(TreasureRarity rarity, boolean golden) {
         this.rarity = rarity;
+        this.golden = golden;
 
         this.position = MathUtils.getRandomNumberInRange(
                 FishConstants.TREASURE_POSITION_INSET, 1f - FishConstants.TREASURE_POSITION_INSET);
@@ -35,6 +45,10 @@ public class MinigameTreasure {
         else held = Math.max(0f, held - amount * decay);
 
         if (held >= holdTime) taken = true;
+    }
+
+    public Color getColor() {
+        return golden ? Misc.getHighlightColor() : rarity.color;
     }
 
     public boolean isTaken() {

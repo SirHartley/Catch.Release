@@ -190,6 +190,19 @@ public class FishingMinigame {
         if (first != null) treasures.add(first);
     }
 
+    // A quest chest goes on the track at once so it cannot be lost behind a slow spawn; any treasure already rolled
+    // returns to the queue and comes up after it.
+    public void addGoldenChest() {
+        for (MinigameTreasure treasure : treasures) {
+            if (treasure.golden) return;
+        }
+        if (!hasEndlessTreasure()) {
+            treasuresLeft += treasures.size();
+            treasures.clear();
+        }
+        treasures.add(new MinigameTreasure(TreasureRarity.EPIC, true));
+    }
+
     protected boolean hasEndlessTreasure() {
         return "lantern_jack".equals(fish.id);
     }
