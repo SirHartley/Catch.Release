@@ -431,8 +431,9 @@ public class Searchlight implements EveryFrameScript {
         return currentRenderLoc;
     }
 
-    // Where the unlocked sweep will put the beam's centre after the given seconds. It ignores the turn at the arc's
-    // end and any lock; over a lead of a few seconds the beam still passes over the point.
+    // Where the unlocked sweep will put the beam's centre after the given seconds, carried along by the fleet's
+    // current velocity because the arc is centred on the moving fleet. It ignores the turn at the arc's end, any
+    // lock and changes of course; over a lead of a few seconds the beam still passes over the point.
     public Vector2f getPointAhead(float seconds) {
         if (arc == null) return new Vector2f(currentRenderLoc);
 
@@ -443,7 +444,13 @@ public class Searchlight implements EveryFrameScript {
                 + arc.convertToDegreesPerSecond(speed) * seconds * travelDirection);
         float offset = (float) Math.sin((oscillationTime + seconds) * OSCILLATION_TIME_MULT) * SINE_CADENCE;
 
-        return MathUtils.getPointOnCircumference(arc.getPointForAngle(angle), offset, angle + 90f);
+        Vector2f point = MathUtils.getPointOnCircumference(arc.getPointForAngle(angle), offset, angle + 90f);
+        if (ownerFleet != null && ownerFleet.getVelocity() != null) {
+            point.x += ownerFleet.getVelocity().x * seconds;
+            point.y += ownerFleet.getVelocity().y * seconds;
+        }
+
+        return point;
     }
 
     public Vector2f getOrigin() {
