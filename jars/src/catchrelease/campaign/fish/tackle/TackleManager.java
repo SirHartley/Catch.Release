@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.tackle;
 
 import catchrelease.campaign.fish.data.FishLogEntry;
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.memory.upgrades.StatIds;
 import com.fs.starfarer.api.Global;
 
@@ -50,10 +51,12 @@ public class TackleManager {
     }
 
     // A module fills one slot of a rig at most and never shares the rig with one of its exclusion group; other rigs
-    // are never consulted, so a module that fits both the ROD and the Harpoon can sit on each.
+    // are never consulted, so a module that fits both the ROD and the Harpoon can sit on each. The second slot takes
+    // a module only while the rig's fishing ship is in the fleet; emptying it is always allowed.
     public static boolean canFit(Tackle.Fit rig, int slot, Tackle tackle) {
         if (rig == null || tackle == null || slot < 0 || slot >= RigLoadout.SLOTS) return false;
         if (!tackle.fits(rig)) return false;
+        if (slot == 1 && tackle != Tackle.NONE && !FishingShips.hasSecondSlot(rig)) return false;
 
         for (int other = 0; other < RigLoadout.SLOTS; other++) {
             if (other != slot && tackle.conflictsWith(getSlot(rig, other))) return false;

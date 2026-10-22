@@ -270,7 +270,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 
 **Stage 2: ship slots.**
 - [x] 2.1 Three placeholder hulls, each a full copy of the vanilla `nebula` under its own hull id and name.
-- [ ] 2.2 `FishingShips`: the hull → rig → module registry and `reconcile()`, covering once per rig, emptying on leave and resetting on rejoin.
+- [x] 2.2 `FishingShips`: the hull → rig → module registry and `reconcile()`, covering once per rig, emptying on leave and resetting on rejoin.
 - [ ] 2.3 Fleet presence: market, battle and recovery listeners, `onGameLoad`, direct calls from quest grants, and the documented fallback check in the rig abilities' `advance`.
 - [ ] 2.4 Ship modules: Retrieval Head and Fanned Array set to `stocked = false`. Availability comes from ship presence, never ownership, and has no price.
 - [ ] 2.5 Outfitter: second slot per rig, a disabled row state, hovers naming the conflict or where a module is fitted, undo per slot, and the "one slot" text. UI scoping goes to the UI subagent.
