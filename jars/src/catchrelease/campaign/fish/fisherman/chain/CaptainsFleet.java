@@ -77,8 +77,10 @@ public final class CaptainsFleet {
 
     public static final float FLEET_POINTS = 45f;
     public static final float HOLD_DAYS = 100000f;
-    // where the fleet waits, past the star's surface; inside the lamp range, so the player starts there
-    public static final float HOLD_DISTANCE = 2500f;
+    // Where the fleet waits, past the star's surface. Clears every vanilla corona (the widest, a red supergiant's,
+    // reaches about 2,250 past the surface) and stays inside the lamp range, so the player starts there.
+    public static final float HOLD_DISTANCE = 3000f;
+    public static final float HOLD_ORBIT_DAYS = 1000000f;
 
     public static final String PLANTER = "catchrelease_chainT2";
     public static final float LAMP_SECONDS = 15f;
@@ -535,6 +537,7 @@ public final class CaptainsFleet {
         CampaignFleetAPI fleet = saved.t2Fleet;
         if (fleet != null && fleet.isAlive() && !fleet.isExpired() && fleet.getContainingLocation() == system) return;
 
+        clearHold();
         saved.t2Fleet = spawnFleet(system);
     }
 
@@ -551,9 +554,16 @@ public final class CaptainsFleet {
         fleet.setName(FLEET_NAME);
         fleet.setTransponderOn(true);
 
+        // Orbiting the star itself would park the fleet just above its surface, inside the corona (ORBIT_PASSIVE
+        // circles its target at the fleet's radius plus 100-200), so it circles a point held out past it instead.
+        float angle = MathUtils.getRandomNumberInRange(0f, 360f);
+        float distance = star.getRadius() + HOLD_DISTANCE;
+        Vector2f at = MathUtils.getPointOnCircumference(star.getLocation(), distance, angle);
+        SectorEntityToken hold = system.createToken(at);
+        hold.setCircularOrbit(star, angle, distance, HOLD_ORBIT_DAYS);
+        system.addEntity(hold);
+
         system.addEntity(fleet);
-        Vector2f at = MathUtils.getPointOnCircumference(star.getLocation(), star.getRadius() + HOLD_DISTANCE,
-                MathUtils.getRandomNumberInRange(0f, 360f));
         fleet.setLocation(at.x, at.y);
 
         PersonAPI captain = Global.getSector().getFaction(Factions.INDEPENDENT)
@@ -578,7 +588,10 @@ public final class CaptainsFleet {
         Misc.makeImportant(fleet, IMPORTANT_REASON);
 
         fleet.clearAssignments();
-        fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, star, HOLD_DAYS, "Hunting");
+        fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, hold, HOLD_DAYS, "Hunting");
+
+        FishermanChain.Saved saved = FishermanChain.get(true);
+        if (saved != null) saved.t2Hold = hold;
 
         return fleet;
     }
@@ -588,7 +601,8 @@ public final class CaptainsFleet {
         FishermanChain.Saved saved = FishermanChain.get(false);
         CampaignFleetAPI fleet = saved == null ? null : saved.t2Fleet;
         if (saved != null) saved.t2Fleet = null;
-        if (fleet == null || fleet.isExpired()) return;
+        clearHold();
+        if (fleet == null || fleet.isExpired() || !fleet.isAlive()) return;
 
         MemoryAPI mem = fleet.getMemoryWithoutUpdate();
         mem.unset(MemFlags.MEMORY_KEY_NO_JUMP);
@@ -597,13 +611,21 @@ public final class CaptainsFleet {
         mem.unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
         Misc.makeUnimportant(fleet, IMPORTANT_REASON);
 
+        // never despawned here: this runs inside the captain's open comm dialog
         SectorEntityToken exit = Misc.findNearestJumpPointTo(fleet);
-        fleet.clearAssignments();
         if (exit == null) {
-            fleet.despawn();
+            Misc.giveStandardReturnToSourceAssignments(fleet, true);
         } else {
+            fleet.clearAssignments();
             fleet.addAssignment(FleetAssignment.GO_TO_LOCATION_AND_DESPAWN, exit, 1000f, "Heading home");
         }
+    }
+
+    protected static void clearHold() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        SectorEntityToken hold = saved == null ? null : saved.t2Hold;
+        if (saved != null) saved.t2Hold = null;
+        if (hold != null && hold.getContainingLocation() != null) hold.getContainingLocation().removeEntity(hold);
     }
 
     public static StarSystemAPI getSystem() {
