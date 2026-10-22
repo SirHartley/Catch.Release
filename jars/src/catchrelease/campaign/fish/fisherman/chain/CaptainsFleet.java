@@ -671,6 +671,8 @@ public final class CaptainsFleet {
         if (system == null || system.getId() == null || system.isNebula()) return false;
         if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER) || system.hasTag(Tags.SYSTEM_ABYSSAL)) return false;
         if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) return false;
+        // Remnant bases and other fleets strong enough to interfere with a mission, as vanilla missions exclude
+        if (system.hasTag(Tags.THEME_UNSAFE)) return false;
         if (system.getHyperspaceAnchor() == null || OuterReaches.isPopulated(system)) return false;
         if (FishRumors.isOccupied(system.getId())) return false;
 
