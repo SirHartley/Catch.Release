@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.fisherman.chain;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 
 import java.io.Serializable;
@@ -17,10 +18,20 @@ public final class FishermanChain {
         T1_ACTIVE,
         T1_LENS,
         T1_BOUGHT,
-        T1_DONE
+        // T2 can be offered from here
+        T1_DONE,
+        T2_MEET,
+        T2_LAMPS,
+        T2_HUNT,
+        T2_REPORT,
+        T2_DEBRIEF,
+        T2_SENSOR,
+        // T3 starts in the next Fisherman conversation
+        T2_SENSOR_BOUGHT
     }
 
     public static final String KEY = "$catchrelease_fisherChain";
+    public static final String PLANTER_PREFIX = "catchrelease_chain";
 
     public static final String T1_OFFER = "$catchreleaseChainT1Offer";
     public static final String T1_ACTIVE = "$catchreleaseChainT1Active";
@@ -35,6 +46,19 @@ public final class FishermanChain {
     public static final String T1_LOST_STORED = "$catchreleaseChainT1LostStored";
     public static final String T1_LOST_GONE = "$catchreleaseChainT1LostGone";
     public static final String T1_LOST_MARKET = "$catchreleaseChainT1LostMarket";
+
+    public static final String T2_OFFER = "$catchreleaseChainT2Offer";
+    public static final String T2_SYSTEM = "$catchreleaseChainT2System";
+    public static final String T2_SPECIES = "$catchreleaseChainT2Species";
+    public static final String T2_PLACED = "$catchreleaseChainT2Placed";
+    public static final String T2_MEET = "$catchreleaseChainT2Meet";
+    public static final String T2_SEARCHING = "$catchreleaseChainT2Searching";
+    public static final String T2_HUNT = "$catchreleaseChainT2Hunt";
+    public static final String T2_CAUGHT = "$catchreleaseChainT2Caught";
+    public static final String T2_LOST = "$catchreleaseChainT2Lost";
+    public static final String T2_DEBRIEF = "$catchreleaseChainT2Debrief";
+    public static final String T2_LANDED = "$catchreleaseChainT2Landed";
+    public static final String T2_HAS_SENSOR = "$catchreleaseChainT2HasSensor";
 
     public static class Saved implements Serializable {
 
@@ -52,9 +76,20 @@ public final class FishermanChain {
         public String soldMarketName;
         public TreasureRumour.Lost lost;
         public String lostMarketName;
+
+        public String t2SystemId;
+        public String t2SystemName;
+        public String t2SpeciesId;
+        public CampaignFleetAPI t2Fleet;
+        public boolean t2Caught;
     }
 
     private FishermanChain() {
+    }
+
+    // Quest motes the chain plants carry these planter ids; they are no chart request.
+    public static boolean isPlanter(String id) {
+        return id != null && id.startsWith(PLANTER_PREFIX);
     }
 
     public static Stage getStage() {
@@ -79,6 +114,7 @@ public final class FishermanChain {
     // Transient listeners for whichever quest is under way; called on load and when a quest starts.
     public static void register() {
         TreasureRumour.CompassWatcher.register();
+        CaptainsFleet.register();
     }
 
     // Display values for one dialog; expiry 0 as every CatchReleaseCMD token.
@@ -101,6 +137,19 @@ public final class FishermanChain {
         local.set(T1_LOST_STORED, lost == TreasureRumour.Lost.STORED, 0);
         local.set(T1_LOST_GONE, lost == TreasureRumour.Lost.GONE, 0);
         local.set(T1_LOST_MARKET, saved == null || saved.lostMarketName == null ? "" : saved.lostMarketName, 0);
+
+        local.set(T2_OFFER, stage == Stage.T1_DONE, 0);
+        local.set(T2_SYSTEM, saved == null || saved.t2SystemName == null ? "" : saved.t2SystemName, 0);
+        local.set(T2_SPECIES, CaptainsFleet.getSpeciesName(), 0);
+        local.set(T2_PLACED, saved != null && saved.t2SystemName != null, 0);
+        local.set(T2_MEET, stage == Stage.T2_MEET, 0);
+        local.set(T2_SEARCHING, stage == Stage.T2_LAMPS, 0);
+        local.set(T2_HUNT, stage == Stage.T2_HUNT, 0);
+        local.set(T2_CAUGHT, stage == Stage.T2_REPORT && saved != null && saved.t2Caught, 0);
+        local.set(T2_LOST, stage == Stage.T2_REPORT && (saved == null || !saved.t2Caught), 0);
+        local.set(T2_DEBRIEF, stage == Stage.T2_DEBRIEF, 0);
+        local.set(T2_LANDED, stage == Stage.T2_DEBRIEF && saved != null && saved.t2Caught, 0);
+        local.set(T2_HAS_SENSOR, SensorBuild.isOwned(), 0);
     }
 
     public static Saved get(boolean create) {

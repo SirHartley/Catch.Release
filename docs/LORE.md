@@ -1200,6 +1200,26 @@ Fleet quests are short conversations with people in the middle of a bad day. The
 | Seeker captain (Fleet on a Hunt) | Worn down, terse, private about the reason. | “Got into debt. Sold one. My decision. Wasn't my property.” |
 | Wager captain (Settling a Bet) | Exasperated referee of their own crew. | “I've forbidden any more betting. That hasn't improved the atmosphere.” |
 
+### The epic-hunting captain
+
+The captain in the Fisherman's second follow-up job (see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#t2-the-captains-fleet)) is an old, grizzled independent skipper who once worked for the Fisherman and now runs his own fleet. He has chased one epic for years and believes it is in the system where his fleet waits. His Breach Lights have broken down, which is why he needs the player.
+
+He is an ordinary observer. Working on the Fisherman's boat did not give him the Fisherman's knowledge: he cannot see the crew's changes, does not discuss them and does not explain the fabric. What he knows is the trade's: lamps, harpoons, how an epic drifts and how it runs once woken, and his own long record of near misses.
+
+**Speech.** He talks with a Scottish-style accent, dialect and slang. This is only how he talks. Scotland, Earth and every real place stay outside the setting, which follows vanilla Starsector ([Canon sources](#canon-sources)). He never names them, nobody comments on where his speech comes from, and no line explains it by an origin outside the Sector. Carry the voice through word choice and rhythm: "aye", "wee", "ken", "cannae", "dinnae", "och", "the noo", "away and", "bonnie", "nae bother". Spell ordinary words normally; a few dialect forms per line read better than phonetic spelling throughout. His sentences run long when he is telling a story and short when he is giving orders to his crew.
+
+**His epic.** He tells a personal encounter with the epic, for example that it took his leg. The story is his account, told as a fisher's yarn under the rules for [legendary tales](#legendary-tales): narration does not confirm it, and it must fit any epic species. It must not describe the species' movement, shield or abilities, and it must not imply mechanics the game does not have.
+
+**Temper.** Proud, stubborn, warm with people who help him and openly delighted when something goes right. Losing the epic again disappoints him without breaking him; he expects to get it next time. If it is caught, he is overjoyed and talks about retiring.
+
+**Illustrative lines** (not existing dialogue):
+
+> "Aye, that's her. Sixteen year I've been after that beast, and she took a leg off me for my trouble."
+
+> "My lamps are done, so they are. Cannae see a thing out there. Take a wee turn round the star with yours lit, would ye?"
+
+These show the dialect density and his habit of turning a request into a story. They are not lines to reuse.
+
 ### The young factor
 
 The startup factor in the bar speaks in models, projections, baselines, volume and the financing case. Every delivery becomes a data point that lets them build a larger forecast, and they never notice that the customers are still projected. Keep them bright, quick and sincere; the joke is the pale forecast lines, not a sneer at the character.

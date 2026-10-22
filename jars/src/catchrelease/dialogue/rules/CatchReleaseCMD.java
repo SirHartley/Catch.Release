@@ -19,7 +19,9 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
+import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
+import catchrelease.campaign.fish.fisherman.chain.SensorBuild;
 import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.camp.CampedSpotJob;
@@ -253,6 +255,21 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "t1Done":
                 TreasureRumour.finish();
                 return true;
+
+            case "chainTokens":
+                FishermanChain.writeTokens(memoryMap.get(MemKeys.LOCAL));
+                return true;
+            case "t2Prepare":
+                return CaptainsFleet.prepareOffer();
+            case "t2Accept":
+                return CaptainsFleet.start(text(dialog));
+            case "t2Search":
+                CaptainsFleet.beginSearch();
+                return true;
+            case "t2Complete":
+                return CaptainsFleet.complete(text(dialog));
+            case "t2Debrief":
+                return SensorBuild.give(text(dialog));
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);

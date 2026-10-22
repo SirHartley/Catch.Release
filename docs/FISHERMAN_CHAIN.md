@@ -144,15 +144,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **Follow-up: build the Needle Sensor.** A tracked intel quest. Its first step is to buy the Needle Sensor at the Outfitter with the schematic. Once the player owns it, the intel tells them to go back and talk to the Fisherman, and T3 starts in that conversation. If the player already owns one, the intel starts at the return step.
 
-**Work**
-- Quest fleet: an independent fleet with a contact person, using the existing fleet-quest spawning and contact patterns where possible.
-- Choosing the target: an epic species whose range matches the zero-market system. If none qualifies, choose another system rather than a species from elsewhere.
-- Placing the mote:
-  - count continuous lamp-on time within 6,000 units of the star's surface;
-  - then put a buried mote of the target species ahead of the beam sweep;
-  - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
-- Failure: the quest-epic hooks for reset, failed catch and blast (see [Implementation plan](#implementation-plan)).
-- Needle Sensor follow-up: grant the schematic through `FishReward.tackleSchematic`. Advance the intel to its return step when the Outfitter closes and the module is owned, not from `ShopEntry.grant`: the Outfitter's undo refunds a purchase through `TackleManager.consume` without passing through `ShopEntry`.
+**Work.** Implemented in Stage 3 (`CaptainsFleet`, `SensorBuild`); see [ARCHITECTURE.md](ARCHITECTURE.md). The Needle Sensor's return step hands over to T3 (Stage 4).
 
 ## T3: The wounded epic
 
@@ -230,7 +222,7 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 |---|---|---|
 | Chain state | New `campaign/fish/fisherman/chain/FishermanChain` | Saved stage per quest (T1–T4 and follow-ups) in sector persistent data, as `FishermanQuest` stores its `STATE_KEY`. Entry points are `CatchReleaseCMD` verbs. A `tokens` Boolean per offer gates the `CatchReleaseFisherOptions` rows. Registers its transient listeners on load. |
 | Chain intel | New `BaseIntelPlugin` subclasses in the same package | One intel per quest: lost compass, Needle Sensor build, wounded epic, and the rumour hunt (title and body switch after the first legendary, as `FishingIntro.IntroIntel` switches by stage). Created through `FishIntelNotifications.queue`. |
-| T2 mission | New `BaseHubMission` subclass | Needs a contact person and a fleet, and `BaseHubMission` supplies both and ticks `advanceImpl`. Fleet spawning follows `CampedSpot.spawn`; holding and friendliness reuse `FleetQuest.hold`/`keepStanding`; comms reuse the `catchrelease_fleetQuestHail` pattern. Not a `FishJob`: no fish are delivered. |
+| T2 mission | `chain/CaptainsFleet` | Implemented in Stage 3; see [ARCHITECTURE.md](ARCHITECTURE.md). A chain-owned class with its own intel, like T1, not a `BaseHubMission`: the chain already saves the stage, and the fleet's commander is the contact. |
 | Rig slots | `TackleManager`, `RigLoadout`, `TackleEffects` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Incompatibility | `Tackle.Exclusion` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Ships | `FishingShips` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md). |
@@ -277,15 +269,15 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 2.6 A check covering the reconcile rules and the incompatibility matrix.
 
 **Stage 3: T2, the captain's fleet.**
-- [ ] 3.1 The captain's voice entry in `LORE.md`.
-- [ ] 3.2 System and species selection: zero markets and colonies, a star, nearby, and an epic species in range.
-- [ ] 3.3 The T2 hub mission: spawn and hold the fleet, the captain with his portrait, the map marker and the comms rows.
-- [ ] 3.4 The lamp timer in `SearchlightAbilityPlugin.advance`: 15 continuous seconds within 6,000 units of the star's surface.
-- [ ] 3.5 A `Searchlight` accessor for a point ahead of the sweep, then placing the quest's buried epic there.
-- [ ] 3.6 The hunt through the Stage 0 hooks: a catch, or a failure on reset, failed catch or blast with a notification back to the captain.
-- [ ] 3.7 Outcomes: the harpoon ship through `FishReward.ship` for both, plus the extra rewards on a catch.
-- [ ] 3.8 The Fisherman debrief, its lore questions and the Needle Sensor schematic.
-- [ ] 3.9 The Needle Sensor intel: buy it (checked when the Outfitter closes), then return to the Fisherman.
+- [x] 3.1 The captain's voice entry in `LORE.md`.
+- [x] 3.2 System and species selection: zero markets and colonies, a star, nearby, and an epic species in range.
+- [x] 3.3 The T2 hub mission: spawn and hold the fleet, the captain with his portrait, the map marker and the comms rows.
+- [x] 3.4 The lamp timer in `SearchlightAbilityPlugin.advance`: 15 continuous seconds within 6,000 units of the star's surface.
+- [x] 3.5 A `Searchlight` accessor for a point ahead of the sweep, then placing the quest's buried epic there.
+- [x] 3.6 The hunt through the Stage 0 hooks: a catch, or a failure on reset, failed catch or blast with a notification back to the captain.
+- [x] 3.7 Outcomes: the harpoon ship through `FishReward.ship` for both, plus the extra rewards on a catch.
+- [x] 3.8 The Fisherman debrief, its lore questions and the Needle Sensor schematic.
+- [x] 3.9 The Needle Sensor intel: buy it (checked when the Outfitter closes), then return to the Fisherman.
 - [ ] 3.10 Text through the Editor process, then the dialogue and rules checks.
 
 **Stage 4: T3, the wounded epic.**

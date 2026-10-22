@@ -1,5 +1,6 @@
 package catchrelease;
 
+import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import catchrelease.config.PlayerSettings;
 import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
 import catchrelease.campaign.crime.HarpoonPatrolResponse;
@@ -120,10 +121,12 @@ public class ModPlugin extends BaseModPlugin {
         known.add(TutorialConstants.TARGET_KEY);
         known.add(FishermanQuest.STATE_KEY);
         known.add(FishJob.REF_KEY);
+        known.add(CaptainsFleet.PLANTER);
 
         Set<String> live = new LinkedHashSet<>();
         if (FishingIntro.getTarget() != null) live.add(TutorialConstants.TARGET_KEY);
         if (FishermanQuest.getActive() != null) live.add(FishermanQuest.STATE_KEY);
+        if (CaptainsFleet.isSearching()) live.add(CaptainsFleet.PLANTER);
 
         for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel()) {
             if (intel instanceof FishJob && !intel.isEnded()) {

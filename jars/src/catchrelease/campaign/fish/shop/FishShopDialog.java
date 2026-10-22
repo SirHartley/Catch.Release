@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
+import catchrelease.campaign.fish.fisherman.chain.SensorBuild;
 import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.RigLoadout;
@@ -1304,6 +1305,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
         ShopSchematics.clearAllFresh();
         // ownership is final here: undo works only inside the session
         TreasureRumour.checkLensBought();
+        SensorBuild.checkBought();
 
         if (onClose == null) {
             dialog.dismiss();
