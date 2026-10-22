@@ -1,14 +1,19 @@
 package catchrelease.campaign.fish.fisherman.chain;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.abilities.searchlight.scripts.Searchlight;
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
+import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
@@ -61,6 +66,11 @@ public final class CaptainsFleet {
     // where the fleet waits, past the star's surface; inside the lamp range, so the player starts there
     public static final float HOLD_DISTANCE = 2500f;
 
+    public static final String PLANTER = "catchrelease_chainT2";
+    public static final float LAMP_SECONDS = 15f;
+    // measured from the star's surface, not its centre
+    public static final float LAMP_RANGE = 6000f;
+
     private CaptainsFleet() {
     }
 
@@ -77,6 +87,39 @@ public final class CaptainsFleet {
         @Override
         public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
             if (curr != null && curr == getSystem()) ensureFleet();
+        }
+    }
+
+    // Continuous lamp time near the star while the captain waits for his epic. Advanced from the player's
+    // SearchlightAbilityPlugin.advance: no callback reports lamp time, and the ability already runs every unpaused
+    // frame. Transient, so a load or any break in the conditions restarts the count.
+    public static class LampTimer {
+
+        protected float seconds;
+
+        public void advance(SearchlightAbilityPlugin lamps, float amount) {
+            if (!FishermanChain.isAt(FishermanChain.Stage.T2_LAMPS) || !isCounting(lamps)) {
+                seconds = 0f;
+                return;
+            }
+
+            seconds += amount;
+            if (seconds < LAMP_SECONDS) return;
+
+            seconds = 0f;
+            Searchlight beam = lamps.getFirstLitBeam();
+            if (beam != null) placeEpic(beam.getRenderLoc());
+        }
+
+        protected boolean isCounting(SearchlightAbilityPlugin lamps) {
+            CampaignFleetAPI fleet = lamps.getFleet();
+            StarSystemAPI system = getSystem();
+            if (fleet == null || system == null || fleet.getContainingLocation() != system) return false;
+
+            PlanetAPI star = system.getStar();
+            if (star == null || Misc.getDistance(fleet, star) - star.getRadius() > LAMP_RANGE) return false;
+
+            return lamps.hasLitBeam();
         }
     }
 
@@ -120,6 +163,13 @@ public final class CaptainsFleet {
             bullet(info);
             switch (FishermanChain.getStage()) {
                 case T2_MEET -> info.addPara("Meet the captain's fleet in %s", pad, text, h, getSystemName());
+                case T2_LAMPS -> {
+                    info.addPara("Run the Breach Lights within %s of the star in %s", pad, text, h,
+                            Misc.getWithDGS(LAMP_RANGE) + " units", getSystemName());
+                    info.addPara("Keep them lit for %s without a break", 0f, text, h,
+                            (int) LAMP_SECONDS + " seconds");
+                }
+                case T2_HUNT -> info.addPara("Harpoon the %s", pad, text, h, getSpeciesName());
                 case T2_DEBRIEF -> info.addPara("Return to the nearest fishing boat", text, pad);
                 default -> info.addPara("Speak to the captain in %s", pad, text, h, getSystemName());
             }
@@ -254,6 +304,21 @@ public final class CaptainsFleet {
         if (!FishermanChain.isAt(FishermanChain.Stage.T2_MEET)) return;
 
         FishermanChain.setStage(FishermanChain.Stage.T2_LAMPS);
+        updateIntel();
+    }
+
+    // The captain's epic, buried and quest-marked so spawners, culls and Lantern Jack leave it alone.
+    protected static void placeEpic(Vector2f at) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        StarSystemAPI system = getSystem();
+        if (saved == null || system == null || at == null) return;
+
+        SectorEntityToken mote = system.addCustomEntity(Misc.genUID(), null, FishConstants.BURIED_ENTITY_ID, null,
+                new BuriedMoteEntityPlugin.Params(saved.t2SpeciesId));
+        mote.setLocation(at.x, at.y);
+        QuestPond.markPlanted(mote, PLANTER);
+
+        FishermanChain.setStage(FishermanChain.Stage.T2_HUNT);
         updateIntel();
     }
 

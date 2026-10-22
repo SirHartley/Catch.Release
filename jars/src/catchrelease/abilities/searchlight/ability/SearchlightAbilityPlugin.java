@@ -3,6 +3,7 @@ package catchrelease.abilities.searchlight.ability;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import catchrelease.campaign.ponds.constants.PondConstants;
 import catchrelease.campaign.ponds.terrain.MaskedFishingPondTerrainPlugin;
 import catchrelease.helper.math.CircularArc;
@@ -52,6 +53,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
     private transient LocationAPI activationLocation;
     private transient NeedleSensor needleSensor;
     private transient NeutrinoLens neutrinoLens;
+    private transient CaptainsFleet.LampTimer captainLamps;
 
     private transient LocationAPI proximityLocation;
     private transient long pondStateVersion;
@@ -64,6 +66,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         impressionRenderer = null;
         activationLocation = null;
         needleSensor = null;
+        captainLamps = null;
         proximityLocation = null;
 
         return this;
@@ -222,6 +225,10 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             neutrinoLens = new NeutrinoLens();
             LunaCampaignRenderer.addTransientRenderer(neutrinoLens);
         }
+        if (getFleet() == Global.getSector().getPlayerFleet()) {
+            if (captainLamps == null) captainLamps = new CaptainsFleet.LampTimer();
+            captainLamps.advance(this, amount);
+        }
     }
 
     @Override
@@ -379,6 +386,24 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         for (Searchlight searchlight : activeSearchlights) {
             if (searchlight != null) searchlight.expire(withFade);
         }
+    }
+
+    public boolean hasLitBeam() {
+        if (!isRuntimeCurrent()) return false;
+
+        for (Searchlight light : activeSearchlights) {
+            if (light != null && light.isRuntimeCurrent()) return true;
+        }
+        return false;
+    }
+
+    public Searchlight getFirstLitBeam() {
+        if (!isRuntimeCurrent()) return null;
+
+        for (Searchlight light : activeSearchlights) {
+            if (light != null && light.isRuntimeCurrent()) return light;
+        }
+        return null;
     }
 
     public boolean owns(Searchlight light) {
