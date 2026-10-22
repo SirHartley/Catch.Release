@@ -25,6 +25,8 @@ public final class FishermanChain {
     public static final String T1_ACTIVE = "$catchreleaseChainT1Active";
     public static final String T1_LENS = "$catchreleaseChainT1Lens";
     public static final String T1_SYSTEM = "$catchreleaseChainT1System";
+    public static final String T1_PITCH = "$catchreleaseChainT1Pitch";
+    public static final String T1_PLACED = "$catchreleaseChainT1Placed";
 
     public static class Saved implements Serializable {
 
@@ -32,6 +34,8 @@ public final class FishermanChain {
 
         public String systemId;
         public String systemName;
+        // the Fisherman has raised T1 himself, at graduation or on the first call after a skip
+        public boolean pitched;
     }
 
     private FishermanChain() {
@@ -65,6 +69,8 @@ public final class FishermanChain {
         local.set(T1_ACTIVE, stage == Stage.T1_ACTIVE, 0);
         local.set(T1_LENS, stage == Stage.T1_LENS, 0);
         local.set(T1_SYSTEM, saved == null || saved.systemName == null ? "" : saved.systemName, 0);
+        local.set(T1_PITCH, stage == Stage.T1_OFFERED && saved != null && !saved.pitched, 0);
+        local.set(T1_PLACED, saved != null && saved.systemName != null, 0);
     }
 
     public static Saved get(boolean create) {

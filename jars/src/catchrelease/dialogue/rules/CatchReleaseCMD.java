@@ -20,6 +20,7 @@ import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
 import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
+import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.camp.CampedSpotJob;
 import catchrelease.campaign.fish.legendary.KantaTribute;
@@ -237,6 +238,14 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "skipIntro":
                 FishingIntro.skip(text(dialog));
                 return true;
+
+            case "t1Prepare":
+                return TreasureRumour.prepareOffer();
+            case "t1Pitched":
+                TreasureRumour.markPitched();
+                return true;
+            case "t1Accept":
+                return TreasureRumour.start(text(dialog));
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);

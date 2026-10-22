@@ -2615,6 +2615,34 @@ He sends the trace again.
 
 $catchreleaseWorkInstructions",100:catchrelease_fisherBack:Continue,
 ,,,,,,
+# fisherman chain T1: the treasure rumour,,,,,,
+catchrelease_fisherCommsT1,OpenCommLink,"$entity.catchrelease_fisherman score:1040
+CatchReleaseCMD tokens
+$catchreleaseChainT1Pitch","$menuState = catchreleaseFisher 0
+CatchReleaseCMD t1Pitched","The Fisherman is sorting through a crate of salvaged fittings when the link opens. He leaves it to a deckhand and comes to the pickup.
+
+""Captain. I've heard of somewhere worth fishing, if you've a minute for it.""","catchrelease_introGetFreeRumor:""Go on.""
+catchrelease_t1Later:""Not now.""",
+catchrelease_fisherOptT1,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT1Offer",SetOptionColor catchrelease_introGetFreeRumor highlight,,"35:catchrelease_introGetFreeRumor:""Heard of anywhere worth fishing?""",
+catchrelease_t1Offer,CatchReleaseT1Offer,"$catchreleaseChainT1Offer
+$catchreleaseChainT1Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""golden chest""","""$catchreleaseChainT1System. The crews working there have been bringing up a lot more bycatch than usual.""
+
+""There's something of mine in it, too. A golden chest. I appear to have lost it, and I'm sure it's there.""
+
+""It'll only come up in open space, under the lights. Bring it back to me and there's a lens schematic in it for you, with the fish and credits to have it built. No hurry on it.""","catchrelease_t1Accept:""I'll look for it.""
+catchrelease_t1Decline:""Not right now.""",
+catchrelease_t1OfferNone,CatchReleaseT1Offer,,,"""Nothing worth sending you after.""",catchrelease_fisherBack:Continue,
+catchrelease_t1Accept,DialogOptionSelected,$option == catchrelease_t1Accept,"CatchReleaseCMD t1Accept
+CatchReleaseCMD tokens
+FireBest CatchReleaseT1Accepted",,,
+catchrelease_t1Accepted,CatchReleaseT1Accepted,$catchreleaseChainT1Active,,"""Good. Keep an eye on the catch window when you're working there. It won't sit around waiting for you.""",catchrelease_fisherBack:Continue,
+catchrelease_t1AcceptFailed,CatchReleaseT1Accepted,,,"""Hm. The talk's moved on since I last heard it. Ask me again another time.""",catchrelease_fisherBack:Continue,
+catchrelease_t1Decline,DialogOptionSelected,$option == catchrelease_t1Decline,,"""Suit yourself. It's not going anywhere. Ask me if you change your mind.""",catchrelease_fisherBack:Continue,
+catchrelease_t1Later,DialogOptionSelected,$option == catchrelease_t1Later,"$menuState = catchreleaseFisher 0
+CatchReleaseCMD tokens
+FireAll CatchReleaseFisherOptions","""Another time, then.""",,
+,,,,,,
 # fisherman questions,,,,,,
 catchrelease_fisherOptAsk,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseStage >= 2",,,60:catchrelease_fisherAsk:Ask about something else,
@@ -3373,7 +3401,9 @@ AddTextSmall ""Range data purchasing unlocked"" highlight","""Both of them. Good
 catchrelease_introTurnIn5_cont,DialogOptionSelected,$option == catchrelease_introTurnIn5_cont,,"""You know enough to take work now. Read what they're asking for before you agree to a price. People get particular when it's their money.""
 
 He picks up a tool from the bench. ""Bring me whatever you want to sell. And keep the rig serviced, Captain. I'd rather hear about your catch than your breakdowns.""","catchrelease_introGetFreeRumor:""Heard of anywhere worth fishing?""",
-catchrelease_introGetFreeRumor,DialogOptionSelected,$option == catchrelease_introGetFreeRumor,FireBest CatchReleaseRumorText,,catchrelease_fisherBack:Continue,
+catchrelease_introGetFreeRumor,DialogOptionSelected,$option == catchrelease_introGetFreeRumor,"CatchReleaseCMD t1Prepare
+CatchReleaseCMD tokens
+FireBest CatchReleaseT1Offer",,,
 catchrelease_briefRod,CatchReleaseIntroBrief,"CatchReleaseCMD tokens
 $catchreleaseTargetSet
 $catchreleaseStage == 2
