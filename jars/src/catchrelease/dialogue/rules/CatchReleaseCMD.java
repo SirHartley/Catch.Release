@@ -19,6 +19,7 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
+import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.jobs.FishJob;
@@ -252,6 +253,17 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return TreasureRumour.complete(text(dialog));
             case "t1Done":
                 TreasureRumour.finish();
+                return true;
+
+            case "chainTokens":
+                FishermanChain.writeTokens(memoryMap.get(MemKeys.LOCAL));
+                return true;
+            case "t2Prepare":
+                return CaptainsFleet.prepareOffer();
+            case "t2Accept":
+                return CaptainsFleet.start(text(dialog));
+            case "t2Search":
+                CaptainsFleet.beginSearch();
                 return true;
 
             case "rescueCastaway":

@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.fisherman.chain;
 
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 
 import java.io.Serializable;
@@ -48,6 +49,9 @@ public final class FishermanChain {
     public static final String T2_OFFER = "$catchreleaseChainT2Offer";
     public static final String T2_SYSTEM = "$catchreleaseChainT2System";
     public static final String T2_SPECIES = "$catchreleaseChainT2Species";
+    public static final String T2_PLACED = "$catchreleaseChainT2Placed";
+    public static final String T2_MEET = "$catchreleaseChainT2Meet";
+    public static final String T2_SEARCHING = "$catchreleaseChainT2Searching";
 
     public static class Saved implements Serializable {
 
@@ -69,6 +73,7 @@ public final class FishermanChain {
         public String t2SystemId;
         public String t2SystemName;
         public String t2SpeciesId;
+        public CampaignFleetAPI t2Fleet;
     }
 
     private FishermanChain() {
@@ -96,6 +101,7 @@ public final class FishermanChain {
     // Transient listeners for whichever quest is under way; called on load and when a quest starts.
     public static void register() {
         TreasureRumour.CompassWatcher.register();
+        CaptainsFleet.register();
     }
 
     // Display values for one dialog; expiry 0 as every CatchReleaseCMD token.
@@ -122,6 +128,9 @@ public final class FishermanChain {
         local.set(T2_OFFER, stage == Stage.T1_DONE, 0);
         local.set(T2_SYSTEM, saved == null || saved.t2SystemName == null ? "" : saved.t2SystemName, 0);
         local.set(T2_SPECIES, CaptainsFleet.getSpeciesName(), 0);
+        local.set(T2_PLACED, saved != null && saved.t2SystemName != null, 0);
+        local.set(T2_MEET, stage == Stage.T2_MEET, 0);
+        local.set(T2_SEARCHING, stage == Stage.T2_LAMPS || stage == Stage.T2_HUNT, 0);
     }
 
     public static Saved get(boolean create) {

@@ -5,22 +5,211 @@ import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.FishRumors;
+import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
+import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.intel.FishIntelNotifications;
+import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.FleetAssignment;
+import com.fs.starfarer.api.campaign.FactionAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.PlanetAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.campaign.TextPanelAPI;
+import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
+import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
+import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.characters.FullName;
+import com.fs.starfarer.api.characters.PersonAPI;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
+import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
+import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
+import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
+import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
+import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
+import com.fs.starfarer.api.ui.IntelUIAPI;
+import com.fs.starfarer.api.ui.SectorMapAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
+import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
+
+import java.awt.Color;
+import java.util.Set;
 
 // T2: the captain's fleet. A captain the Fisherman knows is hunting an epic in an empty system; the player's lamps
 // find it for him.
 public final class CaptainsFleet {
 
+    public static final String CAPTAIN_FLAG = "$catchrelease_t2Captain";
+    public static final String IMPORTANT_REASON = "catchrelease_t2";
+
+    public static final String PORTRAIT = "graphics/portraits/portrait30.png";
+    public static final String FLEET_NAME = "Hunting Fleet";
+
+    public static final float FLEET_POINTS = 45f;
+    public static final float HOLD_DAYS = 100000f;
+    // where the fleet waits, past the star's surface; inside the lamp range, so the player starts there
+    public static final float HOLD_DISTANCE = 2500f;
+
     private CaptainsFleet() {
+    }
+
+    // Brings the fleet back if it was lost while the captain still has business with the player: the player only
+    // ever finds it on entering the system, so a replacement is never seen appearing.
+    public static class Arrival implements CurrentLocationChangedListener {
+
+        public static void register() {
+            ListenerManagerAPI listeners = Global.getSector().getListenerManager();
+            listeners.removeListenerOfClass(Arrival.class);
+            if (isCaptainWaiting()) listeners.addListener(new Arrival(), true);
+        }
+
+        @Override
+        public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
+            if (curr != null && curr == getSystem()) ensureFleet();
+        }
+    }
+
+    // One intel from accepting the job to reporting back to the Fisherman; title, lines and map target follow the stage.
+    public static class CaptainIntel extends BaseIntelPlugin {
+
+        @Override
+        public boolean shouldRemoveIntel() {
+            if (isEnded()) return true;
+            if (!isCaptainWaiting() && !FishermanChain.isAt(FishermanChain.Stage.T2_DEBRIEF)) endImmediately();
+
+            return isEnded();
+        }
+
+        @Override
+        public String getName() {
+            return switch (FishermanChain.getStage()) {
+                case T2_DEBRIEF -> "The captain's epic: report to the Fisherman";
+                default -> "The captain's epic";
+            };
+        }
+
+        @Override
+        public String getSmallDescriptionTitle() {
+            return getName();
+        }
+
+        @Override
+        public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
+            info.addPara(getName(), getTitleColor(mode), 0f);
+
+            addBulletPoints(info, mode);
+        }
+
+        @Override
+        protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+            Color text = getBulletColorForMode(mode);
+            Color h = Misc.getHighlightColor();
+            float pad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+
+            bullet(info);
+            switch (FishermanChain.getStage()) {
+                case T2_MEET -> info.addPara("Meet the captain's fleet in %s", pad, text, h, getSystemName());
+                case T2_DEBRIEF -> info.addPara("Return to the nearest fishing boat", text, pad);
+                default -> info.addPara("Speak to the captain in %s", pad, text, h, getSystemName());
+            }
+            unindent(info);
+        }
+
+        @Override
+        public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
+            float opad = 10f;
+            Color h = Misc.getHighlightColor();
+            FactionAPI faction = Global.getSector().getFaction(Factions.INDEPENDENT);
+
+            info.addImages(width, 128, opad, opad, PORTRAIT, faction.getCrest());
+
+            if (FishermanChain.isAt(FishermanChain.Stage.T2_DEBRIEF)) {
+                info.addPara("The captain's business is done. The Fisherman will want to hear how it went.", opad);
+                addBulletPoints(info, ListInfoMode.IN_DESC);
+                FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
+                return;
+            }
+
+            info.addPara("A captain who once crewed for the Fisherman is hunting a %s in %s. His Breach Lights have "
+                    + "failed, and he wants yours.", opad, h, getSpeciesName(), getSystemName());
+            info.addPara("Reward: one of his ships.", opad, h, "one of his ships");
+            addBulletPoints(info, ListInfoMode.IN_DESC);
+            FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
+        }
+
+        @Override
+        public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
+            if (FishermanChain.isAt(FishermanChain.Stage.T2_DEBRIEF)
+                    && FishIntelMapButton.handleSetAutopilot(buttonId, FishingIntro.getNearestBoat())) {
+                return;
+            }
+            if (FishIntelMapButton.handlePlotRoute(buttonId, getMapLocation(null))) return;
+
+            super.buttonPressConfirmed(buttonId, ui);
+        }
+
+        protected String getSystemName() {
+            FishermanChain.Saved saved = FishermanChain.get(false);
+
+            return saved == null || saved.t2SystemName == null ? "the system" : saved.t2SystemName;
+        }
+
+        @Override
+        public String getIcon() {
+            return PORTRAIT;
+        }
+
+        @Override
+        public String getSortString() {
+            return getSortStringNewestFirst();
+        }
+
+        @Override
+        public FactionAPI getFactionForUIColors() {
+            return Global.getSector().getPlayerFaction();
+        }
+
+        @Override
+        public Set<String> getIntelTags(SectorMapAPI map) {
+            Set<String> tags = super.getIntelTags(map);
+            tags.add(Tags.INTEL_MISSIONS);
+            tags.add(Tags.INTEL_ACCEPTED);
+            tags.add(FishermanConstants.FACTION);
+
+            return tags;
+        }
+
+        @Override
+        public SectorEntityToken getMapLocation(SectorMapAPI map) {
+            if (!isCaptainWaiting()) return null;
+
+            StarSystemAPI system = getSystem();
+
+            return system == null ? null : system.getHyperspaceAnchor();
+        }
+    }
+
+    public static void register() {
+        Arrival.register();
+        if (isCaptainWaiting() && Global.getSector().getCurrentLocation() != getSystem()) ensureFleet();
+    }
+
+    public static boolean isCaptainWaiting() {
+        FishermanChain.Stage stage = FishermanChain.getStage();
+
+        return stage == FishermanChain.Stage.T2_MEET || stage == FishermanChain.Stage.T2_LAMPS
+                || stage == FishermanChain.Stage.T2_HUNT || stage == FishermanChain.Stage.T2_REPORT;
     }
 
     // Keeps the saved system and species while they still qualify, so a declined offer names the same place again.
@@ -40,6 +229,123 @@ public final class CaptainsFleet {
         saved.t2SpeciesId = species.id;
 
         return true;
+    }
+
+    public static boolean start(TextPanelAPI text) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T1_DONE)) return false;
+
+        StarSystemAPI system = getSystem();
+        if (!isCandidate(system) || !isTarget(FishSpecLoader.getFishSpec(saved.t2SpeciesId), system)) return false;
+
+        CampaignFleetAPI fleet = spawnFleet(system);
+        if (fleet == null) return false;
+
+        saved.t2Fleet = fleet;
+        FishermanChain.setStage(FishermanChain.Stage.T2_MEET);
+        register();
+        FishIntelNotifications.queue(new CaptainIntel(), text);
+
+        return true;
+    }
+
+    // "Find her for me": the lamp count starts.
+    public static void beginSearch() {
+        if (!FishermanChain.isAt(FishermanChain.Stage.T2_MEET)) return;
+
+        FishermanChain.setStage(FishermanChain.Stage.T2_LAMPS);
+        updateIntel();
+    }
+
+    public static void updateIntel() {
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel(CaptainIntel.class)) {
+            FishIntelNotifications.update((CaptainIntel) intel, null);
+        }
+    }
+
+    public static CampaignFleetAPI getFleet() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+
+        return saved == null ? null : saved.t2Fleet;
+    }
+
+    protected static void ensureFleet() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        StarSystemAPI system = getSystem();
+        if (saved == null || system == null || !isCaptainWaiting()) return;
+
+        CampaignFleetAPI fleet = saved.t2Fleet;
+        if (fleet != null && fleet.isAlive() && !fleet.isExpired() && fleet.getContainingLocation() == system) return;
+
+        saved.t2Fleet = spawnFleet(system);
+    }
+
+    protected static CampaignFleetAPI spawnFleet(StarSystemAPI system) {
+        PlanetAPI star = system.getStar();
+        if (star == null) return null;
+
+        FleetParamsV3 params = new FleetParamsV3(null, system.getLocation(), Factions.INDEPENDENT, null,
+                FleetTypes.SCAVENGER_SMALL, FLEET_POINTS, 0f, FLEET_POINTS * 0.1f, 0f, 0f, 0f, 0f);
+        CampaignFleetAPI fleet = FleetFactoryV3.createFleet(params);
+        if (fleet == null || fleet.isEmpty()) return null;
+
+        fleet.setNoFactionInName(true);
+        fleet.setName(FLEET_NAME);
+        fleet.setTransponderOn(true);
+
+        system.addEntity(fleet);
+        Vector2f at = MathUtils.getPointOnCircumference(star.getLocation(), star.getRadius() + HOLD_DISTANCE,
+                MathUtils.getRandomNumberInRange(0f, 360f));
+        fleet.setLocation(at.x, at.y);
+
+        PersonAPI captain = Global.getSector().getFaction(Factions.INDEPENDENT)
+                .createRandomPerson(FullName.Gender.MALE);
+        captain.setPortraitSprite(PORTRAIT);
+        captain.setRankId(Ranks.SPACE_CAPTAIN);
+        captain.setPostId(Ranks.POST_FLEET_COMMANDER);
+        fleet.setCommander(captain);
+        FleetMemberAPI flagship = fleet.getFlagship();
+        if (flagship != null) flagship.setCaptain(captain);
+
+        // never hostile and never drawn away: the player must always be able to find him and talk
+        MemoryAPI mem = fleet.getMemoryWithoutUpdate();
+        mem.set(CAPTAIN_FLAG, true);
+        mem.set(MemFlags.MEMORY_KEY_MAKE_NON_HOSTILE, true);
+        mem.set(MemFlags.NON_HOSTILE_OVERRIDES_MAKE_HOSTILE, true);
+        mem.set(MemFlags.MEMORY_KEY_NO_JUMP, true);
+        mem.set(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED, true);
+        mem.set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
+        mem.set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
+        mem.set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
+        Misc.makeImportant(fleet, IMPORTANT_REASON);
+
+        fleet.clearAssignments();
+        fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, star, HOLD_DAYS, "Hunting");
+
+        return fleet;
+    }
+
+    // The captain heads home: the fleet makes for the nearest jump point and despawns there.
+    protected static void releaseFleet() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        CampaignFleetAPI fleet = saved == null ? null : saved.t2Fleet;
+        if (saved != null) saved.t2Fleet = null;
+        if (fleet == null || fleet.isExpired()) return;
+
+        MemoryAPI mem = fleet.getMemoryWithoutUpdate();
+        mem.unset(MemFlags.MEMORY_KEY_NO_JUMP);
+        mem.unset(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED);
+        mem.unset(MemFlags.FLEET_IGNORES_OTHER_FLEETS);
+        mem.unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
+        Misc.makeUnimportant(fleet, IMPORTANT_REASON);
+
+        SectorEntityToken exit = Misc.findNearestJumpPointTo(fleet);
+        fleet.clearAssignments();
+        if (exit == null) {
+            fleet.despawn();
+        } else {
+            fleet.addAssignment(FleetAssignment.GO_TO_LOCATION_AND_DESPAWN, exit, 1000f, "Heading home");
+        }
     }
 
     public static StarSystemAPI getSystem() {

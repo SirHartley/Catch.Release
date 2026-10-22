@@ -230,7 +230,7 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 |---|---|---|
 | Chain state | New `campaign/fish/fisherman/chain/FishermanChain` | Saved stage per quest (T1–T4 and follow-ups) in sector persistent data, as `FishermanQuest` stores its `STATE_KEY`. Entry points are `CatchReleaseCMD` verbs. A `tokens` Boolean per offer gates the `CatchReleaseFisherOptions` rows. Registers its transient listeners on load. |
 | Chain intel | New `BaseIntelPlugin` subclasses in the same package | One intel per quest: lost compass, Needle Sensor build, wounded epic, and the rumour hunt (title and body switch after the first legendary, as `FishingIntro.IntroIntel` switches by stage). Created through `FishIntelNotifications.queue`. |
-| T2 mission | New `BaseHubMission` subclass | Needs a contact person and a fleet, and `BaseHubMission` supplies both and ticks `advanceImpl`. Fleet spawning follows `CampedSpot.spawn`; holding and friendliness reuse `FleetQuest.hold`/`keepStanding`; comms reuse the `catchrelease_fleetQuestHail` pattern. Not a `FishJob`: no fish are delivered. |
+| T2 mission | `chain/CaptainsFleet` | Implemented in Stage 3; see [ARCHITECTURE.md](ARCHITECTURE.md). A chain-owned class with its own intel, like T1, not a `BaseHubMission`: the chain already saves the stage, and the fleet's commander is the contact. |
 | Rig slots | `TackleManager`, `RigLoadout`, `TackleEffects` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Incompatibility | `Tackle.Exclusion` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Ships | `FishingShips` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md). |
@@ -279,7 +279,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 **Stage 3: T2, the captain's fleet.**
 - [x] 3.1 The captain's voice entry in `LORE.md`.
 - [x] 3.2 System and species selection: zero markets and colonies, a star, nearby, and an epic species in range.
-- [ ] 3.3 The T2 hub mission: spawn and hold the fleet, the captain with his portrait, the map marker and the comms rows.
+- [x] 3.3 The T2 hub mission: spawn and hold the fleet, the captain with his portrait, the map marker and the comms rows.
 - [ ] 3.4 The lamp timer in `SearchlightAbilityPlugin.advance`: 15 continuous seconds within 6,000 units of the star's surface.
 - [ ] 3.5 A `Searchlight` accessor for a point ahead of the sweep, then placing the quest's buried epic there.
 - [ ] 3.6 The hunt through the Stage 0 hooks: a catch, or a failure on reset, failed catch or blast with a notification back to the captain.

@@ -2670,6 +2670,49 @@ catchrelease_t1FollowupLens,CatchReleaseT1Followup,$catchreleaseChainT1Lens,Catc
 catchrelease_t1FollowupBought,CatchReleaseT1Followup,$catchreleaseChainT1Bought,"CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""two months""
 CatchReleaseCMD t1Done","""You've already got one of those lenses, I see. Then take it back to $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupNone,CatchReleaseT1Followup,,,"""Good fishing, Captain.""",catchrelease_fisherBack:Continue,
+# fisherman chain T2: the captain's fleet,,,,,,
+catchrelease_fisherOptT2,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT2Offer",SetOptionColor catchrelease_t2Ask highlight,,"35:catchrelease_t2Ask:""Got any more work for me?""",
+catchrelease_t2Ask,DialogOptionSelected,$option == catchrelease_t2Ask,"CatchReleaseCMD t2Prepare
+CatchReleaseCMD tokens
+FireBest CatchReleaseT2Offer",,,
+catchrelease_t2Offer,CatchReleaseT2Offer,"$catchreleaseChainT2Offer
+$catchreleaseChainT2Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT2System $catchreleaseChainT2Species ""one of his ships""","""There is, as it happens. A man who used to crew for me has his own fleet now. He sent word asking for a hand.""
+
+""He's in $catchreleaseChainT2System, after a $catchreleaseChainT2Species. He's been after that one for years. His lamps have given out, and he can't find it without them. Yours work.""
+
+""He's offering one of his ships for the trouble. Go and hear him out. There's no hurry.""","catchrelease_t2Accept:""I'll go and see him.""
+catchrelease_t2Decline:""Not right now.""",
+catchrelease_t2OfferNone,CatchReleaseT2Offer,,,"""Nobody's asking for anything just now. Try me another time.""",catchrelease_fisherBack:Continue,
+catchrelease_t2Accept,DialogOptionSelected,$option == catchrelease_t2Accept,"CatchReleaseCMD t2Accept
+CatchReleaseCMD tokens
+FireBest CatchReleaseT2Accepted",,,
+catchrelease_t2Accepted,CatchReleaseT2Accepted,$catchreleaseChainT2Meet,,"""Good. His fleet's holding near the star. He'll hail you when you get there.""",catchrelease_fisherBack:Continue,
+catchrelease_t2AcceptFailed,CatchReleaseT2Accepted,,,"""Hm. He'll have moved on since he wrote. Ask me again another time.""",catchrelease_fisherBack:Continue,
+catchrelease_t2Decline,DialogOptionSelected,$option == catchrelease_t2Decline,,"""Suit yourself. He's waited this long.""",catchrelease_fisherBack:Continue,
+catchrelease_t2Hail,BeginFleetEncounter,"$catchrelease_t2Captain score:1200
+!$catchrelease_t2Hailed","$catchrelease_t2Hailed = true
+FleetDesc
+HailPlayer",,,
+catchrelease_t2Comms,OpenCommLink,$entity.catchrelease_t2Captain score:1200,"ShowPersonVisual
+CatchReleaseCMD chainTokens
+FireBest CatchReleaseT2Captain",,,
+catchrelease_t2CaptainMeet,CatchReleaseT2Captain,$catchreleaseChainT2Meet,"CatchReleaseCMD highlightFishText $catchreleaseChainT2Species
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The link opens on a cramped bridge. The captain is an old man with a grey beard, propped on a crutch beside the plot table.
+
+""You'll be the one the old man sent. Good. I was starting to think he'd forgotten me.""
+
+""There's a $catchreleaseChainT2Species out there. I've been after her sixteen year. First time I got a harpoon in her, she took my leg off at the knee, and I've been on her tail ever since.""
+
+""Och, but my lamps are done. Cannae see a thing without them. Take a wee turn round the star with yours lit, close in, and keep them lit till she shows. When she does, put a harpoon in her.""","catchrelease_t2Search:""I'll find her.""
+100:catchrelease_fleetResolutionLeave:Leave",
+catchrelease_t2Search,DialogOptionSelected,$option == catchrelease_t2Search,"CatchReleaseCMD t2Search
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""Grand. We'll be right here. Give us a shout when you've seen her.""",100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2CaptainSearching,CatchReleaseT2Captain,$catchreleaseChainT2Searching,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is at the plot table again. He doesn't wait for a greeting.
+
+""Nae sign of her yet? Keep close in to the star with the lamps lit. She'll show.""",100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2CaptainNone,CatchReleaseT2Captain,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""",The captain is busy with his crew and waves you off.,100:catchrelease_fleetResolutionLeave:Leave,
+,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,
 catchrelease_fisherOptAsk,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
