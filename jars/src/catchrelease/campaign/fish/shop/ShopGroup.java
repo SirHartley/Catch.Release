@@ -11,9 +11,9 @@ public enum ShopGroup {
     DRONES("Drones", "Drones", "shop_rod", "catchrelease_rod"),
     HARPOON("Harpoon", "Harpoon", "shop_harpoon", "catchrelease_harpoon"),
     THE_CATCH("The catch", "Catch", "pane_fish"),
-    DRONE_TACKLE("Drone cores", "Drone cores", "shop_rod_modifiers", "catchrelease_rod"),
-    HARPOON_TIPS("Harpoon tips", "Harpoon tips", "shop_harpoon", "catchrelease_harpoon"),
-    SEARCHLIGHT_RIG("Lens arrays", "Lens arrays", "shop_lights_modifiers", "catchrelease_searchlights");
+    DRONE_TACKLE("Drone Cores", "Drone Cores", "shop_rod_modifiers", "catchrelease_rod"),
+    HARPOON_TIPS("Harpoon Tips", "Harpoon Tips", "shop_harpoon", "catchrelease_harpoon"),
+    SEARCHLIGHT_RIG("Lens Arrays", "Lens Arrays", "shop_lights_modifiers", "catchrelease_searchlights");
 
     public final String title;
     public final String tabTitle;
