@@ -277,7 +277,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 2.6 A check covering the reconcile rules and the incompatibility matrix.
 
 **Stage 3: T2, the captain's fleet.**
-- [ ] 3.1 The captain's voice entry in `LORE.md`.
+- [x] 3.1 The captain's voice entry in `LORE.md`.
 - [ ] 3.2 System and species selection: zero markets and colonies, a star, nearby, and an epic species in range.
 - [ ] 3.3 The T2 hub mission: spawn and hold the fleet, the captain with his portrait, the map marker and the comms rows.
 - [ ] 3.4 The lamp timer in `SearchlightAbilityPlugin.advance`: 15 continuous seconds within 6,000 units of the star's surface.
