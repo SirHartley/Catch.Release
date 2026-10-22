@@ -2731,6 +2731,33 @@ SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain hears you
 catchrelease_t2CaptainNone,CatchReleaseT2Captain,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is busy getting his fleet under way. He raises a hand to the pickup.
 
 ""Tell the old man I'm obliged to him.""",100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_fisherOptT2Debrief,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT2Debrief",SetOptionColor catchrelease_t2Debrief highlight,,"36:catchrelease_t2Debrief:""I've been to see your old crewman.""",
+catchrelease_t2Debrief,DialogOptionSelected,$option == catchrelease_t2Debrief,"CatchReleaseCMD tokens
+FireBest CatchReleaseT2Debrief",,,
+catchrelease_t2DebriefLanded,CatchReleaseT2Debrief,$catchreleaseChainT2Landed,FireBest CatchReleaseT2Lesson,"The Fisherman hears the whole account before he says anything.
+
+""So it's landed. Thank you for going. He's been at that one a long time, and it'll do him good to stop.""",,
+catchrelease_t2DebriefLost,CatchReleaseT2Debrief,,FireBest CatchReleaseT2Lesson,"The Fisherman hears the whole account before he says anything.
+
+""It got away from him again, then. Thank you for going. He'll be back out after it inside a month, and glad of the excuse.""",,
+catchrelease_t2Lesson,CatchReleaseT2Lesson,,FireAll CatchReleaseT2DebriefQuestions,"""The big ones all go like that. The first strike wakes them and won't land. After that they run hard, and they only settle if you let them get well ahead of you. Stay close and keep at it.""
+
+""There are stranger things out there than that one. Each of those has habits of its own. You'll learn them as you go.""",,
+catchrelease_t2DebriefQuestionsCrew,CatchReleaseT2DebriefQuestions,!$catchreleaseT2AskedCrew,,,"0:catchrelease_t2AskCrew:""He used to work for you?""",
+catchrelease_t2DebriefQuestionsStrike,CatchReleaseT2DebriefQuestions,!$catchreleaseT2AskedStrike,,,"10:catchrelease_t2AskStrike:""Why didn't the first harpoon land?""",
+catchrelease_t2DebriefQuestionsDone,CatchReleaseT2DebriefQuestions,,,,"100:catchrelease_t2DebriefDone:""What now?""",
+catchrelease_t2AskCrew,DialogOptionSelected,$option == catchrelease_t2AskCrew,"$catchreleaseT2AskedCrew = true
+FireAll CatchReleaseT2DebriefQuestions","""For a few years, before he had a boat of his own. Good hand with a harpoon. He'd tell you he was the best I had. He wasn't, but he wasn't far off.""",,
+catchrelease_t2AskStrike,DialogOptionSelected,$option == catchrelease_t2AskStrike,"$catchreleaseT2AskedStrike = true
+FireAll CatchReleaseT2DebriefQuestions","""The big ones hold together better than most. The first strike uses that up. The next one goes in.""",,
+catchrelease_t2DebriefDone,DialogOptionSelected,$option == catchrelease_t2DebriefDone,"CatchReleaseCMD tokens
+FireBest CatchReleaseT2Sensor",,,
+catchrelease_t2SensorOwned,CatchReleaseT2Sensor,$catchreleaseChainT2HasSensor,CatchReleaseCMD t2Debrief,"""You've a Needle Sensor on your lights already, I see. Good. Then I've something else for you, whenever you're ready.""",catchrelease_fisherBack:Continue,
+catchrelease_t2SensorGive,CatchReleaseT2Sensor,,"CatchReleaseCMD highlightFishText Outfitter
+CatchReleaseCMD t2Debrief","A deckhand brings up a data chip and passes it across.
+
+""Schematic for a lens array. It picks up the big ones while your lights are off. Have it built at the Outfitter, then come back and see me. I've something I'd like you to look at.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,

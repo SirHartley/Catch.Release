@@ -56,6 +56,9 @@ public final class FishermanChain {
     public static final String T2_HUNT = "$catchreleaseChainT2Hunt";
     public static final String T2_CAUGHT = "$catchreleaseChainT2Caught";
     public static final String T2_LOST = "$catchreleaseChainT2Lost";
+    public static final String T2_DEBRIEF = "$catchreleaseChainT2Debrief";
+    public static final String T2_LANDED = "$catchreleaseChainT2Landed";
+    public static final String T2_HAS_SENSOR = "$catchreleaseChainT2HasSensor";
 
     public static class Saved implements Serializable {
 
@@ -144,6 +147,9 @@ public final class FishermanChain {
         local.set(T2_HUNT, stage == Stage.T2_HUNT, 0);
         local.set(T2_CAUGHT, stage == Stage.T2_REPORT && saved != null && saved.t2Caught, 0);
         local.set(T2_LOST, stage == Stage.T2_REPORT && (saved == null || !saved.t2Caught), 0);
+        local.set(T2_DEBRIEF, stage == Stage.T2_DEBRIEF, 0);
+        local.set(T2_LANDED, stage == Stage.T2_DEBRIEF && saved != null && saved.t2Caught, 0);
+        local.set(T2_HAS_SENSOR, SensorBuild.isOwned(), 0);
     }
 
     public static Saved get(boolean create) {

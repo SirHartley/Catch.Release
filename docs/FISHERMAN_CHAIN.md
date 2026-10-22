@@ -284,7 +284,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 3.5 A `Searchlight` accessor for a point ahead of the sweep, then placing the quest's buried epic there.
 - [x] 3.6 The hunt through the Stage 0 hooks: a catch, or a failure on reset, failed catch or blast with a notification back to the captain.
 - [x] 3.7 Outcomes: the harpoon ship through `FishReward.ship` for both, plus the extra rewards on a catch.
-- [ ] 3.8 The Fisherman debrief, its lore questions and the Needle Sensor schematic.
+- [x] 3.8 The Fisherman debrief, its lore questions and the Needle Sensor schematic.
 - [ ] 3.9 The Needle Sensor intel: buy it (checked when the Outfitter closes), then return to the Fisherman.
 - [ ] 3.10 Text through the Editor process, then the dialogue and rules checks.
 
