@@ -828,7 +828,7 @@ charges, moving couriers, notice placement, pause and cleanup.
 | `charges/BaseChargedSkillshotAbility.java` | Shared charge pool for charged abilities. |
 | `rod/ability/PondInteractionAbilityPlugin.java` | Opens ponds, launches and recalls drones, and supports lamp fishing with the Breach Coupler (currently disabled; see below). |
 | `rod/entities/FishingDroneEntityPlugin.java` | Drone launch, orbit, timed chase, catch, and return. |
-| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast, staggered launches, recall, target assignment, hit cues, and reachability checks. |
+| `rod/scripts/FishingDroneSwarmScript.java` | Owns one cast, staggered launches, recall, target assignment, hit cues, and reachability checks. Never targets an epic (`EpicHunt.applies`): epics are harpoon catches. |
 | `rod/scripts/RoamingDroneSwarmScript.java` | Pondless Breach Coupler swarm; dormant while the Coupler is disabled. |
 | `harpoon/ability/HarpoonAbilityPlugin.java` | Charged manual targeting and tow-line cutting. |
 | `harpoon/entities/HarpoonEntityPlugin.java` | Flight, collision, shields, mines, hauling, fleet contact, rope, catch, and return. |
