@@ -7,9 +7,16 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.FishermanIdentity;
+import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
+import catchrelease.campaign.fish.items.FishItems;
+import catchrelease.campaign.fish.jobs.FishReward;
+import catchrelease.campaign.fish.shop.PaymentSpecimens;
+import catchrelease.campaign.fish.shop.ShopPricing;
+import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.treasure.TreasureAward;
 import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -37,6 +44,8 @@ import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 // T1: the treasure rumour. The Fisherman's compass comes up as a golden chest in one system's lamp catches.
@@ -373,9 +382,44 @@ public final class TreasureRumour {
         saved.lostMarketName = null;
         CompassWatcher.unregister();
         FishermanChain.setStage(FishermanChain.Stage.T1_LENS);
+        FishReward.showReceipts(text, grantRewards());
         updateIntel();
 
         return true;
+    }
+
+    // The Glitter Lens schematic and the means to buy it: the specimens its saved fish payment asks for, plus its
+    // credit price after the player's cost setting. Without a payment that specimens can meet, credits alone. A
+    // player who already owns the lens gets its credit price only.
+    protected static List<FishReward.Receipt> grantRewards() {
+        List<FishReward.Receipt> receipts = new ArrayList<>();
+        Tackle lens = Tackle.GLITTER_LENS;
+
+        if (!ShopSchematics.has(lens)) receipts.add(FishReward.tackleSchematic(lens).grantWithReceipt());
+
+        ShopPricing.Price price = ShopPricing.getPrice(lens);
+        if (price == null) return receipts;
+
+        if (!TackleManager.isOwned(lens)) {
+            List<FishCatch> specimens = PaymentSpecimens.build(price.fish);
+            CargoAPI cargo = getPlayerCargo();
+            if (specimens != null && cargo != null) {
+                for (FishCatch specimen : specimens) FishItems.stow(cargo, specimen);
+                receipts.add(describe(specimens));
+            }
+        }
+
+        receipts.add(FishReward.credits(price.credits).grantWithReceipt());
+
+        return receipts;
+    }
+
+    protected static FishReward.Receipt describe(List<FishCatch> specimens) {
+        FishSpec spec = specimens.get(0).getSpec();
+        String name = spec.getDisplayName();
+
+        return new FishReward.Receipt(specimens.size() > 1 ? name + " x" + specimens.size() : name, name,
+                spec.rarity.color);
     }
 
     // Any won or lost minigame on a non-legendary lamp catch in the target system counts toward the guarantee.

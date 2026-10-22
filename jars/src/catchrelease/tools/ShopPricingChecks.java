@@ -1,5 +1,6 @@
 package catchrelease.tools;
 
+import catchrelease.campaign.fish.shop.PaymentSpecimens;
 import catchrelease.campaign.fish.shop.ShopPricing;
 import catchrelease.campaign.fish.shop.ShopFishPayments;
 import catchrelease.campaign.fish.shop.FishRequirement;
@@ -204,6 +205,11 @@ public final class ShopPricingChecks {
             require(req.speciesId == null || req.minRarity == null, "no redundant named rarity floor");
             require(pool.stream().anyMatch(option -> req.couldBeSatisfiedBy(option.spec())
                     && req.matches(sample(option))), "combined recipe has an obtainable witness: " + req.describe());
+            List<FishCatch> gift = PaymentSpecimens.build(req);
+            require(gift != null && gift.size() == req.count
+                    && gift.stream().allMatch(fish -> FishCurrency.isAutoPayable(req, fish))
+                    && gift.stream().map(fish -> fish.speciesId).distinct().count() == 1,
+                    "reward specimens pay the recipe: " + req.describe());
             int mods = 0;
             if (req.minGrade != null) { modifiers.add("grade"); mods++; }
             if (req.minLength > 0) { modifiers.add("length"); mods++; }

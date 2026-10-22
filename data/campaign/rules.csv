@@ -2642,6 +2642,11 @@ catchrelease_t1Decline,DialogOptionSelected,$option == catchrelease_t1Decline,,"
 catchrelease_t1Later,DialogOptionSelected,$option == catchrelease_t1Later,"$menuState = catchreleaseFisher 0
 CatchReleaseCMD tokens
 FireAll CatchReleaseFisherOptions","""Another time, then.""",,
+catchrelease_fisherOptT1HandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT1HasCompass",SetOptionColor catchrelease_t1HandIn highlight,,"36:catchrelease_t1HandIn:""I found your chest. There was a compass in it.""",
+catchrelease_t1HandIn,DialogOptionSelected,$option == catchrelease_t1HandIn,CatchReleaseCMD t1Complete,"The Fisherman sends a deckhand across for the compass. He turns it over once, then puts it in his coat without opening the case.
+
+""That's the one. Thank you, Captain.""",catchrelease_t1Followup:Continue,
 catchrelease_fisherOptT1Lost,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT1Active
 $catchreleaseChainT1Pulled
@@ -2653,8 +2658,12 @@ CatchReleaseCMD tokens
 FireBest CatchReleaseT1Lost",,,
 catchrelease_t1LostSold,CatchReleaseT1Lost,$catchreleaseChainT1LostSold,CatchReleaseCMD highlightFishText $catchreleaseChainT1LostMarket,"""I'm fairly sure I saw it for sale at $catchreleaseChainT1LostMarket. You'd better go and buy it back.""",catchrelease_fisherBack:Continue,
 catchrelease_t1LostStored,CatchReleaseT1Lost,$catchreleaseChainT1LostStored,CatchReleaseCMD highlightFishText $catchreleaseChainT1LostMarket,"""Have you looked in your storage at $catchreleaseChainT1LostMarket? I'd start there.""",catchrelease_fisherBack:Continue,
-catchrelease_t1LostGone,CatchReleaseT1Lost,$catchreleaseChainT1LostGone,CatchReleaseCMD t1Complete,"""Then it's gone, and that's that. You found it, which is what I asked you to do.""",catchrelease_fisherBack:Continue,
+catchrelease_t1LostGone,CatchReleaseT1Lost,$catchreleaseChainT1LostGone,CatchReleaseCMD t1Complete,"""Then it's gone, and that's that. You found it, which is what I asked you to do.""",catchrelease_t1Followup:Continue,
 catchrelease_t1LostNone,CatchReleaseT1Lost,,,"""Bring it by when you find it.""",catchrelease_fisherBack:Continue,
+catchrelease_t1Followup,DialogOptionSelected,$option == catchrelease_t1Followup,"CatchReleaseCMD tokens
+FireBest CatchReleaseT1Followup",,,
+catchrelease_t1FollowupLens,CatchReleaseT1Followup,$catchreleaseChainT1Lens,CatchReleaseCMD highlightFishText Outfitter,"""That schematic's for a lens array. Have it built at the Outfitter and fit it to your lights. You'll bring up a good deal more bycatch working under them.""",catchrelease_fisherBack:Continue,
+catchrelease_t1FollowupNone,CatchReleaseT1Followup,,,"""Good fishing, Captain.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman questions,,,,,,
 catchrelease_fisherOptAsk,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
