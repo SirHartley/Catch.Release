@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.intel;
 
+import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.codex.FishCodex;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.CatchImplement;
@@ -215,7 +216,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
         info.addPara("Valued around %s", 3f, gray, h,
                 Misc.getDGSCredits(specimen.getValue()));
 
-        if (specimen.questTargetId != null) {
+        if (specimen.questTargetId != null && !FishermanChain.isPlanter(specimen.questTargetId)) {
             info.addPara("Landed for a chart request.", gray, opad);
         }
 

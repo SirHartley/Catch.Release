@@ -2711,6 +2711,9 @@ SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""Grand. We'll be rig
 catchrelease_t2CaptainSearching,CatchReleaseT2Captain,$catchreleaseChainT2Searching,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is at the plot table again. He doesn't wait for a greeting.
 
 ""Nae sign of her yet? Keep close in to the star with the lamps lit. She'll show.""",100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2CaptainHunt,CatchReleaseT2Captain,$catchreleaseChainT2Hunt,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is leaning over the plot table when the link opens. Your lamp returns are up on his display.
+
+""That's her, right enough. What are you doing on the comms? Away and get a harpoon in her before she's off again.""",100:catchrelease_fleetResolutionLeave:Leave,
 catchrelease_t2CaptainNone,CatchReleaseT2Captain,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""",The captain is busy with his crew and waves you off.,100:catchrelease_fleetResolutionLeave:Leave,
 ,,,,,,
 ,,,,,,

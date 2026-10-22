@@ -31,6 +31,7 @@ public final class FishermanChain {
     }
 
     public static final String KEY = "$catchrelease_fisherChain";
+    public static final String PLANTER_PREFIX = "catchrelease_chain";
 
     public static final String T1_OFFER = "$catchreleaseChainT1Offer";
     public static final String T1_ACTIVE = "$catchreleaseChainT1Active";
@@ -52,6 +53,7 @@ public final class FishermanChain {
     public static final String T2_PLACED = "$catchreleaseChainT2Placed";
     public static final String T2_MEET = "$catchreleaseChainT2Meet";
     public static final String T2_SEARCHING = "$catchreleaseChainT2Searching";
+    public static final String T2_HUNT = "$catchreleaseChainT2Hunt";
 
     public static class Saved implements Serializable {
 
@@ -74,9 +76,15 @@ public final class FishermanChain {
         public String t2SystemName;
         public String t2SpeciesId;
         public CampaignFleetAPI t2Fleet;
+        public boolean t2Caught;
     }
 
     private FishermanChain() {
+    }
+
+    // Quest motes the chain plants carry these planter ids; they are no chart request.
+    public static boolean isPlanter(String id) {
+        return id != null && id.startsWith(PLANTER_PREFIX);
     }
 
     public static Stage getStage() {
@@ -130,7 +138,8 @@ public final class FishermanChain {
         local.set(T2_SPECIES, CaptainsFleet.getSpeciesName(), 0);
         local.set(T2_PLACED, saved != null && saved.t2SystemName != null, 0);
         local.set(T2_MEET, stage == Stage.T2_MEET, 0);
-        local.set(T2_SEARCHING, stage == Stage.T2_LAMPS || stage == Stage.T2_HUNT, 0);
+        local.set(T2_SEARCHING, stage == Stage.T2_LAMPS, 0);
+        local.set(T2_HUNT, stage == Stage.T2_HUNT, 0);
     }
 
     public static Saved get(boolean create) {

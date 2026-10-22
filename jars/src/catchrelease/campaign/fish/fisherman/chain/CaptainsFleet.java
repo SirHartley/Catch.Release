@@ -7,14 +7,18 @@ import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
+import catchrelease.campaign.fish.legendary.QuestEpicListener;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
@@ -50,6 +54,8 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 // T2: the captain's fleet. A captain the Fisherman knows is hunting an epic in an empty system; the player's lamps
@@ -73,23 +79,63 @@ public final class CaptainsFleet {
     public static final float LAMP_RANGE = 6000f;
     // how far ahead of the sweep the epic is placed, so the beam reaches it rather than starting on top of it
     public static final float LEAD_SECONDS = 2f;
+    public static final float VANISH_GRACE = 5f;
 
     private CaptainsFleet() {
     }
 
-    // Brings the fleet back if it was lost while the captain still has business with the player: the player only
-    // ever finds it on entering the system, so a replacement is never seen appearing.
-    public static class Arrival implements CurrentLocationChangedListener {
+    // Entering the system brings back a lost fleet: the player only ever finds it on arrival, so a replacement is
+    // never seen appearing. Leaving it before the epic wakes re-arms the lamp count; an awake epic is left to
+    // EpicHunt.DepartureCleanup, whose reset ends the hunt.
+    public static class Movement implements CurrentLocationChangedListener {
 
         public static void register() {
             ListenerManagerAPI listeners = Global.getSector().getListenerManager();
-            listeners.removeListenerOfClass(Arrival.class);
-            if (isCaptainWaiting()) listeners.addListener(new Arrival(), true);
+            listeners.removeListenerOfClass(Movement.class);
+            if (isCaptainWaiting()) listeners.addListener(new Movement(), true);
         }
 
         @Override
         public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
-            if (curr != null && curr == getSystem()) ensureFleet();
+            StarSystemAPI system = getSystem();
+            if (system == null) return;
+
+            if (prev == system && prev != curr && FishermanChain.isAt(FishermanChain.Stage.T2_HUNT)
+                    && !hasAwakeEpic(system)) {
+                rearm();
+            }
+            if (curr == system) ensureFleet();
+        }
+    }
+
+    // The captain's epic hunt ends at the first report for it; reports for an epic already given up are ignored.
+    // LAMPS is accepted too: the vanish check can re-arm while a minigame on the epic is about to report.
+    public static class Hunt implements QuestEpicListener {
+
+        public static void register() {
+            ListenerManagerAPI listeners = Global.getSector().getListenerManager();
+            listeners.removeListenerOfClass(Hunt.class);
+            if (isSearching()) listeners.addListener(new Hunt(), true);
+        }
+
+        @Override
+        public void reportQuestEpicReset(SectorEntityToken mote, String planter) {
+            if (PLANTER.equals(planter)) resolve(false);
+        }
+
+        @Override
+        public void reportQuestEpicEscaped(SectorEntityToken mote, String planter) {
+            if (PLANTER.equals(planter)) resolve(false);
+        }
+
+        @Override
+        public void reportQuestEpicBlasted(SectorEntityToken mote, String planter) {
+            if (PLANTER.equals(planter)) resolve(false);
+        }
+
+        @Override
+        public void reportQuestEpicCaught(SectorEntityToken mote, String planter, FishCatch caught) {
+            if (PLANTER.equals(planter)) resolve(true);
         }
     }
 
@@ -99,8 +145,16 @@ public final class CaptainsFleet {
     public static class LampTimer {
 
         protected float seconds;
+        protected float missing;
 
         public void advance(SearchlightAbilityPlugin lamps, float amount) {
+            if (FishermanChain.isAt(FishermanChain.Stage.T2_HUNT)) {
+                seconds = 0f;
+                checkVanished(amount);
+                return;
+            }
+            missing = 0f;
+
             if (!FishermanChain.isAt(FishermanChain.Stage.T2_LAMPS) || !isCounting(lamps)) {
                 seconds = 0f;
                 return;
@@ -112,6 +166,23 @@ public final class CaptainsFleet {
             seconds = 0f;
             Searchlight beam = lamps.getFirstLitBeam();
             if (beam != null) placeEpic(beam.getPointAhead(LEAD_SECONDS));
+        }
+
+        // A buried epic a drone surfaced without waking it fades at the end of its swim with no report. After
+        // VANISH_GRACE seconds with no mote in the system the count starts again; the grace covers the frames
+        // between a hook and the minigame that will report the result.
+        protected void checkVanished(float amount) {
+            StarSystemAPI system = getSystem();
+            if (system == null || Global.getSector().getCurrentLocation() != system || hasEpic(system)) {
+                missing = 0f;
+                return;
+            }
+
+            missing += amount;
+            if (missing < VANISH_GRACE) return;
+
+            missing = 0f;
+            rearm();
         }
 
         protected boolean isCounting(SearchlightAbilityPlugin lamps) {
@@ -173,6 +244,7 @@ public final class CaptainsFleet {
                             (int) LAMP_SECONDS + " seconds");
                 }
                 case T2_HUNT -> info.addPara("Harpoon the %s", pad, text, h, getSpeciesName());
+                case T2_REPORT -> info.addPara("Report to the captain in %s", pad, text, h, getSystemName());
                 case T2_DEBRIEF -> info.addPara("Return to the nearest fishing boat", text, pad);
                 default -> info.addPara("Speak to the captain in %s", pad, text, h, getSystemName());
             }
@@ -254,8 +326,16 @@ public final class CaptainsFleet {
     }
 
     public static void register() {
-        Arrival.register();
+        Movement.register();
+        Hunt.register();
+        if (!FishermanChain.isAt(FishermanChain.Stage.T2_HUNT)) clearEpic();
         if (isCaptainWaiting() && Global.getSector().getCurrentLocation() != getSystem()) ensureFleet();
+    }
+
+    public static boolean isSearching() {
+        FishermanChain.Stage stage = FishermanChain.getStage();
+
+        return stage == FishermanChain.Stage.T2_LAMPS || stage == FishermanChain.Stage.T2_HUNT;
     }
 
     public static boolean isCaptainWaiting() {
@@ -307,7 +387,58 @@ public final class CaptainsFleet {
         if (!FishermanChain.isAt(FishermanChain.Stage.T2_MEET)) return;
 
         FishermanChain.setStage(FishermanChain.Stage.T2_LAMPS);
+        Hunt.register();
         updateIntel();
+    }
+
+    // The epic was lost before anyone woke it: it goes, and the lamp count starts again.
+    protected static void rearm() {
+        if (!FishermanChain.isAt(FishermanChain.Stage.T2_HUNT)) return;
+
+        clearEpic();
+        FishermanChain.setStage(FishermanChain.Stage.T2_LAMPS);
+        updateIntel();
+    }
+
+    // The hunt is over either way; the captain hears about it next.
+    protected static void resolve(boolean caught) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved == null || !isSearching()) return;
+
+        saved.t2Caught = caught;
+        clearEpic();
+        FishermanChain.setStage(FishermanChain.Stage.T2_REPORT);
+        Hunt.register();
+        updateIntel();
+    }
+
+    // QuestPond.sweep only reaches surfaced motes, so the buried one is removed here too.
+    protected static void clearEpic() {
+        StarSystemAPI system = getSystem();
+        if (system == null) return;
+
+        for (SectorEntityToken mote : getEpics(system)) Misc.fadeAndExpire(mote, 1f);
+    }
+
+    protected static boolean hasEpic(StarSystemAPI system) {
+        return !getEpics(system).isEmpty();
+    }
+
+    protected static boolean hasAwakeEpic(StarSystemAPI system) {
+        for (SectorEntityToken mote : getEpics(system)) {
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && EpicHunt.isActive(fish)) return true;
+        }
+        return false;
+    }
+
+    protected static List<SectorEntityToken> getEpics(StarSystemAPI system) {
+        List<SectorEntityToken> epics = new ArrayList<>();
+        for (String tag : new String[]{FishEntityPlugin.MOTE_TAG, BuriedMoteEntityPlugin.BURIED_TAG}) {
+            for (SectorEntityToken mote : system.getEntitiesWithTag(tag)) {
+                if (!mote.isExpired() && PLANTER.equals(QuestPond.getPlanter(mote))) epics.add(mote);
+            }
+        }
+        return epics;
     }
 
     // The captain's epic, buried and quest-marked so spawners, culls and Lantern Jack leave it alone.
