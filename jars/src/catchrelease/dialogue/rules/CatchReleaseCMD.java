@@ -277,6 +277,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return WoundedEpic.start(text(dialog));
             case "t3Complete":
                 return WoundedEpic.complete(text(dialog));
+            case "t3Done":
+                WoundedEpic.finish();
+                return true;
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);

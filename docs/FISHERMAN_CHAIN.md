@@ -167,10 +167,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Gist: "Rumours about the stranger fish are worth following once your gear is very good." He does not name legendaries, so T4 stays vague.
 - Epics are not unique, but they are rare enough that they might as well be.
 
-**Work**
-- Circling: a heading rule for the quest's buried mote in `BuriedMoteEntityPlugin`, which today wanders on random headings. Only the buried stage circles, so the surfaced fish needs no route. Do not use `orbitAnchor`: it marks surfaced shield escorts, which `NeedleSensor.isEligible` and `EpicHunt.applies` exclude.
-- Slower movement: a per-fish multiplier of 0.5 on top of `EpicHunt`'s awake speed. The buried mote carries it, and `unearth()` passes it to the surfaced fish along with the quest claim.
-- Respawn: on the quest fish's reset, expire it and spawn a fresh buried, circling mote at the planet.
+**Work.** Implemented in Stage 4 (`WoundedEpic`, `BuriedMoteEntityPlugin` circling, `EpicHunt.AWAKE_SPEED_KEY`); see [ARCHITECTURE.md](ARCHITECTURE.md). Any hunt that does not land the epic returns it to the planet, so T3 cannot fail.
 
 ## T4: Listen for rumours
 
@@ -287,7 +284,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 4.4 The T3 offer in the Needle Sensor return conversation, and its intel.
 - [x] 4.5 Hand-in: the Breach Light ship blueprint and range data on an epic.
 - [x] 4.6 The build follow-up, completed through `FishingShips.reconcile()`.
-- [ ] 4.7 The closing conversation; text through the Editor process, then the dialogue and rules checks.
+- [ ] 4.7 The closing conversation; text through the Editor process, then the dialogue and rules checks. The conversation and checks are done; the Editor pass is pending.
 
 **Stage 5: T4 and the legendary hunt.**
 - [ ] 5.1 Reployment Bays:

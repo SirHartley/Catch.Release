@@ -2786,6 +2786,15 @@ CatchReleaseCMD t3Complete","""Did you, now? Good work. That one would have kept
 He sends a deckhand below for two chips and hands them across himself.
 
 ""The first is a blueprint for a lamp ship. Bigger lights, and room for a second lens array. You'll have to find someone who can build it; I don't run a yard. The other is range data. Somewhere to go next.""",catchrelease_fisherBack:Continue,
+catchrelease_fisherOptT3Built,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT3Built",SetOptionColor catchrelease_t3Built highlight,,"36:catchrelease_t3Built:""The lamp ship's built.""",
+catchrelease_t3Built,DialogOptionSelected,$option == catchrelease_t3Built,CatchReleaseCMD t3Done,"The Fisherman looks the ship over on his display for longer than he needs to.
+
+""She'll do. Put the fan array on her lights and your lamps will cover a good deal more ground.""
+
+""You've landed an epic now. There are others out there like it, but not many. You'll go a long while between them, and some crews never see one.""
+
+""There are stranger things than epics, too. Talk gets round about them, and most of it is nonsense. Once your gear is good, very good, it's worth following anyway.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,

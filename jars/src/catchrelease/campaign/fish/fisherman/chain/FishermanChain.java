@@ -74,6 +74,7 @@ public final class FishermanChain {
     public static final String T3_SPECIES = "$catchreleaseChainT3Species";
     public static final String T3_HUNT = "$catchreleaseChainT3Hunt";
     public static final String T3_CAUGHT = "$catchreleaseChainT3Caught";
+    public static final String T3_BUILT = "$catchreleaseChainT3Built";
 
     public static class Saved implements Serializable {
 
@@ -182,6 +183,7 @@ public final class FishermanChain {
         local.set(T3_SPECIES, WoundedEpic.getSpeciesName(), 0);
         local.set(T3_HUNT, stage == Stage.T3_HUNT, 0);
         local.set(T3_CAUGHT, stage == Stage.T3_CAUGHT, 0);
+        local.set(T3_BUILT, stage == Stage.T3_BUILT, 0);
     }
 
     public static Saved get(boolean create) {

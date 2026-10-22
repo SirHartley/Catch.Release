@@ -368,6 +368,11 @@ public final class WoundedEpic {
         updateIntel();
     }
 
+    // The closing conversation ends T3; T4 is offered from here.
+    public static void finish() {
+        if (FishermanChain.isAt(FishermanChain.Stage.T3_BUILT)) FishermanChain.setStage(FishermanChain.Stage.T3_DONE);
+    }
+
     public static String getLampShipName() {
         ShipHullSpecAPI spec = Global.getSettings().getHullSpec(FishingShips.Ship.LAMP.hullId);
 
