@@ -28,13 +28,13 @@ T2 and T3 build on this; T2's failure condition is the reset.
 
 ## Shared mechanic: ship-bound equipment
 
-Not implemented. Each fishing ship belongs to one rig and carries one module for it (see [Ships](#ships)). The harpoon ship goes with the Harpoon (Harpoon Tips), the Breach Light ship with the Breach Lights (Lens Arrays) and the drone carrier with the ROD (Drone Cores).
+Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md) (`FishingShips`, the Outfitter). Each fishing ship belongs to one rig and carries one module for it (see [Ships](#ships)). The harpoon ship goes with the Harpoon (Harpoon Tips), the Breach Light ship with the Breach Lights (Lens Arrays) and the drone carrier with the ROD (Drone Cores).
 
 - **Second slot.** While a ship of that kind is in the fleet, its rig gets a second equipment slot, and the ship's module becomes available.
   - This happens once per rig. Two harpoon ships still give one extra harpoon slot.
 - **Fitting.** The second slot works like the first. The player can swap the ship's module out for any other module they own.
   - While the ship is in the fleet, its module can be fitted in either slot.
-- **Ship leaves the fleet.** When the last ship of that kind leaves, the second slot is emptied at once. The ship's module is unfitted wherever it sits, because it is only available with the ship.
+- **Ship leaves the fleet.** When the last ship of that kind leaves, the second slot is emptied at once. The ship's module is unfitted wherever it sits, because it is only available with the ship. A copy bought before the module moved onto the ship is the player's own and stays.
 - **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
 - **Two modules on one rig.**
   - Effects apply in slot order: the first slot, then the second.
@@ -233,10 +233,10 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 | T2 mission | New `BaseHubMission` subclass | Needs a contact person and a fleet, and `BaseHubMission` supplies both and ticks `advanceImpl`. Fleet spawning follows `CampedSpot.spawn`; holding and friendliness reuse `FleetQuest.hold`/`keepStanding`; comms reuse the `catchrelease_fleetQuestHail` pattern. Not a `FishJob`: no fish are delivered. |
 | Rig slots | `TackleManager`, `RigLoadout`, `TackleEffects` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Incompatibility | `Tackle.Exclusion` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
-| Ships | New `campaign/fish/ships/FishingShips` | Hull id → rig → ship module. `reconcile()` compares fleet presence with the second slot and applies the leave/rejoin rules. Ship modules are available while their ship is present, never added to the owned set, and have no price. |
-| Fleet presence | `FishingShips` listeners | Vanilla has no fleet-membership callback (`FleetData.addFleetMember` reports nothing). Covered: `reportPlayerMarketTransaction` (buy, sell, storage), `FleetEventListener.reportBattleOccurred` (losses), `ShipRecoveryListener`, `onGameLoad`, and quest grants calling `reconcile()` directly. Not covered: scuttling and changes made by other code. Implemented in Stage 2 with a transient member-count watcher instead of the rig abilities' `advance` (the ROD ability has none); see [ARCHITECTURE.md](ARCHITECTURE.md). |
+| Ships | `FishingShips` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md). |
+| Fleet presence | `FishingShips.Listener`, `FishingShips.Watcher` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Hull ids | Placeholder hulls `catchrelease_harpoon_ship`, `catchrelease_lamp_ship`, `catchrelease_rod_ship` | Added; see [Ships](#ships). A D-modded ship becomes `<id>_default_D`, so match `spec.isDefaultDHull() ? spec.getDParentHullId() : spec.getHullId()`. |
-| Outfitter | `FishShopDialog`, `ShopRowPlugin`, `ShopEntry`, `ShopDetailHeaderPlugin` | Second slot per rig, a disabled row state (rows have none today), and row hovers naming the conflict or where a module is fitted. Undo restores per slot. The "one slot" text changes. |
+| Outfitter | `FishShopDialog`, `ShopSlotPlugin`, `ShopRowPlugin`, `ShopEntry`, `ShopDetailHeaderPlugin` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md) and [UI.md](UI.md#outfitter-second-slot). |
 | Quest motes | `BuriedMoteEntityPlugin`, `BuriedMoteSpawner` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Epic hooks | `QuestEpicListener`, `EpicHunt` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). Still to add: a per-fish awake speed multiplier saved under a `$catchrelease_` memory key, which `unearth()` already copies from buried mote to surfaced fish. |
 | Ship rewards | `FishReward.Ship` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
@@ -274,7 +274,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 2.3 Fleet presence: market, battle and recovery listeners, `onGameLoad`, direct calls from quest grants, and the documented fallback check in the rig abilities' `advance`.
 - [x] 2.4 Ship modules: Retrieval Head and Fanned Array set to `stocked = false`. Availability comes from ship presence, never ownership, and has no price.
 - [x] 2.5 Outfitter: second slot per rig, a disabled row state, hovers naming the conflict or where a module is fitted, undo per slot, and the "one slot" text. UI scoping goes to the UI subagent.
-- [ ] 2.6 A check covering the reconcile rules and the incompatibility matrix.
+- [x] 2.6 A check covering the reconcile rules and the incompatibility matrix.
 
 **Stage 3: T2, the captain's fleet.**
 - [ ] 3.1 The captain's voice entry in `LORE.md`.
