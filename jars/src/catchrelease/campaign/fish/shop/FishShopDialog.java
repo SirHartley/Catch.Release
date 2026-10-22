@@ -562,7 +562,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                     tooltip.addPara("Slot %s", 0f, Misc.getHighlightColor(), String.valueOf(slot + 1));
-                    tooltip.addPara("Click to fit modules to this slot.", 6f);
+                    tooltip.addPara("Click to select this slot. FIT puts the selected module here.", 6f);
                     if (slot == 0) return;
 
                     String hull = getShipName(rig);
@@ -824,7 +824,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                             + " active together.", 8f);
 
                     tooltip.addPara("EQUIPMENT", Misc.getBasePlayerColor(), 12f);
-                    tooltip.addPara("Each fishing ability has one equipment slot. Swap owned"
+                    tooltip.addPara("Each rig has one equipment slot of its own. Swap owned"
                             + " equipment freely at no cost. Items marked as single-use are"
                             + " consumed when used.", 8f);
                     if (anySecondSlot()) {
@@ -872,6 +872,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
                         + " rig.", 16f, Misc.getGrayColor(), Misc.getHighlightColor(), blocker.name,
                         String.valueOf(2 - slot));
             }
+            // nothing to pay for, and nothing to fit here: "fitting it is free" would contradict the line above
+            if (blocker != null && (entry.isOwned() || entry.isShipModule())) return;
 
             // empty slot never had a price; an owned module was already paid for once
             if (entry.tackle == Tackle.NONE) {

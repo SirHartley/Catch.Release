@@ -1216,7 +1216,7 @@ He is an ordinary observer. Working on the Fisherman's boat did not give him the
 
 > "Aye, that's her. Sixteen year I've been after that beast, and she took a leg off me for my trouble."
 
-> "My lamps are done, so they are. Cannae see a thing out there. Take a wee turn round the star with yours lit, would ye?"
+> "My lamps are done, so they are. Cannae raise a thing out there without them. Take a wee turn round the star with yours lit, would ye?"
 
 These show the dialect density and his habit of turning a request into a story. They are not lines to reuse.
 

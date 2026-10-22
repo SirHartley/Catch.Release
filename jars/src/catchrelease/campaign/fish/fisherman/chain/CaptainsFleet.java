@@ -77,8 +77,10 @@ public final class CaptainsFleet {
 
     public static final float FLEET_POINTS = 45f;
     public static final float HOLD_DAYS = 100000f;
-    // where the fleet waits, past the star's surface; inside the lamp range, so the player starts there
-    public static final float HOLD_DISTANCE = 2500f;
+    // Where the fleet waits, past the star's surface. Clears every vanilla corona (the widest, a red supergiant's,
+    // reaches about 2,250 past the surface) and stays inside the lamp range, so the player starts there.
+    public static final float HOLD_DISTANCE = 3000f;
+    public static final float HOLD_ORBIT_DAYS = 1000000f;
 
     public static final String PLANTER = "catchrelease_chainT2";
     public static final float LAMP_SECONDS = 15f;
@@ -252,7 +254,11 @@ public final class CaptainsFleet {
                     info.addPara("Keep them lit for %s without a break", 0f, text, h,
                             (int) LAMP_SECONDS + " seconds");
                 }
-                case T2_HUNT -> info.addPara("Harpoon the %s", pad, text, FishRarity.EPIC.color, getSpeciesName());
+                case T2_HUNT -> {
+                    info.addPara("Harpoon the %s and land it", pad, text, FishRarity.EPIC.color, getSpeciesName());
+                    info.addPara("It is lost if you get more than %s from it or leave the system", 0f, text, h,
+                            Misc.getWithDGS(EpicHunt.RESET_RANGE) + " units");
+                }
                 case T2_REPORT -> info.addPara("Report to the captain in %s", pad, text, h, getSystemName());
                 case T2_DEBRIEF -> info.addPara("Return to the nearest fishing boat", text, pad);
                 default -> info.addPara("Speak to the captain in %s", pad, text, h, getSystemName());
@@ -275,10 +281,15 @@ public final class CaptainsFleet {
                 return;
             }
 
-            info.addPara("A captain who once crewed for the Fisherman is hunting a %s in %s. His Breach Lights have "
-                    + "failed, and he wants yours.", opad, new Color[]{FishRarity.EPIC.color, h}, getSpeciesName(),
-                    getSystemName());
-            info.addPara("Reward: one of his ships.", opad, h, "one of his ships");
+            if (FishermanChain.isAt(FishermanChain.Stage.T2_REPORT)) {
+                info.addPara("The hunt for the %s in %s is over. The captain is waiting to hear how it went.", opad,
+                        new Color[]{FishRarity.EPIC.color, h}, getSpeciesName(), getSystemName());
+            } else {
+                info.addPara("A captain who once crewed for the Fisherman is hunting a %s in %s. His Breach Lights "
+                        + "have failed, and he wants yours.", opad, new Color[]{FishRarity.EPIC.color, h},
+                        getSpeciesName(), getSystemName());
+            }
+            info.addPara("Reward: one of his ships. There is no deadline.", opad, h, "one of his ships");
             addBulletPoints(info, ListInfoMode.IN_DESC);
             FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
         }
@@ -365,7 +376,13 @@ public final class CaptainsFleet {
 
         StarSystemAPI system = pickSystem();
         FishSpec species = system == null ? null : pickSpecies(system);
-        if (species == null) return false;
+        if (species == null) {
+            // nothing qualifies any more: the offer must not name the old system
+            saved.t2SystemId = null;
+            saved.t2SystemName = null;
+            saved.t2SpeciesId = null;
+            return false;
+        }
 
         saved.t2SystemId = system.getId();
         saved.t2SystemName = system.getNameWithNoType();
@@ -521,6 +538,10 @@ public final class CaptainsFleet {
         }
     }
 
+    public static boolean isCaptain(CampaignFleetAPI fleet) {
+        return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(CAPTAIN_FLAG);
+    }
+
     public static CampaignFleetAPI getFleet() {
         FishermanChain.Saved saved = FishermanChain.get(false);
 
@@ -535,6 +556,7 @@ public final class CaptainsFleet {
         CampaignFleetAPI fleet = saved.t2Fleet;
         if (fleet != null && fleet.isAlive() && !fleet.isExpired() && fleet.getContainingLocation() == system) return;
 
+        clearHold();
         saved.t2Fleet = spawnFleet(system);
     }
 
@@ -551,9 +573,16 @@ public final class CaptainsFleet {
         fleet.setName(FLEET_NAME);
         fleet.setTransponderOn(true);
 
+        // Orbiting the star itself would park the fleet just above its surface, inside the corona (ORBIT_PASSIVE
+        // circles its target at the fleet's radius plus 100-200), so it circles a point held out past it instead.
+        float angle = MathUtils.getRandomNumberInRange(0f, 360f);
+        float distance = star.getRadius() + HOLD_DISTANCE;
+        Vector2f at = MathUtils.getPointOnCircumference(star.getLocation(), distance, angle);
+        SectorEntityToken hold = system.createToken(at);
+        hold.setCircularOrbit(star, angle, distance, HOLD_ORBIT_DAYS);
+        system.addEntity(hold);
+
         system.addEntity(fleet);
-        Vector2f at = MathUtils.getPointOnCircumference(star.getLocation(), star.getRadius() + HOLD_DISTANCE,
-                MathUtils.getRandomNumberInRange(0f, 360f));
         fleet.setLocation(at.x, at.y);
 
         PersonAPI captain = Global.getSector().getFaction(Factions.INDEPENDENT)
@@ -578,7 +607,10 @@ public final class CaptainsFleet {
         Misc.makeImportant(fleet, IMPORTANT_REASON);
 
         fleet.clearAssignments();
-        fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, star, HOLD_DAYS, "Hunting");
+        fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, hold, HOLD_DAYS, "Hunting");
+
+        FishermanChain.Saved saved = FishermanChain.get(true);
+        if (saved != null) saved.t2Hold = hold;
 
         return fleet;
     }
@@ -588,7 +620,8 @@ public final class CaptainsFleet {
         FishermanChain.Saved saved = FishermanChain.get(false);
         CampaignFleetAPI fleet = saved == null ? null : saved.t2Fleet;
         if (saved != null) saved.t2Fleet = null;
-        if (fleet == null || fleet.isExpired()) return;
+        clearHold();
+        if (fleet == null || fleet.isExpired() || !fleet.isAlive()) return;
 
         MemoryAPI mem = fleet.getMemoryWithoutUpdate();
         mem.unset(MemFlags.MEMORY_KEY_NO_JUMP);
@@ -597,13 +630,21 @@ public final class CaptainsFleet {
         mem.unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
         Misc.makeUnimportant(fleet, IMPORTANT_REASON);
 
+        // never despawned here: this runs inside the captain's open comm dialog
         SectorEntityToken exit = Misc.findNearestJumpPointTo(fleet);
-        fleet.clearAssignments();
         if (exit == null) {
-            fleet.despawn();
+            Misc.giveStandardReturnToSourceAssignments(fleet, true);
         } else {
+            fleet.clearAssignments();
             fleet.addAssignment(FleetAssignment.GO_TO_LOCATION_AND_DESPAWN, exit, 1000f, "Heading home");
         }
+    }
+
+    protected static void clearHold() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        SectorEntityToken hold = saved == null ? null : saved.t2Hold;
+        if (saved != null) saved.t2Hold = null;
+        if (hold != null && hold.getContainingLocation() != null) hold.getContainingLocation().removeEntity(hold);
     }
 
     public static StarSystemAPI getSystem() {
@@ -645,6 +686,8 @@ public final class CaptainsFleet {
         if (system == null || system.getId() == null || system.isNebula()) return false;
         if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER) || system.hasTag(Tags.SYSTEM_ABYSSAL)) return false;
         if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) return false;
+        // Remnant bases and other fleets strong enough to interfere with a mission, as vanilla missions exclude
+        if (system.hasTag(Tags.THEME_UNSAFE)) return false;
         if (system.getHyperspaceAnchor() == null || OuterReaches.isPopulated(system)) return false;
         if (FishRumors.isOccupied(system.getId())) return false;
 

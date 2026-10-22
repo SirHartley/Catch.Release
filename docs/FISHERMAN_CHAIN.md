@@ -18,7 +18,7 @@ It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains th
 
 Implemented in `EpicHunt` (see [ARCHITECTURE.md](ARCHITECTURE.md)).
 
-- Every epic is a Breach Light catch, never a rupture catch.
+- Every epic is a Breach Light catch, never a rupture catch, and only the harpoon lands one: ROD drones never take an epic.
 - It drifts slowly until a harpoon hit wakes it. That hit is deflected and raises a single purple shield charge that never regenerates.
 - The awake epic swims at full speed and more erratically. A failed catch loses it, like any other fish.
 - More than 3,000 units from the player resets it to drifting. It drifts a short way and fades, like any fish at the end of its swim. The shield charge is never restored: once spent, every later hit lands.

@@ -69,7 +69,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
 
         if (entry.isLocked() || isBlocked()) return Misc.getGrayColor();
 
-        if (entry.isDone()) return Misc.getPositiveHighlightColor();
+        if (entry.isDone(slot)) return Misc.getPositiveHighlightColor();
 
         FishRarity rarity = entry.getPriceRarity();
 

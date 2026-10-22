@@ -1,5 +1,6 @@
 package catchrelease.abilities.rod.scripts;
 
+import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.config.FishingSounds;
 import catchrelease.config.Setting;
 import catchrelease.abilities.rod.constants.RodConstants;
@@ -298,6 +299,8 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         if (handled.contains(mote.getId())) return false;
 
         if (!isReachable(mote)) return false;
+        // epics are harpoon catches: the waking strike and the shield charge belong to the harpoon
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && EpicHunt.applies(fish)) return false;
 
         Vector2f center = getSearchCenter();
         if (center == null) return false;

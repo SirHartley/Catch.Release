@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.fisherman.chain;
 
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 
 import java.io.Serializable;
@@ -81,6 +82,8 @@ public final class FishermanChain {
         public String t2SystemName;
         public String t2SpeciesId;
         public CampaignFleetAPI t2Fleet;
+        // the point the fleet circles; removed with the fleet
+        public SectorEntityToken t2Hold;
         public boolean t2Caught;
     }
 
