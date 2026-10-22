@@ -4,6 +4,7 @@ import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.ships.FishingShips;
+import catchrelease.campaign.fish.tackle.RigLoadout;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -164,8 +165,41 @@ public class ShopEntry {
         return isUpgrade() && ShopPricing.isMaxed(stat);
     }
 
+    // For the None entry, "fitted" means that slot is empty.
+    public boolean isFittedIn(int slot) {
+        return kind == Kind.TACKLE && TackleManager.getSlot(rig, slot) == tackle;
+    }
+
+    // Fitted to the rig in any slot; the None entry counts only the first slot, which every rig has.
     public boolean isFitted() {
-        return kind == Kind.TACKLE && TackleManager.getSlot(rig, 0) == tackle;
+        if (kind != Kind.TACKLE) return false;
+        if (tackle == Tackle.NONE) return isFittedIn(0);
+
+        return getFittedSlot() >= 0;
+    }
+
+    public int getFittedSlot() {
+        if (kind != Kind.TACKLE || tackle == Tackle.NONE) return -1;
+
+        for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
+            if (isFittedIn(slot)) return slot;
+        }
+
+        return -1;
+    }
+
+    public boolean canFitIn(int slot) {
+        return kind != Kind.TACKLE || TackleManager.canFit(rig, slot, tackle);
+    }
+
+    // The module in the rig's other slot that keeps this one out of the slot: itself (already fitted there) or one
+    // of its exclusion group. Null when nothing blocks it.
+    public Tackle getBlocker(int slot) {
+        if (kind != Kind.TACKLE || tackle == Tackle.NONE || !FishingShips.hasSecondSlot(rig)) return null;
+
+        Tackle other = TackleManager.getSlot(rig, 1 - slot);
+
+        return tackle.conflictsWith(other) ? other : null;
     }
 
     public boolean isOwned() {
@@ -227,19 +261,28 @@ public class ShopEntry {
         return isMaxed() || isFitted();
     }
 
-    public boolean buy() {
-        return buy(null);
+    public boolean isDone(int slot) {
+        return isMaxed() || isFittedIn(slot);
     }
 
-    public boolean buyWithFishPayment(BooleanSupplier spendFish) {
+    public boolean buy() {
+        return buy(0, null);
+    }
+
+    public boolean buy(int slot) {
+        return buy(slot, null);
+    }
+
+    public boolean buyWithFishPayment(int slot, BooleanSupplier spendFish) {
         ShopPricing.Price price = getPrice();
         if (spendFish == null || price == null || price.fish == null) return false;
 
-        return buy(spendFish);
+        return buy(slot, spendFish);
     }
 
-    protected boolean buy(BooleanSupplier spendFish) {
-        if (isDone() || isPurchaseLocked() || !canAfford()) return false;
+    // The slot is checked before anything is spent, so a refused fit never leaves the player paid but not fitted.
+    protected boolean buy(int slot, BooleanSupplier spendFish) {
+        if (isDone(slot) || isPurchaseLocked() || !canAfford() || !canFitIn(slot)) return false;
 
         ShopPricing.Price price = getPrice();
         if (price != null) {
@@ -253,7 +296,7 @@ public class ShopEntry {
             }
         }
 
-        grant();
+        grant(slot);
         Global.getSector().getCampaignUI().getMessageDisplay().addMessage(getBoughtMessage());
 
         return true;
@@ -266,15 +309,20 @@ public class ShopEntry {
         return "Fitted " + getName();
     }
 
-    public boolean devBuy() {
-        if (isDone()) return false;
+    public boolean devBuy(int slot) {
+        if (isDone(slot) || !canFitIn(slot)) return false;
 
-        grant();
+        grant(slot);
 
         return true;
     }
 
+    // Grants from outside the Outfitter: the first slot, or the second when a module there keeps it out of the first.
     public void grant() {
+        grant(canFitIn(0) || !canFitIn(1) ? 0 : 1);
+    }
+
+    public void grant(int slot) {
         ShopMarks.unmark(ShopMarks.getMarkKey(this));
         ShopSchematics.clearFresh(this);
 
@@ -294,7 +342,7 @@ public class ShopEntry {
 
         // own before fit - ownership is what was paid for; the slot can be swapped freely afterward
         if (!isShipModule()) TackleManager.own(tackle);
-        TackleManager.fit(rig, tackle);
+        TackleManager.fit(rig, slot, tackle);
 
         if (tackle == Tackle.NEUTRINO_LENS) {
             FishingIntro.grant(Abilities.GRAVITIC_SCAN, null);
