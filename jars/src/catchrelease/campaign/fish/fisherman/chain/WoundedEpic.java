@@ -33,6 +33,7 @@ import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.IntelUIAPI;
@@ -111,20 +112,30 @@ public final class WoundedEpic {
     public static class WoundedIntel extends BaseIntelPlugin {
 
         protected static boolean isReturning() {
-            return FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT);
+            return FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT)
+                    || FishermanChain.isAt(FishermanChain.Stage.T3_BUILT);
+        }
+
+        protected static boolean isBuilding() {
+            return FishermanChain.isAt(FishermanChain.Stage.T3_BUILD);
         }
 
         @Override
         public boolean shouldRemoveIntel() {
             if (isEnded()) return true;
-            if (!isHunting() && !isReturning()) endImmediately();
+            if (!isHunting() && !isReturning() && !isBuilding()) endImmediately();
 
             return isEnded();
         }
 
         @Override
         public String getName() {
-            return isReturning() ? "The wounded epic: report to the Fisherman" : "The wounded epic";
+            return switch (FishermanChain.getStage()) {
+                case T3_CAUGHT -> "The wounded epic: report to the Fisherman";
+                case T3_BUILD -> "Build the " + getLampShipName();
+                case T3_BUILT -> getLampShipName() + ": report to the Fisherman";
+                default -> "The wounded epic";
+            };
         }
 
         @Override
@@ -148,6 +159,8 @@ public final class WoundedEpic {
             bullet(info);
             if (isReturning()) {
                 info.addPara("Return to the nearest fishing boat", text, pad);
+            } else if (isBuilding()) {
+                info.addPara("Learn the blueprint and have a %s built", pad, text, h, getLampShipName());
             } else {
                 info.addPara("Find the %s circling %s in %s", pad, text, h, getSpeciesName(), getPlanetName(),
                         getSystemName()).setHighlightColors(FishRarity.EPIC.color, h, h);
@@ -166,6 +179,22 @@ public final class WoundedEpic {
             FactionAPI faction = Global.getSector().getFaction(FishermanConstants.FACTION);
 
             info.addImages(width, 128, opad, opad, FishermanIdentity.getPortrait(0f), faction.getCrest());
+
+            if (isBuilding()) {
+                info.addPara("The Fisherman gave you the blueprint for the %s. It brings a second Lens Array slot "
+                        + "and the %s while it is in your fleet. He doesn't build ships himself.", opad, h,
+                        getLampShipName(), Tackle.FANNED_ARRAY.name);
+                addBulletPoints(info, ListInfoMode.IN_DESC);
+                return;
+            }
+
+            if (FishermanChain.isAt(FishermanChain.Stage.T3_BUILT)) {
+                info.addPara("Your %s is in the fleet. The Fisherman will want to see it.", opad, h,
+                        getLampShipName());
+                addBulletPoints(info, ListInfoMode.IN_DESC);
+                FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
+                return;
+            }
 
             if (isReturning()) {
                 info.addPara("You landed the wounded %s. The Fisherman will want to hear about it.", opad,
@@ -324,8 +353,25 @@ public final class WoundedEpic {
         register();
         FishReward.showReceipts(text, receipts);
         updateIntel();
+        checkBuilt();
 
         return true;
+    }
+
+    // The follow-up ends once a lamp ship is in the fleet; FishingShips.reconcile runs this after every presence
+    // check, which covers production delivery, purchase and recovery alike.
+    public static void checkBuilt() {
+        if (!FishermanChain.isAt(FishermanChain.Stage.T3_BUILD)
+                || !FishingShips.hasSecondSlot(FishingShips.Ship.LAMP.rig)) return;
+
+        FishermanChain.setStage(FishermanChain.Stage.T3_BUILT);
+        updateIntel();
+    }
+
+    public static String getLampShipName() {
+        ShipHullSpecAPI spec = Global.getSettings().getHullSpec(FishingShips.Ship.LAMP.hullId);
+
+        return spec == null ? "Breach Light ship" : spec.getHullName();
     }
 
     protected static FishSpec pickRangeData(Random random) {

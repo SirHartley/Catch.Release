@@ -286,7 +286,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 4.3 Spawning at the planet, plus respawn on reset and on arrival in the system, with the campaign message.
 - [x] 4.4 The T3 offer in the Needle Sensor return conversation, and its intel.
 - [x] 4.5 Hand-in: the Breach Light ship blueprint and range data on an epic.
-- [ ] 4.6 The build follow-up, completed through `FishingShips.reconcile()`.
+- [x] 4.6 The build follow-up, completed through `FishingShips.reconcile()`.
 - [ ] 4.7 The closing conversation; text through the Editor process, then the dialogue and rules checks.
 
 **Stage 5: T4 and the legendary hunt.**
