@@ -21,13 +21,26 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
     public static final float PIP_GAP = 4f;
 
     protected final ShopEntry entry;
+    // the Outfitter's target slot; the second slot exists only while the rig's fishing ship is in the fleet
+    protected final int slot;
+    protected final boolean twoSlots;
     protected PositionAPI pos;
 
     protected transient LazyFont.DrawableString name;
     protected transient LazyFont.DrawableString sub;
 
     public ShopDetailHeaderPlugin(ShopEntry entry) {
+        this(entry, 0, false);
+    }
+
+    public ShopDetailHeaderPlugin(ShopEntry entry, int slot, boolean twoSlots) {
         this.entry = entry;
+        this.slot = slot;
+        this.twoSlots = twoSlots;
+    }
+
+    protected boolean isBlocked() {
+        return entry.kind == ShopEntry.Kind.TACKLE && !entry.isFittedIn(slot) && !entry.canFitIn(slot);
     }
 
     @Override
@@ -54,7 +67,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
             return entry.isOn() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
         }
 
-        if (entry.isLocked()) return Misc.getGrayColor();
+        if (entry.isLocked() || isBlocked()) return Misc.getGrayColor();
 
         if (entry.isDone()) return Misc.getPositiveHighlightColor();
 
@@ -76,7 +89,7 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
             art.setSize(art.getWidth() * scale, art.getHeight() * scale);
             art.setColor(Color.WHITE);
             art.setNormalBlend();
-            art.setAlphaMult(alphaMult);
+            art.setAlphaMult((isBlocked() ? 0.5f : 1f) * alphaMult);
             art.renderAtCenter(x + BOX_SIZE * 0.5f, y + BOX_SIZE * 0.5f);
         }
 
@@ -156,15 +169,17 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
         LazyFont font = ShopUi.getSmallFont();
         if (font == null) return;
 
-        String text = entry.group.title.toUpperCase() + "  -  ONE SLOT"
-                + (entry.isFitted() ? "  -  FITTED" : "");
+        int fittedSlot = entry.tackle == catchrelease.campaign.fish.tackle.Tackle.NONE
+                ? (entry.isFittedIn(slot) ? slot : -1) : entry.getFittedSlot();
+        String state = fittedSlot < 0 ? "" : twoSlots ? "  -  FITTED IN SLOT " + (fittedSlot + 1) : "  -  FITTED";
+        String text = entry.group.title.toUpperCase() + (twoSlots ? "  -  2 SLOTS" : "  -  ONE SLOT") + state;
 
         if (sub == null) {
             sub = ShopUi.createText(font, text);
             sub.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        Color color = entry.isFitted() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
+        Color color = fittedSlot >= 0 ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
 
         sub.setBaseColor(ShopUi.withAlpha(color, alphaMult));
         sub.draw(Math.round(x), Math.round(top));

@@ -4,6 +4,7 @@ import catchrelease.abilities.harpoon.ability.HarpoonAbilityPlugin;
 import catchrelease.abilities.rod.ability.PondInteractionAbilityPlugin;
 import catchrelease.abilities.rod.scripts.FishingDroneSwarmScript;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.charges.ChargeManager;
@@ -28,9 +29,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public final class AbilityTooltipCheck {
 
@@ -132,6 +135,9 @@ public final class AbilityTooltipCheck {
 
     // Both slots show in one Fitted line and each module keeps its own line; fit rules apply within one rig only.
     private static void checkSecondSlot(Fixture f) {
+        require(!TackleManager.fit(Tackle.Fit.HARPOON, 1, Tackle.RETRIEVAL_HEAD), "no second slot without the ship");
+        f.data.put(FishingShips.PRESENT_KEY, new LinkedHashSet<>(Set.of(FishingShips.Ship.HARPOON.name(),
+                FishingShips.Ship.LAMP.name(), FishingShips.Ship.ROD.name())));
         TackleManager.fit(Tackle.Fit.HARPOON, Tackle.FATHOM_HEAD);
         require(TackleManager.fit(Tackle.Fit.HARPOON, 1, Tackle.RETRIEVAL_HEAD), "second harpoon slot fits");
         includes(f.harpoon(), "Fitted: Fathom Head, Retrieval Head", "Can also hit diving fish", "A fish hit restores");
@@ -150,6 +156,7 @@ public final class AbilityTooltipCheck {
         TackleManager.fit(Tackle.Fit.HARPOON, 1, Tackle.NONE);
         TackleManager.fit(Tackle.Fit.SEARCHLIGHT, 1, Tackle.NONE);
         TackleManager.fit(Tackle.Fit.DRONE, Tackle.BAITED_RESONATOR);
+        f.data.remove(FishingShips.PRESENT_KEY);
     }
 
     private static void checkStatus(Fixture f) {

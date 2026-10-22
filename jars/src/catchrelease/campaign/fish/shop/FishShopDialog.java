@@ -12,6 +12,8 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
+import catchrelease.campaign.fish.ships.FishingShips;
+import catchrelease.campaign.fish.tackle.RigLoadout;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -71,6 +73,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     public static final float MAIN_TAB_HEIGHT = 28f;
     public static final float CATEGORY_TAB_HEIGHT = 44f;
     public static final float TAB_GAP = 4f;
+    public static final float SLOT_HEIGHT = 40f;
 
     public static final float LEAVE_WIDTH = 120f;
     public static final float LEAVE_HEIGHT = 26f;
@@ -91,7 +94,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
     }
 
     protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin,
-            ShopRowPlugin.Host, ShopTabPlugin.Host, ShopHeaderPlugin.Purse {
+            ShopRowPlugin.Host, ShopTabPlugin.Host, ShopHeaderPlugin.Purse, ShopSlotPlugin.Host {
 
         protected CustomPanelAPI panel;
         protected DialogCallbacks callbacks;
@@ -99,6 +102,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected String selectedKey;
         protected ShopEntry.Kind mainTab = ShopEntry.Kind.UPGRADE;
         protected ShopGroup category = ShopGroup.SEARCHLIGHTS;
+        // kept across the payment picker's reopen; reset when the shelf changes
+        protected int targetSlot = 0;
         protected TooltipMakerAPI list;
 
         protected Map<FishRarity, Integer> wallet = new HashMap<>();
@@ -122,9 +127,12 @@ public class FishShopDialog implements InteractionDialogPlugin {
             final boolean marked;
             final int statLevel;
             final boolean tackleOwned;
+            final Tackle.Fit rig;
+            final Tackle tackle;
+            final int slot;
             final Tackle fitted;
 
-            Receipt(ShopEntry entry) {
+            Receipt(ShopEntry entry, int slot) {
                 entryKey = entry.getKey();
                 markKey = ShopMarks.getMarkKey(entry);
                 fishAboard = snapshotFish();
@@ -134,8 +142,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 statLevel = entry.isUpgrade() ? entry.getLevel() : -1;
                 tackleOwned = entry.kind == ShopEntry.Kind.TACKLE
                         && TackleManager.isOwned(entry.tackle);
+                rig = entry.rig;
+                tackle = entry.tackle;
+                this.slot = slot;
                 fitted = entry.kind == ShopEntry.Kind.TACKLE
-                        ? TackleManager.getSlot(entry.rig, 0) : null;
+                        ? TackleManager.getSlot(entry.rig, slot) : null;
             }
         }
 
@@ -209,7 +220,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected void build() {
             buildHeader();
             buildTabs();
-            buildList();
+            float listTop = buildSlots();
+            buildList(listTop);
             buildDetail();
             buildUndo();
             buildLeave();
@@ -485,13 +497,104 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
+            targetSlot = 0;
             selectFirstVisible();
             rebuild(false);
         }
 
-        protected void buildList() {
+        protected Tackle.Fit getShelfRig() {
+            return mainTab == ShopEntry.Kind.TACKLE && category != null ? category.getRig() : null;
+        }
+
+        protected boolean hasTwoSlots() {
+            Tackle.Fit rig = getShelfRig();
+
+            return rig != null && FishingShips.hasSecondSlot(rig);
+        }
+
+        @Override
+        public int getTargetSlot() {
+            return hasTwoSlots() ? targetSlot : 0;
+        }
+
+        @Override
+        public void onSlotClicked(int slot) {
+            targetSlot = slot;
+            rebuild(true);
+        }
+
+        // Two cells above the module list while the shelf's rig has its second slot; returns where the list starts.
+        protected float buildSlots() {
             float top = PAD + HEADER_HEIGHT + 10f + MAIN_TAB_HEIGHT + TAB_GAP
                     + CATEGORY_TAB_HEIGHT + 8f;
+            if (!hasTwoSlots()) return top;
+
+            Tackle.Fit rig = getShelfRig();
+            float cellWidth = (LIST_WIDTH - TAB_GAP) / 2f;
+
+            CustomPanelAPI holder = panel.createCustomPanel(LIST_WIDTH, SLOT_HEIGHT, new BaseCustomUIPanelPlugin() {
+            });
+            TooltipMakerAPI tooltipHost = holder.createUIElement(1f, 1f, false);
+            holder.addUIElement(tooltipHost).inTL(0f, 0f);
+
+            for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
+                CustomPanelAPI cell = holder.createCustomPanel(cellWidth, SLOT_HEIGHT,
+                        new ShopSlotPlugin(slot, TackleManager.getSlot(rig, slot), this));
+                holder.addComponent(cell).inTL(slot * (cellWidth + TAB_GAP), 0f);
+                tooltipHost.addTooltipTo(createSlotTooltip(rig, slot), cell,
+                        TooltipMakerAPI.TooltipLocation.BELOW, false);
+            }
+
+            panel.addComponent(holder).inTL(PAD, top);
+            added.add(holder);
+
+            return top + SLOT_HEIGHT + 8f;
+        }
+
+        protected TooltipMakerAPI.TooltipCreator createSlotTooltip(Tackle.Fit rig, int slot) {
+            return new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return TOOLTIP_WIDTH;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
+                    tooltip.addPara("Slot %s", 0f, Misc.getHighlightColor(), String.valueOf(slot + 1));
+                    tooltip.addPara("Click to fit modules to this slot.", 6f);
+                    if (slot == 0) return;
+
+                    String hull = getShipName(rig);
+                    Tackle module = FishingShips.getShipModule(rig);
+                    if (module == null) {
+                        tooltip.addPara("Provided by your %s. If the ship leaves your fleet, this slot is emptied.",
+                                6f, Misc.getHighlightColor(), hull);
+                    } else {
+                        tooltip.addPara("Provided by your %s. If the ship leaves your fleet, this slot is emptied"
+                                + " and the %s leaves the rig.", 6f, Misc.getHighlightColor(), hull, module.name);
+                    }
+                }
+            };
+        }
+
+        protected boolean anySecondSlot() {
+            for (Tackle.Fit rig : Tackle.Fit.values()) {
+                if (rig.isRig() && FishingShips.hasSecondSlot(rig)) return true;
+            }
+
+            return false;
+        }
+
+        protected String getShipName(Tackle.Fit rig) {
+            FishingShips.Ship ship = FishingShips.forRig(rig);
+            try {
+                return Global.getSettings().getHullSpec(ship.hullId).getHullName();
+            } catch (RuntimeException e) {
+                return "fishing ship";
+            }
+        }
+
+        protected void buildList(float top) {
             float height = HEIGHT - top - PAD - UNDO_HEIGHT - 8f;
 
             list = panel.createUIElement(LIST_WIDTH, height, true);
@@ -509,6 +612,18 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     row.addComponent(ring).inTL(ShopRowPlugin.ACCENT_WIDTH, 0f);
 
                     list.addTooltipTo(createMarkTooltip(entry), ring,
+                            TooltipMakerAPI.TooltipLocation.BELOW);
+                }
+
+                Tackle blocker = entry.getBlocker(getTargetSlot());
+                if (blocker != null && !entry.isFittedIn(getTargetSlot())) {
+                    float left = ShopRowPlugin.ACCENT_WIDTH + ShopRowPlugin.MARK_SLOT;
+                    CustomPanelAPI hotspot = panel.createCustomPanel(ROW_WIDTH - left, ROW_HEIGHT,
+                            new BaseCustomUIPanelPlugin() {
+                            });
+                    row.addComponent(hotspot).inTL(left, 0f);
+
+                    list.addTooltipTo(createBlockedTooltip(entry, blocker), hotspot,
                             TooltipMakerAPI.TooltipLocation.BELOW);
                 }
 
@@ -538,6 +653,32 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 tooltipHost.addTooltipTo(createPipTooltip(entry, rung), pip,
                         TooltipMakerAPI.TooltipLocation.BELOW);
             }
+        }
+
+        protected TooltipMakerAPI.TooltipCreator createBlockedTooltip(ShopEntry entry, Tackle blocker) {
+            int other = 2 - getTargetSlot();
+
+            return new BaseTooltipCreator() {
+                @Override
+                public float getTooltipWidth(Object tooltipParam) {
+                    return TOOLTIP_WIDTH;
+                }
+
+                @Override
+                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
+                    if (blocker == entry.tackle) {
+                        tooltip.addPara("Already fitted", Misc.getGrayColor(), 0f);
+                        tooltip.addPara("This module is fitted in slot %s. One module cannot fill both slots of a"
+                                + " rig.", 6f, Misc.getHighlightColor(), String.valueOf(other));
+                        return;
+                    }
+
+                    tooltip.addPara("Conflicts with %s", 0f, Misc.getGrayColor(), Misc.getHighlightColor(),
+                            blocker.name);
+                    tooltip.addPara("%s is fitted in slot %s. Modules with similar or opposing effects cannot share"
+                            + " a rig.", 6f, Misc.getHighlightColor(), blocker.name, String.valueOf(other));
+                }
+            };
         }
 
         protected TooltipMakerAPI.TooltipCreator createMarkTooltip(ShopEntry entry) {
@@ -623,7 +764,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         protected void buildDetailContent(TooltipMakerAPI info, float width, ShopEntry entry) {
             CustomPanelAPI head = panel.createCustomPanel(width - 10f, 84f,
-                    new ShopDetailHeaderPlugin(entry));
+                    new ShopDetailHeaderPlugin(entry, getTargetSlot(), hasTwoSlots()));
 
             CustomPanelAPI help = panel.createCustomPanel(DETAIL_HELP_SIZE, DETAIL_HELP_SIZE,
                     new PaneWidgets.HelpMark());
@@ -651,11 +792,14 @@ public class FishShopDialog implements InteractionDialogPlugin {
                         entry.getValueAt(entry.getLevel()), entry.getValueAt(entry.getLevel() + 1));
             }
 
-            if (entry.kind == ShopEntry.Kind.TACKLE && !entry.isFitted()) {
-                Tackle fitted = TackleManager.getSlot(entry.rig, 0);
+            if (entry.kind == ShopEntry.Kind.TACKLE && !entry.isFittedIn(getTargetSlot())
+                    && entry.canFitIn(getTargetSlot())) {
+                Tackle fitted = TackleManager.getSlot(entry.rig, getTargetSlot());
 
                 if (fitted != entry.tackle && fitted != Tackle.NONE) {
-                    info.addPara("Replaces %s. You keep the removed equipment.", 12f, Misc.getGrayColor(),
+                    info.addPara(FishingShips.isShipModule(fitted) && !TackleManager.isOwned(fitted)
+                                    ? "Replaces %s. It stays with the ship and can be fitted again."
+                                    : "Replaces %s. You keep the removed equipment.", 12f, Misc.getGrayColor(),
                             Misc.getHighlightColor(), fitted.name);
                 }
             }
@@ -682,6 +826,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     tooltip.addPara("Each fishing ability has one equipment slot. Swap owned"
                             + " equipment freely at no cost. Items marked as single-use are"
                             + " consumed when used.", 8f);
+                    if (anySecondSlot()) {
+                        tooltip.addPara("A fishing ship in your fleet adds a second slot to its rig and brings a"
+                                + " module you can fit while the ship stays. A module cannot fill both slots, and"
+                                + " modules with similar or opposing effects cannot share a rig.", 8f);
+                    }
 
                     tooltip.addPara("PURCHASING", Misc.getBasePlayerColor(), 12f);
                     tooltip.addPara("Payment takes only fish that meet the requirement, using"
@@ -707,9 +856,20 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
-            if (entry.isFitted()) {
+            int slot = getTargetSlot();
+            if (entry.isFittedIn(slot)) {
                 info.addPara("Fitted and ready.", Misc.getPositiveHighlightColor(), 16f);
                 return;
+            }
+
+            Tackle blocker = entry.getBlocker(slot);
+            if (blocker == entry.tackle) {
+                info.addPara("Fitted in slot %s. A module can fill only one slot of a rig.", 16f, Misc.getGrayColor(),
+                        Misc.getHighlightColor(), String.valueOf(2 - slot));
+            } else if (blocker != null) {
+                info.addPara("Conflicts with %s in slot %s. Modules with similar or opposing effects cannot share a"
+                        + " rig.", 16f, Misc.getGrayColor(), Misc.getHighlightColor(), blocker.name,
+                        String.valueOf(2 - slot));
             }
 
             // empty slot never had a price; an owned module was already paid for once
@@ -720,6 +880,12 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             if (entry.isOwned()) {
                 info.addPara("Owned - fitting it is free.", Misc.getGrayColor(), 16f);
+                return;
+            }
+
+            if (entry.isShipModule()) {
+                info.addPara("Comes with your %s - fitting it is free.", 16f, Misc.getGrayColor(),
+                        Misc.getHighlightColor(), getShipName(entry.rig));
                 return;
             }
 
@@ -755,10 +921,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         protected void buildBuyButton(TooltipMakerAPI info, ShopEntry entry) {
-            if (entry.isDone()) return;
+            int slot = getTargetSlot();
+            if (entry.isDone(slot)) return;
 
             String label = entry.isCurio() ? (entry.isOn() ? "SWITCH OFF" : "SWITCH ON")
-                    : entry.isUpgrade() ? "UPGRADE" : "FIT";
+                    : entry.isUpgrade() ? "UPGRADE" : hasTwoSlots() ? "FIT IN SLOT " + (slot + 1) : "FIT";
 
             boolean dev = Global.getSettings().isDevMode() && !entry.isCurio();
             ShopPricing.Price price = entry.getPrice();
@@ -774,14 +941,14 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             CustomPanelAPI buy = panel.createCustomPanel(240f, 30f,
                     new catchrelease.ui.PaneWidgets.TextButton(() -> label,
-                            entry::canAfford,
+                            () -> entry.canAfford() && entry.canFitIn(slot),
                             () -> buyClicked(entry, false, automaticPayment)));
             row.addComponent(buy).inTL(0f, 0f);
 
             if (canSelectPayment) {
                 CustomPanelAPI select = panel.createCustomPanel(120f, 30f,
                         new PaneWidgets.TextButton(() -> "SELECT",
-                                entry::canAfford, () -> selectedPaymentClicked(entry),
+                                () -> entry.canAfford() && entry.canFitIn(slot), () -> selectedPaymentClicked(entry),
                                 PaneWidgets.TextButton.Style.MUTED));
                 row.addComponent(select).inTL(250f, 0f);
             }
@@ -842,8 +1009,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         protected void buyClicked(ShopEntry entry, boolean free,
                                   FishHandoffPicker.Selection automaticPayment) {
+            int slot = getTargetSlot();
+            if (!entry.canFitIn(slot)) return;
+
             Receipt receipt = !free && entry.getPrice() != null
-                    ? new Receipt(entry) : null;
+                    ? new Receipt(entry, slot) : null;
 
             ShopPricing.Price price = entry.getPrice();
             // only a legendary would cover it: the player must choose to spend it
@@ -855,11 +1025,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             boolean bought;
             if (free) {
-                bought = entry.devBuy();
+                bought = entry.devBuy(slot);
             } else if (automaticPayment != null) {
-                bought = entry.buyWithFishPayment(automaticPayment::spend);
+                bought = entry.buyWithFishPayment(slot, automaticPayment::spend);
             } else {
-                bought = entry.buy();
+                bought = entry.buy(slot);
             }
 
             if (!bought) return;
@@ -875,10 +1045,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
         protected void selectedPaymentClicked(ShopEntry entry) {
             ShopPricing.Price price = entry.getPrice();
             if (entry.isCurio() || price == null || price.fish == null
-                    || !entry.canAfford() || callbacks == null) return;
+                    || !entry.canAfford() || !entry.canFitIn(getTargetSlot()) || callbacks == null) return;
 
             selectedPaymentEntry = entry;
-            selectedPaymentReceipt = new Receipt(entry);
+            selectedPaymentReceipt = new Receipt(entry, getTargetSlot());
             callbacks.dismissDialog();
         }
 
@@ -902,7 +1072,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     new FishHandoffPicker.Listener() {
                         @Override
                         public void picked(FishHandoffPicker.Selection selection) {
-                            if (entry.buyWithFishPayment(selection::spend)) {
+                            if (entry.buyWithFishPayment(receipt.slot, selection::spend)) {
                                 purchases.add(receipt);
                                 FishingSounds.playUISound(SOUND_BOUGHT, 1f, 1f);
                             } else {
@@ -968,10 +1138,17 @@ public class FishShopDialog implements InteractionDialogPlugin {
             if (entry != null && entry.isUpgrade()) {
                 UpgradeManager.getInstance().setLevel(entry.stat.id, receipt.statLevel);
                 ShopEntry.stopAbility(StatIds.getAbilityId(entry.stat.id));
-            } else if (entry != null && entry.kind == ShopEntry.Kind.TACKLE) {
-                if (!receipt.tackleOwned) TackleManager.consume(entry.tackle);
-                TackleManager.fit(entry.rig, receipt.fitted == null ? Tackle.NONE : receipt.fitted);
-                ShopEntry.stopAbility(entry.getRigAbilityId());
+            } else if (receipt.rig != null && receipt.tackle != null) {
+                if (!receipt.tackleOwned) TackleManager.consume(receipt.tackle);
+
+                // a ship module whose ship has gone cannot come back; a refused restore leaves the slot as consume left it
+                Tackle prior = receipt.fitted == null ? Tackle.NONE : receipt.fitted;
+                if (FishingShips.isShipModule(prior) && !TackleManager.isOwned(prior)
+                        && !FishingShips.isShipModuleAvailable(prior)) {
+                    prior = Tackle.NONE;
+                }
+                TackleManager.fit(receipt.rig, receipt.slot, prior);
+                ShopEntry.stopAbility(entry != null ? entry.getRigAbilityId() : null);
             }
 
             if (receipt.marked) ShopMarks.mark(receipt.markKey);
@@ -1103,6 +1280,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
         this.dialog = dialog;
         closed = false;
         reopenPending = false;
+        FishingShips.reconcile();
 
         // returns anything a save is still holding in shop storage - that button no longer exists
 

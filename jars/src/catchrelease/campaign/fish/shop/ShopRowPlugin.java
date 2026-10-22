@@ -35,6 +35,9 @@ public class ShopRowPlugin extends ListRow {
         void onRowClicked(ShopEntry entry);
 
         PositionAPI getListViewport();
+
+        // the slot FIT puts a module into: 0, or 1 while the rig has its second slot
+        int getTargetSlot();
     }
 
     public ShopRowPlugin(ShopEntry entry, Host host) {
@@ -57,8 +60,19 @@ public class ShopRowPlugin extends ListRow {
         return 0.5f;
     }
 
+    protected int slot() {
+        return host.getTargetSlot();
+    }
+
+    // fitted elsewhere on the rig, or clashing with what is: greyed out for this slot only
+    protected boolean isBlocked() {
+        return entry.kind == ShopEntry.Kind.TACKLE && !entry.isFittedIn(slot()) && !entry.canFitIn(slot());
+    }
+
     @Override
     protected Color getAccentColor() {
+        if (isBlocked()) return Misc.getGrayColor();
+
         FishRarity tier = entry.getPriceRarity();
         return tier == null ? Misc.getBasePlayerColor() : tier.color;
     }
@@ -102,12 +116,12 @@ public class ShopRowPlugin extends ListRow {
         }
 
         // fitted gear reads as good news, not as spent; a maxed ladder and a locked rung stay quiet
-        Color color = entry.isFitted() ? Misc.getPositiveHighlightColor()
-                : entry.isDone() || entry.isLocked() || (entry.isCurio() && !entry.isOn())
+        Color color = entry.isFittedIn(slot()) ? Misc.getPositiveHighlightColor()
+                : entry.isDone(slot()) || entry.isLocked() || isBlocked() || (entry.isCurio() && !entry.isOn())
                 ? Misc.getGrayColor()
                 : selected ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
-        name.setBaseColor(ShopUi.withAlpha(color, alphaMult));
+        name.setBaseColor(ShopUi.withAlpha(color, (isBlocked() ? 0.6f : 1f) * alphaMult));
 
         // rounded to the pixel - bitmap fonts blur off-pixel. Indented past the ring's slot whether or not this row draws one, so the names stay in a column
         name.draw(Math.round(x + ACCENT_WIDTH + MARK_SLOT + 4f),
@@ -142,8 +156,15 @@ public class ShopRowPlugin extends ListRow {
             return;
         }
 
-        if (entry.isDone()) {
+        if (entry.isDone(slot())) {
             drawMark(entry.isUpgrade() ? "MAX" : "FITTED", Misc.getPositiveHighlightColor(),
+                    right, y, height, alphaMult);
+            return;
+        }
+
+        if (isBlocked()) {
+            Tackle blocker = entry.getBlocker(slot());
+            drawMark(blocker == entry.tackle ? "IN SLOT " + (2 - slot()) : "CONFLICT", Misc.getGrayColor(),
                     right, y, height, alphaMult);
             return;
         }
@@ -155,6 +176,11 @@ public class ShopRowPlugin extends ListRow {
 
         if (entry.isOwned() && entry.tackle != Tackle.NONE) {
             drawMark("OWNED", Misc.getGrayColor(), right, y, height, alphaMult);
+            return;
+        }
+
+        if (entry.isShipModule()) {
+            drawMark("SHIP", Misc.getGrayColor(), right, y, height, alphaMult);
             return;
         }
 

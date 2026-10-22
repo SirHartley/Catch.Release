@@ -65,6 +65,14 @@ public enum ShopGroup {
         }
     }
 
+    public Tackle.Fit getRig() {
+        for (Tackle.Fit rig : Tackle.Fit.values()) {
+            if (rig.isRig() && forRig(rig) == this) return rig;
+        }
+
+        return null;
+    }
+
     public static String getModuleType(Tackle.Fit rig) {
         if (rig == null) return "rig module";
 

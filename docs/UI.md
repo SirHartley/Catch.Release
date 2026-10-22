@@ -29,8 +29,22 @@ Use the [shared text presentation](DIALOGUE.md#shared-text-presentation),
 [Catch.Release display conventions](DIALOGUE.md#colours-rewards-and-sidebars).
 Do not maintain separate wording or formatting standards for Java strings.
 
-In the outfitter, a null module price can mean an empty slot or an already-owned
-module. UI text must distinguish them.
+In the outfitter, a null module price can mean an empty slot, an already-owned
+module or a ship module that comes with a fishing ship. UI text must distinguish them.
+
+### Outfitter second slot
+
+While a rig has its second slot (`FishingShips.hasSecondSlot`), the Equipment shelf
+shows two `ShopSlotPlugin` cells above the module list, drawn like category tabs:
+half the list width each, `SLOT_HEIGHT` tall, the slot's module or "Empty" beneath a
+small "SLOT n" label. The selected cell is the target slot; FIT reads "FIT IN SLOT n"
+and every row and the detail pane are judged against it. Without a second slot the
+shelf looks as it did with one slot. A module fitted in the other slot, or one that
+shares an exclusion group with it, is blocked for the target slot: its row name is
+grey at 0.6 alpha with an "IN SLOT n" or "CONFLICT" mark, FIT and SELECT are not
+live, and a hotspot past the mark ring carries a hover naming the slot or the
+conflicting module. A blocked row stays selectable so the detail pane can say why.
+A ship module shows "SHIP" where an owned module shows "OWNED".
 
 Treasure result rows normally use the chest rarity colour, read from
 `TreasureAward.color`; a quest chest such as T1's golden chest sets its own label and

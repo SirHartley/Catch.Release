@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.shop;
 
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.UpgradeManager;
@@ -147,7 +148,7 @@ public class ShopMarks {
                     continue;
                 }
 
-                if (TackleManager.isOwned(tackle)) continue;
+                if (TackleManager.isOwned(tackle) || FishingShips.isShipModule(tackle)) continue;
                 if (!ShopSchematics.has(tackle)) continue;
 
                 price = ShopPricing.getPrice(tackle);
@@ -250,7 +251,7 @@ public class ShopMarks {
                     continue;
                 }
 
-                if (TackleManager.isOwned(tackle)) continue;
+                if (TackleManager.isOwned(tackle) || FishingShips.isShipModule(tackle)) continue;
                 if (!ShopSchematics.has(tackle)) continue;
 
                 ShopPricing.Price price = ShopPricing.getPrice(tackle);
