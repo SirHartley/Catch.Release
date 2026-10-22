@@ -17,7 +17,16 @@ public final class FishermanChain {
         T1_ACTIVE,
         T1_LENS,
         T1_BOUGHT,
-        T1_DONE
+        // T2 can be offered from here
+        T1_DONE,
+        T2_MEET,
+        T2_LAMPS,
+        T2_HUNT,
+        T2_REPORT,
+        T2_DEBRIEF,
+        T2_SENSOR,
+        // T3 starts in the next Fisherman conversation
+        T2_SENSOR_BOUGHT
     }
 
     public static final String KEY = "$catchrelease_fisherChain";
@@ -36,6 +45,10 @@ public final class FishermanChain {
     public static final String T1_LOST_GONE = "$catchreleaseChainT1LostGone";
     public static final String T1_LOST_MARKET = "$catchreleaseChainT1LostMarket";
 
+    public static final String T2_OFFER = "$catchreleaseChainT2Offer";
+    public static final String T2_SYSTEM = "$catchreleaseChainT2System";
+    public static final String T2_SPECIES = "$catchreleaseChainT2Species";
+
     public static class Saved implements Serializable {
 
         public Stage stage = Stage.NONE;
@@ -52,6 +65,10 @@ public final class FishermanChain {
         public String soldMarketName;
         public TreasureRumour.Lost lost;
         public String lostMarketName;
+
+        public String t2SystemId;
+        public String t2SystemName;
+        public String t2SpeciesId;
     }
 
     private FishermanChain() {
@@ -101,6 +118,10 @@ public final class FishermanChain {
         local.set(T1_LOST_STORED, lost == TreasureRumour.Lost.STORED, 0);
         local.set(T1_LOST_GONE, lost == TreasureRumour.Lost.GONE, 0);
         local.set(T1_LOST_MARKET, saved == null || saved.lostMarketName == null ? "" : saved.lostMarketName, 0);
+
+        local.set(T2_OFFER, stage == Stage.T1_DONE, 0);
+        local.set(T2_SYSTEM, saved == null || saved.t2SystemName == null ? "" : saved.t2SystemName, 0);
+        local.set(T2_SPECIES, CaptainsFleet.getSpeciesName(), 0);
     }
 
     public static Saved get(boolean create) {
