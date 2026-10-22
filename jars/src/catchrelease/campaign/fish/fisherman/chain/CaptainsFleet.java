@@ -252,7 +252,7 @@ public final class CaptainsFleet {
                     info.addPara("Keep them lit for %s without a break", 0f, text, h,
                             (int) LAMP_SECONDS + " seconds");
                 }
-                case T2_HUNT -> info.addPara("Harpoon the %s", pad, text, h, getSpeciesName());
+                case T2_HUNT -> info.addPara("Harpoon the %s", pad, text, FishRarity.EPIC.color, getSpeciesName());
                 case T2_REPORT -> info.addPara("Report to the captain in %s", pad, text, h, getSystemName());
                 case T2_DEBRIEF -> info.addPara("Return to the nearest fishing boat", text, pad);
                 default -> info.addPara("Speak to the captain in %s", pad, text, h, getSystemName());
@@ -276,7 +276,8 @@ public final class CaptainsFleet {
             }
 
             info.addPara("A captain who once crewed for the Fisherman is hunting a %s in %s. His Breach Lights have "
-                    + "failed, and he wants yours.", opad, h, getSpeciesName(), getSystemName());
+                    + "failed, and he wants yours.", opad, new Color[]{FishRarity.EPIC.color, h}, getSpeciesName(),
+                    getSystemName());
             info.addPara("Reward: one of his ships.", opad, h, "one of his ships");
             addBulletPoints(info, ListInfoMode.IN_DESC);
             FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));

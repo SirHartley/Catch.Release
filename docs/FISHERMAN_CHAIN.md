@@ -144,15 +144,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **Follow-up: build the Needle Sensor.** A tracked intel quest. Its first step is to buy the Needle Sensor at the Outfitter with the schematic. Once the player owns it, the intel tells them to go back and talk to the Fisherman, and T3 starts in that conversation. If the player already owns one, the intel starts at the return step.
 
-**Work**
-- Quest fleet: an independent fleet with a contact person, using the existing fleet-quest spawning and contact patterns where possible.
-- Choosing the target: an epic species whose range matches the zero-market system. If none qualifies, choose another system rather than a species from elsewhere.
-- Placing the mote:
-  - count continuous lamp-on time within 6,000 units of the star's surface;
-  - then put a buried mote of the target species ahead of the beam sweep;
-  - one quest-owned fish, claimed so other spawners and Lantern Jack's feeding leave it alone.
-- Failure: the quest-epic hooks for reset, failed catch and blast (see [Implementation plan](#implementation-plan)).
-- Needle Sensor follow-up: grant the schematic through `FishReward.tackleSchematic`. Advance the intel to its return step when the Outfitter closes and the module is owned, not from `ShopEntry.grant`: the Outfitter's undo refunds a purchase through `TackleManager.consume` without passing through `ShopEntry`.
+**Work.** Implemented in Stage 3 (`CaptainsFleet`, `SensorBuild`); see [ARCHITECTURE.md](ARCHITECTURE.md). The Needle Sensor's return step hands over to T3 (Stage 4).
 
 ## T3: The wounded epic
 
@@ -285,7 +277,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 3.6 The hunt through the Stage 0 hooks: a catch, or a failure on reset, failed catch or blast with a notification back to the captain.
 - [x] 3.7 Outcomes: the harpoon ship through `FishReward.ship` for both, plus the extra rewards on a catch.
 - [x] 3.8 The Fisherman debrief, its lore questions and the Needle Sensor schematic.
-- [ ] 3.9 The Needle Sensor intel: buy it (checked when the Outfitter closes), then return to the Fisherman.
+- [x] 3.9 The Needle Sensor intel: buy it (checked when the Outfitter closes), then return to the Fisherman.
 - [ ] 3.10 Text through the Editor process, then the dialogue and rules checks.
 
 **Stage 4: T3, the wounded epic.**
