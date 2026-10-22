@@ -54,6 +54,8 @@ public final class FishermanChain {
     public static final String T2_MEET = "$catchreleaseChainT2Meet";
     public static final String T2_SEARCHING = "$catchreleaseChainT2Searching";
     public static final String T2_HUNT = "$catchreleaseChainT2Hunt";
+    public static final String T2_CAUGHT = "$catchreleaseChainT2Caught";
+    public static final String T2_LOST = "$catchreleaseChainT2Lost";
 
     public static class Saved implements Serializable {
 
@@ -140,6 +142,8 @@ public final class FishermanChain {
         local.set(T2_MEET, stage == Stage.T2_MEET, 0);
         local.set(T2_SEARCHING, stage == Stage.T2_LAMPS, 0);
         local.set(T2_HUNT, stage == Stage.T2_HUNT, 0);
+        local.set(T2_CAUGHT, stage == Stage.T2_REPORT && saved != null && saved.t2Caught, 0);
+        local.set(T2_LOST, stage == Stage.T2_REPORT && (saved == null || !saved.t2Caught), 0);
     }
 
     public static Saved get(boolean create) {

@@ -2702,9 +2702,9 @@ SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The link opens on a c
 
 ""You'll be the one the old man sent. Good. I was starting to think he'd forgotten me.""
 
-""There's a $catchreleaseChainT2Species out there. I've been after her sixteen year. First time I got a harpoon in her, she took my leg off at the knee, and I've been on her tail ever since.""
+""There's a $catchreleaseChainT2Species out there. I've been on her tail near twenty year. First time I got a harpoon in her, she had my leg off at the knee. I've no had a decent night's sleep since.""
 
-""Och, but my lamps are done. Cannae see a thing without them. Take a wee turn round the star with yours lit, close in, and keep them lit till she shows. When she does, put a harpoon in her.""","catchrelease_t2Search:""I'll find her.""
+""Och, but my lamps are finished. Burnt out the lot of them last week, and we're blind without them. Run yours close in round the star and keep them lit till she shows. When she does, put a harpoon in her.""","catchrelease_t2Search:""I'll find her.""
 100:catchrelease_fleetResolutionLeave:Leave",
 catchrelease_t2Search,DialogOptionSelected,$option == catchrelease_t2Search,"CatchReleaseCMD t2Search
 SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""Grand. We'll be right here. Give us a shout when you've seen her.""",100:catchrelease_fleetResolutionLeave:Leave,
@@ -2714,7 +2714,23 @@ catchrelease_t2CaptainSearching,CatchReleaseT2Captain,$catchreleaseChainT2Search
 catchrelease_t2CaptainHunt,CatchReleaseT2Captain,$catchreleaseChainT2Hunt,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is leaning over the plot table when the link opens. Your lamp returns are up on his display.
 
 ""That's her, right enough. What are you doing on the comms? Away and get a harpoon in her before she's off again.""",100:catchrelease_fleetResolutionLeave:Leave,
-catchrelease_t2CaptainNone,CatchReleaseT2Captain,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""",The captain is busy with his crew and waves you off.,100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2CaptainCaught,CatchReleaseT2Captain,$catchreleaseChainT2Caught,"CatchReleaseCMD t2Complete
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The link opens on a bridge full of noise. Somebody behind the captain is singing, badly.
+
+""You got her! Near twenty year, and you landed her in an afternoon!"" He has to stop and wipe his eyes. ""Och, I'm too old for this. That's me done, so it is. I'm away home to put my leg up. The one I've got left.""
+
+""You'll be wanting paid. Take the harpoon boat, she's earned a better captain than me. And the crew have dug out a few things they'll not be needing now.""",100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2CaptainLost,CatchReleaseT2Captain,$catchreleaseChainT2Lost,"CatchReleaseCMD t2Complete
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain hears you out without interrupting. When you're done he nods slowly.
+
+""Aye, that's her all over. Twenty year near enough, and she's never once let me close enough to land her.""
+
+""Still, you found her, and that's more than I've managed in a long while. The crew have your whole run on the plot now. We'll know where to look next time, and there will be a next time.""
+
+""Take the harpoon boat for your trouble. You'll get more use out of her than I will the noo.""",100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2CaptainNone,CatchReleaseT2Captain,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is busy getting his fleet under way. He raises a hand to the pickup.
+
+""Tell the old man I'm obliged to him.""",100:catchrelease_fleetResolutionLeave:Leave,
 ,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,

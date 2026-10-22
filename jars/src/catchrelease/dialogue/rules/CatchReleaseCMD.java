@@ -265,6 +265,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "t2Search":
                 CaptainsFleet.beginSearch();
                 return true;
+            case "t2Complete":
+                return CaptainsFleet.complete(text(dialog));
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);

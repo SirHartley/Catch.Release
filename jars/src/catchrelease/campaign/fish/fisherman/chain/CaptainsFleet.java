@@ -16,9 +16,15 @@ import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.jobs.FishReward;
+import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.campaign.fish.legendary.QuestEpicListener;
+import catchrelease.campaign.fish.ships.FishingShips;
+import catchrelease.campaign.fish.shop.ShopSchematics;
+import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
@@ -56,6 +62,7 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 // T2: the captain's fleet. A captain the Fisherman knows is hunting an epic in an empty system; the player's lamps
@@ -80,6 +87,8 @@ public final class CaptainsFleet {
     // how far ahead of the sweep the epic is placed, so the beam reaches it rather than starting on top of it
     public static final float LEAD_SECONDS = 2f;
     public static final float VANISH_GRACE = 5f;
+
+    public static final int RANGE_DATA = 3;
 
     private CaptainsFleet() {
     }
@@ -389,6 +398,54 @@ public final class CaptainsFleet {
         FishermanChain.setStage(FishermanChain.Stage.T2_LAMPS);
         Hunt.register();
         updateIntel();
+    }
+
+    // Both outcomes pay the harpoon ship; a catch also pays a schematic and range data. The fleet then heads home.
+    public static boolean complete(TextPanelAPI text) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T2_REPORT)) return false;
+
+        Random random = new Random();
+        List<FishReward.Receipt> receipts = new ArrayList<>();
+        receipts.add(FishReward.ship(FishingShips.Ship.HARPOON.hullId).grantWithReceipt());
+        if (saved.t2Caught) {
+            FishReward schematic = pickSchematic(random);
+            if (schematic != null) receipts.add(schematic.grantWithReceipt());
+
+            for (FishReward data : FishRewardRoller.rollLocationData(random, RANGE_DATA,
+                    FishRewardRoller.VALUE_PER_FISH)) {
+                receipts.add(data.grantWithReceipt());
+            }
+        }
+
+        releaseFleet();
+        FishermanChain.setStage(FishermanChain.Stage.T2_DEBRIEF);
+        register();
+        FishReward.showReceipts(text, receipts);
+        updateIntel();
+
+        return true;
+    }
+
+    // A harpoon module the player has no schematic for; failing that, any module. Ship modules are never stocked,
+    // and the Needle Sensor is left for the Fisherman to give.
+    protected static FishReward pickSchematic(Random random) {
+        Set<String> reserved = FishRewardRoller.getReservedSchematicKeys();
+        List<Tackle> harpoon = new ArrayList<>();
+        List<Tackle> any = new ArrayList<>();
+
+        for (Tackle tackle : Tackle.values()) {
+            if (tackle == Tackle.NONE || tackle == Tackle.NEEDLE_SENSOR || !tackle.stocked) continue;
+            if (!TackleManager.isUnlocked(tackle) || ShopSchematics.has(tackle)) continue;
+            if (reserved.contains(ShopSchematics.getKey(tackle))) continue;
+
+            any.add(tackle);
+            if (tackle.fits(Tackle.Fit.HARPOON)) harpoon.add(tackle);
+        }
+
+        List<Tackle> pool = harpoon.isEmpty() ? any : harpoon;
+
+        return pool.isEmpty() ? null : FishReward.tackleSchematic(pool.get(random.nextInt(pool.size())));
     }
 
     // The epic was lost before anyone woke it: it goes, and the lamp count starts again.
