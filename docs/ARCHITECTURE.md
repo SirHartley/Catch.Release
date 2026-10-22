@@ -62,7 +62,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/world/factions/default_ranks.json` | Contact roles |
 | `data/campaign/terrain.json` | Pond/coherence terrain; ponds are not custom entities |
 | `data/config/custom_entities.json` | Motes, drones, harpoons, legendary props and map proxies |
-| `data/campaign/special_items.csv` | Fish cargo |
+| `data/campaign/special_items.csv` | Fish cargo; the T1 compass (`catchrelease_compass`, plain `BaseSpecialItemPlugin`, `TreasureRumour.COMPASS`) |
 | `data/campaign/industries.csv` | Breach Conservatory |
 | `data/hulls/ship_data.csv`, `data/hulls/catchrelease_*_ship.ship`, `data/strings/descriptions.csv` | Placeholder fishing-ship hulls `catchrelease_harpoon_ship`, `catchrelease_lamp_ship` and `catchrelease_rod_ship`: full copies of vanilla `nebula` (stats, `.ship` layout, sprite path and description) under their own ids and names. Vanilla's blueprint-package tags (`base_bp`, `merc`, `ind`) are left out so no faction builds or sells them; `no_drop`, `no_sell`, `no_bp_drop` and the `HIDE_IN_CODEX` hint keep them out of loot, markets and the Codex. Only quests grant them (`FishReward.ship`). The real hulls replace them under the same ids; see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#ships). |
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |

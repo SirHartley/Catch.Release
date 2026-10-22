@@ -259,7 +259,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 
 **Stage 1: T1, the treasure rumour.**
 - [x] 1.1 `FishermanChain`: saved chain state, its `CatchReleaseCMD` verbs, and a `tokens` Boolean that gates each offer row. Every later quest builds on it.
-- [ ] 1.2 The compass `special_items.csv` row (`BaseSpecialItemPlugin`).
+- [x] 1.2 The compass `special_items.csv` row (`BaseSpecialItemPlugin`).
 - [ ] 1.3 The quest-owned `LOOT` rumour in a nearby system. It replaces the graduation lead: `FishingIntro.finish` and `skip` stop calling `ensureTutorialLead()`. It starts the shared cooldown as that lead did.
 - [ ] 1.4 The offer: "Heard of anywhere worth fishing?" after the last hand-in leads into T1, and after a skipped tutorial the Fisherman offers it on the next visit. Then the lost-compass intel.
 - [ ] 1.5 The golden chest: a flagged `MinigameTreasure` whose "chest due" is decided in `FishingMinigameDialogPlugin.init`, with the pity counter updated in `resolve()` and the compass granted on a win.
