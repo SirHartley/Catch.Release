@@ -1,6 +1,7 @@
 package catchrelease.campaign.crime;
 
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
+import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
@@ -68,6 +69,9 @@ public class HarpoonOffence {
     }
 
     public static boolean record(CampaignFleetAPI victim, boolean explosive) {
+        // the epic-hunting captain shrugs it off: an offence would put the harpoon comm rows over his quest rows
+        if (CaptainsFleet.isCaptain(victim)) return false;
+
         FactionAPI faction = getOffendedFaction(victim);
         if (faction == null) return false;
 
@@ -355,7 +359,7 @@ public class HarpoonOffence {
     }
 
     public static void turnHostile(CampaignFleetAPI victim) {
-        if (victim == null || FishermanSpawner.isFisherman(victim)) return;
+        if (victim == null || FishermanSpawner.isFisherman(victim) || CaptainsFleet.isCaptain(victim)) return;
 
         MemoryAPI mem = victim.getMemoryWithoutUpdate();
 

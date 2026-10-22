@@ -816,7 +816,7 @@ charges, moving couriers, notice placement, pause and cleanup.
 |---|---|
 | `LampOffence.java` | Defines the inhabited-world distance gate, consequences, and per-faction/per-system warning history. |
 | `LampPatrolResponse.java` | While lamps are on and the player remains inside the inhabited-world radius, every eligible patrol that sees the player pushes an intercept ahead of its current assignments. |
-| `HarpoonOffence.java` | Per-faction, per-system hit history, debts, reputation loss, witness state, and response ladders. |
+| `HarpoonOffence.java` | Per-faction, per-system hit history, debts, reputation loss, witness state, and response ladders. The T2 captain's fleet (`CaptainsFleet.isCaptain`) is never recorded or turned hostile, so the harpoon comm rows (score 1200–1300) never take over his conversation. |
 | `HarpoonPatrolResponse.java` | Sends one collector at a time in the incident system; after a reported refusal, every eligible patrol there that sees the player. |
 | `HarpoonWitness.java` | Makes a civilian seek a patrol, after a first hit or a refused repair bill. |
 | `HarpoonHitman.java` | Revenge-contract roll for eligible colonial factions and eligible victims; the `CHANCE_*` constants set each trigger's odds. |

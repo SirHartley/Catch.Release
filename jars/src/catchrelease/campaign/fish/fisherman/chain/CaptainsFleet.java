@@ -523,6 +523,10 @@ public final class CaptainsFleet {
         }
     }
 
+    public static boolean isCaptain(CampaignFleetAPI fleet) {
+        return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(CAPTAIN_FLAG);
+    }
+
     public static CampaignFleetAPI getFleet() {
         FishermanChain.Saved saved = FishermanChain.get(false);
 
