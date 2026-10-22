@@ -2,13 +2,24 @@ package catchrelease.campaign.fish.ships;
 
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BattleAPI;
+import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.InteractionDialogAPI;
+import com.fs.starfarer.api.campaign.PlayerMarketTransaction;
+import com.fs.starfarer.api.campaign.econ.MarketAPI;
+import com.fs.starfarer.api.campaign.listeners.ColonyInteractionListener;
+import com.fs.starfarer.api.campaign.listeners.FleetEventListener;
+import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
+import com.fs.starfarer.api.campaign.listeners.ShipRecoveryListener;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,7 +48,86 @@ public final class FishingShips {
 
     public static final String PRESENT_KEY = "$catchrelease_fishingShipsPresent";
 
+    // Market trades and storage transfers, battle losses and recovery are reported; scuttling, mothballing, rule
+    // commands and other mods' fleet changes are not (FleetData calls no listener). Watcher covers those.
+    public static class Listener implements ColonyInteractionListener, FleetEventListener, ShipRecoveryListener {
+
+        @Override
+        public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
+            if (!transaction.getShipsBought().isEmpty() || !transaction.getShipsSold().isEmpty()) reconcile();
+        }
+
+        @Override
+        public void reportBattleOccurred(CampaignFleetAPI fleet, CampaignFleetAPI primaryWinner, BattleAPI battle) {
+            reconcile();
+        }
+
+        @Override
+        public void reportShipsRecovered(List<FleetMemberAPI> ships, InteractionDialogAPI dialog) {
+            reconcile();
+        }
+
+        @Override
+        public void reportFleetDespawnedToListener(CampaignFleetAPI fleet, CampaignEventListener.FleetDespawnReason reason,
+                                                   Object param) {
+        }
+
+        @Override
+        public void reportPlayerOpenedMarket(MarketAPI market) {
+        }
+
+        @Override
+        public void reportPlayerClosedMarket(MarketAPI market) {
+        }
+
+        @Override
+        public void reportPlayerOpenedMarketAndCargoUpdated(MarketAPI market) {
+        }
+    }
+
+    // Polling exception (CLAUDE.md): no callback reports the removals Listener misses. A member count is O(1) and
+    // runs only while unpaused; a change in it triggers the one full scan in reconcile. Two changes that cancel out
+    // within one frame are missed until the next count change or callback.
+    public static class Watcher implements EveryFrameScript {
+
+        protected transient int members = -1;
+
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+
+        @Override
+        public boolean runWhilePaused() {
+            return false;
+        }
+
+        @Override
+        public void advance(float amount) {
+            CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+            if (fleet == null) return;
+
+            int count = fleet.getFleetData().getNumMembers();
+            if (count == members) return;
+
+            members = count;
+            reconcile();
+        }
+    }
+
     private FishingShips() {
+    }
+
+    // Transient: re-added on every load, then a reconcile catches anything that changed while the game was closed.
+    public static void register() {
+        ListenerManagerAPI listeners = Global.getSector().getListenerManager();
+        listeners.removeListenerOfClass(Listener.class);
+        listeners.addListener(new Listener(), true);
+
+        Global.getSector().removeTransientScriptsOfClass(Watcher.class);
+        Global.getSector().addTransientScript(new Watcher());
+
+        reconcile();
     }
 
     public static boolean hasSecondSlot(Tackle.Fit rig) {

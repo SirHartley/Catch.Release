@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.shop.ShopEntry;
 import catchrelease.campaign.fish.shop.ShopGroup;
 import catchrelease.campaign.fish.shop.ShopMarks;
@@ -524,6 +525,8 @@ public abstract class FishReward {
             member.setShipName(fleet.getFleetData().pickShipName(member, null));
             fleet.getFleetData().addFleetMember(member);
             member.getRepairTracker().setCR(member.getRepairTracker().getMaxCR());
+            // adding a member reports nothing; a fishing ship's second slot must open now
+            FishingShips.reconcile();
 
             return member;
         }

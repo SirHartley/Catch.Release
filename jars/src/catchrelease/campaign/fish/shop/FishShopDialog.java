@@ -12,6 +12,7 @@ import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.jobs.FishHandoffPicker;
 import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.StatIds;
@@ -1103,6 +1104,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
         this.dialog = dialog;
         closed = false;
         reopenPending = false;
+        FishingShips.reconcile();
 
         // returns anything a save is still holding in shop storage - that button no longer exists
 
