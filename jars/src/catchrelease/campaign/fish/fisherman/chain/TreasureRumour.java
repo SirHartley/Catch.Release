@@ -65,6 +65,9 @@ public final class TreasureRumour {
     public static final float MIN_LY = 2f;
     public static final float MAX_LY = 10f;
 
+    // how long the rumour keeps paying once the lens is bought
+    public static final float EXTENSION_DAYS = 60f;
+
     public static final float CHEST_CHANCE = 0.3f;
     // the chest is certain on the 4th qualifying minigame, then on every 2nd after it until taken
     public static final int CHEST_GUARANTEED_AT = 4;
@@ -376,7 +379,7 @@ public final class TreasureRumour {
         if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE)) return false;
 
         CargoAPI cargo = getPlayerCargo();
-        if (cargo != null) cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, compass(), 1f);
+        if (cargo != null && isCarried()) cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, compass(), 1f);
 
         saved.lost = null;
         saved.lostMarketName = null;
@@ -384,8 +387,22 @@ public final class TreasureRumour {
         FishermanChain.setStage(FishermanChain.Stage.T1_LENS);
         FishReward.showReceipts(text, grantRewards());
         updateIntel();
+        checkLensBought();
 
         return true;
+    }
+
+    // The follow-up ends once the lens is owned, checked when the Outfitter closes and at hand-in. From then on the
+    // rumour runs its ordinary course for EXTENSION_DAYS; the Fisherman remarks on it at the next call.
+    public static void checkLensBought() {
+        if (!FishermanChain.isAt(FishermanChain.Stage.T1_LENS) || !TackleManager.isOwned(Tackle.GLITTER_LENS)) return;
+
+        FishRumors.release(getRumour(), EXTENSION_DAYS);
+        FishermanChain.setStage(FishermanChain.Stage.T1_BOUGHT);
+    }
+
+    public static void finish() {
+        if (FishermanChain.isAt(FishermanChain.Stage.T1_BOUGHT)) FishermanChain.setStage(FishermanChain.Stage.T1_DONE);
     }
 
     // The Glitter Lens schematic and the means to buy it: the specimens its saved fish payment asks for, plus its

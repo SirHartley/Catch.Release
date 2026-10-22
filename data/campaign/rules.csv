@@ -2647,6 +2647,10 @@ $catchreleaseChainT1HasCompass",SetOptionColor catchrelease_t1HandIn highlight,,
 catchrelease_t1HandIn,DialogOptionSelected,$option == catchrelease_t1HandIn,CatchReleaseCMD t1Complete,"The Fisherman sends a deckhand across for the compass. He turns it over once, then puts it in his coat without opening the case.
 
 ""That's the one. Thank you, Captain.""",catchrelease_t1Followup:Continue,
+catchrelease_fisherOptT1Bought,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT1Bought",SetOptionColor catchrelease_t1Bought highlight,,"36:catchrelease_t1Bought:""I've had the lens built.""",
+catchrelease_t1Bought,DialogOptionSelected,$option == catchrelease_t1Bought,"CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""two months""
+CatchReleaseCMD t1Done","""Good. Take it back to $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
 catchrelease_fisherOptT1Lost,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT1Active
 $catchreleaseChainT1Pulled
@@ -2663,6 +2667,8 @@ catchrelease_t1LostNone,CatchReleaseT1Lost,,,"""Bring it by when you find it."""
 catchrelease_t1Followup,DialogOptionSelected,$option == catchrelease_t1Followup,"CatchReleaseCMD tokens
 FireBest CatchReleaseT1Followup",,,
 catchrelease_t1FollowupLens,CatchReleaseT1Followup,$catchreleaseChainT1Lens,CatchReleaseCMD highlightFishText Outfitter,"""That schematic's for a lens array. Have it built at the Outfitter and fit it to your lights. You'll bring up a good deal more bycatch working under them.""",catchrelease_fisherBack:Continue,
+catchrelease_t1FollowupBought,CatchReleaseT1Followup,$catchreleaseChainT1Bought,"CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""two months""
+CatchReleaseCMD t1Done","""You've already got one of those lenses, I see. Then take it back to $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupNone,CatchReleaseT1Followup,,,"""Good fishing, Captain.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman questions,,,,,,
