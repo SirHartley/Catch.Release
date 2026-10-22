@@ -2778,6 +2778,14 @@ FireBest CatchReleaseT3Accepted",,,
 catchrelease_t3Accepted,CatchReleaseT3Accepted,$catchreleaseChainT3Hunt,,"""Good. Keep your lights off until the sensor has found it.""",catchrelease_fisherBack:Continue,
 catchrelease_t3AcceptFailed,CatchReleaseT3Accepted,,,"""Hm. It's moved on from there. Ask me again later and I'll see where it went.""",catchrelease_fisherBack:Continue,
 catchrelease_t3Decline,DialogOptionSelected,$option == catchrelease_t3Decline,,"""It'll keep. It isn't going far.""",catchrelease_fisherBack:Continue,
+catchrelease_fisherOptT3HandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT3Caught",SetOptionColor catchrelease_t3HandIn highlight,,"36:catchrelease_t3HandIn:""I landed your wounded epic.""",
+catchrelease_t3HandIn,DialogOptionSelected,$option == catchrelease_t3HandIn,"CatchReleaseCMD highlightFishText ""lamp ship"" ""second lens array"" ""range data""
+CatchReleaseCMD t3Complete","""Did you, now? Good work. That one would have kept a lesser crew busy for months.""
+
+He sends a deckhand below for two chips and hands them across himself.
+
+""The first is a blueprint for a lamp ship. Bigger lights, and room for a second lens array. You'll have to find someone who can build it; I don't run a yard. The other is range data. Somewhere to go next.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,

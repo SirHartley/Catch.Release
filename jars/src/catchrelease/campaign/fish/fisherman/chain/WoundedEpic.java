@@ -11,10 +11,14 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
+import catchrelease.campaign.fish.jobs.FishReward;
+import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.campaign.fish.legendary.QuestEpicListener;
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -39,6 +43,9 @@ import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 // T3: the wounded epic. It circles a planet while buried and hunts at half speed once woken; any hunt that does not
@@ -298,6 +305,43 @@ public final class WoundedEpic {
         FishIntelNotifications.queue(new WoundedIntel(), text);
 
         return true;
+    }
+
+    // The lamp ship's blueprint and range data on an epic the player has not charted; with every epic charted the
+    // entry pays its credit fallback.
+    public static boolean complete(TextPanelAPI text) {
+        if (!FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT)) return false;
+
+        List<FishReward.Receipt> receipts = new ArrayList<>();
+        receipts.add(FishReward.shipBlueprint(FishingShips.Ship.LAMP.hullId).grantWithReceipt());
+
+        FishSpec epic = pickRangeData(new Random());
+        if (epic != null) {
+            receipts.add(FishReward.locationData(epic.id, FishRewardRoller.VALUE_PER_FISH).grantWithReceipt());
+        }
+
+        FishermanChain.setStage(FishermanChain.Stage.T3_BUILD);
+        register();
+        FishReward.showReceipts(text, receipts);
+        updateIntel();
+
+        return true;
+    }
+
+    protected static FishSpec pickRangeData(Random random) {
+        List<FishSpec> unknown = new ArrayList<>();
+        List<FishSpec> any = new ArrayList<>();
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (spec == null || spec.rarity != FishRarity.EPIC || spec.spawnWeight <= 0f || !spec.hasHabitat()) {
+                continue;
+            }
+
+            any.add(spec);
+            if (!FishLog.isCaught(spec.id) && !FishLog.isLocationDataUnlocked(spec.id)) unknown.add(spec);
+        }
+
+        List<FishSpec> pool = unknown.isEmpty() ? any : unknown;
+        return pool.isEmpty() ? null : pool.get(random.nextInt(pool.size()));
     }
 
     public static void updateIntel() {

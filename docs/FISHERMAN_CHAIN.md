@@ -285,7 +285,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 4.2 The awake 0.5 multiplier in `EpicHunt.getSpeedMult`, carried to the surfaced fish by `unearth()`.
 - [x] 4.3 Spawning at the planet, plus respawn on reset and on arrival in the system, with the campaign message.
 - [x] 4.4 The T3 offer in the Needle Sensor return conversation, and its intel.
-- [ ] 4.5 Hand-in: the Breach Light ship blueprint and range data on an epic.
+- [x] 4.5 Hand-in: the Breach Light ship blueprint and range data on an epic.
 - [ ] 4.6 The build follow-up, completed through `FishingShips.reconcile()`.
 - [ ] 4.7 The closing conversation; text through the Editor process, then the dialogue and rules checks.
 
