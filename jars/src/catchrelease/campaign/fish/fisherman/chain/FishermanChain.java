@@ -51,6 +51,11 @@ public final class FishermanChain {
         get(true).stage = stage;
     }
 
+    // The tutorial's end, finished or skipped, opens the chain; a chain already under way is left alone.
+    public static void offerFirst() {
+        if (getStage() == Stage.NONE) setStage(Stage.T1_OFFERED);
+    }
+
     // Display values for one dialog; expiry 0 as every CatchReleaseCMD token.
     public static void writeTokens(MemoryAPI local) {
         Saved saved = get(false);

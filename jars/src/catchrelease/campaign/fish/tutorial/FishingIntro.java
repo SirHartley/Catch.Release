@@ -14,7 +14,7 @@ import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
-import catchrelease.campaign.fish.fisherman.FishRumors;
+import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.intel.FishIntelIcon;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
@@ -554,7 +554,7 @@ public class FishingIntro {
         Global.getSector().getMemoryWithoutUpdate().unset(TutorialConstants.DEEP_HANDOFF_KEY);
 
         dropNote();
-        FishRumors.ensureTutorialLead();
+        FishermanChain.offerFirst();
     }
 
     public static void point() {
@@ -664,7 +664,7 @@ public class FishingIntro {
         }
 
         enableFutureSkip();
-        FishRumors.ensureTutorialLead();
+        FishermanChain.offerFirst();
     }
 
     public static boolean showCurrentIntel(TextPanelAPI text) {
