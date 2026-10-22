@@ -10,6 +10,7 @@ import catchrelease.campaign.fish.data.FishLogEntry;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishermanBycatch;
+import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.treasure.MinigameTreasure;
 import catchrelease.campaign.fish.treasure.TreasureAward;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
@@ -235,7 +236,8 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         if (!minigame.getTakenTreasures().isEmpty()) FishermanBycatch.recordFound();
 
         for (MinigameTreasure treasure : minigame.getTakenTreasures()) {
-            lootAwards.add(TreasureRoller.award(treasure.rarity, minigame.getTackle().shipTackle));
+            lootAwards.add(treasure.golden ? TreasureRumour.awardCompass()
+                    : TreasureRoller.award(treasure.rarity, minigame.getTackle().shipTackle));
         }
     }
 
@@ -602,7 +604,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
         float centerY = layout.getTrackY(treasure.position);
 
         // rarity-colour wash behind the icon so tier reads before the icon does
-        Disc.draw(centerX, centerY, FishConstants.TREASURE_ICON_SIZE * 0.9f, treasure.rarity.color,
+        Disc.draw(centerX, centerY, FishConstants.TREASURE_ICON_SIZE * 0.9f, treasure.getColor(),
                 0.5f * alphaMult, 0f, true);
 
         SpriteAPI sprite = SpriteLoader.loadSprite(FishConstants.TREASURE_MINIGAME_ICON);
@@ -619,7 +621,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             float to = FishConstants.TREASURE_ICON_SIZE * 0.5f * FishConstants.TREASURE_RING_END;
 
             Disc.drawOutline(centerX, centerY, from + (to - from) * held,
-                    treasure.rarity.color, alphaMult, 2f);
+                    treasure.getColor(), alphaMult, 2f);
         }
 
         renderTreasureClock(treasure, centerX, centerY, alphaMult);
@@ -635,7 +637,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 - FishConstants.TREASURE_BAR_GAP - height;
 
         drawQuad(x, y, width, height, Color.BLACK, 0.6f * alphaMult);
-        drawQuad(x, y, width * treasure.getTimeLeft(), height, treasure.rarity.color, 0.9f * alphaMult);
+        drawQuad(x, y, width * treasure.getTimeLeft(), height, treasure.getColor(), 0.9f * alphaMult);
     }
 
     protected void renderMeter(FishingMinigameLayout layout, float alphaMult) {

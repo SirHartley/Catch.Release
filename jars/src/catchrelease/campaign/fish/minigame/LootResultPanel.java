@@ -85,7 +85,7 @@ public class LootResultPanel {
         for (TreasureAward award : this.awards) {
             for (TreasureAward.Item item : award.items) {
                 rows.add(new Row(item.name, item.sprite, item.count,
-                        item.color == null ? award.rarity.color : item.color));
+                        item.color == null ? award.color : item.color));
             }
         }
     }
@@ -343,7 +343,7 @@ public class LootResultPanel {
     }
 
     protected void renderBox(FishingMinigameLayout layout, float alphaMult) {
-        Color accent = getBestRarity().color;
+        Color accent = getBestColor();
 
         float x = layout.lootBoxX;
         float y = layout.lootBoxY;
@@ -367,14 +367,14 @@ public class LootResultPanel {
         CatchResultPanel.dress(x, y, size, size, alphaMult);
     }
 
-    protected TreasureRarity getBestRarity() {
-        TreasureRarity best = TreasureRarity.COMMON;
+    protected Color getBestColor() {
+        TreasureAward best = null;
 
         for (TreasureAward award : awards) {
-            if (award.rarity.rank > best.rank) best = award.rarity;
+            if (best == null || award.rarity.rank > best.rarity.rank) best = award;
         }
 
-        return best;
+        return best == null ? TreasureRarity.COMMON.color : best.color;
     }
 
     protected float renderTitle(FishingMinigameLayout layout, float y, float alphaMult) {

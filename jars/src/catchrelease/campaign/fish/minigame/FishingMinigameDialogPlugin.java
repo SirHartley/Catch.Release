@@ -11,6 +11,7 @@ import catchrelease.campaign.fish.data.SectorRegion;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishRumors;
+import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
 import catchrelease.campaign.fish.tackle.Tackle;
@@ -56,6 +57,7 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
 
     protected boolean resolved = false;
     protected boolean failureRecorded;
+    protected boolean chestQualifying;
     transient protected boolean dismissed = false;
 
     transient protected float previousCampaignMusicVolume;
@@ -297,6 +299,9 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         this.minigame = catchrelease.campaign.fish.legendary.MantaFormationModule.SPECIES.equals(fish.id)
                 ? new MantaMinigame(fish, tackle, location, scars, lampTreasure)
                 : new FishingMinigame(fish, tackle, location, scars, lampTreasure);
+        // read off the anchor now, as the specimen fields below are: the mote is gone by resolve()
+        this.chestQualifying = TreasureRumour.isChestQualifying(fish, anchor);
+        if (chestQualifying && TreasureRumour.isChestDue()) minigame.addGoldenChest();
         this.minigame.setPresentedColor(catchrelease.campaign.fish.legendary
                 .LegendaryShields.getPresentedColor(fish, catchTarget));
 
@@ -435,6 +440,10 @@ public class FishingMinigameDialogPlugin implements InteractionDialogPlugin {
         if (caught) {
             FishingIntro.recordCatchForTargetProtection(specimen,
                     anchor == null ? null : anchor.getContainingLocation());
+        }
+        if (chestQualifying) {
+            TreasureRumour.recordChestMinigame(caught && minigame.getTakenTreasures().stream()
+                    .anyMatch(treasure -> treasure.golden));
         }
 
         // panel closes before the dialog, unless panel-close is what triggered this

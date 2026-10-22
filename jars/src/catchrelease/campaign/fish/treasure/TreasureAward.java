@@ -7,6 +7,8 @@ import java.awt.Color;
 public class TreasureAward {
 
     public final TreasureRarity rarity;
+    public final String label;
+    public final Color color;
     public final List<Item> items = new ArrayList<>();
 
     public static class Item {
@@ -29,7 +31,14 @@ public class TreasureAward {
     }
 
     public TreasureAward(TreasureRarity rarity) {
+        this(rarity, rarity == null ? null : rarity.name, rarity == null ? null : rarity.color);
+    }
+
+    // rarity still ranks the award for the loot card; label and colour name it there and in the catch log
+    public TreasureAward(TreasureRarity rarity, String label, Color color) {
         this.rarity = rarity;
+        this.label = label;
+        this.color = color;
     }
 
     public String describe() {

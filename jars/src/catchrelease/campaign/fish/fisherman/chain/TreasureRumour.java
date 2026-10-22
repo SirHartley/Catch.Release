@@ -10,6 +10,8 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.treasure.TreasureAward;
+import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
@@ -38,8 +40,15 @@ public final class TreasureRumour {
 
     public static final String COMPASS = "catchrelease_compass";
 
+    public static final String COMPASS_ICON = "graphics/catchrelease/icon/compass.png";
+
     public static final float MIN_LY = 2f;
     public static final float MAX_LY = 10f;
+
+    public static final float CHEST_CHANCE = 0.3f;
+    // the chest is certain on the 4th qualifying minigame, then on every 2nd after it until taken
+    public static final int CHEST_GUARANTEED_AT = 4;
+    public static final int CHEST_GUARANTEED_EVERY = 2;
 
     private TreasureRumour() {
     }
@@ -229,6 +238,58 @@ public final class TreasureRumour {
         FishermanChain.Saved saved = FishermanChain.get(false);
 
         return saved == null ? null : FishRumors.findActive(saved.systemId, FishRumors.Kind.LOOT);
+    }
+
+    // Any won or lost minigame on a non-legendary lamp catch in the target system counts toward the guarantee.
+    public static boolean isChestQualifying(FishSpec fish, SectorEntityToken anchor) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved == null || saved.compassPulled || !FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE)) return false;
+        if (fish == null || fish.rarity == FishRarity.LEGENDARY) return false;
+        if (CatchImplement.of(anchor) != CatchImplement.BREACH_LAMP) return false;
+
+        return anchor.getContainingLocation() instanceof StarSystemAPI system
+                && system.getId().equals(saved.systemId);
+    }
+
+    public static boolean isChestDue() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved == null) return false;
+
+        int index = saved.chestMinigames + 1;
+        if (index >= CHEST_GUARANTEED_AT
+                && (index - CHEST_GUARANTEED_AT) % CHEST_GUARANTEED_EVERY == 0) return true;
+
+        return Math.random() < CHEST_CHANCE;
+    }
+
+    public static void recordChestMinigame(boolean pulled) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved == null) return;
+
+        saved.chestMinigames++;
+        if (pulled && !saved.compassPulled) {
+            saved.compassPulled = true;
+            updateIntel();
+        }
+    }
+
+    // The chest's whole contents; granted by the minigame panel on a win, like any bycatch.
+    public static TreasureAward awardCompass() {
+        CargoAPI cargo = getPlayerCargo();
+        if (cargo != null) cargo.addSpecial(compass(), 1f);
+
+        TreasureAward award = new TreasureAward(TreasureRarity.EPIC, "Golden chest", Misc.getHighlightColor());
+        award.items.add(new TreasureAward.Item(getCompassName(), COMPASS_ICON, 1, Misc.getHighlightColor()));
+
+        return award;
+    }
+
+    public static String getCompassName() {
+        try {
+            return Global.getSettings().getSpecialItemSpec(COMPASS).getName();
+        } catch (RuntimeException e) {
+            return "Compass";
+        }
     }
 
     public static SpecialItemData compass() {

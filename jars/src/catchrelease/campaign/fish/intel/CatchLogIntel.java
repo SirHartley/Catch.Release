@@ -57,7 +57,7 @@ public class CatchLogIntel extends BaseIntelPlugin {
             for (TreasureAward award : loot) {
                 if (award == null || award.rarity == null) continue;
 
-                bycatch.add(new Bycatch(award.rarity.name, award.rarity.color, award.describe()));
+                bycatch.add(new Bycatch(award.label, award.color, award.describe()));
             }
         }
     }

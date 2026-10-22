@@ -36,6 +36,9 @@ public final class FishermanChain {
         public String systemName;
         // the Fisherman has raised T1 himself, at graduation or on the first call after a skip
         public boolean pitched;
+        // T1 lamp minigames in the target system that could have shown the golden chest, and whether it was taken
+        public int chestMinigames;
+        public boolean compassPulled;
     }
 
     private FishermanChain() {
