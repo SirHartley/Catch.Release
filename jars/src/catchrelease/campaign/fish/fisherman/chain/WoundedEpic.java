@@ -65,7 +65,8 @@ public final class WoundedEpic {
     private WoundedEpic() {
     }
 
-    // The planet is never left without its epic while the hunt is on: a lost one is replaced on arrival or load.
+    // The planet is never left without its epic while the hunt is on: a lost one is replaced on arrival or load, and
+    // wild ones of its species are cleared.
     public static class Arrival implements CurrentLocationChangedListener {
 
         public static void register() {
@@ -76,7 +77,10 @@ public final class WoundedEpic {
 
         @Override
         public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
-            if (curr != null && curr == getSystem()) ensureEpic();
+            if (curr != null && curr == getSystem()) {
+                clearWild();
+                ensureEpic();
+            }
         }
     }
 
@@ -275,6 +279,7 @@ public final class WoundedEpic {
         Arrival.register();
         Hunt.register();
         if (isHunting()) {
+            clearWild();
             ensureEpic();
         } else {
             clearEpic();
@@ -440,6 +445,30 @@ public final class WoundedEpic {
         FishermanChain.setStage(FishermanChain.Stage.T3_CAUGHT);
         register();
         updateIntel();
+    }
+
+    // While the hunt is on, the wounded epic is the only one of its species in its system. A wild one would wake at
+    // full speed and read as the quest's, its sensor ripples identical. BuriedMoteSpawner asks before each spawn.
+    public static boolean isReserved(LocationAPI location, String fishId) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+
+        return isHunting() && saved != null && fishId != null && fishId.equals(saved.t3SpeciesId)
+                && location != null && location == getSystem();
+    }
+
+    protected static void clearWild() {
+        StarSystemAPI system = getSystem();
+        if (system == null) return;
+
+        for (SectorEntityToken mote : new ArrayList<>(system.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG))) {
+            if (mote.isExpired() || QuestPond.isQuestMote(mote)
+                    || !(mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried)
+                    || buried.getFishSpec() == null || !isReserved(system, buried.getFishSpec().id)) continue;
+
+            // removeEntity does not expire it, and an epic's trail renderer retires on expiry
+            mote.setExpired(true);
+            system.removeEntity(mote);
+        }
     }
 
     protected static void ensureEpic() {
