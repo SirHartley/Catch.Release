@@ -500,15 +500,20 @@ public final class WoundedEpic {
         return nearest;
     }
 
-    // No markets or colonies, where Breach Lights would bring patrols down on the player, and nothing unsafe.
+    // No markets or colonies, where Breach Lights would bring patrols down on the player, nothing unsafe and no pulsar.
     protected static boolean isCandidate(StarSystemAPI system) {
         if (system == null || system.getId() == null) return false;
         if (system.hasTag(Tags.SYSTEM_CUT_OFF_FROM_HYPER) || system.hasTag(Tags.SYSTEM_ABYSSAL)) return false;
         if (system.hasTag(Tags.THEME_SPECIAL) || system.hasTag(Tags.THEME_HIDDEN)) return false;
         if (system.hasTag(Tags.THEME_UNSAFE)) return false;
         if (system.getHyperspaceAnchor() == null || OuterReaches.isPopulated(system)) return false;
+        if (FishRumors.isOccupied(system.getId())) return false;
 
-        return !FishRumors.isOccupied(system.getId());
+        // a pulsar's beams reach far past any clearance the circle keeps
+        for (PlanetAPI star : system.getPlanets()) {
+            if (star.isStar() && star.getSpec() != null && star.getSpec().isPulsar()) return false;
+        }
+        return true;
     }
 
     protected static PlanetAPI pickPlanet(StarSystemAPI system) {
