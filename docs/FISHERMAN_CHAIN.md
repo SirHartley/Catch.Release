@@ -148,7 +148,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 ## T3: The wounded epic
 
-**Premise.** The Fisherman points the player at a nearby system with epics. One has been wounded and is recovering, circling a planet at about 1,000 units.
+**Premise.** The Fisherman points the player at a nearby system with epics, never the captain's system from T2, and at a species other than the captain's. One has been wounded and is recovering, circling a planet at about 1,000 units.
 
 **Steps**
 1. The player uses the Needle Sensor built after T2 to locate it.

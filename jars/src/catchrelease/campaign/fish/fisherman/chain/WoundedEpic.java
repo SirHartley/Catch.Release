@@ -39,6 +39,7 @@ import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -291,7 +292,7 @@ public final class WoundedEpic {
 
         StarSystemAPI kept = FishRumors.findSystem(saved.t3SystemId);
         if (isCandidate(kept) && isHost(kept, getPlanet(kept, saved.t3PlanetId))
-                && CaptainsFleet.isTarget(FishSpecLoader.getFishSpec(saved.t3SpeciesId), kept)) {
+                && isTarget(FishSpecLoader.getFishSpec(saved.t3SpeciesId), kept)) {
             return true;
         }
 
@@ -305,7 +306,7 @@ public final class WoundedEpic {
         if (system == null) return false;
 
         PlanetAPI planet = pickPlanet(system);
-        FishSpec species = CaptainsFleet.pickSpecies(system);
+        FishSpec species = pickSpecies(system);
         if (planet == null || species == null) return false;
 
         saved.t3SystemId = system.getId();
@@ -323,7 +324,7 @@ public final class WoundedEpic {
         FishermanChain.Saved saved = FishermanChain.get(false);
         StarSystemAPI system = getSystem();
         if (saved == null || !isCandidate(system) || !isHost(system, getPlanet())
-                || !CaptainsFleet.isTarget(FishSpecLoader.getFishSpec(saved.t3SpeciesId), system)) {
+                || !isTarget(FishSpecLoader.getFishSpec(saved.t3SpeciesId), system)) {
             return false;
         }
 
@@ -485,7 +486,7 @@ public final class WoundedEpic {
         float best = Float.MAX_VALUE;
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (!isCandidate(system) || pickPlanet(system) == null || CaptainsFleet.pickSpecies(system) == null) {
+            if (!isCandidate(system) || pickPlanet(system) == null || pickSpecies(system) == null) {
                 continue;
             }
 
@@ -507,12 +508,32 @@ public final class WoundedEpic {
         if (system.hasTag(Tags.THEME_UNSAFE)) return false;
         if (system.getHyperspaceAnchor() == null || OuterReaches.isPopulated(system)) return false;
         if (FishRumors.isOccupied(system.getId())) return false;
+        // never the captain's system: T3 is a new hunt
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved != null && system.getId().equals(saved.t2SystemId)) return false;
 
         // a pulsar's beams reach far past any clearance the circle keeps
         for (PlanetAPI star : system.getPlanets()) {
             if (star.isStar() && star.getSpec() != null && star.getSpec().isPulsar()) return false;
         }
         return true;
+    }
+
+    protected static FishSpec pickSpecies(StarSystemAPI system) {
+        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (isTarget(spec, system)) picker.add(spec, spec.spawnWeight);
+        }
+
+        return picker.pick();
+    }
+
+    // An epic CaptainsFleet would hunt there, but never the captain's own species.
+    protected static boolean isTarget(FishSpec spec, StarSystemAPI system) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (spec == null || saved != null && spec.id.equals(saved.t2SpeciesId)) return false;
+
+        return CaptainsFleet.isTarget(spec, system);
     }
 
     protected static PlanetAPI pickPlanet(StarSystemAPI system) {
