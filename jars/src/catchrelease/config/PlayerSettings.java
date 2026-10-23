@@ -101,6 +101,7 @@ public final class PlayerSettings implements LunaSettingsListener {
         if (Global.getSector() == null) return;
         QuestPond.refreshMarkers();
         CaptainsFleet.syncMapIcon();
+        CaptainsFleet.syncMarker();
         for (var location : Global.getSector().getAllLocations()) {
             for (var fleet : location.getFleets()) {
                 Object ref = fleet.getMemoryWithoutUpdate().get(FishJob.REF_KEY);

@@ -16,6 +16,7 @@ import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.jobs.fleet.FleetQuest;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuestMapIcon;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
@@ -27,7 +28,9 @@ import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.config.Setting;
 import catchrelease.helper.loading.FishSpecLoader;
+import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
@@ -71,7 +74,6 @@ import java.util.Set;
 public final class CaptainsFleet {
 
     public static final String CAPTAIN_FLAG = "$catchrelease_t2Captain";
-    public static final String IMPORTANT_REASON = "catchrelease_t2";
 
     public static final String PORTRAIT = "graphics/portraits/portrait30.png";
     public static final String FLEET_NAME = "Captain's Fishing Fleet";
@@ -92,6 +94,9 @@ public final class CaptainsFleet {
     public static final float VANISH_GRACE = 5f;
 
     public static final int RANGE_DATA = 3;
+
+    // LunaLib renderers do not survive a load; register() adds it again
+    protected static FleetMarkerRenderer marker;
 
     private CaptainsFleet() {
     }
@@ -352,6 +357,7 @@ public final class CaptainsFleet {
         if (!FishermanChain.isAt(FishermanChain.Stage.T2_HUNT)) clearEpic();
         if (isCaptainWaiting() && Global.getSector().getCurrentLocation() != getSystem()) ensureFleet();
         syncMapIcon();
+        syncMarker();
     }
 
     public static boolean isSearching() {
@@ -425,6 +431,7 @@ public final class CaptainsFleet {
         FishermanChain.setStage(FishermanChain.Stage.T2_LAMPS);
         Hunt.register();
         syncMapIcon();
+        syncMarker();
         updateIntel();
     }
 
@@ -556,6 +563,22 @@ public final class CaptainsFleet {
         }
     }
 
+    // The fishing-job marker beside the fleet, as fishing fleets show it: the offer colour until the player has met
+    // him, then the accepted one.
+    public static void syncMarker() {
+        if (marker != null) marker.expire();
+        marker = null;
+
+        CampaignFleetAPI fleet = getFleet();
+        if (fleet == null || fleet.isExpired() || !fleet.isAlive() || !isCaptainWaiting()) return;
+
+        boolean met = !FishermanChain.isAt(FishermanChain.Stage.T2_MEET);
+        if (!(met ? Setting.ACCEPTED_MARKERS : Setting.OFFER_MARKERS).enabled()) return;
+
+        marker = FleetMarkerRenderer.addTo(fleet, FleetQuest.MARKER_SPRITE_CATEGORY, FleetQuest.MARKER_SPRITE,
+                met ? FleetQuestMapIcon.getMarkerColor() : FleetQuest.OFFER_COLOR, FleetMarkerRenderer.SIZE);
+    }
+
     protected static void unpin(CampaignFleetAPI fleet) {
         if (fleet == null) return;
 
@@ -584,6 +607,7 @@ public final class CaptainsFleet {
         clearHold();
         saved.t2Fleet = spawnFleet(system);
         syncMapIcon();
+        syncMarker();
     }
 
     protected static CampaignFleetAPI spawnFleet(StarSystemAPI system) {
@@ -630,7 +654,6 @@ public final class CaptainsFleet {
         mem.set(MemFlags.FLEET_IGNORES_OTHER_FLEETS, true);
         mem.set(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS, true);
         mem.set(MemFlags.MEMORY_KEY_NEVER_AVOID_PLAYER_SLOWLY, true);
-        Misc.makeImportant(fleet, IMPORTANT_REASON);
 
         fleet.clearAssignments();
         fleet.addAssignment(FleetAssignment.ORBIT_PASSIVE, hold, HOLD_DAYS, "Hunting");
@@ -648,6 +671,7 @@ public final class CaptainsFleet {
         if (saved != null) saved.t2Fleet = null;
         clearHold();
         unpin(fleet);
+        syncMarker();
         if (fleet == null || fleet.isExpired() || !fleet.isAlive()) return;
 
         MemoryAPI mem = fleet.getMemoryWithoutUpdate();
@@ -655,7 +679,6 @@ public final class CaptainsFleet {
         mem.unset(MemFlags.MEMORY_KEY_FLEET_DO_NOT_GET_SIDETRACKED);
         mem.unset(MemFlags.FLEET_IGNORES_OTHER_FLEETS);
         mem.unset(MemFlags.FLEET_IGNORED_BY_OTHER_FLEETS);
-        Misc.makeUnimportant(fleet, IMPORTANT_REASON);
 
         // never despawned here: this runs inside the captain's open comm dialog
         SectorEntityToken exit = Misc.findNearestJumpPointTo(fleet);
