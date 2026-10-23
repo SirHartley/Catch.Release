@@ -387,6 +387,13 @@ public final class CaptainsFleet {
         return true;
     }
 
+    // The offered system for the offer's dialogue map; CaptainIntel only points there once the captain waits.
+    public static SectorEntityToken getOfferMapLocation() {
+        StarSystemAPI system = getSystem();
+
+        return system == null ? null : system.getHyperspaceAnchor();
+    }
+
     public static boolean start(TextPanelAPI text) {
         FishermanChain.Saved saved = FishermanChain.get(false);
         if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T1_DONE)) return false;

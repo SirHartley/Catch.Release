@@ -2683,19 +2683,21 @@ catchrelease_t2Ask,DialogOptionSelected,$option == catchrelease_t2Ask,"CatchRele
 CatchReleaseCMD tokens
 FireBest CatchReleaseT2Offer",,,
 catchrelease_t2Offer,CatchReleaseT2Offer,"$catchreleaseChainT2Offer
-$catchreleaseChainT2Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT2System $catchreleaseChainT2Species ""one of his ships""","""As it happens. A man who used to crew for me has his own fleet now. He sent word asking for one.""
+$catchreleaseChainT2Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT2System $catchreleaseChainT2Species ""one of his ships""
+CatchReleaseCMD showChainMap t2 ""Target: $catchreleaseChainT2System""","""As it happens. A man who used to crew for me has his own fleet now. He sent word asking for one.""
 
 ""He's in the $catchreleaseChainT2System, after a $catchreleaseChainT2Species. He's been hunting that one for years, and will appreciate the support.""
 
 ""Go and hear him out. It'll be worthwhile, we take care of our own.""","catchrelease_t2Accept:""I'll go and see him.""
 catchrelease_t2Decline:""Not right now.""",
 catchrelease_t2OfferNone,CatchReleaseT2Offer,,,"""Nobody's asking for anything just now. Try me another time.""",catchrelease_fisherBack:Continue,
-catchrelease_t2Accept,DialogOptionSelected,$option == catchrelease_t2Accept,"CatchReleaseCMD t2Accept
+catchrelease_t2Accept,DialogOptionSelected,$option == catchrelease_t2Accept,"HideMapMarker
+CatchReleaseCMD t2Accept
 CatchReleaseCMD tokens
 FireBest CatchReleaseT2Accepted",,,
 catchrelease_t2Accepted,CatchReleaseT2Accepted,$catchreleaseChainT2Meet,,"""Good. His fleet's holding 'round the star. Fly out to him when you get there. He's expecting you.""",catchrelease_fisherBack:Continue,
 catchrelease_t2AcceptFailed,CatchReleaseT2Accepted,,,"""Hm. He'll have moved on since he wrote. Ask me again another time.""",catchrelease_fisherBack:Continue,
-catchrelease_t2Decline,DialogOptionSelected,$option == catchrelease_t2Decline,,"""Suit yourself. He's waited this long.""",catchrelease_fisherBack:Continue,
+catchrelease_t2Decline,DialogOptionSelected,$option == catchrelease_t2Decline,HideMapMarker,"""Suit yourself. He's waited this long.""",catchrelease_fisherBack:Continue,
 catchrelease_t2Hail,BeginFleetEncounter,"$catchrelease_t2Captain score:1200
 !$catchrelease_t2Hailed","$catchrelease_t2Hailed = true
 FleetDesc
