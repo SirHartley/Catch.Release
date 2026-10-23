@@ -2796,6 +2796,15 @@ catchrelease_t3Built,DialogOptionSelected,$option == catchrelease_t3Built,CatchR
 
 ""There are stranger things than epics, too. Talk gets round about them, and most of it is nonsense. Once your gear is good, very good, it's worth following anyway.""",catchrelease_fisherBack:Continue,
 ,,,,,,
+# fisherman chain T4: listen for rumours,,,,,,
+catchrelease_fisherOptT4Landed,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT4Landed",SetOptionColor catchrelease_t4Landed highlight,,"36:catchrelease_t4Landed:""I caught one of those stranger things.""",
+catchrelease_t4Landed,DialogOptionSelected,$option == catchrelease_t4Landed,CatchReleaseCMD t4Complete,"""Then you know what I meant."" He doesn't ask which one it was. ""There's more than one of them, and no two alike. The talk about each is as bad as the last. Keep listening.""
+
+While he talks, a ship detaches from his fleet and falls in with yours.
+
+""She's a drone carrier, and she's yours. Your drones will have somewhere better to come home to.""",catchrelease_fisherBack:Continue,
+,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,
 catchrelease_fisherOptAsk,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher

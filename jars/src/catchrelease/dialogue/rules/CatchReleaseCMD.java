@@ -21,6 +21,7 @@ import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
 import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
+import catchrelease.campaign.fish.fisherman.chain.LegendaryHunt;
 import catchrelease.campaign.fish.fisherman.chain.SensorBuild;
 import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
@@ -280,6 +281,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "t3Done":
                 WoundedEpic.finish(text(dialog));
                 return true;
+            case "t4Complete":
+                return LegendaryHunt.complete(text(dialog));
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);

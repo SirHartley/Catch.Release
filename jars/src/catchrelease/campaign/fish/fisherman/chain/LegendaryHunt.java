@@ -6,7 +6,9 @@ import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
+import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.legendary.LegendaryChases;
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
@@ -157,6 +159,20 @@ public final class LegendaryHunt {
         FishermanChain.setStage(FishermanChain.Stage.T4_LISTEN);
         FishIntelNotifications.queue(new HuntIntel(), text);
         checkLanded();
+    }
+
+    // The drone carrier, unannounced until now, and the news that there is more than one legendary.
+    public static boolean complete(TextPanelAPI text) {
+        if (!FishermanChain.isAt(FishermanChain.Stage.T4_LANDED)) return false;
+
+        List<FishReward.Receipt> receipts = new ArrayList<>();
+        receipts.add(FishReward.ship(FishingShips.Ship.ROD.hullId).grantWithReceipt());
+
+        FishermanChain.setStage(FishermanChain.Stage.HUNTING);
+        FishReward.showReceipts(text, receipts);
+        updateIntel();
+
+        return true;
     }
 
     public static boolean isActive() {

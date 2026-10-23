@@ -177,7 +177,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - It is a long-term quest: no deadline. It completes on the first legendary catch, whenever that happens.
 - It starts in T3's closing conversation, which already gives the Fisherman's advice; there is no separate offer.
 - There is no gear checkpoint. Player skill is part of how hard a legendary is.
-- The ROD ship (drone carrier) is still the reward on completion. Nothing announces it beforehand.
+- The ROD ship (drone carrier) is still the reward on completion. Nothing announces it beforehand. The Fisherman hands it over at the next visit after the catch, not at the catch itself.
 
 **After the first legendary: hunting the legendary fish**
 - When T4 completes, the player learns there is more than one legendary. The intel changes to "Hunting the legendary fish".
@@ -295,7 +295,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 5.2 Told names: one per rumour, including the story-drawn names, recorded in `FishRumors.publish`.
 - [x] 5.3 The existing legendary rumour intel shows the told name.
 - [x] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
-- [ ] 5.5 The ROD ship grant.
+- [x] 5.5 The ROD ship grant.
 - [ ] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
 - [ ] 5.7 Text through the Editor process, then the dialogue and rules checks.
 

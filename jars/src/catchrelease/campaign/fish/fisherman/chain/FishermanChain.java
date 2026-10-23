@@ -80,6 +80,8 @@ public final class FishermanChain {
     public static final String T3_CAUGHT = "$catchreleaseChainT3Caught";
     public static final String T3_BUILT = "$catchreleaseChainT3Built";
 
+    public static final String T4_LANDED = "$catchreleaseChainT4Landed";
+
     public static class Saved implements Serializable {
 
         public Stage stage = Stage.NONE;
@@ -191,6 +193,8 @@ public final class FishermanChain {
         local.set(T3_HUNT, stage == Stage.T3_HUNT, 0);
         local.set(T3_CAUGHT, stage == Stage.T3_CAUGHT, 0);
         local.set(T3_BUILT, stage == Stage.T3_BUILT, 0);
+
+        local.set(T4_LANDED, stage == Stage.T4_LANDED, 0);
     }
 
     public static Saved get(boolean create) {
