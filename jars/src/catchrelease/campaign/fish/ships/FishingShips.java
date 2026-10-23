@@ -33,8 +33,7 @@ public final class FishingShips {
 
         HARPOON("catchrelease_harpoon_ship", Tackle.Fit.HARPOON, Tackle.RETRIEVAL_HEAD),
         LAMP("catchrelease_lamp_ship", Tackle.Fit.SEARCHLIGHT, Tackle.FANNED_ARRAY),
-        // the drone carrier's Reployment Bays do not exist yet; it still opens the ROD's second slot
-        ROD("catchrelease_rod_ship", Tackle.Fit.DRONE, null);
+        ROD("catchrelease_rod_ship", Tackle.Fit.DRONE, Tackle.REPLOYMENT_BAYS);
 
         public final String hullId;
         public final Tackle.Fit rig;

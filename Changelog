@@ -11,6 +11,7 @@ None
 
 1.0.d - UNRELEASED
 Changed - The Retrieval Head and Fanned Array are no longer sold or given as rewards. They will come with the fishing ships, which add a second equipment slot to their rig while they are in your fleet. Copies you already own are kept
+Added - Reployment Bays, a Drone Core module that comes with the drone carrier: whenever every drone has come back, the whole swarm goes out again to the same area until you recall it or leave the rupture
 Added - After the tutorial, the Fisherman has a treasure rumour for a nearby system in place of the free lead. He has lost a golden chest there: it can come up in the catch window on lamp catches in that system (30% each, and certain on the 4th, then every 2nd, until taken). Bring back the compass inside for the Glitter Lens schematic plus the fish and credits to buy it
 Added - If you lose the Fisherman's compass, tell him: he remembers where it was sold, checks your storage, and if it is gone for good he pays you anyway
 Changed - The treasure rumour's bycatch boost lasts until you return the compass, then another two months once you buy the Glitter Lens

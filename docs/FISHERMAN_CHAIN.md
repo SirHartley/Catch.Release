@@ -201,7 +201,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 |---|---|---|---|
 | Harpoon fishing ship | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
 | Breach Light ship | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
-| ROD ship (drone carrier) | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): once every drone has returned, the drones deploy again to the same area |
+| ROD ship (drone carrier) | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): each time every drone has returned, the drones deploy again to the same area, until the player recalls them or leaves the rupture |
 
 None of the final hulls exist yet. Until they do, each ship is a placeholder hull: a full copy of the vanilla Nebula (`nebula`, a civilian transport) under its own hull id and name, so the fleet check can tell which rig gets the second slot. The placeholders are `catchrelease_harpoon_ship` (Harpoon Nebula), `catchrelease_lamp_ship` (Breach Light Nebula) and `catchrelease_rod_ship` (ROD Nebula); see [ARCHITECTURE.md](ARCHITECTURE.md) for their data. Each real hull replaces its placeholder under the same id. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 
@@ -287,7 +287,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [ ] 4.7 The closing conversation; text through the Editor process, then the dialogue and rules checks. The conversation and checks are done; the Editor pass is pending.
 
 **Stage 5: T4 and the legendary hunt.**
-- [ ] 5.1 Reployment Bays:
+- [x] 5.1 Reployment Bays:
   - an unstocked `Tackle` constant;
   - a `ShopPricing.getCredits` case, because the switch is exhaustive;
   - redeploying at the swarm's "every drone returned" branch in `FishingDroneSwarmScript.advance`, after re-checking `shouldRecall()`, and never after a manual recall.
