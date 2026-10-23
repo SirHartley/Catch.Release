@@ -441,14 +441,15 @@ public final class CaptainsFleet {
     }
 
     // A harpoon module the player has no schematic for; failing that, any module. Ship modules are never stocked,
-    // and the Needle Sensor is left for the Fisherman to give.
+    // quest-only modules have their own source, and the Needle Sensor is left for the Fisherman to give.
     protected static FishReward pickSchematic(Random random) {
         Set<String> reserved = FishRewardRoller.getReservedSchematicKeys();
         List<Tackle> harpoon = new ArrayList<>();
         List<Tackle> any = new ArrayList<>();
 
         for (Tackle tackle : Tackle.values()) {
-            if (tackle == Tackle.NONE || tackle == Tackle.NEEDLE_SENSOR || !tackle.stocked) continue;
+            if (tackle == Tackle.NONE || tackle == Tackle.NEEDLE_SENSOR) continue;
+            if (!tackle.stocked || tackle.questOnly) continue;
             if (!TackleManager.isUnlocked(tackle) || ShopSchematics.has(tackle)) continue;
             if (reserved.contains(ShopSchematics.getKey(tackle))) continue;
 

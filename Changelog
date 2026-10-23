@@ -26,7 +26,7 @@ Changed - Ordinary fish now surface as soon as your Breach Lights reach them and
 Changed - The Tracking Gimbal also follows fish your Breach Lights have surfaced, and the tracking upgrade keeps them visible and in reach after the beam moves on
 Changed - Fight Night's fee option now reads "Take the rewards." and lists the rewards in its tooltip
 Changed - Every equipment module costs one price tier more (25,000 to 45,000 credits), and none can be paid for with common fish alone
-Added - Glitter Lens, a Lens Array module that doubles the chance of bycatch on catches made under Breach Lights
+Added - Glitter Lens, a Lens Array module that doubles the chance of bycatch on catches made under Breach Lights. Its schematic comes only from the Fisherman's treasure rumour, never from job or distress rewards
 Changed - The Neutrino Lens only shows its spikes while the Breach Lights are on as well as the Neutrino Detector
 Removed - The Breach Coupler is withdrawn for now: it is no longer sold or awarded, and one already fitted does nothing; ROD drones fish ruptures only
 Changed - Every epic fish now comes up only under Breach Lights; ruptures fished with the ROD no longer hold them

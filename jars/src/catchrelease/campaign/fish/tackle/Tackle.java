@@ -120,11 +120,13 @@ public enum Tackle {
     NEEDLE_SENSOR("Needle Sensor", Fit.SEARCHLIGHT,
             "While Breach Lights are off, hidden rare and epic patterns and dormant legendaries"
                     + " occasionally produce faint ripple rings."),
+    // Its schematic comes only from the Fisherman's treasure rumour (TreasureRumour).
     GLITTER_LENS("Glitter Lens", Fit.SEARCHLIGHT,
             "Doubles the chance that a catch includes bycatch when the fish was caught under Breach"
                     + " Lights. Catches from ruptures are unaffected.") {
         {
             lampTreasureChanceMult = 2f;
+            questOnly = true;
         }
     },
     NEUTRINO_LENS("Neutrino Lens", Fit.SEARCHLIGHT,
@@ -202,6 +204,8 @@ public enum Tackle {
     public boolean retrievesCharge = false;
     public boolean explosive = false;
     public boolean stocked = true;
+    // sold once its schematic is known, but never a random reward's schematic
+    public boolean questOnly = false;
     public float lockTime = 0f;
     public boolean fanBeam = false;
     public boolean redeploys = false;
