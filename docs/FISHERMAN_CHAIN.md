@@ -292,7 +292,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
   - a `ShopPricing.getCredits` case, because the switch is exhaustive;
   - redeploying at the swarm's "every drone returned" branch in `FishingDroneSwarmScript.advance`, after re-checking `shouldRecall()`, and never after a manual recall.
 - [x] 5.2 Told names: one per rumour, including the story-drawn names, recorded in `FishRumors.publish`.
-- [ ] 5.3 The existing legendary rumour intel shows the told name.
+- [x] 5.3 The existing legendary rumour intel shows the told name.
 - [ ] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
 - [ ] 5.5 The ROD ship grant.
 - [ ] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
