@@ -518,15 +518,22 @@ public final class WoundedEpic {
         return null;
     }
 
-    // A planet whose circle stays clear of every star and its corona.
+    // A planet whose circle stays clear of every star and its corona as both orbit. Measured from the planet's orbit
+    // focus, the closest a star that also circles it can come is the difference of their orbit radii; a star at the
+    // focus is the planet's own orbit radius away. Moons are refused: their path round a moving planet has no such
+    // bound. The epic does not steer round stars, so the circle itself has to stay clear.
     protected static boolean isHost(StarSystemAPI system, PlanetAPI planet) {
         if (system == null || planet == null || planet.isStar() || planet.isExpired()) return false;
 
-        for (PlanetAPI other : system.getPlanets()) {
-            if (!other.isStar()) continue;
+        SectorEntityToken focus = planet.getOrbitFocus() != null ? planet.getOrbitFocus() : system.getCenter();
+        if (focus == null || focus instanceof PlanetAPI parent && !parent.isStar()) return false;
 
-            float gap = Misc.getDistance(planet, other) - other.getRadius() - CIRCLE_RADIUS;
-            if (gap < STAR_CLEARANCE) return false;
+        float orbit = Misc.getDistance(focus.getLocation(), planet.getLocation());
+        for (PlanetAPI star : system.getPlanets()) {
+            if (!star.isStar()) continue;
+
+            float closest = Math.abs(orbit - Misc.getDistance(focus.getLocation(), star.getLocation()));
+            if (closest - star.getRadius() - CIRCLE_RADIUS < STAR_CLEARANCE) return false;
         }
         return true;
     }
