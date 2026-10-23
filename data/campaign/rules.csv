@@ -2765,7 +2765,7 @@ catchrelease_t3Ask,DialogOptionSelected,$option == catchrelease_t3Ask,"CatchRele
 CatchReleaseCMD tokens
 FireBest CatchReleaseT3Offer",,,
 catchrelease_t3Offer,CatchReleaseT3Offer,"$catchreleaseChainT3Offer
-$catchreleaseChainT3Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT3Species $catchreleaseChainT3System $catchreleaseChainT3Planet ""Needle Sensor"" $catchreleaseChainT3Planet ""blueprint for a lamp ship"" ""range data on another epic""","""I did. There's a $catchreleaseChainT3Species in $catchreleaseChainT3System that took a bad hit a while back. It has kept close to $catchreleaseChainT3Planet since, going round about a thousand out while it mends.""
+$catchreleaseChainT3Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT3Species $catchreleaseChainT3System $catchreleaseChainT3Planet ""Needle Sensor"" $catchreleaseChainT3Planet ""range data on another epic""","""I did. There's a $catchreleaseChainT3Species in $catchreleaseChainT3System that took a bad hit a while back. It has kept close to $catchreleaseChainT3Planet since, going round about a thousand out while it mends.""
 
 ""Switch your lights off when you get there and let the Needle Sensor find it. Then light it up and put a harpoon in it. It's slower than it ought to be. Don't let it get far ahead of you, though, or it'll go straight back to $catchreleaseChainT3Planet.""
 
@@ -2780,7 +2780,7 @@ catchrelease_t3AcceptFailed,CatchReleaseT3Accepted,,,"""Hm. It's moved on from t
 catchrelease_t3Decline,DialogOptionSelected,$option == catchrelease_t3Decline,,"""It'll keep. It isn't going far.""",catchrelease_fisherBack:Continue,
 catchrelease_fisherOptT3HandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT3Caught",SetOptionColor catchrelease_t3HandIn highlight,,"36:catchrelease_t3HandIn:""I landed your wounded epic.""",
-catchrelease_t3HandIn,DialogOptionSelected,$option == catchrelease_t3HandIn,"CatchReleaseCMD highlightFishText ""lamp ship"" ""second lens array"" ""range data""
+catchrelease_t3HandIn,DialogOptionSelected,$option == catchrelease_t3HandIn,"CatchReleaseCMD highlightFishText ""second lens array"" ""range data""
 CatchReleaseCMD t3Complete","""Did you, now? Good work. That one would have kept a lesser crew busy for months.""
 
 He sends a deckhand below for two chips and hands them across himself.
@@ -2788,9 +2788,10 @@ He sends a deckhand below for two chips and hands them across himself.
 ""The first is a blueprint for a lamp ship. Bigger lights, and room for a second lens array. You'll have to find someone who can build it; I don't run a yard. The other is range data. Somewhere to go next.""",catchrelease_fisherBack:Continue,
 catchrelease_fisherOptT3Built,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT3Built",SetOptionColor catchrelease_t3Built highlight,,"36:catchrelease_t3Built:""The lamp ship's built.""",
-catchrelease_t3Built,DialogOptionSelected,$option == catchrelease_t3Built,CatchReleaseCMD t3Done,"The Fisherman looks the ship over on his display for longer than he needs to.
+catchrelease_t3Built,DialogOptionSelected,$option == catchrelease_t3Built,"CatchReleaseCMD highlightFishText ""Fanned Array""
+CatchReleaseCMD t3Done","The Fisherman looks the ship over on his display for longer than he needs to.
 
-""She'll do. Put the fan array on her lights and your lamps will cover a good deal more ground.""
+""She'll do. She carries a Fanned Array for your Breach Lights. Your lamps will cover a good deal more ground with it.""
 
 ""You've landed an epic now. There are others out there like it, but not many. You'll go a long while between them, and some crews never see one.""
 

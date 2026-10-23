@@ -1,5 +1,6 @@
 package catchrelease.abilities.rod.scripts;
 
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.legendary.EpicHunt;
@@ -307,8 +308,11 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         if (handled.contains(mote.getId())) return false;
 
         if (!isReachable(mote)) return false;
-        // epics are harpoon catches: the waking strike and the shield charge belong to the harpoon
+        // epics are harpoon catches: the waking strike and the shield charge belong to the harpoon, and the roaming
+        // swarm would otherwise dig a buried one up
         if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && EpicHunt.applies(fish)) return false;
+        if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried
+                && buried.getRarity() == FishRarity.EPIC) return false;
 
         Vector2f center = getSearchCenter();
         if (center == null) return false;
