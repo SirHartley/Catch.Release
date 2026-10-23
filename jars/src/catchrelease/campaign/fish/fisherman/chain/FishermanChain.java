@@ -106,6 +106,9 @@ public final class FishermanChain {
         public String t3PlanetId;
         public String t3PlanetName;
         public String t3SpeciesId;
+
+        // legendary id to the name its latest rumour used
+        public Map<String, String> toldNames;
     }
 
     private FishermanChain() {

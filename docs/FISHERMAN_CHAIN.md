@@ -192,7 +192,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - Record each species' told name whenever a legendary rumour is heard, including before the list appears. There are two sources:
   - the Fisherman's monthly lead (`FishRumors`);
   - the bar spacer's report (`RatingBarEvent`, `CatchReleaseRatingLegendaryReport` rows).
-- Today's spacer tellings name some legendaries ("Lantern Jack", "The Moray", "The Imposter") and give no name for the Quorum, False Dawn and Ghost Manta. None gives a deliberately wrong name. Each rumour therefore needs an explicit told name, following the rule above. The tellings' dialogue can keep saying no name was given; the intel's name comes from the story.
+- Today's spacer tellings name some legendaries ("Lantern Jack", "The Moray", "The Imposter") and give no name for the Quorum, False Dawn and Ghost Manta. None gives a deliberately wrong name. Each rumour therefore needs an explicit told name, following the rule above. The tellings' dialogue can keep saying no name was given; the intel's name comes from the story. Decided: the Quorum is told as "The Many", False Dawn as "The Burning Lie" and the Abyssal Ghost Manta as "The Abyss". The Fisherman's leads use the real names.
 - Catches: `LegendaryChases.isCaught`. A legendary caught before T4 starts completes it at once.
 
 ## Ships
@@ -291,7 +291,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
   - an unstocked `Tackle` constant;
   - a `ShopPricing.getCredits` case, because the switch is exhaustive;
   - redeploying at the swarm's "every drone returned" branch in `FishingDroneSwarmScript.advance`, after re-checking `shouldRecall()`, and never after a manual recall.
-- [ ] 5.2 Told names: one per rumour, including the story-drawn names, recorded in `FishRumors.publish`.
+- [x] 5.2 Told names: one per rumour, including the story-drawn names, recorded in `FishRumors.publish`.
 - [ ] 5.3 The existing legendary rumour intel shows the told name.
 - [ ] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
 - [ ] 5.5 The ROD ship grant.

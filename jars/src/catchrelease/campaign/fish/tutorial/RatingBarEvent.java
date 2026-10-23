@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.tutorial;
 
+import catchrelease.campaign.fish.fisherman.chain.LegendaryHunt;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
@@ -16,6 +17,7 @@ public class RatingBarEvent {
         if (getReport() != null) return;
 
         FishRumors.Saved report = FishRumors.rollLegendary();
+        if (report != null) report.toldName = LegendaryHunt.getSpacerName(report.legendaryId);
         if (report != null) Global.getSector().getPersistentData().put(REPORT_KEY, report);
         else Global.getSector().getPersistentData().remove(REPORT_KEY);
     }
