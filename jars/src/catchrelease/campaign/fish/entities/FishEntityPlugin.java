@@ -523,14 +523,18 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 > pond.getRadius() * plugin.activity;
     }
 
+    // The swing runs on a clock, not per distance travelled: at a slower pace the same swing curls the path into
+    // loops and a restless fish barely advances. Lamp-surfaced and beam-slowed fish shrink it with their pace, as a
+    // dormant epic does (EpicHunt.getWanderMult).
     protected float getWander() {
         float wanderMult = getWanderMult();
 
         float wander = (float) Math.sin(time * 1.5f) * sineVariance;
         float extra = (float) Math.sin(time * 2.63f + sineVariance) * sineVariance * 0.6f;
+        float pace = Math.min(1f, getBaseSpeed() / MOVE_SPEED * getSlowMult());
 
         return ((wander + extra * (wanderMult - 1f)) * wanderMult + getModeWander())
-                * getJackAgilityMult() * EpicHunt.getWanderMult(this);
+                * getJackAgilityMult() * EpicHunt.getWanderMult(this) * pace;
     }
 
     protected float advanceMode(float amount) {
