@@ -52,7 +52,7 @@ public final class LegendaryHunt {
         @Override
         public boolean shouldRemoveIntel() {
             if (isEnded()) return true;
-            // the finished list stays up for its own end delay, set when the last legendary is caught
+            // the finished list stays up for its end delay, counted down by the script checkAllCaught adds
             if (!isActive() && !FishermanChain.isAt(FishermanChain.Stage.HUNT_DONE)) endImmediately();
 
             return isEnded();
@@ -227,7 +227,9 @@ public final class LegendaryHunt {
 
         FishermanChain.setStage(FishermanChain.Stage.HUNT_DONE);
         for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel(HuntIntel.class)) {
+            // the end delay only counts down in advance(), which the IntelManager never calls
             ((HuntIntel) intel).endAfterDelay();
+            Global.getSector().addScript((HuntIntel) intel);
             FishIntelNotifications.update((HuntIntel) intel, null);
         }
     }
