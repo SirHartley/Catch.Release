@@ -132,10 +132,10 @@ public final class WoundedEpic {
         @Override
         public String getName() {
             return switch (FishermanChain.getStage()) {
-                case T3_CAUGHT -> "The wounded epic: report to the Fisherman";
+                case T3_CAUGHT -> "An Epic tale: report to the Fisherman";
                 case T3_BUILD -> "Build the " + getLampShipName();
                 case T3_BUILT -> getLampShipName() + ": report to the Fisherman";
-                default -> "The wounded epic";
+                default -> "An Epic tale: Chapter 2";
             };
         }
 
@@ -165,10 +165,9 @@ public final class WoundedEpic {
             } else {
                 info.addPara("Find the %s circling %s in %s", pad, text, h, getSpeciesName(), getPlanetName(),
                         getSystemName()).setHighlightColors(FishRarity.EPIC.color, h, h);
-                info.addPara("The %s finds it while the Breach Lights are off", 0f, text, h,
+                info.addPara("Use the %s to see it while the Breach Lights are off", 0f, text, h,
                         Tackle.NEEDLE_SENSOR.name);
-                info.addPara("Harpoon it and land it; if you get more than %s from it, it returns to %s", 0f, text,
-                        h, Misc.getWithDGS(EpicHunt.RESET_RANGE) + " units", getPlanetName());
+                info.addPara("Harpoon and land it.", 0f);
             }
             unindent(info);
         }
@@ -183,7 +182,7 @@ public final class WoundedEpic {
 
             if (isBuilding()) {
                 info.addPara("The Fisherman gave you the blueprint for the %s. It brings a second Lens Array slot "
-                        + "and the %s while it is in your fleet. He doesn't build ships himself.", opad, h,
+                        + "and the %s while it is in your fleet.", opad, h,
                         getLampShipName(), Tackle.FANNED_ARRAY.name);
                 addBulletPoints(info, ListInfoMode.IN_DESC);
                 return;
@@ -208,9 +207,6 @@ public final class WoundedEpic {
             info.addPara("A wounded %s is circling %s in %s, about %s out. It swims slower than it should once "
                     + "woken.", opad, new Color[]{FishRarity.EPIC.color, h, h, h}, getSpeciesName(),
                     getPlanetName(), getSystemName(), Misc.getWithDGS(CIRCLE_RADIUS) + " units");
-            String blueprint = "the blueprint for the " + getLampShipFullName();
-            info.addPara("Reward: " + blueprint + ", and range data on an epic. There is no deadline.", opad, h,
-                    blueprint, "range data on an epic");
             addBulletPoints(info, ListInfoMode.IN_DESC);
             FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
         }

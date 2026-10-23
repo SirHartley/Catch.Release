@@ -145,9 +145,9 @@ public final class TreasureRumour {
         @Override
         public String getName() {
             if (FishermanChain.isAt(FishermanChain.Stage.T1_LENS)) return "Buy the Glitter Lens";
-            if (isReturning()) return "The Fisherman's compass: take it back";
+            if (isReturning()) return "Return the Fisherman's compass";
 
-            return "The Fisherman's golden chest";
+            return "The Fisherman's lost compass";
         }
 
         @Override
@@ -177,7 +177,7 @@ public final class TreasureRumour {
                 addMislaidLine(info, text, pad);
             } else {
                 info.addPara("Lamp catches in %s", pad, text, Misc.getHighlightColor(), getSystemName());
-                info.addPara("Take the golden chest when it comes up", text, 0f);
+                info.addPara("Take the Fisherman's Chest when it comes up", text, 0f);
             }
             unindent(info);
         }
@@ -212,11 +212,10 @@ public final class TreasureRumour {
                 return;
             }
 
-            info.addPara("The Fisherman has lost a golden chest in %s and is sure it is there.", opad, h,
+            info.addPara("The Fisherman has lost something in %s and is sure it is there.", opad, h,
                     getSystemName());
-            info.addPara("It can come up with any catch made under Breach Lights in that system, never from a "
-                    + "rupture. Take it in the catch window like any other bycatch.", opad);
-            info.addPara("Reward: a rig module schematic, with the fish and credits to buy it.", opad, h,
+            info.addPara("It can come up with any catch made under Breach Lights in that system. Gather it like any other bycatch.", opad);
+            info.addPara("Reward: a rig module schematic and whatever is needed to build it.", opad, h,
                     "a rig module schematic");
             addBulletPoints(info, ListInfoMode.IN_DESC);
             FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
@@ -477,7 +476,7 @@ public final class TreasureRumour {
         CargoAPI cargo = getPlayerCargo();
         if (cargo != null) cargo.addSpecial(compass(), 1f);
 
-        TreasureAward award = new TreasureAward(TreasureRarity.EPIC, "Golden chest", Misc.getHighlightColor());
+        TreasureAward award = new TreasureAward(TreasureRarity.EPIC, "Fisherman's Chest", Misc.getHighlightColor());
         award.items.add(new TreasureAward.Item(getCompassName(), COMPASS_ICON, 1, Misc.getHighlightColor()));
 
         return award;

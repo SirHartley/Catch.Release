@@ -2739,7 +2739,7 @@ catchrelease_t2DebriefLanded,CatchReleaseT2Debrief,$catchreleaseChainT2Landed,Fi
 
 ""So it's landed. Thank you for going. He's been at that one a long time, and it'll do him good to stop.""",,
 catchrelease_t2DebriefLost,CatchReleaseT2Debrief,,FireBest CatchReleaseT2Lesson,"""He didn't get it, then. Thank you for going. He'll be back out looking inside a month, and glad of the excuse.""",,
-catchrelease_t2Lesson,CatchReleaseT2Lesson,,FireAll CatchReleaseT2DebriefQuestions,"""The bright ones all go like that. First strike wakes them, makes it run hard. It only settles if you let it get well ahead of you. Stay close and keep at it.""
+catchrelease_t2Lesson,CatchReleaseT2Lesson,,FireAll CatchReleaseT2DebriefQuestions,"""About that pattern. The deeper ones all go like that. The first harpoon hit makes it form a shell, and makes it run. It only settles if you let it get well ahead of you. Stay close and keep at it.""
 
 ""There are stranger things out there than that one. Each of those has habits of its own. You'll learn them as you go.""",,
 catchrelease_t2DebriefQuestionsCrew,CatchReleaseT2DebriefQuestions,!$catchreleaseT2AskedCrew,,,"0:catchrelease_t2AskCrew:""What's he like, your old crewman?""",
@@ -2748,7 +2748,7 @@ catchrelease_t2DebriefQuestionsDone,CatchReleaseT2DebriefQuestions,,,,"100:catch
 catchrelease_t2AskCrew,DialogOptionSelected,$option == catchrelease_t2AskCrew,"$catchreleaseT2AskedCrew = true
 FireAll CatchReleaseT2DebriefQuestions","""Stubborn. He was a good hand with a harpoon when he crewed for me. He'd tell you he was the best I had. He wasn't, but he wasn't far off.""",,
 catchrelease_t2AskStrike,DialogOptionSelected,$option == catchrelease_t2AskStrike,"$catchreleaseT2AskedStrike = true
-FireAll CatchReleaseT2DebriefQuestions","""It takes a second strike to knock that bubble it makes down. Every strike after that goes right in.""",,
+FireAll CatchReleaseT2DebriefQuestions","""It takes a second hit to knock off that shell it makes. Every strike after that goes right in.""",,
 catchrelease_t2DebriefDone,DialogOptionSelected,$option == catchrelease_t2DebriefDone,"CatchReleaseCMD tokens
 FireBest CatchReleaseT2Sensor",,,
 catchrelease_t2SensorOwned,CatchReleaseT2Sensor,$catchreleaseChainT2HasSensor,"CatchReleaseCMD highlightFishText ""Needle Sensor""
@@ -2756,7 +2756,7 @@ CatchReleaseCMD t2Debrief","""You've a Needle Sensor on your lights already, I s
 catchrelease_t2SensorGive,CatchReleaseT2Sensor,,"CatchReleaseCMD highlightFishText ""Needle Sensor"" ""Come back and see me once you have it.""
 CatchReleaseCMD t2Debrief","A deckhand brings up a data chip and passes it across.
 
-""Needle Sensor. It'll tell you where the rarer patterns are sitting while the lights are off. The Outfitter can build it. Come back and see me once you have it built. I've something I'd like you to look at.""",catchrelease_fisherBack:Continue,
+""Here, that's a Needle Sensor. It'll tell you where the rarer patterns are sitting while the lights are off. The Outfitter can build it. Come back and see me once you have it built. I've something I'd like you to look at.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman chain T3: the wounded epic,,,,,,
 catchrelease_fisherOptT3,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
