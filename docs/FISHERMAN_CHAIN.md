@@ -198,7 +198,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 |---|---|---|---|
 | Harpoon fishing ship | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
 | Breach Light ship | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
-| ROD ship (drone carrier) | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): each time every drone has returned, the drones deploy again to the same area, until the player recalls them or leaves the rupture |
+| ROD ship (drone carrier) | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): each time every drone has returned, the drones deploy again, until the player recalls them or they can no longer fish there (both the pond swarm and the roaming swarm) |
 
 None of the final hulls exist yet. Until they do, each ship is a placeholder hull: a full copy of the vanilla Nebula (`nebula`, a civilian transport) under its own hull id and name, so the fleet check can tell which rig gets the second slot. The placeholders are `catchrelease_harpoon_ship` (Harpoon Nebula), `catchrelease_lamp_ship` (Breach Light Nebula) and `catchrelease_rod_ship` (ROD Nebula); see [ARCHITECTURE.md](ARCHITECTURE.md) for their data. Each real hull replaces its placeholder under the same id. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 

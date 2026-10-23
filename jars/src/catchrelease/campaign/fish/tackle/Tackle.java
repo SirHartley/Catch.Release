@@ -147,8 +147,8 @@ public enum Tackle {
         }
     },
     REPLOYMENT_BAYS("Reployment Bays", Fit.DRONE,
-            "Once every drone has come back, sends them all out again to the same area. Keeps going until you"
-                    + " recall them or leave the rupture.") {
+            "Once every drone has come back, sends the whole swarm out again. Keeps going until you recall it or"
+                    + " it can no longer fish where you are.") {
         {
             redeploys = true;
             stocked = false;
