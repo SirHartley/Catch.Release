@@ -16,6 +16,7 @@ import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.jobs.fleet.FleetQuestMapIcon;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.legendary.EpicHunt;
@@ -116,6 +117,7 @@ public final class CaptainsFleet {
                 rearm();
             }
             if (curr == system) ensureFleet();
+            syncMapIcon();
         }
     }
 
@@ -152,13 +154,16 @@ public final class CaptainsFleet {
 
     // Continuous lamp time near the star while the captain waits for his epic. Advanced from the player's
     // SearchlightAbilityPlugin.advance: no callback reports lamp time, and the ability already runs every unpaused
-    // frame. Transient, so a load or any break in the conditions restarts the count.
+    // frame. Transient, so a load or any break in the conditions restarts the count. In the captain's system it also
+    // syncs his map proxy, which no callback restores once radar contact is lost (FleetMapVisibility).
     public static class LampTimer {
 
         protected float seconds;
         protected float missing;
 
         public void advance(SearchlightAbilityPlugin lamps, float amount) {
+            if (isCaptainWaiting() && Global.getSector().getCurrentLocation() == getSystem()) syncMapIcon();
+
             if (FishermanChain.isAt(FishermanChain.Stage.T2_HUNT)) {
                 seconds = 0f;
                 checkVanished(amount);
@@ -346,6 +351,7 @@ public final class CaptainsFleet {
         Hunt.register();
         if (!FishermanChain.isAt(FishermanChain.Stage.T2_HUNT)) clearEpic();
         if (isCaptainWaiting() && Global.getSector().getCurrentLocation() != getSystem()) ensureFleet();
+        syncMapIcon();
     }
 
     public static boolean isSearching() {
@@ -418,6 +424,7 @@ public final class CaptainsFleet {
 
         FishermanChain.setStage(FishermanChain.Stage.T2_LAMPS);
         Hunt.register();
+        syncMapIcon();
         updateIntel();
     }
 
@@ -536,6 +543,26 @@ public final class CaptainsFleet {
         }
     }
 
+    // Once met, the captain stays on the map like an accepted fishing job, through the shared proxy.
+    public static void syncMapIcon() {
+        CampaignFleetAPI fleet = getFleet();
+        if (fleet == null) return;
+
+        if (isCaptainWaiting() && !FishermanChain.isAt(FishermanChain.Stage.T2_MEET)) {
+            fleet.getMemoryWithoutUpdate().set(FleetQuestMapIcon.PINNED_FLAG, true);
+            FleetQuestMapIcon.findOrAdd(fleet);
+        } else if (fleet.getMemoryWithoutUpdate().getBoolean(FleetQuestMapIcon.PINNED_FLAG)) {
+            unpin(fleet);
+        }
+    }
+
+    protected static void unpin(CampaignFleetAPI fleet) {
+        if (fleet == null) return;
+
+        fleet.getMemoryWithoutUpdate().unset(FleetQuestMapIcon.PINNED_FLAG);
+        FleetQuestMapIcon.removeFor(fleet);
+    }
+
     public static boolean isCaptain(CampaignFleetAPI fleet) {
         return fleet != null && fleet.getMemoryWithoutUpdate().getBoolean(CAPTAIN_FLAG);
     }
@@ -556,6 +583,7 @@ public final class CaptainsFleet {
 
         clearHold();
         saved.t2Fleet = spawnFleet(system);
+        syncMapIcon();
     }
 
     protected static CampaignFleetAPI spawnFleet(StarSystemAPI system) {
@@ -619,6 +647,7 @@ public final class CaptainsFleet {
         CampaignFleetAPI fleet = saved == null ? null : saved.t2Fleet;
         if (saved != null) saved.t2Fleet = null;
         clearHold();
+        unpin(fleet);
         if (fleet == null || fleet.isExpired() || !fleet.isAlive()) return;
 
         MemoryAPI mem = fleet.getMemoryWithoutUpdate();

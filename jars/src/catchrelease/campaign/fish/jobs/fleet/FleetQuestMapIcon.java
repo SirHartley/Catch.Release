@@ -6,6 +6,7 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CustomCampaignEntityAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.BaseCustomEntityPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 public class FleetQuestMapIcon extends BaseCustomEntityPlugin {
 
     public static final String ENTITY_ID = "catchrelease_FleetQuestMapIcon";
+    // Keeps the proxy for a fleet no FleetQuest owns (CaptainsFleet); its owner adds, syncs and removes it.
+    public static final String PINNED_FLAG = "$catchrelease_mapPinned";
     private static final String MARKER_KEY = "$catchrelease_fleetQuestMapMarker";
     protected static final float AUTOPILOT_CHECK_SECONDS = 1f;
 
@@ -111,9 +114,12 @@ public class FleetQuestMapIcon extends BaseCustomEntityPlugin {
     }
 
     private static boolean isActive(CampaignFleetAPI fleet) {
-        return fleet != null && !fleet.isExpired() && fleet.isAlive()
-                && fleet.getMemoryWithoutUpdate().getBoolean(FleetQuest.QUEST_FLAG)
-                && fleet.getMemoryWithoutUpdate().getBoolean(FleetQuest.TAKEN_FLAG);
+        if (fleet == null || fleet.isExpired() || !fleet.isAlive()) return false;
+
+        MemoryAPI memory = fleet.getMemoryWithoutUpdate();
+
+        return memory.getBoolean(PINNED_FLAG)
+                || memory.getBoolean(FleetQuest.QUEST_FLAG) && memory.getBoolean(FleetQuest.TAKEN_FLAG);
     }
 
     protected void redirectAutopilot(float amount) {

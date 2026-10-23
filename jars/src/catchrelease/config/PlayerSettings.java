@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.jobs.FishJob;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuest;
 import catchrelease.campaign.fish.jobs.fleet.FleetQuestMapIcon;
+import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
 import lunalib.backend.ui.settings.LunaSettingsData;
@@ -99,6 +100,7 @@ public final class PlayerSettings implements LunaSettingsListener {
         }
         if (Global.getSector() == null) return;
         QuestPond.refreshMarkers();
+        CaptainsFleet.syncMapIcon();
         for (var location : Global.getSector().getAllLocations()) {
             for (var fleet : location.getFleets()) {
                 Object ref = fleet.getMemoryWithoutUpdate().get(FishJob.REF_KEY);
