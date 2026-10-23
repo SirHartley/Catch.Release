@@ -1,6 +1,6 @@
 # Fisherman follow-up chain
 
-**Status: approved design, not yet implemented.** This document records the author's decisions for the quest chain that follows the tutorial, plus the open questions and the work each step needs. Read it before implementing or revising any of these quests.
+**Status: approved design, implemented in Stages 0–5.** The player-facing text of Stages 1–5 still awaits the Editor pass (subtasks 1.9, 3.10, 4.7, 5.7), and one open question remains. This document records the author's decisions for the quest chain that follows the tutorial, plus the open questions and the work each step needed. Read it before revising any of these quests.
 
 It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains the authority on facts, knowledge limits and voice. [DIALOGUE.md](DIALOGUE.md) owns the text workflow, and [RULES_WRITING.md](RULES_WRITING.md) owns conversation structure. Text described here is a brief, not approved dialogue. The deferred [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) follows after this chain; see [Ships](#ships).
 
@@ -184,17 +184,13 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - It lists one entry per legendary species, each shown as question marks until known, so the list shows how many there are.
 - Each rumour the player hears about a legendary turns its question marks into the last known name: the name the teller used. A bar teller can give a folk name or the wrong one, so an entry can stay wrong until the catch.
 - Every rumour fills in a name. A telling that names nothing gives either a wrong name or one taken from its story, for example "World Serpent" for an eel that lies curled with its tail in its mouth.
+- Told names: the Fisherman's leads use the real names. The bar spacer's tellings use "Lantern Jack", "The Moray" and "The Imposter"; the three that name nothing go by "The Many" (the Quorum), "The Burning Lie" (False Dawn) and "The Abyss" (the Abyssal Ghost Manta). The tellings' dialogue still says no name was given.
+- Names are recorded from the first rumour heard, before the list appears, at the single path every rumour is published through.
 - Catching a legendary changes its entry to the species' real name.
 - The existing legendary rumour intel shows the told name too, not the species' real name (`FishRumors.getStrangerDisplayName` today).
 - The intel concludes once every legendary has been caught (six today). What happens then is decided later.
 
-**Work**
-- Count the entries from the legendary rows in `fish.csv` (six today), not a constant.
-- Record each species' told name whenever a legendary rumour is heard, including before the list appears. There are two sources:
-  - the Fisherman's monthly lead (`FishRumors`);
-  - the bar spacer's report (`RatingBarEvent`, `CatchReleaseRatingLegendaryReport` rows).
-- Today's spacer tellings name some legendaries ("Lantern Jack", "The Moray", "The Imposter") and give no name for the Quorum, False Dawn and Ghost Manta. None gives a deliberately wrong name. Each rumour therefore needs an explicit told name, following the rule above. The tellings' dialogue can keep saying no name was given; the intel's name comes from the story. Decided: the Quorum is told as "The Many", False Dawn as "The Burning Lie" and the Abyssal Ghost Manta as "The Abyss". The Fisherman's leads use the real names.
-- Catches: `LegendaryChases.isCaught`. A legendary caught before T4 starts completes it at once.
+**Work.** Implemented in Stage 5 (`LegendaryHunt`, `FishRumors.Saved.toldName`, Reployment Bays); see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Ships
 
@@ -296,7 +292,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [x] 5.3 The existing legendary rumour intel shows the told name.
 - [x] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
 - [x] 5.5 The ROD ship grant.
-- [ ] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
-- [ ] 5.7 Text through the Editor process, then the dialogue and rules checks.
+- [x] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
+- [ ] 5.7 Text through the Editor process, then the dialogue and rules checks. The checks pass; the Editor pass is pending.
 
 **Behaviour to keep in mind.** With the Retrieval Head and the Explosive Head both fitted, a blast does not refund the harpoon charge, and the head is consumed. The Retrieval Head's description says so. The Tracking Gimbal locks onto quest motes like any buried pattern.

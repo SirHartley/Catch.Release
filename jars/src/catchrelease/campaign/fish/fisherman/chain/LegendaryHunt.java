@@ -52,7 +52,8 @@ public final class LegendaryHunt {
         @Override
         public boolean shouldRemoveIntel() {
             if (isEnded()) return true;
-            if (!isActive()) endImmediately();
+            // the finished list stays up for its own end delay, set when the last legendary is caught
+            if (!isActive() && !FishermanChain.isAt(FishermanChain.Stage.HUNT_DONE)) endImmediately();
 
             return isEnded();
         }
@@ -62,6 +63,7 @@ public final class LegendaryHunt {
             return switch (FishermanChain.getStage()) {
                 case T4_LANDED -> "Listen for rumours: report to the Fisherman";
                 case HUNTING -> "Hunting the legendary fish";
+                case HUNT_DONE -> "Hunting the legendary fish: every one caught";
                 default -> "Listen for rumours";
             };
         }
@@ -86,7 +88,7 @@ public final class LegendaryHunt {
             bullet(info);
             switch (FishermanChain.getStage()) {
                 case T4_LANDED -> info.addPara("Return to the nearest fishing boat", text, pad);
-                case HUNTING -> addHuntingLines(info, text, pad);
+                case HUNTING, HUNT_DONE -> addHuntingLines(info, text, pad);
                 default -> {
                     info.addPara("Improve your gear", text, pad);
                     info.addPara("Listen for rumours", text, 0f);
@@ -95,7 +97,22 @@ public final class LegendaryHunt {
             unindent(info);
         }
 
+        // One line per legendary: the real name once caught, else the latest told name, else question marks.
         protected void addHuntingLines(TooltipMakerAPI info, Color text, float pad) {
+            float linePad = pad;
+            for (FishSpec spec : getLegendaries()) {
+                if (LegendaryChases.isCaught(spec.id)) {
+                    info.addPara("%s - caught", linePad, text, FishRarity.LEGENDARY.color, spec.getDisplayName());
+                } else {
+                    String told = getToldName(spec.id);
+                    if (told == null) {
+                        info.addPara("???", text, linePad);
+                    } else {
+                        info.addPara("%s - heard of", linePad, text, Misc.getHighlightColor(), told);
+                    }
+                }
+                linePad = 0f;
+            }
         }
 
         @Override
@@ -110,6 +127,19 @@ public final class LegendaryHunt {
                         + "hear about it.", opad);
                 addBulletPoints(info, ListInfoMode.IN_DESC);
                 FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
+                return;
+            }
+
+            if (FishermanChain.isAt(FishermanChain.Stage.HUNTING)
+                    || FishermanChain.isAt(FishermanChain.Stage.HUNT_DONE)) {
+                List<FishSpec> legendaries = getLegendaries();
+                long caught = legendaries.stream().filter(spec -> LegendaryChases.isCaught(spec.id)).count();
+
+                info.addPara("There is more than one legendary, and no two are alike. Rumours from the Fisherman and "
+                        + "from bars give their names as the tellers know them; a catch shows what each one is.", opad);
+                info.addPara("Caught: %s of %s.", opad, Misc.getHighlightColor(), String.valueOf(caught),
+                        String.valueOf(legendaries.size()));
+                addBulletPoints(info, ListInfoMode.IN_DESC);
                 return;
             }
 
@@ -171,6 +201,7 @@ public final class LegendaryHunt {
         FishermanChain.setStage(FishermanChain.Stage.HUNTING);
         FishReward.showReceipts(text, receipts);
         updateIntel();
+        checkAllCaught();
 
         return true;
     }
@@ -185,6 +216,20 @@ public final class LegendaryHunt {
     // Called by LegendaryChases.noteCaught for every legendary catch.
     public static void noteCaught(String legendaryId) {
         checkLanded();
+        if (FishermanChain.isAt(FishermanChain.Stage.HUNTING)) updateIntel();
+        checkAllCaught();
+    }
+
+    // The list concludes once every legendary is caught. What that brings is still open (FISHERMAN_CHAIN.md).
+    protected static void checkAllCaught() {
+        if (!FishermanChain.isAt(FishermanChain.Stage.HUNTING)
+                || !getLegendaries().stream().allMatch(spec -> LegendaryChases.isCaught(spec.id))) return;
+
+        FishermanChain.setStage(FishermanChain.Stage.HUNT_DONE);
+        for (IntelInfoPlugin intel : Global.getSector().getIntelManager().getIntel(HuntIntel.class)) {
+            ((HuntIntel) intel).endAfterDelay();
+            FishIntelNotifications.update((HuntIntel) intel, null);
+        }
     }
 
     protected static void checkLanded() {
