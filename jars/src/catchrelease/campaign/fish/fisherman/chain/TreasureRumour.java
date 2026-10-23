@@ -315,6 +315,14 @@ public final class TreasureRumour {
         return true;
     }
 
+    // The offered system for the offer's dialogue map; CompassIntel only points there once T1 is under way.
+    public static SectorEntityToken getOfferMapLocation() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        StarSystemAPI system = saved == null ? null : FishRumors.findSystem(saved.systemId);
+
+        return system == null ? null : system.getHyperspaceAnchor();
+    }
+
     public static boolean start(TextPanelAPI text) {
         FishermanChain.Saved saved = FishermanChain.get(false);
         if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T1_OFFERED)) return false;

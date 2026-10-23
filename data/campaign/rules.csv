@@ -2626,19 +2626,21 @@ catchrelease_t1Later:""Not now.""",
 catchrelease_fisherOptT1,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT1Offer",SetOptionColor catchrelease_introGetFreeRumor highlight,,"35:catchrelease_introGetFreeRumor:""Heard of anywhere worth fishing?""",
 catchrelease_t1Offer,CatchReleaseT1Offer,"$catchreleaseChainT1Offer
-$catchreleaseChainT1Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""treasure""","""$catchreleaseChainT1System. The crews working there have been bringing up a lot more treasure than usual.""
+$catchreleaseChainT1Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""treasure""
+CatchReleaseCMD showChainMap t1 ""Target: $catchreleaseChainT1System""","""$catchreleaseChainT1System. The crews working there have been bringing up a lot more treasure than usual.""
 
 ""There's also a bit of a personal request. The fabric took something of mine in that place.""
 
 ""It won't release it to me, but you got better odds. You'll find it under the lights, coming up with the catch. Bring it back to me and there's some very worthwhile equipment in it for you. No hurry on it.""","catchrelease_t1Accept:""I'll look for it.""
 catchrelease_t1Decline:""Not right now.""",
 catchrelease_t1OfferNone,CatchReleaseT1Offer,,,"""Nothing worth sending you after.""",catchrelease_fisherBack:Continue,
-catchrelease_t1Accept,DialogOptionSelected,$option == catchrelease_t1Accept,"CatchReleaseCMD t1Accept
+catchrelease_t1Accept,DialogOptionSelected,$option == catchrelease_t1Accept,"HideMapMarker
+CatchReleaseCMD t1Accept
 CatchReleaseCMD tokens
 FireBest CatchReleaseT1Accepted",,,
 catchrelease_t1Accepted,CatchReleaseT1Accepted,$catchreleaseChainT1Active,,"""Good. Keep an eye on the catch window when you're working there. It won't sit around waiting for you.""",catchrelease_fisherBack:Continue,
 catchrelease_t1AcceptFailed,CatchReleaseT1Accepted,,,"""Hm. The talk's moved on since I last heard it. Ask me again another time.""",catchrelease_fisherBack:Continue,
-catchrelease_t1Decline,DialogOptionSelected,$option == catchrelease_t1Decline,,"""Suit yourself. It's not going anywhere. Ask me if you change your mind.""",catchrelease_fisherBack:Continue,
+catchrelease_t1Decline,DialogOptionSelected,$option == catchrelease_t1Decline,HideMapMarker,"""Suit yourself. It's not going anywhere. Ask me if you change your mind.""",catchrelease_fisherBack:Continue,
 catchrelease_t1Later,DialogOptionSelected,$option == catchrelease_t1Later,"$menuState = catchreleaseFisher 0
 CatchReleaseCMD tokens
 FireAll CatchReleaseFisherOptions","""Another time, then.""",,
