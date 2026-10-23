@@ -146,7 +146,8 @@ public final class SensorBuild {
         FishReward.showReceipts(text, receipts);
         CaptainsFleet.updateIntel();
         checkBought();
-        FishIntelNotifications.queue(new SensorIntel(), text);
+        // added inside the dialogue, so its card follows the Fisherman's line
+        FishIntelNotifications.addNow(new SensorIntel(), text);
 
         return true;
     }
