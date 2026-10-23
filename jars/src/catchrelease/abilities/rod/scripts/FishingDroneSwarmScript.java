@@ -1,5 +1,7 @@
 package catchrelease.abilities.rod.scripts;
 
+import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.config.FishingSounds;
 import catchrelease.config.Setting;
@@ -192,6 +194,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         // an empty live list is not the end while upgraded drones are still queued
         if (drones.isEmpty() && !hasPendingDrones()) {
+            // Reployment Bays send the whole swarm out again; a manual recall ended the cast above, never here
+            if (TackleManager.effects(Tackle.Fit.DRONE).redeploys && !shouldRecall()) {
+                beginDroneLaunches();
+                return;
+            }
+
             done = true;
             return;
         }

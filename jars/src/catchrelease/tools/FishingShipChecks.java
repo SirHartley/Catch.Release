@@ -90,7 +90,8 @@ public final class FishingShipChecks {
         f.add("catchrelease_rod_ship", false);
         FishingShips.reconcile();
         require(FishingShips.hasSecondSlot(Tackle.Fit.DRONE)
-                && TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.NONE, "drone carrier opens an empty slot");
+                && TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.REPLOYMENT_BAYS,
+                "drone carrier brings its Reployment Bays");
 
         f.add("catchrelease_lamp_ship", false);
         f.add("nebula", false);

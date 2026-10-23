@@ -145,6 +145,14 @@ public enum Tackle {
             fanBeam = true;
             stocked = false;
         }
+    },
+    REPLOYMENT_BAYS("Reployment Bays", Fit.DRONE,
+            "Once every drone has come back, sends them all out again to the same area. Keeps going until you"
+                    + " recall them or leave the rupture.") {
+        {
+            redeploys = true;
+            stocked = false;
+        }
     };
 
     // Modules with similar or opposing effects on one rig; two of the same group cannot share it.
@@ -196,6 +204,7 @@ public enum Tackle {
     public boolean stocked = true;
     public float lockTime = 0f;
     public boolean fanBeam = false;
+    public boolean redeploys = false;
     public Exclusion exclusion;
 
     Tackle(String name, Fit fit, String description) {

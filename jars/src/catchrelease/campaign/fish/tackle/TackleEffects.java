@@ -31,6 +31,7 @@ public final class TackleEffects {
     public final boolean retrievesCharge;
     public final boolean explosive;
     public final boolean fanBeam;
+    public final boolean redeploys;
 
     private TackleEffects(List<Tackle> modules) {
         this.modules = Collections.unmodifiableList(modules);
@@ -38,7 +39,7 @@ public final class TackleEffects {
         float barSize = 1f, barLift = 1f, barGravity = 1f, progress = 1f, escape = 1f;
         float treasure = 1f, lampTreasure = 1f, rarity = 1f, quality = 0f, coherence = 0f, lock = 0f;
         boolean ship = false, sonarSeen = false, coupling = false, deep = false, retrieves = false;
-        boolean blast = false, fan = false;
+        boolean blast = false, fan = false, redeploy = false;
 
         for (Tackle tackle : modules) {
             barSize *= tackle.barSizeMult;
@@ -60,6 +61,7 @@ public final class TackleEffects {
             retrieves |= tackle.retrievesCharge;
             blast |= tackle.explosive;
             fan |= tackle.fanBeam;
+            redeploy |= tackle.redeploys;
         }
 
         barSizeMult = barSize;
@@ -81,6 +83,7 @@ public final class TackleEffects {
         retrievesCharge = retrieves;
         explosive = blast;
         fanBeam = fan;
+        redeploys = redeploy;
     }
 
     public static TackleEffects of(Tackle... fitted) {

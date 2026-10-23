@@ -33,8 +33,12 @@ public final class FishermanChain {
         T3_CAUGHT,
         T3_BUILD,
         T3_BUILT,
-        // T4 is offered from here
-        T3_DONE
+        // T4 starts in T3's closing conversation
+        T4_LISTEN,
+        T4_LANDED,
+        // "Hunting the legendary fish", until every legendary is caught
+        HUNTING,
+        HUNT_DONE
     }
 
     public static final String KEY = "$catchrelease_fisherChain";
@@ -76,6 +80,8 @@ public final class FishermanChain {
     public static final String T3_CAUGHT = "$catchreleaseChainT3Caught";
     public static final String T3_BUILT = "$catchreleaseChainT3Built";
 
+    public static final String T4_LANDED = "$catchreleaseChainT4Landed";
+
     public static class Saved implements Serializable {
 
         public Stage stage = Stage.NONE;
@@ -106,6 +112,9 @@ public final class FishermanChain {
         public String t3PlanetId;
         public String t3PlanetName;
         public String t3SpeciesId;
+
+        // legendary id to the name its latest rumour used
+        public Map<String, String> toldNames;
     }
 
     private FishermanChain() {
@@ -184,6 +193,8 @@ public final class FishermanChain {
         local.set(T3_HUNT, stage == Stage.T3_HUNT, 0);
         local.set(T3_CAUGHT, stage == Stage.T3_CAUGHT, 0);
         local.set(T3_BUILT, stage == Stage.T3_BUILT, 0);
+
+        local.set(T4_LANDED, stage == Stage.T4_LANDED, 0);
     }
 
     public static Saved get(boolean create) {

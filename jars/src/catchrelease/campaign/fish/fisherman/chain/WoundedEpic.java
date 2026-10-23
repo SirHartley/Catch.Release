@@ -368,9 +368,9 @@ public final class WoundedEpic {
         updateIntel();
     }
 
-    // The closing conversation ends T3; T4 is offered from here.
-    public static void finish() {
-        if (FishermanChain.isAt(FishermanChain.Stage.T3_BUILT)) FishermanChain.setStage(FishermanChain.Stage.T3_DONE);
+    // The closing conversation ends T3 and starts T4, which it introduces.
+    public static void finish(TextPanelAPI text) {
+        if (FishermanChain.isAt(FishermanChain.Stage.T3_BUILT)) LegendaryHunt.start(text);
     }
 
     public static String getLampShipName() {

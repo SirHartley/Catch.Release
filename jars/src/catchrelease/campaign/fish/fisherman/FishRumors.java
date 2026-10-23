@@ -1,5 +1,7 @@
 package catchrelease.campaign.fish.fisherman;
 
+import com.fs.starfarer.api.util.Misc;
+import catchrelease.campaign.fish.fisherman.chain.LegendaryHunt;
 import catchrelease.config.PlayerSettings;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.map.FishPresence;
@@ -100,6 +102,8 @@ public class FishRumors {
         public float duration = Setting.RUMOR_DURATION.value();
         // a quest's rumour: its lifetime does not run until the quest releases it
         public boolean held;
+        // a legendary rumour: the name its teller used, which need not be the species' real name
+        public String toldName;
     }
 
     public static class RumorIntel extends BaseIntelPlugin {
@@ -202,8 +206,18 @@ public class FishRumors {
             String[] highlights = DESCRIPTION_TOKEN.matcher(descriptionTemplate(rumor))
                     .results().map(match -> "System".equals(match.group(1))
                             ? rumor.systemName : getStrangerDisplayName(rumor)).toArray(String[]::new);
-            FishRequirement.highlight(paragraph, getKind(rumor) == Kind.LEGENDARY
-                    ? FishIntelMapButton.forSpecies(rumor.legendaryId) : List.of(), null, highlights);
+            if (getKind(rumor) == Kind.LEGENDARY) {
+                // a told name is no species name, so it is coloured here rather than looked up
+                Color[] colors = new Color[highlights.length];
+                for (int i = 0; i < highlights.length; i++) {
+                    colors[i] = rumor.systemName != null && rumor.systemName.equals(highlights[i])
+                            ? Misc.getHighlightColor() : FishRarity.LEGENDARY.color;
+                }
+                paragraph.setHighlight(highlights);
+                paragraph.setHighlightColors(colors);
+            } else {
+                FishRequirement.highlight(paragraph, List.of(), null, highlights);
+            }
 
             addBulletPoints(info, ListInfoMode.IN_DESC);
             if (getMapAsks() == null) {
@@ -418,7 +432,10 @@ public class FishRumors {
         Kind kind = kinds.get((int) MathUtils.getRandomNumberInRange(0f, kinds.size() - 0.01f));
         if (kind == Kind.LEGENDARY) {
             Saved legendary = rollLegendary();
-            if (legendary != null) return publish(legendary);
+            if (legendary != null) {
+                legendary.toldName = LegendaryHunt.getFishermanName(legendary.legendaryId);
+                return publish(legendary);
+            }
             kinds.remove(Kind.LEGENDARY);
             kind = kinds.get((int) MathUtils.getRandomNumberInRange(0f, kinds.size() - 0.01f));
         }
@@ -478,8 +495,11 @@ public class FishRumors {
         return null;
     }
 
+    // Every rumour is published here, so this is where a legendary's told name is recorded.
     public static Saved publish(Saved rumor) {
         if (isExpired(rumor)) return null;
+
+        if (getKind(rumor) == Kind.LEGENDARY) LegendaryHunt.recordTold(rumor.legendaryId, rumor.toldName);
 
         List<Saved> active = new ArrayList<>(getActiveRumors());
         active.add(rumor);
@@ -590,9 +610,14 @@ public class FishRumors {
         return strangers.get((int) MathUtils.getRandomNumberInRange(0f, strangers.size() - 0.01f)).id;
     }
 
+    // A legendary goes by the name its teller used; the real name only replaces it once the player has caught one
+    // and knows better.
     public static String getStrangerDisplayName(Saved rumor) {
         if (getKind(rumor) == Kind.LEGENDARY) {
             FishSpec spec = FishSpecLoader.getFishSpec(rumor.legendaryId);
+            if (rumor.toldName != null && !rumor.toldName.isEmpty() && !LegendaryChases.isCaught(rumor.legendaryId)) {
+                return rumor.toldName;
+            }
             return spec == null ? "" : spec.getDisplayName();
         }
         if (!hasEffect(rumor, TYPE_STRANGER)) return "";

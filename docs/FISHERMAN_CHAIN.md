@@ -1,6 +1,6 @@
 # Fisherman follow-up chain
 
-**Status: approved design, not yet implemented.** This document records the author's decisions for the quest chain that follows the tutorial, plus the open questions and the work each step needs. Read it before implementing or revising any of these quests.
+**Status: approved design, implemented in Stages 0–5.** The player-facing text of Stages 1–5 still awaits the Editor pass (subtasks 1.9, 3.10, 4.7, 5.7), and one open question remains. This document records the author's decisions for the quest chain that follows the tutorial, plus the open questions and the work each step needed. Read it before revising any of these quests.
 
 It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains the authority on facts, knowledge limits and voice. [DIALOGUE.md](DIALOGUE.md) owns the text workflow, and [RULES_WRITING.md](RULES_WRITING.md) owns conversation structure. Text described here is a brief, not approved dialogue. The deferred [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) follows after this chain; see [Ships](#ships).
 
@@ -175,25 +175,22 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - The Fisherman tells the player to improve their gear and listen for rumours. He stays vague about *what* they are hunting.
 - The intel's title is along the lines of "Listen for rumours". It is a permanent reminder that there is more to find. Neither it nor the Fisherman mentions a reward or names legendaries.
 - It is a long-term quest: no deadline. It completes on the first legendary catch, whenever that happens.
+- It starts in T3's closing conversation, which already gives the Fisherman's advice; there is no separate offer.
 - There is no gear checkpoint. Player skill is part of how hard a legendary is.
-- The ROD ship (drone carrier) is still the reward on completion. Nothing announces it beforehand.
+- The ROD ship (drone carrier) is still the reward on completion. Nothing announces it beforehand. The Fisherman hands it over at the next visit after the catch, not at the catch itself.
 
 **After the first legendary: hunting the legendary fish**
 - When T4 completes, the player learns there is more than one legendary. The intel changes to "Hunting the legendary fish".
 - It lists one entry per legendary species, each shown as question marks until known, so the list shows how many there are.
 - Each rumour the player hears about a legendary turns its question marks into the last known name: the name the teller used. A bar teller can give a folk name or the wrong one, so an entry can stay wrong until the catch.
 - Every rumour fills in a name. A telling that names nothing gives either a wrong name or one taken from its story, for example "World Serpent" for an eel that lies curled with its tail in its mouth.
+- Told names: the Fisherman's leads use the real names. The bar spacer's tellings use "Lantern Jack", "The Moray" and "The Imposter"; the three that name nothing go by "The Many" (the Quorum), "The Burning Lie" (False Dawn) and "The Abyss" (the Abyssal Ghost Manta). The tellings' dialogue still says no name was given.
+- Names are recorded from the first rumour heard, before the list appears, at the single path every rumour is published through.
 - Catching a legendary changes its entry to the species' real name.
 - The existing legendary rumour intel shows the told name too, not the species' real name (`FishRumors.getStrangerDisplayName` today).
 - The intel concludes once every legendary has been caught (six today). What happens then is decided later.
 
-**Work**
-- Count the entries from the legendary rows in `fish.csv` (six today), not a constant.
-- Record each species' told name whenever a legendary rumour is heard, including before the list appears. There are two sources:
-  - the Fisherman's monthly lead (`FishRumors`);
-  - the bar spacer's report (`RatingBarEvent`, `CatchReleaseRatingLegendaryReport` rows).
-- Today's spacer tellings name some legendaries ("Lantern Jack", "The Moray", "The Imposter") and give no name for the Quorum, False Dawn and Ghost Manta. None gives a deliberately wrong name. Each rumour therefore needs an explicit told name, following the rule above. The tellings' dialogue can keep saying no name was given; the intel's name comes from the story.
-- Catches: `LegendaryChases.isCaught`. A legendary caught before T4 starts completes it at once.
+**Work.** Implemented in Stage 5 (`LegendaryHunt`, `FishRumors.Saved.toldName`, Reployment Bays); see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Ships
 
@@ -201,7 +198,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 |---|---|---|---|
 | Harpoon fishing ship | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
 | Breach Light ship | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
-| ROD ship (drone carrier) | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): once every drone has returned, the drones deploy again to the same area |
+| ROD ship (drone carrier) | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): each time every drone has returned, the drones deploy again to the same area, until the player recalls them or leaves the rupture |
 
 None of the final hulls exist yet. Until they do, each ship is a placeholder hull: a full copy of the vanilla Nebula (`nebula`, a civilian transport) under its own hull id and name, so the fleet check can tell which rig gets the second slot. The placeholders are `catchrelease_harpoon_ship` (Harpoon Nebula), `catchrelease_lamp_ship` (Breach Light Nebula) and `catchrelease_rod_ship` (ROD Nebula); see [ARCHITECTURE.md](ARCHITECTURE.md) for their data. Each real hull replaces its placeholder under the same id. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 
@@ -287,15 +284,15 @@ Each stage is one pull request and depends on the stages before it. Within a sta
 - [ ] 4.7 The closing conversation; text through the Editor process, then the dialogue and rules checks. The conversation and checks are done; the Editor pass is pending.
 
 **Stage 5: T4 and the legendary hunt.**
-- [ ] 5.1 Reployment Bays:
+- [x] 5.1 Reployment Bays:
   - an unstocked `Tackle` constant;
   - a `ShopPricing.getCredits` case, because the switch is exhaustive;
   - redeploying at the swarm's "every drone returned" branch in `FishingDroneSwarmScript.advance`, after re-checking `shouldRecall()`, and never after a manual recall.
-- [ ] 5.2 Told names: one per rumour, including the story-drawn names, recorded in `FishRumors.publish`.
-- [ ] 5.3 The existing legendary rumour intel shows the told name.
-- [ ] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
-- [ ] 5.5 The ROD ship grant.
-- [ ] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
-- [ ] 5.7 Text through the Editor process, then the dialogue and rules checks.
+- [x] 5.2 Told names: one per rumour, including the story-drawn names, recorded in `FishRumors.publish`.
+- [x] 5.3 The existing legendary rumour intel shows the told name.
+- [x] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
+- [x] 5.5 The ROD ship grant.
+- [x] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
+- [ ] 5.7 Text through the Editor process, then the dialogue and rules checks. The checks pass; the Editor pass is pending.
 
 **Behaviour to keep in mind.** With the Retrieval Head and the Explosive Head both fitted, a blast does not refund the harpoon charge, and the head is consumed. The Retrieval Head's description says so. The Tracking Gimbal locks onto quest motes like any buried pattern.
