@@ -161,7 +161,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - The blueprint for the second fishing ship, the Breach Light ship. It brings a second Lens Array slot and the Fanned Array.
 - Range data on an epic.
 
-**Follow-up: have the ship built.** The player works out how; the Fisherman does not build it. Completes when the player owns a ship of that hull.
+**Follow-up: have the ship built.** The player works out how; the Fisherman does not build it. Completes when a ship of that hull joins the player's fleet; custom production delivers to storage, so a built ship counts once it is taken aboard.
 
 **Closing conversation**
 - Gist: "Rumours about the stranger fish are worth following once your gear is very good." He does not name legendaries, so T4 stays vague.

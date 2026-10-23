@@ -358,8 +358,8 @@ public final class WoundedEpic {
         return true;
     }
 
-    // The follow-up ends once a lamp ship is in the fleet; FishingShips.reconcile runs this after every presence
-    // check, which covers production delivery, purchase and recovery alike.
+    // The follow-up ends once a lamp ship joins the fleet; FishingShips.reconcile runs this after every presence
+    // check. Custom production delivers to storage, so a built ship counts when it is taken out of storage.
     public static void checkBuilt() {
         if (!FishermanChain.isAt(FishermanChain.Stage.T3_BUILD)
                 || !FishingShips.hasSecondSlot(FishingShips.Ship.LAMP.rig)) return;
