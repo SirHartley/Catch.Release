@@ -1,10 +1,12 @@
 package catchrelease.campaign.fish.fisherman.chain;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.FishermanIdentity;
@@ -22,6 +24,8 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
+import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -32,6 +36,7 @@ import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
+import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
@@ -111,6 +116,30 @@ public final class WoundedEpic {
         @Override
         public void reportQuestEpicCaught(SectorEntityToken mote, String planter, FishCatch caught) {
             if (PLANTER.equals(planter)) landed();
+        }
+    }
+
+    // Putting the Breach Lights out calls a woken epic off: it goes back to the planet. Vanilla reports the player's
+    // ability deactivation (BaseAbilityPlugin.deactivate), so the lamp state is never polled. A location change turns
+    // the lights off too, after the player has left the epic's system, where EpicHunt's own reset covers it.
+    public static class LampsOff extends BaseCampaignEventListener {
+
+        public LampsOff() {
+            super(false);
+        }
+
+        public static void register() {
+            for (CampaignEventListener listener : Global.getSector().getAllListeners()) {
+                if (listener instanceof LampsOff) Global.getSector().removeListener(listener);
+            }
+            if (isHunting()) Global.getSector().addTransientListener(new LampsOff());
+        }
+
+        @Override
+        public void reportPlayerDeactivatedAbility(AbilityPlugin ability, Object param) {
+            if (ability != null && SearchlightAbilityPlugin.ABILITY_ID.equals(ability.getId()) && isAwakeHere()) {
+                returnToPlanet();
+            }
         }
     }
 
@@ -278,6 +307,7 @@ public final class WoundedEpic {
     public static void register() {
         Arrival.register();
         Hunt.register();
+        LampsOff.register();
         if (isHunting()) {
             clearWild();
             ensureEpic();
@@ -436,6 +466,19 @@ public final class WoundedEpic {
 
         Global.getSector().getCampaignUI().addMessage("The pattern returns to " + planet.getName() + " to recover.",
                 Misc.getTextColor(), planet.getName(), null, Misc.getHighlightColor(), null);
+    }
+
+    // A woken epic in the player's location, not on the line or in a minigame.
+    protected static boolean isAwakeHere() {
+        StarSystemAPI system = getSystem();
+        if (!isHunting() || system == null || Global.getSector().getCurrentLocation() != system) return false;
+
+        for (SectorEntityToken mote : QuestPond.getPlanted(system, PLANTER)) {
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && EpicHunt.isActive(fish) && !fish.isHeld()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected static void landed() {

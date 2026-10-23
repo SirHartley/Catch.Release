@@ -154,7 +154,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 1. The player uses the Needle Sensor built after T2 to locate it.
 2. Asleep, it behaves like any epic: buried, drifting at the normal buried speed, and visible under the Breach Lights. The difference is that its drift circles the planet at about 1,000 units.
 3. A harpoon hit wakes it as usual: the hit is deflected, the fish surfaces and its shield charge goes up. It stops circling and runs the normal epic hunt, at half the speed of a normal awake epic. While the hunt is on, no wild epic of its species is in the system, so the one the player wakes is always the wounded one.
-4. If the hunt resets (more than 3,000 units from the player), it despawns and respawns at the planet, buried and circling again, with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
+4. If the hunt resets (more than 3,000 units from the player) or the player puts the Breach Lights out while it is awake, it despawns and respawns at the planet, buried and circling again, with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
 5. The player is expected to hunt it until caught, then return to the Fisherman.
 
 **Rewards**
