@@ -12,7 +12,6 @@ import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishReward;
-import catchrelease.campaign.fish.jobs.FishRewardRoller;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.legendary.EpicHunt;
@@ -57,6 +56,8 @@ public final class WoundedEpic {
 
     public static final float CIRCLE_RADIUS = 1000f;
     public static final float AWAKE_SPEED_MULT = 0.5f;
+    // paid in place of the range data when every epic is already caught or charted
+    public static final int RANGE_DATA_CREDITS = 10000;
     // past the star's surface, clear of every vanilla corona (the widest reaches about 2,250) with the circle
     public static final float STAR_CLEARANCE = 2500f;
 
@@ -336,8 +337,8 @@ public final class WoundedEpic {
         return true;
     }
 
-    // The lamp ship's blueprint and range data on an epic the player has not charted; with every epic charted the
-    // entry pays its credit fallback.
+    // The lamp ship's blueprint and range data on an epic the player has neither caught nor charted; with none left,
+    // RANGE_DATA_CREDITS instead.
     public static boolean complete(TextPanelAPI text) {
         if (!FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT)) return false;
 
@@ -345,9 +346,8 @@ public final class WoundedEpic {
         receipts.add(FishReward.shipBlueprint(FishingShips.Ship.LAMP.hullId).grantWithReceipt());
 
         FishSpec epic = pickRangeData(new Random());
-        if (epic != null) {
-            receipts.add(FishReward.locationData(epic.id, FishRewardRoller.VALUE_PER_FISH).grantWithReceipt());
-        }
+        receipts.add(epic == null ? FishReward.credits(RANGE_DATA_CREDITS).grantWithReceipt()
+                : FishReward.locationData(epic.id, RANGE_DATA_CREDITS).grantWithReceipt());
 
         FishermanChain.setStage(FishermanChain.Stage.T3_BUILD);
         register();
@@ -381,18 +381,14 @@ public final class WoundedEpic {
 
     protected static FishSpec pickRangeData(Random random) {
         List<FishSpec> unknown = new ArrayList<>();
-        List<FishSpec> any = new ArrayList<>();
         for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
             if (spec == null || spec.rarity != FishRarity.EPIC || spec.spawnWeight <= 0f || !spec.hasHabitat()) {
                 continue;
             }
-
-            any.add(spec);
             if (!FishLog.isCaught(spec.id) && !FishLog.isLocationDataUnlocked(spec.id)) unknown.add(spec);
         }
 
-        List<FishSpec> pool = unknown.isEmpty() ? any : unknown;
-        return pool.isEmpty() ? null : pool.get(random.nextInt(pool.size()));
+        return unknown.isEmpty() ? null : unknown.get(random.nextInt(unknown.size()));
     }
 
     public static void updateIntel() {
