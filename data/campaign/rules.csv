@@ -2685,7 +2685,7 @@ FireBest CatchReleaseT2Offer",,,
 catchrelease_t2Offer,CatchReleaseT2Offer,"$catchreleaseChainT2Offer
 $catchreleaseChainT2Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT2System $catchreleaseChainT2Species ""one of his ships""","""As it happens. A man who used to crew for me has his own fleet now. He sent word asking for one.""
 
-""He's in $catchreleaseChainT2System, after a $catchreleaseChainT2Species. He's been hunting that one for years, and will appreciate the support.""
+""He's in the $catchreleaseChainT2System, after a $catchreleaseChainT2Species. He's been hunting that one for years, and will appreciate the support.""
 
 ""Go and hear him out. It'll be worthwhile, we take care of our own.""","catchrelease_t2Accept:""I'll go and see him.""
 catchrelease_t2Decline:""Not right now.""",

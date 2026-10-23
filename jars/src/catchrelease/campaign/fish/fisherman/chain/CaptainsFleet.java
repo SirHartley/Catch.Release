@@ -303,7 +303,7 @@ public final class CaptainsFleet {
         protected String getSystemName() {
             FishermanChain.Saved saved = FishermanChain.get(false);
 
-            return saved == null || saved.t2SystemName == null ? "the system" : saved.t2SystemName;
+            return saved == null || saved.t2SystemName == null ? "the system" : "the " + saved.t2SystemName;
         }
 
         @Override
@@ -380,7 +380,8 @@ public final class CaptainsFleet {
         }
 
         saved.t2SystemId = system.getId();
-        saved.t2SystemName = system.getNameWithNoType();
+        // "Foo star system": the bare name reads as the star's
+        saved.t2SystemName = system.getNameWithLowercaseType();
         saved.t2SpeciesId = species.id;
 
         return true;
