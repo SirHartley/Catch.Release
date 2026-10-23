@@ -175,6 +175,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - The Fisherman tells the player to improve their gear and listen for rumours. He stays vague about *what* they are hunting.
 - The intel's title is along the lines of "Listen for rumours". It is a permanent reminder that there is more to find. Neither it nor the Fisherman mentions a reward or names legendaries.
 - It is a long-term quest: no deadline. It completes on the first legendary catch, whenever that happens.
+- It starts in T3's closing conversation, which already gives the Fisherman's advice; there is no separate offer.
 - There is no gear checkpoint. Player skill is part of how hard a legendary is.
 - The ROD ship (drone carrier) is still the reward on completion. Nothing announces it beforehand.
 
@@ -293,7 +294,7 @@ Each stage is one pull request and depends on the stages before it. Within a sta
   - redeploying at the swarm's "every drone returned" branch in `FishingDroneSwarmScript.advance`, after re-checking `shouldRecall()`, and never after a manual recall.
 - [x] 5.2 Told names: one per rumour, including the story-drawn names, recorded in `FishRumors.publish`.
 - [x] 5.3 The existing legendary rumour intel shows the told name.
-- [ ] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
+- [x] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
 - [ ] 5.5 The ROD ship grant.
 - [ ] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
 - [ ] 5.7 Text through the Editor process, then the dialogue and rules checks.

@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.campaign.fish.fisherman.chain.LegendaryHunt;
 import catchrelease.campaign.fish.data.FishHabitat;
 import catchrelease.campaign.fish.data.FishGrade;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -191,6 +192,8 @@ public class LegendaryChases {
         chase.caught = true;
         chase.encountered = true;
         chase.systemId = null;
+
+        LegendaryHunt.noteCaught(speciesId);
     }
 
     protected static Chase getChase(FishSpec spec) {

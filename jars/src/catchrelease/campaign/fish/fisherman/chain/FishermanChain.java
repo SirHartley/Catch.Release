@@ -33,8 +33,12 @@ public final class FishermanChain {
         T3_CAUGHT,
         T3_BUILD,
         T3_BUILT,
-        // T4 is offered from here
-        T3_DONE
+        // T4 starts in T3's closing conversation
+        T4_LISTEN,
+        T4_LANDED,
+        // "Hunting the legendary fish", until every legendary is caught
+        HUNTING,
+        HUNT_DONE
     }
 
     public static final String KEY = "$catchrelease_fisherChain";
