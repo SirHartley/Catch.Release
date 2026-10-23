@@ -2421,6 +2421,9 @@ catchrelease_introSkipOpt,CatchReleaseFisherOptions,"$menuState == catchreleaseF
 $catchreleaseCanSkip",SetOptionColor catchrelease_introSkip highlight,,"5:catchrelease_introSkip:""I've been here before. The fabric calls to me.""",
 catchrelease_fisherOptShop,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseOutfitter",,,10:catchrelease_fisherShop:Access the outfitter,
+catchrelease_fisherOptShopLens,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseOutfitter
+$catchreleaseChainT1Lens",SetOptionColor catchrelease_fisherShop highlight,,,
 catchrelease_fisherOptCharts,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseStage >= 6
 $catchreleaseShelf",,,20:catchrelease_fisherCharts:Purchase range data,
