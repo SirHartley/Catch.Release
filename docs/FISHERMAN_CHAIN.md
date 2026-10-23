@@ -196,11 +196,11 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 | Ship | Rig | Given by | Ship module ([second slot](#shared-mechanic-ship-bound-equipment)) |
 |---|---|---|---|
-| Harpoon fishing ship | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
-| Breach Light ship | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
-| ROD ship (drone carrier) | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): each time every drone has returned, the drones deploy again, until the player recalls them or they can no longer fish there (both the pond swarm and the roaming swarm) |
+| Stigmata-class Harpoon Tug ("opens wounds") | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
+| Monstrance-class Breach Light Trawler ("presents the sacred for all to see") | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
+| Reliquary-class LYNE Drone Tender ("keeps implements") | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): each time every drone has returned, the drones deploy again, until the player recalls them or they can no longer fish there (both the pond swarm and the roaming swarm) |
 
-None of the final hulls exist yet. Until they do, each ship is a placeholder hull: a full copy of the vanilla Nebula (`nebula`, a civilian transport) under its own hull id and name, so the fleet check can tell which rig gets the second slot. The placeholders are `catchrelease_harpoon_ship` (Harpoon Nebula), `catchrelease_lamp_ship` (Breach Light Nebula) and `catchrelease_rod_ship` (ROD Nebula); see [ARCHITECTURE.md](ARCHITECTURE.md) for their data. Each real hull replaces its placeholder under the same id. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
+The names are decided; the quoted notes are the author's meaning for each name, not player-facing text. None of the final hulls exist yet. Until they do, each ship is a placeholder hull: a full copy of the vanilla Nebula (`nebula`, a civilian transport) under its own hull id, with its final name, designation and description: `catchrelease_harpoon_ship` (Stigmata, Harpoon Tug), `catchrelease_lamp_ship` (Monstrance, Breach Light Trawler) and `catchrelease_rod_ship` (Reliquary, LYNE Drone Tender); see [ARCHITECTURE.md](ARCHITECTURE.md) for their data. Each real hull replaces its placeholder under the same id. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 
 ## Open questions
 

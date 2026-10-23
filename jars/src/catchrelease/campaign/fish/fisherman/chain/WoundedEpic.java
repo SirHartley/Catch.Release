@@ -208,8 +208,9 @@ public final class WoundedEpic {
             info.addPara("A wounded %s is circling %s in %s, about %s out. It swims slower than it should once "
                     + "woken.", opad, new Color[]{FishRarity.EPIC.color, h, h, h}, getSpeciesName(),
                     getPlanetName(), getSystemName(), Misc.getWithDGS(CIRCLE_RADIUS) + " units");
-            info.addPara("Reward: the blueprint for a Breach Light ship, and range data on an epic. There is no "
-                    + "deadline.", opad, h, "the blueprint for a Breach Light ship", "range data on an epic");
+            String blueprint = "the blueprint for the " + getLampShipFullName();
+            info.addPara("Reward: " + blueprint + ", and range data on an epic. There is no deadline.", opad, h,
+                    blueprint, "range data on an epic");
             addBulletPoints(info, ListInfoMode.IN_DESC);
             FishIntelMapButton.addPlotRoute(info, width, getMapLocation(null));
         }
@@ -376,7 +377,13 @@ public final class WoundedEpic {
     public static String getLampShipName() {
         ShipHullSpecAPI spec = Global.getSettings().getHullSpec(FishingShips.Ship.LAMP.hullId);
 
-        return spec == null ? "Breach Light ship" : spec.getHullName();
+        return spec == null ? "Breach Light Trawler" : spec.getHullName();
+    }
+
+    public static String getLampShipFullName() {
+        ShipHullSpecAPI spec = Global.getSettings().getHullSpec(FishingShips.Ship.LAMP.hullId);
+
+        return spec == null ? "Breach Light Trawler" : spec.getNameWithDesignationWithDashClass();
     }
 
     protected static FishSpec pickRangeData(Random random) {
