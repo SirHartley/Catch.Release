@@ -1111,6 +1111,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
             target = lampHold;
         }
 
+        // the harpoon surfaced an awake epic: it stays in view and in reach with the lamps off or past the beam
+        if (EpicHunt.isActive(this)) target = 1f;
+
         lampFade += (target - lampFade) * Math.min(1f, amount * 4f);
     }
 
