@@ -215,7 +215,7 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 | Area | Owner (new or changed) | Role |
 |---|---|---|
 | Chain state | New `campaign/fish/fisherman/chain/FishermanChain` | Saved stage per quest (T1–T4 and follow-ups) in sector persistent data, as `FishermanQuest` stores its `STATE_KEY`. Entry points are `CatchReleaseCMD` verbs. A `tokens` Boolean per offer gates the `CatchReleaseFisherOptions` rows. Registers its transient listeners on load. |
-| Chain intel | New `BaseIntelPlugin` subclasses in the same package | One intel per quest: lost compass, Needle Sensor build, wounded epic, and the rumour hunt (title and body switch after the first legendary, as `FishingIntro.IntroIntel` switches by stage). Created through `FishIntelNotifications.queue`. |
+| Chain intel | New `BaseIntelPlugin` subclasses in the same package | One intel per quest: lost compass, Glitter Lens purchase, Needle Sensor build, wounded epic, and the rumour hunt (title and body switch after the first legendary, as `FishingIntro.IntroIntel` switches by stage). Created through `FishIntelNotifications.queue`, or `addNow` when the intel's card must follow a line of the open dialogue. |
 | T2 mission | `chain/CaptainsFleet` | Implemented in Stage 3; see [ARCHITECTURE.md](ARCHITECTURE.md). A chain-owned class with its own intel, like T1, not a `BaseHubMission`: the chain already saves the stage, and the fleet's commander is the contact. |
 | Rig slots | `TackleManager`, `RigLoadout`, `TackleEffects` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Incompatibility | `Tackle.Exclusion` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |

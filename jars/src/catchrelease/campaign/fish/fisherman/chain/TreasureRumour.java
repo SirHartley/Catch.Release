@@ -125,7 +125,7 @@ public final class TreasureRumour {
         }
     }
 
-    // One intel for the whole of T1; its title and lines follow the chain stage, as FishingIntro.IntroIntel does.
+    // One intel for the compass errand; its title and lines follow the chain stage, as FishingIntro.IntroIntel does.
     public static class CompassIntel extends BaseIntelPlugin {
 
         protected static boolean isReturning() {
@@ -136,15 +136,13 @@ public final class TreasureRumour {
         public boolean shouldRemoveIntel() {
             if (isEnded()) return true;
 
-            FishermanChain.Stage stage = FishermanChain.getStage();
-            if (stage != FishermanChain.Stage.T1_ACTIVE && stage != FishermanChain.Stage.T1_LENS) endImmediately();
+            if (!FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE)) endImmediately();
 
             return isEnded();
         }
 
         @Override
         public String getName() {
-            if (FishermanChain.isAt(FishermanChain.Stage.T1_LENS)) return "Buy the Glitter Lens";
             if (isReturning()) return "Return the Fisherman's compass";
 
             return "The Fisherman's lost compass";
@@ -168,10 +166,7 @@ public final class TreasureRumour {
             float pad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
 
             bullet(info);
-            if (FishermanChain.isAt(FishermanChain.Stage.T1_LENS)) {
-                info.addPara("Buy the %s at the Outfitter", pad, text, Misc.getHighlightColor(),
-                        Tackle.GLITTER_LENS.name);
-            } else if (isReturning()) {
+            if (isReturning()) {
                 info.addPara("Return to the nearest fishing boat", text, pad);
             } else if (isMislaid()) {
                 addMislaidLine(info, text, pad);
@@ -189,14 +184,6 @@ public final class TreasureRumour {
             FactionAPI faction = Global.getSector().getFaction(FishermanConstants.FACTION);
 
             info.addImages(width, 128, opad, opad, FishermanIdentity.getPortrait(0f), faction.getCrest());
-
-            if (FishermanChain.isAt(FishermanChain.Stage.T1_LENS)) {
-                info.addPara("The Fisherman gave you the %s schematic, with the fish and credits to buy it.",
-                        opad, h, Tackle.GLITTER_LENS.name);
-                info.addPara("Buy it at the Outfitter.", opad);
-                addBulletPoints(info, ListInfoMode.IN_DESC);
-                return;
-            }
 
             if (isReturning()) {
                 info.addPara("The chest held a compass. The Fisherman is expecting it back.", opad);
@@ -293,6 +280,82 @@ public final class TreasureRumour {
         }
     }
 
+    // T1's follow-up: buy the lens the Fisherman gave the schematic for. Ends once it is owned.
+    public static class LensIntel extends BaseIntelPlugin {
+
+        @Override
+        public boolean shouldRemoveIntel() {
+            if (isEnded()) return true;
+            if (!FishermanChain.isAt(FishermanChain.Stage.T1_LENS)) endImmediately();
+
+            return isEnded();
+        }
+
+        @Override
+        public String getName() {
+            return "Buy the " + Tackle.GLITTER_LENS.name;
+        }
+
+        @Override
+        public String getSmallDescriptionTitle() {
+            return getName();
+        }
+
+        @Override
+        public void createIntelInfo(TooltipMakerAPI info, ListInfoMode mode) {
+            info.addPara(getName(), getTitleColor(mode), 0f);
+
+            addBulletPoints(info, mode);
+        }
+
+        @Override
+        protected void addBulletPoints(TooltipMakerAPI info, ListInfoMode mode) {
+            Color text = getBulletColorForMode(mode);
+            float pad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
+
+            bullet(info);
+            info.addPara("Buy the %s at the Outfitter", pad, text, Misc.getHighlightColor(), Tackle.GLITTER_LENS.name);
+            unindent(info);
+        }
+
+        @Override
+        public void createSmallDescription(TooltipMakerAPI info, float width, float height) {
+            float opad = 10f;
+            FactionAPI faction = Global.getSector().getFaction(FishermanConstants.FACTION);
+
+            info.addImages(width, 128, opad, opad, FishermanIdentity.getPortrait(0f), faction.getCrest());
+            info.addPara("The Fisherman gave you the %s schematic, with the fish and credits to buy it.", opad,
+                    Misc.getHighlightColor(), Tackle.GLITTER_LENS.name);
+            info.addPara("Buy it at the Outfitter.", opad);
+            addBulletPoints(info, ListInfoMode.IN_DESC);
+        }
+
+        @Override
+        public String getIcon() {
+            return FishermanIdentity.getPortrait(0f);
+        }
+
+        @Override
+        public String getSortString() {
+            return getSortStringNewestFirst();
+        }
+
+        @Override
+        public FactionAPI getFactionForUIColors() {
+            return Global.getSector().getPlayerFaction();
+        }
+
+        @Override
+        public Set<String> getIntelTags(SectorMapAPI map) {
+            Set<String> tags = super.getIntelTags(map);
+            tags.add(Tags.INTEL_MISSIONS);
+            tags.add(Tags.INTEL_ACCEPTED);
+            tags.add(FishermanConstants.FACTION);
+
+            return tags;
+        }
+    }
+
     public static void markPitched() {
         FishermanChain.Saved saved = FishermanChain.get(true);
         if (saved != null) saved.pitched = true;
@@ -380,7 +443,8 @@ public final class TreasureRumour {
         return null;
     }
 
-    // Ends the compass errand, with or without the compass: T1 moves on to buying the lens.
+    // Ends the compass errand, with or without the compass: T1 moves on to buying the lens, whose intel the
+    // Fisherman's follow-up adds (showLensIntel).
     public static boolean complete(TextPanelAPI text) {
         FishermanChain.Saved saved = FishermanChain.get(false);
         if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE)) return false;
@@ -393,8 +457,17 @@ public final class TreasureRumour {
         CompassWatcher.unregister();
         FishermanChain.setStage(FishermanChain.Stage.T1_LENS);
         FishReward.showReceipts(text, grantRewards());
-        updateIntel();
         checkLensBought();
+
+        return true;
+    }
+
+    // The follow-up's intel, added inside the dialogue so its card follows his line.
+    public static boolean showLensIntel(TextPanelAPI text) {
+        if (!FishermanChain.isAt(FishermanChain.Stage.T1_LENS)
+                || !Global.getSector().getIntelManager().getIntel(LensIntel.class).isEmpty()) return false;
+
+        FishIntelNotifications.addNow(new LensIntel(), text);
 
         return true;
     }

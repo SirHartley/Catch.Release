@@ -2668,7 +2668,8 @@ catchrelease_t1LostGone,CatchReleaseT1Lost,$catchreleaseChainT1LostGone,CatchRel
 catchrelease_t1LostNone,CatchReleaseT1Lost,,,"""Bring it by when you find it.""",catchrelease_fisherBack:Continue,
 catchrelease_t1Followup,DialogOptionSelected,$option == catchrelease_t1Followup,"CatchReleaseCMD tokens
 FireBest CatchReleaseT1Followup",,,
-catchrelease_t1FollowupLens,CatchReleaseT1Followup,$catchreleaseChainT1Lens,CatchReleaseCMD highlightFishText Outfitter,"""That schematic's for a lens array. Have it built at the Outfitter and fit it to your lights. You'll bring up a good deal more bycatch working under them.""",catchrelease_fisherBack:Continue,
+catchrelease_t1FollowupLens,CatchReleaseT1Followup,$catchreleaseChainT1Lens,"CatchReleaseCMD highlightFishText Outfitter
+CatchReleaseCMD t1LensIntel","""That schematic's for a lens array. Have it built at the Outfitter and fit it to your lights. You'll bring up a good deal more bycatch working under them.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupBought,CatchReleaseT1Followup,$catchreleaseChainT1Bought,"CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""two months""
 CatchReleaseCMD t1Done","""You've already got one of those, I see. Then take it back to $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupNone,CatchReleaseT1Followup,,,"""Good fishing, Captain.""",catchrelease_fisherBack:Continue,

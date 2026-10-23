@@ -260,6 +260,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return TreasureRumour.checkLost() != null;
             case "t1Complete":
                 return TreasureRumour.complete(text(dialog));
+            case "t1LensIntel":
+                return TreasureRumour.showLensIntel(text(dialog));
             case "t1Done":
                 TreasureRumour.finish();
                 return true;

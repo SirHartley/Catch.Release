@@ -46,6 +46,17 @@ public final class FishIntelNotifications {
         showAdded(intel, textPanel);
     }
 
+    // Adds the intel at once, inside an open dialogue, with its card in the text panel and no later popup.
+    public static void addNow(BaseIntelPlugin intel, TextPanelAPI textPanel) {
+        if (intel == null || Global.getSector() == null) return;
+
+        IntelManagerAPI manager = Global.getSector().getIntelManager();
+        if (manager.hasIntel(intel)) return;
+
+        manager.unqueueIntel(intel);
+        manager.addIntel(intel, false, textPanel);
+    }
+
     public static void showAdded(BaseIntelPlugin intel, TextPanelAPI textPanel) {
         if (intel == null || textPanel == null || Global.getSector() == null) return;
 
