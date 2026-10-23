@@ -1774,7 +1774,7 @@ catchrelease_fq_parley_fish_action,CatchReleaseFleetQuestActionText,$entity.catc
 catchrelease_fq_parley_fish_intelPurpose,CatchReleaseFleetQuestIntelPurpose,$entity.catchrelease_fleetQuestType == parley_fish,,The pirates aboard $entity.catchreleaseFleetFlagshipName want to settle a dispute over protection money before anyone loses a ship. Custom calls for a fresh catch at the parley. Their captain has hired you to take it from $entity.catchreleaseFleetRupture after accepting the job; an older catch won't do.,,
 catchrelease_fq_parley_fish_intelTerms,CatchReleaseFleetQuestIntelTerms,$entity.catchrelease_fleetQuestType == parley_fish,,The captain offers the following terms.,,
 catchrelease_fq_parley_fish_hail,CatchReleaseFleetQuestHailText,$entity.catchrelease_fleetQuestType == parley_fish,,"""This is $entity.catchreleaseFleetFlagshipName. Captain speaking. That fishing rig of yours work, or do you just like the look of it?""",,
-catchrelease_fq_parley_fish_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == parley_fish,CatchReleaseCMD highlightJobText $entity.catchreleaseFleetRupture,"""We collect off the crews working $entity.catchreleaseFleetRupture. Another pack of bastards has decided they'd like the money. We've had words. A few warning shots. Nobody's lost a ship yet, and I'd prefer to keep it that way.""
+catchrelease_fq_parley_fish_pitch,CatchReleaseFleetQuestPitchText,$entity.catchrelease_fleetQuestType == parley_fish,CatchReleaseCMD highlightJobText $entity.catchreleaseFleetRupture,"""We collect off the crews working $entity.catchreleaseFleetRupture. Another pack of bastards has decided they'd like the money. We've had words. A few warning shots. Nobody's lost a ship... for now.""
 
 The captain sends you the location. ""We're sitting down for a parley. Custom says you bring a fresh catch from the patch you're claiming. My grandmother's crew did it that way. Good enough for me.""",,
 catchrelease_fq_parley_fish_terms,CatchReleaseFleetQuestTermsText,$entity.catchrelease_fleetQuestType == parley_fish,"CatchReleaseCMD highlightJobText $entity.catchrelease_fleetQuestAsk ""caught after you take the job"" $entity.catchrelease_fleetQuestReward $entity.catchreleaseFleetDeadline","""I need $entity.catchrelease_fleetQuestAsk out of that rupture, caught after you take the job. Don't bring me something that's been rolling around your hold since Corvus. They'll check, and I won't have them calling me a cheat before we've even started.""
@@ -2626,11 +2626,11 @@ catchrelease_t1Later:""Not now.""",
 catchrelease_fisherOptT1,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT1Offer",SetOptionColor catchrelease_introGetFreeRumor highlight,,"35:catchrelease_introGetFreeRumor:""Heard of anywhere worth fishing?""",
 catchrelease_t1Offer,CatchReleaseT1Offer,"$catchreleaseChainT1Offer
-$catchreleaseChainT1Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""golden chest""","""$catchreleaseChainT1System. The crews working there have been bringing up a lot more bycatch than usual.""
+$catchreleaseChainT1Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""treasure""","""$catchreleaseChainT1System. The crews working there have been bringing up a lot more treasure than usual.""
 
-""There's something of mine in it, too. A golden chest. I appear to have lost it, and I'm sure it's there.""
+""There's also a bit of a personal request. The fabric took something of mine in that place.""
 
-""It'll only come up in open space, under the lights. Bring it back to me and there's a lens schematic in it for you, with the fish and credits to have it built. No hurry on it.""","catchrelease_t1Accept:""I'll look for it.""
+""It won't release it to me, but you got better odds. You'll find it under the lights, coming up with the catch. Bring it back to me and there's some very worthwhile equipment in it for you. No hurry on it.""","catchrelease_t1Accept:""I'll look for it.""
 catchrelease_t1Decline:""Not right now.""",
 catchrelease_t1OfferNone,CatchReleaseT1Offer,,,"""Nothing worth sending you after.""",catchrelease_fisherBack:Continue,
 catchrelease_t1Accept,DialogOptionSelected,$option == catchrelease_t1Accept,"CatchReleaseCMD t1Accept
@@ -2660,15 +2660,15 @@ catchrelease_fisherBack:""I'll look again.""",
 catchrelease_t1LostSure,DialogOptionSelected,$option == catchrelease_t1LostSure,"CatchReleaseCMD t1LostCheck
 CatchReleaseCMD tokens
 FireBest CatchReleaseT1Lost",,,
-catchrelease_t1LostSold,CatchReleaseT1Lost,$catchreleaseChainT1LostSold,CatchReleaseCMD highlightFishText $catchreleaseChainT1LostMarket,"""I'm fairly sure I saw it for sale at $catchreleaseChainT1LostMarket. You'd better go and buy it back.""",catchrelease_fisherBack:Continue,
+catchrelease_t1LostSold,CatchReleaseT1Lost,$catchreleaseChainT1LostSold,CatchReleaseCMD highlightFishText $catchreleaseChainT1LostMarket,"""I'm fairly sure I heard tell of it for sale at $catchreleaseChainT1LostMarket. You'd better go and get it back.""",catchrelease_fisherBack:Continue,
 catchrelease_t1LostStored,CatchReleaseT1Lost,$catchreleaseChainT1LostStored,CatchReleaseCMD highlightFishText $catchreleaseChainT1LostMarket,"""Have you looked in your storage at $catchreleaseChainT1LostMarket? I'd start there.""",catchrelease_fisherBack:Continue,
-catchrelease_t1LostGone,CatchReleaseT1Lost,$catchreleaseChainT1LostGone,CatchReleaseCMD t1Complete,"""Then it's gone, and that's that. You found it, which is what I asked you to do.""",catchrelease_t1Followup:Continue,
+catchrelease_t1LostGone,CatchReleaseT1Lost,$catchreleaseChainT1LostGone,CatchReleaseCMD t1Complete,"""Then it's gone. I will make do without.""",catchrelease_t1Followup:Continue,
 catchrelease_t1LostNone,CatchReleaseT1Lost,,,"""Bring it by when you find it.""",catchrelease_fisherBack:Continue,
 catchrelease_t1Followup,DialogOptionSelected,$option == catchrelease_t1Followup,"CatchReleaseCMD tokens
 FireBest CatchReleaseT1Followup",,,
 catchrelease_t1FollowupLens,CatchReleaseT1Followup,$catchreleaseChainT1Lens,CatchReleaseCMD highlightFishText Outfitter,"""That schematic's for a lens array. Have it built at the Outfitter and fit it to your lights. You'll bring up a good deal more bycatch working under them.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupBought,CatchReleaseT1Followup,$catchreleaseChainT1Bought,"CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""two months""
-CatchReleaseCMD t1Done","""You've already got one of those lenses, I see. Then take it back to $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
+CatchReleaseCMD t1Done","""You've already got one of those, I see. Then take it back to $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupNone,CatchReleaseT1Followup,,,"""Good fishing, Captain.""",catchrelease_fisherBack:Continue,
 # fisherman chain T2: the captain's fleet,,,,,,
 catchrelease_fisherOptT2,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
@@ -2679,15 +2679,15 @@ FireBest CatchReleaseT2Offer",,,
 catchrelease_t2Offer,CatchReleaseT2Offer,"$catchreleaseChainT2Offer
 $catchreleaseChainT2Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT2System $catchreleaseChainT2Species ""one of his ships""","""As it happens. A man who used to crew for me has his own fleet now. He sent word asking for one.""
 
-""He's in $catchreleaseChainT2System, after a $catchreleaseChainT2Species. He's been after that one for years. His lamps have given out, and he can't find it without them. Yours work.""
+""He's in $catchreleaseChainT2System, after a $catchreleaseChainT2Species. He's been hunting that one for years, and will appreciate the support.""
 
-""He's offering one of his ships for the trouble. Go and hear him out. There's no hurry.""","catchrelease_t2Accept:""I'll go and see him.""
+""Go and hear him out. It'll be worthwhile, we take care of our own.""","catchrelease_t2Accept:""I'll go and see him.""
 catchrelease_t2Decline:""Not right now.""",
 catchrelease_t2OfferNone,CatchReleaseT2Offer,,,"""Nobody's asking for anything just now. Try me another time.""",catchrelease_fisherBack:Continue,
 catchrelease_t2Accept,DialogOptionSelected,$option == catchrelease_t2Accept,"CatchReleaseCMD t2Accept
 CatchReleaseCMD tokens
 FireBest CatchReleaseT2Accepted",,,
-catchrelease_t2Accepted,CatchReleaseT2Accepted,$catchreleaseChainT2Meet,,"""Good. His fleet's holding off the star. Fly out to him when you get there. He's expecting you.""",catchrelease_fisherBack:Continue,
+catchrelease_t2Accepted,CatchReleaseT2Accepted,$catchreleaseChainT2Meet,,"""Good. His fleet's holding 'round the star. Fly out to him when you get there. He's expecting you.""",catchrelease_fisherBack:Continue,
 catchrelease_t2AcceptFailed,CatchReleaseT2Accepted,,,"""Hm. He'll have moved on since he wrote. Ask me again another time.""",catchrelease_fisherBack:Continue,
 catchrelease_t2Decline,DialogOptionSelected,$option == catchrelease_t2Decline,,"""Suit yourself. He's waited this long.""",catchrelease_fisherBack:Continue,
 catchrelease_t2Hail,BeginFleetEncounter,"$catchrelease_t2Captain score:1200
@@ -2700,34 +2700,34 @@ FireBest CatchReleaseT2Captain",,,
 catchrelease_t2CaptainMeet,CatchReleaseT2Captain,$catchreleaseChainT2Meet,"CatchReleaseCMD highlightFishText $catchreleaseChainT2Species
 SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The link opens on a cramped bridge. The captain is an old man with a grey beard, propped on a crutch beside the plot table.
 
-""You'll be the one the old man sent. Good. I was starting to think he'd forgotten me.""
+""You'll be the one the Fisherman sent. Good. I was starting to think he'd forgotten me.""
 
 ""There's a $catchreleaseChainT2Species out there. I've been on her tail near twenty year. First time I got a harpoon in her, she had my leg off at the knee. I've no had a decent night's sleep since.""
 
-""Och, but my lamps are finished. Burnt out the lot of them last week, and we cannae raise a thing without them. Run yours close in round the star and keep them lit till she shows. When she does, put a harpoon in her.""","catchrelease_t2Search:""I'll find her.""
+""My lamps are finished. Burnt out the lot of them last week, and we can't raise a thing without them. Run yours close in round the star and keep them lit till she shows. When she does, put a harpoon in her. Ludd knows she deserves it.""","catchrelease_t2Search:""I'll find her.""
 100:catchrelease_fleetResolutionLeave:Leave",
 catchrelease_t2Search,DialogOptionSelected,$option == catchrelease_t2Search,"CatchReleaseCMD t2Search
-SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""Grand. We'll be right here. Get a harpoon in her when she shows, then come and tell us how it went.""",100:catchrelease_fleetResolutionLeave:Leave,
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""Grand. We'll be right here. Sharpen that harpoon, then come and tell us how it went.""",100:catchrelease_fleetResolutionLeave:Leave,
 catchrelease_t2CaptainSearching,CatchReleaseT2Captain,$catchreleaseChainT2Searching,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is at the plot table again. He doesn't wait for a greeting.
 
-""Nae sign of her yet? Keep close in to the star with the lamps lit. She'll show.""",100:catchrelease_fleetResolutionLeave:Leave,
+""No sign of her yet? Keep close in to the star with the lamps lit. She'll show. Never one to pass up a meal, greedy bugger.""",100:catchrelease_fleetResolutionLeave:Leave,
 catchrelease_t2CaptainHunt,CatchReleaseT2Captain,$catchreleaseChainT2Hunt,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is leaning over the plot table when the link opens. Your lamp returns are up on his display.
 
 ""That's her, right enough. What are you doing on the comms? Away and get a harpoon in her before she's off again.""",100:catchrelease_fleetResolutionLeave:Leave,
 catchrelease_t2CaptainCaught,CatchReleaseT2Captain,$catchreleaseChainT2Caught,"CatchReleaseCMD t2Complete
 SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The link opens on a bridge full of noise. Somebody behind the captain is singing, badly.
 
-""You got her! Near twenty year, and you landed her in an afternoon!"" He has to stop and wipe his eyes. ""Och, I'm too old for this. That's me done, so it is. I'm away home to put my leg up. The one I've got left.""
+""You got her! Near twenty year, and you landed her in an afternoon!"" He has to stop and wipe his eyes. ""I'm too old for this. That's me done, so it is. I'm away home to put my leg up. The one I've got left.""
 
-""You'll be wanting paid. Take the harpoon boat, she's earned a better captain than me. And the crew have dug out a few things they'll not be needing now.""",100:catchrelease_fleetResolutionLeave:Leave,
+""You'll be wanting paid. Take the boat, she's earned a better captain than me. And the crew have dug out a few things they'll not be needing now.""",100:catchrelease_fleetResolutionLeave:Leave,
 catchrelease_t2CaptainLost,CatchReleaseT2Captain,$catchreleaseChainT2Lost,"CatchReleaseCMD t2Complete
 SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain hears you out without interrupting. When you're done he nods slowly.
 
 ""Aye, that's her all over. Twenty year near enough, and I've never once got her aboard.""
 
-""Still, you found her, and that's more than I've managed in a long while. The crew have your whole run on the plot now. She'll turn up again. They always do, and I'll be there when she does.""
+""Still, you found her, that's more than I've managed in a long while. The crew have your whole run on the plot now. She'll turn up again. Always does, and I'll be there.""
 
-""Take the harpoon boat for your trouble. You'll get more use out of her than I will the noo.""",100:catchrelease_fleetResolutionLeave:Leave,
+""I'll be travelin' light for the next chapter. Care for an extra boat? It's a special one, made for harpoonin', and honed across many years of hunting. Got a history, that one.""",100:catchrelease_fleetResolutionLeave:Leave,
 catchrelease_t2CaptainNone,CatchReleaseT2Captain,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is busy getting his fleet under way. He raises a hand to the pickup.
 
 ""Tell the old man I'm obliged to him.""",100:catchrelease_fleetResolutionLeave:Leave,
@@ -2739,7 +2739,7 @@ catchrelease_t2DebriefLanded,CatchReleaseT2Debrief,$catchreleaseChainT2Landed,Fi
 
 ""So it's landed. Thank you for going. He's been at that one a long time, and it'll do him good to stop.""",,
 catchrelease_t2DebriefLost,CatchReleaseT2Debrief,,FireBest CatchReleaseT2Lesson,"""He didn't get it, then. Thank you for going. He'll be back out looking inside a month, and glad of the excuse.""",,
-catchrelease_t2Lesson,CatchReleaseT2Lesson,,FireAll CatchReleaseT2DebriefQuestions,"""Epics all go like that. Your first strike wakes one, and it won't land. After that it runs hard, and it only settles if you let it get well ahead of you. Stay close and keep at it.""
+catchrelease_t2Lesson,CatchReleaseT2Lesson,,FireAll CatchReleaseT2DebriefQuestions,"""The bright ones all go like that. First strike wakes them, makes it run hard. It only settles if you let it get well ahead of you. Stay close and keep at it.""
 
 ""There are stranger things out there than that one. Each of those has habits of its own. You'll learn them as you go.""",,
 catchrelease_t2DebriefQuestionsCrew,CatchReleaseT2DebriefQuestions,!$catchreleaseT2AskedCrew,,,"0:catchrelease_t2AskCrew:""What's he like, your old crewman?""",
@@ -2748,15 +2748,15 @@ catchrelease_t2DebriefQuestionsDone,CatchReleaseT2DebriefQuestions,,,,"100:catch
 catchrelease_t2AskCrew,DialogOptionSelected,$option == catchrelease_t2AskCrew,"$catchreleaseT2AskedCrew = true
 FireAll CatchReleaseT2DebriefQuestions","""Stubborn. He was a good hand with a harpoon when he crewed for me. He'd tell you he was the best I had. He wasn't, but he wasn't far off.""",,
 catchrelease_t2AskStrike,DialogOptionSelected,$option == catchrelease_t2AskStrike,"$catchreleaseT2AskedStrike = true
-FireAll CatchReleaseT2DebriefQuestions","""It takes a second strike to knock its shield down. That one glances off too. Every strike after that goes in.""",,
+FireAll CatchReleaseT2DebriefQuestions","""It takes a second strike to knock that bubble it makes down. Every strike after that goes right in.""",,
 catchrelease_t2DebriefDone,DialogOptionSelected,$option == catchrelease_t2DebriefDone,"CatchReleaseCMD tokens
 FireBest CatchReleaseT2Sensor",,,
 catchrelease_t2SensorOwned,CatchReleaseT2Sensor,$catchreleaseChainT2HasSensor,"CatchReleaseCMD highlightFishText ""Needle Sensor""
 CatchReleaseCMD t2Debrief","""You've a Needle Sensor on your lights already, I see. Good. Then I've something else for you, whenever you're ready.""",catchrelease_fisherBack:Continue,
-catchrelease_t2SensorGive,CatchReleaseT2Sensor,,"CatchReleaseCMD highlightFishText ""Needle Sensor"" Outfitter
+catchrelease_t2SensorGive,CatchReleaseT2Sensor,,"CatchReleaseCMD highlightFishText ""Needle Sensor"" ""Come back and see me once you have it.""
 CatchReleaseCMD t2Debrief","A deckhand brings up a data chip and passes it across.
 
-""Needle Sensor. Fit it to your lights and leave them off, and it'll tell you where the rarer patterns are sitting. The Outfitter can build it. Come back and see me once you have it. I've something I'd like you to look at.""",catchrelease_fisherBack:Continue,
+""Needle Sensor. It'll tell you where the rarer patterns are sitting while the lights are off. The Outfitter can build it. Come back and see me once you have it built. I've something I'd like you to look at.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman chain T3: the wounded epic,,,,,,
 catchrelease_fisherOptT3,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
@@ -2783,19 +2783,19 @@ $catchreleaseChainT3Caught",SetOptionColor catchrelease_t3HandIn highlight,,"36:
 catchrelease_t3HandIn,DialogOptionSelected,$option == catchrelease_t3HandIn,"CatchReleaseCMD highlightFishText ""second lens array"" ""range data""
 CatchReleaseCMD t3Complete","""Did you, now? Good work. That one would have kept a lesser crew busy for months.""
 
-He sends a deckhand below for two chips and hands them across himself.
+He sends a deckhand below for to transfer two chips.
 
-""The first is a blueprint for a lamp ship. Bigger lights, and room for a second lens array. You'll have to find someone who can build it; I don't run a yard. The other is range data. Somewhere to go next.""",catchrelease_fisherBack:Continue,
+""The first is a blueprint for a Monstrance-Class Breach Trawler. A lamp ship. Carries a specialized rig, and room for a second lens array. You'll have to find someone who can build it; I don't run a yard. The other is range data. Somewhere to go next.""",catchrelease_fisherBack:Continue,
 catchrelease_fisherOptT3Built,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT3Built",SetOptionColor catchrelease_t3Built highlight,,"36:catchrelease_t3Built:""The lamp ship's built.""",
 catchrelease_t3Built,DialogOptionSelected,$option == catchrelease_t3Built,"CatchReleaseCMD highlightFishText ""Fanned Array""
 CatchReleaseCMD t3Done","The Fisherman looks the ship over on his display for longer than he needs to.
 
-""She'll do. She carries a Fanned Array for your Breach Lights. Your lamps will cover a good deal more ground with it.""
+""She'll do. She carries a Fanned Array for your Breach Lights. Your lamps will cover a good deal more ground with it, but the range is shorter.""
 
-""You've landed an epic now. There are others out there like it, but not many. You'll go a long while between them, and some crews never see one.""
+""You've landed a special pattern now. There are others out there like it, but not many. You'll go a long while between them, and some crews never see one.""
 
-""There are stranger things than epics, too. Talk gets round about them, and most of it is nonsense. Once your gear is good, very good, it's worth following anyway.""",catchrelease_fisherBack:Continue,
+""There are stranger things out there, too. Talk gets round, and most of it is nonsense. Once your gear is good, very good, it's worth following anyway.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman chain T4: listen for rumours,,,,,,
 catchrelease_fisherOptT4Landed,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
