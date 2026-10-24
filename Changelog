@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.d - UNRELEASED
+Changed - Codex entries known only from range data show their icon in the species' rarity colour, faded, instead of black
 Fixed - Restless fish such as the Flarefin Koi no longer circle almost in place when Breach Lights surface or slow them; their weave narrows with their pace
 Changed - The Retrieval Head and Fanned Array are no longer sold or given as rewards. They will come with the fishing ships, which add a second equipment slot to their rig while they are in your fleet. Copies you already own are kept
 Added - Reployment Bays, a Drone Core module that comes with the Reliquary-class LYNE Drone Tender: whenever every drone has come back, the whole swarm goes out again until you recall it or it can no longer fish where you are
