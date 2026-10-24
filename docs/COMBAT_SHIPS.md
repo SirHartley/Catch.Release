@@ -248,13 +248,15 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - `beginLandingAnimation` on a wreck.
 
   Fallbacks: if the timer cannot be held, the drone carries a drawn copy (losing the damage overlay); if the landing shrink fails on a wreck, fade it out with the drone.
+
+  Built straight into 5.3 and 5.4, since no simulator is available to the agent; the author confirms all three in game. Safeguards in place: a missing fade field is logged once and wrecks fade normally; a towed wreck that still collides is logged; a wreck that does not shrink is still removed when the drone lands. Also to confirm: whether `setCollisionClass(NONE)` holds on wrecks whose engines are disabled, since such a fighter reports `SHIP` whatever is set.
 - [x] 5.3 `combat/salvage/WreckTracker`: an `EveryFrameCombatPlugin` active only while a Reliquary is deployed. Implemented with the Reliquary's built-in Salvage Bays hullmod; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). The wreck chance is set from a `HullDamageAboutToBeTakenListener` just before a fighter is hit, rather than by scanning ships.
   - Sets the wreck chance (setting, default 75%) on eligible enemy fighters.
   - Keeps their wrecks for 30 seconds.
   - Hands out claims, one wreck per drone.
   - Applies the blacklist: non-fighters, station modules, drones, shuttle pods; hull tags `threat`, `swarm_fighter`, `fragment`, `dweller`, `monster`; wing tags `restricted`, `independent_of_carrier`.
   - Check: the blacklist rules.
-- [ ] 5.4 `combat/salvage/LyneDroneAI` (`ShipAIPlugin`), picked in `ModPlugin.pickShipAI` by a hull tag.
+- [x] 5.4 `combat/salvage/LyneDroneAI` (`ShipAIPlugin`), picked in `ModPlugin.pickShipAI` by a hull tag. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). The store-full rule waits for the store in 6.1.
   - Cycle: claim → fly → attach → tow (wreck collision class `NONE`) → reach `LB 1` → landing shrink, with hit particles at the bay.
   - Drones ignore wrecks while the store is full.
 - Done when: the drones visibly salvage fighter wrecks in a simulator fight.
