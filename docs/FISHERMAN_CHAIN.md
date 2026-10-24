@@ -148,13 +148,13 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 ## T3: The wounded epic
 
-**Premise.** The Fisherman points the player at a nearby system with epics. One has been wounded and is recovering, circling a planet at about 1,000 units.
+**Premise.** The Fisherman points the player at a nearby system with epics, never the captain's system from T2, and at a species other than the captain's. One has been wounded and is recovering, circling a planet at about 1,000 units.
 
 **Steps**
 1. The player uses the Needle Sensor built after T2 to locate it.
 2. Asleep, it behaves like any epic: buried, drifting at the normal buried speed, and visible under the Breach Lights. The difference is that its drift circles the planet at about 1,000 units.
-3. A harpoon hit wakes it as usual: the hit is deflected, the fish surfaces and its shield charge goes up. It stops circling and runs the normal epic hunt, at half the speed of a normal awake epic.
-4. If the hunt resets (more than 3,000 units from the player), it despawns and respawns at the planet, buried and circling again, with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
+3. A harpoon hit wakes it as usual: the hit is deflected, the fish surfaces and its shield charge goes up. It stops circling and runs the normal epic hunt, at half the speed of a normal awake epic. While the hunt is on, no wild epic of its species is in the system, so the one the player wakes is always the wounded one.
+4. If the hunt resets (more than 3,000 units from the player) or the player puts the Breach Lights out while it is awake, it despawns and respawns at the planet, buried and circling again, with a campaign message along the lines of: "The pattern returns to the planet to recuperate once more."
 5. The player is expected to hunt it until caught, then return to the Fisherman.
 
 **Rewards**
@@ -215,7 +215,7 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 | Area | Owner (new or changed) | Role |
 |---|---|---|
 | Chain state | New `campaign/fish/fisherman/chain/FishermanChain` | Saved stage per quest (T1–T4 and follow-ups) in sector persistent data, as `FishermanQuest` stores its `STATE_KEY`. Entry points are `CatchReleaseCMD` verbs. A `tokens` Boolean per offer gates the `CatchReleaseFisherOptions` rows. Registers its transient listeners on load. |
-| Chain intel | New `BaseIntelPlugin` subclasses in the same package | One intel per quest: lost compass, Needle Sensor build, wounded epic, and the rumour hunt (title and body switch after the first legendary, as `FishingIntro.IntroIntel` switches by stage). Created through `FishIntelNotifications.queue`. |
+| Chain intel | New `BaseIntelPlugin` subclasses in the same package | One intel per quest: lost compass, Glitter Lens purchase, Needle Sensor build, wounded epic, and the rumour hunt (title and body switch after the first legendary, as `FishingIntro.IntroIntel` switches by stage). Created through `FishIntelNotifications.queue`, or `addNow` when the intel's card must follow a line of the open dialogue. |
 | T2 mission | `chain/CaptainsFleet` | Implemented in Stage 3; see [ARCHITECTURE.md](ARCHITECTURE.md). A chain-owned class with its own intel, like T1, not a `BaseHubMission`: the chain already saves the stage, and the fleet's commander is the contact. |
 | Rig slots | `TackleManager`, `RigLoadout`, `TackleEffects` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Incompatibility | `Tackle.Exclusion` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |

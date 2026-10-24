@@ -1,10 +1,12 @@
 package catchrelease.campaign.fish.fisherman.chain;
 
+import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.FishermanIdentity;
@@ -22,6 +24,8 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
+import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
@@ -32,6 +36,7 @@ import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
+import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
@@ -39,6 +44,7 @@ import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
+import com.fs.starfarer.api.util.WeightedRandomPicker;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -64,7 +70,8 @@ public final class WoundedEpic {
     private WoundedEpic() {
     }
 
-    // The planet is never left without its epic while the hunt is on: a lost one is replaced on arrival or load.
+    // The planet is never left without its epic while the hunt is on: a lost one is replaced on arrival or load, and
+    // wild ones of its species are cleared.
     public static class Arrival implements CurrentLocationChangedListener {
 
         public static void register() {
@@ -75,7 +82,10 @@ public final class WoundedEpic {
 
         @Override
         public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
-            if (curr != null && curr == getSystem()) ensureEpic();
+            if (curr != null && curr == getSystem()) {
+                clearWild();
+                ensureEpic();
+            }
         }
     }
 
@@ -106,6 +116,30 @@ public final class WoundedEpic {
         @Override
         public void reportQuestEpicCaught(SectorEntityToken mote, String planter, FishCatch caught) {
             if (PLANTER.equals(planter)) landed();
+        }
+    }
+
+    // Putting the Breach Lights out calls a woken epic off: it goes back to the planet. Vanilla reports the player's
+    // ability deactivation (BaseAbilityPlugin.deactivate), so the lamp state is never polled. A location change turns
+    // the lights off too, after the player has left the epic's system, where EpicHunt's own reset covers it.
+    public static class LampsOff extends BaseCampaignEventListener {
+
+        public LampsOff() {
+            super(false);
+        }
+
+        public static void register() {
+            for (CampaignEventListener listener : Global.getSector().getAllListeners()) {
+                if (listener instanceof LampsOff) Global.getSector().removeListener(listener);
+            }
+            if (isHunting()) Global.getSector().addTransientListener(new LampsOff());
+        }
+
+        @Override
+        public void reportPlayerDeactivatedAbility(AbilityPlugin ability, Object param) {
+            if (ability != null && SearchlightAbilityPlugin.ABILITY_ID.equals(ability.getId()) && isAwakeHere()) {
+                returnToPlanet();
+            }
         }
     }
 
@@ -273,7 +307,9 @@ public final class WoundedEpic {
     public static void register() {
         Arrival.register();
         Hunt.register();
+        LampsOff.register();
         if (isHunting()) {
+            clearWild();
             ensureEpic();
         } else {
             clearEpic();
@@ -291,7 +327,7 @@ public final class WoundedEpic {
 
         StarSystemAPI kept = FishRumors.findSystem(saved.t3SystemId);
         if (isCandidate(kept) && isHost(kept, getPlanet(kept, saved.t3PlanetId))
-                && CaptainsFleet.isTarget(FishSpecLoader.getFishSpec(saved.t3SpeciesId), kept)) {
+                && isTarget(FishSpecLoader.getFishSpec(saved.t3SpeciesId), kept)) {
             return true;
         }
 
@@ -305,7 +341,7 @@ public final class WoundedEpic {
         if (system == null) return false;
 
         PlanetAPI planet = pickPlanet(system);
-        FishSpec species = CaptainsFleet.pickSpecies(system);
+        FishSpec species = pickSpecies(system);
         if (planet == null || species == null) return false;
 
         saved.t3SystemId = system.getId();
@@ -323,7 +359,7 @@ public final class WoundedEpic {
         FishermanChain.Saved saved = FishermanChain.get(false);
         StarSystemAPI system = getSystem();
         if (saved == null || !isCandidate(system) || !isHost(system, getPlanet())
-                || !CaptainsFleet.isTarget(FishSpecLoader.getFishSpec(saved.t3SpeciesId), system)) {
+                || !isTarget(FishSpecLoader.getFishSpec(saved.t3SpeciesId), system)) {
             return false;
         }
 
@@ -432,6 +468,19 @@ public final class WoundedEpic {
                 Misc.getTextColor(), planet.getName(), null, Misc.getHighlightColor(), null);
     }
 
+    // A woken epic in the player's location, not on the line or in a minigame.
+    protected static boolean isAwakeHere() {
+        StarSystemAPI system = getSystem();
+        if (!isHunting() || system == null || Global.getSector().getCurrentLocation() != system) return false;
+
+        for (SectorEntityToken mote : QuestPond.getPlanted(system, PLANTER)) {
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin fish && EpicHunt.isActive(fish) && !fish.isHeld()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected static void landed() {
         if (!isHunting()) return;
 
@@ -439,6 +488,30 @@ public final class WoundedEpic {
         FishermanChain.setStage(FishermanChain.Stage.T3_CAUGHT);
         register();
         updateIntel();
+    }
+
+    // While the hunt is on, the wounded epic is the only one of its species in its system. A wild one would wake at
+    // full speed and read as the quest's, its sensor ripples identical. BuriedMoteSpawner asks before each spawn.
+    public static boolean isReserved(LocationAPI location, String fishId) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+
+        return isHunting() && saved != null && fishId != null && fishId.equals(saved.t3SpeciesId)
+                && location != null && location == getSystem();
+    }
+
+    protected static void clearWild() {
+        StarSystemAPI system = getSystem();
+        if (system == null) return;
+
+        for (SectorEntityToken mote : new ArrayList<>(system.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG))) {
+            if (mote.isExpired() || QuestPond.isQuestMote(mote)
+                    || !(mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried)
+                    || buried.getFishSpec() == null || !isReserved(system, buried.getFishSpec().id)) continue;
+
+            // removeEntity does not expire it, and an epic's trail renderer retires on expiry
+            mote.setExpired(true);
+            system.removeEntity(mote);
+        }
     }
 
     protected static void ensureEpic() {
@@ -485,7 +558,7 @@ public final class WoundedEpic {
         float best = Float.MAX_VALUE;
 
         for (StarSystemAPI system : Global.getSector().getStarSystems()) {
-            if (!isCandidate(system) || pickPlanet(system) == null || CaptainsFleet.pickSpecies(system) == null) {
+            if (!isCandidate(system) || pickPlanet(system) == null || pickSpecies(system) == null) {
                 continue;
             }
 
@@ -507,12 +580,32 @@ public final class WoundedEpic {
         if (system.hasTag(Tags.THEME_UNSAFE)) return false;
         if (system.getHyperspaceAnchor() == null || OuterReaches.isPopulated(system)) return false;
         if (FishRumors.isOccupied(system.getId())) return false;
+        // never the captain's system: T3 is a new hunt
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved != null && system.getId().equals(saved.t2SystemId)) return false;
 
         // a pulsar's beams reach far past any clearance the circle keeps
         for (PlanetAPI star : system.getPlanets()) {
             if (star.isStar() && star.getSpec() != null && star.getSpec().isPulsar()) return false;
         }
         return true;
+    }
+
+    protected static FishSpec pickSpecies(StarSystemAPI system) {
+        WeightedRandomPicker<FishSpec> picker = new WeightedRandomPicker<>();
+        for (FishSpec spec : FishSpecLoader.getAllFishSpecs()) {
+            if (isTarget(spec, system)) picker.add(spec, spec.spawnWeight);
+        }
+
+        return picker.pick();
+    }
+
+    // An epic CaptainsFleet would hunt there, but never the captain's own species.
+    protected static boolean isTarget(FishSpec spec, StarSystemAPI system) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (spec == null || saved != null && spec.id.equals(saved.t2SpeciesId)) return false;
+
+        return CaptainsFleet.isTarget(spec, system);
     }
 
     protected static PlanetAPI pickPlanet(StarSystemAPI system) {

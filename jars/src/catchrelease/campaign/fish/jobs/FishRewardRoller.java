@@ -98,7 +98,7 @@ public class FishRewardRoller {
     protected static FishReward rollTackle(Random random, Set<String> reserved) {
         List<Tackle> options = new ArrayList<>();
         for (Tackle tackle : Tackle.values()) {
-            if (tackle != Tackle.NONE && tackle.stocked && TackleManager.isUnlocked(tackle)
+            if (tackle != Tackle.NONE && tackle.stocked && !tackle.questOnly && TackleManager.isUnlocked(tackle)
                     && !ShopSchematics.has(tackle)
                     && !reserved.contains(ShopSchematics.getKey(tackle))
                     && ownsRigFor(tackle)) {

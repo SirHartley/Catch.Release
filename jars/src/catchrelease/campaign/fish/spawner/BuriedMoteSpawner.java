@@ -6,6 +6,7 @@ import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
+import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.memory.upgrades.StatIds;
@@ -127,7 +128,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         // a buried mote is what the lights find, so only what the lights can find is offered
         String fishId = PondFishSpawner.pickFishId(location, CatchImplement.BREACH_LAMP,
                 getRareChance());
-        if (fishId == null) return;
+        if (fishId == null || WoundedEpic.isReserved(location, fishId)) return;
 
         float angle = MathUtils.getRandomNumberInRange(0f, 360f);
         float distance = MathUtils.getRandomNumberInRange(getSpawnMinRange(), getSpawnMaxRange());

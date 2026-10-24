@@ -2421,6 +2421,9 @@ catchrelease_introSkipOpt,CatchReleaseFisherOptions,"$menuState == catchreleaseF
 $catchreleaseCanSkip",SetOptionColor catchrelease_introSkip highlight,,"5:catchrelease_introSkip:""I've been here before. The fabric calls to me.""",
 catchrelease_fisherOptShop,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseOutfitter",,,10:catchrelease_fisherShop:Access the outfitter,
+catchrelease_fisherOptShopLens,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseOutfitter
+$catchreleaseChainT1Lens",SetOptionColor catchrelease_fisherShop highlight,,,
 catchrelease_fisherOptCharts,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseStage >= 6
 $catchreleaseShelf",,,20:catchrelease_fisherCharts:Purchase range data,
@@ -2626,19 +2629,21 @@ catchrelease_t1Later:""Not now.""",
 catchrelease_fisherOptT1,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT1Offer",SetOptionColor catchrelease_introGetFreeRumor highlight,,"35:catchrelease_introGetFreeRumor:""Heard of anywhere worth fishing?""",
 catchrelease_t1Offer,CatchReleaseT1Offer,"$catchreleaseChainT1Offer
-$catchreleaseChainT1Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""treasure""","""$catchreleaseChainT1System. The crews working there have been bringing up a lot more treasure than usual.""
+$catchreleaseChainT1Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""treasure""
+CatchReleaseCMD showChainMap t1 ""Target: $catchreleaseChainT1System""","""$catchreleaseChainT1System. The crews working there have been bringing up a lot more treasure than usual.""
 
 ""There's also a bit of a personal request. The fabric took something of mine in that place.""
 
 ""It won't release it to me, but you got better odds. You'll find it under the lights, coming up with the catch. Bring it back to me and there's some very worthwhile equipment in it for you. No hurry on it.""","catchrelease_t1Accept:""I'll look for it.""
 catchrelease_t1Decline:""Not right now.""",
 catchrelease_t1OfferNone,CatchReleaseT1Offer,,,"""Nothing worth sending you after.""",catchrelease_fisherBack:Continue,
-catchrelease_t1Accept,DialogOptionSelected,$option == catchrelease_t1Accept,"CatchReleaseCMD t1Accept
+catchrelease_t1Accept,DialogOptionSelected,$option == catchrelease_t1Accept,"HideMapMarker
+CatchReleaseCMD t1Accept
 CatchReleaseCMD tokens
 FireBest CatchReleaseT1Accepted",,,
 catchrelease_t1Accepted,CatchReleaseT1Accepted,$catchreleaseChainT1Active,,"""Good. Keep an eye on the catch window when you're working there. It won't sit around waiting for you.""",catchrelease_fisherBack:Continue,
 catchrelease_t1AcceptFailed,CatchReleaseT1Accepted,,,"""Hm. The talk's moved on since I last heard it. Ask me again another time.""",catchrelease_fisherBack:Continue,
-catchrelease_t1Decline,DialogOptionSelected,$option == catchrelease_t1Decline,,"""Suit yourself. It's not going anywhere. Ask me if you change your mind.""",catchrelease_fisherBack:Continue,
+catchrelease_t1Decline,DialogOptionSelected,$option == catchrelease_t1Decline,HideMapMarker,"""Suit yourself. It's not going anywhere. Ask me if you change your mind.""",catchrelease_fisherBack:Continue,
 catchrelease_t1Later,DialogOptionSelected,$option == catchrelease_t1Later,"$menuState = catchreleaseFisher 0
 CatchReleaseCMD tokens
 FireAll CatchReleaseFisherOptions","""Another time, then.""",,
@@ -2666,7 +2671,8 @@ catchrelease_t1LostGone,CatchReleaseT1Lost,$catchreleaseChainT1LostGone,CatchRel
 catchrelease_t1LostNone,CatchReleaseT1Lost,,,"""Bring it by when you find it.""",catchrelease_fisherBack:Continue,
 catchrelease_t1Followup,DialogOptionSelected,$option == catchrelease_t1Followup,"CatchReleaseCMD tokens
 FireBest CatchReleaseT1Followup",,,
-catchrelease_t1FollowupLens,CatchReleaseT1Followup,$catchreleaseChainT1Lens,CatchReleaseCMD highlightFishText Outfitter,"""That schematic's for a lens array. Have it built at the Outfitter and fit it to your lights. You'll bring up a good deal more bycatch working under them.""",catchrelease_fisherBack:Continue,
+catchrelease_t1FollowupLens,CatchReleaseT1Followup,$catchreleaseChainT1Lens,"CatchReleaseCMD highlightFishText Outfitter
+CatchReleaseCMD t1LensIntel","""That schematic's for a lens array. Have it built at the Outfitter and fit it to your lights. You'll bring up a good deal more bycatch working under them.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupBought,CatchReleaseT1Followup,$catchreleaseChainT1Bought,"CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""two months""
 CatchReleaseCMD t1Done","""You've already got one of those, I see. Then take it back to $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupNone,CatchReleaseT1Followup,,,"""Good fishing, Captain.""",catchrelease_fisherBack:Continue,
@@ -2677,19 +2683,21 @@ catchrelease_t2Ask,DialogOptionSelected,$option == catchrelease_t2Ask,"CatchRele
 CatchReleaseCMD tokens
 FireBest CatchReleaseT2Offer",,,
 catchrelease_t2Offer,CatchReleaseT2Offer,"$catchreleaseChainT2Offer
-$catchreleaseChainT2Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT2System $catchreleaseChainT2Species ""one of his ships""","""As it happens. A man who used to crew for me has his own fleet now. He sent word asking for one.""
+$catchreleaseChainT2Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT2System $catchreleaseChainT2Species ""one of his ships""
+CatchReleaseCMD showChainMap t2 ""Target: $catchreleaseChainT2System""","""As it happens. A man who used to crew for me has his own fleet now. He sent word asking for one.""
 
-""He's in $catchreleaseChainT2System, after a $catchreleaseChainT2Species. He's been hunting that one for years, and will appreciate the support.""
+""He's in the $catchreleaseChainT2System, after a $catchreleaseChainT2Species. He's been hunting that one for years, and will appreciate the support.""
 
 ""Go and hear him out. It'll be worthwhile, we take care of our own.""","catchrelease_t2Accept:""I'll go and see him.""
 catchrelease_t2Decline:""Not right now.""",
 catchrelease_t2OfferNone,CatchReleaseT2Offer,,,"""Nobody's asking for anything just now. Try me another time.""",catchrelease_fisherBack:Continue,
-catchrelease_t2Accept,DialogOptionSelected,$option == catchrelease_t2Accept,"CatchReleaseCMD t2Accept
+catchrelease_t2Accept,DialogOptionSelected,$option == catchrelease_t2Accept,"HideMapMarker
+CatchReleaseCMD t2Accept
 CatchReleaseCMD tokens
 FireBest CatchReleaseT2Accepted",,,
 catchrelease_t2Accepted,CatchReleaseT2Accepted,$catchreleaseChainT2Meet,,"""Good. His fleet's holding 'round the star. Fly out to him when you get there. He's expecting you.""",catchrelease_fisherBack:Continue,
 catchrelease_t2AcceptFailed,CatchReleaseT2Accepted,,,"""Hm. He'll have moved on since he wrote. Ask me again another time.""",catchrelease_fisherBack:Continue,
-catchrelease_t2Decline,DialogOptionSelected,$option == catchrelease_t2Decline,,"""Suit yourself. He's waited this long.""",catchrelease_fisherBack:Continue,
+catchrelease_t2Decline,DialogOptionSelected,$option == catchrelease_t2Decline,HideMapMarker,"""Suit yourself. He's waited this long.""",catchrelease_fisherBack:Continue,
 catchrelease_t2Hail,BeginFleetEncounter,"$catchrelease_t2Captain score:1200
 !$catchrelease_t2Hailed","$catchrelease_t2Hailed = true
 FleetDesc

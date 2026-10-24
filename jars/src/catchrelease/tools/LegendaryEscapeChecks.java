@@ -92,6 +92,7 @@ public final class LegendaryEscapeChecks {
                 case "getBoolean" -> quest && catchrelease.campaign.fish.jobs.QuestPond.QUEST_MOTE_FLAG.equals(a[0]);
                 case "getKeys" -> List.of();
                 case "get" -> null;
+                case "contains" -> false;
                 default -> throw new AssertionError(m);
             });
             entity = api(TextMote.class, (p, m, a) -> switch (m.getName()) {

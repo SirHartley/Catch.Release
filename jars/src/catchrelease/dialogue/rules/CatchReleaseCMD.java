@@ -15,6 +15,7 @@ import catchrelease.campaign.fish.crab.CrablobabIdentity;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishRumors;
 import catchrelease.campaign.fish.fisherman.FishermanBycatch;
+import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
@@ -52,6 +53,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.campaign.rules.RuleAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.impl.campaign.ids.Strings;
+import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.impl.campaign.rulecmd.BaseCommandPlugin;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -211,6 +213,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return showWorkMap(dialog, params.size() > 1
                         ? params.get(1).getStringWithTokenReplacement(ruleId, dialog, memoryMap)
                         : null);
+            case "showChainMap":
+                return showChainMap(dialog, arg, params.size() > 2
+                        ? params.get(2).getStringWithTokenReplacement(ruleId, dialog, memoryMap)
+                        : null);
 
             case "point":
                 FishingIntro.point();
@@ -254,6 +260,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return TreasureRumour.checkLost() != null;
             case "t1Complete":
                 return TreasureRumour.complete(text(dialog));
+            case "t1LensIntel":
+                return TreasureRumour.showLensIntel(text(dialog));
             case "t1Done":
                 TreasureRumour.finish();
                 return true;
@@ -400,6 +408,28 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         return QuestDialogMap.show(dialog, intel.getMapLocation(null),
                 title == null ? "Target" : title,
                 intel.getFishermanFaction(), intel.getIcon(), intel.getIntelTags(null));
+    }
+
+    // A chain offer's target, before its intel exists: "t1" or "t2" names the quest.
+    protected boolean showChainMap(InteractionDialogAPI dialog, String quest, String title) {
+        BaseIntelPlugin intel;
+        SectorEntityToken location;
+        switch (quest == null ? "" : quest) {
+            case "t1" -> {
+                intel = new TreasureRumour.CompassIntel();
+                location = TreasureRumour.getOfferMapLocation();
+            }
+            case "t2" -> {
+                intel = new CaptainsFleet.CaptainIntel();
+                location = CaptainsFleet.getOfferMapLocation();
+            }
+            default -> {
+                return QuestDialogMap.hide(dialog);
+            }
+        }
+
+        return QuestDialogMap.show(dialog, location, title == null ? "Target" : title,
+                Global.getSector().getFaction(FishermanConstants.FACTION), intel.getIcon(), intel.getIntelTags(null));
     }
 
     protected boolean showBackdrop(InteractionDialogAPI dialog) {

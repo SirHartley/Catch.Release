@@ -34,6 +34,10 @@ public class NeedleSensor {
     public static final float CHECK_SECONDS = 0.5f;
     public static final float INTERVAL_MIN = 6f;
     public static final float INTERVAL_MAX = 12f;
+    // Rings stay where they were emitted. A mote circling an anchor laps its circle fast enough that rings this far
+    // apart land at scattered points on it; closer ones trace the orbit.
+    public static final float CIRCLING_INTERVAL_MIN = 1.5f;
+    public static final float CIRCLING_INTERVAL_MAX = 2.5f;
 
     public static final float RADIUS = 180f;
     public static final float RIPPLE_SECONDS = 5f;
@@ -111,12 +115,12 @@ public class NeedleSensor {
         for (SectorEntityToken mote : candidates) {
             Float next = nextRipples.get(mote);
             if (next == null) {
-                nextRipples.put(mote, time + nextDelay());
+                nextRipples.put(mote, time + nextDelay(mote));
             } else if (time >= next) {
                 Ripple ring = new Ripple(mote);
                 rings.add(ring);
                 register(ring);
-                nextRipples.put(mote, time + nextDelay());
+                nextRipples.put(mote, time + nextDelay(mote));
             }
         }
     }
@@ -161,6 +165,13 @@ public class NeedleSensor {
 
     protected float nextDelay() {
         return MathUtils.getRandomNumberInRange(INTERVAL_MIN, INTERVAL_MAX) / Setting.NEEDLE_FREQUENCY.mult();
+    }
+
+    protected float nextDelay(SectorEntityToken mote) {
+        if (!mote.getMemoryWithoutUpdate().contains(BuriedMoteEntityPlugin.CIRCLE_ANCHOR_KEY)) return nextDelay();
+
+        return MathUtils.getRandomNumberInRange(CIRCLING_INTERVAL_MIN, CIRCLING_INTERVAL_MAX)
+                / Setting.NEEDLE_FREQUENCY.mult();
     }
 
     protected void register(RippleRingRenderer ring) {

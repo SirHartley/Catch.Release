@@ -95,7 +95,9 @@ Fleet jobs use `fleet_quest_map_icon` beside the fleet and for the accepted map
 proxy. Offers stay light cyan; accepted markers use the yellow colour from the
 `catchrelease_FleetQuestMapIcon` custom-entity spec on both surfaces. Keep its
 asset path and the settings sprite alias aligned. `FleetQuest` owns marker state
-and registers its delivery flag without adding vanilla importance.
+and registers its delivery flag without adding vanilla importance. The Fisherman
+chain's captain (`CaptainsFleet`) reuses the proxy through `FleetQuestMapIcon.PINNED_FLAG` and the fleet-side
+marker in both colours (`CaptainsFleet.syncMarker`).
 
 `FleetMapVisibility` uses the fleet's logical visibility in the player's location,
 not sprite-fader brightness. Even `SENSOR_CONTACT` has a real radar icon. Remove
