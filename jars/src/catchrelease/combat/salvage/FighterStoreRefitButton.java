@@ -148,7 +148,7 @@ public class FighterStoreRefitButton extends BaseRefitButton {
             list.addUIElement(rows).inTL(0f, 0f);
             content.addComponent(list).inTL(PAD, 2f * PAD + HEADING_HEIGHT);
 
-            footer = content.createCustomPanel(WIDTH - 2f * PAD, FOOTER_HEIGHT, this);
+            footer = content.createCustomPanel(WIDTH - 2f * PAD, FOOTER_HEIGHT, new Presses(this));
             TooltipMakerAPI controls = footer.createUIElement(WIDTH - 2f * PAD, FOOTER_HEIGHT, false);
             int count = store == null ? 0 : store.count();
             controls.addPara("%s of %s bays used", 0f, Misc.getHighlightColor(), "" + count,
@@ -215,6 +215,21 @@ public class FighterStoreRefitButton extends BaseRefitButton {
             else if (data instanceof FighterStore.Fighter fighter) store.discard(fighter);
             RefitStoreView.rebuild(member);
             rebuild();
+        }
+    }
+
+    // Routes the footer's button presses to the store panel, whose plugin serves only the content panel.
+    private static final class Presses extends BaseCustomUIPanelPlugin {
+
+        private final StorePanel owner;
+
+        private Presses(StorePanel owner) {
+            this.owner = owner;
+        }
+
+        @Override
+        public void buttonPressed(Object buttonId) {
+            owner.press(buttonId);
         }
     }
 
