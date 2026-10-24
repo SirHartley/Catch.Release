@@ -27,22 +27,25 @@ public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
 
     protected final Color color;
     protected final float size;
+    // an offer pulses; an accepted job's marker holds steady at full alpha
+    protected final boolean pulsing;
     protected float elapsed = 0f;
     protected boolean expired = false;
 
     public FleetMarkerRenderer(CampaignFleetAPI fleet, String spriteCategory, String spriteId,
-                               Color color, float size) {
+                               Color color, float size, boolean pulsing) {
         this.fleet = fleet;
         this.spriteCategory = spriteCategory;
         this.spriteId = spriteId;
         this.color = color;
         this.size = size;
+        this.pulsing = pulsing;
     }
 
     public static FleetMarkerRenderer addTo(CampaignFleetAPI fleet, String spriteCategory,
-                                            String spriteId, Color color, float size) {
+                                            String spriteId, Color color, float size, boolean pulsing) {
         FleetMarkerRenderer marker =
-                new FleetMarkerRenderer(fleet, spriteCategory, spriteId, color, size);
+                new FleetMarkerRenderer(fleet, spriteCategory, spriteId, color, size, pulsing);
 
         LunaCampaignRenderer.addTransientRenderer(marker);
 
@@ -88,7 +91,7 @@ public class FleetMarkerRenderer implements LunaCampaignRenderingPlugin {
         float offset = 4f + (fleet.getRadius() + drawn * 0.5f) / OFFSET_DIVISOR;
         Vector2f at = fleet.getLocation();
 
-        float pulse = 1f - PULSE_DEPTH * (0.5f - 0.5f * (float) Math.cos(elapsed * PULSE_RATE));
+        float pulse = pulsing ? 1f - PULSE_DEPTH * (0.5f - 0.5f * (float) Math.cos(elapsed * PULSE_RATE)) : 1f;
 
         sprite.setSize(drawn, drawn);
         sprite.setColor(color);

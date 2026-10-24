@@ -576,7 +576,7 @@ public final class CaptainsFleet {
         if (!(met ? Setting.ACCEPTED_MARKERS : Setting.OFFER_MARKERS).enabled()) return;
 
         marker = FleetMarkerRenderer.addTo(fleet, FleetQuest.MARKER_SPRITE_CATEGORY, FleetQuest.MARKER_SPRITE,
-                met ? FleetQuestMapIcon.getMarkerColor() : FleetQuest.OFFER_COLOR, FleetMarkerRenderer.SIZE);
+                met ? FleetQuestMapIcon.getMarkerColor() : FleetQuest.OFFER_COLOR, FleetMarkerRenderer.SIZE, !met);
     }
 
     protected static void unpin(CampaignFleetAPI fleet) {

@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.d - UNRELEASED
+Changed - The marker beside a fleet whose fishing job you have accepted is now a steady gold instead of pulsing; offers still pulse light blue
 Changed - Codex entries known only from range data show no fish icon, in the list or on their page, until you catch the fish
 Fixed - A fish's codex list icon no longer stays blank until its art has been shown elsewhere, such as on its codex page
 Fixed - Restless fish such as the Flarefin Koi no longer circle almost in place when Breach Lights surface or slow them; their weave narrows with their pace
