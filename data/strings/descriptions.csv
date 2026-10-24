@@ -1,4 +1,7 @@
 id,type,text1,text2,text3,text4,text5,notes
 catchrelease_harpoon_ship,SHIP,"A heavy tug refitted around a fishing harpoon launcher and the deck crews who keep it working. Its recovery gear turns a spent harpoon round in the time it takes to bring the catch aboard, so a crew that finds its mark rarely waits on the launcher.",,,,,
+catchrelease_harpoon,WEAPON,"A fishing harpoon launcher built up for a tug's work. The ROD in the head takes hold of whatever the harpoon bites, and the return trace holds the catch at the distance it struck from. A ship on the other end can be dragged, or can drag the tug.
+
+The deck crew fire it again to let go. The round is heavy enough to hole a hull on its own, so gunnery treats it as a weapon.",,,,,
 catchrelease_lamp_ship,SHIP,"A trawler rebuilt to carry Breach Lights well beyond what an ordinary rig can power. Its lens arrays spread each beam into a wide fan, opening a broad stretch of open space for every crew in the fleet to work.",,,,,
 catchrelease_rod_ship,SHIP,"A tender with deep bays, handling frames and launch racks for a full swarm of LYNE drones. Its deck crews service every drone that comes home and send the whole swarm straight back out.",,,,,

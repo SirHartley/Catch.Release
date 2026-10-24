@@ -190,7 +190,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 2: harpoon
 
-- [ ] 2.1 Weapon data.
+- [x] 2.1 Weapon data. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug).
   - `catchrelease_harpoon`: built-in MEDIUM ballistic-styled weapon on `WS0001`, real kinetic damage, `ammo`, `ammo/sec`, `reload size`.
   - The projectile uses the placeholder sprite.
   - The turret's return to its default angle is fast but smooth: a turn rate high enough to feel quick, no snap.

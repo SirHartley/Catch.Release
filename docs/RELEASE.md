@@ -97,7 +97,7 @@ version file. The ZIP contains one `Catch.Release/` folder, ready for `mods/`.
   guides, backups, source artwork, and `unused/` or `unedited/` assets.
 - The jar includes only the mod's runtime classes. Existing dormant classes
   and in-game dev hooks are left alone; `catchrelease/tools/` is excluded.
-- The resource allowlist currently accepts CSV, JSON, shaders and `.ship` hulls under data;
+- The resource allowlist currently accepts CSV, JSON, shaders, `.ship` hulls, `.wpn` weapons and `.proj` projectiles under data;
   PNG/JPG/JPEG under graphics; OGG/WAV under sounds. Add a format deliberately
   if a new runtime resource needs it. Literal mod asset references in packaged
   data must resolve inside the archive.

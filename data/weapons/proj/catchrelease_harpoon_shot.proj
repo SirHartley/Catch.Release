@@ -1,0 +1,15 @@
+{
+	"id":"catchrelease_harpoon_shot",
+	"specClass":"projectile",
+	"spawnType":"BALLISTIC",
+	"collisionClass":"PROJECTILE_FF",
+	"collisionClassByFighter":"PROJECTILE_FIGHTER",
+	"length":26.0,
+	"width":12.0,
+	"fadeTime":0.3,
+	"passThroughMissiles":true,
+	"fringeColor":[255,240,220,255],
+	"coreColor":[255,255,255,255],
+	"hitGlowRadius":40,
+	"bulletSprite":"graphics/catchrelease/weapons/harpoon_projectile.png"
+}
