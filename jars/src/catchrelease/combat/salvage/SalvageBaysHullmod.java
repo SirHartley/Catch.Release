@@ -118,6 +118,7 @@ public class SalvageBaysHullmod extends BaseHullMod {
             }
             tooltip.addImageWithText(pad);
         }
+        tooltip.addPara("Discard unwanted fighters through Additional Options.", Misc.getGrayColor(), opad);
     }
 
     // Per wing type: ready count, restoring count, the furthest restoration in percent.

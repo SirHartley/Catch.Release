@@ -74,10 +74,16 @@ public final class RefitStoreView {
         }
     }
 
-    // Rebuilds a member's swap from its current store, as after a discard.
+    // Rebuilds a member's swap from its current store, as after a discard, and the display with it: a store emptied
+    // by the discard leaves no swap for Watcher to follow, so the shown variant is set back here.
     public static void rebuild(FleetMemberAPI member) {
+        Swap old = SWAPS.get(member.getId());
+        ShipHullSpecAPI original = old == null ? member.getVariant().getHullSpec() : old.original();
         revert(member.getId());
-        if (Global.getSector().getCampaignUI().getCurrentCoreTab() == CoreUITabId.REFIT) swap(member);
+        if (Global.getSector().getCampaignUI().getCurrentCoreTab() != CoreUITabId.REFIT) return;
+        swap(member);
+        Swap swap = SWAPS.get(member.getId());
+        refreshDisplay(member, swap == null ? original : swap.copy(), original);
     }
 
     private static void swap(FleetMemberAPI member) {
@@ -136,6 +142,29 @@ public final class RefitStoreView {
         while (wings.size() > spec.getFighterBays()) wings.remove(wings.size() - 1);
     }
 
+    // Puts the spec on the variant the refit shows for this member, then resyncs the panel as LunaLib's refreshVariant
+    // does. Does nothing while another ship is shown or the spec is already in place.
+    static void refreshDisplay(FleetMemberAPI member, ShipHullSpecAPI spec, ShipHullSpecAPI original) {
+        Object panel = Watcher.findRefitPanel();
+        if (panel == null || ReflectionUtils.invokeIfExists(panel, "getMember") != member) return;
+        Object display = ReflectionUtils.invokeIfExists(panel, "getShipDisplay");
+        Object shown = display == null ? null : ReflectionUtils.invokeIfExists(display, "getCurrentVariant");
+        if (!(shown instanceof ShipVariantAPI variant) || variant.getHullSpec() == spec) return;
+        try {
+            stripStoredWings(variant, original);
+            variant.setHullSpecAPI(spec);
+            ReflectionUtils.invoke(panel, "syncWithCurrentVariant", true);
+            ReflectionUtils.invoke(panel, "saveCurrentVariant", false);
+            ReflectionUtils.invokeIfExists(panel, "setEditedSinceSave", false);
+            ReflectionUtils.invoke(panel, "syncWithCurrentVariant", true);
+        } catch (RuntimeException e) {
+            // A member variant with stored wings the display lacks would be charged as removed wings on the next
+            // field save, so the swap is dropped rather than left half applied.
+            LOG.warn("Could not refresh the refit display; recovered fighters show only in the tooltip", e);
+            revert(member.getId());
+        }
+    }
+
     // Swaps the displayed variant, re-applies a copy a restore (which sets the registry spec) replaced, and reverts
     // everything once the refit closes. Runs while paused, since the refit pauses the campaign.
     public static class Watcher implements EveryFrameScript {
@@ -170,31 +199,14 @@ public final class RefitStoreView {
 
         private void syncDisplay() {
             Object panel = findRefitPanel();
-            if (panel == null) return;
-            Object member = ReflectionUtils.invokeIfExists(panel, "getMember");
+            Object member = panel == null ? null : ReflectionUtils.invokeIfExists(panel, "getMember");
             Swap swap = member instanceof FleetMemberAPI fleetMember ? SWAPS.get(fleetMember.getId()) : null;
-            if (swap == null) return;
-            Object display = ReflectionUtils.invokeIfExists(panel, "getShipDisplay");
-            Object shown = display == null ? null : ReflectionUtils.invokeIfExists(display, "getCurrentVariant");
-            if (!(shown instanceof ShipVariantAPI variant) || variant.getHullSpec() == swap.copy()) return;
-            try {
-                stripStoredWings(variant, swap.original());
-                variant.setHullSpecAPI(swap.copy());
-                ReflectionUtils.invoke(panel, "syncWithCurrentVariant", true);
-                ReflectionUtils.invoke(panel, "saveCurrentVariant", false);
-                ReflectionUtils.invokeIfExists(panel, "setEditedSinceSave", false);
-                ReflectionUtils.invoke(panel, "syncWithCurrentVariant", true);
-            } catch (RuntimeException e) {
-                // A member variant with stored wings the display lacks would be charged as removed wings on the next
-                // field save, so the swap is dropped rather than left half applied.
-                LOG.warn("Could not refresh the refit display; recovered fighters show only in the tooltip", e);
-                revert(swap.member().getId());
-            }
+            if (swap != null) refreshDisplay(swap.member(), swap.copy(), swap.original());
         }
 
         // The refit panel, found by method names as LunaLib's RefitButtonAdder does: core UI, then the panel with
         // setBorderInsetLeft, then goBackToParentIfNeeded, then syncWithCurrentVariant.
-        private static Object findRefitPanel() {
+        static Object findRefitPanel() {
             Object ui = Global.getSector().getCampaignUI();
             Object core = ReflectionUtils.invokeIfExists(ui, "getCore");
             Object dialog = ReflectionUtils.invokeIfExists(ui, "getEncounterDialog");

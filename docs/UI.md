@@ -509,6 +509,12 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   each change; [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage) owns the sequence and its safeguards.
   The Salvage Bays tooltip lists the same store with a 32-px fighter sprite per type (`beginImageWithText`),
   values in the highlight colour and no red, since restoring is not a failure.
+  The discard panel is a LunaLib refit option (`FighterStoreRefitButton`). Luna hosts it on a background panel
+  whose plugin ignores button presses, so the content is a child panel with its own plugin; rows and the footer
+  route presses to it and it applies them in `advance`, outside input dispatch. The list and footer are disposable
+  panels rebuilt after every change ([Rebuilding lists](#rebuilding-lists)). Destructive actions take a second press
+  ("Confirm") on the same button. Luna closes the panel on Esc or a click outside; its `advance` and `onPanelClose`
+  do not run when the refit itself closes, so they cannot replace `RefitStoreView`'s tab polling.
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short

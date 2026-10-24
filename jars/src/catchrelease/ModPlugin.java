@@ -1,6 +1,7 @@
 package catchrelease;
 
 import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
+import catchrelease.combat.salvage.FighterStoreRefitButton;
 import catchrelease.combat.salvage.LyneDroneAI;
 import catchrelease.combat.salvage.RefitStoreView;
 import catchrelease.combat.salvage.WreckTracker;
@@ -67,6 +68,7 @@ public class ModPlugin extends BaseModPlugin {
     @Override
     public void onApplicationLoad() {
         PlayerSettings.install();
+        FighterStoreRefitButton.register();
     }
 
     @Override
