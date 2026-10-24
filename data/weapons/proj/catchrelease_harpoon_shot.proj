@@ -11,5 +11,6 @@
 	"fringeColor":[255,240,220,255],
 	"coreColor":[255,255,255,255],
 	"hitGlowRadius":40,
+	"onHitEffect":"catchrelease.combat.tug.HarpoonOnHit",
 	"bulletSprite":"graphics/catchrelease/weapons/harpoon_projectile.png"
 }

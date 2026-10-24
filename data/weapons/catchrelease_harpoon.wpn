@@ -23,5 +23,6 @@
 				 "blowbackSpread":0,
 				 "particleColor":[150,135,115,140]},
 	"projectileSpecId":"catchrelease_harpoon_shot",
+	"everyFrameEffect":"catchrelease.combat.tug.HarpoonWeaponEffect",
 	"fireSoundTwo":"harpoon_fire",
 }

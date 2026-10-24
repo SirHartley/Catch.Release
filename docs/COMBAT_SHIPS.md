@@ -195,7 +195,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - The projectile uses the placeholder sprite.
   - The turret's return to its default angle is fast but smooth: a turn rate high enough to feel quick, no snap.
   - Done when: the Stigmata fires harpoons from its built-in mount in the simulator.
-- [ ] 2.2 Hit rule: `combat/tug/HarpoonOnHit` (`OnHitEffectPlugin`).
+- [x] 2.2 Hit rule: `combat/tug/HarpoonOnHit` (`OnHitEffectPlugin`). Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). The `onFire` hook is the weapon's `everyFrameEffect` (`HarpoonWeaponEffect`); `onFireEffect` is a `.proj` key.
   - A shield hit (`shieldHit`, reliable because the shot does damage) spawns a deflected copy.
   - A hull or armour hit on any ship or wreck creates a `Tether`: target, attachment point in the target's local frame, rope length = distance at impact.
   - Firing again releases the current tether.
