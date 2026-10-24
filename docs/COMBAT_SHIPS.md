@@ -51,7 +51,7 @@ Replaces the placeholder system. It uses the tug drive's field: while active it 
 ### AI
 
 - **Harpoon targets:** prefer vulnerable targets (hull exposed, shields down or flanked) that are not already being hammered by friendly ships, or that are fleeing.
-- **Towing:** no vanilla AI tows. Wrap the default ship AI (call it, then override or block its movement commands with `giveCommand` / `blockCommandForOneFrame`) and choose where to drag the target. A first version can pull toward friendly ships and away from the strongest enemy group. A later one makes a quick firepower estimate of the surroundings and drags the target into friendly firing arcs. This needs workshopping.
+- **Towing:** no vanilla AI tows. Keep the default ship AI and override its movement afterwards from an `AdvanceableListener` on the ship (give the wanted commands, block the rest with `blockCommandForOneFrame`), as Knights of Ludd does; choose where to drag the target. A first version can pull toward friendly ships and away from the strongest enemy group. A later one makes a quick firepower estimate of the surroundings and drags the target into friendly firing arcs. This needs workshopping.
 - **Drive system:** fire it when the rope is taut and the target resists, or to escape.
 - References: Ed Shipyards (https://bitbucket.org/NickWWest/edshipyard/src/develop/) and Knights of Ludd (https://github.com/Dal-041/Knights_of_Ludd) have some of the best combat code to learn from.
 
@@ -226,10 +226,10 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 4: Stigmata AI
 
-- [ ] 4.1 Harpoon targeting: a weapon autofire AI from `ModPlugin.pickWeaponAutofireAI`.
+- [x] 4.1 Harpoon targeting: a weapon autofire AI from `ModPlugin.pickWeaponAutofireAI`. Implemented with `TugPilot`; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). The ship AI can fire any group by hand, past the autofire plugin, so `TugPilot` holds the harpoon with `setForceNoFireOneFrame` unless the plugin wants to fire. The AI lets go of a useless line without firing, rather than spending a charge.
   - Prefer vulnerable targets (exposed hull, shields down or flanked) that friendly ships are not already hammering, or that are fleeing.
   - Fire again to release when the tether is no longer useful.
-- [ ] 4.2 Towing movement: while a tether is live, a wrapper around the ship's default AI (`setShipAI`) calls it, then overrides movement with `giveCommand` and `blockCommandForOneFrame`.
+- [ ] 4.2 Towing movement: while a tether is live, `TugPilot` (an `AdvanceableListener`, which runs after the ship AI and before commands are processed) overrides movement with `giveCommand` and `blockCommandForOneFrame`. A wrapper around the default AI is not possible: `BasicShipAI.advance` throws when the ship's AI is not itself, and about 36 engine checks test for `BasicShipAI` itself.
   - v1 drags the target toward friendly ships and away from the strongest enemy group.
   - Study Ed Shipyards and Knights of Ludd for movement-override patterns first.
 - [ ] 4.3 `ShipSystemAIScript` for the drive: use it when the rope is taut and the target resists, or to escape.

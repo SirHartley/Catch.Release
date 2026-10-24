@@ -39,7 +39,7 @@ public class HarpoonWeaponEffect implements EveryFrameWeaponEffectPlugin, OnFire
     public void advance(float amount, CombatEngineAPI engine, WeaponAPI weapon) {
         if (returnDelay < 0f || engine.isPaused()) return;
         ShipAPI ship = weapon.getShip();
-        if (ship == null || isAimedByPlayer(engine, ship, weapon)) {
+        if (ship == null || isAimedByPlayer(engine, ship, weapon) || hasAutofireTarget(ship, weapon)) {
             returnDelay = -1f;
             return;
         }
@@ -68,6 +68,13 @@ public class HarpoonWeaponEffect implements EveryFrameWeaponEffectPlugin, OnFire
         if (ship != engine.getPlayerShip() || engine.isUIAutopilotOn()) return false;
         WeaponGroupAPI group = ship.getWeaponGroupFor(weapon);
         return group != null && group == ship.getSelectedGroupAPI() && !group.isAutofiring();
+    }
+
+    // The autofire plugin aims the turret through the tracker, which this return would override.
+    private static boolean hasAutofireTarget(ShipAPI ship, WeaponAPI weapon) {
+        WeaponGroupAPI group = ship.getWeaponGroupFor(weapon);
+        return group != null && group.isAutofiring()
+                && group.getAutofirePlugin(weapon) instanceof HarpoonAutofireAI ai && ai.getTargetShip() != null;
     }
 
     private static float angleDifference(float from, float to) {
