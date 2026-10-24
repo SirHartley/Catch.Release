@@ -75,7 +75,7 @@ A classic midline carrier cruiser: slow and cumbersome, with high crew capacity.
 Engine limits:
 
 - **Wreck chance.** A dying fighter leaves a wreck only 50% of the time (`Ship.java:4821-4828`). `setHulkChanceOverride` raises it; use an adjustable setting, default 75%, for enemy fighters while a Reliquary is deployed.
-- **Wreck lifetime.** Every fighter wreck fades about 10.5 seconds after it appears (`Ship.java:215-216`, `1962-1972`), whatever `setAlphaMult` says.
+- **Wreck lifetime.** Every fighter wreck fades about 10.5 seconds after it appears (`Ship.java:215-216`, `1962-1972`), whatever `setAlphaMult` says. While a Reliquary is deployed, a combat script extends every eligible fighter wreck to 30 seconds with the same once-a-second top-up of `timeBeforeFade`, so the drones have time to reach them.
 - **Damage overlay.** The towed wreck should keep its damage decals. Keeping the real wreck does that; a drawn copy would lose them. Keeping it means topping up its private `timeBeforeFade` by reflection once a second (the class and field names are stable; the countdown starts at 10 seconds, so a one-second interval never lets it run out) and setting its collision class to `NONE` while it is towed.
 - **Blacklist.**
   - Skip anything that is not a fighter, station or armour modules, drones and shuttle pods.
