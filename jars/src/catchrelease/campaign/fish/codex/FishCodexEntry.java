@@ -39,6 +39,8 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     public static final float BOX_GAP = 10f;
     public static final float ART_MAX = 240f;
     public static final float CARD_PAD = 16f;
+    // the list icon of a species known only from range data
+    public static final int RANGE_DATA_ICON_ALPHA = 102;
 
     protected final String speciesId;
     protected transient CustomPanelAPI panel;
@@ -118,8 +120,10 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     public Color getIconColor() {
         FishCodexEntryState state = getState();
         if (!state.isRangeDataOnly()) return Color.WHITE;
+        if (state.spec == null) return Color.BLACK;
 
-        return Color.BLACK;
+        // the codex list sets this on the icon sprite, alpha included (codex2 entry button)
+        return Misc.setAlpha(state.spec.rarity.color, RANGE_DATA_ICON_ALPHA);
     }
 
     @Override
