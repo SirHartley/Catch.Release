@@ -1,167 +1,112 @@
 {
-    "bounds": [
-        91,
-        16,
-        91,
-        -16,
-        67,
-        -38,
-        2,
-        -38,
-        -8,
-        -28,
-        -19,
-        -51,
-        -88,
-        -19,
-        -88,
-        19,
-        -19,
-        51,
-        -8,
-        28,
-        2,
-        39,
-        67,
-        39
-    ],
-    "builtInMods": ["civgrade"],
-    "center": [
-        60,
-        99
-    ],
-    "collisionRadius": 121,
-    "engineSlots": [
-        {
-            "angle": 180,
-            "contrailSize": 92,
-            "length": 92,
-            "location": [
-                -92,
-                12
-            ],
-            "style": "MIDLINE",
-            "width": 24
-        },
-        {
-            "angle": 180,
-            "contrailSize": 92,
-            "length": 92,
-            "location": [
-                -92,
-                -12
-            ],
-            "style": "MIDLINE",
-            "width": 24
-        },
-        {
-            "angle": 170,
-            "contrailSize": 32,
-            "length": 32,
-            "location": [
-                -90,
-                20
-            ],
-            "style": "MIDLINE",
-            "width": 8
-        },
-        {
-            "angle": 190,
-            "contrailSize": 32,
-            "length": 32,
-            "location": [
-                -90,
-                -19
-            ],
-            "style": "MIDLINE",
-            "width": 8
-        }
-    ],
-    "height": 200,
-    "hullId": "catchrelease_harpoon_ship",
-    "hullName": "Stigmata",
-    "hullSize": "DESTROYER",
-    "shieldCenter": [
-        1,
-        0
-    ],
-    "shieldRadius": 120,
-    "spriteName": "graphics/ships/nebula/nebula.png",
-    "style": "MIDLINE",
-    "viewOffset": 0,
-    "weaponSlots": [
-        {
-            "angle": 60,
-            "arc": 200,
-            "id": "WS 001",
-            "locations": [
-                76,
-                29
-            ],
-            "mount": "TURRET",
-            "size": "SMALL",
-            "type": "BALLISTIC"
-        },
-        {
-            "angle": -60,
-            "arc": 200,
-            "id": "WS 002",
-            "locations": [
-                75,
-                -29
-            ],
-            "mount": "TURRET",
-            "size": "SMALL",
-            "type": "BALLISTIC"
-        },
-        {
-            "angle": 110,
-            "arc": 180,
-            "id": "WS 003",
-            "locations": [
-                -27,
-                37
-            ],
-            "mount": "TURRET",
-            "size": "SMALL",
-            "type": "BALLISTIC"
-        },
-        {
-            "angle": 250,
-            "arc": 180,
-            "id": "WS 004",
-            "locations": [
-                -27,
-                -38
-            ],
-            "mount": "TURRET",
-            "size": "SMALL",
-            "type": "BALLISTIC"
-        },
-        {
-            "angle": 150,
-            "arc": 30,
-            "id": "WS 005",
-            "locations": [
-                -56,
-                39
-            ],
-            "mount": "HIDDEN",
-            "size": "SMALL",
-            "type": "SYSTEM"
-        },
-        {
-            "angle": 210,
-            "arc": 30,
-            "id": "WS 006",
-            "locations": [
-                -56,
-                -38
-            ],
-            "mount": "HIDDEN",
-            "size": "SMALL",
-            "type": "SYSTEM"
-        }
-    ],
-    "width": 120
+  "hullName": "Stigmata",
+  "hullId": "catchrelease_harpoon_ship",
+  "hullSize": "DESTROYER",
+  "spriteName": "graphics/catchrelease/ships/harpoon_boat.png",
+  "style": "MIDLINE",
+  "height": 210,
+  "width": 126,
+  "center": [54.5, 101],
+  "collisionRadius": 134,
+  "shieldCenter": [-1, -5.5],
+  "shieldRadius": 120,
+  "viewOffset": 0,
+  "builtInMods": [
+    "civgrade"
+  ],
+  "weaponSlots": [
+    {
+      "angle": -59.5,
+      "arc": 190,
+      "id": "WS0001",
+      "locations": [26, -48.5],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "BUILT_IN"
+    },
+    {
+      "angle": -101.5,
+      "arc": 189,
+      "id": "WS0002",
+      "locations": [-25, -26.5],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "BALLISTIC"
+    },
+    {
+      "angle": 119.5,
+      "arc": 229,
+      "id": "WS0003",
+      "locations": [-34, 28.5],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "BALLISTIC"
+    },
+    {
+      "angle": 27.5,
+      "arc": 229,
+      "id": "WS0004",
+      "locations": [46, 19],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "BALLISTIC"
+    },
+    {
+      "angle": 0,
+      "arc": 360,
+      "id": "LB 1",
+      "locations": [11, 16.5],
+      "mount": "HIDDEN",
+      "size": "LARGE",
+      "type": "LAUNCH_BAY"
+    }
+  ],
+  "engineSlots": [
+    {
+      "angle": 180,
+      "contrailSize": 21,
+      "length": 76.5,
+      "location": [-91, 12],
+      "style": "LOW_TECH",
+      "width": 21
+    },
+    {
+      "angle": 180,
+      "contrailSize": 14,
+      "length": 42.5,
+      "location": [-87.5, -6.5],
+      "style": "LOW_TECH",
+      "width": 14
+    },
+    {
+      "angle": 180,
+      "contrailSize": 9,
+      "length": 54,
+      "location": [-87, -19.5],
+      "style": "LOW_TECH",
+      "width": 9
+    }
+  ],
+  "bounds": [
+    30.5, 41.5,
+    78, 23.5,
+    72, -13,
+    42.5, -20,
+    58.5, -38,
+    29, -62.5,
+    -10.5, -50.5,
+    -15.5, -64,
+    -28, -64.5,
+    -49, -44.5,
+    -74, -32,
+    -86, -23,
+    -86, 0,
+    -90.5, 7,
+    -90.5, 18,
+    -72.5, 34,
+    -49, 44.5,
+    -28, 49,
+    -11, 49,
+    9, 38
+  ]
 }

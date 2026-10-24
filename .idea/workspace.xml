@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="rules dialogue desloppification">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="intel writing rework&#10;more rules work">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/chain/CaptainsFleet.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/chain/CaptainsFleet.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/chain/TreasureRumour.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/chain/TreasureRumour.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/chain/WoundedEpic.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/chain/WoundedEpic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/jars/src/scratchpad" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/scratchpad" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hulls/catchrelease_harpoon_ship.ship" beforeDir="false" afterPath="$PROJECT_DIR$/data/hulls/catchrelease_harpoon_ship.ship" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hulls/catchrelease_rod_ship.ship" beforeDir="false" afterPath="$PROJECT_DIR$/data/hulls/catchrelease_rod_ship.ship" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +144,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="rules &amp; fish description work" />
     <MESSAGE value="rules work" />
     <MESSAGE value="fleet visibility indicator work" />
     <MESSAGE value="tooltip formatting updates" />
@@ -172,7 +168,8 @@
     <MESSAGE value="Rules, text adjustments" />
     <MESSAGE value="sprite updates" />
     <MESSAGE value="rules dialogue desloppification" />
-    <option name="LAST_COMMIT_MESSAGE" value="rules dialogue desloppification" />
+    <MESSAGE value="intel writing rework&#10;more rules work" />
+    <option name="LAST_COMMIT_MESSAGE" value="intel writing rework&#10;more rules work" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
