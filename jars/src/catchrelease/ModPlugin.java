@@ -1,7 +1,9 @@
 package catchrelease;
 
 import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
+import catchrelease.combat.salvage.FighterStoreRefitButton;
 import catchrelease.combat.salvage.LyneDroneAI;
+import catchrelease.combat.salvage.RefitStoreView;
 import catchrelease.combat.salvage.WreckTracker;
 import catchrelease.combat.tug.HarpoonAutofireAI;
 import catchrelease.combat.tug.HarpoonOnHit;
@@ -66,6 +68,7 @@ public class ModPlugin extends BaseModPlugin {
     @Override
     public void onApplicationLoad() {
         PlayerSettings.install();
+        FighterStoreRefitButton.register();
     }
 
     @Override
@@ -113,6 +116,7 @@ public class ModPlugin extends BaseModPlugin {
         RatingBarEvent.VisitCounter.register();
         FishermanChain.register();
         FishingShips.register();
+        RefitStoreView.register();
         SoldFishRestock.register();
         FishermanInterception.register();
         FishingIntro.Keeper.register();

@@ -35,9 +35,44 @@ public final class FishingShipChecks {
         Fleet fleet = new Fleet();
 
         reconcileRules(fleet);
+        earlyReliquary(fleet);
         matrix(fleet);
 
         System.out.println("Fishing ship checks passed: " + checks);
+    }
+
+    // The early Reliquary shares the ROD rig with the Reliquary: a second slot with no module, and neither ship's
+    // arrival or departure may undo what the other one gives.
+    private static void earlyReliquary(Fleet f) {
+        f.reset();
+        FleetMemberAPI early = f.add("catchrelease_rod_ship_early", false);
+        FishingShips.reconcile();
+        require(FishingShips.hasSecondSlot(Tackle.Fit.DRONE), "early Reliquary opens the ROD slot");
+        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.NONE, "early Reliquary brings no module");
+        require(!FishingShips.isShipModuleAvailable(Tackle.REPLOYMENT_BAYS), "no Reployment Bays from the early one");
+        require(FishingShips.getShipModule(Tackle.Fit.DRONE) == null, "no module reported for the early one");
+
+        FleetMemberAPI reliquary = f.add("catchrelease_rod_ship", false);
+        FishingShips.reconcile();
+        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.REPLOYMENT_BAYS,
+                "Reliquary fills the empty slot with its module");
+        require(FishingShips.isShipModuleAvailable(Tackle.REPLOYMENT_BAYS), "Reployment Bays with the Reliquary");
+
+        f.remove(early);
+        FishingShips.reconcile();
+        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.REPLOYMENT_BAYS,
+                "early one leaving keeps the Reliquary's module");
+
+        f.add("catchrelease_rod_ship_early", false);
+        FishingShips.reconcile();
+        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.REPLOYMENT_BAYS,
+                "early one joining keeps the Reliquary's module");
+
+        f.remove(reliquary);
+        FishingShips.reconcile();
+        require(FishingShips.hasSecondSlot(Tackle.Fit.DRONE), "slot stays with the early one");
+        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.NONE, "Reployment Bays leave with the Reliquary");
+        require(!FishingShips.isShipModuleAvailable(Tackle.REPLOYMENT_BAYS), "module unavailable without the Reliquary");
     }
 
     private static void reconcileRules(Fleet f) {
@@ -182,6 +217,7 @@ public final class FishingShipChecks {
             ShipHullSpecAPI spec = spec(hullId, dHull);
             FleetMemberAPI member = proxy(FleetMemberAPI.class, (self, method, args) -> switch (method.getName()) {
                 case "getHullSpec" -> spec;
+                case "getId" -> "member" + System.identityHashCode(self);
                 case "equals" -> self == args[0];
                 case "hashCode" -> System.identityHashCode(self);
                 default -> throw new AssertionError(method);

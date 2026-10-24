@@ -8,7 +8,6 @@ import com.fs.starfarer.api.combat.ShipAIPlugin;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.ShipCommand;
 import com.fs.starfarer.api.combat.ShipwideAIFlags;
-import com.fs.starfarer.api.loading.WeaponSlotAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -17,19 +16,18 @@ import java.util.List;
 
 // A LYNE drone's whole AI, picked in ModPlugin.pickShipAI by the drone's hull tag (bays pick an AI for every fighter
 // they launch). It claims a wreck from the battle's WreckTracker, flies to it, tows it to its tender's LB 1 and lands
-// with it. needsRefit stays false, so the wing never recalls it, and wing orders only reach vanilla FighterAI.
+// with it, while the tender's store has room. needsRefit stays false, so the wing never recalls it, and wing orders
+// only reach vanilla FighterAI.
 public class LyneDroneAI implements ShipAIPlugin {
 
     private enum Mode { IDLE, FETCH, TOW, LAND }
 
-    public static final String LANDING_BAY = "LB 1";
     public static final float SEARCH_INTERVAL = 0.5f;
     public static final float SEARCH_RANGE = 4000f;
     public static final float ATTACH_PADDING = 10f;
     public static final float DOCK_DISTANCE = 40f;
     public static final float IDLE_DISTANCE = 150f;
     public static final float IDLE_SPREAD = 15f;
-    public static final float APPROACH_GAIN = 2.5f;
     public static final float TOW_SPEED_MULT = 0.7f;
     public static final float TOW_TURN_RATE = 3f;
     private static final float PARTICLE_INTERVAL = 0.08f;
@@ -62,12 +60,12 @@ public class LyneDroneAI implements ShipAIPlugin {
         switch (mode) {
             case IDLE -> {
                 search -= amount;
-                if (tracker != null && search <= 0f) {
+                if (tracker != null && search <= 0f && tracker.hasRoom(tender)) {
                     search = SEARCH_INTERVAL;
                     wreck = tracker.claim(ship, SEARCH_RANGE);
                     if (wreck != null) mode = Mode.FETCH;
                 }
-                if (mode == Mode.IDLE) moveTo(getIdlePoint(tender), tender.getVelocity(), 1f);
+                if (mode == Mode.IDLE) SalvageFlight.moveTo(ship, getIdlePoint(tender), tender.getVelocity(), 1f);
             }
             case FETCH -> {
                 if (!holds(tracker)) return;
@@ -76,13 +74,13 @@ public class LyneDroneAI implements ShipAIPlugin {
                     tracker.attach(wreck);
                     mode = Mode.TOW;
                 } else {
-                    moveTo(wreck.getLocation(), wreck.getVelocity(), 1f);
+                    SalvageFlight.moveTo(ship, wreck.getLocation(), wreck.getVelocity(), 1f);
                 }
             }
             case TOW -> {
                 if (!holds(tracker)) return;
                 Vector2f dock = getDockPoint(tender);
-                moveTo(dock, tender.getVelocity(), TOW_SPEED_MULT);
+                SalvageFlight.moveTo(ship, dock, tender.getVelocity(), TOW_SPEED_MULT);
                 pinWreck(amount);
                 if (Vector2f.sub(dock, ship.getLocation(), null).length() <= DOCK_DISTANCE) {
                     ship.beginLandingAnimation(tender);
@@ -152,22 +150,6 @@ public class LyneDroneAI implements ShipAIPlugin {
         return difference;
     }
 
-    // Steers toward a point moving with the given velocity, slowing on arrival.
-    private void moveTo(Vector2f point, Vector2f pointVelocity, float speedMult) {
-        Vector2f offset = Vector2f.sub(point, ship.getLocation(), null);
-        float maxSpeed = ship.getMaxSpeed() * speedMult;
-        float approach = Math.min(maxSpeed, offset.length() * APPROACH_GAIN);
-        Vector2f wanted = new Vector2f(pointVelocity);
-        if (offset.lengthSquared() > 0f) {
-            offset.normalise();
-            wanted.translate(offset.x * approach, offset.y * approach);
-        }
-        float speed = Math.min(maxSpeed, wanted.length());
-        float heading = Misc.getAngleInDegrees(wanted);
-        Global.getCombatEngine().headInDirectionWithoutTurning(ship, heading, speed);
-        Misc.turnTowardsFacingV2(ship, heading, 0f);
-    }
-
     private Vector2f getIdlePoint(ShipAPI tender) {
         List<ShipAPI> members = ship.getWing().getWingMembers();
         int index = Math.max(0, members.indexOf(ship));
@@ -177,14 +159,10 @@ public class LyneDroneAI implements ShipAIPlugin {
         return Vector2f.add(tender.getLocation(), offset, null);
     }
 
-    // One of LB 1's launch points, by the drone's place in its wing, in world coordinates.
+    // One of LB 1's launch points, by the drone's place in its wing.
     private Vector2f getDockPoint(ShipAPI tender) {
-        WeaponSlotAPI slot = tender.getHullSpec().getWeaponSlotAPI(LANDING_BAY);
-        List<Vector2f> points = slot == null ? null : slot.getLaunchPointOffsets();
-        if (points == null || points.isEmpty()) return new Vector2f(tender.getLocation());
-        int index = Math.max(0, ship.getWing().getWingMembers().indexOf(ship));
-        Vector2f offset = Misc.rotateAroundOrigin(points.get(index % points.size()), tender.getFacing());
-        return Vector2f.add(tender.getLocation(), offset, null);
+        return SalvageFlight.bayPoint(tender, SalvageFlight.LANDING_BAY,
+                Math.max(0, ship.getWing().getWingMembers().indexOf(ship)));
     }
 
     @Override

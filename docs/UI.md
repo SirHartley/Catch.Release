@@ -496,6 +496,25 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   normal blending, because a projectile's `bulletSprite` is always additive; the `.proj` colours are
   transparent. The shape is `RopeCurve`, the campaign rope's spring and wobble plus a sag.
   Viewport alpha applies, and pause freezes it (the engine does not advance entities while paused).
+- The Reliquary's recovered-fighter store shows in combat through `maintainStatusForPlayerShip`, the list above
+  the player ship's info widget where terrain effects show (`SalvageBaysHullmod.advanceInCombat`, player ship only).
+  The list draws each icon as a 25×25 tinted schematic, so the line uses a fixed glyph (vanilla's
+  `icon_tactical_bdeck` for now), never the fighter's sprite. Title: the fighter hull's name; data: upper-case
+  ready and restoring counts, as vanilla status lines are; a type with nothing ready is drawn as a debuff. A line
+  fades 0.25 s after the first unpaused frame it is not maintained, so nothing is removed by hand. One key per
+  wing type keeps lines from reshuffling.
+- The refit shows a Reliquary's stored fighters as locked built-in bays by swapping a hull-spec copy into the
+  member's and the displayed variant while the refit is open (`combat/salvage/RefitStoreView`). The displayed
+  variant is reached as LunaLib reaches it, through the refit panel's stable method names, and resynced after
+  each change; [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage) owns the sequence and its safeguards.
+  The Salvage Bays tooltip lists the same store with a 32-px fighter sprite per type (`beginImageWithText`),
+  values in the highlight colour and no red, since restoring is not a failure.
+  The discard panel is a LunaLib refit option (`FighterStoreRefitButton`). Luna hosts it on a background panel
+  whose plugin ignores button presses, so the content is a child panel with its own plugin; rows and the footer
+  route presses to it and it applies them in `advance`, outside input dispatch. The list and footer are disposable
+  panels rebuilt after every change ([Rebuilding lists](#rebuilding-lists)). Destructive actions take a second press
+  ("Confirm") on the same button. Luna closes the panel on Esc or a click outside; its `advance` and `onPanelClose`
+  do not run when the refit itself closes, so they cannot replace `RefitStoreView`'s tab polling.
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short

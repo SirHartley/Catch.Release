@@ -12,7 +12,7 @@ Engine facts below are from Starsector 0.98a-RC8 (the `starsector-knowledge` ski
 | Reliquary | `catchrelease_rod_ship` | Cruiser | LYNE Tender | `graphics/catchrelease/ships/done_boat.png` |
 | Monstrance | `catchrelease_lamp_ship` | Cruiser | Breach Trawler | none yet; the hull is still a Nebula copy |
 
-All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`. The Stigmata has its Haul Drive; the Reliquary's system is a vanilla placeholder (`targetingfeed`) until its launch system exists.
+All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`. The Stigmata has its Haul Drive and the Reliquary its Salvage Launch.
 
 ## Stigmata: harpoon tug
 
@@ -88,18 +88,18 @@ Engine limits:
 - **Restoration:** a recovered fighter is restored like a normal replacement (its wing's refit time and the ship's refit modifiers, with the usual CR rules), then waits in the store.
 - **Launch system:** launches every stored fighter at the target for an attack run. Fighters of one type form wings up to their wing size, and never more instances than were recovered: one recovered Broadsword launches as one, two as two.
 - **After launch:** they behave like normal fighters, return and land. A destroyed one is gone and leaves no wreck (`setHulkChanceOverride(0)` on every fighter the Reliquary launches), so no fighter is salvaged twice.
-- **Bays cannot rebuild them.** A launch bay only builds its own wing's type (`obf/combat/entities/ship/A/C.java:47, 63, 346-410`) and deletes a fighter that lands. So the system spawns them itself:
-  - spawn with `CombatFleetManagerAPI.spawnShipOrWing`;
-  - set the Reliquary as source ship;
-  - remove surplus members;
-  - set their CR;
-  - count landed fighters back into the store.
-  - Vanilla `SwarmLauncherEffect.java:148-180` does the same, including `removeDeployed` cleanup.
+- **Bays must not rebuild them.** A bay builds whatever wing asks it for a replacement, using the requesting wing's variant and its own refit time (`obf/combat/entities/ship/A/C.java:161, 362`), and any wing with a source bay asks when it is under strength (`obf/combat/ai/M.java:260-272`). A recovered wing with a Reliquary bay as its source would be rebuilt endlessly. So the system spawns them itself and gives them a source ship but no source bay:
+  - spawn with `CombatFleetManagerAPI.spawnShipOrWing` (only ids ending in `_wing` are treated as wings; other ids go through `createFleetMember(FIGHTER_WING, …)` and `spawnFleetMember`);
+  - set the Reliquary as source ship (`setSourceShip`, never `setSourceBay`);
+  - remove surplus members (`removeMember` plus `removeEntity`);
+  - give each fighter what a bay would: the ship's CR through the CR plugin and its hullmods' `applyEffectsToFighterSpawnedByShip`;
+  - `removeDeployed(wing, false)`, so the wing costs no deployment points and is cleaned up, as vanilla `SwarmLauncherEffect.java:152-178` does (which moves its members into another wing rather than trimming or setting CR).
+  - Without a bay, vanilla never brings them home, so the mod lands them itself and counts landed fighters back into the store.
 - **Status display:** the store shows on the combat screen where terrain effects live. `engine.maintainStatusForPlayerShip` gives one line per entry. A richer display can be drawn in `renderInUICoords`, or MagicLib's `MagicSubsystem` can host the launch ability with its own HUD bars and AI hook (`shouldActivateAI`).
 - **Refit display:** while the refit screen is open, each Reliquary with stored fighters shows them as filled, locked built-in bays. The swap exists only while the refit is open, so saves, D-mod changes and carrier skill counts never see it. Engine facts below are from the 0.98a-RC8 refit, variant and hull-spec code (`obf/coreui/refit/`, `obf/loading/specs/`).
   - **Why a hull spec copy:** a fighter bay is locked only when the hull spec says it is built-in (`isBuiltInWing`). No variant flag is consulted. A copy of the spec with the stored wings appended to its built-in list shows them filled, locked and free of OP. Being built-in also keeps them out of the loot, scuttle and sell paths, which only take non-built-in wings.
   - **Making the copy:** the API has no clone, but the concrete spec class has a public `clone()` that copies the built-in wing list. Call it through `MethodHandles` (mods may not use `java.lang.reflect`) and set it with `ShipVariantAPI.setHullSpecAPI`. The variant must belong to this ship alone, since the refit reloads a stock variant from the registry. Clone it, set its source to `REFIT` and call `member.setVariant(v, false, true)`, as vanilla `PKDefenderPluginImpl` does.
-  - **Open:** `CoreUITabListener.reportAboutToOpenCoreTab(REFIT, …)` builds the copy from the current store, with the LYNE wings first, then the stored wings. It calls `refreshBuiltInWings()`, and the built-in Reliquary hullmod adds one bay per stored wing while the swap is active.
+  - **Open:** `CoreUITabListener.reportAboutToOpenCoreTab(REFIT, …)` builds the copy from the current store, with the LYNE wings first, then the stored wings (`setHullSpecAPI` re-adds built-in wings itself, so `refreshBuiltInWings()` is not needed), and the built-in Reliquary hullmod adds one bay per stored wing while the swap is active, for stats built without an entity. The callback fires after the refit already shows a clone of the first ship's variant (`obf/ui/newui/L.java:337-339`), so the displayed variant is swapped too and the refit panel resynced, as LunaLib's `refreshVariant` does. Leaving the display unswapped is not an option: a field-refit save compares wings by reference and charges CR for each one the saved variant lacks (`obf/loading/specs/HullVariantSpec.java:1594-1612`).
   - **Close:** no callback reports the refit closing. A script added on open checks each frame whether the refit is still the current tab (`CampaignUIAPI.getCurrentCoreTab`) and removes itself on revert, so this polling exists only while the swap does. On close it reverts whatever variant the member holds at that moment: the refit's undo history clones variants that share the copy. It restores the normal spec and removes the stored wing ids from the variant's wing list.
   - **Restore guard:** restoring a hull (removing D-mods) happens inside the refit and calls `setHullSpecAPI` with the normal spec. The same script re-applies the copy whenever the variant's spec is no longer the copy. Otherwise the extra bays would become modular and a stored fighter could be stripped into a free LPC.
   - **Combat:** the hullmod adds the extra bays only outside combat. Bays are created from the variant's wings at ship creation, after `applyEffectsBeforeShipCreation` has run with `stats.getEntity()` set (`Ship.java:841-850`, `obf/loading/specs/_.java:107-133`). So the stored wings never get bays, and only the launch system spawns them.
@@ -107,7 +107,7 @@ Engine limits:
   - **Refitting is otherwise unaffected:** weapons, hullmods, S-mods and OP are identical on the copy. Autofit fills only modular bays. Saving a variant skips built-in wings. The stats panel shows the extra bays while the refit is open.
   - **Fallback:** the built-in hullmod's tooltip (`HullModEffect.addPostDescriptionSection`, with the refit `ShipAPI` and its `getFleetMemberId()`) also lists the store, with sprites, counts and restoration progress. It is the fallback whenever the swap is not in place.
   - **Rejected:** drawing on the refit screen has no API hook. A PatchLib redirect of `isBuiltInWing` would need many fragile call-site patches.
-- **Discarding stored fighters:** the player removes fighters they do not want through a LunaLib refit button on each Reliquary. LunaLib 2.0.1 (`lib/Lazylib_lunalib.zip`) has `lunalib.lunaRefit.BaseRefitButton`, registered with `LunaRefitManager.addRefitButton`. Its `shouldShow(member, variant, market)` limits it to Reliquaries, and `hasPanel`/`initPanel(CustomPanelAPI, …)` opens a custom panel listing the store with a discard control per fighter. After a change, `refreshVariant()` updates the ship, so the refit swap is rebuilt from the new store. A discarded fighter is gone; it gives no LPC. The panel is player-facing UI, so `UI.md` and the text route apply. The button's `advance` and `onPanelClose` may also be usable to detect the refit closing in place of the polling script; that is unverified.
+- **Discarding stored fighters:** the player removes fighters they do not want through a LunaLib refit button on each Reliquary. LunaLib 2.0.1 (`lib/Lazylib_lunalib.zip`) has `lunalib.lunaRefit.BaseRefitButton`, registered with `LunaRefitManager.addRefitButton`. Its `shouldShow(member, variant, market)` limits it to Reliquaries, and `hasPanel`/`initPanel(CustomPanelAPI, …)` opens a custom panel listing the store with a discard control per fighter. After a change, `refreshVariant()` updates the ship, so the refit swap is rebuilt from the new store. A discarded fighter is gone; it gives no LPC. The panel is player-facing UI, so `UI.md` and the text route apply. The button's `advance` runs only while Luna's options list is open, and `onPanelClose` does not run when the refit closes with the panel open, so neither can replace the polling script (LunaLib 2.0.1 `RefitButtonAdder.kt`).
 - **Persistence:** the store carries over between battles, kept per ship. Variant ids are shared by every ship of a stock variant, so key it by fleet member id. Purge it when the ship leaves the player's fleet, for example into storage.
 - **AI:** fire when enough fighters are stored and a target in range is worth it.
 
@@ -116,7 +116,7 @@ Engine limits:
 The player gets a version of the Reliquary early, with no blueprint. In combat it is the same ship: same hull, wings, salvage, store, launch system and refit display. It differs only in the campaign, where it does not unlock the Reployment Bays (see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#ships)).
 
 - **Form:** a hull skin (`.skin`) of `catchrelease_rod_ship` that changes nothing for combat. Its own hull id is what lets the campaign tell it apart.
-- **Combat code must treat it as a Reliquary:** match the Reliquary by base hull id (`ShipHullSpecAPI.getBaseHullId`, which a skin points at its base hull), not by the exact hull id. That covers the built-in hullmod, the salvage and store, the launch system, the refit swap and the store's fleet-member key.
+- **Combat code must treat it as a Reliquary:** a skin inherits the base hull's built-in hullmods, wings, system and stats, so the combat and refit code finds every Reliquary by its built-in Salvage Bays hullmod, never by hull id. That covers the salvage and store, the launch system, the refit swap and the discard panel; the store is keyed by fleet member id either way. A skin does not inherit tags, so it repeats `no_drop`, `no_sell` and `no_bp_drop`.
 
 ## Monstrance: Breach Trawler (later)
 
@@ -263,19 +263,19 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 6: recovered fighters
 
-- [ ] 6.1 `combat/salvage/FighterStore`, saved per fleet member id, on the sector's persistent data.
+- [x] 6.1 `combat/salvage/FighterStore`, saved per fleet member id, on the sector's persistent data. Implemented with `TenderBays`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). Restoration runs in combat only and keeps partial progress; fighters still out when a battle ends count as returned; the simulator works on a copy.
   - Wing id, count and restoration progress per entry.
   - Cap 10 (setting), counting fighters still restoring.
   - Restoration at the wing's refit time with the ship's refit modifiers.
   - Purged when the member leaves the player's fleet: a fleet callback, as `FishingShips` uses.
   - Check: cap, restoration and grouping into wings no larger than the wing size.
-- [ ] 6.2 Launch system: `catchrelease_salvage_launch` with `combat/salvage/SalvageLaunchStats`. It replaces `targetingfeed`.
-  - Spawns every restored fighter with `spawnShipOrWing`, groups them into wings, removes surplus members, sets the source ship and CR, and calls `removeDeployed` on the spawned wing, as `SwarmLauncherEffect` does.
+- [x] 6.2 Launch system: `catchrelease_salvage_launch` with `combat/salvage/SalvageLaunchStats`. It replaces `targetingfeed`. Implemented with `RecoveredWings`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
+  - Spawns every restored fighter with `spawnShipOrWing`, groups them into wings, removes surplus members, sets the source ship (no source bay) and CR, and calls `removeDeployed` on the spawned wing.
   - Every launched fighter gets `setHulkChanceOverride(0)`.
   - Landed fighters go back into the store; destroyed ones are gone.
-- [ ] 6.3 `ShipSystemAIScript` for the launch: fire when enough fighters are restored and a target in range is worth it.
-- [ ] 6.4 Combat status display: one `maintainStatusForPlayerShip` line per stored type, or a richer `renderInUICoords` panel. Fable research first.
-- [ ] 6.5 Refit display, in this order:
+- [x] 6.3 `ShipSystemAIScript` for the launch: fire when enough fighters are restored and a target in range is worth it. Implemented as `SalvageLaunchAI`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
+- [x] 6.4 Combat status display: one `maintainStatusForPlayerShip` line per stored type, or a richer `renderInUICoords` panel. Fable research first. Implemented with status lines in `SalvageBaysHullmod`; see [UI.md](UI.md#drawing-gotchas). MagicLib's `MagicSubsystem` HUD was not used: it would replace the vanilla ship system.
+- [x] 6.5 Refit display, in this order (implemented as `RefitStoreView`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage)). The spike in item 1 could not be run here; the author confirms the swap in game. A failed spec copy leaves the tooltip as the only display, and a failed display refresh reverts the swap:
   1. **Spike** the spec `clone()` through `MethodHandles` and whether `reportAboutToOpenCoreTab` fires when the core UI opens straight into the refit.
   2. `combat/salvage/RefitStoreView`:
      - takes the variant for this member alone;
@@ -285,9 +285,9 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
      - the restore guard;
      - strips stray wings on load and on leaving the fleet.
   3. Check: revert leaves no stored wing ids in the variant.
-- [ ] 6.6 Salvage hullmod tooltip listing the store, the fallback display.
-- [ ] 6.7 LunaLib refit button and panel to discard stored fighters (`BaseRefitButton`). Afterwards, `refreshVariant()`.
-- [ ] 6.8 Early Reliquary skin. Combat code matches it through `getBaseHullId`. Campaign:
+- [x] 6.6 Salvage hullmod tooltip listing the store, the fallback display. Implemented in `SalvageBaysHullmod`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
+- [x] 6.7 LunaLib refit button and panel to discard stored fighters (`BaseRefitButton`). Afterwards, `refreshVariant()`. Implemented as `FighterStoreRefitButton`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). After a discard `RefitStoreView.rebuild` runs Luna's `refreshVariant` sequence itself, since it also has to put the new spec on the shown variant first.
+- [x] 6.8 Early Reliquary skin. Combat code matches it through its inherited Salvage Bays hullmod. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishships). Campaign:
   - a `FishingShips` entry with the ROD rig's second slot and no module;
   - +1 drone in `FishingDroneSwarmScript`.
 

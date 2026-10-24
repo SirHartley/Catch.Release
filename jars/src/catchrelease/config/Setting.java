@@ -51,6 +51,7 @@ public enum Setting {
     NEEDLE_VISIBILITY("catchrelease_needle_visibility", 100d, 0d, 300d),
     HARPOON_ROPE_HULL_BREAK("catchrelease_harpoon_rope_hull_break", true),
     LYNE_WRECK_CHANCE("catchrelease_lyne_wreck_chance", 75d, 0d, 100d),
+    LYNE_STORE_CAP("catchrelease_lyne_store_cap", 10d, 1d, 30d),
 
     // Legendary Hunts
     HUNT_PRESET("catchrelease_hunt_preset", "Keep current", "Keep current,Relaxed,Easy,Standard,Hard"),
