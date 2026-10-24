@@ -285,7 +285,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
      - the restore guard;
      - strips stray wings on load and on leaving the fleet.
   3. Check: revert leaves no stored wing ids in the variant.
-- [ ] 6.6 Salvage hullmod tooltip listing the store, the fallback display.
+- [x] 6.6 Salvage hullmod tooltip listing the store, the fallback display. Implemented in `SalvageBaysHullmod`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
 - [ ] 6.7 LunaLib refit button and panel to discard stored fighters (`BaseRefitButton`). Afterwards, `refreshVariant()`.
 - [ ] 6.8 Early Reliquary skin. Combat code matches it through `getBaseHullId`. Campaign:
   - a `FishingShips` entry with the ROD rig's second slot and no module;

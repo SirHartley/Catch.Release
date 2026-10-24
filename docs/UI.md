@@ -507,6 +507,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   member's and the displayed variant while the refit is open (`combat/salvage/RefitStoreView`). The displayed
   variant is reached as LunaLib reaches it, through the refit panel's stable method names, and resynced after
   each change; [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage) owns the sequence and its safeguards.
+  The Salvage Bays tooltip lists the same store with a 32-px fighter sprite per type (`beginImageWithText`),
+  values in the highlight colour and no red, since restoring is not a failure.
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short
