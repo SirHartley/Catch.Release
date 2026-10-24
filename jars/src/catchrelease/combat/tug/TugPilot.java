@@ -34,6 +34,7 @@ public class TugPilot implements AdvanceableListener {
     private final ShipAPI ship;
     private WeaponAPI harpoon;
     private final Vector2f bias = new Vector2f();
+    private final Vector2f catchPoint = new Vector2f();
     private float biasAge = BIAS_INTERVAL;
 
     public TugPilot(ShipAPI ship) {
@@ -72,7 +73,7 @@ public class TugPilot implements AdvanceableListener {
             biasAge = 0f;
             sumBias(engine, tether.getTarget());
         }
-        Vector2f heading = dragDirection(ship.getLocation(), tether.getTargetPoint(), bias);
+        Vector2f heading = dragDirection(ship.getLocation(), tether.getTargetPoint(catchPoint), bias);
         steer((float) Math.toDegrees(Math.atan2(heading.y, heading.x)));
     }
 

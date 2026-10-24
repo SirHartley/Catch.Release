@@ -8,6 +8,7 @@ import com.fs.starfarer.api.combat.ShieldAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.ShipwideAIFlags.AIFlags;
 import com.fs.starfarer.api.combat.WeaponAPI;
+import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.util.IdentityHashMap;
@@ -74,7 +75,7 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
         float bestScore = MIN_SCORE;
         for (ShipAPI other : engine.getShips()) {
             if (!isCandidate(engine, ship, other)) continue;
-            float distance = Vector2f.sub(other.getLocation(), mount, null).length() - other.getCollisionRadius();
+            float distance = Misc.getDistance(other.getLocation(), mount) - other.getCollisionRadius();
             if (distance > weapon.getRange() || weapon.distanceFromArc(other.getLocation()) > 0f) continue;
             float score = score(getShield(other, mount), isDisabled(other), isFleeing(other), other.getHullLevel(),
                     other.getMass(), helpers.getOrDefault(other, 0),
@@ -144,7 +145,7 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     private boolean isAimed(Vector2f point) {
         Vector2f mount = weapon.getLocation();
         float wanted = (float) Math.toDegrees(Math.atan2(point.y - mount.y, point.x - mount.x));
-        float distance = Math.max(1f, Vector2f.sub(point, mount, null).length());
+        float distance = Math.max(1f, Misc.getDistance(point, mount));
         float tolerance = Math.max(AIM_TOLERANCE,
                 (float) Math.toDegrees(Math.atan(target.getCollisionRadius() * 0.5f / distance)));
         return Math.abs(angleDifference(weapon.getCurrAngle(), wanted)) <= tolerance;

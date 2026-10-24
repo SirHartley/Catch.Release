@@ -12,11 +12,12 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
-
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 // Built into the Reliquary. Starts the battle's WreckTracker on its first combat frame, and keeps the fighters it
 // launches from leaving wrecks, so nothing is salvaged twice.
@@ -25,8 +26,21 @@ public class SalvageBaysHullmod extends BaseHullMod {
     public static final String ID = "catchrelease_salvage_bays";
 
     private static final String STATUS_KEY = "catchrelease_salvageStore_";
+    private static final String STATUS_DATA_KEY = "catchrelease_salvageStatus";
+    private static final float STATUS_INTERVAL = 0.25f;
     private static final float TOOLTIP_ICON = 32f;
     private static final Set<String> LOADED_SPRITES = new HashSet<>();
+
+    private record StatusLine(String key, String title, String text, boolean debuff) {
+    }
+
+    // The ship's status lines, kept in its custom data since one hullmod instance serves every ship.
+    private static final class Status {
+
+        private final String icon = Global.getSettings().getSpriteName("ui", "icon_tactical_bdeck");
+        private final List<StatusLine> lines = new ArrayList<>();
+        private float builtAt = Float.NEGATIVE_INFINITY;
+    }
 
     // The refit's swapped spec (RefitStoreView) lists more built-in wings than the hull has bays. The refit trims a
     // variant's wings to the bay count of stats built without an entity, so the extra bays exist only there; a combat
@@ -40,23 +54,38 @@ public class SalvageBaysHullmod extends BaseHullMod {
     }
 
     // One status line per stored fighter type above the player ship's info, where terrain effects show. The list
-    // fades a line that is not maintained every unpaused frame, and advanceInCombat is not called while paused.
+    // fades a line that is not maintained every unpaused frame, and advanceInCombat is not called while paused, so
+    // the lines are maintained every frame and rebuilt from the store every STATUS_INTERVAL.
     @Override
     public void advanceInCombat(ShipAPI ship, float amount) {
         CombatEngineAPI engine = Global.getCombatEngine();
         if (engine == null) return;
         registerTender(engine, ship);
         if (engine.getPlayerShip() != ship) return;
-        FighterStore store = FighterStore.forBattle(engine, ship.getFleetMemberId());
-        Map<String, int[]> types = summarise(store);
-        String icon = Global.getSettings().getSpriteName("ui", "icon_tactical_bdeck");
-        for (Map.Entry<String, int[]> entry : types.entrySet()) {
+        Status status = ship.getCustomData().get(STATUS_DATA_KEY) instanceof Status cached ? cached : null;
+        if (status == null) {
+            status = new Status();
+            ship.setCustomData(STATUS_DATA_KEY, status);
+        }
+        float now = engine.getTotalElapsedTime(false);
+        if (now - status.builtAt >= STATUS_INTERVAL) {
+            status.builtAt = now;
+            buildStatus(FighterStore.forBattle(engine, ship.getFleetMemberId()), status.lines);
+        }
+        for (StatusLine line : status.lines) {
+            engine.maintainStatusForPlayerShip(line.key(), status.icon, line.title(), line.text(), line.debuff());
+        }
+    }
+
+    private static void buildStatus(FighterStore store, List<StatusLine> lines) {
+        lines.clear();
+        for (Map.Entry<String, int[]> entry : summarise(store).entrySet()) {
             int[] type = entry.getValue();
-            engine.maintainStatusForPlayerShip(STATUS_KEY + entry.getKey(), icon, getFighterName(entry.getKey()),
-                    getStatus(type[0], type[1], type[2]), type[0] == 0);
+            lines.add(new StatusLine(STATUS_KEY + entry.getKey(), getFighterName(entry.getKey()),
+                    getStatus(type[0], type[1], type[2]), type[0] == 0));
         }
         if (store.count() >= FighterStore.getCap()) {
-            engine.maintainStatusForPlayerShip(STATUS_KEY + "full", icon, "Salvage Bays", "BAYS FULL", true);
+            lines.add(new StatusLine(STATUS_KEY + "full", "Salvage Bays", "BAYS FULL", true));
         }
     }
 

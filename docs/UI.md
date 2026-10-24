@@ -502,7 +502,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   `icon_tactical_bdeck` for now), never the fighter's sprite. Title: the fighter hull's name; data: upper-case
   ready and restoring counts, as vanilla status lines are; a type with nothing ready is drawn as a debuff. A line
   fades 0.25 s after the first unpaused frame it is not maintained, so nothing is removed by hand. One key per
-  wing type keeps lines from reshuffling.
+  wing type keeps lines from reshuffling. The lines are maintained every frame but rebuilt from the store every
+  0.25 s, kept in the ship's custom data.
 - The refit shows a Reliquary's stored fighters as locked built-in bays by swapping a hull-spec copy into the
   member's and the displayed variant while the refit is open (`combat/salvage/RefitStoreView`). The displayed
   variant is reached as LunaLib reaches it, through the refit panel's stable method names, and resynced after
