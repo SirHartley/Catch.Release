@@ -49,6 +49,7 @@ Added - Version Checker support: update notices, plus the changelog and direct d
 Outfitter
 Fixed - The Outfitter no longer opens on a locked shelf with an empty list and no category selected, which happened on every visit before the Breach Lights were unlocked
 Fixed - Undoing a purchase made on another tab now brings that item's shelf to the front instead of describing one row while highlighting none
+Fixed - Buying a module that fits both rigs now clears its mark on the other rig's shelf, and the route planner no longer lists the same module twice
 
 Development
 Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete

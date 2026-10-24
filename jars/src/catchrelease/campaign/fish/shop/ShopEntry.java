@@ -324,6 +324,7 @@ public class ShopEntry {
 
     public void grant(int slot) {
         ShopMarks.unmark(ShopMarks.getMarkKey(this));
+        if (kind == Kind.TACKLE) ShopMarks.unmarkTackle(tackle);
         ShopSchematics.clearFresh(this);
 
         // a curio is not handed over, it is flipped - it was already bought before the shop saw it
