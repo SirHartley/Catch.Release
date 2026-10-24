@@ -114,7 +114,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ## Dependencies
 
-- MagicLib in `lib/MagicLib.zip` is 1.3.9 for 0.97a. `MagicSubsystem` needs a current MagicLib (1.5.6, for 0.98a-RC7); update `lib/` before using it.
+- `lib/MagicLib.zip` is MagicLib 1.5.6 (for 0.98a-RC7), which has `MagicSubsystem`. `mod_info.json` pins no MagicLib version; pin one if the mod comes to depend on `MagicSubsystem`.
 - No part of this design needs PatchLib.
 
 ## Open questions
@@ -130,7 +130,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 **Stage 0: data and dependencies**
 - [x] 0.1 New designations: LYNE Tender, Breach Trawler.
 - [x] 0.2 Stigmata and Reliquary stats in `ship_data.csv`; placeholder systems.
-- [ ] 0.3 Update `lib/MagicLib.zip`.
+- [x] 0.3 Update `lib/MagicLib.zip`.
 - [ ] 0.4 Placeholder harpoon projectile sprite.
 
 **Stage 1: tug hullmod**
