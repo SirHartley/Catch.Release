@@ -24,6 +24,11 @@ public class TugTethers extends BaseEveryFrameCombatPlugin {
         this.engine = engine;
     }
 
+    // The lines of this battle, or null before the first harpoon shot. Unlike get, never adds the plugin.
+    public static TugTethers peek(CombatEngineAPI engine) {
+        return engine.getCustomData().get(KEY) instanceof TugTethers tethers ? tethers : null;
+    }
+
     public static TugTethers get(CombatEngineAPI engine) {
         Object existing = engine.getCustomData().get(KEY);
         if (existing instanceof TugTethers tethers) return tethers;
@@ -54,6 +59,19 @@ public class TugTethers extends BaseEveryFrameCombatPlugin {
     void attach(DamagingProjectileAPI shot, ShipAPI target, Vector2f point) {
         Tether tether = inFlight(shot);
         if (tether != null) tether.attach(target, point, shot.getFacing());
+    }
+
+    // The weapon's live line, in flight or attached.
+    public Tether getLine(WeaponAPI weapon) {
+        for (Tether tether : tethers) {
+            if (tether.getWeapon() == weapon && tether.getState() != Tether.State.RELEASED) return tether;
+        }
+        return null;
+    }
+
+    // Lets go without firing, for the AI: firing again would also spend a charge on a new line.
+    public void release(Tether tether) {
+        tether.release();
     }
 
     public Tether getTether(ShipAPI tug) {

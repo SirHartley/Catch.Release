@@ -5,6 +5,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.combat.BaseHullMod;
 import com.fs.starfarer.api.combat.HullModFleetEffect;
+import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.MutableFleetStatsAPI;
@@ -21,6 +22,12 @@ public class TugDriveHullmod extends BaseHullMod implements HullModFleetEffect {
     static final String TUG_COUNT_KEY = "$catchrelease_tugFieldCount";
     static final String MOD_KEY = "catchrelease_tug_field";
     private static final String MOD_DESC = "Tug Drive Field";
+
+    // Also called for refit previews, where the listener simply never advances.
+    @Override
+    public void applyEffectsAfterShipCreation(ShipAPI ship, String id) {
+        if (!ship.hasListenerOfClass(TugPilot.class)) ship.addListener(new TugPilot(ship));
+    }
 
     @Override
     public boolean withOnFleetSync() {

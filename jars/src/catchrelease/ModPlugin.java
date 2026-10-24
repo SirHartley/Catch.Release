@@ -1,6 +1,8 @@
 package catchrelease;
 
 import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
+import catchrelease.combat.tug.HarpoonAutofireAI;
+import catchrelease.combat.tug.HarpoonOnHit;
 import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.config.PlayerSettings;
 import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
@@ -43,6 +45,10 @@ import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.testing.DevShortcut;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.PluginPick;
+import com.fs.starfarer.api.campaign.CampaignPlugin.PickPriority;
+import com.fs.starfarer.api.combat.AutofireAIPlugin;
+import com.fs.starfarer.api.combat.WeaponAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 
 import java.util.LinkedHashSet;
@@ -55,6 +61,12 @@ public class ModPlugin extends BaseModPlugin {
     @Override
     public void onApplicationLoad() {
         PlayerSettings.install();
+    }
+
+    @Override
+    public PluginPick<AutofireAIPlugin> pickWeaponAutofireAI(WeaponAPI weapon) {
+        if (!HarpoonOnHit.WEAPON_ID.equals(weapon.getId())) return null;
+        return new PluginPick<>(new HarpoonAutofireAI(weapon), PickPriority.MOD_SPECIFIC);
     }
 
     @Override
