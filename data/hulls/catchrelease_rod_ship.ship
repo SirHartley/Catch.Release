@@ -12,7 +12,12 @@
   "shieldRadius": 154.5,
   "viewOffset": 0,
   "builtInMods": [
-    "civgrade"
+    "civgrade",
+    "catchrelease_salvage_bays"
+  ],
+  "builtInWings": [
+    "catchrelease_lyne_wing",
+    "catchrelease_lyne_wing"
   ],
   "weaponSlots": [
     {

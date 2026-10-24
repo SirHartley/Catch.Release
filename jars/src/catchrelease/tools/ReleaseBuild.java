@@ -42,7 +42,7 @@ public final class ReleaseBuild {
             "graphics/catchrelease/icon/AA_LICENSED ICONS look inside.txt",
             "graphics/catchrelease/illustrations/AI-Generated - edits of vanilla illustrations.txt");
     static final Map<String, Set<String>> ASSETS = Map.of(
-            "data", Set.of("csv", "json", "shader", "ship", "wpn", "proj", "system"),
+            "data", Set.of("csv", "json", "shader", "ship", "wpn", "proj", "system", "variant"),
             "graphics", Set.of("png", "jpg", "jpeg"),
             "sounds", Set.of("ogg", "wav"));
     static final LocalDateTime ZIP_TIME = LocalDateTime.of(2000, 1, 1, 0, 0);

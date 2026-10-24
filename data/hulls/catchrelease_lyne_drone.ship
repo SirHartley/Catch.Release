@@ -1,0 +1,26 @@
+{
+	"hullId":"catchrelease_lyne_drone",
+	"hullName":"LYNE Drone",
+	"hullSize":"FIGHTER",
+	"style":"MIDLINE",
+	"spriteName":"graphics/catchrelease/ships/lyne_drone.png",
+	"width":32,
+	"height":30,
+	"center":[16, 15],
+	"collisionRadius":17,
+	"bounds":[13, 0, 4, 14, -13, 14, -13, -14, 4, -14],
+	"shieldCenter":[0, 0],
+	"shieldRadius":17,
+	"viewOffset":0,
+	"engineSlots":[
+		{
+			"angle":180,
+			"contrailSize":48,
+			"length":14,
+			"location":[-13, 0],
+			"style":"MIDLINE",
+			"width":6
+		}
+	],
+	"weaponSlots":[]
+}

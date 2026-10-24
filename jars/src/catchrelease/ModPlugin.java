@@ -1,6 +1,8 @@
 package catchrelease;
 
 import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
+import catchrelease.combat.salvage.LyneDroneAI;
+import catchrelease.combat.salvage.WreckTracker;
 import catchrelease.combat.tug.HarpoonAutofireAI;
 import catchrelease.combat.tug.HarpoonOnHit;
 import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
@@ -48,7 +50,10 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.PluginPick;
 import com.fs.starfarer.api.campaign.CampaignPlugin.PickPriority;
 import com.fs.starfarer.api.combat.AutofireAIPlugin;
+import com.fs.starfarer.api.combat.ShipAIPlugin;
+import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.WeaponAPI;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 
 import java.util.LinkedHashSet;
@@ -67,6 +72,12 @@ public class ModPlugin extends BaseModPlugin {
     public PluginPick<AutofireAIPlugin> pickWeaponAutofireAI(WeaponAPI weapon) {
         if (!HarpoonOnHit.WEAPON_ID.equals(weapon.getId())) return null;
         return new PluginPick<>(new HarpoonAutofireAI(weapon), PickPriority.MOD_SPECIFIC);
+    }
+
+    @Override
+    public PluginPick<ShipAIPlugin> pickShipAI(FleetMemberAPI member, ShipAPI ship) {
+        if (!ship.isFighter() || !ship.getHullSpec().hasTag(WreckTracker.DRONE_TAG)) return null;
+        return new PluginPick<>(new LyneDroneAI(ship), PickPriority.MOD_SPECIFIC);
     }
 
     @Override

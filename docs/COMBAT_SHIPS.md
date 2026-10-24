@@ -57,12 +57,12 @@ Replaces the placeholder system. It uses the tug drive's field: while active it 
 
 ## Reliquary: LYNE Tender
 
-A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. It is parasitic: two built-in wings of LYNE drones and no modular bays, so every other fighter it fields is one it salvaged. The hull has two fighter bays; `LB 1` is the landing bay for towed wrecks, and `LB 2`/`LB 3` stay as launch points. Until the LYNE wing exists, the two bays are empty modular bays.
+A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. It is parasitic: two built-in wings of LYNE drones and no modular bays, so every other fighter it fields is one it salvaged. The hull has two fighter bays. Bay *i* launches from the *i*-th launch-bay slot in the `.ship` file (`obf/loading/specs/_.java:107-133`), so the two LYNE wings launch from `LB 1` and `LB 2`; `LB 3` gets a bay only when the stored wings add bays (stage 6). Towed wrecks land at `LB 1`'s six points.
 
 ### LYNE drones
 
 - Five per wing, unarmed, nimble, low hull, very fast, with a very short replacement time. They need to be fast enough to reach wrecks before they fade.
-- Sprite: vanilla `graphics/ships/munitions_drone.png` for now, as in the campaign.
+- Sprite: `graphics/catchrelease/ships/lyne_drone.png`, a copy of the vanilla drone art the campaign uses (`munitions_drone.png`), for now.
 - Low target priority. A drone counts for 10% of a normal threat (`obf/combat/ai/OO0O.java:2981-2983`); whether autofire also ignores drones is untested.
 - Custom fighter AI, chosen by a hull tag in `ModPlugin.pickShipAI`, which also covers bay-launched fighters.
 
@@ -238,7 +238,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 5: LYNE wing
 
-- [ ] 5.1 Data.
+- [x] 5.1 Data. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). The sprite is `graphics/catchrelease/ships/lyne_drone.png` (32×30), a copy of the drone art.
   - LYNE drone fighter hull: unarmed, fast, nimble, low hull, `munitions_drone.png`.
   - Its variant and a `wing_data.csv` row: 5 drones, very short refit.
   - Two `builtInWings` on the Reliquary.
@@ -248,13 +248,15 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - `beginLandingAnimation` on a wreck.
 
   Fallbacks: if the timer cannot be held, the drone carries a drawn copy (losing the damage overlay); if the landing shrink fails on a wreck, fade it out with the drone.
-- [ ] 5.3 `combat/salvage/WreckTracker`: an `EveryFrameCombatPlugin` active only while a Reliquary is deployed.
+
+  Built straight into 5.3 and 5.4, since no simulator is available to the agent; the author confirms all three in game. Safeguards in place: a missing fade field is logged once and wrecks fade normally; a towed wreck that still collides is logged; a wreck that does not shrink is still removed when the drone lands. Also to confirm: whether `setCollisionClass(NONE)` holds on wrecks whose engines are disabled, since such a fighter reports `SHIP` whatever is set.
+- [x] 5.3 `combat/salvage/WreckTracker`: an `EveryFrameCombatPlugin` active only while a Reliquary is deployed. Implemented with the Reliquary's built-in Salvage Bays hullmod; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). The wreck chance is set from a `HullDamageAboutToBeTakenListener` just before a fighter is hit, rather than by scanning ships.
   - Sets the wreck chance (setting, default 75%) on eligible enemy fighters.
   - Keeps their wrecks for 30 seconds.
   - Hands out claims, one wreck per drone.
   - Applies the blacklist: non-fighters, station modules, drones, shuttle pods; hull tags `threat`, `swarm_fighter`, `fragment`, `dweller`, `monster`; wing tags `restricted`, `independent_of_carrier`.
   - Check: the blacklist rules.
-- [ ] 5.4 `combat/salvage/LyneDroneAI` (`ShipAIPlugin`), picked in `ModPlugin.pickShipAI` by a hull tag.
+- [x] 5.4 `combat/salvage/LyneDroneAI` (`ShipAIPlugin`), picked in `ModPlugin.pickShipAI` by a hull tag. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). The store-full rule waits for the store in 6.1.
   - Cycle: claim → fly → attach → tow (wreck collision class `NONE`) → reach `LB 1` → landing shrink, with hit particles at the bay.
   - Drones ignore wrecks while the store is full.
 - Done when: the drones visibly salvage fighter wrecks in a simulator fight.
