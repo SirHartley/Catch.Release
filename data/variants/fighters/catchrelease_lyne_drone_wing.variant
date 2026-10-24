@@ -1,0 +1,9 @@
+{
+	"displayName":"Salvage",
+	"hullId":"catchrelease_lyne_drone",
+	"variantId":"catchrelease_lyne_drone_wing",
+	"fluxVents":0,
+	"fluxCapacitors":0,
+	"mods":[],
+	"weaponGroups":[],
+}

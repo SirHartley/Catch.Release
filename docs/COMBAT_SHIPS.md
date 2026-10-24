@@ -57,7 +57,7 @@ Replaces the placeholder system. It uses the tug drive's field: while active it 
 
 ## Reliquary: LYNE Tender
 
-A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. It is parasitic: two built-in wings of LYNE drones and no modular bays, so every other fighter it fields is one it salvaged. The hull has two fighter bays; `LB 1` is the landing bay for towed wrecks, and `LB 2`/`LB 3` stay as launch points. Until the LYNE wing exists, the two bays are empty modular bays.
+A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. It is parasitic: two built-in wings of LYNE drones and no modular bays, so every other fighter it fields is one it salvaged. The hull has two fighter bays. Bay *i* launches from the *i*-th launch-bay slot in the `.ship` file (`obf/loading/specs/_.java:107-133`), so the two LYNE wings launch from `LB 1` and `LB 2`; `LB 3` gets a bay only when the stored wings add bays (stage 6). Towed wrecks land at `LB 1`'s six points.
 
 ### LYNE drones
 
@@ -238,7 +238,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 5: LYNE wing
 
-- [ ] 5.1 Data.
+- [x] 5.1 Data. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). The `.ship`'s width, height and centre are placeholders until they are read from the actual `munitions_drone.png`.
   - LYNE drone fighter hull: unarmed, fast, nimble, low hull, `munitions_drone.png`.
   - Its variant and a `wing_data.csv` row: 5 drones, very short refit.
   - Two `builtInWings` on the Reliquary.
