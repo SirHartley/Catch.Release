@@ -483,6 +483,19 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   Each ring respects viewport alpha and culling. Load restores the passive controller
   through the lamp ability's existing advance; it does not save timers or renderers.
 - Neutrino Lens spikes reuse vanilla's detector drawing (`abilities/neutrino_detector` texture, two bands, pulse and outward extrusion), one pass per rarity tinted with `FishRarity.color`; rare is lifted 35% toward white (`RARE_LIFT`) so it shows against space and the cyan ring. Per-vertex alpha follows that rarity's signal and is zero elsewhere. Constants copied from `GraviticScanAbility.render` (0.98a-RC8) must track vanilla if it changes.
+- The Stigmata's combat harpoon rope (`combat/tug/TetherRenderer`) is the mod's only combat-layer
+  renderer: one `BaseCombatLayeredRenderingPlugin` per line on `ABOVE_SHIPS_LAYER`, added with
+  `engine.addLayeredRenderingPlugin`. The engine culls on the returned entity's location and the render
+  radius alone, so the entity is kept at the rope's midpoint with a radius covering the rope; the layer set
+  is read once when added. The rope is two feathered `GL_TRIANGLE_STRIP` bands per side (brown edge from
+  0.35 to 1.25 px, beige-white core to 0.75 px), sized in screen pixels through
+  `convertScreenWidthToWorldWidth(1f)` and widened by a quarter per view mult above 1, with normal blending
+  and GL attributes pushed and popped. It flies out at 35%/25% alpha, materialises over 0.25 s on the bite
+  with a white flash and five `spawnEmpArcVisual` arcs along the rope (both skipped under
+  `Setting.REDUCED_EFFECTS`), and fades over 0.3 s after release. The harpoon head is drawn here with
+  normal blending, because a projectile's `bulletSprite` is always additive; the `.proj` colours are
+  transparent. The shape is `RopeCurve`, the campaign rope's spring and wobble plus a sag.
+  Viewport alpha applies, and pause freezes it (the engine does not advance entities while paused).
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short

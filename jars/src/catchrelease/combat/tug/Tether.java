@@ -3,6 +3,7 @@ package catchrelease.combat.tug;
 import catchrelease.config.Setting;
 import com.fs.starfarer.api.combat.BoundsAPI;
 import com.fs.starfarer.api.combat.CombatEngineAPI;
+import com.fs.starfarer.api.combat.CombatEntityAPI;
 import com.fs.starfarer.api.combat.DamagingProjectileAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.ShipAPI;
@@ -39,6 +40,7 @@ public class Tether {
     private ShipAPI target;
     private final Vector2f localPoint = new Vector2f();
     private float length;
+    private float headAngle;
     private boolean targetWasHulk;
     private float age;
 
@@ -53,12 +55,15 @@ public class Tether {
         this.weapon = weapon;
         this.tug = weapon.getShip();
         this.shot = shot;
+        CombatEntityAPI rendered = engine.addLayeredRenderingPlugin(new TetherRenderer(this));
+        rendered.getLocation().set(getMountPoint());
     }
 
-    void attach(ShipAPI target, Vector2f point) {
+    void attach(ShipAPI target, Vector2f point, float facing) {
         if (state != State.FLIGHT) return;
         this.target = target;
         toLocal(target, point, localPoint);
+        headAngle = facing - target.getFacing();
         length = Math.max(MIN_LENGTH, Vector2f.sub(point, getMountPoint(), null).length());
         targetWasHulk = target.isHulk();
         shot = null;
@@ -225,6 +230,11 @@ public class Tether {
 
     public float getLength() {
         return length;
+    }
+
+    // The head's angle at impact, relative to the target's facing.
+    public float getHeadAngle() {
+        return headAngle;
     }
 
     public float getAge() {

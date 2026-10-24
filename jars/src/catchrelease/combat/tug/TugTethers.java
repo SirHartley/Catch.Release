@@ -53,7 +53,7 @@ public class TugTethers extends BaseEveryFrameCombatPlugin {
 
     void attach(DamagingProjectileAPI shot, ShipAPI target, Vector2f point) {
         Tether tether = inFlight(shot);
-        if (tether != null) tether.attach(target, point);
+        if (tether != null) tether.attach(target, point, shot.getFacing());
     }
 
     public Tether getTether(ShipAPI tug) {

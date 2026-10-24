@@ -8,9 +8,8 @@
 	"width":12.0,
 	"fadeTime":0.3,
 	"passThroughMissiles":true,
-	"fringeColor":[255,240,220,255],
-	"coreColor":[255,255,255,255],
+	"fringeColor":[0,0,0,0],
+	"coreColor":[0,0,0,0],
 	"hitGlowRadius":40,
-	"onHitEffect":"catchrelease.combat.tug.HarpoonOnHit",
-	"bulletSprite":"graphics/catchrelease/weapons/harpoon_projectile.png"
+	"onHitEffect":"catchrelease.combat.tug.HarpoonOnHit"
 }
