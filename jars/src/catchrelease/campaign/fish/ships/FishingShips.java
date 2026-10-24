@@ -187,7 +187,7 @@ public final class FishingShips {
 
         Set<Ship> aboard = scan(fleet);
         Set<String> present = getPresent();
-        purgeFighterStores(fleet);
+        tidyFighterStores(fleet);
 
         Set<String> before = new LinkedHashSet<>(present);
         for (Ship ship : Ship.values()) {
@@ -258,10 +258,10 @@ public final class FishingShips {
     }
 
     // A Reliquary's recovered fighters go with the ship: a store whose ship left the fleet is dropped.
-    protected static void purgeFighterStores(CampaignFleetAPI fleet) {
+    protected static void tidyFighterStores(CampaignFleetAPI fleet) {
         Set<String> ids = new HashSet<>();
         for (FleetMemberAPI member : fleet.getFleetData().getMembersListCopy()) ids.add(member.getId());
-        FighterStore.purge(ids);
+        FighterStore.tidy(ids);
     }
 
     protected static Set<Ship> scan(CampaignFleetAPI fleet) {

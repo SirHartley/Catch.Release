@@ -1,7 +1,9 @@
 package catchrelease.combat.tug;
 
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BaseCampaignEventListener;
+import com.fs.starfarer.api.campaign.CampaignEventListener;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
-import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
 import com.fs.starfarer.api.combat.BaseHullMod;
 import com.fs.starfarer.api.combat.HullModFleetEffect;
@@ -17,9 +19,6 @@ public class TugDriveHullmod extends BaseHullMod implements HullModFleetEffect {
     public static final float BURN_PER_TUG = 1f;
     public static final float FIRST_ACCELERATION_BONUS = 0.2f;
 
-    // Counted on fleet sync so the every-frame hook, which runs for every fleet, is one memory read for
-    // fleets without a tug.
-    static final String TUG_COUNT_KEY = "$catchrelease_tugFieldCount";
     static final String MOD_KEY = "catchrelease_tug_field";
     private static final String MOD_DESC = "Tug Drive Field";
 
@@ -34,33 +33,21 @@ public class TugDriveHullmod extends BaseHullMod implements HullModFleetEffect {
         return true;
     }
 
+    // Fleet burn and acceleration stats take effect in the frame they are set, unlike ship stats, which only reach
+    // the fleet at the next sync; BurnWatch reapplies the player's bonus when Sustained Burn changes. Only the player
+    // is given a Stigmata, so another fleet's bonus follows Sustained Burn at its next sync.
     @Override
     public void onFleetSync(CampaignFleetAPI fleet) {
-        int tugs = 0;
-        for (FleetMemberAPI member : fleet.getFleetData().getMembersListCopy()) {
-            if (!member.isMothballed() && member.getVariant().hasHullMod(ID)) tugs++;
-        }
-        MemoryAPI memory = fleet.getMemoryWithoutUpdate();
-        if (tugs > 0) {
-            memory.set(TUG_COUNT_KEY, tugs);
-        } else if (memory.contains(TUG_COUNT_KEY)) {
-            memory.unset(TUG_COUNT_KEY);
-            remove(fleet.getStats());
-        }
+        apply(fleet.getStats(), countTugs(fleet), isSustainedBurnActive(fleet));
     }
 
     @Override
     public boolean withAdvanceInCampaign() {
-        return true;
+        return false;
     }
 
-    // Fleet burn and acceleration stats take effect in the frame they are set, unlike ship stats, which
-    // only reach the fleet at the next sync; that is what lets the bonus follow Sustained Burn.
     @Override
     public void advanceInCampaign(CampaignFleetAPI fleet) {
-        MemoryAPI memory = fleet.getMemoryWithoutUpdate();
-        if (!memory.contains(TUG_COUNT_KEY)) return;
-        apply(fleet.getStats(), memory.getInt(TUG_COUNT_KEY), isSustainedBurnActive(fleet));
     }
 
     public static void apply(MutableFleetStatsAPI stats, int tugs, boolean sustainedBurn) {
@@ -83,9 +70,53 @@ public class TugDriveHullmod extends BaseHullMod implements HullModFleetEffect {
         stats.getAccelerationMult().unmodifyMult(MOD_KEY);
     }
 
+    private static int countTugs(CampaignFleetAPI fleet) {
+        int tugs = 0;
+        for (FleetMemberAPI member : fleet.getFleetData().getMembersListCopy()) {
+            if (!member.isMothballed() && member.getVariant().hasHullMod(ID)) tugs++;
+        }
+        return tugs;
+    }
+
     private static boolean isSustainedBurnActive(CampaignFleetAPI fleet) {
         AbilityPlugin burn = fleet.getAbility(Abilities.SUSTAINED_BURN);
         return burn != null && burn.isActive();
+    }
+
+    // Sustained Burn turns on and off only in activate and deactivate, which report the player fleet's toggles
+    // (BaseAbilityPlugin), so the player's bonus never needs a per-frame check. Transient: re-added on every load.
+    public static class BurnWatch extends BaseCampaignEventListener {
+
+        public BurnWatch() {
+            super(false);
+        }
+
+        public static void register() {
+            for (CampaignEventListener listener : Global.getSector().getAllListeners()) {
+                if (listener instanceof BurnWatch) Global.getSector().removeListener(listener);
+            }
+            Global.getSector().addTransientListener(new BurnWatch());
+            refresh();
+        }
+
+        @Override
+        public void reportPlayerActivatedAbility(AbilityPlugin ability, Object param) {
+            if (isSustainedBurn(ability)) refresh();
+        }
+
+        @Override
+        public void reportPlayerDeactivatedAbility(AbilityPlugin ability, Object param) {
+            if (isSustainedBurn(ability)) refresh();
+        }
+
+        private static boolean isSustainedBurn(AbilityPlugin ability) {
+            return ability != null && Abilities.SUSTAINED_BURN.equals(ability.getId());
+        }
+
+        private static void refresh() {
+            CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+            if (fleet != null) apply(fleet.getStats(), countTugs(fleet), isSustainedBurnActive(fleet));
+        }
     }
 
     @Override

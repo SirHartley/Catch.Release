@@ -10,6 +10,7 @@ import com.fs.starfarer.api.input.InputEventAPI;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 // Recovered fighters out on a launch, one per battle in the engine's custom data. They have no source bay, because a
@@ -59,19 +60,20 @@ public class RecoveredWings extends BaseEveryFrameCombatPlugin {
     @Override
     public void advance(float amount, List<InputEventAPI> events) {
         if (engine.isPaused()) return;
-        out.removeIf(recovered -> {
-            if (recovered.landed) return true;
+        Iterator<Recovered> iterator = out.iterator();
+        while (iterator.hasNext()) {
+            Recovered recovered = iterator.next();
             ShipAPI fighter = recovered.fighter;
-            if (!engine.isEntityInPlay(fighter) || fighter.isHulk() || !fighter.isAlive()) {
+            if (recovered.landed) {
+                iterator.remove();
+            } else if (!engine.isEntityInPlay(fighter) || fighter.isHulk() || !fighter.isAlive()) {
                 recovered.store.destroyed(recovered.wingId);
-                return true;
-            }
-            if (!recovered.returning && shouldReturn(recovered)) {
+                iterator.remove();
+            } else if (!recovered.returning && shouldReturn(recovered)) {
                 recovered.returning = true;
                 fighter.setShipAI(new ReturnAI(recovered));
             }
-            return false;
-        });
+        }
     }
 
     private boolean shouldReturn(Recovered recovered) {

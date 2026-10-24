@@ -8,6 +8,7 @@ import com.fs.starfarer.api.combat.DamagingProjectileAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.WeaponAPI;
+import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.CollisionUtils;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -39,6 +40,9 @@ public class Tether {
 
     private ShipAPI target;
     private final Vector2f localPoint = new Vector2f();
+    private final Vector2f mount = new Vector2f();
+    private final Vector2f point = new Vector2f();
+    private final Vector2f normal = new Vector2f();
     private float length;
     private float headAngle;
     private boolean targetWasHulk;
@@ -56,7 +60,7 @@ public class Tether {
         this.tug = weapon.getShip();
         this.shot = shot;
         CombatEntityAPI rendered = engine.addLayeredRenderingPlugin(new TetherRenderer(this));
-        rendered.getLocation().set(getMountPoint());
+        getMountPoint(rendered.getLocation());
     }
 
     void attach(ShipAPI target, Vector2f point, float facing) {
@@ -64,7 +68,7 @@ public class Tether {
         this.target = target;
         toLocal(target, point, localPoint);
         headAngle = facing - target.getFacing();
-        length = Math.max(MIN_LENGTH, Vector2f.sub(point, getMountPoint(), null).length());
+        length = Math.max(MIN_LENGTH, Misc.getDistance(point, getMountPoint(mount)));
         targetWasHulk = target.isHulk();
         shot = null;
         state = State.ATTACHED;
@@ -98,15 +102,14 @@ public class Tether {
             return;
         }
 
-        Vector2f mount = getMountPoint();
-        Vector2f point = getTargetPoint();
-        boolean taut = Vector2f.sub(point, mount, null).length() > length;
+        getMountPoint(mount);
+        getTargetPoint(point);
+        boolean taut = Misc.getDistance(point, mount) > length;
         if (taut && Setting.HARPOON_ROPE_HULL_BREAK.enabled() && crossesTugHull(point, mount)) {
             release();
             return;
         }
 
-        Vector2f normal = new Vector2f();
         float impulse = solve(mount, point, tug.getVelocity(), target.getVelocity(),
                 inverseMass(tug), inverseMass(target), length, normal);
         if (impulse > 0f) {
@@ -172,12 +175,13 @@ public class Tether {
         return Math.max(0f, allowance - SPEED_ALLOWANCE_DECAY * amount);
     }
 
-    public Vector2f getMountPoint() {
-        return new Vector2f(weapon.getFirePoint(0));
+    public Vector2f getMountPoint(Vector2f out) {
+        out.set(weapon.getFirePoint(0));
+        return out;
     }
 
-    public Vector2f getTargetPoint() {
-        return toWorld(target, localPoint, new Vector2f());
+    public Vector2f getTargetPoint(Vector2f out) {
+        return toWorld(target, localPoint, out);
     }
 
     static void toLocal(ShipAPI ship, Vector2f world, Vector2f out) {

@@ -11,6 +11,7 @@ import com.fs.starfarer.api.combat.EmpArcEntityAPI;
 import com.fs.starfarer.api.combat.EmpArcEntityAPI.EmpArcParams;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -48,6 +49,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
 
     private final Tether tether;
     private final RopeCurve curve = new RopeCurve();
+    private final SpriteAPI head = Global.getSettings().getSprite("catchrelease", "harpoon_head");
     private final Vector2f mount = new Vector2f();
     private final Vector2f end = new Vector2f();
     private final Vector2f headTip = new Vector2f();
@@ -62,9 +64,9 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     TetherRenderer(Tether tether) {
         super(CombatEngineLayers.ABOVE_SHIPS_LAYER);
         this.tether = tether;
-        mount.set(tether.getMountPoint());
+        tether.getMountPoint(mount);
         updateHead();
-        ropeLength = Vector2f.sub(end, mount, null).length();
+        ropeLength = Misc.getDistance(end, mount);
     }
 
     @Override
@@ -80,9 +82,9 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         if (state == Tether.State.RELEASED && seen != Tether.State.RELEASED) releaseTime = 0f;
         seen = state;
 
-        if (engine.isEntityInPlay(tether.getTug())) mount.set(tether.getMountPoint());
+        if (engine.isEntityInPlay(tether.getTug())) tether.getMountPoint(mount);
         updateHead();
-        float chord = Vector2f.sub(end, mount, null).length();
+        float chord = Misc.getDistance(end, mount);
         if (state == Tether.State.FLIGHT) ropeLength = Math.max(ropeLength, chord * PAYOUT);
         else if (state == Tether.State.ATTACHED) ropeLength = tether.getLength();
         curve.advance(mount, end, ropeLength, amount);
@@ -104,7 +106,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
             headAngle = shot.getFacing();
             shotVelocity.set(shot.getVelocity());
         } else if (target != null && Global.getCombatEngine().isEntityInPlay(target)) {
-            headTip.set(tether.getTargetPoint());
+            tether.getTargetPoint(headTip);
             headAngle = target.getFacing() + tether.getHeadAngle();
             headTip.translate(dirX(headAngle) * EMBED, dirY(headAngle) * EMBED);
         }
@@ -137,7 +139,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
 
     @Override
     public float getRenderRadius() {
-        return 0.5f * Vector2f.sub(end, mount, null).length() + 0.5f * ropeLength + 100f;
+        return 0.5f * Misc.getDistance(end, mount) + 0.5f * ropeLength + 100f;
     }
 
     @Override
@@ -159,7 +161,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         float pixel = viewport.convertScreenWidthToWorldWidth(1f)
                 * (1f + 0.25f * Math.max(0f, viewport.getViewMult() - 1f));
         boolean taut = tether.getState() == Tether.State.ATTACHED
-                && Vector2f.sub(end, mount, null).length() >= ropeLength;
+                && Misc.getDistance(end, mount) >= ropeLength;
         Vector2f[] path = curve.getPath(mount, end, ropeLength, taut);
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
@@ -206,13 +208,12 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     }
 
     private void renderHead(float alpha) {
-        SpriteAPI sprite = Global.getSettings().getSprite("catchrelease", "harpoon_head");
-        if (sprite == null) return;
+        if (head == null) return;
         float half = HEAD_LENGTH * 0.5f;
-        sprite.setNormalBlend();
-        sprite.setAlphaMult(alpha);
-        sprite.setAngle(headAngle - 90f);
-        sprite.renderAtCenter(headTip.x - dirX(headAngle) * half, headTip.y - dirY(headAngle) * half);
+        head.setNormalBlend();
+        head.setAlphaMult(alpha);
+        head.setAngle(headAngle - 90f);
+        head.renderAtCenter(headTip.x - dirX(headAngle) * half, headTip.y - dirY(headAngle) * half);
     }
 
     private static float dirX(float degrees) {
