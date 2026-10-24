@@ -217,7 +217,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 3: drive system
 
-- [x] 3.1 `catchrelease_tug_drive` (Haul Drive) with `combat/tug/TugDriveStats` (`BaseShipSystemScript`). Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). It uses vanilla's maneuvering-jets system AI until 4.3.
+- [x] 3.1 `catchrelease_tug_drive` (Haul Drive) with `combat/tug/TugDriveStats` (`BaseShipSystemScript`). Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug).
   - **Stats while active:** raised mass (`setMass`, restored in `unapply`), acceleration, turn acceleration and turn rate.
   - **Visuals:** `extendFlame` and `fadeToOtherColor` on the engines, dark `addNebulaSmokeParticle` smoke from the nozzles.
   - **Uses:** charges through `max uses`/`regen`.
@@ -233,7 +233,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - v1 drags the target toward friendly ships and away from the strongest enemy group.
   - Study Ed Shipyards and Knights of Ludd for movement-override patterns first.
   - Implemented in `TugPilot`; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). Knights of Ludd's pattern: give the wanted movement commands and block the rest from an `AdvanceableListener`.
-- [ ] 4.3 `ShipSystemAIScript` for the drive: use it when the rope is taut and the target resists, or to escape.
+- [x] 4.3 `ShipSystemAIScript` for the drive: use it when the rope is taut and the target resists, or to escape. Implemented as `TugDriveAI`; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug).
 - Done when: an AI Stigmata in the simulator hooks sensible targets and drags them somewhere useful.
 
 ### Stage 5: LYNE wing

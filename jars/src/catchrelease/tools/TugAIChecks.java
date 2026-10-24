@@ -2,6 +2,7 @@ package catchrelease.tools;
 
 import catchrelease.combat.tug.HarpoonAutofireAI;
 import catchrelease.combat.tug.HarpoonAutofireAI.Shield;
+import catchrelease.combat.tug.TugDriveAI;
 import catchrelease.combat.tug.TugPilot;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -51,7 +52,15 @@ public final class TugAIChecks {
             require(Math.abs(heading.length() - 1f) < 1e-4f, "Heading is not a unit vector");
         }
 
-        System.out.println("Tug AI checks: harpoon target scoring, line-of-fire distance and drag heading passed");
+        require(!TugDriveAI.shouldHaul(false, 5f, 200f), "Hauled on a slack line");
+        require(TugDriveAI.shouldHaul(true, 2f, 0f), "Did not haul a heavy catch");
+        require(TugDriveAI.shouldHaul(true, 0.3f, 50f), "Did not haul a light catch pulling away");
+        require(!TugDriveAI.shouldHaul(true, 0.3f, 0f), "Hauled a light catch that follows");
+        require(TugDriveAI.shouldEscape(0.2f, true) && !TugDriveAI.shouldEscape(0.2f, false)
+                && !TugDriveAI.shouldEscape(0.9f, true), "Escape rule changed");
+
+        System.out.println("Tug AI checks: harpoon target scoring, line-of-fire distance, drag heading and drive"
+                + " use passed");
     }
 
     private static boolean near(Vector2f v, float x, float y) {
