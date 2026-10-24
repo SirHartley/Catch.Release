@@ -4,6 +4,7 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
+import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -123,19 +124,21 @@ public final class EpicHunt {
             mote.setExpired(true);
             reportReset(mote);
         } else if (Misc.getDistance(mote.getLocation(), player.getLocation()) > RESET_RANGE) {
-            announceLost(fish, player);
+            announceLost(fish);
             fish.setEpicStage(false, fish.isEpicShieldSpent());
             fish.shortenSwim(DRIFT_OFF_DISTANCE);
             reportReset(mote);
         }
     }
 
-    // A fish that far off is usually out of sight, so the notice goes over the player's fleet instead.
-    protected static void announceLost(FishEntityPlugin fish, CampaignFleetAPI player) {
-        SectorEntityToken mote = fish.getMote();
-        SectorEntityToken at = mote.isVisibleToPlayerFleet() ? mote : player;
+    // One campaign message per reset: a Fisherman chain epic's quest posts its own when it hears the reset.
+    protected static void announceLost(FishEntityPlugin fish) {
+        if (FishermanChain.isPlanter(QuestPond.getPlanter(fish.getMote()))) return;
 
-        LegendaryShields.say(at, "Lost - Out of range", LegendaryShields.getShieldColor(fish));
+        FishSpec spec = fish.getFishSpec();
+        String name = spec == null ? "epic" : spec.getDisplayName();
+        Global.getSector().getCampaignUI().addMessage("The " + name + " got out of range and drifted off.",
+                Misc.getTextColor(), name, null, FishRarity.EPIC.color, null);
     }
 
     public static void reportReset(SectorEntityToken mote) {
