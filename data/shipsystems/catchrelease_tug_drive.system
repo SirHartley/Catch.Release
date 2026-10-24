@@ -1,0 +1,26 @@
+{
+	"id":"catchrelease_tug_drive",
+	"type":"ENGINE_MOD",
+	"aiType":"MANEUVERING_JETS",
+
+	"statsScript":"catchrelease.combat.tug.TugDriveStats",
+
+	"engineGlowLengthMult":1,
+	"engineGlowWidthMult":1,
+	"engineGlowGlowMult":1,
+
+	"flameoutOnImpactChance":0,
+
+	"clampTurnRateAfter":true,
+	"clampMaxSpeedAfter":false,
+
+	"useSound":"system_maneuvering_jets",
+	"loopSound":"system_maneuvering_jets_loop",
+	"outOfUsesSound":"engine_disabled",
+
+	"aiHints":{
+		"activeSpeedIncrease":0,
+		"burstMovementPotential":0,
+		"averageSpeedIncrease":0,
+	}
+}
