@@ -84,6 +84,7 @@ Engine limits:
 
 ### Recovered fighters
 
+- **Store size:** a Reliquary holds at most 10 recovered fighters, counting those still being restored. The limit is a setting (LunaLib, Ruptures & Exploration or a new combat section). While the store is full, the drones ignore wrecks.
 - **Restoration:** a recovered fighter is restored like a normal replacement (its wing's refit time and the ship's refit modifiers, with the usual CR rules), then waits in the store.
 - **Launch system:** launches every stored fighter at the target for an attack run. Fighters of one type form wings up to their wing size, and never more instances than were recovered: one recovered Broadsword launches as one, two as two.
 - **After launch:** they behave like normal fighters, return and land. A destroyed one is gone and leaves no wreck (`setHulkChanceOverride(0)` on every fighter the Reliquary launches), so no fighter is salvaged twice.
@@ -106,6 +107,7 @@ Engine limits:
   - **Refitting is otherwise unaffected:** weapons, hullmods, S-mods and OP are identical on the copy. Autofit fills only modular bays. Saving a variant skips built-in wings. The stats panel shows the extra bays while the refit is open.
   - **Fallback:** the built-in hullmod's tooltip (`HullModEffect.addPostDescriptionSection`, with the refit `ShipAPI` and its `getFleetMemberId()`) also lists the store, with sprites, counts and restoration progress. It is the fallback whenever the swap is not in place.
   - **Rejected:** drawing on the refit screen has no API hook. A PatchLib redirect of `isBuiltInWing` would need many fragile call-site patches.
+- **Discarding stored fighters:** the player removes fighters they do not want through a LunaLib refit button on each Reliquary. LunaLib 2.0.1 (`lib/Lazylib_lunalib.zip`) has `lunalib.lunaRefit.BaseRefitButton`, registered with `LunaRefitManager.addRefitButton`. Its `shouldShow(member, variant, market)` limits it to Reliquaries, and `hasPanel`/`initPanel(CustomPanelAPI, …)` opens a custom panel listing the store with a discard control per fighter. After a change, `refreshVariant()` updates the ship, so the refit swap is rebuilt from the new store. A discarded fighter is gone; it gives no LPC. The panel is player-facing UI, so `UI.md` and the text route apply. The button's `advance` and `onPanelClose` may also be usable to detect the refit closing in place of the polling script; that is unverified.
 - **Persistence:** the store carries over between battles, kept per ship. Variant ids are shared by every ship of a stock variant, so key it by fleet member id. Purge it when the ship leaves the player's fleet, for example into storage.
 - **AI:** fire when enough fighters are stored and a target in range is worth it.
 
@@ -177,7 +179,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 **Stage 6: recovered fighters**
 - [ ] 6.1 Store, restoration and persistence per fleet member.
-- [ ] 6.2 Combat status display; refit spec swap with the restore guard; hullmod tooltip fallback.
+- [ ] 6.2 Combat status display; refit spec swap with the restore guard; hullmod tooltip fallback; LunaLib refit button and panel to discard stored fighters.
 - [ ] 6.3 Launch system and its AI.
 - [ ] 6.4 Early Reliquary skin: combat code matches it through its base hull id.
 
