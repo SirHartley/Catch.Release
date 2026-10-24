@@ -71,6 +71,8 @@ public class Tether {
     }
 
     void release() {
+        if (state == State.RELEASED) return;
+        if (weapon.getEffectPlugin() instanceof HarpoonWeaponEffect effect) effect.onReleased();
         if (state == State.ATTACHED) {
             tug.getMutableStats().getMaxSpeed().unmodifyFlat(speedKey);
             target.getMutableStats().getMaxSpeed().unmodifyFlat(speedKey);

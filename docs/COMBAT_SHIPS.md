@@ -213,7 +213,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - **Flight and bite:** low alpha in flight, then it "materialises" on the bite, with EMP arcs racing along the rope.
   - Done when: the rope reads clearly at all zooms and looks right slack and taut.
   - Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug) and [UI.md](UI.md#drawing-gotchas). The renderer also draws the harpoon head, since a bullet sprite is always additive.
-- [ ] 2.5 Turret return polish and any feel tuning found in 2.3–2.4.
+- [x] 2.5 Turret return polish and any feel tuning found in 2.3–2.4. The return is implemented ([ARCHITECTURE.md](ARCHITECTURE.md#combattug)); feel tuning waits for the author's in-game test.
 
 ### Stage 3: drive system
 

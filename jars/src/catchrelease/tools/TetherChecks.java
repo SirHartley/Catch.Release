@@ -1,5 +1,6 @@
 package catchrelease.tools;
 
+import catchrelease.combat.tug.HarpoonWeaponEffect;
 import catchrelease.combat.tug.Tether;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -48,7 +49,26 @@ public final class TetherChecks {
                 "Allowance did not decay once slack: " + allowance);
         require(Tether.nextAllowance(0f, 80f, 100f, true, 1f / 60f) == 0f, "Allowance given below top speed");
 
-        System.out.println("Tether checks: slack, closing, mass split, stretch correction and speed allowance passed");
+        float frame = 1f / 60f;
+        require(Math.abs(HarpoonWeaponEffect.returnStep(170f, frame) - HarpoonWeaponEffect.MAX_RETURN_SPEED * frame)
+                < 1e-4f, "Wide return not capped");
+        require(Math.abs(HarpoonWeaponEffect.returnStep(-2f, frame) + HarpoonWeaponEffect.MIN_RETURN_SPEED * frame)
+                < 1e-4f, "Small return below the minimum speed or wrong way");
+        require(HarpoonWeaponEffect.returnStep(0.2f, frame) == 0.2f, "Return overshot the slot angle");
+        float angle = 90f;
+        float previousStep = Float.MAX_VALUE;
+        int frames = 0;
+        while (Math.abs(angle) > HarpoonWeaponEffect.SETTLED && frames < 600) {
+            float step = Math.abs(HarpoonWeaponEffect.returnStep(-angle, frame));
+            require(step <= previousStep + 1e-4f, "Return sped up on the way in");
+            previousStep = step;
+            angle -= step;
+            frames++;
+        }
+        require(frames > 6 && frames < 60, "90 degree return took " + frames + " frames");
+
+        System.out.println("Tether checks: slack, closing, mass split, stretch correction, speed allowance"
+                + " and turret return passed");
     }
 
     private static void require(boolean condition, String message) {
