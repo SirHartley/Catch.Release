@@ -273,7 +273,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - Spawns every restored fighter with `spawnShipOrWing`, groups them into wings, removes surplus members, sets the source ship (no source bay) and CR, and calls `removeDeployed` on the spawned wing.
   - Every launched fighter gets `setHulkChanceOverride(0)`.
   - Landed fighters go back into the store; destroyed ones are gone.
-- [ ] 6.3 `ShipSystemAIScript` for the launch: fire when enough fighters are restored and a target in range is worth it.
+- [x] 6.3 `ShipSystemAIScript` for the launch: fire when enough fighters are restored and a target in range is worth it. Implemented as `SalvageLaunchAI`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
 - [ ] 6.4 Combat status display: one `maintainStatusForPlayerShip` line per stored type, or a richer `renderInUICoords` panel. Fable research first.
 - [ ] 6.5 Refit display, in this order:
   1. **Spike** the spec `clone()` through `MethodHandles` and whether `reportAboutToOpenCoreTab` fires when the core UI opens straight into the refit.

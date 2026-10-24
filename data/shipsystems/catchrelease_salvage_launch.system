@@ -1,7 +1,8 @@
 {
 	"id":"catchrelease_salvage_launch",
 	"type":"STAT_MOD",
-	"aiType":"RESERVE_DEPLOYMENT",
+	"aiType":"CUSTOM",
+	"aiScript":"catchrelease.combat.salvage.SalvageLaunchAI",
 
 	"runScriptWhileIdle":true,
 

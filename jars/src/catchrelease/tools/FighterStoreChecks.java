@@ -2,6 +2,7 @@ package catchrelease.tools;
 
 import catchrelease.combat.salvage.FighterStore;
 import catchrelease.combat.salvage.FighterStore.Group;
+import catchrelease.combat.salvage.SalvageLaunchAI;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,7 +48,14 @@ public final class FighterStoreChecks {
         List<Group> wasps = FighterStore.group(counts, sizes::get);
         require(wasps.size() == 3 && wasps.get(2).count() == 1, "Grouping split wrong: " + wasps);
 
-        System.out.println("Fighter store checks: cap, restoration, launch grouping, return and loss passed");
+        require(!SalvageLaunchAI.shouldLaunch(5, 0, false), "Launched with nothing in reach");
+        require(!SalvageLaunchAI.shouldLaunch(0, 3, true), "Launched an empty store");
+        require(!SalvageLaunchAI.shouldLaunch(1, 2, true), "Launched one fighter while others restore");
+        require(SalvageLaunchAI.shouldLaunch(1, 0, true), "Held the last fighter back");
+        require(SalvageLaunchAI.shouldLaunch(2, 4, true), "Held two ready fighters back");
+
+        System.out.println("Fighter store checks: cap, restoration, launch grouping, return, loss and launch rule"
+                + " passed");
     }
 
     private static void require(boolean condition, String message) {
