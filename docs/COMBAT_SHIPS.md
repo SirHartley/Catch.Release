@@ -33,7 +33,7 @@ Implementation route: `HullModFleetEffect.advanceInCampaign(fleet)` writes `getF
 
 ### Harpoon
 
-A built-in weapon on `WS0001` with regenerating charges (`ammo`, `ammo/sec`, `reload size` in `weapon_data.csv`). Prefix its ids: vanilla already uses `harpoon` for a missile. The projectile sprite is still to come; until then use a copy of a vanilla missile sprite, renamed into the mod's graphics.
+A built-in weapon on `WS0001` with regenerating charges (`ammo`, `ammo/sec`, `reload size` in `weapon_data.csv`). Prefix its ids: vanilla already uses `harpoon` for a missile. The projectile sprite is still to come; until then use a renamed copy of the vanilla Harpoon missile's sprite (plan step 0.4).
 
 - **Damage:** it does real damage, as a harpoon should. Non-zero damage also matters technically: `OnHitEffectPlugin` reports `shieldHit` only when shield damage was dealt (`obf/combat/entities/BallisticProjectile.java:255-257`).
 - **Hits:** a shield hit glances off; only a hull or armour hit attaches. A deflected harpoon is a new projectile spawned at the hit point (`engine.spawnProjectile`); vanilla has no ricochet.
@@ -75,8 +75,8 @@ A classic midline carrier cruiser: slow and cumbersome, with high crew capacity.
 Engine limits:
 
 - **Wreck chance.** A dying fighter leaves a wreck only 50% of the time (`Ship.java:4821-4828`). `setHulkChanceOverride` raises it; use an adjustable setting, default 75%, for enemy fighters while a Reliquary is deployed.
-- **Wreck lifetime.** Every fighter wreck fades about 10.5 seconds after it appears (`Ship.java:215-216`, `1962-1972`), whatever `setAlphaMult` says.
-- **Damage overlay.** The towed wreck should keep its damage decals. Keeping the real wreck does that; a drawn copy would lose them. Keeping it means resetting its private `timeBeforeFade` each frame by reflection (the class and field names are stable) and setting its collision class to `NONE` while it is towed.
+- **Wreck lifetime.** Every fighter wreck fades about 10.5 seconds after it appears (`Ship.java:215-216`, `1962-1972`), whatever `setAlphaMult` says. While a Reliquary is deployed, a combat script extends every eligible fighter wreck to 30 seconds with the same once-a-second top-up of `timeBeforeFade`, so the drones have time to reach them.
+- **Damage overlay.** The towed wreck should keep its damage decals. Keeping the real wreck does that; a drawn copy would lose them. Keeping it means topping up its private `timeBeforeFade` by reflection once a second (the class and field names are stable; the countdown starts at 10 seconds, so a one-second interval never lets it run out) and setting its collision class to `NONE` while it is towed.
 - **Blacklist.**
   - Skip anything that is not a fighter, station or armour modules, drones and shuttle pods.
   - Skip hulls tagged `threat`, `swarm_fighter`, `fragment`, `dweller` or `monster`. Threat swarms and Dweller ships never leave wrecks anyway.
@@ -86,7 +86,7 @@ Engine limits:
 
 - **Restoration:** a recovered fighter is restored like a normal replacement (its wing's refit time and the ship's refit modifiers, with the usual CR rules), then waits in the store.
 - **Launch system:** launches every stored fighter at the target for an attack run. Fighters of one type form wings up to their wing size, and never more instances than were recovered: one recovered Broadsword launches as one, two as two.
-- **After launch:** they behave like normal fighters, return and land. A destroyed one is gone, though its wreck can be salvaged again.
+- **After launch:** they behave like normal fighters, return and land. A destroyed one is gone and leaves no wreck (`setHulkChanceOverride(0)` on every fighter the Reliquary launches), so no fighter is salvaged twice.
 - **Bays cannot rebuild them.** A launch bay only builds its own wing's type (`obf/combat/entities/ship/A/C.java:47, 63, 346-410`) and deletes a fighter that lands. So the system spawns them itself:
   - spawn with `CombatFleetManagerAPI.spawnShipOrWing`;
   - set the Reliquary as source ship;
@@ -114,7 +114,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ## Dependencies
 
-- MagicLib in `lib/MagicLib.zip` is 1.3.9 for 0.97a. `MagicSubsystem` needs a current MagicLib (1.5.6, for 0.98a-RC7); update `lib/` before using it.
+- `lib/MagicLib.zip` is MagicLib 1.5.6 (for 0.98a-RC7), which has `MagicSubsystem`. `mod_info.json` pins no MagicLib version; pin one if the mod comes to depend on `MagicSubsystem`.
 - No part of this design needs PatchLib.
 
 ## Open questions
@@ -130,8 +130,8 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 **Stage 0: data and dependencies**
 - [x] 0.1 New designations: LYNE Tender, Breach Trawler.
 - [x] 0.2 Stigmata and Reliquary stats in `ship_data.csv`; placeholder systems.
-- [ ] 0.3 Update `lib/MagicLib.zip`.
-- [ ] 0.4 Placeholder harpoon projectile sprite.
+- [x] 0.3 Update `lib/MagicLib.zip`.
+- [ ] 0.4 Placeholder harpoon projectile sprite: a renamed copy of vanilla `graphics/missiles/missile_harpoon.png` (10×22, centre 5,12, from `harpoon_mrm.proj`) under `graphics/catchrelease/weapons/`. The file has to come from the game install.
 
 **Stage 1: tug hullmod**
 - [ ] 1.1 Hullmod with the fleet effect, Sustained Burn check and diminishing acceleration.
