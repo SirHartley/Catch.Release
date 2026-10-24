@@ -200,7 +200,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 | Monstrance-class Breach Trawler, cruiser ("presents the sacred for all to see") | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
 | Reliquary-class LYNE Tender, cruiser ("keeps implements") | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module): each time every drone has returned, the drones deploy again, until the player recalls them or they can no longer fish there (both the pond swarm and the roaming swarm) |
 
-The names are decided; the quoted notes are the author's meaning for each name, not player-facing text. The Stigmata (`catchrelease_harpoon_ship`) and Reliquary (`catchrelease_rod_ship`) have their real hulls and stats; the Monstrance (`catchrelease_lamp_ship`) stays a full copy of the vanilla Nebula until its art exists. See [ARCHITECTURE.md](ARCHITECTURE.md) for their data. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
+The names are decided; the quoted notes are the author's meaning for each name, not player-facing text. The Stigmata (`catchrelease_harpoon_ship`) and Reliquary (`catchrelease_rod_ship`) have their real hulls and stats; the Monstrance (`catchrelease_lamp_ship`) stays a full copy of the vanilla Nebula until its art exists. See [ARCHITECTURE.md](ARCHITECTURE.md) for their data and [COMBAT_SHIPS.md](COMBAT_SHIPS.md) for their combat design. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 
 ## Open questions
 
