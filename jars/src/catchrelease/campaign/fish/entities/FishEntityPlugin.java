@@ -291,7 +291,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
     // lamp fish keep the slower buried pace so they can still be chased down under the beam
     protected float getBaseSpeed() {
-        return lampSurfaced ? Setting.LAMP_FISH_SPEED.value() : MOVE_SPEED;
+        return lampSurfaced ? MOVE_SPEED * Setting.LAMP_FISH_SPEED.mult() : MOVE_SPEED;
     }
 
     public SectorEntityToken getPond() {
