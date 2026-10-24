@@ -62,7 +62,7 @@ A classic midline carrier cruiser: slow and cumbersome, with high crew capacity.
 ### LYNE drones
 
 - Five per wing, unarmed, nimble, low hull, very fast, with a very short replacement time. They need to be fast enough to reach wrecks before they fade.
-- Sprite: vanilla `graphics/ships/munitions_drone.png` for now, as in the campaign.
+- Sprite: `graphics/catchrelease/ships/lyne_drone.png`, a copy of the vanilla drone art the campaign uses (`munitions_drone.png`), for now.
 - Low target priority. A drone counts for 10% of a normal threat (`obf/combat/ai/OO0O.java:2981-2983`); whether autofire also ignores drones is untested.
 - Custom fighter AI, chosen by a hull tag in `ModPlugin.pickShipAI`, which also covers bay-launched fighters.
 
@@ -238,7 +238,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 5: LYNE wing
 
-- [x] 5.1 Data. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). The `.ship`'s width, height and centre are placeholders until they are read from the actual `munitions_drone.png`.
+- [x] 5.1 Data. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). The sprite is `graphics/catchrelease/ships/lyne_drone.png` (32×30), a copy of the drone art.
   - LYNE drone fighter hull: unarmed, fast, nimble, low hull, `munitions_drone.png`.
   - Its variant and a `wing_data.csv` row: 5 drones, very short refit.
   - Two `builtInWings` on the Reliquary.

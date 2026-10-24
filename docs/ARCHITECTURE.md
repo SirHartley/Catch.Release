@@ -848,7 +848,7 @@ Reliquary salvage code. Design and build plan: [COMBAT_SHIPS.md](COMBAT_SHIPS.md
 
 | File | Owner / connection |
 |---|---|
-| `data/hulls/catchrelease_lyne_drone.ship`, `ship_data.csv`, `data/variants/fighters/catchrelease_lyne_drone_wing.variant`, `data/hulls/wing_data.csv` | LYNE drone `catchrelease_lyne_drone`: unarmed FIGHTER, vanilla `graphics/ships/munitions_drone.png` (width, height and centre are placeholders), 150 hull, 10 armour, speed 450, acceleration 600, turn 240, mass 5, no shield, hull tag `catchrelease_lyne_drone`. Wing `catchrelease_lyne_wing`: 5 drones, refit 3 s, 0 OP, `no_drop`, `no_sell`, `hide_in_codex`. Two of them are the Reliquary's `builtInWings`; bay *i* launches from the *i*-th launch-bay slot, so `LB 1` and `LB 2`. Description in `descriptions.csv`. |
+| `data/hulls/catchrelease_lyne_drone.ship`, `ship_data.csv`, `data/variants/fighters/catchrelease_lyne_drone_wing.variant`, `data/hulls/wing_data.csv` | LYNE drone `catchrelease_lyne_drone`: unarmed FIGHTER, sprite `graphics/catchrelease/ships/lyne_drone.png` (32×30, a copy of the drone art the campaign borrows from vanilla `munitions_drone.png`), 150 hull, 10 armour, speed 450, acceleration 600, turn 240, mass 5, no shield, hull tag `catchrelease_lyne_drone`. Wing `catchrelease_lyne_wing`: 5 drones, refit 3 s, 0 OP, `no_drop`, `no_sell`, `hide_in_codex`. Two of them are the Reliquary's `builtInWings`; bay *i* launches from the *i*-th launch-bay slot, so `LB 1` and `LB 2`. Description in `descriptions.csv`. |
 
 ### `abilities`
 
