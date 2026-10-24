@@ -29,7 +29,7 @@ Built in as the Tug Drive Field (`catchrelease_tug_field`), placeholder icon (va
 
 Vanilla reference: the Ox tug's burn comes from the hidden Drive Field Stabilizer (+1 fleet burn and +200 sensor profile, `api/impl/hullmods/DriveFieldStabilizer.java:10-16`). Augmented Drive Field is a different hullmod (+2 to the ship's own burn). No vanilla hullmod changes campaign acceleration.
 
-Implementation route: `HullModFleetEffect.advanceInCampaign(fleet)` writes `getFleetwideMaxBurnMod().modifyFlat` and `getAccelerationMult().modifyMult` under one key, or removes both, each frame. Those fleet stats take effect in the same frame (`obf/campaign/fleet/FleetData.java:798-823`, `CampaignFleet.java:794-795`). A ship-stat bonus would only reach the fleet at the next fleet sync, so it could not follow Sustained Burn. The hook runs for every fleet every frame, so it must exit at once for fleets without a tug. Sustained Burn: `fleet.getAbility(Abilities.SUSTAINED_BURN)`, `isActive()`.
+Implementation route: `HullModFleetEffect.onFleetSync(fleet)` writes `getFleetwideMaxBurnMod().modifyFlat` and `getAccelerationMult().modifyMult` under one key, or removes both. Those fleet stats take effect in the same frame (`obf/campaign/fleet/FleetData.java:798-823`, `CampaignFleet.java:794-795`). A ship-stat bonus would only reach the fleet at the next fleet sync, so it could not follow Sustained Burn. A campaign listener reapplies the player's bonus when Sustained Burn is toggled (`reportPlayerActivatedAbility`/`reportPlayerDeactivatedAbility`), so nothing runs every frame. Sustained Burn: `fleet.getAbility(Abilities.SUSTAINED_BURN)`, `isActive()`.
 
 ### Harpoon
 
@@ -180,8 +180,8 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 ### Stage 1: tug hullmod
 
 - [x] 1.1 `combat/tug/TugDriveHullmod` (Tug Drive Field, `catchrelease_tug_field`): a `BaseHullMod` that also implements `HullModFleetEffect`, built into the Stigmata. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug).
-  - `advanceInCampaign(fleet)` exits at once when the fleet has no non-mothballed tug (counted on fleet sync). Each frame:
-    - count the tugs: +1 burn per tug through `getFleetwideMaxBurnMod().modifyFlat`;
+  - On fleet sync, and for the player when Sustained Burn is toggled:
+    - count the non-mothballed tugs: +1 burn per tug through `getFleetwideMaxBurnMod().modifyFlat`;
     - acceleration through `getAccelerationMult().modifyMult` with 20% × (1 + ½ + ¼ …);
     - remove both under the same key while `Abilities.SUSTAINED_BURN` is active.
   - The tooltip states the numbers and the Sustained Burn rule.

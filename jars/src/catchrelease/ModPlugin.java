@@ -7,6 +7,7 @@ import catchrelease.combat.salvage.RefitStoreView;
 import catchrelease.combat.salvage.WreckTracker;
 import catchrelease.combat.tug.HarpoonAutofireAI;
 import catchrelease.combat.tug.HarpoonOnHit;
+import catchrelease.combat.tug.TugDriveHullmod;
 import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.config.PlayerSettings;
 import catchrelease.campaign.crime.CatchReleaseCampaignPlugin;
@@ -116,6 +117,7 @@ public class ModPlugin extends BaseModPlugin {
         RatingBarEvent.VisitCounter.register();
         FishermanChain.register();
         FishingShips.register();
+        TugDriveHullmod.BurnWatch.register();
         RefitStoreView.register();
         SoldFishRestock.register();
         FishermanInterception.register();
