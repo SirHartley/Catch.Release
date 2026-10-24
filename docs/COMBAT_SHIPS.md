@@ -12,7 +12,7 @@ Engine facts below are from Starsector 0.98a-RC8 (the `starsector-knowledge` ski
 | Reliquary | `catchrelease_rod_ship` | Cruiser | LYNE Tender | `graphics/catchrelease/ships/done_boat.png` |
 | Monstrance | `catchrelease_lamp_ship` | Cruiser | Breach Trawler | none yet; the hull is still a Nebula copy |
 
-All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`; their systems are vanilla placeholders (`maneuveringjets`, `targetingfeed`) until the custom systems exist.
+All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`. The Stigmata has its Haul Drive; the Reliquary's system is a vanilla placeholder (`targetingfeed`) until its launch system exists.
 
 ## Stigmata: harpoon tug
 
@@ -217,7 +217,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 3: drive system
 
-- [ ] 3.1 `catchrelease_tug_drive` with `combat/tug/TugDriveStats` (`BaseShipSystemScript`).
+- [x] 3.1 `catchrelease_tug_drive` (Haul Drive) with `combat/tug/TugDriveStats` (`BaseShipSystemScript`). Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). It uses vanilla's maneuvering-jets system AI until 4.3.
   - **Stats while active:** raised mass (`setMass`, restored in `unapply`), acceleration, turn acceleration and turn rate.
   - **Visuals:** `extendFlame` and `fadeToOtherColor` on the engines, dark `addNebulaSmokeParticle` smoke from the nozzles.
   - **Uses:** charges through `max uses`/`regen`.
