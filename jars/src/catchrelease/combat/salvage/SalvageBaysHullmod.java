@@ -4,6 +4,8 @@ import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.BaseHullMod;
 import com.fs.starfarer.api.combat.CombatEngineAPI;
+import com.fs.starfarer.api.combat.MutableShipStatsAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
@@ -18,6 +20,17 @@ public class SalvageBaysHullmod extends BaseHullMod {
     public static final String ID = "catchrelease_salvage_bays";
 
     private static final String STATUS_KEY = "catchrelease_salvageStore_";
+
+    // The refit's swapped spec (RefitStoreView) lists more built-in wings than the hull has bays. The refit trims a
+    // variant's wings to the bay count of stats built without an entity, so the extra bays exist only there; a combat
+    // ship has its entity set before hullmods run, and bays are made from that count, so stored wings never get one.
+    @Override
+    public void applyEffectsBeforeShipCreation(HullSize hullSize, MutableShipStatsAPI stats, String id) {
+        if (stats.getEntity() != null || stats.getVariant() == null) return;
+        ShipHullSpecAPI spec = stats.getVariant().getHullSpec();
+        int extra = spec.getBuiltInWings().size() - spec.getFighterBays();
+        if (extra > 0) stats.getNumFighterBays().modifyFlat(id, extra);
+    }
 
     @Override
     public void applyEffectsAfterShipCreation(ShipAPI ship, String id) {

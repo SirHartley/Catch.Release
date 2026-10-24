@@ -503,6 +503,10 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   ready and restoring counts, as vanilla status lines are; a type with nothing ready is drawn as a debuff. A line
   fades 0.25 s after the first unpaused frame it is not maintained, so nothing is removed by hand. One key per
   wing type keeps lines from reshuffling.
+- The refit shows a Reliquary's stored fighters as locked built-in bays by swapping a hull-spec copy into the
+  member's and the displayed variant while the refit is open (`combat/salvage/RefitStoreView`). The displayed
+  variant is reached as LunaLib reaches it, through the refit panel's stable method names, and resynced after
+  each change; [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage) owns the sequence and its safeguards.
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short

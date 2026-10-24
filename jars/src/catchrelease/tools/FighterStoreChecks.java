@@ -2,8 +2,13 @@ package catchrelease.tools;
 
 import catchrelease.combat.salvage.FighterStore;
 import catchrelease.combat.salvage.FighterStore.Group;
+import catchrelease.combat.salvage.RefitStoreView;
 import catchrelease.combat.salvage.SalvageLaunchAI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.combat.ShipVariantAPI;
 
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +59,24 @@ public final class FighterStoreChecks {
         require(SalvageLaunchAI.shouldLaunch(1, 0, true), "Held the last fighter back");
         require(SalvageLaunchAI.shouldLaunch(2, 4, true), "Held two ready fighters back");
 
-        System.out.println("Fighter store checks: cap, restoration, launch grouping, return, loss and launch rule"
-                + " passed");
+        List<String> wings = new ArrayList<>(List.of("catchrelease_lyne_wing", "catchrelease_lyne_wing",
+                "broadsword_wing", "talon_wing"));
+        ShipVariantAPI variant = (ShipVariantAPI) Proxy.newProxyInstance(ShipVariantAPI.class.getClassLoader(),
+                new Class<?>[]{ShipVariantAPI.class}, (self, method, values) -> {
+                    if (method.getName().equals("getWings")) return wings;
+                    throw new AssertionError(method);
+                });
+        ShipHullSpecAPI hull = (ShipHullSpecAPI) Proxy.newProxyInstance(ShipHullSpecAPI.class.getClassLoader(),
+                new Class<?>[]{ShipHullSpecAPI.class}, (self, method, values) -> {
+                    if (method.getName().equals("getFighterBays")) return 2;
+                    throw new AssertionError(method);
+                });
+        RefitStoreView.stripStoredWings(variant, hull);
+        require(wings.equals(List.of("catchrelease_lyne_wing", "catchrelease_lyne_wing")),
+                "Revert left stored wings in the variant: " + wings);
+
+        System.out.println("Fighter store checks: cap, restoration, launch grouping, return, loss, launch rule"
+                + " and refit revert passed");
     }
 
     private static void require(boolean condition, String message) {
