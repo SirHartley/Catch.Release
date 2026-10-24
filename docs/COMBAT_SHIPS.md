@@ -263,7 +263,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 6: recovered fighters
 
-- [ ] 6.1 `combat/salvage/FighterStore`, saved per fleet member id, on the sector's persistent data.
+- [x] 6.1 `combat/salvage/FighterStore`, saved per fleet member id, on the sector's persistent data. Implemented with `TenderBays`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). Restoration runs in combat only and keeps partial progress; fighters still out when a battle ends count as returned; the simulator works on a copy.
   - Wing id, count and restoration progress per entry.
   - Cap 10 (setting), counting fighters still restoring.
   - Restoration at the wing's refit time with the ship's refit modifiers.

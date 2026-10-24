@@ -182,6 +182,7 @@ public final class FishingShipChecks {
             ShipHullSpecAPI spec = spec(hullId, dHull);
             FleetMemberAPI member = proxy(FleetMemberAPI.class, (self, method, args) -> switch (method.getName()) {
                 case "getHullSpec" -> spec;
+                case "getId" -> "member" + System.identityHashCode(self);
                 case "equals" -> self == args[0];
                 case "hashCode" -> System.identityHashCode(self);
                 default -> throw new AssertionError(method);

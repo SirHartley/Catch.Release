@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.ships;
 import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.combat.salvage.FighterStore;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
@@ -19,6 +20,7 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -171,6 +173,7 @@ public final class FishingShips {
 
         Set<Ship> aboard = scan(fleet);
         Set<String> present = getPresent();
+        purgeFighterStores(fleet);
 
         for (Ship ship : Ship.values()) {
             boolean was = present.contains(ship.name());
@@ -205,6 +208,13 @@ public final class FishingShips {
                 && TackleManager.getSlot(ship.rig, 0) == ship.module) {
             TackleManager.fit(ship.rig, 0, Tackle.NONE);
         }
+    }
+
+    // A Reliquary's recovered fighters go with the ship: a store whose ship left the fleet is dropped.
+    protected static void purgeFighterStores(CampaignFleetAPI fleet) {
+        Set<String> ids = new HashSet<>();
+        for (FleetMemberAPI member : fleet.getFleetData().getMembersListCopy()) ids.add(member.getId());
+        FighterStore.purge(ids);
     }
 
     protected static Set<Ship> scan(CampaignFleetAPI fleet) {

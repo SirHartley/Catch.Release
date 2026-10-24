@@ -17,8 +17,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 // Enemy fighter wrecks for the Reliquary's LYNE drones, one per battle in the engine's custom data. Created by the
@@ -44,19 +45,22 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
 
     private final CombatEngineAPI engine;
     private final List<ShipAPI> tenders = new ArrayList<>();
-    private final Set<ShipAPI> candidates = new LinkedHashSet<>();
+    // The wing id is read while the fighter is alive; whether a wreck keeps its wing is unverified.
+    private final Map<ShipAPI, String> candidates = new LinkedHashMap<>();
     private final List<Wreck> wrecks = new ArrayList<>();
     private float topUp;
 
     private static final class Wreck {
 
         private final ShipAPI ship;
+        private final String wingId;
         private float age;
         private ShipAPI claimant;
         private CollisionClass towedFrom;
 
-        private Wreck(ShipAPI ship) {
+        private Wreck(ShipAPI ship, String wingId) {
             this.ship = ship;
+            this.wingId = wingId;
         }
     }
 
@@ -86,12 +90,12 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
     // hit kills it. An override someone else already set, such as 0 on fighters a Reliquary launches, is kept.
     @Override
     public boolean notifyAboutToTakeHullDamage(Object param, ShipAPI ship, Vector2f point, float damageAmount) {
-        if (!ship.isFighter() || ship.isHulk() || candidates.contains(ship) || ship.getHulkChanceOverride() >= 0f) {
+        if (!ship.isFighter() || ship.isHulk() || candidates.containsKey(ship) || ship.getHulkChanceOverride() >= 0f) {
             return false;
         }
-        if (!hasEnemyTender(ship.getOwner()) || !isSalvageable(ship)) return false;
+        if (!hasEnemyTender(ship.getOwner()) || !isSalvageable(ship) || ship.getWing() == null) return false;
         ship.setHulkChanceOverride(Setting.LYNE_WRECK_CHANCE.mult());
-        candidates.add(ship);
+        candidates.put(ship, ship.getWing().getWingId());
         return false;
     }
 
@@ -123,10 +127,11 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
         if (engine.isPaused()) return;
         tenders.removeIf(tender -> !tender.isAlive() || !engine.isEntityInPlay(tender));
 
-        for (Iterator<ShipAPI> it = candidates.iterator(); it.hasNext(); ) {
-            ShipAPI ship = it.next();
+        for (Iterator<Map.Entry<ShipAPI, String>> it = candidates.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<ShipAPI, String> entry = it.next();
+            ShipAPI ship = entry.getKey();
             if (ship.isHulk() && engine.isEntityInPlay(ship)) {
-                wrecks.add(new Wreck(ship));
+                wrecks.add(new Wreck(ship, entry.getValue()));
                 it.remove();
             } else if (!engine.isEntityInPlay(ship)) {
                 it.remove();
@@ -222,11 +227,26 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
         wreck.claimant = null;
     }
 
-    // The wreck is aboard: it leaves the battle. Stage 6 puts it in the tender's store here.
+    // The wreck is aboard: it leaves the battle and its fighter goes into the tender's store.
     public void salvaged(ShipAPI tender, ShipAPI wreck) {
         Wreck entry = find(wreck);
-        if (entry != null) wrecks.remove(entry);
+        if (entry != null) {
+            wrecks.remove(entry);
+            FighterStore.forBattle(engine, tender.getFleetMemberId()).add(entry.wingId, FighterStore.getCap());
+        }
         engine.removeEntity(wreck);
+    }
+
+    // Whether the tender's store has room for one more wreck, counting the wrecks its drones already hold.
+    public boolean hasRoom(ShipAPI tender) {
+        int claimed = 0;
+        for (Wreck wreck : wrecks) {
+            if (wreck.claimant != null && wreck.claimant.getWing() != null
+                    && wreck.claimant.getWing().getSourceShip() == tender) {
+                claimed++;
+            }
+        }
+        return FighterStore.forBattle(engine, tender.getFleetMemberId()).count() + claimed < FighterStore.getCap();
     }
 
     private Wreck find(ShipAPI ship) {

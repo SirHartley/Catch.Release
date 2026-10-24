@@ -18,6 +18,7 @@ public class SalvageBaysHullmod extends BaseHullMod {
         CombatEngineAPI engine = Global.getCombatEngine();
         if (engine == null || Global.getCurrentState() != GameState.COMBAT) return;
         WreckTracker.get(engine).addTender(ship);
+        if (!ship.hasListenerOfClass(TenderBays.class)) ship.addListener(new TenderBays(ship));
     }
 
     @Override

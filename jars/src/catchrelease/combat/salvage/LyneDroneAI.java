@@ -17,7 +17,8 @@ import java.util.List;
 
 // A LYNE drone's whole AI, picked in ModPlugin.pickShipAI by the drone's hull tag (bays pick an AI for every fighter
 // they launch). It claims a wreck from the battle's WreckTracker, flies to it, tows it to its tender's LB 1 and lands
-// with it. needsRefit stays false, so the wing never recalls it, and wing orders only reach vanilla FighterAI.
+// with it, while the tender's store has room. needsRefit stays false, so the wing never recalls it, and wing orders
+// only reach vanilla FighterAI.
 public class LyneDroneAI implements ShipAIPlugin {
 
     private enum Mode { IDLE, FETCH, TOW, LAND }
@@ -62,7 +63,7 @@ public class LyneDroneAI implements ShipAIPlugin {
         switch (mode) {
             case IDLE -> {
                 search -= amount;
-                if (tracker != null && search <= 0f) {
+                if (tracker != null && search <= 0f && tracker.hasRoom(tender)) {
                     search = SEARCH_INTERVAL;
                     wreck = tracker.claim(ship, SEARCH_RANGE);
                     if (wreck != null) mode = Mode.FETCH;
