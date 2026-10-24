@@ -95,11 +95,28 @@ Engine limits:
   - count landed fighters back into the store.
   - Vanilla `SwarmLauncherEffect.java:148-180` does the same, including `removeDeployed` cleanup.
 - **Status display:** the store shows on the combat screen where terrain effects live. `engine.maintainStatusForPlayerShip` gives one line per entry. A richer display can be drawn in `renderInUICoords`, or MagicLib's `MagicSubsystem` can host the launch ability with its own HUD bars and AI hook (`shouldActivateAI`).
-- **Refit display:** a built-in Reliquary hullmod lists the store in its tooltip: fighter sprites, counts and restoration progress. `HullModEffect.addPostDescriptionSection` receives the refit `ShipAPI`, whose `getFleetMemberId()` finds the store. Rejected alternatives:
-  - drawing on the refit screen directly has no API hook; it would need guessed screen positions or a PatchLib patch;
-  - per-ship wings through `ShipVariantAPI.setWingId` need bays, and a bay would build those fighters itself, which breaks the store.
+- **Refit display:** while the refit screen is open, each Reliquary with stored fighters shows them as filled, locked built-in bays. The swap exists only while the refit is open, so saves, D-mod changes and carrier skill counts never see it. Engine facts below are from the 0.98a-RC8 refit, variant and hull-spec code (`obf/coreui/refit/`, `obf/loading/specs/`).
+  - **Why a hull spec copy:** a fighter bay is locked only when the hull spec says it is built-in (`isBuiltInWing`). No variant flag is consulted. A copy of the spec with the stored wings appended to its built-in list shows them filled, locked and free of OP. Being built-in also keeps them out of the loot, scuttle and sell paths, which only take non-built-in wings.
+  - **Making the copy:** the API has no clone, but the concrete spec class has a public `clone()` that copies the built-in wing list. Call it through `MethodHandles` (mods may not use `java.lang.reflect`) and set it with `ShipVariantAPI.setHullSpecAPI`. The variant must belong to this ship alone, since the refit reloads a stock variant from the registry. Clone it, set its source to `REFIT` and call `member.setVariant(v, false, true)`, as vanilla `PKDefenderPluginImpl` does.
+  - **Open:** `CoreUITabListener.reportAboutToOpenCoreTab(REFIT, …)` builds the copy from the current store, with the LYNE wings first, then the stored wings. It calls `refreshBuiltInWings()`, and the built-in Reliquary hullmod adds one bay per stored wing while the swap is active.
+  - **Close:** no callback reports the refit closing. A script added on open checks each frame whether the refit is still the current tab (`CampaignUIAPI.getCurrentCoreTab`) and removes itself on revert, so this polling exists only while the swap does. On close it reverts whatever variant the member holds at that moment: the refit's undo history clones variants that share the copy. It restores the normal spec and removes the stored wing ids from the variant's wing list.
+  - **Restore guard:** restoring a hull (removing D-mods) happens inside the refit and calls `setHullSpecAPI` with the normal spec. The same script re-applies the copy whenever the variant's spec is no longer the copy. Otherwise the extra bays would become modular and a stored fighter could be stripped into a free LPC.
+  - **Combat:** the hullmod adds the extra bays only outside combat. Bays are created from the variant's wings at ship creation, after `applyEffectsBeforeShipCreation` has run with `stats.getEntity()` set (`Ship.java:841-850`, `obf/loading/specs/_.java:107-133`). So the stored wings never get bays, and only the launch system spawns them.
+  - **Safety net:** on game load and when the ship leaves the fleet, strip any stored wing ids left in the variant.
+  - **Refitting is otherwise unaffected:** weapons, hullmods, S-mods and OP are identical on the copy. Autofit fills only modular bays. Saving a variant skips built-in wings. The stats panel shows the extra bays while the refit is open.
+  - **Fallback:** the built-in hullmod's tooltip (`HullModEffect.addPostDescriptionSection`, with the refit `ShipAPI` and its `getFleetMemberId()`) also lists the store, with sprites, counts and restoration progress. It is the fallback whenever the swap is not in place.
+  - **Rejected:** drawing on the refit screen has no API hook. A PatchLib redirect of `isBuiltInWing` would need many fragile call-site patches.
 - **Persistence:** the store carries over between battles, kept per ship. Variant ids are shared by every ship of a stock variant, so key it by fleet member id. Purge it when the ship leaves the player's fleet, for example into storage.
 - **AI:** fire when enough fighters are stored and a target in range is worth it.
+
+### Early Reliquary (hull skin)
+
+The player gets a slightly weaker Reliquary early, because the salvage-and-launch system is the ship's best feature. There is no blueprint for it.
+
+- **Form:** a hull skin (`.skin`) of `catchrelease_rod_ship` with its own hull id. A skin can set its own built-in wings. `FishingShips.forHull` matches the hull id (or a D-hull's parent), so the skin does not count as the Reliquary for the drone rig's second slot unless it is added there on purpose.
+- **Proposed drone nerf (the author's idea):** its LYNE wing gets one extra drone, but lost drones are never replaced. That fits a separate LYNE wing entry for the skin, with one more drone and a refit time long enough never to finish in a battle, so no hullmod is needed.
+- **Suggested addition:** the launch system is what makes the ship strong, and the drone nerf only slows how fast the store fills. Capping the store (for example one wing's worth of fighters, or a fixed number) limits the system directly. A single LYNE wing instead of two is a further option.
+- **Open:** where the player gets it, and the numbers (drone count, store cap, wing count).
 
 ## Monstrance: Breach Trawler (later)
 
@@ -127,6 +144,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - Harpoon: rope length, duration, charge count, break-on-own-hull or not, and how mass ratios map to pull strength.
 - Does the harpoon fire as a plain weapon, or through a `MagicSubsystem` with charges, a key binding and an AI hook?
 - Do spawned recovered wings count toward deployment points?
+- Refit swap: does the spec `clone()` work through `MethodHandles` at runtime, does `reportAboutToOpenCoreTab` fire when the core UI opens straight into the refit (if not, the close script also has to notice the refit opening), and do fighter wings change the crew figures shown while the swap is active?
 
 ## Plan
 
@@ -161,8 +179,9 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 **Stage 6: recovered fighters**
 - [ ] 6.1 Store, restoration and persistence per fleet member.
-- [ ] 6.2 Combat status display and the refit hullmod tooltip.
+- [ ] 6.2 Combat status display; refit spec swap with the restore guard; hullmod tooltip fallback.
 - [ ] 6.3 Launch system and its AI.
+- [ ] 6.4 Early Reliquary hull skin.
 
 **Stage 7: Monstrance**
 - [ ] 7.1 Hull art and data.
