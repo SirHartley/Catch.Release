@@ -33,7 +33,7 @@ Implementation route: `HullModFleetEffect.advanceInCampaign(fleet)` writes `getF
 
 ### Harpoon
 
-A built-in weapon on `WS0001` with regenerating charges (`ammo`, `ammo/sec`, `reload size` in `weapon_data.csv`). Prefix its ids: vanilla already uses `harpoon` for a missile. The projectile sprite is still to come; until then use a renamed copy of the vanilla Harpoon missile's sprite (plan step 0.4).
+A built-in weapon on `WS0001` with regenerating charges (`ammo`, `ammo/sec`, `reload size` in `weapon_data.csv`). Prefix its ids: vanilla already uses `harpoon` for a missile. The projectile sprite is still to come; until then it uses `graphics/catchrelease/weapons/harpoon_projectile.png`, a renamed copy of the vanilla Harpoon missile's sprite.
 
 - **Damage:** it does real damage, as a harpoon should. Non-zero damage also matters technically: `OnHitEffectPlugin` reports `shieldHit` only when shield damage was dealt (`obf/combat/entities/BallisticProjectile.java:255-257`).
 - **Hits:** a shield hit glances off; only a hull or armour hit attaches. A deflected harpoon is a new projectile spawned at the hit point (`engine.spawnProjectile`); vanilla has no ricochet.
@@ -57,7 +57,7 @@ Replaces the placeholder system. It uses the tug drive's field: while active it 
 
 ## Reliquary: LYNE Tender
 
-A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. One built-in wing of LYNE drones and two modular bays (`LB 1` is the built-in wing's bay).
+A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. It is parasitic: two built-in wings of LYNE drones and no modular bays, so every other fighter it fields is one it salvaged. The hull has two fighter bays; `LB 1` is the landing bay for towed wrecks, and `LB 2`/`LB 3` stay as launch points. Until the LYNE wing exists, the two bays are empty modular bays.
 
 ### LYNE drones
 
@@ -95,6 +95,9 @@ Engine limits:
   - count landed fighters back into the store.
   - Vanilla `SwarmLauncherEffect.java:148-180` does the same, including `removeDeployed` cleanup.
 - **Status display:** the store shows on the combat screen where terrain effects live. `engine.maintainStatusForPlayerShip` gives one line per entry. A richer display can be drawn in `renderInUICoords`, or MagicLib's `MagicSubsystem` can host the launch ability with its own HUD bars and AI hook (`shouldActivateAI`).
+- **Refit display:** a built-in Reliquary hullmod lists the store in its tooltip: fighter sprites, counts and restoration progress. `HullModEffect.addPostDescriptionSection` receives the refit `ShipAPI`, whose `getFleetMemberId()` finds the store. Rejected alternatives:
+  - drawing on the refit screen directly has no API hook; it would need guessed screen positions or a PatchLib patch;
+  - per-ship wings through `ShipVariantAPI.setWingId` need bays, and a bay would build those fighters itself, which breaks the store.
 - **Persistence:** the store carries over between battles, kept per ship. Variant ids are shared by every ship of a stock variant, so key it by fleet member id. Purge it when the ship leaves the player's fleet, for example into storage.
 - **AI:** fire when enough fighters are stored and a target in range is worth it.
 
@@ -131,7 +134,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - [x] 0.1 New designations: LYNE Tender, Breach Trawler.
 - [x] 0.2 Stigmata and Reliquary stats in `ship_data.csv`; placeholder systems.
 - [x] 0.3 Update `lib/MagicLib.zip`.
-- [ ] 0.4 Placeholder harpoon projectile sprite: a renamed copy of vanilla `graphics/missiles/missile_harpoon.png` (10×22, centre 5,12, from `harpoon_mrm.proj`) under `graphics/catchrelease/weapons/`. The file has to come from the game install.
+- [x] 0.4 Placeholder harpoon projectile sprite: `graphics/catchrelease/weapons/harpoon_projectile.png` (12×26), a copy of the vanilla Harpoon missile's sprite.
 
 **Stage 1: tug hullmod**
 - [ ] 1.1 Hullmod with the fleet effect, Sustained Burn check and diminishing acceleration.
@@ -152,13 +155,13 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - [ ] 4.3 Drive system AI.
 
 **Stage 5: LYNE wing**
-- [ ] 5.1 Wing and drone hull data; built-in wing on the Reliquary.
+- [ ] 5.1 Wing and drone hull data; both built-in wings on the Reliquary.
 - [ ] 5.2 Drone AI: claim, attach, tow, land.
 - [ ] 5.3 Wreck chance setting, wreck lifetime, blacklist.
 
 **Stage 6: recovered fighters**
 - [ ] 6.1 Store, restoration and persistence per fleet member.
-- [ ] 6.2 Combat status display.
+- [ ] 6.2 Combat status display and the refit hullmod tooltip.
 - [ ] 6.3 Launch system and its AI.
 
 **Stage 7: Monstrance**
