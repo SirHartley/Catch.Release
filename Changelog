@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.d - UNRELEASED
+Changed - The Stigmata-class Harpoon Tug and the Reliquary-class LYNE Tender have their own hulls and stats: the Stigmata a fast midline destroyer with a fighter bay and a built-in harpoon mount, the Reliquary a slow midline carrier cruiser with three fighter bays. Their combat equipment comes later
 Fixed - Fleets already offering a quest, or whose commander is marked important for a mission, no longer take on a fishing job as well
 Changed - The marker beside a fleet whose fishing job you have accepted is now a steady gold instead of pulsing; offers still pulse light blue
 Changed - Codex entries known only from range data show no fish icon, in the list or on their page, until you catch the fish
