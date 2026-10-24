@@ -248,7 +248,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - `beginLandingAnimation` on a wreck.
 
   Fallbacks: if the timer cannot be held, the drone carries a drawn copy (losing the damage overlay); if the landing shrink fails on a wreck, fade it out with the drone.
-- [ ] 5.3 `combat/salvage/WreckTracker`: an `EveryFrameCombatPlugin` active only while a Reliquary is deployed.
+- [x] 5.3 `combat/salvage/WreckTracker`: an `EveryFrameCombatPlugin` active only while a Reliquary is deployed. Implemented with the Reliquary's built-in Salvage Bays hullmod; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). The wreck chance is set from a `HullDamageAboutToBeTakenListener` just before a fighter is hit, rather than by scanning ships.
   - Sets the wreck chance (setting, default 75%) on eligible enemy fighters.
   - Keeps their wrecks for 30 seconds.
   - Hands out claims, one wreck per drone.
