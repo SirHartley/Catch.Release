@@ -334,7 +334,7 @@ public class FleetQuest extends FishJob {
 
         Color color = takenUp ? FleetQuestMapIcon.getMarkerColor() : OFFER_COLOR;
         marker = FleetMarkerRenderer.addTo(giver, MARKER_SPRITE_CATEGORY, MARKER_SPRITE,
-                color, FleetMarkerRenderer.SIZE);
+                color, FleetMarkerRenderer.SIZE, !takenUp);
     }
 
     protected void dropMarker() {
