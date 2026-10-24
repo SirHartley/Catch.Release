@@ -84,6 +84,7 @@ Engine limits:
 
 ### Recovered fighters
 
+- **Store size:** a Reliquary holds at most 10 recovered fighters, counting those still being restored. The limit is a setting (LunaLib, Ruptures & Exploration or a new combat section). While the store is full, the drones ignore wrecks.
 - **Restoration:** a recovered fighter is restored like a normal replacement (its wing's refit time and the ship's refit modifiers, with the usual CR rules), then waits in the store.
 - **Launch system:** launches every stored fighter at the target for an attack run. Fighters of one type form wings up to their wing size, and never more instances than were recovered: one recovered Broadsword launches as one, two as two.
 - **After launch:** they behave like normal fighters, return and land. A destroyed one is gone and leaves no wreck (`setHulkChanceOverride(0)` on every fighter the Reliquary launches), so no fighter is salvaged twice.
