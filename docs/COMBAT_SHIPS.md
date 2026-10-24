@@ -274,7 +274,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - Every launched fighter gets `setHulkChanceOverride(0)`.
   - Landed fighters go back into the store; destroyed ones are gone.
 - [x] 6.3 `ShipSystemAIScript` for the launch: fire when enough fighters are restored and a target in range is worth it. Implemented as `SalvageLaunchAI`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
-- [ ] 6.4 Combat status display: one `maintainStatusForPlayerShip` line per stored type, or a richer `renderInUICoords` panel. Fable research first.
+- [x] 6.4 Combat status display: one `maintainStatusForPlayerShip` line per stored type, or a richer `renderInUICoords` panel. Fable research first. Implemented with status lines in `SalvageBaysHullmod`; see [UI.md](UI.md#drawing-gotchas). MagicLib's `MagicSubsystem` HUD was not used: it would replace the vanilla ship system.
 - [ ] 6.5 Refit display, in this order:
   1. **Spike** the spec `clone()` through `MethodHandles` and whether `reportAboutToOpenCoreTab` fires when the core UI opens straight into the refit.
   2. `combat/salvage/RefitStoreView`:

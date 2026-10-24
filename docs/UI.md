@@ -496,6 +496,13 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   normal blending, because a projectile's `bulletSprite` is always additive; the `.proj` colours are
   transparent. The shape is `RopeCurve`, the campaign rope's spring and wobble plus a sag.
   Viewport alpha applies, and pause freezes it (the engine does not advance entities while paused).
+- The Reliquary's recovered-fighter store shows in combat through `maintainStatusForPlayerShip`, the list above
+  the player ship's info widget where terrain effects show (`SalvageBaysHullmod.advanceInCombat`, player ship only).
+  The list draws each icon as a 25×25 tinted schematic, so the line uses a fixed glyph (vanilla's
+  `icon_tactical_bdeck` for now), never the fighter's sprite. Title: the fighter hull's name; data: upper-case
+  ready and restoring counts, as vanilla status lines are; a type with nothing ready is drawn as a debuff. A line
+  fades 0.25 s after the first unpaused frame it is not maintained, so nothing is removed by hand. One key per
+  wing type keeps lines from reshuffling.
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short
