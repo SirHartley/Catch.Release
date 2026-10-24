@@ -46,6 +46,9 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
     public void positionChanged(PositionAPI position) {
         pos = position;
     }
+    protected SpriteAPI chipIcon;
+    protected boolean chipIconChecked;
+
 
     @Override
     public void render(float alphaMult) {
@@ -134,7 +137,7 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
                 0.18f * alphaMult);
         ShopUi.drawQuad(x, y, CHIP_WIDTH, 2f, rarity.color, 0.6f * presence * alphaMult);
 
-        SpriteAPI icon = SpriteLoader.getSprite("pane_fish");
+        SpriteAPI icon = getChipIcon();
         if (icon != null) {
             icon.setSize(ICON_SIZE, ICON_SIZE);
             icon.setColor(rarity.color);
@@ -164,5 +167,19 @@ public class ShopHeaderPlugin extends BaseCustomUIPanelPlugin {
         }
 
         return counts.get(rarity);
+    }
+
+    /** Looked up once: every settings lookup allocates a fresh sprite, and the chips redraw per frame. */
+    protected SpriteAPI getChipIcon() {
+        if (chipIconChecked) return chipIcon;
+        chipIconChecked = true;
+
+        try {
+            chipIcon = SpriteLoader.getSprite("pane_fish");
+        } catch (Exception e) {
+            chipIcon = null;
+        }
+
+        return chipIcon;
     }
 }

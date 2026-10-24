@@ -852,8 +852,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
                     tooltip.addPara("EQUIPMENT", Misc.getBasePlayerColor(), 12f);
                     tooltip.addPara("Each rig has one equipment slot of its own. Swap owned"
-                            + " equipment freely at no cost. Items marked as single-use are"
-                            + " consumed when used.", 8f);
+                            + " equipment freely at no cost. Equipment that is consumed on use"
+                            + " says so in its description.", 8f);
                     if (anySecondSlot()) {
                         tooltip.addPara("A fishing ship in your fleet adds a second slot to its rig and brings a"
                                 + " module you can fit while the ship stays. A module cannot fill both slots, and"
@@ -928,6 +928,15 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             ShopPricing.Price price = entry.getPrice();
             if (price == null) return; // defensive; the branches above cover the only null cases
+
+            // without a fish price nothing can satisfy it, so FIT stays inert; say so rather than
+            // showing a credit figure and a dead button
+            if (price.fish == null) {
+                info.addPara("Not for sale here.", Misc.getNegativeHighlightColor(), 16f);
+                info.addPara("The trade has no standing price for this one.",
+                        Misc.getGrayColor(), 4f);
+                return;
+            }
 
             boolean creditsOk = credits >= price.credits;
 

@@ -48,6 +48,9 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
         pos = position;
     }
 
+    protected SpriteAPI cachedIcon;
+    protected boolean iconChecked;
+
     @Override
     public void render(float alphaMult) {
         if (pos == null || alphaMult <= 0f) return;
@@ -77,7 +80,7 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
             text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        SpriteAPI icon = iconId == null ? null : SpriteLoader.getSprite(iconId);
+        SpriteAPI icon = getIcon();
         Color color = active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
         text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
 
@@ -135,5 +138,21 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
     protected boolean isMouseOver() {
         return ShopUi.contains(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
                 Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
+    }
+
+    /** Looked up once: every settings lookup allocates a fresh sprite, and this runs per frame. */
+    protected SpriteAPI getIcon() {
+        if (iconChecked) return cachedIcon;
+        iconChecked = true;
+
+        if (iconId == null || iconId.isEmpty()) return null;
+
+        try {
+            cachedIcon = SpriteLoader.getSprite(iconId);
+        } catch (Exception e) {
+            cachedIcon = null;
+        }
+
+        return cachedIcon;
     }
 }
