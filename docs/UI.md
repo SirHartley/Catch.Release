@@ -496,6 +496,19 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   normal blending, because a projectile's `bulletSprite` is always additive; the `.proj` colours are
   transparent. The shape is `RopeCurve`, the campaign rope's spring and wobble plus a sag.
   Viewport alpha applies, and pause freezes it (the engine does not advance entities while paused).
+- Exhaust smoke belongs below the ships. The engine draws every `CombatEngineAPI` particle (`addSmokeParticle`,
+  the `addNebula*` calls) after the layered renderer, above every hull and flame; only the engines' own `SMOKE`
+  contrails draw underneath (`obf/combat/CombatEngine.java:921-953`). Dark smoke also needs normal blending: of
+  the nebula calls only `addNebulaSmokeParticle` has it, the other positive ones are additive and draw nothing in
+  dark colours, and the negative ones subtract. The Haul Drive (`combat/tug/TugDriveStats`) lays one MagicLib
+  trail per nozzle on `BELOW_SHIPS_LAYER` with MagicLib's `base_trail_heavySmoke` texture and `additive` false,
+  starting inside the flame so the hull and flame cover its root. Its pieces slow from 70-100 to 15 and widen
+  from 1.2 to 5 times the slot width over 2.45 s, dark soot cooling to grey, at 55% opacity scaled by the effect
+  level; a quarter of the ship's velocity carries over. The engines' `LOW_TECH` contrail is recoloured toward
+  soot with `fadeToOtherColor`, under its own key so the flame keeps its blend. MagicLib stores a trail's
+  `offsetVelocity` by reference, so each piece gets a new vector; a piece added under the id of a trail that is
+  still fading joins it, so each activation and each restarted nozzle takes a new id
+  (`MagicTrailPlugin.addTrailMemberAdvanced`, `MagicTrailTracker`).
 - The Reliquary's recovered-fighter store shows in combat through `maintainStatusForPlayerShip`, the list above
   the player ship's info widget where terrain effects show (`SalvageBaysHullmod.advanceInCombat`, player ship only).
   The list draws each icon as a 25×25 tinted schematic, so the line uses a fixed glyph (vanilla's

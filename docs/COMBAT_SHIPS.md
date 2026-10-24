@@ -46,7 +46,7 @@ A built-in weapon on `WS0001` with regenerating charges (`ammo`, `ammo/sec`, `re
 
 ### Drive system
 
-Replaces the placeholder system. It uses the tug drive's field: while active it raises the tug's mass (restored when it ends), acceleration, turn acceleration and turn rate, so a hooked target can be hauled. Visuals: longer engine plumes (`ShipEngineControllerAPI.extendFlame`, `fadeToOtherColor`) spewing dirty black smoke (`engine.addNebulaSmokeParticle`). Charges and regeneration come from the system's `max uses` and `regen` (charges per second).
+Replaces the placeholder system. It uses the tug drive's field: while active it raises the tug's mass (restored when it ends), acceleration, turn acceleration and turn rate, so a hooked target can be hauled. Visuals: longer engine plumes (`ShipEngineControllerAPI.extendFlame`, `fadeToOtherColor`) spewing dirty black smoke, drawn below the ships (a MagicLib trail ribbon per nozzle plus the engines' own smoke contrail, darkened). Charges and regeneration come from the system's `max uses` and `regen` (charges per second).
 
 ### AI
 
@@ -219,7 +219,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 - [x] 3.1 `catchrelease_tug_drive` (Haul Drive) with `combat/tug/TugDriveStats` (`BaseShipSystemScript`). Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug).
   - **Stats while active:** raised mass (`setMass`, restored in `unapply`), acceleration, turn acceleration and turn rate.
-  - **Visuals:** `extendFlame` and `fadeToOtherColor` on the engines, dark `addNebulaSmokeParticle` smoke from the nozzles.
+  - **Visuals:** `extendFlame` and `fadeToOtherColor` on the engines; a soot ribbon per nozzle below the ships (`MagicTrailPlugin`, `base_trail_heavySmoke`) and the engines' smoke contrail darkened.
   - **Uses:** charges through `max uses`/`regen`.
   - It replaces `maneuveringjets` in `ship_data.csv`.
   - Done when: a hooked cruiser can be hauled with the drive on, and the smoke and plumes look right.
