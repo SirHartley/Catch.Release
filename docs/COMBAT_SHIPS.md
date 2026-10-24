@@ -12,7 +12,7 @@ Engine facts below are from Starsector 0.98a-RC8 (the `starsector-knowledge` ski
 | Reliquary | `catchrelease_rod_ship` | Cruiser | LYNE Tender | `graphics/catchrelease/ships/done_boat.png` |
 | Monstrance | `catchrelease_lamp_ship` | Cruiser | Breach Trawler | none yet; the hull is still a Nebula copy |
 
-All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`. The Stigmata has its Haul Drive; the Reliquary's system is a vanilla placeholder (`targetingfeed`) until its launch system exists.
+All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`. The Stigmata has its Haul Drive and the Reliquary its Salvage Launch.
 
 ## Stigmata: harpoon tug
 
@@ -88,13 +88,13 @@ Engine limits:
 - **Restoration:** a recovered fighter is restored like a normal replacement (its wing's refit time and the ship's refit modifiers, with the usual CR rules), then waits in the store.
 - **Launch system:** launches every stored fighter at the target for an attack run. Fighters of one type form wings up to their wing size, and never more instances than were recovered: one recovered Broadsword launches as one, two as two.
 - **After launch:** they behave like normal fighters, return and land. A destroyed one is gone and leaves no wreck (`setHulkChanceOverride(0)` on every fighter the Reliquary launches), so no fighter is salvaged twice.
-- **Bays cannot rebuild them.** A launch bay only builds its own wing's type (`obf/combat/entities/ship/A/C.java:47, 63, 346-410`) and deletes a fighter that lands. So the system spawns them itself:
-  - spawn with `CombatFleetManagerAPI.spawnShipOrWing`;
-  - set the Reliquary as source ship;
-  - remove surplus members;
-  - set their CR;
-  - count landed fighters back into the store.
-  - Vanilla `SwarmLauncherEffect.java:148-180` does the same, including `removeDeployed` cleanup.
+- **Bays must not rebuild them.** A bay builds whatever wing asks it for a replacement, using the requesting wing's variant and its own refit time (`obf/combat/entities/ship/A/C.java:161, 362`), and any wing with a source bay asks when it is under strength (`obf/combat/ai/M.java:260-272`). A recovered wing with a Reliquary bay as its source would be rebuilt endlessly. So the system spawns them itself and gives them a source ship but no source bay:
+  - spawn with `CombatFleetManagerAPI.spawnShipOrWing` (only ids ending in `_wing` are treated as wings; other ids go through `createFleetMember(FIGHTER_WING, …)` and `spawnFleetMember`);
+  - set the Reliquary as source ship (`setSourceShip`, never `setSourceBay`);
+  - remove surplus members (`removeMember` plus `removeEntity`);
+  - give each fighter what a bay would: the ship's CR through the CR plugin and its hullmods' `applyEffectsToFighterSpawnedByShip`;
+  - `removeDeployed(wing, false)`, so the wing costs no deployment points and is cleaned up, as vanilla `SwarmLauncherEffect.java:152-178` does (which moves its members into another wing rather than trimming or setting CR).
+  - Without a bay, vanilla never brings them home, so the mod lands them itself and counts landed fighters back into the store.
 - **Status display:** the store shows on the combat screen where terrain effects live. `engine.maintainStatusForPlayerShip` gives one line per entry. A richer display can be drawn in `renderInUICoords`, or MagicLib's `MagicSubsystem` can host the launch ability with its own HUD bars and AI hook (`shouldActivateAI`).
 - **Refit display:** while the refit screen is open, each Reliquary with stored fighters shows them as filled, locked built-in bays. The swap exists only while the refit is open, so saves, D-mod changes and carrier skill counts never see it. Engine facts below are from the 0.98a-RC8 refit, variant and hull-spec code (`obf/coreui/refit/`, `obf/loading/specs/`).
   - **Why a hull spec copy:** a fighter bay is locked only when the hull spec says it is built-in (`isBuiltInWing`). No variant flag is consulted. A copy of the spec with the stored wings appended to its built-in list shows them filled, locked and free of OP. Being built-in also keeps them out of the loot, scuttle and sell paths, which only take non-built-in wings.
@@ -269,8 +269,8 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - Restoration at the wing's refit time with the ship's refit modifiers.
   - Purged when the member leaves the player's fleet: a fleet callback, as `FishingShips` uses.
   - Check: cap, restoration and grouping into wings no larger than the wing size.
-- [ ] 6.2 Launch system: `catchrelease_salvage_launch` with `combat/salvage/SalvageLaunchStats`. It replaces `targetingfeed`.
-  - Spawns every restored fighter with `spawnShipOrWing`, groups them into wings, removes surplus members, sets the source ship and CR, and calls `removeDeployed` on the spawned wing, as `SwarmLauncherEffect` does.
+- [x] 6.2 Launch system: `catchrelease_salvage_launch` with `combat/salvage/SalvageLaunchStats`. It replaces `targetingfeed`. Implemented with `RecoveredWings`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
+  - Spawns every restored fighter with `spawnShipOrWing`, groups them into wings, removes surplus members, sets the source ship (no source bay) and CR, and calls `removeDeployed` on the spawned wing.
   - Every launched fighter gets `setHulkChanceOverride(0)`.
   - Landed fighters go back into the store; destroyed ones are gone.
 - [ ] 6.3 `ShipSystemAIScript` for the launch: fire when enough fighters are restored and a target in range is worth it.
