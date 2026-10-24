@@ -418,13 +418,13 @@ public final class WoundedEpic {
     public static String getLampShipName() {
         ShipHullSpecAPI spec = Global.getSettings().getHullSpec(FishingShips.Ship.LAMP.hullId);
 
-        return spec == null ? "Breach Light Trawler" : spec.getHullName();
+        return spec == null ? "Breach Trawler" : spec.getHullName();
     }
 
     public static String getLampShipFullName() {
         ShipHullSpecAPI spec = Global.getSettings().getHullSpec(FishingShips.Ship.LAMP.hullId);
 
-        return spec == null ? "Breach Light Trawler" : spec.getNameWithDesignationWithDashClass();
+        return spec == null ? "Breach Trawler" : spec.getNameWithDesignationWithDashClass();
     }
 
     protected static FishSpec pickRangeData(Random random) {
