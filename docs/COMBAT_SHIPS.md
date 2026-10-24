@@ -57,7 +57,7 @@ Replaces the placeholder system. It uses the tug drive's field: while active it 
 
 ## Reliquary: LYNE Tender
 
-A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. One built-in wing of LYNE drones and two modular bays (`LB 1` is the built-in wing's bay).
+A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. It is parasitic: two built-in wings of LYNE drones and no modular bays, so every other fighter it fields is one it salvaged. The hull has two fighter bays; `LB 1` is the landing bay for towed wrecks, and `LB 2`/`LB 3` stay as launch points. Until the LYNE wing exists, the two bays are empty modular bays.
 
 ### LYNE drones
 
@@ -155,7 +155,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - [ ] 4.3 Drive system AI.
 
 **Stage 5: LYNE wing**
-- [ ] 5.1 Wing and drone hull data; built-in wing on the Reliquary.
+- [ ] 5.1 Wing and drone hull data; both built-in wings on the Reliquary.
 - [ ] 5.2 Drone AI: claim, attach, tow, land.
 - [ ] 5.3 Wreck chance setting, wreck lifetime, blacklist.
 
