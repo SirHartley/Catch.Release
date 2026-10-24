@@ -1,6 +1,5 @@
 package catchrelease.combat.salvage;
 
-import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.BaseHullMod;
 import com.fs.starfarer.api.combat.CombatEngineAPI;
@@ -19,7 +18,7 @@ import java.util.Set;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-// Built into the Reliquary. Starts the battle's WreckTracker when one is deployed, and keeps the fighters it
+// Built into the Reliquary. Starts the battle's WreckTracker on its first combat frame, and keeps the fighters it
 // launches from leaving wrecks, so nothing is salvaged twice.
 public class SalvageBaysHullmod extends BaseHullMod {
 
@@ -40,20 +39,14 @@ public class SalvageBaysHullmod extends BaseHullMod {
         if (extra > 0) stats.getNumFighterBays().modifyFlat(id, extra);
     }
 
-    @Override
-    public void applyEffectsAfterShipCreation(ShipAPI ship, String id) {
-        CombatEngineAPI engine = Global.getCombatEngine();
-        if (engine == null || Global.getCurrentState() != GameState.COMBAT) return;
-        WreckTracker.get(engine).addTender(ship);
-        if (!ship.hasListenerOfClass(TenderBays.class)) ship.addListener(new TenderBays(ship));
-    }
-
     // One status line per stored fighter type above the player ship's info, where terrain effects show. The list
     // fades a line that is not maintained every unpaused frame, and advanceInCombat is not called while paused.
     @Override
     public void advanceInCombat(ShipAPI ship, float amount) {
         CombatEngineAPI engine = Global.getCombatEngine();
-        if (Global.getCurrentState() != GameState.COMBAT || engine == null || engine.getPlayerShip() != ship) return;
+        if (engine == null) return;
+        registerTender(engine, ship);
+        if (engine.getPlayerShip() != ship) return;
         FighterStore store = FighterStore.forBattle(engine, ship.getFleetMemberId());
         Map<String, int[]> types = summarise(store);
         String icon = Global.getSettings().getSpriteName("ui", "icon_tactical_bdeck");
@@ -65,6 +58,14 @@ public class SalvageBaysHullmod extends BaseHullMod {
         if (store.count() >= FighterStore.getCap()) {
             engine.maintainStatusForPlayerShip(STATUS_KEY + "full", icon, "Salvage Bays", "BAYS FULL", true);
         }
+    }
+
+    // From the first combat frame rather than at ship creation: the refit's simulator builds the player's ship while
+    // the game is still in campaign state, and refit previews are built outside combat altogether.
+    private static void registerTender(CombatEngineAPI engine, ShipAPI ship) {
+        if (ship.hasListenerOfClass(TenderBays.class)) return;
+        WreckTracker.get(engine).addTender(ship);
+        ship.addListener(new TenderBays(ship));
     }
 
     static String getFighterName(String wingId) {

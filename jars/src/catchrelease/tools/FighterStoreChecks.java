@@ -4,11 +4,21 @@ import catchrelease.combat.salvage.FighterStore;
 import catchrelease.combat.salvage.FighterStore.Group;
 import catchrelease.combat.salvage.RefitStoreView;
 import catchrelease.combat.salvage.SalvageLaunchAI;
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.FleetDataAPI;
+import com.fs.starfarer.api.campaign.SectorAPI;
+import com.fs.starfarer.api.combat.CombatEngineAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.combat.ShipVariantAPI;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,8 +85,91 @@ public final class FighterStoreChecks {
         require(wings.equals(List.of("catchrelease_lyne_wing", "catchrelease_lyne_wing")),
                 "Revert left stored wings in the variant: " + wings);
 
-        System.out.println("Fighter store checks: cap, restoration, launch grouping, return, loss, launch rule"
-                + " and refit revert passed");
+        simulatorIsolation(sizes);
+
+        System.out.println("Fighter store checks: cap, restoration, launch grouping, return, loss, launch rule,"
+                + " refit revert and simulator isolation passed");
+    }
+
+    // Salvage in the refit's simulator, a mission or for a ship outside the player's fleet must never reach the saved
+    // store; only a real campaign battle works on it.
+    private static void simulatorIsolation(Map<String, Integer> sizes) {
+        SectorAPI originalSector = Global.getSector();
+        SettingsAPI originalSettings = Global.getSettings();
+        Map<String, Object> persistent = new HashMap<>();
+        FighterWingSpecAPI wing = proxy(FighterWingSpecAPI.class, (self, method, values) -> {
+            if (method.getName().equals("getNumFighters")) return 3;
+            throw new AssertionError(method);
+        });
+        Global.setSettings(proxy(SettingsAPI.class, (self, method, values) -> {
+            if (method.getName().equals("getFighterWingSpec")) return wing;
+            throw new AssertionError(method);
+        }));
+        FleetMemberAPI member = proxy(FleetMemberAPI.class, (self, method, values) -> {
+            if (method.getName().equals("getId")) return "reliquary";
+            throw new AssertionError(method);
+        });
+        FleetDataAPI data = proxy(FleetDataAPI.class, (self, method, values) -> {
+            if (method.getName().equals("getMembersListCopy")) return new ArrayList<>(List.of(member));
+            throw new AssertionError(method);
+        });
+        CampaignFleetAPI fleet = proxy(CampaignFleetAPI.class, (self, method, values) -> {
+            if (method.getName().equals("getFleetData")) return data;
+            throw new AssertionError(method);
+        });
+        Global.setSector(proxy(SectorAPI.class, (self, method, values) -> switch (method.getName()) {
+            case "getPersistentData" -> persistent;
+            case "getPlayerFleet" -> fleet;
+            default -> throw new AssertionError(method);
+        }));
+        try {
+            FighterStore saved = FighterStore.get("reliquary");
+            saved.add("broadsword_wing", 10);
+            saved.add("broadsword_wing", 10);
+            saved.advance(100f, id -> 1f);
+            saved.advance(100f, id -> 1f);
+
+            for (boolean[] kind : new boolean[][]{{false, true, false}, {true, true, false}, {false, false, true},
+                    {true, false, true}}) {
+                FighterStore battle = FighterStore.forBattle(engine(kind[0], kind[1], kind[2]), "reliquary");
+                require(battle != saved && battle.countReady() == 2, "Practice battle did not start from a copy");
+                battle.add("talon_wing", 10);
+                battle.advance(100f, id -> 1f);
+                battle.launchReady(sizes::get);
+                battle.destroyed("broadsword_wing");
+                battle.returned("talon_wing");
+                battle.discardAll();
+                require(saved.countReady() == 2 && saved.count() == 2 && saved.getFighters().size() == 2,
+                        "A practice battle changed the saved store");
+            }
+
+            FighterStore stranger = FighterStore.forBattle(engine(true, false, false), "someone_else");
+            stranger.add("talon_wing", 10);
+            require(FighterStore.get("someone_else").count() == 0, "A ship outside the fleet wrote to the save");
+
+            FighterStore real = FighterStore.forBattle(engine(true, false, false), "reliquary");
+            require(real == saved, "A real campaign battle did not use the saved store");
+            real.add("talon_wing", 10);
+            require(saved.count() == 3, "Real salvage did not reach the saved store");
+        } finally {
+            Global.setSector(originalSector);
+            Global.setSettings(originalSettings);
+        }
+    }
+
+    private static CombatEngineAPI engine(boolean inCampaign, boolean simulation, boolean mission) {
+        Map<String, Object> custom = new HashMap<>();
+        return proxy(CombatEngineAPI.class, (self, method, values) -> switch (method.getName()) {
+            case "getCustomData" -> custom;
+            case "isInCampaign" -> inCampaign;
+            case "isSimulation" -> simulation;
+            case "isMission" -> mission;
+            default -> throw new AssertionError(method);
+        });
+    }
+
+    private static <T> T proxy(Class<T> type, InvocationHandler handler) {
+        return type.cast(Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, handler));
     }
 
     private static void require(boolean condition, String message) {

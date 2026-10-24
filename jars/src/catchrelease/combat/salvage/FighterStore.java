@@ -65,14 +65,15 @@ public class FighterStore {
     }
 
     // Only player-fleet ships in a real campaign battle use the saved store; the simulator and missions get a copy
-    // for the battle, so practice salvage never reaches the save.
+    // for the battle, so practice salvage never reaches the save. The refit's simulator marks its battle with the
+    // "run combat simulator" session key, which makes isInCampaign false and isSimulation true; both are checked.
     public static FighterStore forBattle(CombatEngineAPI engine, String memberId) {
         @SuppressWarnings("unchecked")
         Map<String, FighterStore> battle = (Map<String, FighterStore>) engine.getCustomData()
                 .computeIfAbsent(BATTLE_KEY, key -> new HashMap<String, FighterStore>());
         FighterStore store = battle.get(memberId);
         if (store != null) return store;
-        FighterStore saved = engine.isInCampaign() && isPlayerMember(memberId) ? get(memberId) : null;
+        FighterStore saved = usesSavedStore(engine) && isPlayerMember(memberId) ? get(memberId) : null;
         if (saved == null) {
             store = new FighterStore();
             FighterStore source = getSaved() == null || memberId == null ? null : getSaved().get(memberId);
@@ -83,6 +84,10 @@ public class FighterStore {
         store.recallLaunched();
         battle.put(memberId, store);
         return store;
+    }
+
+    static boolean usesSavedStore(CombatEngineAPI engine) {
+        return engine.isInCampaign() && !engine.isSimulation() && !engine.isMission();
     }
 
     private static boolean isPlayerMember(String memberId) {
