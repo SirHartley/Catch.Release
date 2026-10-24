@@ -229,9 +229,10 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - [x] 4.1 Harpoon targeting: a weapon autofire AI from `ModPlugin.pickWeaponAutofireAI`. Implemented with `TugPilot`; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). The ship AI can fire any group by hand, past the autofire plugin, so `TugPilot` holds the harpoon with `setForceNoFireOneFrame` unless the plugin wants to fire. The AI lets go of a useless line without firing, rather than spending a charge.
   - Prefer vulnerable targets (exposed hull, shields down or flanked) that friendly ships are not already hammering, or that are fleeing.
   - Fire again to release when the tether is no longer useful.
-- [ ] 4.2 Towing movement: while a tether is live, `TugPilot` (an `AdvanceableListener`, which runs after the ship AI and before commands are processed) overrides movement with `giveCommand` and `blockCommandForOneFrame`. A wrapper around the default AI is not possible: `BasicShipAI.advance` throws when the ship's AI is not itself, and about 36 engine checks test for `BasicShipAI` itself.
+- [x] 4.2 Towing movement: while a tether is live, `TugPilot` (an `AdvanceableListener`, which runs after the ship AI and before commands are processed) overrides movement with `giveCommand` and `blockCommandForOneFrame`. A wrapper around the default AI is not possible: `BasicShipAI.advance` throws when the ship's AI is not itself, and about 36 engine checks test for `BasicShipAI` itself.
   - v1 drags the target toward friendly ships and away from the strongest enemy group.
   - Study Ed Shipyards and Knights of Ludd for movement-override patterns first.
+  - Implemented in `TugPilot`; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). Knights of Ludd's pattern: give the wanted movement commands and block the rest from an `AdvanceableListener`.
 - [ ] 4.3 `ShipSystemAIScript` for the drive: use it when the rope is taut and the target resists, or to escape.
 - Done when: an AI Stigmata in the simulator hooks sensible targets and drags them somewhere useful.
 

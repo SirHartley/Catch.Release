@@ -2,6 +2,7 @@ package catchrelease.tools;
 
 import catchrelease.combat.tug.HarpoonAutofireAI;
 import catchrelease.combat.tug.HarpoonAutofireAI.Shield;
+import catchrelease.combat.tug.TugPilot;
 import org.lwjgl.util.vector.Vector2f;
 
 public final class TugAIChecks {
@@ -34,7 +35,27 @@ public final class TugAIChecks {
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(-40f, 30f), a, b) == 50f, "Segment start");
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(130f, 40f), a, b) == 50f, "Segment end");
 
-        System.out.println("Tug AI checks: harpoon target scoring and line-of-fire distance passed");
+        Vector2f tug = new Vector2f(0f, 0f);
+        Vector2f catchPoint = new Vector2f(-500f, 0f);
+        Vector2f straight = TugPilot.dragDirection(tug, catchPoint, new Vector2f());
+        require(near(straight, 1f, 0f), "No bias did not pull straight away");
+        Vector2f towardFriends = TugPilot.dragDirection(tug, catchPoint, new Vector2f(0f, 3f));
+        require(towardFriends.y > 0.3f && towardFriends.x > 0f, "Did not bend toward friendly ships");
+        Vector2f awayFromEnemies = TugPilot.dragDirection(tug, catchPoint, new Vector2f(0f, -5f));
+        require(awayFromEnemies.y < -0.3f, "Did not bend away from enemies");
+        for (int angle = 0; angle < 360; angle += 15) {
+            Vector2f bias = new Vector2f((float) Math.cos(Math.toRadians(angle)) * 9f,
+                    (float) Math.sin(Math.toRadians(angle)) * 9f);
+            Vector2f heading = TugPilot.dragDirection(tug, catchPoint, bias);
+            require(heading.x > 0.4f, "Heading closes on the catch for bias at " + angle + " degrees");
+            require(Math.abs(heading.length() - 1f) < 1e-4f, "Heading is not a unit vector");
+        }
+
+        System.out.println("Tug AI checks: harpoon target scoring, line-of-fire distance and drag heading passed");
+    }
+
+    private static boolean near(Vector2f v, float x, float y) {
+        return Math.abs(v.x - x) < 1e-4f && Math.abs(v.y - y) < 1e-4f;
     }
 
     private static void require(boolean condition, String message) {
