@@ -39,8 +39,6 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
     public static final float BOX_GAP = 10f;
     public static final float ART_MAX = 240f;
     public static final float CARD_PAD = 16f;
-    // the list icon of a species known only from range data
-    public static final int RANGE_DATA_ICON_ALPHA = 102;
 
     protected final String speciesId;
     protected transient CustomPanelAPI panel;
@@ -112,18 +110,9 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         FishSpec spec = state.spec;
         if (spec == null) return FishConstants.CODEX_CATEGORY_ICON;
         if (!state.isKnown()) return FishConstants.CODEX_CATEGORY_ICON;
+        if (state.isRangeDataOnly()) return FishConstants.CODEX_BLANK_ICON;
 
         return FishCodex.getIcon(spec);
-    }
-
-    @Override
-    public Color getIconColor() {
-        FishCodexEntryState state = getState();
-        if (!state.isRangeDataOnly()) return Color.WHITE;
-        if (state.spec == null) return Color.BLACK;
-
-        // the codex list sets this on the icon sprite, alpha included (codex2 entry button)
-        return Misc.setAlpha(state.spec.rarity.color, RANGE_DATA_ICON_ALPHA);
     }
 
     @Override
@@ -189,7 +178,7 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         y += location.getPosition().getHeight() + BOX_GAP;
 
         float rightHeight = 0f;
-        UIPanelAPI card = buildIconCard(state.isKnown() ? spec : null, logged,
+        UIPanelAPI card = buildIconCard(state.isCaught() ? spec : null, logged,
                 width - leftWidth - BOX_GAP);
 
         if (card != null) {

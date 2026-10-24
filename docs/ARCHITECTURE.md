@@ -523,7 +523,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | File | Owner / connection |
 |---|---|
 | `FishCodexEntryState.java` | Central `UNKNOWN`, `RANGE_DATA`, and `CAUGHT` policy for visibility, links, art, description, records, and map access. |
-| `FishCodexEntry.java`, `FishSizeChart.java` | Species page: left-column boxes, right-column icon card and, for caught species, the size-distribution box below it. A range-data-only species' list icon is tinted its rarity colour at 40% alpha (`getIconColor`, `RANGE_DATA_ICON_ALPHA`). [Chart contract](UI.md#codex-size-chart). |
+| `FishCodexEntry.java`, `FishSizeChart.java` | Species page: left-column boxes, right-column icon card and, for caught species, the size-distribution box below it. A range-data-only species has no icon: the list row gets the fully transparent `FishConstants.CODEX_BLANK_ICON` (preloaded as `codex_blank` in `settings.json`; vanilla's row needs a real sprite), and the page builds no icon card until the species is caught. [Chart contract](UI.md#codex-size-chart). |
 
 ### `campaign/fish/legendary`
 

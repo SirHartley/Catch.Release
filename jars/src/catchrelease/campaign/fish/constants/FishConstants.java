@@ -284,6 +284,8 @@ public class FishConstants {
 
     public static final String CODEX_CATEGORY_TITLE = "Fish";
     public static final String CODEX_CATEGORY_ICON = "graphics/catchrelease/icon/small_icon_catchrelease.png";
+    // fully transparent; preloaded through settings.json, since the codex list needs a real sprite for every row
+    public static final String CODEX_BLANK_ICON = "graphics/catchrelease/icon/codex_blank.png";
 
     public static final String BURIED_ENTITY_ID = "catchrelease_BuriedMote";
     public static final int BURIED_POPULATION = 14;
