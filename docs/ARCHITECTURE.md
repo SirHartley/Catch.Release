@@ -64,7 +64,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `data/config/custom_entities.json` | Motes, drones, harpoons, legendary props and map proxies |
 | `data/campaign/special_items.csv` | Fish cargo; the T1 compass (`catchrelease_compass`, plain `BaseSpecialItemPlugin`, `TreasureRumour.COMPASS`) |
 | `data/campaign/industries.csv` | Breach Conservatory |
-| `data/hulls/ship_data.csv`, `data/hulls/catchrelease_*_ship.ship`, `data/strings/descriptions.csv` | Fishing-ship hulls `catchrelease_harpoon_ship` (Stigmata, midline destroyer: built-in harpoon mount, one bay, placeholder system `maneuveringjets`), `catchrelease_rod_ship` (Reliquary, midline carrier cruiser: two bays, for its two built-in LYNE wings once they exist, placeholder system `targetingfeed`) and `catchrelease_lamp_ship` (Monstrance, still a full copy of vanilla `nebula` until its art exists). Sprites are under `graphics/catchrelease/ships`; the harpoon weapon sprite is `graphics/catchrelease/weapons/harpoon_harpoon.png`. The combat design is in [COMBAT_SHIPS.md](COMBAT_SHIPS.md). Vanilla's blueprint-package tags (`base_bp`, `merc`, `ind`) are left out so no faction builds or sells them; `no_drop`, `no_sell`, `no_bp_drop` and the `HIDE_IN_CODEX` hint keep them out of loot, markets and the Codex. Only quests grant them (`FishReward.ship`). The real hulls replace them under the same ids; see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#ships). |
+| `data/hulls/ship_data.csv`, `data/hulls/catchrelease_*_ship.ship`, `data/hullmods/hull_mods.csv`, `data/strings/descriptions.csv` | Fishing-ship hulls `catchrelease_harpoon_ship` (Stigmata, midline destroyer: built-in harpoon mount and Tug Drive Field hullmod (see [`combat/tug`](#combattug)), one bay, placeholder system `maneuveringjets`), `catchrelease_rod_ship` (Reliquary, midline carrier cruiser: two bays, for its two built-in LYNE wings once they exist, placeholder system `targetingfeed`) and `catchrelease_lamp_ship` (Monstrance, still a full copy of vanilla `nebula` until its art exists). Sprites are under `graphics/catchrelease/ships`; the harpoon weapon sprite is `graphics/catchrelease/weapons/harpoon_harpoon.png`. The combat design is in [COMBAT_SHIPS.md](COMBAT_SHIPS.md). Vanilla's blueprint-package tags (`base_bp`, `merc`, `ind`) are left out so no faction builds or sells them; `no_drop`, `no_sell`, `no_bp_drop` and the `HIDE_IN_CODEX` hint keep them out of loot, markets and the Codex. Only quests grant them (`FishReward.ship`). The real hulls replace them under the same ids; see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#ships). |
 | `data/campaign/backdrops.csv` | Aquarium scenes and ownership source |
 | `data/config/UpgradeData.csv` -> `memory/upgrades/` | Current stat definitions, saved levels and runtime values |
 
@@ -822,6 +822,14 @@ charges, moving couriers, notice placement, pause and cleanup.
 | `HarpoonPatrolResponse.java` | Sends one collector at a time in the incident system; after a reported refusal, every eligible patrol there that sees the player. |
 | `HarpoonWitness.java` | Makes a civilian seek a patrol, after a first hit or a refused repair bill. |
 | `HarpoonHitman.java` | Revenge-contract roll for eligible colonial factions and eligible victims; the `CHANCE_*` constants set each trigger's odds. |
+
+### `combat/tug`
+
+Stigmata combat and towing code. Design and build plan: [COMBAT_SHIPS.md](COMBAT_SHIPS.md#stigmata-harpoon-tug).
+
+| File | Owner / connection |
+|---|---|
+| `TugDriveHullmod.java` | Tug Drive Field (`catchrelease_tug_field`, `data/hullmods/hull_mods.csv`), built into the Stigmata. A `HullModFleetEffect`: `onFleetSync` counts non-mothballed members with the hullmod into fleet memory `$catchrelease_tugFieldCount` (unset at zero), so `advanceInCampaign`, which the engine calls for every fleet every frame, is one memory read for fleets without one. Fleets with tugs get `getFleetwideMaxBurnMod().modifyFlat` (+1 per tug) and `getAccelerationMult().modifyMult` (+20% × (2 − ½^(n−1))) under `catchrelease_tug_field`, both removed while `Abilities.SUSTAINED_BURN` is active. These fleet stats apply in the same frame (`FleetData.getBurnLevel`, `CampaignFleet` movement), which ship stats would not until the next sync. `tools/TugDriveChecks` covers the falloff, reapplying and Sustained Burn. |
 
 ### `abilities`
 

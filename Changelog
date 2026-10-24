@@ -10,6 +10,7 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.d - UNRELEASED
+Added - The Stigmata-class Harpoon Tug has a built-in Tug Drive Field: each one in your fleet (not mothballed) adds 1 to the fleet's maximum burn level, and the first adds 20% campaign acceleration, each further one half the previous bonus (+10%, +5%, ...). It does nothing while Sustained Burn is on
 Changed - The Stigmata-class Harpoon Tug and the Reliquary-class LYNE Tender have their own hulls and stats: the Stigmata a fast midline destroyer with a fighter bay and a built-in harpoon mount, the Reliquary a slow midline carrier cruiser with two fighter bays, meant for two built-in wings of LYNE drones. Their combat equipment comes later
 Fixed - Fleets already offering a quest, or whose commander is marked important for a mission, no longer take on a fishing job as well
 Changed - The marker beside a fleet whose fishing job you have accepted is now a steady gold instead of pulsing; offers still pulse light blue

@@ -1,0 +1,4 @@
+name,id,tier,rarity,tech/manufacturer,tags,uiTags,base value,unlocked,hidden,hiddenEverywhere,cost_frigate,cost_dest,cost_cruiser,cost_capital,script,desc,short,sModDesc,sprite
+Tug Drive Field,catchrelease_tug_field,,,,hide_in_codex,,,,TRUE,,0,0,0,0,catchrelease.combat.tug.TugDriveHullmod,"Increases the fleet's maximum burn level by %s for each ship with a Tug Drive Field, and the fleet's acceleration by %s for the first. Each further one adds %s the previous one's acceleration bonus. Mothballed ships do not count. No effect while %s is active.
+
+A drive field rated to haul a working catch, wide enough to carry the rest of the fleet along.",Increases fleet burn level and acceleration while Sustained Burn is off.,,graphics/hullmods/augmented_drive_field2.png
