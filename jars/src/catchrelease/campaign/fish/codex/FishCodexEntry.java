@@ -112,7 +112,12 @@ public class FishCodexEntry extends CodexEntryV2 implements CustomUIPanelPlugin 
         if (!state.isKnown()) return FishConstants.CODEX_CATEGORY_ICON;
         if (state.isRangeDataOnly()) return FishConstants.CODEX_BLANK_ICON;
 
-        return FishCodex.getIcon(spec);
+        // The codex row only looks up an already-loaded texture and draws nothing otherwise (codex2 entry row,
+        // 0.98a-RC8); fish icons are loaded on first use, so the row loads its own before vanilla reads it.
+        String icon = FishCodex.getIcon(spec);
+        SpriteLoader.loadSprite(icon);
+
+        return icon;
     }
 
     @Override
