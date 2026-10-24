@@ -31,7 +31,8 @@
           "intel_rod":"graphics/catchrelease/intel/intel_rod.png",
           "harpoon_explosive":"graphics/catchrelease/ability/harpoon_explosive.png",
           "placeholder":"graphics/catchrelease/icon/small_icon_catchrelease.png",
-          "placeholder2":"graphics/catchrelease/icon/small_icon_catchrelease2.png"
+          "placeholder2":"graphics/catchrelease/icon/small_icon_catchrelease2.png",
+          "codex_blank":"graphics/catchrelease/icon/codex_blank.png"
     },
 
     "characters": {

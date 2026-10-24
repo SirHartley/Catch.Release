@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.fleet;
 
+import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import catchrelease.config.Setting;
 import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
@@ -440,8 +441,14 @@ public class FleetQuestSpawner implements EveryFrameScript {
         if (fleet.getCommander() == null) return "The fleet has no commander.";
 
         if (FleetQuest.isQuestFleet(fleet)) return "The fleet already carries a fishing quest.";
+        // he carries no vanilla importance, since his fishing-job marker replaces it (CaptainsFleet.syncMarker)
+        if (CaptainsFleet.isCaptain(fleet)) return "The fleet is the Fisherman chain's captain.";
+        // a fleet that already offers a quest: vanilla marks the fleet or its commander (Misc.makeImportant)
         if (fleet.getMemoryWithoutUpdate().getBoolean(MemFlags.ENTITY_MISSION_IMPORTANT)) {
             return "The fleet is marked important for a mission.";
+        }
+        if (fleet.getCommander().getMemoryWithoutUpdate().getBoolean(MemFlags.ENTITY_MISSION_IMPORTANT)) {
+            return "The fleet's commander is marked important for a mission.";
         }
 
         return Misc.isFleetReturningToDespawn(fleet)

@@ -92,7 +92,8 @@ in `sources-obf/ui.impl.java` (0.98a-RC8).
 ### Fleet map markers
 
 Fleet jobs use `fleet_quest_map_icon` beside the fleet and for the accepted map
-proxy. Offers stay light cyan; accepted markers use the yellow colour from the
+proxy. Offers stay light cyan and pulse; accepted markers hold steady at full alpha
+in the yellow colour from the
 `catchrelease_FleetQuestMapIcon` custom-entity spec on both surfaces. Keep its
 asset path and the settings sprite alias aligned. `FleetQuest` owns marker state
 and registers its delivery flag without adding vanilla importance. The Fisherman

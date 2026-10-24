@@ -52,6 +52,9 @@ public final class FleetQuestSpawnCheck {
             f.fleetValues.put(MemFlags.ENTITY_MISSION_IMPORTANT, true);
             f.checkSpawn("marked important for a mission");
             f.fleetValues.remove(MemFlags.ENTITY_MISSION_IMPORTANT);
+            f.commanderValues.put(MemFlags.ENTITY_MISSION_IMPORTANT, true);
+            f.checkSpawn("commander is marked important");
+            f.commanderValues.remove(MemFlags.ENTITY_MISSION_IMPORTANT);
             f.checkSpawn("tutorial is not complete");
 
             f.tutorialStage = FishingIntro.DONE;
@@ -74,8 +77,8 @@ public final class FleetQuestSpawnCheck {
             require(FleetQuestType.CLAIM_ASSAY.canSpawnIn(null), "Added a system gate to Claim Assay");
             require(FleetQuestType.PARLEY_FISH.getSpawnFailure(f.system).contains("Core system"),
                     "Lost Core-system exclusion");
-            System.out.println("Fleet quest spawn diagnostics: missing/rejected givers, tutorial, duplicate quest,"
-                    + " location gates and legacy caller passed");
+            System.out.println("Fleet quest spawn diagnostics: missing/rejected givers, important commanders,"
+                    + " tutorial, duplicate quest, location gates and legacy caller passed");
         } finally {
             Global.setSector(originalSector);
             Global.setSettings(originalSettings);
@@ -119,8 +122,17 @@ public final class FleetQuestSpawnCheck {
                     case "isPlayerFaction" -> false;
                     default -> throw new AssertionError(method);
                 });
+        private final Map<String, Object> commanderValues = new HashMap<>();
+        private final MemoryAPI commanderMemory = proxy(MemoryAPI.class,
+                (self, method, values) -> switch (method.getName()) {
+                    case "getBoolean" -> Boolean.TRUE.equals(commanderValues.get(values[0]));
+                    default -> throw new AssertionError(method);
+                });
         private final PersonAPI commander = proxy(PersonAPI.class,
-                (self, method, values) -> { throw new AssertionError(method); });
+                (self, method, values) -> switch (method.getName()) {
+                    case "getMemoryWithoutUpdate" -> commanderMemory;
+                    default -> throw new AssertionError(method);
+                });
         private final CampaignFleetAPI giver = proxy(CampaignFleetAPI.class,
                 (self, method, values) -> switch (method.getName()) {
                     case "getFaction" -> faction;
