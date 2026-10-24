@@ -146,43 +146,151 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - Do spawned recovered wings count toward deployment points?
 - Refit swap: does the spec `clone()` work through `MethodHandles` at runtime, does `reportAboutToOpenCoreTab` fire when the core UI opens straight into the refit (if not, the close script also has to notice the refit opening), and do fighter wings change the crew figures shown while the swap is active?
 
-## Plan
+## Implementation plan
 
-**Stage 0: data and dependencies**
+### How the work is delivered
+
+- One stage is one pull request, with one commit per numbered step, as in [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md). Each stage ends with the compile gate, the checks below, the docs and the changelog.
+- Every step that changes what the player sees in combat ends with an in-game test by the author. The PR lists what to try.
+- Steps marked **spike** prove an untested engine assumption first, in a throwaway branch or behind a dev flag. If it fails, the step falls back as described, and this document is updated before the stage goes on.
+- Player-facing text (descriptions, tooltips, settings, HUD labels) goes through [DIALOGUE.md](DIALOGUE.md); panels, renderers and HUD work through [UI.md](UI.md). UI design research goes to a Fable subagent (see `CLAUDE.md`); the main session writes the code.
+- Ids use the `catchrelease_` prefix. Vanilla already owns `harpoon`.
+- Combat code goes under `jars/src/catchrelease/combat/`, one package per ship: `tug`, `salvage` (Reliquary) and later `lights`. Shared helpers go in `combat/` itself. Each owner gets an `ARCHITECTURE.md` row when it lands.
+- Checks go under `jars/src/catchrelease/tools/`, headless, in the style of the existing `*Checks` classes. Check the maths and rules, not restated code: rope constraint, acceleration falloff, store cap and wing grouping, blacklist, and refit-swap revert.
+
+### Data files this introduces
+
+| File | Contents |
+|---|---|
+| `data/hullmods/hull_mods.csv` | tug hullmod, Reliquary salvage hullmod |
+| `data/weapons/weapon_data.csv`, `data/weapons/catchrelease_harpoon.wpn`, `data/weapons/proj/catchrelease_harpoon_shot.proj` | harpoon weapon and projectile |
+| `data/shipsystems/ship_systems.csv`, `data/shipsystems/catchrelease_tug_drive.system`, `catchrelease_salvage_launch.system` | Stigmata drive, Reliquary launch |
+| `data/hulls/wing_data.csv`, `data/hulls/catchrelease_lyne_drone.ship`, a `ship_data.csv` row, `data/variants/fighters/catchrelease_lyne_drone_wing.variant` | LYNE drone wing |
+| `data/hulls/skins/catchrelease_rod_ship_early.skin` | early Reliquary |
+| `data/hulls/catchrelease_harpoon_ship.ship`, `catchrelease_rod_ship.ship` | `builtInWeapons`, `builtInMods`, `builtInWings`; these are the author's files, edited only for those keys |
+| `data/strings/descriptions.csv`, `data/config/settings.json`, `sounds.json`, `LunaSettings.csv` | descriptions, sprites, sounds, settings |
+
+### Stage 0: data and dependencies
+
 - [x] 0.1 New designations: LYNE Tender, Breach Trawler.
 - [x] 0.2 Stigmata and Reliquary stats in `ship_data.csv`; placeholder systems.
 - [x] 0.3 Update `lib/MagicLib.zip`.
 - [x] 0.4 Placeholder harpoon projectile sprite: `graphics/catchrelease/weapons/harpoon_projectile.png` (12×26), a copy of the vanilla Harpoon missile's sprite.
 
-**Stage 1: tug hullmod**
-- [ ] 1.1 Hullmod with the fleet effect, Sustained Burn check and diminishing acceleration.
+### Stage 1: tug hullmod
 
-**Stage 2: harpoon**
-- [ ] 2.1 Weapon and projectile data, built into `WS0001`.
-- [ ] 2.2 Hit rule: glance off shields, attach to hull or armour, any ship or wreck.
-- [ ] 2.3 Rope constraint and mass-weighted pull, slack, release and break rules.
-- [ ] 2.4 Rope rendering and the connection effect.
-- [ ] 2.5 Smooth turret return.
+- [ ] 1.1 `combat/tug/TugDriveHullmod`: a `BaseHullMod` that also implements `HullModFleetEffect`, built into the Stigmata.
+  - `advanceInCampaign(fleet)` exits at once when the fleet has no non-mothballed tug. Each frame:
+    - count the tugs: +1 burn per tug through `getFleetwideMaxBurnMod().modifyFlat`;
+    - acceleration through `getAccelerationMult().modifyMult` with 20% × (1 + ½ + ¼ …);
+    - remove both under the same key while `Abilities.SUSTAINED_BURN` is active.
+  - The tooltip states the numbers and the Sustained Burn rule.
+  - Check: the falloff sum for 1–5 tugs, and that the bonus is gone with Sustained Burn on.
+  - Done when: a fleet with tugs gains burn and acceleration, and loses them the moment Sustained Burn starts.
 
-**Stage 3: drive system**
-- [ ] 3.1 Mass, acceleration and turn boost; plumes and smoke.
+### Stage 2: harpoon
 
-**Stage 4: Stigmata AI**
-- [ ] 4.1 Harpoon target choice.
-- [ ] 4.2 Towing movement.
-- [ ] 4.3 Drive system AI.
+- [ ] 2.1 Weapon data.
+  - `catchrelease_harpoon`: built-in MEDIUM ballistic-styled weapon on `WS0001`, real kinetic damage, `ammo`, `ammo/sec`, `reload size`.
+  - The projectile uses the placeholder sprite.
+  - The turret's return to its default angle is fast but smooth: a turn rate high enough to feel quick, no snap.
+  - Done when: the Stigmata fires harpoons from its built-in mount in the simulator.
+- [ ] 2.2 Hit rule: `combat/tug/HarpoonOnHit` (`OnHitEffectPlugin`).
+  - A shield hit (`shieldHit`, reliable because the shot does damage) spawns a deflected copy.
+  - A hull or armour hit on any ship or wreck creates a `Tether`: target, attachment point in the target's local frame, rope length = distance at impact.
+  - Firing again releases the current tether.
+- [ ] 2.3 Tether physics: `combat/tug/Tether`, advanced by one `EveryFrameCombatPlugin` that owns every live tether.
+  - **Pull:** when taut, remove the outward velocity along the rope and add an impulse split by mass, so the lighter ship moves more. Slack never pulls.
+  - **Top speed:** a temporary max-speed allowance on a dragged target so its auto-brake does not fight the rope.
+  - **Breaks** on:
+    - duration;
+    - target destroyed or removed;
+    - the rope crossing the tug's hull (LazyLib `CollisionUtils`, tested from outside the hull) — behind a setting, off if it plays badly.
+  - Check: the constraint maths, i.e. mass split, slack, and no pull while slack.
+  - Done when: the tug can hook and drag a frigate, struggles with a cruiser, and the rope behaves when slack.
+- [ ] 2.4 Rope rendering: `combat/tug/TetherRenderer`, a `BaseCombatLayeredRenderingPlugin` per tether, its entity kept at the rope's midpoint with a render radius covering the rope.
+  - **Look:** about 2 px wide, beige-white centre, brown edges, as a feathered quad strip along the campaign rope's curve and slack maths, ported from `HarpoonEntityPlugin`.
+  - **Flight and bite:** low alpha in flight, then it "materialises" on the bite, with EMP arcs racing along the rope.
+  - Done when: the rope reads clearly at all zooms and looks right slack and taut.
+- [ ] 2.5 Turret return polish and any feel tuning found in 2.3–2.4.
 
-**Stage 5: LYNE wing**
-- [ ] 5.1 Wing and drone hull data; both built-in wings on the Reliquary.
-- [ ] 5.2 Drone AI: claim, attach, tow, land.
-- [ ] 5.3 Wreck chance setting, wreck lifetime, blacklist.
+### Stage 3: drive system
 
-**Stage 6: recovered fighters**
-- [ ] 6.1 Store, restoration and persistence per fleet member.
-- [ ] 6.2 Combat status display; refit spec swap with the restore guard; hullmod tooltip fallback; LunaLib refit button and panel to discard stored fighters.
-- [ ] 6.3 Launch system and its AI.
-- [ ] 6.4 Early Reliquary skin: combat code matches it through its base hull id.
+- [ ] 3.1 `catchrelease_tug_drive` with `combat/tug/TugDriveStats` (`BaseShipSystemScript`).
+  - **Stats while active:** raised mass (`setMass`, restored in `unapply`), acceleration, turn acceleration and turn rate.
+  - **Visuals:** `extendFlame` and `fadeToOtherColor` on the engines, dark `addNebulaSmokeParticle` smoke from the nozzles.
+  - **Uses:** charges through `max uses`/`regen`.
+  - It replaces `maneuveringjets` in `ship_data.csv`.
+  - Done when: a hooked cruiser can be hauled with the drive on, and the smoke and plumes look right.
 
-**Stage 7: Monstrance**
-- [ ] 7.1 Hull art and data.
-- [ ] 7.2 Light system, effects, AI avoidance and system AI.
+### Stage 4: Stigmata AI
+
+- [ ] 4.1 Harpoon targeting: a weapon autofire AI from `ModPlugin.pickWeaponAutofireAI`.
+  - Prefer vulnerable targets (exposed hull, shields down or flanked) that friendly ships are not already hammering, or that are fleeing.
+  - Fire again to release when the tether is no longer useful.
+- [ ] 4.2 Towing movement: while a tether is live, a wrapper around the ship's default AI (`setShipAI`) calls it, then overrides movement with `giveCommand` and `blockCommandForOneFrame`.
+  - v1 drags the target toward friendly ships and away from the strongest enemy group.
+  - Study Ed Shipyards and Knights of Ludd for movement-override patterns first.
+- [ ] 4.3 `ShipSystemAIScript` for the drive: use it when the rope is taut and the target resists, or to escape.
+- Done when: an AI Stigmata in the simulator hooks sensible targets and drags them somewhere useful.
+
+### Stage 5: LYNE wing
+
+- [ ] 5.1 Data.
+  - LYNE drone fighter hull: unarmed, fast, nimble, low hull, `munitions_drone.png`.
+  - Its variant and a `wing_data.csv` row: 5 drones, very short refit.
+  - Two `builtInWings` on the Reliquary.
+- [ ] 5.2 **Spike**, all three in the simulator:
+  - `ShipAPI.setHulkChanceOverride` on enemy fighters;
+  - topping up `timeBeforeFade` by reflection (`ReflectionUtils`) once a second;
+  - `beginLandingAnimation` on a wreck.
+
+  Fallbacks: if the timer cannot be held, the drone carries a drawn copy (losing the damage overlay); if the landing shrink fails on a wreck, fade it out with the drone.
+- [ ] 5.3 `combat/salvage/WreckTracker`: an `EveryFrameCombatPlugin` active only while a Reliquary is deployed.
+  - Sets the wreck chance (setting, default 75%) on eligible enemy fighters.
+  - Keeps their wrecks for 30 seconds.
+  - Hands out claims, one wreck per drone.
+  - Applies the blacklist: non-fighters, station modules, drones, shuttle pods; hull tags `threat`, `swarm_fighter`, `fragment`, `dweller`, `monster`; wing tags `restricted`, `independent_of_carrier`.
+  - Check: the blacklist rules.
+- [ ] 5.4 `combat/salvage/LyneDroneAI` (`ShipAIPlugin`), picked in `ModPlugin.pickShipAI` by a hull tag.
+  - Cycle: claim → fly → attach → tow (wreck collision class `NONE`) → reach `LB 1` → landing shrink, with hit particles at the bay.
+  - Drones ignore wrecks while the store is full.
+- Done when: the drones visibly salvage fighter wrecks in a simulator fight.
+
+### Stage 6: recovered fighters
+
+- [ ] 6.1 `combat/salvage/FighterStore`, saved per fleet member id, on the sector's persistent data.
+  - Wing id, count and restoration progress per entry.
+  - Cap 10 (setting), counting fighters still restoring.
+  - Restoration at the wing's refit time with the ship's refit modifiers.
+  - Purged when the member leaves the player's fleet: a fleet callback, as `FishingShips` uses.
+  - Check: cap, restoration and grouping into wings no larger than the wing size.
+- [ ] 6.2 Launch system: `catchrelease_salvage_launch` with `combat/salvage/SalvageLaunchStats`. It replaces `targetingfeed`.
+  - Spawns every restored fighter with `spawnShipOrWing`, groups them into wings, removes surplus members, sets the source ship and CR, and calls `removeDeployed` on the spawned wing, as `SwarmLauncherEffect` does.
+  - Every launched fighter gets `setHulkChanceOverride(0)`.
+  - Landed fighters go back into the store; destroyed ones are gone.
+- [ ] 6.3 `ShipSystemAIScript` for the launch: fire when enough fighters are restored and a target in range is worth it.
+- [ ] 6.4 Combat status display: one `maintainStatusForPlayerShip` line per stored type, or a richer `renderInUICoords` panel. Fable research first.
+- [ ] 6.5 Refit display, in this order:
+  1. **Spike** the spec `clone()` through `MethodHandles` and whether `reportAboutToOpenCoreTab` fires when the core UI opens straight into the refit.
+  2. `combat/salvage/RefitStoreView`:
+     - takes the variant for this member alone;
+     - swaps in the spec copy on open;
+     - extra bays from the salvage hullmod only outside combat;
+     - reverts on close;
+     - the restore guard;
+     - strips stray wings on load and on leaving the fleet.
+  3. Check: revert leaves no stored wing ids in the variant.
+- [ ] 6.6 Salvage hullmod tooltip listing the store, the fallback display.
+- [ ] 6.7 LunaLib refit button and panel to discard stored fighters (`BaseRefitButton`). Afterwards, `refreshVariant()`.
+- [ ] 6.8 Early Reliquary skin. Combat code matches it through `getBaseHullId`. Campaign:
+  - a `FishingShips` entry with the ROD rig's second slot and no module;
+  - +1 drone in `FishingDroneSwarmScript`.
+
+  Where the player gets it is still open, so no grant yet.
+- Done when: fighters are salvaged in one battle, show in the refit, can be discarded, launch in the next battle and return.
+
+### Stage 7: Monstrance
+
+- [ ] 7.1 Hull art and data, cruiser.
+- [ ] 7.2 Light projectors and the light system: cone rendering ported from the campaign renderers, effects, mine-flagged invisible missiles for AI avoidance, and system AI. Revisit the design first; it is a dodgeable debuff whose fun is unproven.
