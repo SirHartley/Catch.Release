@@ -33,7 +33,7 @@ Implementation route: `HullModFleetEffect.advanceInCampaign(fleet)` writes `getF
 
 ### Harpoon
 
-A built-in weapon on `WS0001` with regenerating charges (`ammo`, `ammo/sec`, `reload size` in `weapon_data.csv`). Prefix its ids: vanilla already uses `harpoon` for a missile. The projectile sprite is still to come; until then use a copy of a vanilla missile sprite, renamed into the mod's graphics.
+A built-in weapon on `WS0001` with regenerating charges (`ammo`, `ammo/sec`, `reload size` in `weapon_data.csv`). Prefix its ids: vanilla already uses `harpoon` for a missile. The projectile sprite is still to come; until then use a renamed copy of the vanilla Harpoon missile's sprite (plan step 0.4).
 
 - **Damage:** it does real damage, as a harpoon should. Non-zero damage also matters technically: `OnHitEffectPlugin` reports `shieldHit` only when shield damage was dealt (`obf/combat/entities/BallisticProjectile.java:255-257`).
 - **Hits:** a shield hit glances off; only a hull or armour hit attaches. A deflected harpoon is a new projectile spawned at the hit point (`engine.spawnProjectile`); vanilla has no ricochet.
@@ -131,7 +131,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - [x] 0.1 New designations: LYNE Tender, Breach Trawler.
 - [x] 0.2 Stigmata and Reliquary stats in `ship_data.csv`; placeholder systems.
 - [x] 0.3 Update `lib/MagicLib.zip`.
-- [ ] 0.4 Placeholder harpoon projectile sprite.
+- [ ] 0.4 Placeholder harpoon projectile sprite: a renamed copy of vanilla `graphics/missiles/missile_harpoon.png` (10×22, centre 5,12, from `harpoon_mrm.proj`) under `graphics/catchrelease/weapons/`. The file has to come from the game install.
 
 **Stage 1: tug hullmod**
 - [ ] 1.1 Hullmod with the fleet effect, Sustained Burn check and diminishing acceleration.
