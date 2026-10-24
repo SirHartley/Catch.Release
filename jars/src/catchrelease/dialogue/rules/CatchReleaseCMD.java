@@ -410,7 +410,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 intel.getFishermanFaction(), intel.getIcon(), intel.getIntelTags(null));
     }
 
-    // A chain offer's target, before its intel exists: "t1" or "t2" names the quest.
+    // A chain offer's target, before its intel exists: "t1", "t2" or "t3" names the quest.
     protected boolean showChainMap(InteractionDialogAPI dialog, String quest, String title) {
         BaseIntelPlugin intel;
         SectorEntityToken location;
@@ -422,6 +422,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "t2" -> {
                 intel = new CaptainsFleet.CaptainIntel();
                 location = CaptainsFleet.getOfferMapLocation();
+            }
+            case "t3" -> {
+                intel = new WoundedEpic.WoundedIntel();
+                location = WoundedEpic.getOfferMapLocation();
             }
             default -> {
                 return QuestDialogMap.hide(dialog);

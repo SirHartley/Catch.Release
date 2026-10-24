@@ -353,6 +353,15 @@ public final class WoundedEpic {
         return true;
     }
 
+    // The offered planet for the offer's dialogue map, else its system; WoundedIntel only points there once T3 is on.
+    public static SectorEntityToken getOfferMapLocation() {
+        PlanetAPI planet = getPlanet();
+        if (planet != null) return planet;
+
+        StarSystemAPI system = getSystem();
+        return system == null ? null : system.getHyperspaceAnchor();
+    }
+
     public static boolean start(TextPanelAPI text) {
         if (!FishermanChain.isAt(FishermanChain.Stage.T2_SENSOR_BOUGHT)) return false;
 
