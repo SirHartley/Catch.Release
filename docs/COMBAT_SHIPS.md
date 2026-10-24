@@ -109,6 +109,15 @@ Engine limits:
 - **Persistence:** the store carries over between battles, kept per ship. Variant ids are shared by every ship of a stock variant, so key it by fleet member id. Purge it when the ship leaves the player's fleet, for example into storage.
 - **AI:** fire when enough fighters are stored and a target in range is worth it.
 
+### Early Reliquary (hull skin)
+
+The player gets a slightly weaker Reliquary early, because the salvage-and-launch system is the ship's best feature. There is no blueprint for it.
+
+- **Form:** a hull skin (`.skin`) of `catchrelease_rod_ship` with its own hull id. A skin can set its own built-in wings. `FishingShips.forHull` matches the hull id (or a D-hull's parent), so the skin does not count as the Reliquary for the drone rig's second slot unless it is added there on purpose.
+- **Proposed drone nerf (the author's idea):** its LYNE wing gets one extra drone, but lost drones are never replaced. That fits a separate LYNE wing entry for the skin, with one more drone and a refit time long enough never to finish in a battle, so no hullmod is needed.
+- **Suggested addition:** the launch system is what makes the ship strong, and the drone nerf only slows how fast the store fills. Capping the store (for example one wing's worth of fighters, or a fixed number) limits the system directly. A single LYNE wing instead of two is a further option.
+- **Open:** where the player gets it, and the numbers (drone count, store cap, wing count).
+
 ## Monstrance: Breach Trawler (later)
 
 Lower priority; the hull art does not exist yet. Real breach-light projectors on the ship. The system spools the reactor and turns on the lights for a time, with cone visuals and sounds exactly as in the campaign. The number of cones depends on the projectors fitted. The cones sweep in a circle as in the campaign, with some targeting movement.
@@ -172,6 +181,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - [ ] 6.1 Store, restoration and persistence per fleet member.
 - [ ] 6.2 Combat status display; refit spec swap with the restore guard; hullmod tooltip fallback.
 - [ ] 6.3 Launch system and its AI.
+- [ ] 6.4 Early Reliquary hull skin.
 
 **Stage 7: Monstrance**
 - [ ] 7.1 Hull art and data.
