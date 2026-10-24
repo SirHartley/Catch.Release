@@ -20,7 +20,7 @@ A fast destroyer with classic midline stats, one modular launch bay, three small
 
 ### Tug hullmod
 
-Built in, placeholder icon.
+Built in as the Tug Drive Field (`catchrelease_tug_field`), placeholder icon (vanilla Augmented Drive Field).
 
 - +1 maximum burn for the fleet per tug; several tugs stack.
 - Campaign acceleration +20% for the first tug, each further tug adding half the previous one's bonus (+20%, +10%, +5%, …).
@@ -179,8 +179,8 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 1: tug hullmod
 
-- [ ] 1.1 `combat/tug/TugDriveHullmod`: a `BaseHullMod` that also implements `HullModFleetEffect`, built into the Stigmata.
-  - `advanceInCampaign(fleet)` exits at once when the fleet has no non-mothballed tug. Each frame:
+- [x] 1.1 `combat/tug/TugDriveHullmod` (Tug Drive Field, `catchrelease_tug_field`): a `BaseHullMod` that also implements `HullModFleetEffect`, built into the Stigmata. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug).
+  - `advanceInCampaign(fleet)` exits at once when the fleet has no non-mothballed tug (counted on fleet sync). Each frame:
     - count the tugs: +1 burn per tug through `getFleetwideMaxBurnMod().modifyFlat`;
     - acceleration through `getAccelerationMult().modifyMult` with 20% × (1 + ½ + ¼ …);
     - remove both under the same key while `Abilities.SUSTAINED_BURN` is active.

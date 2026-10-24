@@ -12,7 +12,8 @@
   "shieldRadius": 120,
   "viewOffset": 0,
   "builtInMods": [
-    "civgrade"
+    "civgrade",
+    "catchrelease_tug_field"
   ],
   "weaponSlots": [
     {
