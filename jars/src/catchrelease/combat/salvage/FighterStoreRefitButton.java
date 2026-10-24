@@ -78,9 +78,8 @@ public class FighterStoreRefitButton extends BaseRefitButton {
 
     @Override
     public void addTooltip(TooltipMakerAPI tooltip, FleetMemberAPI member, ShipVariantAPI variant, MarketAPI market) {
-        tooltip.addPara("Lists the fighters this ship's LYNE drones have recovered, and discards the ones it should"
-                + " not keep. A discarded fighter is gone for good: it gives no LPC, and undoing the refit does not"
-                + " bring it back.", 0f);
+        tooltip.addPara("View recovered fighters and choose which to discard. Discarding is permanent and gives"
+                + " no LPC. Undoing the refit will not restore discarded fighters.", 0f);
         if (!isClickable(member, variant, market)) {
             tooltip.addPara("No recovered fighters aboard.", Misc.getGrayColor(), PAD);
         }

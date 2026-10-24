@@ -830,6 +830,8 @@ charges, moving couriers, notice placement, pause and cleanup.
 
 Stigmata combat and towing code. Design and build plan: [COMBAT_SHIPS.md](COMBAT_SHIPS.md#stigmata-harpoon-tug).
 
+Combat equipment text: `data/strings/descriptions.csv` owns ship, weapon and system descriptions; `data/hullmods/hull_mods.csv` owns hullmod descriptions. Hullmod `%s` arguments come from `getDescriptionParam` in the corresponding Java class. Refit controls and live fighter counts are in `combat/salvage` below.
+
 | File | Owner / connection |
 |---|---|
 | `data/weapons/weapon_data.csv`, `catchrelease_harpoon.wpn`, `proj/catchrelease_harpoon_shot.proj` | Tug Harpoon `catchrelease_harpoon`, built into the Stigmata's `WS0001` (`builtInWeapons`): BALLISTIC MEDIUM turret, 400 kinetic, range 900, 2 charges regained one per 12 seconds (`ammo`, `ammo/sec` 0.0833, `reload size` 1), 1.5 s refire (`chargedown`). Tagged `restricted`, `no_drop`, `no_sell`; hint `NO_MANUAL_FIRE` so the ship AI rarely selects it to fire by hand. Its shot is a `PROJECTILE_FF` ballistic, so it hits friendly ships and wrecks (owner 100) too, never its own source. The shot's colours are transparent and it has no `bulletSprite`, which is always drawn additively; `TetherRenderer` draws the head (`harpoon_head` in `settings.json`). Description in `descriptions.csv`. |
