@@ -11,6 +11,7 @@ import org.lazywizard.console.CommandUtils;
 import org.lazywizard.console.Console;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -26,11 +27,13 @@ public class AddFish implements BaseCommandWithSuggestion {
     private static final class ParsedArguments {
 
         private final String fishId;
+        private final int quantity;
         private final Float quality;
         private final Float coherence;
 
-        private ParsedArguments(String fishId, Float quality, Float coherence) {
+        private ParsedArguments(String fishId, int quantity, Float quality, Float coherence) {
             this.fishId = fishId;
+            this.quantity = quantity;
             this.quality = quality;
             this.coherence = coherence;
         }
@@ -82,37 +85,38 @@ public class AddFish implements BaseCommandWithSuggestion {
 
         FishSpec spec = FishSpecLoader.getFishSpec(parsed.fishId);
         if (spec == null) {
-            Console.showMessage("No fish ID matches \"" + parsed.fishId + "\".");
+            Console.showMessage("No fish ID or name matches \"" + parsed.fishId + "\".");
             return CommandResult.ERROR;
         }
 
-        float aberration = parsed.coherence == null
-                ? (spec.minAberration + spec.maxAberration) * 0.5f : 1f - parsed.coherence;
-        FishCatch specimen = FishCatch.roll(spec, aberration);
-        if (specimen == null) {
-            Console.showMessage("Could not create any specimens for " + spec.getDisplayName() + ".");
-            return CommandResult.ERROR;
-        }
-        if (parsed.quality != null) {
-            specimen.length = spec.lengthMin + (spec.lengthMax - spec.lengthMin) * parsed.quality;
-            specimen.weight = spec.weightMin + (spec.weightMax - spec.weightMin) * parsed.quality;
-        }
-
+        List<FishCatch> specimens = createSpecimens(spec, parsed);
         CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
-        cargo.addSpecial(FishItems.toBundle(Collections.singletonList(specimen)), 1);
+        cargo.addSpecial(FishItems.toBundle(specimens), 1);
 
-        Console.showMessage("Added 1 x " + spec.getDisplayName()
+        Console.showMessage("Added " + parsed.quantity + " x " + spec.getDisplayName()
                 + " [" + spec.id + "] to the player fleet's cargo.");
         return CommandResult.SUCCESS;
     }
 
+    private static List<FishCatch> createSpecimens(FishSpec spec, ParsedArguments parsed) {
+        float aberration = parsed.coherence == null
+                ? (spec.minAberration + spec.maxAberration) * 0.5f : 1f - parsed.coherence;
+        List<FishCatch> specimens = new ArrayList<>();
+        for (int i = 0; i < parsed.quantity; i++) {
+            FishCatch specimen = FishCatch.roll(spec, aberration);
+            if (parsed.quality != null) {
+                specimen.length = spec.lengthMin + (spec.lengthMax - spec.lengthMin) * parsed.quality;
+                specimen.weight = spec.weightMin + (spec.weightMax - spec.weightMin) * parsed.quality;
+            }
+            specimens.add(specimen);
+        }
+
+        return specimens;
+    }
+
     @Override
     public List<String> getSuggestions(int parameter, List<String> previous, CommandContext context) {
-        if (!context.isInCampaign() || parameter != 0) return Collections.emptyList();
-
-        List<String> ids = new ArrayList<>();
-        for (FishSpec spec : validSpecs()) ids.add(spec.id);
-        return ids;
+        return getFishSuggestions(parameter, previous, context);
     }
 
     static List<String> getFishSuggestions(int parameter, List<String> previous,
@@ -153,15 +157,40 @@ public class AddFish implements BaseCommandWithSuggestion {
     private static ParsedArguments parseArguments(String args) {
         if (args == null || args.isBlank()) return null;
         String[] parts = args.trim().split("\\s+");
-        if (parts.length > 3) return null;
+        List<FishSpec> specs = validSpecs();
+        FishSpec spec = null;
+        int nameEnd = parts.length;
+        for (; nameEnd > 0; nameEnd--) {
+            String query = String.join(" ", Arrays.copyOfRange(parts, 0, nameEnd));
+            spec = findExactSpec(query, specs);
+            if (spec != null) break;
+        }
+        if (spec == null) return new ParsedArguments(args.trim(), 1, null, null);
+        int remaining = parts.length - nameEnd;
+        if (remaining > 3) return null;
 
         try {
-            Float quality = parts.length > 1 ? parseUnitValue(parts[1]) : null;
-            Float coherence = parts.length > 2 ? parseUnitValue(parts[2]) : null;
-            return new ParsedArguments(parts[0], quality, coherence);
+            int quantity = remaining > 0 ? Integer.parseInt(parts[nameEnd]) : 1;
+            if (quantity <= 0) return null;
+            Float quality = remaining > 1 ? parseUnitValue(parts[nameEnd + 1]) : null;
+            Float coherence = remaining > 2 ? parseUnitValue(parts[nameEnd + 2]) : null;
+            return new ParsedArguments(spec.id, quantity, quality, coherence);
         } catch (NumberFormatException ex) {
             return null;
         }
+    }
+
+    private static FishSpec findExactSpec(String query, List<FishSpec> specs) {
+        if (query.startsWith("\"") && query.endsWith("\"") && query.length() >= 2) {
+            query = query.substring(1, query.length() - 1);
+        }
+        for (FishSpec spec : specs) {
+            if (spec.id.equalsIgnoreCase(query)) return spec;
+        }
+        for (FishSpec spec : specs) {
+            if (spec.getDisplayName().equalsIgnoreCase(query)) return spec;
+        }
+        return null;
     }
 
     private static float parseUnitValue(String text) {

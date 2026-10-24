@@ -213,7 +213,7 @@ limits are in [RULES.md](RULES.md#rules-check-tool).
 the rows `docs/LORE.md` quotes still match (`LoreExcerpts`). Run it with the `Dialogue Check` run
 configuration; usage, checks, bands and exemptions are in [DIALOGUE.md](DIALOGUE.md#dialogue-check).
 
-`AddFish <fishId> [quality] [coherence]` adds one bundled specimen. Exact IDs and ID-only autocomplete; optional finite values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses the normal size roll; omitted coherence uses the species' aberration midpoint. `SpawnFish` retains the shared name/fuzzy matcher and its separate suggestions.
+`AddFish <fish id or name> [quantity] [quality] [coherence]` adds one bundle containing the requested number of separately rolled specimens. Exact IDs or full display names are case-insensitive; multi-word names may be quoted or unquoted. The longest exact prefix identifies the species, followed by a positive integer quantity (default 1) and optional finite quality/coherence values in `[0,1]`. Quality interpolates both length and weight directly; coherence is stored as `1 - coherence`. Omitted quality uses a separate normal size roll per fish; omitted coherence uses the species' aberration midpoint. ID/name autocomplete is shared with `SpawnFish`; only `SpawnFish` uses the fuzzy matcher.
 
 ## Data identity
 
