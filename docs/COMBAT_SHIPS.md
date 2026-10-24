@@ -86,7 +86,7 @@ Engine limits:
 
 - **Restoration:** a recovered fighter is restored like a normal replacement (its wing's refit time and the ship's refit modifiers, with the usual CR rules), then waits in the store.
 - **Launch system:** launches every stored fighter at the target for an attack run. Fighters of one type form wings up to their wing size, and never more instances than were recovered: one recovered Broadsword launches as one, two as two.
-- **After launch:** they behave like normal fighters, return and land. A destroyed one is gone, though its wreck can be salvaged again.
+- **After launch:** they behave like normal fighters, return and land. A destroyed one is gone and leaves no wreck (`setHulkChanceOverride(0)` on every fighter the Reliquary launches), so no fighter is salvaged twice.
 - **Bays cannot rebuild them.** A launch bay only builds its own wing's type (`obf/combat/entities/ship/A/C.java:47, 63, 346-410`) and deletes a fighter that lands. So the system spawns them itself:
   - spawn with `CombatFleetManagerAPI.spawnShipOrWing`;
   - set the Reliquary as source ship;
