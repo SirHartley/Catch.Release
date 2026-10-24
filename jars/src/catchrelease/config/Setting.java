@@ -49,6 +49,7 @@ public enum Setting {
     TRACKING_TIME("catchrelease_tracking_time", 100d, 0d, 300d),
     NEEDLE_FREQUENCY("catchrelease_needle_frequency", 100d, 25d, 400d),
     NEEDLE_VISIBILITY("catchrelease_needle_visibility", 100d, 0d, 300d),
+    HARPOON_ROPE_HULL_BREAK("catchrelease_harpoon_rope_hull_break", true),
 
     // Legendary Hunts
     HUNT_PRESET("catchrelease_hunt_preset", "Keep current", "Keep current,Relaxed,Easy,Standard,Hard"),
