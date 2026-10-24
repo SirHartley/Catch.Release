@@ -458,6 +458,7 @@ public final class TreasureRumour {
         FishermanChain.setStage(FishermanChain.Stage.T1_LENS);
         FishReward.showReceipts(text, grantRewards());
         checkLensBought();
+        FishermanChain.listWantedPurchase();
 
         return true;
     }
