@@ -1,5 +1,8 @@
 package catchrelease.campaign.fish.fisherman.chain;
 
+import catchrelease.campaign.fish.shop.ShopEntry;
+import catchrelease.campaign.fish.shop.ShopMarks;
+import catchrelease.campaign.fish.tackle.Tackle;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -82,6 +85,9 @@ public final class FishermanChain {
 
     public static final String T4_LANDED = "$catchreleaseChainT4Landed";
 
+    // a quest step waits on an Outfitter purchase: the Fisherman's Outfitter option is highlighted
+    public static final String OUTFITTER_WANTED = "$catchreleaseChainOutfitterWanted";
+
     public static class Saved implements Serializable {
 
         public Stage stage = Stage.NONE;
@@ -151,6 +157,24 @@ public final class FishermanChain {
         WoundedEpic.register();
     }
 
+    // The module a quest step is waiting for the player to buy, if any.
+    public static Tackle getWantedPurchase() {
+        return switch (getStage()) {
+            case T1_LENS -> Tackle.GLITTER_LENS;
+            case T2_SENSOR -> Tackle.NEEDLE_SENSOR;
+            default -> null;
+        };
+    }
+
+    // Puts the wanted module on the Outfitter's shopping list; buying it takes it off again (ShopEntry.grant).
+    public static void listWantedPurchase() {
+        Tackle wanted = getWantedPurchase();
+        if (wanted == null) return;
+
+        ShopEntry entry = ShopEntry.of(wanted);
+        if (ShopMarks.isMarkable(entry)) ShopMarks.mark(ShopMarks.getMarkKey(entry));
+    }
+
     // Display values for one dialog; expiry 0 as every CatchReleaseCMD token.
     public static void writeTokens(MemoryAPI local) {
         Saved saved = get(false);
@@ -195,6 +219,7 @@ public final class FishermanChain {
         local.set(T3_BUILT, stage == Stage.T3_BUILT, 0);
 
         local.set(T4_LANDED, stage == Stage.T4_LANDED, 0);
+        local.set(OUTFITTER_WANTED, getWantedPurchase() != null, 0);
     }
 
     public static Saved get(boolean create) {

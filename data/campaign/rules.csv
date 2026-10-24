@@ -2421,9 +2421,9 @@ catchrelease_introSkipOpt,CatchReleaseFisherOptions,"$menuState == catchreleaseF
 $catchreleaseCanSkip",SetOptionColor catchrelease_introSkip highlight,,"5:catchrelease_introSkip:""I've been here before. The fabric calls to me.""",
 catchrelease_fisherOptShop,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseOutfitter",,,10:catchrelease_fisherShop:Access the outfitter,
-catchrelease_fisherOptShopLens,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+catchrelease_fisherOptShopQuest,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseOutfitter
-$catchreleaseChainT1Lens",SetOptionColor catchrelease_fisherShop highlight,,,
+$catchreleaseChainOutfitterWanted",SetOptionColor catchrelease_fisherShop highlight,,,
 catchrelease_fisherOptCharts,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseStage >= 6
 $catchreleaseShelf",,,20:catchrelease_fisherCharts:Purchase range data,
@@ -2630,7 +2630,7 @@ catchrelease_fisherOptT1,CatchReleaseFisherOptions,"$menuState == catchreleaseFi
 $catchreleaseChainT1Offer",SetOptionColor catchrelease_introGetFreeRumor highlight,,"35:catchrelease_introGetFreeRumor:""Heard of anywhere worth fishing?""",
 catchrelease_t1Offer,CatchReleaseT1Offer,"$catchreleaseChainT1Offer
 $catchreleaseChainT1Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""treasure""
-CatchReleaseCMD showChainMap t1 ""Target: $catchreleaseChainT1System""","""$catchreleaseChainT1System. The crews working there have been bringing up a lot more treasure than usual.""
+CatchReleaseCMD showChainMap t1 ""Target: $catchreleaseChainT1System""","""The $catchreleaseChainT1System. The crews working there have been bringing up a lot more treasure than usual.""
 
 ""There's also a bit of a personal request. The fabric took something of mine in that place.""
 
@@ -2655,7 +2655,7 @@ catchrelease_t1HandIn,DialogOptionSelected,$option == catchrelease_t1HandIn,Catc
 catchrelease_fisherOptT1Bought,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT1Bought",SetOptionColor catchrelease_t1Bought highlight,,"36:catchrelease_t1Bought:""I've had the lens built.""",
 catchrelease_t1Bought,DialogOptionSelected,$option == catchrelease_t1Bought,"CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""two months""
-CatchReleaseCMD t1Done","""Good. Take it back to $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
+CatchReleaseCMD t1Done","""Good. Take it back to the $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
 catchrelease_fisherOptT1Lost,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT1Active
 $catchreleaseChainT1Pulled
@@ -2674,7 +2674,7 @@ FireBest CatchReleaseT1Followup",,,
 catchrelease_t1FollowupLens,CatchReleaseT1Followup,$catchreleaseChainT1Lens,"CatchReleaseCMD highlightFishText Outfitter
 CatchReleaseCMD t1LensIntel","""That schematic's for a lens array. Have it built at the Outfitter and fit it to your lights. You'll bring up a good deal more bycatch working under them.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupBought,CatchReleaseT1Followup,$catchreleaseChainT1Bought,"CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""two months""
-CatchReleaseCMD t1Done","""You've already got one of those, I see. Then take it back to $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
+CatchReleaseCMD t1Done","""You've already got one of those, I see. Then take it back to the $catchreleaseChainT1System while the bycatch is still coming through. I'd give it another two months.""",catchrelease_fisherBack:Continue,
 catchrelease_t1FollowupNone,CatchReleaseT1Followup,,,"""Good fishing, Captain.""",catchrelease_fisherBack:Continue,
 # fisherman chain T2: the captain's fleet,,,,,,
 catchrelease_fisherOptT2,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
@@ -2773,19 +2773,21 @@ catchrelease_t3Ask,DialogOptionSelected,$option == catchrelease_t3Ask,"CatchRele
 CatchReleaseCMD tokens
 FireBest CatchReleaseT3Offer",,,
 catchrelease_t3Offer,CatchReleaseT3Offer,"$catchreleaseChainT3Offer
-$catchreleaseChainT3Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT3Species $catchreleaseChainT3System $catchreleaseChainT3Planet ""Needle Sensor"" $catchreleaseChainT3Planet ""range data on another epic""","""I did. There's a $catchreleaseChainT3Species in $catchreleaseChainT3System that took a bad hit a while back. It has kept close to $catchreleaseChainT3Planet since, going round about a thousand out while it mends.""
+$catchreleaseChainT3Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT3Species $catchreleaseChainT3System $catchreleaseChainT3Planet ""Needle Sensor"" $catchreleaseChainT3Planet ""range data on another epic""
+CatchReleaseCMD showChainMap t3 ""Target: $catchreleaseChainT3Planet""","""I did. There's a $catchreleaseChainT3Species in the $catchreleaseChainT3System that took a bad hit a while back. It has kept close to $catchreleaseChainT3Planet since, going round about a thousand out while it mends.""
 
 ""Switch your lights off when you get there and let the Needle Sensor find it. Then light it up and put a harpoon in it. It's slower than it ought to be. Don't let it get far ahead of you, though, or it'll go straight back to $catchreleaseChainT3Planet.""
 
 ""Land it and come and tell me. There's a blueprint for a lamp ship in it for you, and range data on another epic. Take your time.""","catchrelease_t3Accept:""I'll find it.""
 catchrelease_t3Decline:""Not right now.""",
 catchrelease_t3OfferNone,CatchReleaseT3Offer,,,"""Not yet. I'll need to look into it again. Ask me later.""",catchrelease_fisherBack:Continue,
-catchrelease_t3Accept,DialogOptionSelected,$option == catchrelease_t3Accept,"CatchReleaseCMD t3Accept
+catchrelease_t3Accept,DialogOptionSelected,$option == catchrelease_t3Accept,"HideMapMarker
+CatchReleaseCMD t3Accept
 CatchReleaseCMD tokens
 FireBest CatchReleaseT3Accepted",,,
 catchrelease_t3Accepted,CatchReleaseT3Accepted,$catchreleaseChainT3Hunt,,"""Good. Keep your lights off until the sensor has found it.""",catchrelease_fisherBack:Continue,
 catchrelease_t3AcceptFailed,CatchReleaseT3Accepted,,,"""Hm. It's moved on from there. Ask me again later and I'll see where it went.""",catchrelease_fisherBack:Continue,
-catchrelease_t3Decline,DialogOptionSelected,$option == catchrelease_t3Decline,,"""It'll keep. It isn't going far.""",catchrelease_fisherBack:Continue,
+catchrelease_t3Decline,DialogOptionSelected,$option == catchrelease_t3Decline,HideMapMarker,"""It'll keep. It isn't going far.""",catchrelease_fisherBack:Continue,
 catchrelease_fisherOptT3HandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT3Caught",SetOptionColor catchrelease_t3HandIn highlight,,"36:catchrelease_t3HandIn:""I landed your wounded epic.""",
 catchrelease_t3HandIn,DialogOptionSelected,$option == catchrelease_t3HandIn,"CatchReleaseCMD highlightFishText ""second lens array"" ""range data""

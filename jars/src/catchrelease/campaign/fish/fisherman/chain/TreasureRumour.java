@@ -241,7 +241,7 @@ public final class TreasureRumour {
         protected String getSystemName() {
             FishermanChain.Saved saved = FishermanChain.get(false);
 
-            return saved == null || saved.systemName == null ? "the system" : saved.systemName;
+            return saved == null || saved.systemName == null ? "the system" : "the " + saved.systemName;
         }
 
         @Override
@@ -373,7 +373,7 @@ public final class TreasureRumour {
         if (system == null) return false;
 
         saved.systemId = system.getId();
-        saved.systemName = system.getNameWithNoType();
+        saved.systemName = system.getNameWithLowercaseType();
 
         return true;
     }
@@ -458,6 +458,7 @@ public final class TreasureRumour {
         FishermanChain.setStage(FishermanChain.Stage.T1_LENS);
         FishReward.showReceipts(text, grantRewards());
         checkLensBought();
+        FishermanChain.listWantedPurchase();
 
         return true;
     }

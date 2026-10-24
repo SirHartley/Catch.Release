@@ -5,8 +5,6 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.intel.FishIntelMapButton;
 import catchrelease.campaign.fish.intel.FishIntelNotifications;
 import catchrelease.campaign.fish.jobs.FishReward;
-import catchrelease.campaign.fish.shop.ShopEntry;
-import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.shop.ShopSchematics;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
@@ -148,17 +146,11 @@ public final class SensorBuild {
         FishReward.showReceipts(text, receipts);
         CaptainsFleet.updateIntel();
         checkBought();
-        if (FishermanChain.isAt(FishermanChain.Stage.T2_SENSOR)) addToShoppingList();
+        FishermanChain.listWantedPurchase();
         // added inside the dialogue, so its card follows the Fisherman's line
         FishIntelNotifications.addNow(new SensorIntel(), text);
 
         return true;
-    }
-
-    // The Outfitter's shopping list; buying the sensor takes it off again (ShopEntry.grant).
-    protected static void addToShoppingList() {
-        ShopEntry entry = ShopEntry.of(Tackle.NEEDLE_SENSOR);
-        if (ShopMarks.isMarkable(entry)) ShopMarks.mark(ShopMarks.getMarkKey(entry));
     }
 
     public static boolean isOwned() {
