@@ -15,6 +15,9 @@
     "civgrade",
     "catchrelease_tug_field"
   ],
+  "builtInWeapons": {
+    "WS0001": "catchrelease_harpoon"
+  },
   "weaponSlots": [
     {
       "angle": -59.5,

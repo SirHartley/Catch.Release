@@ -11,6 +11,8 @@ None
 
 1.0.d - UNRELEASED
 Added - The Stigmata-class Harpoon Tug has a built-in Tug Drive Field: each one in your fleet (not mothballed) adds 1 to the fleet's maximum burn level, and the first adds 20% campaign acceleration, each further one half the previous bonus (+10%, +5%, ...). It does nothing while Sustained Burn is on
+Added - The Stigmata-class Harpoon Tug has a built-in Tug Harpoon: 2 charges, one regained every 12 seconds, 400 kinetic damage and 900 range. A harpoon that hits a ship's hull or armour, friend, foe or wreck, tethers it for 20 seconds at the distance it struck from: a taut tether drags both ships, the lighter one more. A harpoon that hits a shield glances off at reduced speed, at most twice. Firing again lets go. The tether is drawn as a thin rope that sags when slack and flashes into place when the harpoon bites. After a shot the launcher swings smoothly back to its resting angle
+Added - "Harpoon tether snaps on the Stigmata's hull" setting in Fishing Equipment (on by default): the tether snaps if it runs through the Stigmata's own hull
 Changed - The Stigmata-class Harpoon Tug and the Reliquary-class LYNE Tender have their own hulls and stats: the Stigmata a fast midline destroyer with a fighter bay and a built-in harpoon mount, the Reliquary a slow midline carrier cruiser with two fighter bays, meant for two built-in wings of LYNE drones. Their combat equipment comes later
 Fixed - Fleets already offering a quest, or whose commander is marked important for a mission, no longer take on a fishing job as well
 Changed - The marker beside a fleet whose fishing job you have accepted is now a steady gold instead of pulsing; offers still pulse light blue
