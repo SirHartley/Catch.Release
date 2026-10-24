@@ -294,7 +294,7 @@ public final class WoundedEpic {
         protected static String getSystemName() {
             FishermanChain.Saved saved = FishermanChain.get(false);
 
-            return saved == null || saved.t3SystemName == null ? "the system" : saved.t3SystemName;
+            return saved == null || saved.t3SystemName == null ? "the system" : "the " + saved.t3SystemName;
         }
 
         protected static String getPlanetName() {
@@ -345,7 +345,7 @@ public final class WoundedEpic {
         if (planet == null || species == null) return false;
 
         saved.t3SystemId = system.getId();
-        saved.t3SystemName = system.getNameWithNoType();
+        saved.t3SystemName = system.getNameWithLowercaseType();
         saved.t3PlanetId = planet.getId();
         saved.t3PlanetName = planet.getName();
         saved.t3SpeciesId = species.id;

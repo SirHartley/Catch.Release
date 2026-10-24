@@ -392,7 +392,7 @@ public final class CaptainsFleet {
         }
 
         saved.t2SystemId = system.getId();
-        // "Foo star system": the bare name reads as the star's
+        // "Foo star system", as vanilla names systems: the bare name reads as the star's
         saved.t2SystemName = system.getNameWithLowercaseType();
         saved.t2SpeciesId = species.id;
 
