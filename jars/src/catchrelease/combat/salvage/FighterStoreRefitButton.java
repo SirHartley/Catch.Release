@@ -67,7 +67,7 @@ public class FighterStoreRefitButton extends BaseRefitButton {
 
     @Override
     public boolean isClickable(FleetMemberAPI member, ShipVariantAPI variant, MarketAPI market) {
-        FighterStore store = FighterStore.get(member.getId());
+        FighterStore store = FighterStore.find(member.getId());
         return store != null && !store.getFighters().isEmpty();
     }
 
@@ -127,7 +127,7 @@ public class FighterStoreRefitButton extends BaseRefitButton {
         }
 
         private FighterStore store() {
-            return FighterStore.get(member.getId());
+            return FighterStore.find(member.getId());
         }
 
         // Rebuilds the list and footer as disposable panels; vanilla keeps tooltips made for the old ones.

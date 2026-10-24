@@ -88,7 +88,7 @@ public final class RefitStoreView {
     }
 
     private static void swap(FleetMemberAPI member) {
-        FighterStore store = FighterStore.get(member.getId());
+        FighterStore store = FighterStore.find(member.getId());
         if (store == null || SWAPS.containsKey(member.getId())) return;
         List<String> stored = new ArrayList<>();
         for (FighterStore.Group group : store.getGroups()) {

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public final class FighterStoreChecks {
 
@@ -88,7 +89,7 @@ public final class FighterStoreChecks {
         simulatorIsolation(sizes);
 
         System.out.println("Fighter store checks: cap, restoration, launch grouping, return, loss, launch rule,"
-                + " refit revert and simulator isolation passed");
+                + " refit revert, simulator isolation and tidying passed");
     }
 
     // Salvage in the refit's simulator, a mission or for a ship outside the player's fleet must never reach the saved
@@ -102,7 +103,7 @@ public final class FighterStoreChecks {
             throw new AssertionError(method);
         });
         Global.setSettings(proxy(SettingsAPI.class, (self, method, values) -> {
-            if (method.getName().equals("getFighterWingSpec")) return wing;
+            if (method.getName().equals("getFighterWingSpec")) return "gone_wing".equals(values[0]) ? null : wing;
             throw new AssertionError(method);
         }));
         FleetMemberAPI member = proxy(FleetMemberAPI.class, (self, method, values) -> {
@@ -123,7 +124,8 @@ public final class FighterStoreChecks {
             default -> throw new AssertionError(method);
         }));
         try {
-            FighterStore saved = FighterStore.get("reliquary");
+            require(FighterStore.find("reliquary") == null && persistent.isEmpty(), "A read created a store");
+            FighterStore saved = FighterStore.forBattle(engine(true, false, false), "reliquary");
             saved.add("broadsword_wing", 10);
             saved.add("broadsword_wing", 10);
             saved.advance(100f, id -> 1f);
@@ -145,12 +147,24 @@ public final class FighterStoreChecks {
 
             FighterStore stranger = FighterStore.forBattle(engine(true, false, false), "someone_else");
             stranger.add("talon_wing", 10);
-            require(FighterStore.get("someone_else").count() == 0, "A ship outside the fleet wrote to the save");
+            require(FighterStore.find("someone_else") == null, "A ship outside the fleet wrote to the save");
 
             FighterStore real = FighterStore.forBattle(engine(true, false, false), "reliquary");
             require(real == saved, "A real campaign battle did not use the saved store");
             real.add("talon_wing", 10);
             require(saved.count() == 3, "Real salvage did not reach the saved store");
+
+            real.add("gone_wing", 10);
+            real.advance(100f, id -> 1f);
+            real.advance(100f, id -> 1f);
+            real.launchReady(id -> sizes.getOrDefault(id, 1));
+            require(FighterStore.find("reliquary") == saved && saved.getFighters().isEmpty(),
+                    "A read changed the saved store");
+            FighterStore.tidy(Set.of("reliquary"));
+            require(saved.getFighters().size() == 3 && saved.countReady() == 3 && saved.count() == 3,
+                    "Tidy did not return launched fighters or kept an unknown wing");
+            FighterStore.tidy(Set.of());
+            require(FighterStore.find("reliquary") == null, "Tidy kept the store of a ship that left the fleet");
         } finally {
             Global.setSector(originalSector);
             Global.setSettings(originalSettings);

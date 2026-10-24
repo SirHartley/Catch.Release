@@ -121,7 +121,7 @@ public class SalvageBaysHullmod extends BaseHullMod {
         float opad = 10f;
         float pad = 3f;
         if (ship == null || isForModSpec || Global.CODEX_TOOLTIP_MODE || ship.getFleetMemberId() == null) return;
-        FighterStore store = FighterStore.get(ship.getFleetMemberId());
+        FighterStore store = FighterStore.find(ship.getFleetMemberId());
         if (store == null || store.isEmpty()) {
             tooltip.addPara("No recovered fighters aboard.", Misc.getGrayColor(), opad);
             return;

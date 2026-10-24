@@ -18,7 +18,8 @@ import java.util.function.ToIntFunction;
 
 // One Reliquary's recovered fighters, kept per fleet member id (variant ids are shared by every ship of a stock
 // variant). Fighters restore one at a time, oldest first, during combat; partial progress is kept between battles.
-// Fighters still out when a battle ends count as returned.
+// Fighters still out when a battle ends count as returned. Only a campaign battle creates or changes a saved store
+// (forBattle) and only FishingShips.reconcile tidies them (tidy); everything else reads through find.
 public class FighterStore {
 
     private static final String KEY = "catchrelease_fighterStores";
@@ -54,14 +55,10 @@ public class FighterStore {
         return Math.round(Setting.LYNE_STORE_CAP.value());
     }
 
-    // The store a campaign battle, or the refit, works on. Null outside a game.
-    public static FighterStore get(String memberId) {
-        Map<String, FighterStore> stores = getSaved();
-        if (stores == null || memberId == null) return null;
-        FighterStore store = stores.computeIfAbsent(memberId, id -> new FighterStore());
-        store.recallLaunched();
-        store.fighters.removeIf(fighter -> getWingSpec(fighter.wingId) == null);
-        return store;
+    // The ship's saved store, or null when it has none. Never creates or changes one.
+    public static FighterStore find(String memberId) {
+        Map<String, FighterStore> stores = getSaved(false);
+        return stores == null || memberId == null ? null : stores.get(memberId);
     }
 
     // Only player-fleet ships in a real campaign battle use the saved store; the simulator and missions get a copy
@@ -73,10 +70,10 @@ public class FighterStore {
                 .computeIfAbsent(BATTLE_KEY, key -> new HashMap<String, FighterStore>());
         FighterStore store = battle.get(memberId);
         if (store != null) return store;
-        FighterStore saved = usesSavedStore(engine) && isPlayerMember(memberId) ? get(memberId) : null;
+        FighterStore saved = usesSavedStore(engine) && isPlayerMember(memberId) ? getOrCreate(memberId) : null;
         if (saved == null) {
             store = new FighterStore();
-            FighterStore source = getSaved() == null || memberId == null ? null : getSaved().get(memberId);
+            FighterStore source = find(memberId);
             if (source != null) store.copyFrom(source);
         } else {
             store = saved;
@@ -99,17 +96,31 @@ public class FighterStore {
         return false;
     }
 
+    private static FighterStore getOrCreate(String memberId) {
+        Map<String, FighterStore> stores = getSaved(true);
+        return stores == null || memberId == null ? null : stores.computeIfAbsent(memberId, id -> new FighterStore());
+    }
+
     @SuppressWarnings("unchecked")
-    private static Map<String, FighterStore> getSaved() {
+    private static Map<String, FighterStore> getSaved(boolean create) {
         if (Global.getSector() == null) return null;
         Map<String, Object> data = Global.getSector().getPersistentData();
+        if (!create) return (Map<String, FighterStore>) data.get(KEY);
         return (Map<String, FighterStore>) data.computeIfAbsent(KEY, key -> new HashMap<String, FighterStore>());
     }
 
-    // Drops the stores of ships no longer in the player's fleet: sold, stored, lost or scuttled.
-    public static void purge(Set<String> memberIds) {
-        Map<String, FighterStore> stores = getSaved();
-        if (stores != null) stores.keySet().removeIf(id -> !memberIds.contains(id));
+    // After every battle and on load: drops the stores of ships no longer in the player's fleet (sold, stored, lost
+    // or scuttled) and empty ones, returns fighters still out from the last battle, and drops wings no longer in
+    // the game.
+    public static void tidy(Set<String> memberIds) {
+        Map<String, FighterStore> stores = getSaved(false);
+        if (stores == null) return;
+        stores.keySet().removeIf(id -> !memberIds.contains(id));
+        for (FighterStore store : stores.values()) {
+            store.recallLaunched();
+            store.fighters.removeIf(fighter -> getWingSpec(fighter.wingId) == null);
+        }
+        stores.values().removeIf(FighterStore::isEmpty);
     }
 
     private void copyFrom(FighterStore other) {
