@@ -7,6 +7,7 @@ import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.crime.HarpoonedFleetFID;
 import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.crab.CrabWares;
+import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.fisherman.FishermanSpawner;
 import catchrelease.campaign.fish.tackle.Tackle;
@@ -778,7 +779,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     public static boolean canTake(SectorEntityToken target) {
         if (target == null || target.isExpired()) return false;
 
-        if (target.getCustomPlugin() instanceof BuriedMoteEntityPlugin) {
+        if (target.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) {
+            // an epic wakes only inside a lit beam: a lingering lamp mark or a Fathom Head dent does not reach it
+            if (buried.getRarity() == FishRarity.EPIC) {
+                return SearchlightAbilityPlugin.getBeamStrengthAt(target.getLocation()) > 0f;
+            }
+
             return SearchlightAbilityPlugin.isLit(target)
                     || (reachesUnder() && SearchlightAbilityPlugin.isDetected(target));
         }
