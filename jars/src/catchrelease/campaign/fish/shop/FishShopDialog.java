@@ -164,10 +164,37 @@ public class FishShopDialog implements InteractionDialogPlugin {
             pos = null;
 
             buildEntries();
+            reconcileTabs();
             selectFirstVisible();
             refreshWallet();
 
             build();
+        }
+
+        /**
+         * Drops the remembered tab and category back onto something stocked.
+         * <p>
+         * Only {@code onTabClicked} used to do this, so the shop opened on whatever the fields were
+         * initialised to - Upgrades and the lamp shelf - and the lamp shelf is locked until the
+         * introduction's third catch. The result was an empty list, a blank detail pane and a
+         * category row with nothing highlighted until the player clicked something. Reopening after
+         * a SELECT can land on a stale pair the same way, since this delegate keeps its state.
+         */
+        protected void reconcileTabs() {
+            List<ShopEntry.Kind> kinds = getStockedKinds();
+            if (kinds.isEmpty()) return;
+
+            if (!kinds.contains(mainTab)) mainTab = kinds.get(0);
+
+            ShopGroup[] groups = getCategories(mainTab);
+            if (groups.length == 0) return;
+
+            for (ShopGroup group : groups) {
+                if (group == category) return;
+            }
+
+            category = groups[0];
+            targetSlot = 0;
         }
 
         protected void buildEntries() {
@@ -1157,12 +1184,27 @@ public class FishShopDialog implements InteractionDialogPlugin {
             if (receipt.marked) ShopMarks.mark(receipt.markKey);
 
             selectedKey = receipt.entryKey;
+            showSelected(entry);
             refreshWallet();
             rebuild(true);
 
             Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
                     "Refunded " + (entry != null ? entry.getName() : "the last purchase"));
             FishingSounds.playUISound(SOUND_UNDONE, 1f, 1f);
+        }
+
+        /**
+         * Brings the shelf an entry lives on to the front, so a refund made from another tab does
+         * not leave the detail pane describing a row the list is not showing. Undo only set
+         * {@code selectedKey}: the pane then fell back to the first visible entry while nothing
+         * matched for highlighting.
+         */
+        protected void showSelected(ShopEntry entry) {
+            if (entry == null) return;
+
+            mainTab = entry.kind;
+            category = entry.group;
+            targetSlot = 0;
         }
 
         protected ShopEntry findEntry(String key) {

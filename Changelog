@@ -46,6 +46,10 @@ Changed - Every epic fish now comes up only under Breach Lights; ruptures fished
 Changed - Epic fish are now hunted in two stages: they drift slowly until a harpoon hit inside a lit Breach Light beam wakes them, then raise a one-charge shield that never comes back and swim more erratically, staying in view with your lights off; one that gets more than 3,000 units away drifts off and fades, with a notice that it was lost, and an awake epic is gone once you leave the system. Only the harpoon lands one: ROD drones leave epics alone
 Added - Version Checker support: update notices, plus the changelog and direct download for LunaLib's update screen and mod managers such as triOS
 
+Outfitter
+Fixed - The Outfitter no longer opens on a locked shelf with an empty list and no category selected, which happened on every visit before the Breach Lights were unlocked
+Fixed - Undoing a purchase made on another tab now brings that item's shelf to the front instead of describing one row while highlighting none
+
 Development
 Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete
 
