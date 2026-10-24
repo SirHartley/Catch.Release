@@ -95,6 +95,9 @@ Engine limits:
   - count landed fighters back into the store.
   - Vanilla `SwarmLauncherEffect.java:148-180` does the same, including `removeDeployed` cleanup.
 - **Status display:** the store shows on the combat screen where terrain effects live. `engine.maintainStatusForPlayerShip` gives one line per entry. A richer display can be drawn in `renderInUICoords`, or MagicLib's `MagicSubsystem` can host the launch ability with its own HUD bars and AI hook (`shouldActivateAI`).
+- **Refit display:** a built-in Reliquary hullmod lists the store in its tooltip: fighter sprites, counts and restoration progress. `HullModEffect.addPostDescriptionSection` receives the refit `ShipAPI`, whose `getFleetMemberId()` finds the store. Rejected alternatives:
+  - drawing on the refit screen directly has no API hook; it would need guessed screen positions or a PatchLib patch;
+  - per-ship wings through `ShipVariantAPI.setWingId` need bays, and a bay would build those fighters itself, which breaks the store.
 - **Persistence:** the store carries over between battles, kept per ship. Variant ids are shared by every ship of a stock variant, so key it by fleet member id. Purge it when the ship leaves the player's fleet, for example into storage.
 - **AI:** fire when enough fighters are stored and a target in range is worth it.
 
@@ -158,7 +161,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 **Stage 6: recovered fighters**
 - [ ] 6.1 Store, restoration and persistence per fleet member.
-- [ ] 6.2 Combat status display.
+- [ ] 6.2 Combat status display and the refit hullmod tooltip.
 - [ ] 6.3 Launch system and its AI.
 
 **Stage 7: Monstrance**
