@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.entities;
 
 import catchrelease.config.FishingSounds;
 import catchrelease.config.Setting;
+import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -445,7 +446,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         boolean pursuing = (hunting || getLungePhase() == LungePhase.DASH) && evasiveLeft <= 0f;
         if (pursuing) keepSurfaced(1f);
 
-        float motionMult = diving || pursuing ? 1f : advanceMode(amount);
+        float motionMult = diving || pursuing || isStraightLampSwim() ? 1f : advanceMode(amount);
         if (LegendaryShields.MORAY_SPECIES.equals(getFishId())) {
             motionMult = Math.min(motionMult, MORAY_MOTION_SPEED_CAP);
         } else if (LegendaryShields.DAWN_SPECIES.equals(getFishId()) && LegendaryShields.isFleeing(this)) {
@@ -528,6 +529,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     // dormant epic does (EpicHunt.getWanderMult).
     protected float getWander() {
         float wanderMult = getWanderMult();
+        if (isStraightLampSwim()) return (float) Math.sin(time * 0.9f) * FishConstants.BURIED_WEAVE * wanderMult;
 
         float wander = (float) Math.sin(time * 1.5f) * sineVariance;
         float extra = (float) Math.sin(time * 2.63f + sineVariance) * sineVariance * 0.6f;
@@ -535,6 +537,12 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
 
         return ((wander + extra * (wanderMult - 1f)) * wanderMult + getModeWander())
                 * getJackAgilityMult() * EpicHunt.getWanderMult(this) * pace;
+    }
+
+    // The straight lamp-swim setting: a lamp-surfaced fish keeps the hidden drift's straight course and gentle weave,
+    // with no species movement pattern and no dives.
+    protected boolean isStraightLampSwim() {
+        return lampSurfaced && Setting.LAMP_STRAIGHT_SWIM.enabled();
     }
 
     protected float advanceMode(float amount) {
@@ -625,6 +633,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected boolean dives() {
+        if (isStraightLampSwim()) return false;
+
         FishRarity rarity = getRarity();
 
         return rarity != null && rarity.rank >= DIVE_FROM.rank;
