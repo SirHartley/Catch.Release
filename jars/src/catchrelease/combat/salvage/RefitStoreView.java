@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 // Shows a Reliquary's recovered fighters in the refit screen as filled, locked bays. A bay is locked only when the
 // hull spec lists its wing as built in, so while the refit is open each such ship gets its own variant on a copy of
@@ -83,7 +84,7 @@ public final class RefitStoreView {
         if (Global.getSector().getCampaignUI().getCurrentCoreTab() != CoreUITabId.REFIT) return;
         swap(member);
         Swap swap = SWAPS.get(member.getId());
-        refreshDisplay(member, swap == null ? original : swap.copy(), original);
+        refreshDisplay(findRefitPanel(), member, swap == null ? original : swap.copy(), original);
     }
 
     private static void swap(FleetMemberAPI member) {
@@ -144,19 +145,17 @@ public final class RefitStoreView {
 
     // Puts the spec on the variant the refit shows for this member, then resyncs the panel as LunaLib's refreshVariant
     // does. Does nothing while another ship is shown or the spec is already in place.
-    static void refreshDisplay(FleetMemberAPI member, ShipHullSpecAPI spec, ShipHullSpecAPI original) {
-        Object panel = Watcher.findRefitPanel();
-        if (panel == null || ReflectionUtils.invokeIfExists(panel, "getMember") != member) return;
-        Object display = ReflectionUtils.invokeIfExists(panel, "getShipDisplay");
-        Object shown = display == null ? null : ReflectionUtils.invokeIfExists(display, "getCurrentVariant");
+    static void refreshDisplay(Object panel, FleetMemberAPI member, ShipHullSpecAPI spec, ShipHullSpecAPI original) {
+        if (panel == null || call(panel, "getMember") != member) return;
+        Object shown = call(call(panel, "getShipDisplay"), "getCurrentVariant");
         if (!(shown instanceof ShipVariantAPI variant) || variant.getHullSpec() == spec) return;
         try {
             stripStoredWings(variant, original);
             variant.setHullSpecAPI(spec);
-            ReflectionUtils.invoke(panel, "syncWithCurrentVariant", true);
-            ReflectionUtils.invoke(panel, "saveCurrentVariant", false);
-            ReflectionUtils.invokeIfExists(panel, "setEditedSinceSave", false);
-            ReflectionUtils.invoke(panel, "syncWithCurrentVariant", true);
+            require(panel, "syncWithCurrentVariant", true);
+            require(panel, "saveCurrentVariant", false);
+            call(panel, "setEditedSinceSave", false);
+            require(panel, "syncWithCurrentVariant", true);
         } catch (RuntimeException e) {
             // A member variant with stored wings the display lacks would be charged as removed wings on the next
             // field save, so the swap is dropped rather than left half applied.
@@ -165,11 +164,62 @@ public final class RefitStoreView {
         }
     }
 
+    // The refit panel, found by method names as LunaLib's RefitButtonAdder does: core UI, then the panel with
+    // setBorderInsetLeft, then goBackToParentIfNeeded, then syncWithCurrentVariant.
+    static Object findRefitPanel() {
+        Object ui = Global.getSector().getCampaignUI();
+        Object core = call(ui, "getCore");
+        Object dialog = call(ui, "getEncounterDialog");
+        if (dialog != null) core = call(dialog, "getCoreUI");
+        Object panel = findChild(core, "setBorderInsetLeft");
+        panel = findChild(panel, "goBackToParentIfNeeded");
+        return findChild(panel, "syncWithCurrentVariant");
+    }
+
+    private static Object findChild(Object parent, String method) {
+        if (!(parent instanceof UIPanelAPI)) return null;
+        if (!(call(parent, "getChildrenCopy") instanceof List<?> children)) return null;
+        for (Object child : children) {
+            if (child != null && lookUp(child.getClass(), method, -1) != null) return child;
+        }
+        return null;
+    }
+
+    // Each lookup through ReflectionUtils copies the class's whole method list, so a class's method is resolved once,
+    // by name and argument count (-1: any), and an absent one is remembered as absent. Classes outlive saves.
+    private static final Map<Class<?>, Map<String, Optional<ReflectedMethod>>> METHODS = new HashMap<>();
+
+    private static ReflectedMethod lookUp(Class<?> type, String name, int arguments) {
+        return METHODS.computeIfAbsent(type, key -> new HashMap<>())
+                .computeIfAbsent(name + "/" + arguments, key -> {
+                    List<ReflectedMethod> found = ReflectionUtils.getMethodsMatching(type, name, null,
+                            arguments < 0 ? null : arguments, null);
+                    return found.size() == 1 || (arguments < 0 && !found.isEmpty())
+                            ? Optional.of(found.get(0)) : Optional.empty();
+                })
+                .orElse(null);
+    }
+
+    private static Object call(Object target, String name, Object... arguments) {
+        if (target == null) return null;
+        ReflectedMethod method = lookUp(target.getClass(), name, arguments.length);
+        return method == null ? null : method.invoke(target, arguments);
+    }
+
+    private static void require(Object target, String name, Object... arguments) {
+        if (lookUp(target.getClass(), name, arguments.length) == null) {
+            throw new IllegalStateException("No " + name + " on " + target.getClass().getName());
+        }
+        call(target, name, arguments);
+    }
+
     // Swaps the displayed variant, re-applies a copy a restore (which sets the registry spec) replaced, and reverts
-    // everything once the refit closes. Runs while paused, since the refit pauses the campaign.
+    // everything once the refit closes. Runs while paused, since the refit pauses the campaign. The refit panel is
+    // found once and kept while it still shows a ship.
     public static class Watcher implements EveryFrameScript {
 
         private boolean done;
+        private Object panel;
 
         @Override
         public boolean isDone() {
@@ -194,36 +244,10 @@ public final class RefitStoreView {
                 stripStoredWings(variant, swap.original());
                 variant.setHullSpecAPI(swap.copy());
             }
-            syncDisplay();
-        }
-
-        private void syncDisplay() {
-            Object panel = findRefitPanel();
-            Object member = panel == null ? null : ReflectionUtils.invokeIfExists(panel, "getMember");
+            if (panel == null || call(panel, "getMember") == null) panel = findRefitPanel();
+            Object member = call(panel, "getMember");
             Swap swap = member instanceof FleetMemberAPI fleetMember ? SWAPS.get(fleetMember.getId()) : null;
-            if (swap != null) refreshDisplay(swap.member(), swap.copy(), swap.original());
-        }
-
-        // The refit panel, found by method names as LunaLib's RefitButtonAdder does: core UI, then the panel with
-        // setBorderInsetLeft, then goBackToParentIfNeeded, then syncWithCurrentVariant.
-        static Object findRefitPanel() {
-            Object ui = Global.getSector().getCampaignUI();
-            Object core = ReflectionUtils.invokeIfExists(ui, "getCore");
-            Object dialog = ReflectionUtils.invokeIfExists(ui, "getEncounterDialog");
-            if (dialog != null) core = ReflectionUtils.invokeIfExists(dialog, "getCoreUI");
-            Object panel = findChild(core, "setBorderInsetLeft");
-            panel = findChild(panel, "goBackToParentIfNeeded");
-            return findChild(panel, "syncWithCurrentVariant");
-        }
-
-        private static Object findChild(Object parent, String method) {
-            if (!(parent instanceof UIPanelAPI)) return null;
-            Object children = ReflectionUtils.invokeIfExists(parent, "getChildrenCopy");
-            if (!(children instanceof List<?> list)) return null;
-            for (Object child : list) {
-                if (child != null && ReflectionUtils.hasMethodOfName(child, method)) return child;
-            }
-            return null;
+            if (swap != null) refreshDisplay(panel, swap.member(), swap.copy(), swap.original());
         }
     }
 }
