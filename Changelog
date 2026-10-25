@@ -69,6 +69,7 @@ Fixed - Undoing an equipment purchase made in a rig's second slot now leaves the
 Fixed - A long module name no longer puts the two equipment slot cells in different typefaces, and the cells' two lines are spaced evenly
 
 Text and UI
+Adjusted - Rewrote the Reliquary owner's bar dialogue and the Fisherman's legendary catch reports
 Adjusted - Clearer combat equipment descriptions, fishing settings, recovered-fighter controls and AddFish help
 
 Development
