@@ -27,6 +27,17 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     public static final float SUPPORT_RANGE = 1600f;
     public static final float FULL_SUPPORT = 4f;
     public static final float REFERENCE_MASS = 600f;
+    // A friendly ship in a pinch scores this with its hull open to the mount, before mass and distance, which outranks
+    // an exposed enemy frigate but not an overloaded or running one.
+    public static final float RESCUE_SCORE = 5f;
+    // Ships this close to a ship count toward its danger: the weight of enemies its side is aware of against that of
+    // its friends, itself included. It is in a pinch when outweighed SWARMED times over, or at all while overloaded
+    // or venting, above RESCUE_FLUX flux or below RESCUE_HULL hull; it is out of it below SAFE_SHARE of its cover.
+    public static final float THREAT_RANGE = 1000f;
+    public static final float SWARMED = 2f;
+    public static final float RESCUE_FLUX = 0.85f;
+    public static final float RESCUE_HULL = 0.4f;
+    public static final float SAFE_SHARE = 0.75f;
     // Friendly ships and wrecks closer than this share of their radius to the line of fire block the shot; the
     // weapon itself has no friendly-fire check, and the vanilla autofire AI's is not reachable. Raised shields block
     // it too (see isClear).
@@ -35,6 +46,7 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     public static final float BLOCKED_RECHECK = 0.1f;
 
     private final WeaponAPI weapon;
+    private final Vector2f threatCentre = new Vector2f();
     private ShipAPI target;
     private Vector2f aim;
     private float rescore;
@@ -51,7 +63,8 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
         ShipAPI ship = weapon.getShip();
         if (engine == null || ship == null) return;
         rescore -= amount;
-        if (rescore <= 0f || (target != null && !isCandidate(engine, ship, target))) {
+        if (rescore <= 0f || (target != null && !isCandidate(engine, ship, target)
+                && !isRescueCandidate(engine, ship, target))) {
             rescore = RESCORE_INTERVAL;
             target = pickTarget(engine, ship);
         }
@@ -70,17 +83,22 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     // List passes, not the ship grid: a grid query copies every object in its 300-unit cells into a new set, which
     // costs more at weapon and support range.
     private ShipAPI pickTarget(CombatEngineAPI engine, ShipAPI ship) {
-        float support = weightNear(engine, ship, ship.getLocation(), SUPPORT_RANGE, true);
+        float support = weightNear(engine, ship, ship.getLocation(), SUPPORT_RANGE, true, null);
         Vector2f mount = weapon.getLocation();
         ShipAPI best = null;
         float bestScore = MIN_SCORE;
         float currentScore = 0f;
         for (ShipAPI other : engine.getShips()) {
-            if (!isCandidate(engine, ship, other)) continue;
+            boolean enemy = isCandidate(engine, ship, other);
+            if (!enemy && !isRescueCandidate(engine, ship, other)) continue;
             float distance = Misc.getDistance(other.getLocation(), mount) - other.getCollisionRadius();
             if (distance > weapon.getRange() || weapon.distanceFromArc(other.getLocation()) > 0f) continue;
-            float score = score(getShield(other, mount), isDisabled(other), isFleeing(other), other.getHullLevel(),
-                    other.getMass(), support, Math.max(0f, distance) / weapon.getRange());
+            Shield shield = getShield(other, mount);
+            float distanceShare = Math.max(0f, distance) / weapon.getRange();
+            float score = enemy
+                    ? score(shield, isDisabled(other), isFleeing(other), other.getHullLevel(), other.getMass(), support,
+                            distanceShare)
+                    : rescue(engine, ship, other, shield, distanceShare);
             if (other == target) currentScore = score;
             if (score > bestScore) {
                 bestScore = score;
@@ -92,24 +110,81 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     }
 
     // Misc.getShipWeight of the tug's friends (or of ships hostile to it) within range of a point, the tug and
-    // fighters excepted.
-    static float weightNear(CombatEngineAPI engine, ShipAPI ship, Vector2f point, float range, boolean friendly) {
+    // fighters excepted. With centre given, it is set to their weighted centre.
+    static float weightNear(CombatEngineAPI engine, ShipAPI ship, Vector2f point, float range, boolean friendly,
+                            Vector2f centre) {
         float weight = 0f;
+        float x = 0f;
+        float y = 0f;
         for (ShipAPI other : engine.getShips()) {
             if (other == ship || other.isFighter() || !other.isAlive() || other.isHulk()) continue;
             if ((other.getOwner() == ship.getOwner()) != friendly || other.getOwner() == 100) continue;
             if (!friendly && !engine.isAwareOf(ship.getOwner(), other)) continue;
-            float dx = other.getLocation().x - point.x;
-            float dy = other.getLocation().y - point.y;
-            if (dx * dx + dy * dy <= range * range) weight += Misc.getShipWeight(other);
+            Vector2f location = other.getLocation();
+            float dx = location.x - point.x;
+            float dy = location.y - point.y;
+            if (dx * dx + dy * dy > range * range) continue;
+            float shipWeight = Misc.getShipWeight(other);
+            weight += shipWeight;
+            x += location.x * shipWeight;
+            y += location.y * shipWeight;
         }
+        if (centre != null && weight > 0f) centre.set(x / weight, y / weight);
         return weight;
+    }
+
+    // Whether a friend no longer needs saving: the enemies near it weigh less than SAFE_SHARE of its cover.
+    static boolean isSafe(CombatEngineAPI engine, ShipAPI ship, ShipAPI friend) {
+        float threat = weightNear(engine, ship, friend.getLocation(), THREAT_RANGE, false, null);
+        return threat < weightNear(engine, ship, friend.getLocation(), THREAT_RANGE, true, null) * SAFE_SHARE;
     }
 
     private static boolean isCandidate(CombatEngineAPI engine, ShipAPI ship, ShipAPI other) {
         return other != ship && other.isAlive() && !other.isHulk() && other.getOwner() != ship.getOwner()
                 && other.getOwner() != 100 && !other.isFighter() && !other.isStation() && !other.isStationModule()
                 && !other.isPhased() && engine.isEntityInPlay(other) && engine.isAwareOf(ship.getOwner(), other);
+    }
+
+    // AI-flown friends only: a ship the player flies is left to the player.
+    private static boolean isRescueCandidate(CombatEngineAPI engine, ShipAPI ship, ShipAPI other) {
+        return other != ship && other.isAlive() && !other.isHulk() && other.getOwner() == ship.getOwner()
+                && !other.isFighter() && !other.isStation() && !other.isStationModule() && !other.isPhased()
+                && !other.isRetreating() && other.getShipAI() != null && engine.isEntityInPlay(other);
+    }
+
+    // A friend's rescue score, zero unless it is in a pinch away from friendly lines (where TugPilot would let it go
+    // at once) and the line, which pulls it toward the tug, would take it away from the enemies near it.
+    private float rescue(CombatEngineAPI engine, ShipAPI ship, ShipAPI friend, Shield shield, float distanceShare) {
+        if (shield == Shield.FACING) return 0f;
+        Vector2f location = friend.getLocation();
+        float lines = weightNear(engine, ship, location, TugPilot.ARRIVE_RANGE, true, null) - Misc.getShipWeight(friend);
+        if (lines >= TugPilot.ARRIVE_WEIGHT) return 0f;
+        float threat = weightNear(engine, ship, location, THREAT_RANGE, false, threatCentre);
+        if (threat <= 0f) return 0f;
+        float cover = weightNear(engine, ship, location, THREAT_RANGE, true, null);
+        if (!inPinch(threat, cover, isDisabled(friend), friend.getFluxTracker().getFluxLevel(),
+                friend.getHullLevel())) {
+            return 0f;
+        }
+        Vector2f mount = weapon.getLocation();
+        float away = (mount.x - location.x) * (location.x - threatCentre.x)
+                + (mount.y - location.y) * (location.y - threatCentre.y);
+        return away < 0f ? 0f : rescueScore(shield, friend.getMass(), distanceShare);
+    }
+
+    public static boolean inPinch(float threat, float cover, boolean disabled, float fluxLevel, float hullLevel) {
+        if (threat <= 0f) return false;
+        if (threat >= cover * SWARMED) return true;
+        return threat >= cover && (disabled || fluxLevel > RESCUE_FLUX || hullLevel < RESCUE_HULL);
+    }
+
+    public static float rescueScore(Shield shield, float mass, float distanceShare) {
+        float score = switch (shield) {
+            case DOWN -> RESCUE_SCORE;
+            case FLANKED -> RESCUE_SCORE * 0.75f;
+            case FACING -> 0f;
+        };
+        return score * massFactor(mass) * (1f - 0.3f * clamp(distanceShare));
     }
 
     // The harpoon is there to drag ships into friendly guns, so a catch is worth most with friendly firepower near
@@ -125,10 +200,14 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
         if (disabled) score *= 1.5f;
         if (fleeing) score *= 1.5f;
         score *= 1f + 0.5f * (1f - clamp(hullLevel));
-        score *= Math.max(0.3f, Math.min(1.5f, REFERENCE_MASS / Math.max(1f, mass)));
+        score *= massFactor(mass);
         score *= clamp(support / FULL_SUPPORT);
         score *= 1f - 0.3f * clamp(distanceShare);
         return score;
+    }
+
+    private static float massFactor(float mass) {
+        return Math.max(0.3f, Math.min(1.5f, REFERENCE_MASS / Math.max(1f, mass)));
     }
 
     private static Shield getShield(ShipAPI other, Vector2f mount) {

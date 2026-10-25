@@ -62,7 +62,9 @@ public class TugPilot implements AdvanceableListener {
     private final Vector2f mountPoint = new Vector2f();
     private float biasAge = BIAS_INTERVAL;
     private boolean arrived;
+    private boolean friendSafe;
     private float swingSide = 1f;
+    private Tether towing;
     private ShipAPI escort;
     private float escortAge = ESCORT_INTERVAL;
 
@@ -82,10 +84,19 @@ public class TugPilot implements AdvanceableListener {
 
         TugTethers tethers = TugTethers.peek(engine);
         Tether tether = tethers == null ? null : tethers.getTether(ship);
-        if (tether != null && !isWorthHolding(tether)) {
-            tethers.release(tether);
-            tether = null;
+        if (tether != null) {
+            tether.getTargetPoint(catchPoint);
+            biasAge += amount;
+            if (biasAge >= BIAS_INTERVAL) {
+                biasAge = 0f;
+                sumPull(engine, tether.getTarget());
+            }
+            if (!isWorthHolding(tether)) {
+                tethers.release(tether);
+                tether = null;
+            }
         }
+        towing = tether;
         if (tether == null) {
             biasAge = BIAS_INTERVAL;
             keepBack(engine, weapon, amount);
@@ -93,7 +104,12 @@ public class TugPilot implements AdvanceableListener {
             if (aim != null) aimWithHull(weapon, aim);
             return;
         }
-        tow(engine, tether, amount);
+        tow(tether);
+    }
+
+    // The line this pilot holds and tows, or null; TugDriveAI hauls only on it.
+    public Tether getTowing() {
+        return towing;
     }
 
     // Without a line out the default ship AI moves the tug. It sizes its engagement range from the weapons without
@@ -180,13 +196,7 @@ public class TugPilot implements AdvanceableListener {
     // Drags the catch where friendly guns are and holds it there, overriding the ship AI's movement: the wanted
     // commands are given and every other movement command blocked, since the engine drops a blocked type even
     // when given.
-    private void tow(CombatEngineAPI engine, Tether tether, float amount) {
-        tether.getTargetPoint(catchPoint);
-        biasAge += amount;
-        if (biasAge >= BIAS_INTERVAL) {
-            biasAge = 0f;
-            sumPull(engine, tether.getTarget());
-        }
+    private void tow(Tether tether) {
         float rope = Misc.getAngleInDegrees(catchPoint, ship.getLocation());
         if (arrived) {
             if (isPulledAway(tether)) steer(rope);
@@ -207,10 +217,11 @@ public class TugPilot implements AdvanceableListener {
     }
 
     // Where the catch should go, as a direction from it: toward friendly ships and away from enemies, each by weight,
-    // over ships within SCAN_RANGE of the catch; also whether it has arrived. Other tugs carry no guns to drag a catch
-    // into. A list pass, not the ship grid: a grid query copies every object in its 300-unit cells into a new set,
-    // which costs more at this range.
+    // over ships within SCAN_RANGE of the catch; also whether it has arrived, and for a friend whether it is safe.
+    // Other tugs carry no guns to drag a catch into. A list pass, not the ship grid: a grid query copies every object
+    // in its 300-unit cells into a new set, which costs more at this range.
     private void sumPull(CombatEngineAPI engine, ShipAPI towed) {
+        friendSafe = towed.getOwner() == ship.getOwner() && HarpoonAutofireAI.isSafe(engine, ship, towed);
         pull.set(0f, 0f);
         float near = 0f;
         for (ShipAPI other : engine.getShips()) {
@@ -303,11 +314,13 @@ public class TugPilot implements AdvanceableListener {
         return plugin instanceof HarpoonAutofireAI && plugin.shouldFire();
     }
 
-    // A friendly ship or a wreck is never worth towing for the AI. Neither is a catch it cannot move while the tug is
-    // in trouble or out of drive charges.
+    // A wreck is never worth towing for the AI, nor a friend once it is safe or back at friendly lines, since a
+    // tethered ship cannot manoeuvre (one hooked by chance is safe at once). Neither is a catch the tug cannot move
+    // while it is in trouble or out of drive charges.
     private boolean isWorthHolding(Tether tether) {
         ShipAPI target = tether.getTarget();
-        if (target.isHulk() || target.getOwner() == ship.getOwner() || isInTrouble()) return false;
+        boolean friend = target.getOwner() == ship.getOwner();
+        if (target.isHulk() || (friend && (friendSafe || arrived)) || isInTrouble()) return false;
         boolean hopeless = target.getMass() > ship.getMass() * HOPELESS_MASS_RATIO
                 && (ship.getSystem() == null || ship.getSystem().isOutOfAmmo());
         return !(hopeless && tether.getAge() > HOPELESS_TIME);

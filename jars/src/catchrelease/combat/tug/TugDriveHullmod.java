@@ -26,6 +26,7 @@ public class TugDriveHullmod extends BaseHullMod implements HullModFleetEffect {
     @Override
     public void applyEffectsAfterShipCreation(ShipAPI ship, String id) {
         if (!ship.hasListenerOfClass(TugPilot.class)) ship.addListener(new TugPilot(ship));
+        if (!ship.hasListenerOfClass(HarpoonFriendlyFire.class)) ship.addListener(new HarpoonFriendlyFire(ship));
     }
 
     @Override

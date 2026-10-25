@@ -37,6 +37,19 @@ public final class TugAIChecks {
         require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 4f, 0f) > exposed,
                 "A nearer ship is not preferred");
 
+        require(!HarpoonAutofireAI.inPinch(0f, 2f, true, 1f, 0.1f), "A friend with no enemies near is in a pinch");
+        require(HarpoonAutofireAI.inPinch(4f, 2f, false, 0f, 1f), "A swarmed friend is not in a pinch");
+        require(!HarpoonAutofireAI.inPinch(3f, 2f, false, 0f, 1f), "A sound friend outweighed less than twice over is"
+                + " in a pinch");
+        require(HarpoonAutofireAI.inPinch(2f, 2f, true, 0f, 1f) && HarpoonAutofireAI.inPinch(2f, 2f, false, 0.9f, 1f)
+                && HarpoonAutofireAI.inPinch(2f, 2f, false, 0f, 0.3f), "A matched friend in trouble is not in a pinch");
+        require(!HarpoonAutofireAI.inPinch(2f, 4f, true, 1f, 0.1f), "A covered friend is in a pinch");
+        float rescue = HarpoonAutofireAI.rescueScore(Shield.DOWN, 800f, 0.5f);
+        require(rescue > exposed, "Rescuing a destroyer ranks below an exposed frigate");
+        require(rescue < HarpoonAutofireAI.score(Shield.DOWN, true, true, 1f, 200f, 4f, 0.5f),
+                "Rescuing a destroyer ranks above an overloaded frigate on the run");
+        require(HarpoonAutofireAI.rescueScore(Shield.FACING, 200f, 0f) == 0f, "Would fire into a friend's facing shield");
+
         Vector2f a = new Vector2f(0f, 0f);
         Vector2f b = new Vector2f(100f, 0f);
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(50f, 30f), a, b) == 30f, "Segment middle");
@@ -72,8 +85,8 @@ public final class TugAIChecks {
         require(TugDriveAI.shouldEscape(0.2f, true) && !TugDriveAI.shouldEscape(0.2f, false)
                 && !TugDriveAI.shouldEscape(0.9f, true), "Escape rule changed");
 
-        System.out.println("Tug AI checks: harpoon target scoring, line-of-fire distance, shield contact, drag heading"
-                + " and drive use passed");
+        System.out.println("Tug AI checks: harpoon target and rescue scoring, line-of-fire distance, shield contact,"
+                + " drag heading and drive use passed");
     }
 
     private static void require(boolean condition, String message) {
