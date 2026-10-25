@@ -112,7 +112,7 @@ public class TugDriveStats extends BaseShipSystemScript {
                     70f + 30f * (float) Math.random(), 15f, angle + 8f * (float) Math.random() - 4f,
                     20f * (float) Math.random() - 10f, 0f,
                     width * 1.2f * (0.4f + 0.6f * effectLevel), width * 5f, SOOT, HAZE,
-                    SOOT_OPACITY * effectLevel, 0.15f, 0.5f, 1.8f, false,
+                    SOOT_OPACITY * effectLevel, 0.15f, 1f, 3f, false,
                     TEXTURE_LOOP, TEXTURE_SCROLL, -1f,
                     new Vector2f(ship.getVelocity().x * 0.25f, ship.getVelocity().y * 0.25f), null,
                     CombatEngineLayers.BELOW_SHIPS_LAYER, 1f);
