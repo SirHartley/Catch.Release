@@ -2773,12 +2773,12 @@ catchrelease_t3Ask,DialogOptionSelected,$option == catchrelease_t3Ask,"CatchRele
 CatchReleaseCMD tokens
 FireBest CatchReleaseT3Offer",,,
 catchrelease_t3Offer,CatchReleaseT3Offer,"$catchreleaseChainT3Offer
-$catchreleaseChainT3Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT3Species $catchreleaseChainT3System $catchreleaseChainT3Planet ""Needle Sensor"" $catchreleaseChainT3Planet ""range data on another epic""
+$catchreleaseChainT3Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT3Species $catchreleaseChainT3System $catchreleaseChainT3Planet ""Needle Sensor"" $catchreleaseChainT3Planet ""range data""
 CatchReleaseCMD showChainMap t3 ""Target: $catchreleaseChainT3Planet""","""I did. There's a $catchreleaseChainT3Species in the $catchreleaseChainT3System that took a bad hit a while back. It has kept close to $catchreleaseChainT3Planet since, going round about a thousand out while it mends.""
 
 ""Switch your lights off when you get there and let the Needle Sensor find it. Then light it up and put a harpoon in it. It's slower than it ought to be. Don't let it get far ahead of you, though, or it'll go straight back to $catchreleaseChainT3Planet.""
 
-""Land it and come and tell me. There's range data on another epic in it for you. Take your time.""","catchrelease_t3Accept:""I'll find it.""
+""Land it and come and tell me. There's range data in it for you, on another one worth the hunt. Take your time.""","catchrelease_t3Accept:""I'll find it.""
 catchrelease_t3Decline:""Not right now.""",
 catchrelease_t3OfferNone,CatchReleaseT3Offer,,,"""Not yet. I'll need to look into it again. Ask me later.""",catchrelease_fisherBack:Continue,
 catchrelease_t3Accept,DialogOptionSelected,$option == catchrelease_t3Accept,"HideMapMarker
@@ -2789,7 +2789,7 @@ catchrelease_t3Accepted,CatchReleaseT3Accepted,$catchreleaseChainT3Hunt,,"""Good
 catchrelease_t3AcceptFailed,CatchReleaseT3Accepted,,,"""Hm. It's moved on from there. Ask me again later and I'll see where it went.""",catchrelease_fisherBack:Continue,
 catchrelease_t3Decline,DialogOptionSelected,$option == catchrelease_t3Decline,HideMapMarker,"""It'll keep. It isn't going far.""",catchrelease_fisherBack:Continue,
 catchrelease_fisherOptT3HandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
-$catchreleaseChainT3Caught",SetOptionColor catchrelease_t3HandIn highlight,,"36:catchrelease_t3HandIn:""I landed your wounded epic.""",
+$catchreleaseChainT3Caught",SetOptionColor catchrelease_t3HandIn highlight,,"36:catchrelease_t3HandIn:""I landed your wounded fish.""",
 catchrelease_t3HandIn,DialogOptionSelected,$option == catchrelease_t3HandIn,"CatchReleaseCMD t3TradePrepare
 CatchReleaseCMD tokens
 FireBest CatchReleaseT3HandIn",,,
@@ -2799,7 +2799,7 @@ CatchReleaseCMD t3Complete","""Did you, now? Good work. That one would have kept
 
 A deckhand passes you a data chip. ""That's range data. Somewhere to go next.""
 
-""Something else. A man on $catchreleaseChainT3Market in the $catchreleaseChainT3MarketSystem sent word asking for my help. He's sitting on an old Reliquary, a drone tender, and he's no use for her. I'd say he'd trade her for that epic in your hold. You'll find him in the bar. Most nights, by the sound of him.""",catchrelease_fisherBack:Continue,
+""Something else. A man on $catchreleaseChainT3Market in the $catchreleaseChainT3MarketSystem sent word asking for my help. He's sitting on an old Reliquary, a drone tender, and he's no use for her. I'd say he'd trade her for that fish in your hold. You'll find him in the bar. Most nights, by the sound of him.""",catchrelease_fisherBack:Continue,
 catchrelease_t3HandInNone,CatchReleaseT3HandIn,,,"""Did you, now? Good work. Give me a little while to settle what you're owed, and ask me again.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman chain T3: the Reliquary trade,,,,,,
@@ -2807,21 +2807,21 @@ catchrelease_t3DrunkAdd,AddBarEvents,CatchReleaseCMD t3TradeHere,"AddBarEvent ca
 catchrelease_t3Drunk,DialogOptionSelected,$option == catchrelease_t3Drunk,"CatchReleaseCMD tokens
 FireBest CatchReleaseT3DrunkGreeting",,,
 catchrelease_t3DrunkGreetFirst,CatchReleaseT3DrunkGreeting,!$market.catchrelease_t3DrunkMet,"$market.catchrelease_t3DrunkMet = true
-CatchReleaseCMD highlightFishText ""Three epics""
+CatchReleaseCMD highlightFishText ""Three trophy fish""
 FireAll CatchReleaseT3DrunkOptions","He takes a while to find your face. ""The Fisherman sent you? Good. Good man, the Fisherman.""
 
-""I've got a Reliquary. Old clanker. Nobody wants her, I've tried. Everybody wants epic fish, though. Worth a lot more to the right buyer than she'll ever fetch."" He holds up three fingers and checks them. ""Three epics. I sell them on, I live off it, and I never look at that ship again.""",,
+""I've got a Reliquary. Old clanker. Nobody wants her, I've tried. Everybody wants trophy fish, though. The kind a crew chases for months. Worth a lot more to the right buyer than she'll ever fetch."" He holds up three fingers and checks them. ""Three trophy fish. I sell them on, I live off it, and I never look at that ship again.""",,
 catchrelease_t3DrunkGreetAgain,CatchReleaseT3DrunkGreeting,$market.catchrelease_t3DrunkMet,"CatchReleaseCMD highlightFishText $catchreleaseChainT3Price
-FireAll CatchReleaseT3DrunkOptions","He is in the same seat, or back in it. ""You again. Got my $catchreleaseChainT3Price epics?""",,
+FireAll CatchReleaseT3DrunkOptions","He is in the same seat, or back in it. ""You again. Got my $catchreleaseChainT3Price fish?""",,
 catchrelease_t3DrunkOptPay,CatchReleaseT3DrunkOptions,,,,catchrelease_t3DrunkPay:Hand over $catchreleaseChainT3Price epic fish,
 catchrelease_t3DrunkOptPayShort,CatchReleaseT3DrunkOptions,!$catchreleaseChainT3CanPay,"SetEnabled catchrelease_t3DrunkPay false
 SetTooltip catchrelease_t3DrunkPay ""You need $catchreleaseChainT3Price epic fish in your cargo.""",,,
 catchrelease_t3DrunkOptHaggle,CatchReleaseT3DrunkOptions,!$catchreleaseChainT3Haggled,"SetStoryOption catchrelease_t3DrunkHaggle 1 avoidCargoScan ui_char_spent_story_point ""Talked a drunk down to two epics for his Reliquary""",,"catchrelease_t3DrunkHaggle:""Three is steep for a ship nobody wants.""",
 catchrelease_t3DrunkOptLeave,CatchReleaseT3DrunkOptions,,SetShortcut catchrelease_t3DrunkLeave ESCAPE,,100:catchrelease_t3DrunkLeave:Leave him to his drink,
-catchrelease_t3DrunkHaggle,DialogOptionSelected,$option == catchrelease_t3DrunkHaggle,"CatchReleaseCMD highlightFishText ""Two epics""
+catchrelease_t3DrunkHaggle,DialogOptionSelected,$option == catchrelease_t3DrunkHaggle,"CatchReleaseCMD highlightFishText ""Two fish""
 CatchReleaseCMD t3Haggle
 CatchReleaseCMD tokens
-FireAll CatchReleaseT3DrunkOptions","He thinks about it long enough that you wonder whether he has fallen asleep. ""Two epics. You're robbing me. I don't care. Two.""",,
+FireAll CatchReleaseT3DrunkOptions","He thinks about it long enough that you wonder whether he has fallen asleep. ""Two fish. You're robbing me. I don't care. Two.""",,
 catchrelease_t3DrunkPay,DialogOptionSelected,$option == catchrelease_t3DrunkPay,"CatchReleaseCMD t3Trade
 SetShortcut catchrelease_t3DrunkLeave ESCAPE","He doesn't look at the fish. He pushes the ship's codes across the bar and waves for another drink.
 
