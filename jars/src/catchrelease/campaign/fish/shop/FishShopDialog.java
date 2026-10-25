@@ -588,8 +588,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    tooltip.addPara("Slot %s", 0f, Misc.getHighlightColor(), String.valueOf(slot + 1));
-                    tooltip.addPara("Click to select this slot. FIT puts the selected module here.", 6f);
+                    tooltip.addPara("Slot " + (slot + 1), Misc.getHighlightColor(), 0f);
+                    tooltip.addPara(getTargetSlot() == slot
+                            ? "FIT puts the selected module here."
+                            : "Click to select this slot. FIT then puts the selected module here.", 6f);
                     if (slot == 0) return;
 
                     String hull = getShipName(rig);
@@ -695,14 +697,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                     if (blocker == entry.tackle) {
-                        tooltip.addPara("Already fitted", Misc.getGrayColor(), 0f);
+                        tooltip.addPara("Already fitted", Misc.getHighlightColor(), 0f);
                         tooltip.addPara("This module is fitted in slot %s. One module cannot fill both slots of a"
                                 + " rig.", 6f, Misc.getHighlightColor(), String.valueOf(other));
                         return;
                     }
 
-                    tooltip.addPara("Conflicts with %s", 0f, Misc.getGrayColor(), Misc.getHighlightColor(),
-                            blocker.name);
+                    tooltip.addPara("Conflict", Misc.getHighlightColor(), 0f);
                     tooltip.addPara("%s is fitted in slot %s. Modules with similar or opposing effects cannot share"
                             + " a rig.", 6f, Misc.getHighlightColor(), blocker.name, String.valueOf(other));
                 }

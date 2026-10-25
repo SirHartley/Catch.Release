@@ -58,6 +58,8 @@ Changed - The two equipment slot cells are drawn as bordered sockets instead of 
 Changed - An equipment description now names the slot FIT will use, instead of only saying the rig has two
 Fixed - A module fitted in a rig's other slot no longer reads as a green "fitted" in its description while its row is greyed out as unavailable
 Changed - An equipment slot cell marks a module that came with the ship, so it is no longer drawn the same as one you bought
+Fixed - Hovering the equipment slot already selected no longer tells you to click it
+Changed - The Outfitter's slot, conflict and shopping-list hovers use one title style
 
 Development
 Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete
