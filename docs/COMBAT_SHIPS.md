@@ -175,7 +175,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - [x] 0.1 New designations: LYNE Tender, Breach Trawler.
 - [x] 0.2 Stigmata and Reliquary stats in `ship_data.csv`; placeholder systems.
 - [x] 0.3 Update `lib/MagicLib.zip`.
-- [x] 0.4 Placeholder harpoon projectile sprite: `graphics/catchrelease/weapons/harpoon_projectile.png` (12×26), a copy of the vanilla Harpoon missile's sprite.
+- [x] 0.4 Placeholder harpoon projectile sprite: `graphics/catchrelease/weapons/harpoon_projectile.png` (12×20, the author's sprite; it began as a copy of the vanilla Harpoon missile's). `TetherRenderer` reads the head's length from the sprite's height, and the `.proj` `length` matches it.
 
 ### Stage 1: tug hullmod
 

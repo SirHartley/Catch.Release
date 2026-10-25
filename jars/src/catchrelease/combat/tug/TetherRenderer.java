@@ -46,16 +46,17 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     private static final int ARC_COUNT = 5;
     private static final float ARC_INTERVAL = 0.06f;
 
-    // harpoon_projectile.png is 12x26 with the point up; the rope leaves from the tail, and a bitten head sits
-    // EMBED units into the hull.
-    private static final float HEAD_LENGTH = 26f;
-    private static final float EMBED = 6f;
+    // The head sprite (harpoon_head, point up) is drawn at its own size, so its height is the head's length: the
+    // rope leaves from its tail, and a bitten head sits EMBED_SHARE of that length into the hull.
+    private static final float DEFAULT_HEAD_LENGTH = 20f;
+    private static final float EMBED_SHARE = 0.25f;
 
     private final Tether tether;
     private final RopeCurve curve = new RopeCurve();
     private RopeChain chain;
     private final Vector2f catchPoint = new Vector2f();
     private final SpriteAPI head = Global.getSettings().getSprite("catchrelease", "harpoon_head");
+    private final float headLength = head != null && head.getHeight() > 0f ? head.getHeight() : DEFAULT_HEAD_LENGTH;
     private final Vector2f mount = new Vector2f();
     private final Vector2f end = new Vector2f();
     private final Vector2f headTip = new Vector2f();
@@ -126,9 +127,10 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         } else if (target != null && Global.getCombatEngine().isEntityInPlay(target)) {
             tether.getTargetPoint(headTip);
             headAngle = target.getFacing() + tether.getHeadAngle();
-            headTip.translate(dirX(headAngle) * EMBED, dirY(headAngle) * EMBED);
+            float embed = headLength * EMBED_SHARE;
+            headTip.translate(dirX(headAngle) * embed, dirY(headAngle) * embed);
         }
-        end.set(headTip.x - dirX(headAngle) * HEAD_LENGTH, headTip.y - dirY(headAngle) * HEAD_LENGTH);
+        end.set(headTip.x - dirX(headAngle) * headLength, headTip.y - dirY(headAngle) * headLength);
     }
 
     // Short visual arcs racing from the mount to the head along the rope, one every ARC_INTERVAL.
@@ -230,7 +232,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
 
     private void renderHead(float alpha) {
         if (head == null) return;
-        float half = HEAD_LENGTH * 0.5f;
+        float half = headLength * 0.5f;
         head.setNormalBlend();
         head.setAlphaMult(alpha);
         head.setAngle(headAngle - 90f);
