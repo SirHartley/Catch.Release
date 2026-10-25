@@ -55,6 +55,7 @@ Fixed - Undoing a purchase made on another tab now brings that item's shelf to t
 Fixed - Buying a module that fits both rigs now clears its mark on the other rig's shelf, and the route planner no longer lists the same module twice
 Fixed - Equipment with no fish price now says it is not for sale, instead of showing a price with a FIT button that does nothing
 Changed - The Equipment category tabs follow the same rig order as the Upgrades tabs
+Adjusted - The shopping-list dot in Outfitter rows sits centred between the row's edge and its name
 Changed - The Equipment help text no longer refers to a single-use marker that was never drawn; equipment consumed on use says so in its description
 
 Text and UI
