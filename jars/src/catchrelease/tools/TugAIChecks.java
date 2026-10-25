@@ -35,6 +35,14 @@ public final class TugAIChecks {
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(50f, 30f), a, b) == 30f, "Segment middle");
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(-40f, 30f), a, b) == 50f, "Segment start");
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(130f, 40f), a, b) == 50f, "Segment end");
+        float contact = HarpoonAutofireAI.shieldContact(new Vector2f(60f, 0f), 20f, a, b);
+        require(Math.abs(contact - 0.4f) < 1e-4f, "Shield met at " + contact + " of the line, expected 0.4");
+        require(HarpoonAutofireAI.shieldContact(new Vector2f(50f, 30f), 20f, a, b) < 0f,
+                "A shield beside the line met it");
+        require(HarpoonAutofireAI.shieldContact(new Vector2f(200f, 0f), 20f, a, b) < 0f,
+                "A shield past the target met it");
+        contact = HarpoonAutofireAI.shieldContact(new Vector2f(0f, 0f), 30f, a, b);
+        require(Math.abs(contact - 0.3f) < 1e-4f, "A line from inside a shield should meet it where it leaves");
 
         // The rope runs from the catch to the tug along 0 degrees.
         float swing = TugPilot.MAX_SWING;
@@ -57,8 +65,8 @@ public final class TugAIChecks {
         require(TugDriveAI.shouldEscape(0.2f, true) && !TugDriveAI.shouldEscape(0.2f, false)
                 && !TugDriveAI.shouldEscape(0.9f, true), "Escape rule changed");
 
-        System.out.println("Tug AI checks: harpoon target scoring, line-of-fire distance, drag heading and drive"
-                + " use passed");
+        System.out.println("Tug AI checks: harpoon target scoring, line-of-fire distance, shield contact, drag heading"
+                + " and drive use passed");
     }
 
     private static void require(boolean condition, String message) {

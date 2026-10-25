@@ -27,7 +27,8 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     public static final float REFERENCE_MASS = 600f;
     public static final float RECENT_HIT = 1f;
     // Friendly ships and wrecks closer than this share of their radius to the line of fire block the shot; the
-    // weapon itself has no friendly-fire check, and the vanilla autofire AI's is not reachable.
+    // weapon itself has no friendly-fire check, and the vanilla autofire AI's is not reachable. Raised shields block
+    // it too (see isClear).
     public static final float BLOCK_SHARE = 0.8f;
     // A blocked line is checked again after this long; a clear one fires at once and puts a line out.
     public static final float BLOCKED_RECHECK = 0.1f;
@@ -151,16 +152,45 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
         return Math.abs(angleDifference(weapon.getCurrAngle(), wanted)) <= tolerance;
     }
 
+    // The harpoon glances off any raised shield, so besides friendly hulls and wrecks on the line, a shield of any
+    // ship but the target's blocks the shot when its arc covers the point where the line would first meet it.
     private boolean isClear(CombatEngineAPI engine, ShipAPI ship, Vector2f point) {
         Vector2f mount = weapon.getLocation();
         for (ShipAPI other : engine.getShips()) {
             if (other == ship || other == target || other.isFighter()) continue;
-            if (other.getOwner() != ship.getOwner() && !other.isHulk()) continue;
-            if (distanceToSegment(other.getLocation(), mount, point) < other.getCollisionRadius() * BLOCK_SHARE) {
+            boolean friendOrWreck = other.getOwner() == ship.getOwner() || other.isHulk();
+            if (friendOrWreck && distanceToSegment(other.getLocation(), mount, point)
+                    < other.getCollisionRadius() * BLOCK_SHARE) {
                 return false;
             }
+            if (!other.isHulk() && shieldBlocks(other.getShield(), mount, point)) return false;
         }
         return true;
+    }
+
+    private static boolean shieldBlocks(ShieldAPI shield, Vector2f from, Vector2f to) {
+        if (shield == null || !shield.isOn()) return false;
+        float share = shieldContact(shield.getLocation(), shield.getRadius(), from, to);
+        if (share < 0f) return false;
+        return shield.isWithinArc(new Vector2f(from.x + (to.x - from.x) * share, from.y + (to.y - from.y) * share));
+    }
+
+    // How far along a to b, as a share, the line first meets the circle, or -1 if it does not. A line that starts
+    // inside meets it where it leaves.
+    public static float shieldContact(Vector2f centre, float radius, Vector2f a, Vector2f b) {
+        float dx = b.x - a.x;
+        float dy = b.y - a.y;
+        float fx = a.x - centre.x;
+        float fy = a.y - centre.y;
+        float qa = dx * dx + dy * dy;
+        float qb = 2f * (fx * dx + fy * dy);
+        float qc = fx * fx + fy * fy - radius * radius;
+        if (qa <= 0f) return -1f;
+        float disc = qb * qb - 4f * qa * qc;
+        if (disc < 0f) return -1f;
+        float root = (float) Math.sqrt(disc);
+        float share = qc <= 0f ? (-qb + root) / (2f * qa) : (-qb - root) / (2f * qa);
+        return share >= 0f && share <= 1f ? share : -1f;
     }
 
     public static float distanceToSegment(Vector2f p, Vector2f a, Vector2f b) {
