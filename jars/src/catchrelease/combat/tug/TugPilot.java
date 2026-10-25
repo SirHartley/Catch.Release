@@ -3,12 +3,8 @@ package catchrelease.combat.tug;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.combat.AutofireAIPlugin;
 import com.fs.starfarer.api.combat.CombatEngineAPI;
-import com.fs.starfarer.api.combat.CombatFleetManagerAPI;
-import com.fs.starfarer.api.combat.CombatTaskManagerAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.ShipCommand;
-import com.fs.starfarer.api.combat.ShipwideAIFlags;
-import com.fs.starfarer.api.combat.ShipwideAIFlags.AIFlags;
 import com.fs.starfarer.api.combat.WeaponAPI;
 import com.fs.starfarer.api.combat.WeaponGroupAPI;
 import com.fs.starfarer.api.combat.listeners.AdvanceableListener;
@@ -18,7 +14,8 @@ import org.lwjgl.util.vector.Vector2f;
 // AI-side control of an AI-flown Stigmata, added by its Tug Drive Field hullmod. An AdvanceableListener runs at the
 // start of Ship.advance, after the ship AI and before commands and weapons are processed, so what it gives, blocks or
 // forces acts in the same frame. Wrapping the default ship AI instead is not possible: BasicShipAI.advance throws
-// when the ship's AI is not itself. Does nothing while the player flies the ship without autopilot.
+// when the ship's AI is not itself. Does nothing while the player flies the ship without autopilot. It only fires the
+// harpoon and tows: with no line out the default AI flies the ship, shields and targets included.
 public class TugPilot implements AdvanceableListener {
 
     public static final float DANGER_HULL = 0.35f;
@@ -46,14 +43,6 @@ public class TugPilot implements AdvanceableListener {
     public static final float THRUST_ARC = 60f;
     // How often the pull of nearby ships is re-summed; the heading itself follows the catch every frame.
     public static final float BIAS_INTERVAL = 0.25f;
-    // The closest the default AI may hold to its target, centre to centre: this share of harpoon range plus the
-    // target's radius.
-    public static final float STANDOFF_SHARE = 0.8f;
-    // The friend the tug keeps with is the heaviest combat ship, discounted by distance over ESCORT_FALLOFF; it is
-    // picked again every ESCORT_INTERVAL and replaced only by one ESCORT_SWITCH times as good.
-    public static final float ESCORT_INTERVAL = 2f;
-    public static final float ESCORT_SWITCH = 1.5f;
-    public static final float ESCORT_FALLOFF = 2000f;
 
     private final ShipAPI ship;
     private WeaponAPI harpoon;
@@ -65,8 +54,6 @@ public class TugPilot implements AdvanceableListener {
     private boolean friendSafe;
     private float swingSide = 1f;
     private Tether towing;
-    private ShipAPI escort;
-    private float escortAge = ESCORT_INTERVAL;
 
     public TugPilot(ShipAPI ship) {
         this.ship = ship;
@@ -99,9 +86,6 @@ public class TugPilot implements AdvanceableListener {
         towing = tether;
         if (tether == null) {
             biasAge = BIAS_INTERVAL;
-            keepBack(engine, weapon, amount);
-            Vector2f aim = getReadyAim(weapon, tethers);
-            if (aim != null) aimWithHull(weapon, aim);
             return;
         }
         tow(tether);
@@ -110,87 +94,6 @@ public class TugPilot implements AdvanceableListener {
     // The line this pilot holds and tows, or null; TugDriveAI hauls only on it.
     public Tether getTowing() {
         return towing;
-    }
-
-    // Without a line out the default ship AI moves the tug. It sizes its engagement range from the weapons without
-    // NO_MANUAL_FIRE (AttackAIModule), and the harpoon has that hint, so with nothing else fitted, or only point
-    // defence, it closes to ramming range. Both flags are set again every frame and lapse a second after the ship
-    // stops being AI-flown. BACK_OFF_MIN_RANGE floors the strafe maneuver's distance to its target. ESCORT_OTHER_SHIP
-    // is read before any fleet order (the order module skips it only when retreating), so it is left off while the
-    // tug has an assignment; TIMID_ESCORT keeps the escort defensive. The AI reads the escort flag only when it
-    // picks a new maneuver, hence the cancel on a change.
-    private void keepBack(CombatEngineAPI engine, WeaponAPI weapon, float amount) {
-        ShipwideAIFlags flags = ship.getAIFlags();
-        ShipAPI target = ship.getShipTarget();
-        float standoff = weapon.getRange() * STANDOFF_SHARE + (target == null ? 0f : target.getCollisionRadius());
-        flags.setFlag(AIFlags.BACK_OFF_MIN_RANGE, 1f, standoff);
-
-        escortAge += amount;
-        if (escortAge >= ESCORT_INTERVAL || (escort != null && !isEscortable(escort))) {
-            escortAge = 0f;
-            ShipAPI picked = hasAssignment(engine) ? null : pickEscort(engine);
-            if (picked != escort) {
-                escort = picked;
-                if (escort == null) {
-                    flags.unsetFlag(AIFlags.ESCORT_OTHER_SHIP);
-                    flags.unsetFlag(AIFlags.TIMID_ESCORT);
-                }
-                ship.getShipAI().cancelCurrentManeuver();
-            }
-        }
-        if (escort != null) {
-            flags.setFlag(AIFlags.ESCORT_OTHER_SHIP, 1f, escort);
-            flags.setFlag(AIFlags.TIMID_ESCORT, 1f);
-        }
-    }
-
-    private ShipAPI pickEscort(CombatEngineAPI engine) {
-        ShipAPI best = null;
-        float bestScore = 0f;
-        float currentScore = 0f;
-        for (ShipAPI other : engine.getShips()) {
-            if (!isEscortable(other)) continue;
-            float score = Misc.getShipWeight(other)
-                    / (1f + Misc.getDistance(ship.getLocation(), other.getLocation()) / ESCORT_FALLOFF);
-            if (other == escort) currentScore = score;
-            if (score > bestScore) {
-                bestScore = score;
-                best = other;
-            }
-        }
-        if (currentScore > 0f && bestScore < currentScore * ESCORT_SWITCH) return escort;
-        return best;
-    }
-
-    // Other tugs are left out, so two never keep with each other away from the fight.
-    private boolean isEscortable(ShipAPI other) {
-        return other != ship && other.getOwner() == ship.getOwner() && other.isAlive() && !other.isHulk()
-                && !other.isFighter() && !other.isStationModule() && !other.isRetreating()
-                && !other.isNonCombat(false) && !other.hasListenerOfClass(TugPilot.class);
-    }
-
-    private boolean hasAssignment(CombatEngineAPI engine) {
-        CombatFleetManagerAPI fleet = engine.getFleetManager(ship.getOwner());
-        CombatTaskManagerAPI tasks = fleet == null ? null : fleet.getTaskManager(ship.isAlly());
-        return tasks != null && tasks.getAssignmentFor(ship) != null;
-    }
-
-    // The aim point of a loaded harpoon with a target and no line out, or null.
-    private Vector2f getReadyAim(WeaponAPI weapon, TugTethers tethers) {
-        if (isInTrouble() || weapon.getAmmo() <= 0 || (tethers != null && tethers.getLine(weapon) != null)) {
-            return null;
-        }
-        WeaponGroupAPI group = ship.getWeaponGroupFor(weapon);
-        if (group == null || !group.isAutofiring()) return null;
-        return group.getAutofirePlugin(weapon) instanceof HarpoonAutofireAI ai ? ai.getTarget() : null;
-    }
-
-    // The turret turns far slower than the hull, so the hull turns to put the target on the turret's current
-    // bearing while the turret closes the rest. Only turning is overridden; the ship AI keeps its thrust.
-    private void aimWithHull(WeaponAPI weapon, Vector2f aim) {
-        float bearing = Misc.getAngleInDegrees(weapon.getLocation(), aim);
-        float turretOffset = HarpoonAutofireAI.angleDifference(ship.getFacing(), weapon.getCurrAngle());
-        turnToward(bearing - turretOffset);
     }
 
     // Drags the catch where friendly guns are and holds it there, overriding the ship AI's movement: the wanted
@@ -273,15 +176,13 @@ public class TugPilot implements AdvanceableListener {
         ship.blockCommandForOneFrame(ShipCommand.STRAFE_RIGHT);
     }
 
-    // Holds still. Turning is blocked too: it moves the off-centre mount, which on a taut rope swings the catch round.
+    // Holds still. Turning stays with the ship AI, which keeps its shield on threats.
     private void brake() {
         ship.giveCommand(ShipCommand.DECELERATE, null, 0);
         ship.blockCommandForOneFrame(ShipCommand.ACCELERATE);
         ship.blockCommandForOneFrame(ShipCommand.ACCELERATE_BACKWARDS);
         ship.blockCommandForOneFrame(ShipCommand.STRAFE_LEFT);
         ship.blockCommandForOneFrame(ShipCommand.STRAFE_RIGHT);
-        ship.blockCommandForOneFrame(ShipCommand.TURN_LEFT);
-        ship.blockCommandForOneFrame(ShipCommand.TURN_RIGHT);
     }
 
     // Turns with an angular-speed target (TURN_GAIN times the angle, capped at the turn rate) and blocks the ship
