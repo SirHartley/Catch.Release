@@ -43,6 +43,9 @@ public class TugPilot implements AdvanceableListener {
     public static final float THRUST_ARC = 60f;
     // How often the pull of nearby ships is re-summed; the heading itself follows the catch every frame.
     public static final float BIAS_INTERVAL = 0.25f;
+    // A tug in a pinch (HarpoonAutofireAI.inPinch, judged within its THREAT_RANGE) holds the harpoon, and one towing
+    // lets go and runs straight away from the enemies' weighted centre for FLEE_TIME, Haul Drive and all.
+    public static final float FLEE_TIME = 4f;
 
     private final ShipAPI ship;
     private WeaponAPI harpoon;
@@ -54,6 +57,10 @@ public class TugPilot implements AdvanceableListener {
     private boolean friendSafe;
     private float swingSide = 1f;
     private Tether towing;
+    private final Vector2f threatCentre = new Vector2f();
+    private float pinchAge = BIAS_INTERVAL;
+    private boolean pinched;
+    private float fleeTime;
 
     public TugPilot(ShipAPI ship) {
         this.ship = ship;
@@ -65,6 +72,13 @@ public class TugPilot implements AdvanceableListener {
         if (engine == null || ship.getShipAI() == null || !ship.isAlive()) return;
         WeaponAPI weapon = getHarpoon();
         if (weapon == null) return;
+
+        pinchAge += amount;
+        if (pinchAge >= BIAS_INTERVAL) {
+            pinchAge = 0f;
+            pinched = isPinched(engine);
+        }
+        fleeTime -= amount;
 
         // The ship AI can also fire a group by hand, past the autofire plugin; only this flag stops every source.
         if (!wantsToFire(weapon)) weapon.setForceNoFireOneFrame(true);
@@ -78,7 +92,11 @@ public class TugPilot implements AdvanceableListener {
                 biasAge = 0f;
                 sumPull(engine, tether.getTarget());
             }
-            if (!isWorthHolding(tether)) {
+            if (pinched) {
+                tethers.release(tether);
+                tether = null;
+                fleeTime = FLEE_TIME;
+            } else if (!isWorthHolding(tether)) {
                 tethers.release(tether);
                 tether = null;
             }
@@ -86,9 +104,32 @@ public class TugPilot implements AdvanceableListener {
         towing = tether;
         if (tether == null) {
             biasAge = BIAS_INTERVAL;
+            if (isFleeing()) flee();
             return;
         }
         tow(tether);
+    }
+
+    // Whether the tug is running from a swarm after letting go; TugDriveAI fires the Haul Drive for it.
+    public boolean isFleeing() {
+        return fleeTime > 0f;
+    }
+
+    private boolean isPinched(CombatEngineAPI engine) {
+        Vector2f location = ship.getLocation();
+        float threat = HarpoonAutofireAI.weightNear(engine, ship, location, HarpoonAutofireAI.THREAT_RANGE, false,
+                threatCentre);
+        float cover = HarpoonAutofireAI.weightNear(engine, ship, location, HarpoonAutofireAI.THREAT_RANGE, true, null)
+                + Misc.getShipWeight(ship);
+        return HarpoonAutofireAI.inPinch(threat, cover, ship.getFluxTracker().isOverloadedOrVenting(),
+                ship.getFluxTracker().getFluxLevel(), ship.getHullLevel());
+    }
+
+    // Uncapped: with no line out the rope's speed allowance is gone, and the Haul Drive's top speed is the point.
+    private void flee() {
+        Vector2f away = Vector2f.sub(ship.getLocation(), threatCentre, null);
+        float heading = away.lengthSquared() < 1f ? ship.getFacing() : Misc.getAngleInDegrees(away);
+        steer(heading, false);
     }
 
     // The line this pilot holds and tows, or null; TugDriveAI hauls only on it.
@@ -160,11 +201,15 @@ public class TugPilot implements AdvanceableListener {
     // hull's own top speed along the heading; past that it would build speed without end and fling the catch past
     // friendly guns. The hull spec's value leaves out the Haul Drive's top-speed bonus, which is for the player.
     private void steer(float heading) {
+        steer(heading, true);
+    }
+
+    private void steer(float heading, boolean capped) {
         float difference = turnToward(heading);
         Vector2f velocity = ship.getVelocity();
         double radians = Math.toRadians(heading);
         float ahead = (float) (velocity.x * Math.cos(radians) + velocity.y * Math.sin(radians));
-        boolean mayThrust = ahead < ship.getHullSpec().getEngineSpec().getMaxSpeed();
+        boolean mayThrust = !capped || ahead < ship.getHullSpec().getEngineSpec().getMaxSpeed();
         boolean facing = Math.abs(difference) < THRUST_ARC;
         if (mayThrust && facing) {
             ship.giveCommand(ShipCommand.ACCELERATE, null, 0);
@@ -208,10 +253,10 @@ public class TugPilot implements AdvanceableListener {
         return difference;
     }
 
-    // The plugin only advances while its group is on autofire, so off autofire its answer is stale. A tug in trouble
-    // would let go of the line at once, so it does not spend a charge on one.
+    // The plugin only advances while its group is on autofire, so off autofire its answer is stale. A tug in trouble or
+    // in a pinch would let go of the line at once, and a fleeing one is busy, so neither spends a charge.
     private boolean wantsToFire(WeaponAPI weapon) {
-        if (isInTrouble()) return false;
+        if (isInTrouble() || pinched || isFleeing()) return false;
         WeaponGroupAPI group = ship.getWeaponGroupFor(weapon);
         if (group == null || !group.isAutofiring()) return false;
         AutofireAIPlugin plugin = group.getAutofirePlugin(weapon);

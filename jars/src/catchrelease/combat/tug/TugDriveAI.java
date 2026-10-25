@@ -59,7 +59,7 @@ public class TugDriveAI implements ShipSystemAIScript {
             use = isTowing(tether) && shouldHaul(distance >= tether.getLength() * TAUT_SHARE,
                     caught.getMass() / Math.max(1f, ship.getMass()), separating);
         } else {
-            use = shouldEscape(ship.getHullLevel(), flags.hasFlag(AIFlags.BACKING_OFF)
+            use = isPilotFleeing() || shouldEscape(ship.getHullLevel(), flags.hasFlag(AIFlags.BACKING_OFF)
                     || flags.hasFlag(AIFlags.NEEDS_HELP) || missileDangerDir != null);
         }
         if (use) ship.giveCommand(ShipCommand.USE_SYSTEM, null, 0);
@@ -70,6 +70,13 @@ public class TugDriveAI implements ShipSystemAIScript {
     private boolean isTowing(Tether tether) {
         for (TugPilot pilot : ship.getListeners(TugPilot.class)) {
             if (pilot.getTowing() == tether) return true;
+        }
+        return false;
+    }
+
+    private boolean isPilotFleeing() {
+        for (TugPilot pilot : ship.getListeners(TugPilot.class)) {
+            if (pilot.isFleeing()) return true;
         }
         return false;
     }
