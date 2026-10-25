@@ -12,22 +12,29 @@ public final class TugAIChecks {
     }
 
     public static void main(String[] args) {
-        float exposed = HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 0, false, 0.5f);
-        float flanked = HarpoonAutofireAI.score(Shield.FLANKED, false, false, 1f, 200f, 0, false, 0.5f);
-        float facing = HarpoonAutofireAI.score(Shield.FACING, false, false, 1f, 200f, 0, false, 0.5f);
+        float exposed = HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 4f, 0.5f);
+        float flanked = HarpoonAutofireAI.score(Shield.FLANKED, false, false, 1f, 200f, 4f, 0.5f);
+        float facing = HarpoonAutofireAI.score(Shield.FACING, true, true, 0.2f, 200f, 8f, 0f);
         require(exposed > flanked && flanked > facing, "Shield state does not order the targets");
-        require(facing < HarpoonAutofireAI.MIN_SCORE, "Would fire into a frigate's facing shield");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 2, false, 0.5f) < exposed / 2f,
-                "Ships already under friendly attack are not passed over");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, true, 1f, 200f, 0, false, 0.5f) > exposed,
+        require(facing < HarpoonAutofireAI.MIN_SCORE, "Would fire into a facing shield, even of a crippled frigate");
+        require(HarpoonAutofireAI.score(Shield.DOWN, true, true, 0.2f, 200f, 0f, 0f) < HarpoonAutofireAI.MIN_SCORE,
+                "Would harpoon a ship with no friendly guns near the tug");
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 1f, 0.5f) < exposed / 2f,
+                "A catch with little friendly firepower near the tug is not passed over");
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 8f, 0.5f) == exposed,
+                "Support past FULL_SUPPORT still counts");
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 600f, 4f, 0.5f)
+                        >= HarpoonAutofireAI.MIN_SCORE * 2f,
+                "A destroyer with its shield down near friends is not an easy pick");
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, true, 1f, 200f, 4f, 0.5f) > exposed,
                 "A fleeing ship is not preferred");
-        require(HarpoonAutofireAI.score(Shield.DOWN, true, false, 1f, 200f, 0, false, 0.5f) > exposed,
+        require(HarpoonAutofireAI.score(Shield.DOWN, true, false, 1f, 200f, 4f, 0.5f) > exposed,
                 "An overloaded ship is not preferred");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 3500f, 0, false, 0.5f) < exposed,
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 3500f, 4f, 0.5f) < exposed,
                 "A capital scores as well as a frigate");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 0.3f, 200f, 0, false, 0.5f) > exposed,
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 0.3f, 200f, 4f, 0.5f) > exposed,
                 "A damaged ship is not preferred");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 0, false, 0f) > exposed,
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 4f, 0f) > exposed,
                 "A nearer ship is not preferred");
 
         Vector2f a = new Vector2f(0f, 0f);

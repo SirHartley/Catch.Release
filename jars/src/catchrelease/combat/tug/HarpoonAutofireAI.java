@@ -11,9 +11,6 @@ import com.fs.starfarer.api.combat.WeaponAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-
 // Harpoon targeting, picked in ModPlugin.pickWeaponAutofireAI. The engine only asks it while the weapon's group is
 // on autofire; TugPilot stops the ship AI firing the harpoon by hand when this plugin would not.
 public class HarpoonAutofireAI implements AutofireAIPlugin {
@@ -21,11 +18,15 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     public enum Shield { DOWN, FLANKED, FACING }
 
     public static final float RESCORE_INTERVAL = 0.3f;
-    public static final float MIN_SCORE = 0.6f;
+    public static final float MIN_SCORE = 0.4f;
+    // A new target must beat the current one by this factor, so the slow turret is not sent off mid-swing.
+    public static final float SWITCH_MARGIN = 1.3f;
     public static final float AIM_TOLERANCE = 3f;
-    public static final float HELPER_RANGE = 2000f;
+    // Friendly firepower within this range of the tug is where a catch gets dragged. A catch counts in proportion to
+    // that ship weight (Misc.getShipWeight: a destroyer is 2) up to FULL_SUPPORT, and not at all with none.
+    public static final float SUPPORT_RANGE = 1600f;
+    public static final float FULL_SUPPORT = 4f;
     public static final float REFERENCE_MASS = 600f;
-    public static final float RECENT_HIT = 1f;
     // Friendly ships and wrecks closer than this share of their radius to the line of fire block the shot; the
     // weapon itself has no friendly-fire check, and the vanilla autofire AI's is not reachable. Raised shields block
     // it too (see isClear).
@@ -34,7 +35,6 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     public static final float BLOCKED_RECHECK = 0.1f;
 
     private final WeaponAPI weapon;
-    private final Map<ShipAPI, Integer> helpers = new IdentityHashMap<>();
     private ShipAPI target;
     private Vector2f aim;
     private float rescore;
@@ -68,25 +68,42 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     }
 
     // List passes, not the ship grid: a grid query copies every object in its 300-unit cells into a new set, which
-    // costs more at weapon and helper range.
+    // costs more at weapon and support range.
     private ShipAPI pickTarget(CombatEngineAPI engine, ShipAPI ship) {
-        countHelpers(engine, ship);
+        float support = weightNear(engine, ship, ship.getLocation(), SUPPORT_RANGE, true);
         Vector2f mount = weapon.getLocation();
         ShipAPI best = null;
         float bestScore = MIN_SCORE;
+        float currentScore = 0f;
         for (ShipAPI other : engine.getShips()) {
             if (!isCandidate(engine, ship, other)) continue;
             float distance = Misc.getDistance(other.getLocation(), mount) - other.getCollisionRadius();
             if (distance > weapon.getRange() || weapon.distanceFromArc(other.getLocation()) > 0f) continue;
             float score = score(getShield(other, mount), isDisabled(other), isFleeing(other), other.getHullLevel(),
-                    other.getMass(), helpers.getOrDefault(other, 0),
-                    other.getSinceLastDamageTaken() < RECENT_HIT, Math.max(0f, distance) / weapon.getRange());
+                    other.getMass(), support, Math.max(0f, distance) / weapon.getRange());
+            if (other == target) currentScore = score;
             if (score > bestScore) {
                 bestScore = score;
                 best = other;
             }
         }
+        if (currentScore >= MIN_SCORE && bestScore < currentScore * SWITCH_MARGIN) return target;
         return best;
+    }
+
+    // Misc.getShipWeight of the tug's friends (or of ships hostile to it) within range of a point, the tug and
+    // fighters excepted.
+    static float weightNear(CombatEngineAPI engine, ShipAPI ship, Vector2f point, float range, boolean friendly) {
+        float weight = 0f;
+        for (ShipAPI other : engine.getShips()) {
+            if (other == ship || other.isFighter() || !other.isAlive() || other.isHulk()) continue;
+            if ((other.getOwner() == ship.getOwner()) != friendly || other.getOwner() == 100) continue;
+            if (!friendly && !engine.isAwareOf(ship.getOwner(), other)) continue;
+            float dx = other.getLocation().x - point.x;
+            float dy = other.getLocation().y - point.y;
+            if (dx * dx + dy * dy <= range * range) weight += Misc.getShipWeight(other);
+        }
+        return weight;
     }
 
     private static boolean isCandidate(CombatEngineAPI engine, ShipAPI ship, ShipAPI other) {
@@ -95,21 +112,21 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
                 && !other.isPhased() && engine.isEntityInPlay(other) && engine.isAwareOf(ship.getOwner(), other);
     }
 
-    // Prefers a ship with its shield down or turned away, disabled, running or damaged, light enough to drag, near,
-    // and not already the target of friendly ships. A shield facing the mount would only deflect the harpoon.
+    // The harpoon is there to drag ships into friendly guns, so a catch is worth most with friendly firepower near
+    // the tug (support, in ship weight), and with its shield down or turned away, disabled, running or damaged,
+    // light enough to drag, and near. A shield facing the mount would only deflect the harpoon.
     public static float score(Shield shield, boolean disabled, boolean fleeing, float hullLevel, float mass,
-                              int helpers, boolean recentlyHit, float distanceShare) {
+                              float support, float distanceShare) {
         float score = switch (shield) {
             case DOWN -> 2f;
             case FLANKED -> 1.5f;
-            case FACING -> 0.25f;
+            case FACING -> 0f;
         };
         if (disabled) score *= 1.5f;
         if (fleeing) score *= 1.5f;
         score *= 1f + 0.5f * (1f - clamp(hullLevel));
         score *= Math.max(0.3f, Math.min(1.5f, REFERENCE_MASS / Math.max(1f, mass)));
-        score /= 1f + helpers;
-        if (recentlyHit) score *= 0.75f;
+        score *= clamp(support / FULL_SUPPORT);
         score *= 1f - 0.3f * clamp(distanceShare);
         return score;
     }
@@ -128,19 +145,6 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
         if (other.isRetreating()) return true;
         return other.getAIFlags() != null && (other.getAIFlags().hasFlag(AIFlags.BACKING_OFF)
                 || other.getAIFlags().hasFlag(AIFlags.RUN_QUICKLY));
-    }
-
-    // Friendly ships targeting each ship from within HELPER_RANGE of it.
-    private void countHelpers(CombatEngineAPI engine, ShipAPI ship) {
-        helpers.clear();
-        for (ShipAPI ally : engine.getShips()) {
-            if (ally == ship || ally.isFighter() || ally.getOwner() != ship.getOwner() || !ally.isAlive()) continue;
-            ShipAPI other = ally.getShipTarget();
-            if (other == null) continue;
-            float dx = ally.getLocation().x - other.getLocation().x;
-            float dy = ally.getLocation().y - other.getLocation().y;
-            if (dx * dx + dy * dy < HELPER_RANGE * HELPER_RANGE) helpers.merge(other, 1, Integer::sum);
-        }
     }
 
     private boolean isAimed(Vector2f point) {

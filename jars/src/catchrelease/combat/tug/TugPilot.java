@@ -89,6 +89,8 @@ public class TugPilot implements AdvanceableListener {
         if (tether == null) {
             biasAge = BIAS_INTERVAL;
             keepBack(engine, weapon, amount);
+            Vector2f aim = getReadyAim(weapon, tethers);
+            if (aim != null) aimWithHull(weapon, aim);
             return;
         }
         tow(engine, tether, amount);
@@ -155,6 +157,24 @@ public class TugPilot implements AdvanceableListener {
         CombatFleetManagerAPI fleet = engine.getFleetManager(ship.getOwner());
         CombatTaskManagerAPI tasks = fleet == null ? null : fleet.getTaskManager(ship.isAlly());
         return tasks != null && tasks.getAssignmentFor(ship) != null;
+    }
+
+    // The aim point of a loaded harpoon with a target and no line out, or null.
+    private Vector2f getReadyAim(WeaponAPI weapon, TugTethers tethers) {
+        if (isInTrouble() || weapon.getAmmo() <= 0 || (tethers != null && tethers.getLine(weapon) != null)) {
+            return null;
+        }
+        WeaponGroupAPI group = ship.getWeaponGroupFor(weapon);
+        if (group == null || !group.isAutofiring()) return null;
+        return group.getAutofirePlugin(weapon) instanceof HarpoonAutofireAI ai ? ai.getTarget() : null;
+    }
+
+    // The turret turns far slower than the hull, so the hull turns to put the target on the turret's current
+    // bearing while the turret closes the rest. Only turning is overridden; the ship AI keeps its thrust.
+    private void aimWithHull(WeaponAPI weapon, Vector2f aim) {
+        float bearing = Misc.getAngleInDegrees(weapon.getLocation(), aim);
+        float turretOffset = HarpoonAutofireAI.angleDifference(ship.getFacing(), weapon.getCurrAngle());
+        turnToward(bearing - turretOffset);
     }
 
     // Drags the catch where friendly guns are and holds it there, overriding the ship AI's movement: the wanted

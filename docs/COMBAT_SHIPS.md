@@ -50,7 +50,7 @@ Replaces the placeholder system. It uses the tug drive's field: while active it 
 
 ### AI
 
-- **Harpoon targets:** prefer vulnerable targets (hull exposed, shields down or flanked) that are not already being hammered by friendly ships, or that are fleeing.
+- **Harpoon targets:** the Stigmata is a support ship with point defence only; the harpoon drags ships into the guns of friendly ships. Fire freely when friendly firepower is near the tug, and prefer exposed targets (shields down or flanked), fleeing or disabled ones, damaged ones and light ones. Never fire into a facing shield, and turn the hull to help the slow turret onto the target.
 - **Positioning:** the Stigmata has no guns to fight with and must not charge in. Without a catch it keeps with a friendly combat ship and holds off at harpoon range from its targets, so it hooks what comes at its friends.
 - **Towing:** no vanilla AI tows. Keep the default ship AI and override its movement afterwards from an `AdvanceableListener` on the ship (give the wanted commands, block the rest with `blockCommandForOneFrame`), as Knights of Ludd does. Drag the catch toward friendly ships and away from enemies, swinging round it when it lies between the tug and its friends, and hold it once it is within friendly guns. A later version could make a quick firepower estimate of the surroundings and drag the target into friendly firing arcs.
 - **Drive system:** fire it when the rope is taut and the target resists, or to escape.
