@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="sprite and wep fixes">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="fixed reliquary sprite &amp; lyne drone">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/hulls/catchrelease_lyne_drone.ship" beforeDir="false" afterPath="$PROJECT_DIR$/data/hulls/catchrelease_lyne_drone.ship" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/hulls/catchrelease_rod_ship.ship" beforeDir="false" afterPath="$PROJECT_DIR$/data/hulls/catchrelease_rod_ship.ship" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +143,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="tooltip formatting updates" />
     <MESSAGE value="todos" />
     <MESSAGE value="trail adjutments" />
     <MESSAGE value="adjustments" />
@@ -169,7 +167,8 @@
     <MESSAGE value="intel writing rework&#10;more rules work" />
     <MESSAGE value="boat setup" />
     <MESSAGE value="sprite and wep fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="sprite and wep fixes" />
+    <MESSAGE value="fixed reliquary sprite &amp; lyne drone" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed reliquary sprite &amp; lyne drone" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

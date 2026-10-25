@@ -2799,7 +2799,7 @@ CatchReleaseCMD t3Complete","""Did you, now? Good work. That one would have kept
 
 A deckhand passes you a data chip. ""That's range data. Somewhere to go next.""
 
-""Something else. A man on $catchreleaseChainT3Market in the $catchreleaseChainT3MarketSystem sent word asking for my help. He's sitting on an old Reliquary, a drone tender, and he's no use for her. I'd say he'd trade her for that fish in your hold. You'll find him in the bar. Most nights, by the sound of him.""",catchrelease_fisherBack:Continue,
+""I got something else for you, if you're interested. A man on $catchreleaseChainT3Market in the $catchreleaseChainT3MarketSystem sent word asking for my help. He's sitting on an old Reliquary-Class drone tender, and he's no use for her. I'd say he'd trade her for that fish in your hold. You'll find him in the bar. Most nights, by the sound of him.""",catchrelease_fisherBack:Continue,
 catchrelease_t3HandInNone,CatchReleaseT3HandIn,,,"""Did you, now? Good work. Give me a little while to settle what you're owed, and ask me again.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman chain T3: the Reliquary trade,,,,,,
@@ -2808,7 +2808,7 @@ catchrelease_t3Drunk,DialogOptionSelected,$option == catchrelease_t3Drunk,"Catch
 FireBest CatchReleaseT3DrunkGreeting",,,
 catchrelease_t3DrunkGreetFirst,CatchReleaseT3DrunkGreeting,!$market.catchrelease_t3DrunkMet,"$market.catchrelease_t3DrunkMet = true
 CatchReleaseCMD highlightFishText ""Three trophy fish""
-FireAll CatchReleaseT3DrunkOptions","He takes a while to find your face. ""The Fisherman sent you? Good. Good man, the Fisherman.""
+FireAll CatchReleaseT3DrunkOptions","He takes a while to find your face. ""The Fisherman sent you? Good. Good man, the Fisherman, depending on the man! Hah!""
 
 ""I've got a Reliquary. Old clanker. Nobody wants her, I've tried. Everybody wants trophy fish, though. The kind a crew chases for months. Worth a lot more to the right buyer than she'll ever fetch."" He holds up three fingers and checks them. ""Three trophy fish. I sell them on, I live off it, and I never look at that ship again.""",,
 catchrelease_t3DrunkGreetAgain,CatchReleaseT3DrunkGreeting,$market.catchrelease_t3DrunkMet,"CatchReleaseCMD highlightFishText $catchreleaseChainT3Price
