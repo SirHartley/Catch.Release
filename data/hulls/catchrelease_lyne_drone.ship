@@ -1,26 +1,56 @@
 {
-	"hullId":"catchrelease_lyne_drone",
-	"hullName":"LYNE Drone",
-	"hullSize":"FIGHTER",
-	"style":"MIDLINE",
-	"spriteName":"graphics/catchrelease/ships/lyne_drone.png",
-	"width":32,
-	"height":30,
-	"center":[16, 15],
-	"collisionRadius":17,
-	"bounds":[13, 0, 4, 14, -13, 14, -13, -14, 4, -14],
-	"shieldCenter":[0, 0],
-	"shieldRadius":17,
-	"viewOffset":0,
-	"engineSlots":[
-		{
-			"angle":180,
-			"contrailSize":48,
-			"length":14,
-			"location":[-13, 0],
-			"style":"MIDLINE",
-			"width":6
-		}
-	],
-	"weaponSlots":[]
+  "hullName": "LYNE Drone",
+  "hullId": "catchrelease_lyne_drone",
+  "hullSize": "FIGHTER",
+  "spriteName": "graphics/catchrelease/ships/lyne_drone.png",
+  "style": "MIDLINE",
+  "height": 30,
+  "width": 32,
+  "center": [16, 14],
+  "collisionRadius": 17,
+  "shieldCenter": [1, 0],
+  "shieldRadius": 17,
+  "viewOffset": 0,
+  "weaponSlots": [],
+  "engineSlots": [
+    {
+      "angle": 180,
+      "contrailSize": 4,
+      "length": 7.5,
+      "location": [-12, 8.5],
+      "style": "LOW_TECH",
+      "width": 4
+    },
+    {
+      "angle": -180,
+      "contrailSize": 4,
+      "length": 7.5,
+      "location": [-12, -8.5],
+      "style": "LOW_TECH",
+      "width": 4
+    },
+    {
+      "angle": 180,
+      "contrailSize": 4.033771,
+      "length": 12.881466,
+      "location": [-12, 4.5],
+      "style": "LOW_TECH",
+      "width": 4.033771
+    },
+    {
+      "angle": -180,
+      "contrailSize": 4.033771,
+      "length": 12.881466,
+      "location": [-12, -4.5],
+      "style": "LOW_TECH",
+      "width": 4.033771
+    }
+  ],
+  "bounds": [
+    14, 0,
+    5, 14,
+    -12, 14,
+    -12, -14,
+    5, -14
+  ]
 }

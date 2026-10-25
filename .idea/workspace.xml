@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="sprite and wep fixes">
-      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/weapons/harpoon_projectile.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/weapons/harpoon_projectile.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hulls/catchrelease_lyne_drone.ship" beforeDir="false" afterPath="$PROJECT_DIR$/data/hulls/catchrelease_lyne_drone.ship" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/hulls/catchrelease_rod_ship.ship" beforeDir="false" afterPath="$PROJECT_DIR$/data/hulls/catchrelease_rod_ship.ship" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
