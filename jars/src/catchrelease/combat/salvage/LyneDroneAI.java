@@ -23,7 +23,7 @@ public class LyneDroneAI implements ShipAIPlugin {
     private enum Mode { IDLE, FETCH, TOW, LAND }
 
     public static final float SEARCH_INTERVAL = 0.5f;
-    public static final float SEARCH_RANGE = 4000f;
+    public static final float SEARCH_RANGE = 8000f;
     public static final float ATTACH_PADDING = 10f;
     public static final float DOCK_DISTANCE = 40f;
     public static final float IDLE_DISTANCE = 150f;

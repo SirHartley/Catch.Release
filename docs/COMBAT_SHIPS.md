@@ -59,7 +59,7 @@ Replaces the placeholder system. It uses the tug drive's field: while active it 
 
 ## Reliquary: LYNE Tender
 
-A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. It is parasitic: two built-in wings of LYNE drones and no modular bays, so every other fighter it fields is one it salvaged. The hull has two fighter bays. Bay *i* launches from the *i*-th launch-bay slot in the `.ship` file (`obf/loading/specs/_.java:107-133`), so the two LYNE wings launch from `LB 1` and `LB 2`; `LB 3` gets a bay only when the stored wings add bays (stage 6). Towed wrecks land at `LB 1`'s six points.
+A classic midline carrier cruiser: slow and cumbersome, with high crew capacity. It is parasitic: one built-in wing of LYNE drones and no modular bays, so every other fighter it fields is one it salvaged. The hull has one fighter bay. Bay *i* launches from the *i*-th launch-bay slot in the `.ship` file (`obf/loading/specs/_.java:107-133`), so the LYNE wing launches from `LB 1`; `LB 2` and `LB 3` get bays only when the stored wings add bays (stage 6). Towed wrecks land at `LB 1`'s six points.
 
 ### LYNE drones
 
