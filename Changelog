@@ -54,6 +54,7 @@ Fixed - Equipment with no fish price now says it is not for sale, instead of sho
 Changed - The Equipment category tabs follow the same rig order as the Upgrades tabs
 Changed - The Equipment help text no longer refers to a single-use marker that was never drawn; equipment consumed on use says so in its description
 Fixed - An upgrade's description no longer claims it is "fitted in slot 2" above its price
+Changed - The two equipment slot cells are drawn as bordered sockets instead of a second row of category tabs, which they were almost indistinguishable from
 
 Development
 Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete

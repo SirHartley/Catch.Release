@@ -35,9 +35,12 @@ module or a ship module that comes with a fishing ship. UI text must distinguish
 ### Outfitter second slot
 
 While a rig has its second slot (`FishingShips.hasSecondSlot`), the Equipment shelf
-shows two `ShopSlotPlugin` cells above the module list, drawn like category tabs:
-half the list width each, `SLOT_HEIGHT` tall, the slot's module or "Empty" beneath a
-small "SLOT n" label. The selected cell is the target slot; FIT reads "FIT IN SLOT n"
+shows two `ShopSlotPlugin` cells above the module list: half the list width each,
+`SLOT_HEIGHT` tall, the slot's module or "Empty" beneath a small "SLOT n" label. A cell
+is a black well with a dark-player tint and a full `RoundedBorder` outline, bright and
+2px while it is the target slot. It carries no bottom accent bar, because the category
+tabs directly above it are a flat fill plus that accent and no outline; the two rows
+pick different things and must not read as one control. The selected cell is the target slot; FIT reads "FIT IN SLOT n"
 and every row and the detail pane are judged against it. Without a second slot the
 shelf looks as it did with one slot. A module fitted in the other slot, or one that
 shares an exclusion group with it, is blocked for the target slot: its row name is

@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.shop;
 
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.config.FishingSounds;
+import catchrelease.rendering.helper.RoundedBorder;
 import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -14,10 +15,12 @@ import java.awt.Color;
 import java.util.List;
 
 // One cell of the Equipment tab's slot picker, shown while a rig has its second slot. The selected cell is where the
-// FIT button puts a module; rows and the detail pane are judged against it. Drawn like a category tab.
+// FIT button puts a module; rows and the detail pane are judged against it. Drawn as a bordered socket, deliberately
+// unlike the category tabs it sits under.
 public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
 
     public static final float TEXT_PAD = 10f;
+    public static final float BORDER_RADIUS = 3f;
 
     protected final int slot;
     protected final Tackle fitted;
@@ -57,10 +60,15 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         boolean active = host.getTargetSlot() == slot;
         boolean hovered = !active && isMouseOver();
 
+        // A socket, not a tab. The category tabs immediately above are a flat fill plus a bottom accent bar and no
+        // outline; a cell is a recessed well with a full rounded border and no accent, so two rows that select
+        // different things do not read as one control.
+        ShopUi.drawQuad(x, y, width, height, Color.BLACK, 0.5f * alphaMult);
         ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(),
-                (active ? 0.5f : hovered ? 0.35f : 0.18f) * alphaMult);
-        ShopUi.drawQuad(x, y, width, ShopTabPlugin.ACCENT_HEIGHT, Misc.getBrightPlayerColor(),
-                (active ? 0.95f : 0.35f) * alphaMult);
+                (active ? 0.38f : hovered ? 0.22f : 0.1f) * alphaMult);
+        RoundedBorder.draw(x, y, width, height, BORDER_RADIUS,
+                active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor(),
+                (active ? 0.95f : hovered ? 0.6f : 0.28f) * alphaMult, active ? 2f : 1f);
 
         LazyFont small = ShopUi.getSmallFont();
         LazyFont body = ShopUi.getBodyFont();
