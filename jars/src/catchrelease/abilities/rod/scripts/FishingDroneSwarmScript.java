@@ -198,11 +198,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         // an empty live list is not the end while upgraded drones are still queued
         if (drones.isEmpty() && !hasPendingDrones()) {
-            // Reployment Bays send the whole swarm out again; a manual recall ended the cast above, never here
-            if (TackleManager.effects(Tackle.Fit.DRONE).redeploys && !shouldRecall()) {
-                beginDroneLaunches();
-                return;
-            }
+            // Reployment Bays (commented out in Tackle) send the whole swarm out again; a manual recall ended the
+            // cast above, never here.
+            // if (TackleManager.effects(Tackle.Fit.DRONE).redeploys && !shouldRecall()) {
+            //     beginDroneLaunches();
+            //     return;
+            // }
 
             done = true;
             return;
