@@ -37,10 +37,12 @@ module or a ship module that comes with a fishing ship. UI text must distinguish
 While a rig has its second slot (`FishingShips.hasSecondSlot`), the Equipment shelf
 shows two `ShopSlotPlugin` cells above the module list: half the list width each,
 `SLOT_HEIGHT` tall, the slot's module or "Empty" beneath a small "SLOT n" label. A cell
-is a black well with a dark-player tint and a full `RoundedBorder` outline, bright and
-2px while it is the target slot. It carries no bottom accent bar, because the category
-tabs directly above it are a flat fill plus that accent and no outline; the two rows
-pick different things and must not read as one control. A cell holding a module that
+is drawn like the module rows beneath it, in the Outfitter's flat style: the rows'
+dark-player fill (0.12, 0.3 hovered, 0.5 as the target slot) and a 3px bright left accent
+(0.3, 0.6, 0.9), with its text in the rows' name column (`TEXT_LEFT`) and the label
+bright while it is the target. It has no outline and no bottom accent, which the
+category tabs directly above carry, so the cells read as part of the list rather than
+as a second row of tabs. A cell holding a module that
 came with the ship, and that the player does not own a copy of, carries a small grey
 "SHIP" in its top right, the same distinction the rows draw. `needsCompactSlotText`
 measures every slot's name with `LazyFont.calcWidth` and picks one font for the whole

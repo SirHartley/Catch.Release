@@ -586,7 +586,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             LazyFont body = ShopUi.getBodyFont();
             if (body == null) return false;
 
-            float room = cellWidth - ShopSlotPlugin.TEXT_PAD * 2f;
+            float room = cellWidth - ShopSlotPlugin.TEXT_LEFT - ShopSlotPlugin.TEXT_PAD;
 
             for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
                 Tackle fitted = TackleManager.getSlot(rig, slot);
