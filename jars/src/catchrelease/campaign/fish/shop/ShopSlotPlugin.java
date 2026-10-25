@@ -4,7 +4,7 @@ import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.config.FishingSounds;
-import catchrelease.rendering.helper.RoundedBorder;
+import catchrelease.ui.ListRow;
 import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -17,14 +17,15 @@ import java.awt.Color;
 import java.util.List;
 
 // One cell of the Equipment tab's slot picker, shown while a rig has its second slot. The selected cell is where the
-// FIT button puts a module; rows and the detail pane are judged against it. Drawn as a bordered socket, deliberately
-// unlike the category tabs it sits under.
+// FIT button puts a module; rows and the detail pane are judged against it. Drawn like the module rows beneath it, with
+// their fill and left accent, so it reads as part of the list rather than as a second row of tabs.
 public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
 
+    // the rows' name column, so slot and module names line up
+    public static final float TEXT_LEFT = ListRow.ACCENT_WIDTH + ShopRowPlugin.MARK_SLOT;
     public static final float TEXT_PAD = 10f;
     public static final float TEXT_GAP = 4f;
     public static final float LINE_GAP = 3f;
-    public static final float BORDER_RADIUS = 3f;
 
     protected final int slot;
     protected final Tackle fitted;
@@ -73,15 +74,12 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         boolean active = host.getTargetSlot() == slot;
         boolean hovered = !active && isMouseOver();
 
-        // A socket, not a tab. The category tabs immediately above are a flat fill plus a bottom accent bar and no
-        // outline; a cell is a recessed well with a full rounded border and no accent, so two rows that select
-        // different things do not read as one control.
-        ShopUi.drawQuad(x, y, width, height, Color.BLACK, 0.5f * alphaMult);
+        // the module rows' fill and accent (ListRow, ShopRowPlugin.getSelectedFieldAlpha); the category tabs above
+        // carry theirs along the bottom instead
         ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(),
-                (active ? 0.38f : hovered ? 0.22f : 0.1f) * alphaMult);
-        RoundedBorder.draw(x, y, width, height, BORDER_RADIUS,
-                active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor(),
-                (active ? 0.95f : hovered ? 0.6f : 0.28f) * alphaMult, active ? 2f : 1f);
+                (active ? 0.5f : hovered ? 0.3f : 0.12f) * alphaMult);
+        ShopUi.drawQuad(x, y, ListRow.ACCENT_WIDTH, height, Misc.getBrightPlayerColor(),
+                (active ? 0.9f : hovered ? 0.6f : 0.3f) * alphaMult);
 
         LazyFont small = ShopUi.getSmallFont();
         LazyFont body = ShopUi.getBodyFont();
@@ -101,12 +99,12 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         // five pixels went spare above and below
         float captionTop = y + height - TEXT_GAP;
 
-        label.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
-        label.draw(Math.round(x + TEXT_PAD), Math.round(captionTop));
+        label.setBaseColor(ShopUi.withAlpha(active ? Misc.getBrightPlayerColor() : Misc.getGrayColor(), alphaMult));
+        label.draw(Math.round(x + TEXT_LEFT), Math.round(captionTop));
 
         Color color = fitted == Tackle.NONE ? Misc.getGrayColor() : Misc.getPositiveHighlightColor();
         content.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-        content.draw(Math.round(x + TEXT_PAD), Math.round(captionTop - label.getHeight() - LINE_GAP));
+        content.draw(Math.round(x + TEXT_LEFT), Math.round(captionTop - label.getHeight() - LINE_GAP));
 
         if (!shipModule) return;
 
