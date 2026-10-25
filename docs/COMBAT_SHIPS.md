@@ -39,7 +39,7 @@ A built-in weapon on `WS0001` with regenerating charges (`ammo`, `ammo/sec`, `re
 - **Hits:** a shield hit glances off; only a hull or armour hit attaches. A deflected harpoon is a new projectile spawned at the hit point (`engine.spawnProjectile`); vanilla has no ricochet.
 - **Targets:** anything with a hull: enemies, friendly ships and wrecks.
 - **While attached:** the rope keeps its length. When taut it pulls both ships along the rope, split by mass, so lighter hulls are dragged more easily. Mass is a plain field (`CombatEntityAPI.getMass/setMass`), not a stat. LazyLib `CombatUtils.applyForce` does not scale by frame time. A ship above its top speed brakes on its own unless it is accelerating, decelerating or strafing (`obf/combat/entities/Ship.java:2031-2039`), and those commands clamp to top speed too (`obf/combat/entities/ship/null.java:740-815`); `blockCommandForOneFrame` cannot stop the brake. So a dragged ship needs a temporary top-speed allowance. The rope can go slack; slack must never pull.
-- **Release:** firing again releases the current rope. The rope also breaks when its duration runs out, when the target is destroyed or removed, and, probably, when the rope crosses the tug's own hull while it turns (LazyLib `CollisionUtils`; start the test outside the hull, since a line starting inside the bounds reports a hit at its start, whatever its javadoc says).
+- **Release:** firing again releases the current rope. The rope also breaks when its duration runs out and when the target is destroyed or removed. It does not break when it crosses the tug's own hull: that rule was tried and removed as unintuitive.
 - **Turret return:** after firing or release the mount turns back fast but smoothly, never snapping.
 - **Rope look:** about 2 px wide, a beige-white centre with brown edges, using half-pixel widths where that helps. Drawn as a feathered quad strip from a `CombatLayeredRenderingPlugin`, with its entity kept at the rope's midpoint and a render radius covering the rope (vanilla `NeuralTransferVisual` draws between two ships this way). The campaign harpoon's curve, spring slack and wobble maths in `HarpoonEntityPlugin` are portable; its classes are not.
 - **Connection:** the line flies out at low alpha and "materialises" when the harpoon bites, possibly with EMP arcs racing along it.
@@ -199,17 +199,16 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - A shield hit (`shieldHit`, reliable because the shot does damage) spawns a deflected copy.
   - A hull or armour hit on any ship or wreck creates a `Tether`: target, attachment point in the target's local frame, rope length = distance at impact.
   - Firing again releases the current tether.
-- [x] 2.3 Tether physics: `combat/tug/Tether`, advanced by one `EveryFrameCombatPlugin` that owns every live tether. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). Duration 20 s; the hull-break setting is `catchrelease_harpoon_rope_hull_break`, on by default.
+- [x] 2.3 Tether physics: `combat/tug/Tether`, advanced by one `EveryFrameCombatPlugin` that owns every live tether. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). Duration 20 s.
   - **Pull:** when taut, remove the outward velocity along the rope and add an impulse split by mass, so the lighter ship moves more. Slack never pulls.
   - **Top speed:** a temporary max-speed allowance on a dragged target so its auto-brake does not fight the rope.
   - **Breaks** on:
     - duration;
-    - target destroyed or removed;
-    - the rope crossing the tug's hull (LazyLib `CollisionUtils`, tested from outside the hull) — behind a setting, off if it plays badly.
+    - target destroyed or removed.
   - Check: the constraint maths, i.e. mass split, slack, and no pull while slack.
   - Done when: the tug can hook and drag a frigate, struggles with a cruiser, and the rope behaves when slack.
 - [x] 2.4 Rope rendering: `combat/tug/TetherRenderer`, a `BaseCombatLayeredRenderingPlugin` per tether, its entity kept at the rope's midpoint with a render radius covering the rope.
-  - **Look:** about 2 px wide, beige-white centre, brown edges, as a feathered quad strip along the campaign rope's curve and slack maths, ported from `HarpoonEntityPlugin`.
+  - **Look:** about 2 px wide, beige-white centre, brown edges, as a feathered quad strip along the campaign rope's curve and slack maths, ported from `HarpoonEntityPlugin`. It behaves like the campaign line: no sideways bow in flight or when slack.
   - **Flight and bite:** low alpha in flight, then it "materialises" on the bite, with EMP arcs racing along the rope.
   - Done when: the rope reads clearly at all zooms and looks right slack and taut.
   - Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug) and [UI.md](UI.md#drawing-gotchas). The renderer also draws the harpoon head, since a bullet sprite is always additive.

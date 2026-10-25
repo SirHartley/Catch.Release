@@ -36,8 +36,11 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     private static final float MATERIALISE_TIME = 0.25f;
     private static final float FLASH_TIME = 0.2f;
     private static final float FADE_TIME = 0.3f;
+    // The rope's length only sets how much it wobbles: paid out ahead of the shot in flight, then taken up to the
+    // distance at the campaign line's rates (HarpoonConstants LINE_PAYOUT, LINE_TAKEUP and LINE_REEL_IN).
     private static final float PAYOUT = 1.06f;
-    private static final float BITE_KICK = 0.5f;
+    private static final float TAKEUP = 2500f;
+    private static final float REEL_IN = 850f;
 
     private static final int ARC_COUNT = 5;
     private static final float ARC_INTERVAL = 0.06f;
@@ -53,7 +56,6 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     private final Vector2f mount = new Vector2f();
     private final Vector2f end = new Vector2f();
     private final Vector2f headTip = new Vector2f();
-    private final Vector2f shotVelocity = new Vector2f();
     private float headAngle;
     private float ropeLength;
     private Tether.State seen = Tether.State.FLIGHT;
@@ -75,10 +77,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         if (engine.isPaused()) return;
 
         Tether.State state = tether.getState();
-        if (state == Tether.State.ATTACHED && seen == Tether.State.FLIGHT) {
-            biteTime = 0f;
-            curve.kick(shotVelocity, BITE_KICK);
-        }
+        if (state == Tether.State.ATTACHED && seen == Tether.State.FLIGHT) biteTime = 0f;
         if (state == Tether.State.RELEASED && seen != Tether.State.RELEASED) releaseTime = 0f;
         seen = state;
 
@@ -86,8 +85,8 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         updateHead();
         float chord = Misc.getDistance(end, mount);
         if (state == Tether.State.FLIGHT) ropeLength = Math.max(ropeLength, chord * PAYOUT);
-        else if (state == Tether.State.ATTACHED) ropeLength = tether.getLength();
-        curve.advance(mount, end, ropeLength, amount);
+        else ropeLength = approach(ropeLength, chord, (state == Tether.State.ATTACHED ? TAKEUP : REEL_IN) * amount);
+        curve.advance(mount, end, amount);
 
         if (biteTime >= 0f) {
             biteTime += amount;
@@ -104,7 +103,6 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         if (tether.getState() == Tether.State.FLIGHT && shot != null) {
             headTip.set(shot.getLocation());
             headAngle = shot.getFacing();
-            shotVelocity.set(shot.getVelocity());
         } else if (target != null && Global.getCombatEngine().isEntityInPlay(target)) {
             tether.getTargetPoint(headTip);
             headAngle = target.getFacing() + tether.getHeadAngle();
@@ -160,9 +158,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         // Pixel widths, a little wider when zoomed far out so the rope stays legible.
         float pixel = viewport.convertScreenWidthToWorldWidth(1f)
                 * (1f + 0.25f * Math.max(0f, viewport.getViewMult() - 1f));
-        boolean taut = tether.getState() == Tether.State.ATTACHED
-                && Misc.getDistance(end, mount) >= ropeLength;
-        Vector2f[] path = curve.getPath(mount, end, ropeLength, taut);
+        Vector2f[] path = curve.getPath(mount, end, ropeLength, tether.getState() == Tether.State.ATTACHED);
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
         try {
@@ -214,6 +210,10 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         head.setAlphaMult(alpha);
         head.setAngle(headAngle - 90f);
         head.renderAtCenter(headTip.x - dirX(headAngle) * half, headTip.y - dirY(headAngle) * half);
+    }
+
+    private static float approach(float value, float target, float step) {
+        return value > target ? Math.max(target, value - step) : Math.min(target, value + step);
     }
 
     private static float dirX(float degrees) {

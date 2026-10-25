@@ -49,7 +49,6 @@ public enum Setting {
     TRACKING_TIME("catchrelease_tracking_time", 100d, 0d, 300d),
     NEEDLE_FREQUENCY("catchrelease_needle_frequency", 100d, 25d, 400d),
     NEEDLE_VISIBILITY("catchrelease_needle_visibility", 100d, 0d, 300d),
-    HARPOON_ROPE_HULL_BREAK("catchrelease_harpoon_rope_hull_break", true),
     LYNE_WRECK_CHANCE("catchrelease_lyne_wreck_chance", 75d, 0d, 100d),
     LYNE_STORE_CAP("catchrelease_lyne_store_cap", 10d, 1d, 30d),
 
