@@ -421,9 +421,11 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   from all copies. The real shield turns clockwise at 36 degrees/second; phantom
   shields turn counterclockwise using the same saved angle and damage mask.
   Rotation advances only from the real mote's existing callback.
-  `FishEntityPlugin.getShieldAlpha` applies each mote's local lamp fade and viewport
-  alpha to all shields and deflection flashes. Diving hides the body, not the shield;
-  a lit copy keeps its shield even when the real fish is outside the lamps.
+  `FishEntityPlugin.getShieldAlpha` applies each mote's local lamp fade, viewport
+  alpha and dive fade (`getVisibility`, shared with the real fish) to all shields and
+  deflection flashes, so a dived fish shows no shield while it is out of reach; the
+  GraphicsLib shield lens fades and is removed the same way. A lit copy keeps its
+  shield even when the real fish is outside the lamps.
   GL attributes and matrices are restored.
   The bubble lens uses `WaveDistortion.setSize(SHIELD_RADIUS)`: GraphicsLib treats
   size as a radius and draws a sprite twice that wide. Keep the lens inside the

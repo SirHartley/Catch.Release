@@ -248,11 +248,13 @@ public final class LonglinerHauntChecks {
                         for (Fish fish : f.env.fish) {
                             check(fish.getVisibility() == (submerged ? 0f : 1f),
                                     "real fish and copies still share the normal dive fade");
-                            check(Math.abs((float) alpha.invoke(fish, viewport) - viewportAlpha * fade) < 0.0001f,
-                                    "shield visibility follows local lamps and viewport, not the shared dive cycle");
+                            check(Math.abs((float) alpha.invoke(fish, viewport)
+                                            - viewportAlpha * fade * fish.getVisibility()) < 0.0001f,
+                                    "shield visibility follows local lamps, viewport and the shared dive fade");
                         }
                     }
                 }
+                diving.setBoolean(f.real, false);
                 lampFade.setFloat(f.real, 0f);
                 lampFade.setFloat(f.copies().get(0), 1f);
                 check((float) alpha.invoke(f.real, viewport) == 0f

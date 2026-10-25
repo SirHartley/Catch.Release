@@ -1128,7 +1128,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected void advanceShieldLens() {
-        boolean wanted = !LonglinerShield.applies(this) && lampFade > 0.05f
+        boolean wanted = !LonglinerShield.applies(this) && lampFade > 0.05f && getVisibility() > 0.05f
                 && LegendaryShields.isShielded(getLegendaryVisualSource())
                 && catchrelease.rendering.distortion.CampaignDistortionRenderer.isSupported();
 
@@ -1151,7 +1151,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         shieldLens.setLocation(entity.getLocation());
-        shieldLens.setIntensity(SHIELD_LENS_INTENSITY * lampFade);
+        shieldLens.setIntensity(SHIELD_LENS_INTENSITY * lampFade * getVisibility());
         // refreshed every frame: a mote that stops advancing takes its lens with it
         shieldLens.setLifetime(2f);
     }
@@ -1397,8 +1397,8 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected float getShieldAlpha(ViewportAPI viewport) {
-        // Diving hides the body, not its lamp-lit shield.
-        return viewport.getAlphaMult() * lampFade;
+        // a dived fish is out of reach, so its shield fades with the body
+        return viewport.getAlphaMult() * lampFade * getVisibility();
     }
 
     protected void renderShield(ViewportAPI viewport) {
