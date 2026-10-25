@@ -26,6 +26,7 @@ public class TugDriveStats extends BaseShipSystemScript {
     public static final float DECELERATION_BONUS = 100f;
     public static final float TURN_ACCELERATION_BONUS = 150f;
     public static final float TURN_RATE_BONUS = 50f;
+    public static final float MAX_SPEED_BONUS = 50f;
 
     private static final Color FLAME = new Color(255, 140, 70, 255);
     // The LOW_TECH engines' own smoke contrail, which only shows while thrusting, turns sooty.
@@ -57,6 +58,7 @@ public class TugDriveStats extends BaseShipSystemScript {
         stats.getDeceleration().modifyPercent(id, DECELERATION_BONUS * effectLevel);
         stats.getTurnAcceleration().modifyPercent(id, TURN_ACCELERATION_BONUS * effectLevel);
         stats.getMaxTurnRate().modifyPercent(id, TURN_RATE_BONUS * effectLevel);
+        stats.getMaxSpeed().modifyPercent(id, MAX_SPEED_BONUS * effectLevel);
 
         ShipEngineControllerAPI engines = ship.getEngineController();
         engines.extendFlame(id, 0.8f * effectLevel, 0.3f * effectLevel, 0.5f * effectLevel);
@@ -75,6 +77,7 @@ public class TugDriveStats extends BaseShipSystemScript {
         stats.getDeceleration().unmodify(id);
         stats.getTurnAcceleration().unmodify(id);
         stats.getMaxTurnRate().unmodify(id);
+        stats.getMaxSpeed().unmodify(id);
     }
 
     // One soot ribbon per working nozzle, a MagicLib trail drawn below the ships as vanilla draws its smoke contrails,
