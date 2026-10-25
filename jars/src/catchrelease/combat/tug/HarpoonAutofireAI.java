@@ -26,7 +26,8 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     // that ship weight (Misc.getShipWeight: a destroyer is 2) up to FULL_SUPPORT, and not at all with none.
     public static final float SUPPORT_RANGE = 1600f;
     public static final float FULL_SUPPORT = 4f;
-    public static final float REFERENCE_MASS = 600f;
+    // The Stigmata's own mass in ship_data.csv.
+    public static final float REFERENCE_MASS = 1000f;
     // A friendly ship in a pinch scores this with its hull open to the mount, before mass and distance, which outranks
     // an exposed enemy frigate but not an overloaded or running one.
     public static final float RESCUE_SCORE = 5f;

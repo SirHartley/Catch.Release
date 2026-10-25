@@ -165,13 +165,16 @@ public class TugPilot implements AdvanceableListener {
         double radians = Math.toRadians(heading);
         float ahead = (float) (velocity.x * Math.cos(radians) + velocity.y * Math.sin(radians));
         boolean mayThrust = ahead < ship.getHullSpec().getEngineSpec().getMaxSpeed();
-        if (mayThrust && Math.abs(difference) < THRUST_ARC) {
+        boolean facing = Math.abs(difference) < THRUST_ARC;
+        if (mayThrust && facing) {
             ship.giveCommand(ShipCommand.ACCELERATE, null, 0);
         } else {
             ship.blockCommandForOneFrame(ShipCommand.ACCELERATE);
         }
+        // Still turning to the heading, the tug brakes instead of coasting, so a catch cannot run off with it.
+        if (facing) ship.blockCommandForOneFrame(ShipCommand.DECELERATE);
+        else ship.giveCommand(ShipCommand.DECELERATE, null, 0);
         ship.blockCommandForOneFrame(ShipCommand.ACCELERATE_BACKWARDS);
-        ship.blockCommandForOneFrame(ShipCommand.DECELERATE);
         ship.blockCommandForOneFrame(ShipCommand.STRAFE_LEFT);
         ship.blockCommandForOneFrame(ShipCommand.STRAFE_RIGHT);
     }
