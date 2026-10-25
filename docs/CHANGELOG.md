@@ -51,6 +51,11 @@ blank line between categories and versions.
 
 Combine entries when several edits fix the same player-visible problem.
 Amend an existing unreleased entry if the task changes that same feature again.
+A feature that did not exist in the last release gets one `Added -` entry that
+describes it as it now stands. Do not add `Changed -`, `Fixed -` or `Adjusted -`
+entries for later work on it in the same version; edit its `Added -` entry
+instead. Changes to features that shipped in an earlier release still get their
+own entries.
 Do not repeat a change once per file, implementation step or PR.
 
 ## Versions and upkeep
