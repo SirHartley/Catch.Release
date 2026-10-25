@@ -42,6 +42,8 @@ public enum Tackle {
             treasureChanceMult = 1.4f;
             exclusion = Exclusion.BYCATCH_CHANCE;
             shipTackle = true;
+            // The Reliquary's ship module (FishingShips).
+            stocked = false;
         }
     },
     STASIS_CRADLE("Stasis Cradle", Fit.DRONE,
@@ -147,15 +149,17 @@ public enum Tackle {
             fanBeam = true;
             stocked = false;
         }
-    },
-    REPLOYMENT_BAYS("Reployment Bays", Fit.DRONE,
-            "Once every drone has come back, sends the whole swarm out again. Keeps going until you recall it or"
-                    + " it can no longer fish where you are.") {
-        {
-            redeploys = true;
-            stocked = false;
-        }
     };
+    // Commented out for now, with its redeploys effect (TackleEffects, FishingDroneSwarmScript); restore all three
+    // to bring it back.
+    // REPLOYMENT_BAYS("Reployment Bays", Fit.DRONE,
+    //         "Once every drone has come back, sends the whole swarm out again. Keeps going until you recall it or"
+    //                 + " it can no longer fish where you are.") {
+    //     {
+    //         redeploys = true;
+    //         stocked = false;
+    //     }
+    // };
 
     // Modules with similar or opposing effects on one rig; two of the same group cannot share it.
     public enum Exclusion {
@@ -208,7 +212,7 @@ public enum Tackle {
     public boolean questOnly = false;
     public float lockTime = 0f;
     public boolean fanBeam = false;
-    public boolean redeploys = false;
+    // public boolean redeploys = false;
     public Exclusion exclusion;
 
     Tackle(String name, Fit fit, String description) {

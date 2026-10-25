@@ -1,6 +1,5 @@
 package catchrelease.abilities.rod.scripts;
 
-import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.tackle.Tackle;
@@ -152,11 +151,9 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
         return new FishingDroneEntityPlugin.Params(target, slotAngle, RodConstants.DRONE_COLOR);
     }
 
-    // The early Reliquary brings one more drone in place of a ship module.
     public static int getDroneCount() {
-        int count = Math.max(1, Math.round(UpgradeManager.getValue(
+        return Math.max(1, Math.round(UpgradeManager.getValue(
                 StatIds.FISHING_DRONE_COUNT, RodConstants.DRONE_COUNT_FALLBACK)));
-        return FishingShips.isPresent(FishingShips.Ship.ROD_EARLY) ? count + 1 : count;
     }
 
     public static float getRingRadius() {
@@ -198,11 +195,12 @@ public class FishingDroneSwarmScript implements EveryFrameScript {
 
         // an empty live list is not the end while upgraded drones are still queued
         if (drones.isEmpty() && !hasPendingDrones()) {
-            // Reployment Bays send the whole swarm out again; a manual recall ended the cast above, never here
-            if (TackleManager.effects(Tackle.Fit.DRONE).redeploys && !shouldRecall()) {
-                beginDroneLaunches();
-                return;
-            }
+            // Reployment Bays (commented out in Tackle) send the whole swarm out again; a manual recall ended the
+            // cast above, never here.
+            // if (TackleManager.effects(Tackle.Fit.DRONE).redeploys && !shouldRecall()) {
+            //     beginDroneLaunches();
+            //     return;
+            // }
 
             done = true;
             return;

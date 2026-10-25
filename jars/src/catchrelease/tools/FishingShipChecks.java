@@ -35,44 +35,9 @@ public final class FishingShipChecks {
         Fleet fleet = new Fleet();
 
         reconcileRules(fleet);
-        earlyReliquary(fleet);
         matrix(fleet);
 
         System.out.println("Fishing ship checks passed: " + checks);
-    }
-
-    // The early Reliquary shares the ROD rig with the Reliquary: a second slot with no module, and neither ship's
-    // arrival or departure may undo what the other one gives.
-    private static void earlyReliquary(Fleet f) {
-        f.reset();
-        FleetMemberAPI early = f.add("catchrelease_rod_ship_early", false);
-        FishingShips.reconcile();
-        require(FishingShips.hasSecondSlot(Tackle.Fit.DRONE), "early Reliquary opens the ROD slot");
-        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.NONE, "early Reliquary brings no module");
-        require(!FishingShips.isShipModuleAvailable(Tackle.REPLOYMENT_BAYS), "no Reployment Bays from the early one");
-        require(FishingShips.getShipModule(Tackle.Fit.DRONE) == null, "no module reported for the early one");
-
-        FleetMemberAPI reliquary = f.add("catchrelease_rod_ship", false);
-        FishingShips.reconcile();
-        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.REPLOYMENT_BAYS,
-                "Reliquary fills the empty slot with its module");
-        require(FishingShips.isShipModuleAvailable(Tackle.REPLOYMENT_BAYS), "Reployment Bays with the Reliquary");
-
-        f.remove(early);
-        FishingShips.reconcile();
-        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.REPLOYMENT_BAYS,
-                "early one leaving keeps the Reliquary's module");
-
-        f.add("catchrelease_rod_ship_early", false);
-        FishingShips.reconcile();
-        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.REPLOYMENT_BAYS,
-                "early one joining keeps the Reliquary's module");
-
-        f.remove(reliquary);
-        FishingShips.reconcile();
-        require(FishingShips.hasSecondSlot(Tackle.Fit.DRONE), "slot stays with the early one");
-        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.NONE, "Reployment Bays leave with the Reliquary");
-        require(!FishingShips.isShipModuleAvailable(Tackle.REPLOYMENT_BAYS), "module unavailable without the Reliquary");
     }
 
     private static void reconcileRules(Fleet f) {
@@ -125,8 +90,8 @@ public final class FishingShipChecks {
         f.add("catchrelease_rod_ship", false);
         FishingShips.reconcile();
         require(FishingShips.hasSecondSlot(Tackle.Fit.DRONE)
-                && TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.REPLOYMENT_BAYS,
-                "drone carrier brings its Reployment Bays");
+                && TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.LIFTING_RIG,
+                "drone carrier brings its Lifting Rig");
 
         f.add("catchrelease_lamp_ship", false);
         f.add("nebula", false);
@@ -136,8 +101,19 @@ public final class FishingShipChecks {
 
         for (FishingShips.Ship ship : FishingShips.Ship.values()) {
             require(ship.module == null || !ship.module.stocked, "ship modules are not sold: " + ship);
-            require(ship.module == null || ship.module.exclusion == null, "ship modules are in no pair: " + ship);
         }
+
+        // The Lifting Rig shares the bycatch group with the Salvage Trawl: with the Trawl fitted, the second slot
+        // starts empty, and the Rig fits once the Trawl is out.
+        f.reset();
+        TackleManager.own(Tackle.SALVAGE_TRAWL);
+        TackleManager.fit(Tackle.Fit.DRONE, 0, Tackle.SALVAGE_TRAWL);
+        f.add("catchrelease_rod_ship", false);
+        FishingShips.reconcile();
+        require(TackleManager.getSlot(Tackle.Fit.DRONE, 1) == Tackle.NONE, "Lifting Rig not fitted beside the Trawl");
+        require(!TackleManager.fit(Tackle.Fit.DRONE, 1, Tackle.LIFTING_RIG), "Lifting Rig refused beside the Trawl");
+        TackleManager.fit(Tackle.Fit.DRONE, 0, Tackle.NONE);
+        require(TackleManager.fit(Tackle.Fit.DRONE, 1, Tackle.LIFTING_RIG), "Lifting Rig fits once the Trawl is out");
     }
 
     // Every pair of modules on every rig: only the same module or a shared exclusion group is refused.

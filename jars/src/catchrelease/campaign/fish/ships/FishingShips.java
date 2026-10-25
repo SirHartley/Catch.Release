@@ -35,9 +35,7 @@ public final class FishingShips {
 
         HARPOON("catchrelease_harpoon_ship", Tackle.Fit.HARPOON, Tackle.RETRIEVAL_HEAD),
         LAMP("catchrelease_lamp_ship", Tackle.Fit.SEARCHLIGHT, Tackle.FANNED_ARRAY),
-        ROD("catchrelease_rod_ship", Tackle.Fit.DRONE, Tackle.REPLOYMENT_BAYS),
-        // The early Reliquary, a skin: the same ROD second slot, no module, and one more ROD drone instead.
-        ROD_EARLY("catchrelease_rod_ship_early", Tackle.Fit.DRONE, null);
+        ROD("catchrelease_rod_ship", Tackle.Fit.DRONE, Tackle.LIFTING_RIG);
 
         public final String hullId;
         public final Tackle.Fit rig;
@@ -145,7 +143,6 @@ public final class FishingShips {
         }
     }
 
-    // Two ships can serve one rig (the Reliquary and its early skin); either one gives the slot.
     public static boolean hasSecondSlot(Tackle.Fit rig) {
         Set<String> present = getPresent();
         for (Ship ship : Ship.values()) {
@@ -159,7 +156,7 @@ public final class FishingShips {
         return getPresent().contains(ship.name());
     }
 
-    // The module a present ship brings to the rig; null when none of the present ships brings one.
+    // The module the rig's ship brings while it is present, or null.
     public static Tackle getShipModule(Tackle.Fit rig) {
         Set<String> present = getPresent();
         for (Ship ship : Ship.values()) {
@@ -189,7 +186,6 @@ public final class FishingShips {
         Set<String> present = getPresent();
         tidyFighterStores(fleet);
 
-        Set<String> before = new LinkedHashSet<>(present);
         for (Ship ship : Ship.values()) {
             boolean was = present.contains(ship.name());
             boolean is = aboard.contains(ship);
@@ -197,12 +193,10 @@ public final class FishingShips {
 
             if (is) {
                 present.add(ship.name());
-                if (hasSibling(ship, before)) joinSibling(ship);
-                else join(ship);
+                join(ship);
             } else {
                 present.remove(ship.name());
-                if (hasSibling(ship, names(aboard))) leaveSibling(ship);
-                else leave(ship);
+                leave(ship);
             }
         }
 
@@ -214,36 +208,6 @@ public final class FishingShips {
     protected static void join(Ship ship) {
         if (ship.module == null || !TackleManager.fit(ship.rig, 1, ship.module)) {
             TackleManager.fit(ship.rig, 1, Tackle.NONE);
-        }
-    }
-
-    protected static boolean hasSibling(Ship ship, Set<String> names) {
-        for (Ship other : Ship.values()) {
-            if (other != ship && other.rig == ship.rig && names.contains(other.name())) return true;
-        }
-
-        return false;
-    }
-
-    protected static Set<String> names(Set<Ship> ships) {
-        Set<String> names = new LinkedHashSet<>();
-        for (Ship ship : ships) names.add(ship.name());
-        return names;
-    }
-
-    // The rig already has its second slot from the other ship: keep what is fitted, and fill an empty slot with
-    // this ship's module.
-    protected static void joinSibling(Ship ship) {
-        if (ship.module != null && TackleManager.getSlot(ship.rig, 1) == Tackle.NONE) {
-            TackleManager.fit(ship.rig, 1, ship.module);
-        }
-    }
-
-    // The other ship keeps the slot; only this ship's module leaves the rig, unless the player owns a copy.
-    protected static void leaveSibling(Ship ship) {
-        if (ship.module == null || TackleManager.isOwned(ship.module)) return;
-        for (int slot = 0; slot < 2; slot++) {
-            if (TackleManager.getSlot(ship.rig, slot) == ship.module) TackleManager.fit(ship.rig, slot, Tackle.NONE);
         }
     }
 
@@ -286,17 +250,12 @@ public final class FishingShips {
         return null;
     }
 
-    // A present ship of the rig if there is one, else the rig's first ship.
     public static Ship forRig(Tackle.Fit rig) {
-        Ship first = null;
-        Set<String> present = getPresent();
         for (Ship ship : Ship.values()) {
-            if (ship.rig != rig) continue;
-            if (present.contains(ship.name())) return ship;
-            if (first == null) first = ship;
+            if (ship.rig == rig) return ship;
         }
 
-        return first;
+        return null;
     }
 
     public static Ship forModule(Tackle tackle) {
