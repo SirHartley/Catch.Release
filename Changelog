@@ -55,6 +55,8 @@ Changed - The Equipment category tabs follow the same rig order as the Upgrades 
 Changed - The Equipment help text no longer refers to a single-use marker that was never drawn; equipment consumed on use says so in its description
 Fixed - An upgrade's description no longer claims it is "fitted in slot 2" above its price
 Changed - The two equipment slot cells are drawn as bordered sockets instead of a second row of category tabs, which they were almost indistinguishable from
+Changed - An equipment description now names the slot FIT will use, instead of only saying the rig has two
+Fixed - A module fitted in a rig's other slot no longer reads as a green "fitted" in its description while its row is greyed out as unavailable
 
 Development
 Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete

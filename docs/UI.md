@@ -48,7 +48,10 @@ grey at 0.6 alpha with an "IN SLOT n" or "CONFLICT" mark, FIT and SELECT are not
 live, and a hotspot past the mark ring carries a hover naming the slot or the
 conflicting module. A blocked row stays selectable so the detail pane can say why; for an owned or ship
 module that line replaces the "fitting it is free" price line. The detail header's
-accent, like the row, is judged against the target slot (`ShopEntry.isDone(slot)`).
+accent, like the row, is judged against the target slot (`ShopEntry.isDone(slot)`), and
+so is its subtitle: it names the target as "FITTING SLOT n" unless the module is already
+in that slot, and goes green only when it is. A module fitted in the rig's other slot
+reads grey there, matching its grey row, and the subtitle names both slots.
 A ship module shows "SHIP" where an owned module shows "OWNED".
 
 Treasure result rows normally use the chest rarity colour, read from

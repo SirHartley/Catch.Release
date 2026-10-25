@@ -171,17 +171,28 @@ public class ShopDetailHeaderPlugin extends BaseCustomUIPanelPlugin {
 
         int fittedSlot = entry.tackle == catchrelease.campaign.fish.tackle.Tackle.NONE
                 ? (entry.isFittedIn(slot) ? slot : -1) : entry.getFittedSlot();
-        String state = fittedSlot < 0 ? "" : twoSlots ? "  -  FITTED IN SLOT " + (fittedSlot + 1) : "  -  FITTED";
-        String text = entry.group.title.toUpperCase() + (twoSlots ? "  -  2 SLOTS" : "  -  ONE SLOT") + state;
 
         if (sub == null) {
-            sub = ShopUi.createText(font, text);
+            sub = ShopUi.createText(font, entry.group.title.toUpperCase() + getSlotState(fittedSlot));
             sub.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        Color color = fittedSlot >= 0 ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
+        // green only while it is fitted in the slot FIT is aimed at: the list greys a module fitted elsewhere on the
+        // rig, and the two must not disagree about it on one screen
+        Color color = fittedSlot == slot ? Misc.getPositiveHighlightColor() : Misc.getGrayColor();
 
         sub.setBaseColor(ShopUi.withAlpha(color, alphaMult));
         sub.draw(Math.round(x), Math.round(top));
+    }
+
+    // Names the slot FIT will use whenever that is not already obvious, so the pane says where a purchase lands
+    // rather than only where the module already sits.
+    protected String getSlotState(int fittedSlot) {
+        if (!twoSlots) return fittedSlot < 0 ? "  -  1 SLOT" : "  -  FITTED";
+        if (fittedSlot == slot) return "  -  FITTED IN SLOT " + (slot + 1);
+
+        String target = "  -  FITTING SLOT " + (slot + 1);
+
+        return fittedSlot < 0 ? target : target + "  -  FITTED IN SLOT " + (fittedSlot + 1);
     }
 }
