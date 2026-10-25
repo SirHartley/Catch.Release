@@ -18,8 +18,10 @@ import org.lwjgl.util.vector.Vector2f;
 import java.awt.Color;
 
 // Draws one tether: the rope as feathered triangle strips sized in screen pixels, and the harpoon head, which the
-// projectile spec leaves invisible because a bullet sprite is always drawn additively. Its entity is kept at the
-// rope's midpoint with a radius covering the rope, since the engine culls on that point alone.
+// projectile spec leaves invisible because a bullet sprite is always drawn additively. In flight the rope is the
+// campaign line's curve (RopeCurve); from the bite on it is a simulated chain (RopeChain) as long as the tether plus
+// its slack, so a slack rope folds and loops. Its entity is kept at the rope's midpoint with a radius covering the
+// rope, since the engine culls on that point alone.
 public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
 
     private static final Color CORE = new Color(238, 228, 206);
@@ -36,10 +38,9 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     private static final float MATERIALISE_TIME = 0.25f;
     private static final float FLASH_TIME = 0.2f;
     private static final float FADE_TIME = 0.3f;
-    // The rope's length only sets how much it wobbles: paid out ahead of the shot in flight, then taken up to the
-    // distance at the campaign line's rates (HarpoonConstants LINE_PAYOUT, LINE_TAKEUP and LINE_REEL_IN).
+    // In flight the line is paid out ahead of the shot, which only sets how much it wobbles, and reeled in after a
+    // miss, at the campaign line's rates (HarpoonConstants LINE_PAYOUT and LINE_REEL_IN).
     private static final float PAYOUT = 1.06f;
-    private static final float TAKEUP = 2500f;
     private static final float REEL_IN = 850f;
 
     private static final int ARC_COUNT = 5;
@@ -52,6 +53,8 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
 
     private final Tether tether;
     private final RopeCurve curve = new RopeCurve();
+    private RopeChain chain;
+    private final Vector2f catchPoint = new Vector2f();
     private final SpriteAPI head = Global.getSettings().getSprite("catchrelease", "harpoon_head");
     private final Vector2f mount = new Vector2f();
     private final Vector2f end = new Vector2f();
@@ -84,9 +87,20 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         if (engine.isEntityInPlay(tether.getTug())) tether.getMountPoint(mount);
         updateHead();
         float chord = Misc.getDistance(end, mount);
-        if (state == Tether.State.FLIGHT) ropeLength = Math.max(ropeLength, chord * PAYOUT);
-        else ropeLength = approach(ropeLength, chord, (state == Tether.State.ATTACHED ? TAKEUP : REEL_IN) * amount);
-        curve.advance(mount, end, amount);
+        if (state == Tether.State.ATTACHED) {
+            ropeLength = chord + getSlack();
+            if (chain == null) {
+                chain = new RopeChain(curve.getPath(mount, end, ropeLength), ropeLength,
+                        tether.getTug().getVelocity(), tether.getTarget().getVelocity());
+            }
+        }
+        if (chain != null) {
+            chain.advance(mount, end, ropeLength, amount);
+        } else {
+            if (state == Tether.State.FLIGHT) ropeLength = Math.max(ropeLength, chord * PAYOUT);
+            else ropeLength = approach(ropeLength, chord, REEL_IN * amount);
+            curve.advance(mount, end, amount);
+        }
 
         if (biteTime >= 0f) {
             biteTime += amount;
@@ -95,6 +109,12 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         if (releaseTime >= 0f) releaseTime += amount;
 
         if (entity != null) entity.getLocation().set((mount.x + end.x) * 0.5f, (mount.y + end.y) * 0.5f);
+    }
+
+    // How much shorter the mount-to-hit distance is than the tether, which the drawn rope carries as spare length.
+    private float getSlack() {
+        tether.getTargetPoint(catchPoint);
+        return Math.max(0f, tether.getLength() - Misc.getDistance(mount, catchPoint));
     }
 
     private void updateHead() {
@@ -114,10 +134,11 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     // Short visual arcs racing from the mount to the head along the rope, one every ARC_INTERVAL.
     private void spawnArcs(CombatEngineAPI engine) {
         if (Setting.REDUCED_EFFECTS.enabled()) return;
-        Vector2f[] path = curve.getPath(mount, end, ropeLength, true);
+        Vector2f[] path = getPath();
+        int last = path.length - 1;
         while (arcsSpawned < ARC_COUNT && biteTime >= arcsSpawned * ARC_INTERVAL) {
-            int from = Math.round(arcsSpawned * RopeCurve.SEGMENTS / (float) ARC_COUNT);
-            int to = Math.round((arcsSpawned + 1) * RopeCurve.SEGMENTS / (float) ARC_COUNT);
+            int from = Math.round(arcsSpawned * last / (float) ARC_COUNT);
+            int to = Math.round((arcsSpawned + 1) * last / (float) ARC_COUNT);
             EmpArcParams params = new EmpArcParams();
             params.zigZagReductionFactor = 0.25f;
             params.maxZigZagMult = 0.5f;
@@ -126,13 +147,17 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
             params.flickerRateMult = 0.8f;
             EmpArcEntityAPI arc = engine.spawnEmpArcVisual(new Vector2f(path[from]),
                     from == 0 ? tether.getTug() : null, new Vector2f(path[to]),
-                    to == RopeCurve.SEGMENTS ? tether.getTarget() : null, 6f, ARC_FRINGE, Color.white, params);
+                    to == last ? tether.getTarget() : null, 6f, ARC_FRINGE, Color.white, params);
             arc.setCoreWidthOverride(3f);
             arc.setSingleFlickerMode();
             arc.setRenderGlowAtStart(from == 0);
-            arc.setRenderGlowAtEnd(to == RopeCurve.SEGMENTS);
+            arc.setRenderGlowAtEnd(to == last);
             arcsSpawned++;
         }
+    }
+
+    private Vector2f[] getPath() {
+        return chain != null ? chain.getPath() : curve.getPath(mount, end, ropeLength);
     }
 
     @Override
@@ -158,7 +183,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         // Pixel widths, a little wider when zoomed far out so the rope stays legible.
         float pixel = viewport.convertScreenWidthToWorldWidth(1f)
                 * (1f + 0.25f * Math.max(0f, viewport.getViewMult() - 1f));
-        Vector2f[] path = curve.getPath(mount, end, ropeLength, tether.getState() == Tether.State.ATTACHED);
+        Vector2f[] path = getPath();
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
         try {
