@@ -38,6 +38,8 @@ public class LyneDroneAI implements ShipAIPlugin {
     private final ShipwideAIFlags flags = new ShipwideAIFlags();
     private Mode mode = Mode.IDLE;
     private ShipAPI wreck;
+    // The wreck is in the store and fading out; the drone holds it at the dock until it is gone.
+    private boolean handedOver;
     private float search;
     private float sparks;
 
@@ -92,14 +94,15 @@ public class LyneDroneAI implements ShipAIPlugin {
         }
     }
 
-    // The drone and wreck ride the moving dock point while the landing animation shrinks them, then the bay takes
-    // the drone back, which counts it as returned rather than lost.
+    // The drone and wreck ride the moving dock point while the landing animation shrinks them. Once landed the
+    // wreck is handed over and fades out, still pinned, since a wreck whose engines are dead collides as a ship and
+    // would be shoved out of the hull; then the bay takes the drone back, which counts it as returned, not lost.
     private void land(CombatEngineAPI engine, WreckTracker tracker, ShipAPI tender, float amount) {
         Vector2f dock = getDockPoint(tender);
         ship.getLocation().set(dock);
         ship.getVelocity().set(tender.getVelocity());
-        boolean towing = tracker != null && wreck != null && tracker.isClaimedBy(wreck, ship);
-        if (towing) {
+        boolean towing = handedOver || (tracker != null && wreck != null && tracker.isClaimedBy(wreck, ship));
+        if (towing && engine.isEntityInPlay(wreck)) {
             wreck.getLocation().set(dock);
             wreck.getVelocity().set(tender.getVelocity());
         }
@@ -114,7 +117,12 @@ public class LyneDroneAI implements ShipAIPlugin {
             return;
         }
         if (!ship.isFinishedLanding()) return;
-        if (towing) tracker.salvaged(tender, wreck);
+        if (towing && !handedOver) {
+            tracker.salvaged(tender, wreck);
+            handedOver = true;
+        }
+        if (handedOver && engine.isEntityInPlay(wreck)) return;
+        handedOver = false;
         wreck = null;
         ship.getWing().getSource().land(ship);
     }
@@ -128,6 +136,7 @@ public class LyneDroneAI implements ShipAIPlugin {
 
     private void drop(WreckTracker tracker) {
         if (tracker != null && wreck != null && tracker.isClaimedBy(wreck, ship)) tracker.release(wreck);
+        handedOver = false;
         wreck = null;
         mode = Mode.IDLE;
     }
