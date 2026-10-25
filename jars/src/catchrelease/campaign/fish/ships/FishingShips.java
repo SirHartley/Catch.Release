@@ -35,7 +35,7 @@ public final class FishingShips {
 
         HARPOON("catchrelease_harpoon_ship", Tackle.Fit.HARPOON, Tackle.RETRIEVAL_HEAD),
         LAMP("catchrelease_lamp_ship", Tackle.Fit.SEARCHLIGHT, Tackle.FANNED_ARRAY),
-        ROD("catchrelease_rod_ship", Tackle.Fit.DRONE, null),
+        ROD("catchrelease_rod_ship", Tackle.Fit.DRONE, Tackle.LIFTING_RIG),
         // The early Reliquary, a skin: the same ROD second slot, no module, and one more ROD drone instead.
         ROD_EARLY("catchrelease_rod_ship_early", Tackle.Fit.DRONE, null);
 

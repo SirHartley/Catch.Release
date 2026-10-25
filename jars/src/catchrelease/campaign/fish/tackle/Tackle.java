@@ -42,6 +42,8 @@ public enum Tackle {
             treasureChanceMult = 1.4f;
             exclusion = Exclusion.BYCATCH_CHANCE;
             shipTackle = true;
+            // The Reliquary's ship module (FishingShips).
+            stocked = false;
         }
     },
     STASIS_CRADLE("Stasis Cradle", Fit.DRONE,

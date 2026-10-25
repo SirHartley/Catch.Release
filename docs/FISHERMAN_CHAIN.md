@@ -43,7 +43,7 @@ Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md) (`FishingShips`, 
   - Rigs do not block each other. The three modules that fit both the ROD and the Harpoon (Calibrated Grader, Barbed Head, Sonar Head) can still be fitted to both rigs at once, as today.
   - Modules with similar or opposing effects cannot share a rig. Two modules that change the same value count as similar. The pairs are listed under [Incompatible pairs](#incompatible-pairs).
   - In the Outfitter, a module that conflicts with the one in the rig's other slot is greyed out for that slot and cannot be fitted there. Its hover names the conflicting module.
-- **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head and the Fanned Array. The drone carrier's module, the Reployment Bays, is commented out in `Tackle` for now.
+- **Supply.** A module that moves onto a ship leaves the shop and the reward pools; the ship is the only way to get it. This applies to the Retrieval Head, the Fanned Array and the Lifting Rig, the drone carrier's module. Its first module, the Reployment Bays, is commented out in `Tackle` for now.
 
 **Work**
 - Fitted state is a two-slot `RigLoadout` per rig, and every effect check reads the combined `TackleManager.effects(rig)` (Stage 0). Ship slots only need to fill and empty the second slot (`RigLoadout` index 1).
@@ -198,7 +198,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 |---|---|---|---|
 | Stigmata-class Harpoon Tug, destroyer ("opens wounds") | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
 | Monstrance-class Breach Trawler, cruiser ("presents the sacred for all to see") | Breach Lights | T3 blueprint; the player builds it | Fanned Array: each Breach Light becomes a wide fan |
-| Reliquary-class LYNE Tender, cruiser ("keeps implements") | ROD drones | T4, first legendary | Reployment Bays (new Drone Core module, commented out for now): each time every drone has returned, the drones deploy again, until the player recalls them or they can no longer fish there (both the pond swarm and the roaming swarm) |
+| Reliquary-class LYNE Tender, cruiser ("keeps implements") | ROD drones | T4, first legendary | Lifting Rig (moved from the shop). It was the Reployment Bays (new Drone Core module, now commented out): each time every drone has returned, the drones deploy again, until the player recalls them or they can no longer fish there (both the pond swarm and the roaming swarm) |
 
 **Early Reliquary.** The player gets a version of the Reliquary early, with no blueprint. It is a hull skin of `catchrelease_rod_ship` with its own hull id: identical in combat ([COMBAT_SHIPS.md](COMBAT_SHIPS.md)), different in the campaign. While it is in the fleet, it does not make the Reployment Bays available in the Outfitter. Instead, the ROD swarm launches one extra drone. It still gives the ROD rig its second slot, which starts empty since there is no ship module. `FishingShips` has an entry for the skin's hull id (`ROD_EARLY`) with no module, and the extra drone applies whenever it is in the fleet, also alongside the real Reliquary. Open: where the player gets it.
 
