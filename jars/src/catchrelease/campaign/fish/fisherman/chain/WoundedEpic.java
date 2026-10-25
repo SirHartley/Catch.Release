@@ -309,6 +309,7 @@ public final class WoundedEpic {
         saved.t3PlanetId = null;
         saved.t3PlanetName = null;
         saved.t3SpeciesId = null;
+        saved.t3SpawnAngle = null;
 
         StarSystemAPI system = pickSystem();
         if (system == null) return false;
@@ -418,11 +419,12 @@ public final class WoundedEpic {
         return spec == null ? "" : spec.getDisplayName();
     }
 
-    // The epic goes back to circling its planet, wherever the player is.
+    // The whole chase starts over, wherever the player is: the old fish goes at once, awake or buried, and a fresh
+    // buried one with its shield up takes its place where the first was spawned.
     protected static void returnToPlanet() {
         if (!isHunting()) return;
 
-        clearEpic();
+        removeEpic();
         SectorEntityToken mote = spawnEpic();
         PlanetAPI planet = getPlanet();
         if (mote == null || planet == null) return;
@@ -492,8 +494,9 @@ public final class WoundedEpic {
         PlanetAPI planet = getPlanet();
         if (saved == null || system == null || planet == null || saved.t3SpeciesId == null) return null;
 
+        if (saved.t3SpawnAngle == null) saved.t3SpawnAngle = MathUtils.getRandomNumberInRange(0f, 360f);
         Vector2f at = LegendaryStarAvoidance.place(system, MathUtils.getPointOnCircumference(planet.getLocation(),
-                CIRCLE_RADIUS, MathUtils.getRandomNumberInRange(0f, 360f)), 0f);
+                CIRCLE_RADIUS, saved.t3SpawnAngle), 0f);
         SectorEntityToken mote = system.addCustomEntity(Misc.genUID(), null, FishConstants.BURIED_ENTITY_ID, null,
                 new BuriedMoteEntityPlugin.Params(saved.t3SpeciesId));
         mote.setLocation(at.x, at.y);
@@ -510,6 +513,19 @@ public final class WoundedEpic {
         if (system == null) return;
 
         for (SectorEntityToken mote : QuestPond.getPlanted(system, PLANTER)) Misc.fadeAndExpire(mote, 1f);
+    }
+
+    // At once rather than faded: a fading fish stays awake, drawn and harpoonable for its last second. Expired as
+    // well as removed, since removeEntity does not expire it and an epic's trail renderer retires on expiry.
+    protected static void removeEpic() {
+        StarSystemAPI system = getSystem();
+        if (system == null) return;
+
+        for (SectorEntityToken mote : QuestPond.getPlanted(system, PLANTER)) {
+            if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) fish.setEpicStage(false, false);
+            mote.setExpired(true);
+            system.removeEntity(mote);
+        }
     }
 
     // The nearest qualifying system, at any distance.
