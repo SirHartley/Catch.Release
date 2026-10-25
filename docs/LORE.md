@@ -1222,7 +1222,7 @@ These show the dialect density and his habit of turning a request into a story. 
 
 ### The Reliquary's owner
 
-The man in T3's follow-up (see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#t3-the-wounded-epic)) drinks in the bar of an independent Core world. He sent word to the Fisherman asking for help, and he owns an old Reliquary he cannot sell. He is very drunk every time the player meets him. He wants epic fish to sell on and live off: nobody wants the old ship, everybody wants epic fish, and to the right buyer they are worth far more than she will ever fetch. He asks for three and can be talked down to two, never fewer.
+The man in T3's follow-up (see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#t3-the-wounded-epic)) drinks in the bar of an independent Core world. He sent word to the Fisherman asking for help, and he owns an old Reliquary he cannot sell. He is very drunk every time the player meets him. He wants epic fish to sell on and live off: nobody wants the old ship, everybody wants the trophy fish, and to the right buyer they are worth far more than she will ever fetch. He calls them trophy fish, never epics ([Terminology](#terminology)). He asks for three and can be talked down to two, never fewer.
 
 He is an ordinary observer. He knows the trade's prices and that the Fisherman is someone to ask, nothing about the Fisherman's nature, the fabric or why epics are valuable beyond what buyers pay. His drunkenness is in his rhythm and his attention (losing the player's face, checking his own fingers, agreeing with himself), not in slurred spelling. He is tired of the ship rather than bitter about it.
 
@@ -1293,6 +1293,8 @@ are Harpoon Tips, Drone Cores and Lens Arrays; use “rig module” when discuss
 | Pattern distribution | range | where they turn up | waters, biome |
 
 "Species" may still be used as a **game-data/table classification** because the player needs a usable category. Do not make the fiction claim that patterns belong to conventional biological species in a scientific sense.
+
+Nobody in dialogue calls a fish "an epic" or "epic fish". Epic is the game's rarity tier, and naming it in speech turns the catch back into a loot grade. Speakers say what the fish is to them: a trophy fish, one worth the hunt, the one in your hold, or its name. Intel, receipts, tooltips and option labels that state a mechanical requirement may still use the tier.
 
 ## Faction voices
 
