@@ -46,7 +46,7 @@ Added - Glitter Lens, a Lens Array module that doubles the chance of bycatch on 
 Changed - The Neutrino Lens only shows its spikes while the Breach Lights are on as well as the Neutrino Detector
 Removed - The Breach Coupler is withdrawn for now: it is no longer sold or awarded, and one already fitted does nothing; ROD drones fish ruptures only
 Changed - Every epic fish now comes up only under Breach Lights; ruptures fished with the ROD no longer hold them
-Changed - Epic fish are now hunted in two stages: they drift slowly until a harpoon hit inside a lit Breach Light beam wakes them, then raise a one-charge shield that never comes back and swim more erratically, staying in view with your lights off; one that gets more than 3,000 units away drifts off and fades, with a notice that it was lost, and an awake epic is gone once you leave the system. Only the harpoon lands one: ROD drones leave epics alone
+Changed - Epic fish are now hunted in two stages: they drift slowly until a harpoon hit inside a lit Breach Light beam wakes them, then raise a one-charge shield that never comes back and swim more erratically; like other lamp fish, they stay in view and in reach only while lit; one that gets more than 3,000 units away drifts off and fades, with a notice that it was lost, and an awake epic is gone once you leave the system. Only the harpoon lands one: ROD drones leave epics alone
 Fixed - Epic and legendary shields now fade out with the fish when it dives, instead of staying on screen while it is out of reach
 Added - Version Checker support: update notices, plus the changelog and direct download for LunaLib's update screen and mod managers such as triOS
 
