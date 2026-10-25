@@ -522,7 +522,7 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   dark colours, and the negative ones subtract. The Haul Drive (`combat/tug/TugDriveStats`) lays one MagicLib
   trail per nozzle on `BELOW_SHIPS_LAYER` with MagicLib's `base_trail_heavySmoke` texture and `additive` false,
   starting inside the flame so the hull and flame cover its root. Its pieces slow from 70-100 to 15 and widen
-  from 1.2 to 5 times the slot width over 2.45 s, dark soot cooling to grey, at 55% opacity scaled by the effect
+  from 1.2 to 5 times the slot width over 4.15 s, dark soot cooling to grey, at 55% opacity scaled by the effect
   level; a quarter of the ship's velocity carries over. The engines' `LOW_TECH` contrail is recoloured toward
   soot with `fadeToOtherColor`, under its own key so the flame keeps its blend. MagicLib stores a trail's
   `offsetVelocity` by reference, so each piece gets a new vector; a piece added under the id of a trail that is
