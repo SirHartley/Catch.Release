@@ -24,6 +24,7 @@ import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Items;
+import com.fs.starfarer.api.impl.campaign.rulecmd.AddRemoveCommodity;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
@@ -481,6 +482,20 @@ public abstract class FishReward {
 
             cargo.addSpecial(new SpecialItemData(itemId, data), 1);
         }
+
+        // Printed by vanilla's AddRemoveCommodity item helper, as rule-granted items are.
+        @Override
+        public Receipt grantWithReceipt() {
+            Receipt plain = receipt();
+            grant();
+
+            return new Receipt(plain.description, plain.highlight, plain.highlightColor) {
+                @Override
+                public void addTo(TextPanelAPI text, String verb) {
+                    if (text != null) AddRemoveCommodity.addItemGainText(new SpecialItemData(itemId, data), 1, text);
+                }
+            };
+        }
     }
 
     public static class Ship extends FishReward {
@@ -508,11 +523,18 @@ public abstract class FishReward {
             addToPlayerFleet();
         }
 
+        // Printed by vanilla's AddShip helper, as rule-granted ships are.
         @Override
         public Receipt grantWithReceipt() {
             FleetMemberAPI member = addToPlayerFleet();
+            if (member == null) return new Receipt(null);
 
-            return new Receipt(member == null ? null : member.getVariant().getFullDesignationWithHullNameForShip());
+            return new Receipt(member.getVariant().getFullDesignationWithHullNameForShip()) {
+                @Override
+                public void addTo(TextPanelAPI text, String verb) {
+                    if (text != null) AddRemoveCommodity.addFleetMemberGainText(member, text);
+                }
+            };
         }
 
         // Named and at full readiness the way FleetFactoryV3 adds a member; the game generates the empty _Hull variant
