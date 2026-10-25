@@ -503,7 +503,10 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   is read once when added. The rope is two feathered `GL_TRIANGLE_STRIP` bands per side (brown edge from
   0.35 to 1.25 px, beige-white core to 0.75 px), sized in screen pixels through
   `convertScreenWidthToWorldWidth(1f)` and widened by a quarter per view mult above 1, with normal blending
-  and GL attributes pushed and popped. It flies out at 35%/25% alpha, materialises over 0.25 s on the bite
+  and GL attributes pushed and popped. Each end of the rope fades by arc length from full alpha 50 screen pixels
+  in (`convertScreenWidthToWorldWidth`, without the zoomed-out widening) to half alpha at the end; `buildEndFade`
+  inserts a vertex where each fade levels off, because the strips interpolate colour linearly between vertices and
+  `RopeCurve`'s flight segments can be longer than the fade. It flies out at 35%/25% alpha, materialises to 80% over 0.25 s on the bite
   with a white flash and five `spawnEmpArcVisual` arcs along the rope (both skipped under
   `Setting.REDUCED_EFFECTS`), and fades over 0.3 s after release. The harpoon head is drawn here with
   normal blending, because a projectile's `bulletSprite` is always additive; the `.proj` colours are

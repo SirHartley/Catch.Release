@@ -16,6 +16,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
 
 import java.awt.Color;
+import java.util.Arrays;
 
 // Draws one tether: the rope as feathered triangle strips sized in screen pixels, and the harpoon head, which the
 // projectile spec leaves invisible because a bullet sprite is always drawn additively. In flight the rope is the
@@ -35,9 +36,14 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     private static final float FLASH_HALF_WIDTH = 1.5f;
     private static final float FLIGHT_CORE_ALPHA = 0.35f;
     private static final float FLIGHT_EDGE_ALPHA = 0.25f;
+    private static final float CONNECTED_ALPHA = 0.8f;
     private static final float MATERIALISE_TIME = 0.25f;
     private static final float FLASH_TIME = 0.2f;
     private static final float FADE_TIME = 0.3f;
+    // Each end of the rope fades from full alpha END_FADE_PIXELS in to END_ALPHA at the end itself.
+    private static final float END_FADE_PIXELS = 50f;
+    private static final float END_ALPHA = 0.5f;
+    private static final float KNEE_EPSILON = 0.01f;
     // In flight the line is paid out ahead of the shot, which only sets how much it wobbles, and reeled in after a
     // miss, at the campaign line's rates (HarpoonConstants LINE_PAYOUT and LINE_REEL_IN).
     private static final float PAYOUT = 1.06f;
@@ -46,21 +52,24 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     private static final int ARC_COUNT = 5;
     private static final float ARC_INTERVAL = 0.06f;
 
-    // harpoon_projectile.png is 12x26 with the point up; the rope leaves from the tail, and a bitten head sits
-    // EMBED units into the hull.
-    private static final float HEAD_LENGTH = 26f;
-    private static final float EMBED = 6f;
+    // The head sprite (harpoon_head, point up) is drawn at its own size, so its height is the head's length: the
+    // rope leaves from its tail, and a bitten head sits EMBED_SHARE of that length into the hull.
+    private static final float DEFAULT_HEAD_LENGTH = 20f;
+    private static final float EMBED_SHARE = 0.25f;
 
     private final Tether tether;
     private final RopeCurve curve = new RopeCurve();
     private RopeChain chain;
     private final Vector2f catchPoint = new Vector2f();
     private final SpriteAPI head = Global.getSettings().getSprite("catchrelease", "harpoon_head");
+    private final float headLength = head != null && head.getHeight() > 0f ? head.getHeight() : DEFAULT_HEAD_LENGTH;
     private final Vector2f mount = new Vector2f();
     private final Vector2f end = new Vector2f();
     private final Vector2f headTip = new Vector2f();
     private float headAngle;
     private float ropeLength;
+    private Vector2f[] fadePath;
+    private float[] fadeMult;
     private Tether.State seen = Tether.State.FLIGHT;
     private float biteTime = -1f;
     private float releaseTime = -1f;
@@ -126,9 +135,10 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         } else if (target != null && Global.getCombatEngine().isEntityInPlay(target)) {
             tether.getTargetPoint(headTip);
             headAngle = target.getFacing() + tether.getHeadAngle();
-            headTip.translate(dirX(headAngle) * EMBED, dirY(headAngle) * EMBED);
+            float embed = headLength * EMBED_SHARE;
+            headTip.translate(dirX(headAngle) * embed, dirY(headAngle) * embed);
         }
-        end.set(headTip.x - dirX(headAngle) * HEAD_LENGTH, headTip.y - dirY(headAngle) * HEAD_LENGTH);
+        end.set(headTip.x - dirX(headAngle) * headLength, headTip.y - dirY(headAngle) * headLength);
     }
 
     // Short visual arcs racing from the mount to the head along the rope, one every ARC_INTERVAL.
@@ -177,23 +187,23 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         if (alpha <= 0f) return;
 
         float materialised = biteTime < 0f ? 0f : (float) Math.sqrt(Math.min(1f, biteTime / MATERIALISE_TIME));
-        float coreAlpha = alpha * (FLIGHT_CORE_ALPHA + (1f - FLIGHT_CORE_ALPHA) * materialised);
-        float edgeAlpha = alpha * (FLIGHT_EDGE_ALPHA + (1f - FLIGHT_EDGE_ALPHA) * materialised);
+        float coreAlpha = alpha * (FLIGHT_CORE_ALPHA + (CONNECTED_ALPHA - FLIGHT_CORE_ALPHA) * materialised);
+        float edgeAlpha = alpha * (FLIGHT_EDGE_ALPHA + (CONNECTED_ALPHA - FLIGHT_EDGE_ALPHA) * materialised);
 
         // Pixel widths, a little wider when zoomed far out so the rope stays legible.
         float pixel = viewport.convertScreenWidthToWorldWidth(1f)
                 * (1f + 0.25f * Math.max(0f, viewport.getViewMult() - 1f));
-        Vector2f[] path = getPath();
+        buildEndFade(getPath(), viewport.convertScreenWidthToWorldWidth(END_FADE_PIXELS));
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
         try {
             GL11.glDisable(GL11.GL_TEXTURE_2D);
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            drawBand(path, EDGE, EDGE_INNER * pixel, 0.95f * edgeAlpha, EDGE_OUTER * pixel);
-            drawBand(path, CORE, 0f, coreAlpha, CORE_HALF_WIDTH * pixel);
+            drawBand(fadePath, fadeMult, EDGE, EDGE_INNER * pixel, 0.95f * edgeAlpha, EDGE_OUTER * pixel);
+            drawBand(fadePath, fadeMult, CORE, 0f, coreAlpha, CORE_HALF_WIDTH * pixel);
             if (biteTime >= 0f && biteTime < FLASH_TIME && !Setting.REDUCED_EFFECTS.enabled()) {
-                drawBand(path, Color.white, 0f, 0.6f * alpha * (1f - biteTime / FLASH_TIME),
+                drawBand(fadePath, fadeMult, Color.white, 0f, 0.6f * alpha * (1f - biteTime / FLASH_TIME),
                         FLASH_HALF_WIDTH * pixel);
             }
         } finally {
@@ -202,9 +212,49 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         renderHead(alpha);
     }
 
-    // Two strips per band, one each side of the centre line, fading from innerAlpha at inner to 0 at outer.
-    // Normals average the neighbouring segments so the joins do not crack.
-    private static void drawBand(Vector2f[] path, Color color, float inner, float innerAlpha, float outer) {
+    // Fills fadePath with the rope's points plus a vertex at each knee, where an end fade reaches full alpha, and
+    // fadeMult with each point's multiplier by arc length from the nearer end. The strips interpolate colour linearly
+    // between vertices, so the knees keep the ramp exact on long flight segments. On a rope shorter than two fades
+    // the ramps meet at the middle.
+    private void buildEndFade(Vector2f[] path, float fadeLength) {
+        int n = path.length;
+        float[] along = new float[n];
+        for (int i = 1; i < n; i++) along[i] = along[i - 1] + Misc.getDistance(path[i - 1], path[i]);
+        float total = n == 0 ? 0f : along[n - 1];
+        float knee = Math.min(fadeLength, total * 0.5f);
+        float[] knees = {knee, total - knee};
+
+        Vector2f[] points = new Vector2f[n + knees.length];
+        float[] pointAlong = new float[points.length];
+        int count = 0;
+        int nextKnee = 0;
+        for (int i = 0; i < n; i++) {
+            while (i > 0 && nextKnee < knees.length && knees[nextKnee] < along[i] - KNEE_EPSILON) {
+                if (knees[nextKnee] > pointAlong[count - 1] + KNEE_EPSILON) {
+                    float t = (knees[nextKnee] - along[i - 1]) / (along[i] - along[i - 1]);
+                    points[count] = new Vector2f(path[i - 1].x + (path[i].x - path[i - 1].x) * t,
+                            path[i - 1].y + (path[i].y - path[i - 1].y) * t);
+                    pointAlong[count++] = knees[nextKnee];
+                }
+                nextKnee++;
+            }
+            points[count] = path[i];
+            pointAlong[count++] = along[i];
+        }
+
+        fadePath = Arrays.copyOf(points, count);
+        fadeMult = new float[count];
+        for (int i = 0; i < count; i++) {
+            float fromEnd = Math.min(pointAlong[i], total - pointAlong[i]);
+            float ramp = fadeLength > 0f ? Math.min(1f, fromEnd / fadeLength) : 1f;
+            fadeMult[i] = END_ALPHA + (1f - END_ALPHA) * ramp;
+        }
+    }
+
+    // Two strips per band, one each side of the centre line, fading from innerAlpha times the point's end fade at
+    // inner to 0 at outer. Normals average the neighbouring segments so the joins do not crack.
+    private static void drawBand(Vector2f[] path, float[] mult, Color color, float inner, float innerAlpha,
+                                 float outer) {
         if (innerAlpha <= 0f) return;
         float r = color.getRed() / 255f;
         float g = color.getGreen() / 255f;
@@ -219,7 +269,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
                 float length = (float) Math.sqrt(tx * tx + ty * ty);
                 float nx = length > 0f ? -ty / length * sideSign : 0f;
                 float ny = length > 0f ? tx / length * sideSign : 0f;
-                GL11.glColor4f(r, g, b, innerAlpha);
+                GL11.glColor4f(r, g, b, innerAlpha * mult[i]);
                 GL11.glVertex2f(path[i].x + nx * inner, path[i].y + ny * inner);
                 GL11.glColor4f(r, g, b, 0f);
                 GL11.glVertex2f(path[i].x + nx * outer, path[i].y + ny * outer);
@@ -230,7 +280,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
 
     private void renderHead(float alpha) {
         if (head == null) return;
-        float half = HEAD_LENGTH * 0.5f;
+        float half = headLength * 0.5f;
         head.setNormalBlend();
         head.setAlphaMult(alpha);
         head.setAngle(headAngle - 90f);
