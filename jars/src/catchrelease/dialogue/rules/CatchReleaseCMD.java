@@ -24,6 +24,7 @@ import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.fisherman.chain.LegendaryHunt;
 import catchrelease.campaign.fish.fisherman.chain.SensorBuild;
+import catchrelease.campaign.fish.fisherman.chain.ReliquaryTrade;
 import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.campaign.fish.fisherman.chain.TreasureRumour;
 import catchrelease.campaign.fish.jobs.FishJob;
@@ -284,10 +285,19 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return WoundedEpic.prepareOffer();
             case "t3Accept":
                 return WoundedEpic.start(text(dialog));
+            case "t3TradePrepare":
+                return ReliquaryTrade.prepare();
             case "t3Complete":
                 return WoundedEpic.complete(text(dialog));
+            case "t3TradeHere":
+                return ReliquaryTrade.isHere(getMarket(dialog));
+            case "t3Haggle":
+                ReliquaryTrade.haggle();
+                return true;
+            case "t3Trade":
+                return ReliquaryTrade.trade(text(dialog));
             case "t3Done":
-                WoundedEpic.finish(text(dialog));
+                ReliquaryTrade.finish(text(dialog));
                 return true;
             case "t4Complete":
                 return LegendaryHunt.complete(text(dialog));
@@ -410,7 +420,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 intel.getFishermanFaction(), intel.getIcon(), intel.getIntelTags(null));
     }
 
-    // A chain offer's target, before its intel exists: "t1", "t2" or "t3" names the quest.
+    // A chain offer's target, before its intel exists: "t1", "t2", "t3" or "t3trade" names the quest.
     protected boolean showChainMap(InteractionDialogAPI dialog, String quest, String title) {
         BaseIntelPlugin intel;
         SectorEntityToken location;
@@ -426,6 +436,10 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "t3" -> {
                 intel = new WoundedEpic.WoundedIntel();
                 location = WoundedEpic.getOfferMapLocation();
+            }
+            case "t3trade" -> {
+                intel = new ReliquaryTrade.TradeIntel();
+                location = ReliquaryTrade.getMarketEntity();
             }
             default -> {
                 return QuestDialogMap.hide(dialog);

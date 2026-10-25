@@ -2778,7 +2778,7 @@ CatchReleaseCMD showChainMap t3 ""Target: $catchreleaseChainT3Planet""","""I did
 
 ""Switch your lights off when you get there and let the Needle Sensor find it. Then light it up and put a harpoon in it. It's slower than it ought to be. Don't let it get far ahead of you, though, or it'll go straight back to $catchreleaseChainT3Planet.""
 
-""Land it and come and tell me. There's a blueprint for a lamp ship in it for you, and range data on another epic. Take your time.""","catchrelease_t3Accept:""I'll find it.""
+""Land it and come and tell me. There's range data on another epic in it for you. Take your time.""","catchrelease_t3Accept:""I'll find it.""
 catchrelease_t3Decline:""Not right now.""",
 catchrelease_t3OfferNone,CatchReleaseT3Offer,,,"""Not yet. I'll need to look into it again. Ask me later.""",catchrelease_fisherBack:Continue,
 catchrelease_t3Accept,DialogOptionSelected,$option == catchrelease_t3Accept,"HideMapMarker
@@ -2790,18 +2790,49 @@ catchrelease_t3AcceptFailed,CatchReleaseT3Accepted,,,"""Hm. It's moved on from t
 catchrelease_t3Decline,DialogOptionSelected,$option == catchrelease_t3Decline,HideMapMarker,"""It'll keep. It isn't going far.""",catchrelease_fisherBack:Continue,
 catchrelease_fisherOptT3HandIn,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT3Caught",SetOptionColor catchrelease_t3HandIn highlight,,"36:catchrelease_t3HandIn:""I landed your wounded epic.""",
-catchrelease_t3HandIn,DialogOptionSelected,$option == catchrelease_t3HandIn,"CatchReleaseCMD highlightFishText ""second lens array"" ""range data""
+catchrelease_t3HandIn,DialogOptionSelected,$option == catchrelease_t3HandIn,"CatchReleaseCMD t3TradePrepare
+CatchReleaseCMD tokens
+FireBest CatchReleaseT3HandIn",,,
+catchrelease_t3HandInTrade,CatchReleaseT3HandIn,$catchreleaseChainT3MarketPlaced,"CatchReleaseCMD highlightFishText ""range data"" $catchreleaseChainT3Market $catchreleaseChainT3MarketSystem
+CatchReleaseCMD showChainMap t3trade ""Target: $catchreleaseChainT3Market""
 CatchReleaseCMD t3Complete","""Did you, now? Good work. That one would have kept a lesser crew busy for months.""
 
-He sends a deckhand below for to transfer two chips.
+A deckhand passes you a data chip. ""That's range data. Somewhere to go next.""
 
-""The first is a blueprint for a Monstrance-Class Breach Trawler. A lamp ship. Carries a specialized rig, and room for a second lens array. You'll have to find someone who can build it; I don't run a yard. The other is range data. Somewhere to go next.""",catchrelease_fisherBack:Continue,
-catchrelease_fisherOptT3Built,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
-$catchreleaseChainT3Built",SetOptionColor catchrelease_t3Built highlight,,"36:catchrelease_t3Built:""The lamp ship's built.""",
-catchrelease_t3Built,DialogOptionSelected,$option == catchrelease_t3Built,"CatchReleaseCMD highlightFishText ""Fanned Array""
+""Something else. A man on $catchreleaseChainT3Market in the $catchreleaseChainT3MarketSystem sent word asking for my help. He's sitting on an old Reliquary, a drone tender, and he's no use for her. I'd say he'd trade her for that epic in your hold. You'll find him in the bar. Most nights, by the sound of him.""",catchrelease_fisherBack:Continue,
+catchrelease_t3HandInNone,CatchReleaseT3HandIn,,,"""Did you, now? Good work. Give me a little while to settle what you're owed, and ask me again.""",catchrelease_fisherBack:Continue,
+,,,,,,
+# fisherman chain T3: the Reliquary trade,,,,,,
+catchrelease_t3DrunkAdd,AddBarEvents,CatchReleaseCMD t3TradeHere,"AddBarEvent catchrelease_t3Drunk ""Talk to the man who sent for the Fisherman"" ""A man at the end of the bar has his head down beside a row of empty glasses. Every so often he lifts it to tell the bartender about a ship."" highlight",,,
+catchrelease_t3Drunk,DialogOptionSelected,$option == catchrelease_t3Drunk,"CatchReleaseCMD tokens
+FireBest CatchReleaseT3DrunkGreeting",,,
+catchrelease_t3DrunkGreetFirst,CatchReleaseT3DrunkGreeting,!$market.catchrelease_t3DrunkMet,"$market.catchrelease_t3DrunkMet = true
+CatchReleaseCMD highlightFishText ""Three epics""
+FireAll CatchReleaseT3DrunkOptions","He takes a while to find your face. ""The Fisherman sent you? Good. Good man, the Fisherman.""
+
+""I've got a Reliquary. Old clanker. Nobody wants her, I've tried. Everybody wants epic fish, though. Worth a lot more to the right buyer than she'll ever fetch."" He holds up three fingers and checks them. ""Three epics. I sell them on, I live off it, and I never look at that ship again.""",,
+catchrelease_t3DrunkGreetAgain,CatchReleaseT3DrunkGreeting,$market.catchrelease_t3DrunkMet,"CatchReleaseCMD highlightFishText $catchreleaseChainT3Price
+FireAll CatchReleaseT3DrunkOptions","He is in the same seat, or back in it. ""You again. Got my $catchreleaseChainT3Price epics?""",,
+catchrelease_t3DrunkOptPay,CatchReleaseT3DrunkOptions,,,,catchrelease_t3DrunkPay:Hand over $catchreleaseChainT3Price epic fish,
+catchrelease_t3DrunkOptPayShort,CatchReleaseT3DrunkOptions,!$catchreleaseChainT3CanPay,"SetEnabled catchrelease_t3DrunkPay false
+SetTooltip catchrelease_t3DrunkPay ""You need $catchreleaseChainT3Price epic fish in your cargo.""",,,
+catchrelease_t3DrunkOptHaggle,CatchReleaseT3DrunkOptions,!$catchreleaseChainT3Haggled,"SetStoryOption catchrelease_t3DrunkHaggle 1 avoidCargoScan ui_char_spent_story_point ""Talked a drunk down to two epics for his Reliquary""",,"catchrelease_t3DrunkHaggle:""Three is steep for a ship nobody wants.""",
+catchrelease_t3DrunkOptLeave,CatchReleaseT3DrunkOptions,,SetShortcut catchrelease_t3DrunkLeave ESCAPE,,100:catchrelease_t3DrunkLeave:Leave him to his drink,
+catchrelease_t3DrunkHaggle,DialogOptionSelected,$option == catchrelease_t3DrunkHaggle,"CatchReleaseCMD highlightFishText ""Two epics""
+CatchReleaseCMD t3Haggle
+CatchReleaseCMD tokens
+FireAll CatchReleaseT3DrunkOptions","He thinks about it long enough that you wonder whether he has fallen asleep. ""Two epics. You're robbing me. I don't care. Two.""",,
+catchrelease_t3DrunkPay,DialogOptionSelected,$option == catchrelease_t3DrunkPay,"CatchReleaseCMD t3Trade
+SetShortcut catchrelease_t3DrunkLeave ESCAPE","He doesn't look at the fish. He pushes the ship's codes across the bar and waves for another drink.
+
+""She's yours. Treat her better than I did. Wouldn't be hard.""",catchrelease_t3DrunkLeave:Leave him to his drink,
+catchrelease_t3DrunkLeave,DialogOptionSelected,$option == catchrelease_t3DrunkLeave,BarCMD returnFromEvent false,,,
+catchrelease_fisherOptT3Traded,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainT3Traded",SetOptionColor catchrelease_t3Traded highlight,,"36:catchrelease_t3Traded:""I've got the Reliquary.""",
+catchrelease_t3Traded,DialogOptionSelected,$option == catchrelease_t3Traded,"CatchReleaseCMD highlightFishText ""Lifting Rig""
 CatchReleaseCMD t3Done","The Fisherman looks the ship over on his display for longer than he needs to.
 
-""She'll do. She carries a Fanned Array for your Breach Lights. Your lamps will cover a good deal more ground with it, but the range is shorter.""
+""She'll do. She carries a Lifting Rig for your drones. It brings up more bycatch, and now and then a hull worth keeping.""
 
 ""You've landed a special pattern now. There are others out there like it, but not many. You'll go a long while between them, and some crews never see one.""
 
@@ -2810,11 +2841,12 @@ CatchReleaseCMD t3Done","The Fisherman looks the ship over on his display for lo
 # fisherman chain T4: listen for rumours,,,,,,
 catchrelease_fisherOptT4Landed,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT4Landed",SetOptionColor catchrelease_t4Landed highlight,,"36:catchrelease_t4Landed:""I caught one of those stranger things.""",
-catchrelease_t4Landed,DialogOptionSelected,$option == catchrelease_t4Landed,CatchReleaseCMD t4Complete,"""Then you know what I meant."" He doesn't ask which one it was. ""There's more than one of them, and no two alike. The talk about each is as bad as the last. Keep listening.""
+catchrelease_t4Landed,DialogOptionSelected,$option == catchrelease_t4Landed,"CatchReleaseCMD highlightFishText ""Fanned Array""
+CatchReleaseCMD t4Complete","""Then you know what I meant."" He doesn't ask which one it was. ""There's more than one of them, and no two alike. The talk about each is as bad as the last. Keep listening.""
 
 While he talks, a ship detaches from his fleet and falls in with yours.
 
-""She's a drone carrier, and she's yours. Your drones will have somewhere better to come home to.""",catchrelease_fisherBack:Continue,
+""She's a lamp ship, and she's yours. She carries a Fanned Array for your Breach Lights. Your lamps will cover a good deal more ground with it, but the range is shorter.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,

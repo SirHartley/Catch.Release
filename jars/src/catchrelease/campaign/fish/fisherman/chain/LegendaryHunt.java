@@ -191,12 +191,12 @@ public final class LegendaryHunt {
         checkLanded();
     }
 
-    // The drone carrier, unannounced until now, and the news that there is more than one legendary.
+    // The lamp ship, unannounced until now, and the news that there is more than one legendary.
     public static boolean complete(TextPanelAPI text) {
         if (!FishermanChain.isAt(FishermanChain.Stage.T4_LANDED)) return false;
 
         List<FishReward.Receipt> receipts = new ArrayList<>();
-        receipts.add(FishReward.ship(FishingShips.Ship.ROD.hullId).grantWithReceipt());
+        receipts.add(FishReward.ship(FishingShips.Ship.LAMP.hullId).grantWithReceipt());
 
         FishermanChain.setStage(FishermanChain.Stage.HUNTING);
         FishReward.showReceipts(text, receipts);

@@ -34,8 +34,8 @@ public final class FishermanChain {
         T2_SENSOR_BOUGHT,
         T3_HUNT,
         T3_CAUGHT,
-        T3_BUILD,
-        T3_BUILT,
+        T3_TRADE,
+        T3_TRADED,
         // T4 starts in T3's closing conversation
         T4_LISTEN,
         T4_LANDED,
@@ -81,7 +81,13 @@ public final class FishermanChain {
     public static final String T3_SPECIES = "$catchreleaseChainT3Species";
     public static final String T3_HUNT = "$catchreleaseChainT3Hunt";
     public static final String T3_CAUGHT = "$catchreleaseChainT3Caught";
-    public static final String T3_BUILT = "$catchreleaseChainT3Built";
+    public static final String T3_MARKET_PLACED = "$catchreleaseChainT3MarketPlaced";
+    public static final String T3_MARKET = "$catchreleaseChainT3Market";
+    public static final String T3_MARKET_SYSTEM = "$catchreleaseChainT3MarketSystem";
+    public static final String T3_PRICE = "$catchreleaseChainT3Price";
+    public static final String T3_HAGGLED = "$catchreleaseChainT3Haggled";
+    public static final String T3_CAN_PAY = "$catchreleaseChainT3CanPay";
+    public static final String T3_TRADED = "$catchreleaseChainT3Traded";
 
     public static final String T4_LANDED = "$catchreleaseChainT4Landed";
 
@@ -118,6 +124,11 @@ public final class FishermanChain {
         public String t3PlanetId;
         public String t3PlanetName;
         public String t3SpeciesId;
+        // the Reliquary's owner drinks at this market's bar; a story point brings his price down once
+        public String t3MarketId;
+        public String t3MarketName;
+        public String t3MarketSystemName;
+        public boolean t3Haggled;
 
         // legendary id to the name its latest rumour used
         public Map<String, String> toldNames;
@@ -216,7 +227,14 @@ public final class FishermanChain {
         local.set(T3_SPECIES, WoundedEpic.getSpeciesName(), 0);
         local.set(T3_HUNT, stage == Stage.T3_HUNT, 0);
         local.set(T3_CAUGHT, stage == Stage.T3_CAUGHT, 0);
-        local.set(T3_BUILT, stage == Stage.T3_BUILT, 0);
+        local.set(T3_MARKET_PLACED, ReliquaryTrade.getMarket() != null, 0);
+        local.set(T3_MARKET, saved == null || saved.t3MarketName == null ? "" : saved.t3MarketName, 0);
+        local.set(T3_MARKET_SYSTEM, saved == null || saved.t3MarketSystemName == null ? ""
+                : saved.t3MarketSystemName, 0);
+        local.set(T3_PRICE, ReliquaryTrade.getPrice() == ReliquaryTrade.HAGGLED_PRICE ? "two" : "three", 0);
+        local.set(T3_HAGGLED, saved != null && saved.t3Haggled, 0);
+        local.set(T3_CAN_PAY, ReliquaryTrade.canPay(), 0);
+        local.set(T3_TRADED, stage == Stage.T3_TRADED, 0);
 
         local.set(T4_LANDED, stage == Stage.T4_LANDED, 0);
         local.set(OUTFITTER_WANTED, getWantedPurchase() != null, 0);

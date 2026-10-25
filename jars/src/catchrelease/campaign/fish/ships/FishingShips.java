@@ -1,6 +1,5 @@
 package catchrelease.campaign.fish.ships;
 
-import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.combat.salvage.FighterStore;
@@ -199,8 +198,6 @@ public final class FishingShips {
                 leave(ship);
             }
         }
-
-        WoundedEpic.checkBuilt();
     }
 
     // The second slot starts with the ship's module, never with what was fitted before the ship left. A module the
