@@ -30,14 +30,10 @@ public class TugPilot implements AdvanceableListener {
     // swinging to, so a catch lying straight between the tug and its goal does not leave it dithering.
     public static final float MAX_SWING = 60f;
     public static final float SWING_HOLD = 150f;
-    // With this much friendly ship weight within ARRIVE_RANGE of it the catch is in friendly guns, and the tug holds
-    // it there: it brakes, and pulls against the catch only while the rope is taut and the catch moves away along it
-    // faster than PULL_SPEED by its own velocity (on a taut rope the two move together, so their relative speed reads
-    // near zero while the catch drags the tug).
+    // A rescued friend with this much friendly ship weight within ARRIVE_RANGE of it is back at friendly lines and
+    // let go.
     public static final float ARRIVE_RANGE = 800f;
     public static final float ARRIVE_WEIGHT = 2f;
-    public static final float TAUT_SHARE = 0.97f;
-    public static final float PULL_SPEED = 20f;
     public static final float TURN_GAIN = 2f;
     public static final float TURN_DEADBAND = 2f;
     public static final float THRUST_ARC = 60f;
@@ -48,7 +44,6 @@ public class TugPilot implements AdvanceableListener {
     private WeaponAPI harpoon;
     private final Vector2f pull = new Vector2f();
     private final Vector2f catchPoint = new Vector2f();
-    private final Vector2f mountPoint = new Vector2f();
     private float biasAge = BIAS_INTERVAL;
     private boolean arrived;
     private boolean friendSafe;
@@ -96,31 +91,29 @@ public class TugPilot implements AdvanceableListener {
         return towing;
     }
 
-    // Drags the catch where friendly guns are and holds it there, overriding the ship AI's movement: the wanted
+    // Drags the catch toward friendly guns, overriding the ship AI's movement: the wanted
     // commands are given and every other movement command blocked, since the engine drops a blocked type even
     // when given.
     private void tow(Tether tether) {
         float rope = Misc.getAngleInDegrees(catchPoint, ship.getLocation());
-        if (arrived) {
-            if (isPulledAway(tether)) steer(rope);
-            else brake();
-            return;
-        }
         float want = pull.lengthSquared() > 1e-8f ? Misc.getAngleInDegrees(pull) : rope;
         float off = HarpoonAutofireAI.angleDifference(rope, want);
         if (Math.abs(off) <= SWING_HOLD && off != 0f) swingSide = Math.signum(off);
-        steer(dragHeading(rope, want, swingSide));
+        float heading = dragHeading(rope, want, swingSide);
+        // Swinging round the catch is mostly sideways motion, and the rope's top-speed allowance (see Tether) follows
+        // speed, so thrust while swinging would wind the pair up without end; a straight haul is left uncapped.
+        boolean swinging = Math.abs(off) > MAX_SWING;
+        steer(heading, !swinging || speedAlong(heading) < ship.getHullSpec().getEngineSpec().getMaxSpeed());
     }
 
-    private boolean isPulledAway(Tether tether) {
-        Vector2f line = Vector2f.sub(catchPoint, tether.getMountPoint(mountPoint), null);
-        float distance = line.length();
-        if (distance < tether.getLength() * TAUT_SHARE || distance <= 0f) return false;
-        return Vector2f.dot(tether.getTarget().getVelocity(), line) / distance > PULL_SPEED;
+    private float speedAlong(float heading) {
+        double radians = Math.toRadians(heading);
+        Vector2f velocity = ship.getVelocity();
+        return (float) (velocity.x * Math.cos(radians) + velocity.y * Math.sin(radians));
     }
 
     // Where the catch should go, as a direction from it: toward friendly ships and away from enemies, each by weight,
-    // over ships within SCAN_RANGE of the catch; also whether it has arrived, and for a friend whether it is safe.
+    // over ships within SCAN_RANGE of the catch; also, for a friend, whether it is back at friendly lines or safe.
     // Other tugs carry no guns to drag a catch into. A list pass, not the ship grid: a grid query copies every object
     // in its 300-unit cells into a new set, which costs more at this range.
     private void sumPull(CombatEngineAPI engine, ShipAPI towed) {
@@ -156,15 +149,8 @@ public class TugPilot implements AdvanceableListener {
         return rope + turn * MAX_SWING;
     }
 
-    // The rope gives a dragged ship a top-speed allowance that follows its speed (see Tether), so thrust is held at the
-    // hull's own top speed along the heading; past that it would build speed without end and fling the catch past
-    // friendly guns.
-    private void steer(float heading) {
+    private void steer(float heading, boolean mayThrust) {
         float difference = turnToward(heading);
-        Vector2f velocity = ship.getVelocity();
-        double radians = Math.toRadians(heading);
-        float ahead = (float) (velocity.x * Math.cos(radians) + velocity.y * Math.sin(radians));
-        boolean mayThrust = ahead < ship.getHullSpec().getEngineSpec().getMaxSpeed();
         if (mayThrust && Math.abs(difference) < THRUST_ARC) {
             ship.giveCommand(ShipCommand.ACCELERATE, null, 0);
         } else {
@@ -172,15 +158,6 @@ public class TugPilot implements AdvanceableListener {
         }
         ship.blockCommandForOneFrame(ShipCommand.ACCELERATE_BACKWARDS);
         ship.blockCommandForOneFrame(ShipCommand.DECELERATE);
-        ship.blockCommandForOneFrame(ShipCommand.STRAFE_LEFT);
-        ship.blockCommandForOneFrame(ShipCommand.STRAFE_RIGHT);
-    }
-
-    // Holds still. Turning stays with the ship AI, which keeps its shield on threats.
-    private void brake() {
-        ship.giveCommand(ShipCommand.DECELERATE, null, 0);
-        ship.blockCommandForOneFrame(ShipCommand.ACCELERATE);
-        ship.blockCommandForOneFrame(ShipCommand.ACCELERATE_BACKWARDS);
         ship.blockCommandForOneFrame(ShipCommand.STRAFE_LEFT);
         ship.blockCommandForOneFrame(ShipCommand.STRAFE_RIGHT);
     }
