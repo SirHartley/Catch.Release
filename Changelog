@@ -51,6 +51,23 @@ Changed - Every epic fish now comes up only under Breach Lights; ruptures fished
 Changed - Epic fish are now hunted in two stages: they drift slowly until a harpoon hit inside a lit Breach Light beam wakes them, then raise a one-charge shield that never comes back and swim more erratically, staying in view with your lights off; one that gets more than 3,000 units away drifts off and fades, with a notice that it was lost, and an awake epic is gone once you leave the system. Only the harpoon lands one: ROD drones leave epics alone
 Added - Version Checker support: update notices, plus the changelog and direct download for LunaLib's update screen and mod managers such as triOS
 
+Outfitter
+Fixed - The Outfitter no longer opens on a locked shelf with an empty list and no category selected, which happened on every visit before the Breach Lights were unlocked
+Fixed - Undoing a purchase made on another tab now brings that item's shelf to the front instead of describing one row while highlighting none
+Fixed - Buying a module that fits both rigs now clears its mark on the other rig's shelf, and the route planner no longer lists the same module twice
+Fixed - Equipment with no fish price now says it is not for sale, instead of showing a price with a FIT button that does nothing
+Changed - The Equipment category tabs follow the same rig order as the Upgrades tabs
+Changed - The Equipment help text no longer refers to a single-use marker that was never drawn; equipment consumed on use says so in its description
+Fixed - An upgrade's description no longer claims it is "fitted in slot 2" above its price
+Changed - The two equipment slot cells are drawn as bordered sockets instead of a second row of category tabs, which they were almost indistinguishable from
+Changed - An equipment description now names the slot FIT will use, instead of only saying the rig has two
+Fixed - A module fitted in a rig's other slot no longer reads as a green "fitted" in its description while its row is greyed out as unavailable
+Changed - An equipment slot cell marks a module that came with the ship, so it is no longer drawn the same as one you bought
+Fixed - Hovering the equipment slot already selected no longer tells you to click it
+Changed - The Outfitter's slot, conflict and shopping-list hovers use one title style
+Fixed - Undoing an equipment purchase made in a rig's second slot now leaves the Outfitter aimed at that slot, not the first
+Fixed - A long module name no longer puts the two equipment slot cells in different typefaces, and the cells' two lines are spaced evenly
+
 Text and UI
 Adjusted - Clearer combat equipment descriptions, fishing settings, recovered-fighter controls and AddFish help
 

@@ -86,8 +86,11 @@ public class ShopRowPlugin extends ListRow {
     }
 
     protected void renderMarkRing(float x, float y, float height, float alphaMult) {
+        // a row that cannot be marked must not draw a saving-for-this ring, marked or not: a
+        // BOTH-fit module bought on one shelf used to keep a lit ring on the other
+        if (!ShopMarks.isMarkable(entry)) return;
+
         boolean marked = ShopMarks.isMarked(entry);
-        if (!marked && !ShopMarks.isMarkable(entry)) return;
 
         float cx = x + ACCENT_WIDTH + MARK_SLOT * 0.5f;
         float cy = y + height * 0.5f;

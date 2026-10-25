@@ -116,6 +116,20 @@ public class ShopMarks {
         toggle(getMarkKey(entry));
     }
 
+    /**
+     * Clears a module's mark on every shelf it appears on.
+     * <p>
+     * A BOTH-fit module is two entries with two keys - one per rig - so unmarking the shelf it was
+     * bought from left the other shelf's row drawn as owned and still marked.
+     */
+    public static void unmarkTackle(Tackle tackle) {
+        if (tackle == null) return;
+
+        for (Tackle.Fit rig : Tackle.Fit.values()) {
+            if (rig.isRig()) unmark("tackle:" + rig.name() + ":" + tackle.name());
+        }
+    }
+
     public static boolean isMarkable(ShopEntry entry) {
         if (entry == null) return false;
         if (entry.isPurchaseLocked() && !entry.isUpgrade()) return false;
@@ -228,6 +242,7 @@ public class ShopMarks {
 
     public static List<Ask> getMarkedAsks() {
         List<Ask> out = new ArrayList<>();
+        java.util.Set<Tackle> seen = new java.util.LinkedHashSet<>();
 
         for (String key : getMarkedKeys()) {
             if (key.startsWith("stat:")) {
@@ -253,6 +268,8 @@ public class ShopMarks {
 
                 if (TackleManager.isOwned(tackle) || FishingShips.isShipModule(tackle)) continue;
                 if (!ShopSchematics.has(tackle)) continue;
+                // one module marked on both its shelves is still one thing to save for
+                if (!seen.add(tackle)) continue;
 
                 ShopPricing.Price price = ShopPricing.getPrice(tackle);
                 if (price != null && price.fish != null) {

@@ -1,7 +1,10 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.config.FishingSounds;
+import catchrelease.rendering.helper.RoundedBorder;
 import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
@@ -14,18 +17,26 @@ import java.awt.Color;
 import java.util.List;
 
 // One cell of the Equipment tab's slot picker, shown while a rig has its second slot. The selected cell is where the
-// FIT button puts a module; rows and the detail pane are judged against it. Drawn like a category tab.
+// FIT button puts a module; rows and the detail pane are judged against it. Drawn as a bordered socket, deliberately
+// unlike the category tabs it sits under.
 public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
 
     public static final float TEXT_PAD = 10f;
+    public static final float TEXT_GAP = 4f;
+    public static final float LINE_GAP = 3f;
+    public static final float BORDER_RADIUS = 3f;
 
     protected final int slot;
     protected final Tackle fitted;
+    protected final boolean shipModule;
+    // decided for the row, not the cell: see FishShopDialog.needsCompactSlotText
+    protected final boolean compact;
     protected final Host host;
     protected PositionAPI pos;
 
     protected transient LazyFont.DrawableString label;
     protected transient LazyFont.DrawableString content;
+    protected transient LazyFont.DrawableString origin;
 
     public interface Host {
 
@@ -34,10 +45,15 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         void onSlotClicked(int slot);
     }
 
-    public ShopSlotPlugin(int slot, Tackle fitted, Host host) {
+    public ShopSlotPlugin(int slot, Tackle fitted, boolean compact, Host host) {
         this.slot = slot;
         this.fitted = fitted == null ? Tackle.NONE : fitted;
+        this.compact = compact;
         this.host = host;
+        // the distinction the rows draw as SHIP against OWNED: a module that comes with the ship is not the
+        // player's, and a cell that shows both alike cannot say which one it is holding
+        this.shipModule = this.fitted != Tackle.NONE && FishingShips.isShipModule(this.fitted)
+                && !TackleManager.isOwned(this.fitted);
     }
 
     @Override
@@ -57,10 +73,15 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         boolean active = host.getTargetSlot() == slot;
         boolean hovered = !active && isMouseOver();
 
+        // A socket, not a tab. The category tabs immediately above are a flat fill plus a bottom accent bar and no
+        // outline; a cell is a recessed well with a full rounded border and no accent, so two rows that select
+        // different things do not read as one control.
+        ShopUi.drawQuad(x, y, width, height, Color.BLACK, 0.5f * alphaMult);
         ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(),
-                (active ? 0.5f : hovered ? 0.35f : 0.18f) * alphaMult);
-        ShopUi.drawQuad(x, y, width, ShopTabPlugin.ACCENT_HEIGHT, Misc.getBrightPlayerColor(),
-                (active ? 0.95f : 0.35f) * alphaMult);
+                (active ? 0.38f : hovered ? 0.22f : 0.1f) * alphaMult);
+        RoundedBorder.draw(x, y, width, height, BORDER_RADIUS,
+                active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor(),
+                (active ? 0.95f : hovered ? 0.6f : 0.28f) * alphaMult, active ? 2f : 1f);
 
         LazyFont small = ShopUi.getSmallFont();
         LazyFont body = ShopUi.getBodyFont();
@@ -71,18 +92,31 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
             label.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
         if (content == null) {
-            String name = fitted == Tackle.NONE ? "Empty" : fitted.name;
-            content = ShopUi.createText(body, name);
-            if (content.getWidth() > width - TEXT_PAD * 2f) content = ShopUi.createText(small, name);
+            content = ShopUi.createText(compact ? small : body,
+                    fitted == Tackle.NONE ? "Empty" : fitted.name);
             content.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
+        // both lines measured from the caption: the two line boxes used to meet with no leading between them while
+        // five pixels went spare above and below
+        float captionTop = y + height - TEXT_GAP;
+
         label.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
-        label.draw(Math.round(x + TEXT_PAD), Math.round(y + height - 5f));
+        label.draw(Math.round(x + TEXT_PAD), Math.round(captionTop));
 
         Color color = fitted == Tackle.NONE ? Misc.getGrayColor() : Misc.getPositiveHighlightColor();
         content.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-        content.draw(Math.round(x + TEXT_PAD), Math.round(y + 6f + content.getHeight()));
+        content.draw(Math.round(x + TEXT_PAD), Math.round(captionTop - label.getHeight() - LINE_GAP));
+
+        if (!shipModule) return;
+
+        if (origin == null) {
+            origin = ShopUi.createText(small, "SHIP");
+            origin.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
+        }
+
+        origin.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
+        origin.draw(Math.round(x + width - TEXT_PAD), Math.round(captionTop));
     }
 
     @Override

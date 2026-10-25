@@ -164,10 +164,37 @@ public class FishShopDialog implements InteractionDialogPlugin {
             pos = null;
 
             buildEntries();
+            reconcileTabs();
             selectFirstVisible();
             refreshWallet();
 
             build();
+        }
+
+        /**
+         * Drops the remembered tab and category back onto something stocked.
+         * <p>
+         * Only {@code onTabClicked} used to do this, so the shop opened on whatever the fields were
+         * initialised to - Upgrades and the lamp shelf - and the lamp shelf is locked until the
+         * introduction's third catch. The result was an empty list, a blank detail pane and a
+         * category row with nothing highlighted until the player clicked something. Reopening after
+         * a SELECT can land on a stale pair the same way, since this delegate keeps its state.
+         */
+        protected void reconcileTabs() {
+            List<ShopEntry.Kind> kinds = getStockedKinds();
+            if (kinds.isEmpty()) return;
+
+            if (!kinds.contains(mainTab)) mainTab = kinds.get(0);
+
+            ShopGroup[] groups = getCategories(mainTab);
+            if (groups.length == 0) return;
+
+            for (ShopGroup group : groups) {
+                if (group == category) return;
+            }
+
+            category = groups[0];
+            targetSlot = 0;
         }
 
         protected void buildEntries() {
@@ -531,7 +558,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
             if (!hasTwoSlots()) return top;
 
             Tackle.Fit rig = getShelfRig();
-            float cellWidth = (LIST_WIDTH - TAB_GAP) / 2f;
+            float cellWidth = (LIST_WIDTH - TAB_GAP) / RigLoadout.SLOTS;
+            boolean compact = needsCompactSlotText(rig, cellWidth);
 
             CustomPanelAPI holder = panel.createCustomPanel(LIST_WIDTH, SLOT_HEIGHT, new BaseCustomUIPanelPlugin() {
             });
@@ -540,7 +568,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
                 CustomPanelAPI cell = holder.createCustomPanel(cellWidth, SLOT_HEIGHT,
-                        new ShopSlotPlugin(slot, TackleManager.getSlot(rig, slot), this));
+                        new ShopSlotPlugin(slot, TackleManager.getSlot(rig, slot), compact, this));
                 holder.addComponent(cell).inTL(slot * (cellWidth + TAB_GAP), 0f);
                 tooltipHost.addTooltipTo(createSlotTooltip(rig, slot), cell,
                         TooltipMakerAPI.TooltipLocation.BELOW, false);
@@ -552,6 +580,24 @@ public class FishShopDialog implements InteractionDialogPlugin {
             return top + SLOT_HEIGHT + 8f;
         }
 
+        // One font for the whole row. Each cell used to measure only its own module, so a single long name put the
+        // two cells in different typefaces side by side.
+        protected boolean needsCompactSlotText(Tackle.Fit rig, float cellWidth) {
+            LazyFont body = ShopUi.getBodyFont();
+            if (body == null) return false;
+
+            float room = cellWidth - ShopSlotPlugin.TEXT_PAD * 2f;
+
+            for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
+                Tackle fitted = TackleManager.getSlot(rig, slot);
+                String name = fitted == Tackle.NONE ? "Empty" : fitted.name;
+
+                if (body.calcWidth(name, body.getBaseHeight()) > room) return true;
+            }
+
+            return false;
+        }
+
         protected TooltipMakerAPI.TooltipCreator createSlotTooltip(Tackle.Fit rig, int slot) {
             return new BaseTooltipCreator() {
                 @Override
@@ -561,8 +607,10 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    tooltip.addPara("Slot %s", 0f, Misc.getHighlightColor(), String.valueOf(slot + 1));
-                    tooltip.addPara("Click to select this slot. FIT puts the selected module here.", 6f);
+                    tooltip.addPara("Slot " + (slot + 1), Misc.getHighlightColor(), 0f);
+                    tooltip.addPara(getTargetSlot() == slot
+                            ? "FIT puts the selected module here."
+                            : "Click to select this slot. FIT then puts the selected module here.", 6f);
                     if (slot == 0) return;
 
                     String hull = getShipName(rig);
@@ -668,14 +716,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 @Override
                 public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
                     if (blocker == entry.tackle) {
-                        tooltip.addPara("Already fitted", Misc.getGrayColor(), 0f);
+                        tooltip.addPara("Already fitted", Misc.getHighlightColor(), 0f);
                         tooltip.addPara("This module is fitted in slot %s. One module cannot fill both slots of a"
                                 + " rig.", 6f, Misc.getHighlightColor(), String.valueOf(other));
                         return;
                     }
 
-                    tooltip.addPara("Conflicts with %s", 0f, Misc.getGrayColor(), Misc.getHighlightColor(),
-                            blocker.name);
+                    tooltip.addPara("Conflict", Misc.getHighlightColor(), 0f);
                     tooltip.addPara("%s is fitted in slot %s. Modules with similar or opposing effects cannot share"
                             + " a rig.", 6f, Misc.getHighlightColor(), blocker.name, String.valueOf(other));
                 }
@@ -825,8 +872,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
                     tooltip.addPara("EQUIPMENT", Misc.getBasePlayerColor(), 12f);
                     tooltip.addPara("Each rig has one equipment slot of its own. Swap owned"
-                            + " equipment freely at no cost. Items marked as single-use are"
-                            + " consumed when used.", 8f);
+                            + " equipment freely at no cost. Equipment that is consumed on use"
+                            + " says so in its description.", 8f);
                     if (anySecondSlot()) {
                         tooltip.addPara("A fishing ship in your fleet adds a second slot to its rig and brings a"
                                 + " module you can fit while the ship stays. A module cannot fill both slots, and"
@@ -863,8 +910,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
+            // an upgrade carries no tackle, so an unguarded blocker == entry.tackle matched null to null
             Tackle blocker = entry.getBlocker(slot);
-            if (blocker == entry.tackle) {
+            if (blocker != null && blocker == entry.tackle) {
                 info.addPara("Fitted in slot %s. A module can fill only one slot of a rig.", 16f, Misc.getGrayColor(),
                         Misc.getHighlightColor(), String.valueOf(2 - slot));
             } else if (blocker != null) {
@@ -901,6 +949,15 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             ShopPricing.Price price = entry.getPrice();
             if (price == null) return; // defensive; the branches above cover the only null cases
+
+            // without a fish price nothing can satisfy it, so FIT stays inert; say so rather than
+            // showing a credit figure and a dead button
+            if (price.fish == null) {
+                info.addPara("Not for sale here.", Misc.getNegativeHighlightColor(), 16f);
+                info.addPara("The trade has no standing price for this one.",
+                        Misc.getGrayColor(), 4f);
+                return;
+            }
 
             boolean creditsOk = credits >= price.credits;
 
@@ -1157,12 +1214,28 @@ public class FishShopDialog implements InteractionDialogPlugin {
             if (receipt.marked) ShopMarks.mark(receipt.markKey);
 
             selectedKey = receipt.entryKey;
+            showSelected(entry, receipt.slot);
             refreshWallet();
             rebuild(true);
 
             Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
                     "Refunded " + (entry != null ? entry.getName() : "the last purchase"));
             FishingSounds.playUISound(SOUND_UNDONE, 1f, 1f);
+        }
+
+        /**
+         * Brings the shelf an entry lives on to the front, so a refund made from another tab does
+         * not leave the detail pane describing a row the list is not showing. Undo only set
+         * {@code selectedKey}: the pane then fell back to the first visible entry while nothing
+         * matched for highlighting.
+         */
+        protected void showSelected(ShopEntry entry, int slot) {
+            if (entry == null) return;
+
+            mainTab = entry.kind;
+            category = entry.group;
+            // the slot the refund put the previous module back into; getTargetSlot clamps it if that slot has gone
+            targetSlot = slot;
         }
 
         protected ShopEntry findEntry(String key) {

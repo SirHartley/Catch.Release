@@ -35,9 +35,19 @@ module or a ship module that comes with a fishing ship. UI text must distinguish
 ### Outfitter second slot
 
 While a rig has its second slot (`FishingShips.hasSecondSlot`), the Equipment shelf
-shows two `ShopSlotPlugin` cells above the module list, drawn like category tabs:
-half the list width each, `SLOT_HEIGHT` tall, the slot's module or "Empty" beneath a
-small "SLOT n" label. The selected cell is the target slot; FIT reads "FIT IN SLOT n"
+shows two `ShopSlotPlugin` cells above the module list: half the list width each,
+`SLOT_HEIGHT` tall, the slot's module or "Empty" beneath a small "SLOT n" label. A cell
+is a black well with a dark-player tint and a full `RoundedBorder` outline, bright and
+2px while it is the target slot. It carries no bottom accent bar, because the category
+tabs directly above it are a flat fill plus that accent and no outline; the two rows
+pick different things and must not read as one control. A cell holding a module that
+came with the ship, and that the player does not own a copy of, carries a small grey
+"SHIP" in its top right, the same distinction the rows draw. `needsCompactSlotText`
+measures every slot's name with `LazyFont.calcWidth` and picks one font for the whole
+row, so a name too long for the body font never leaves the two cells in different
+typefaces.
+
+The selected cell is the target slot; FIT reads "FIT IN SLOT n"
 and every row and the detail pane are judged against it. Without a second slot the
 shelf looks as it did with one slot. A module fitted in the other slot, or one that
 shares an exclusion group with it, is blocked for the target slot: its row name is
@@ -45,7 +55,10 @@ grey at 0.6 alpha with an "IN SLOT n" or "CONFLICT" mark, FIT and SELECT are not
 live, and a hotspot past the mark ring carries a hover naming the slot or the
 conflicting module. A blocked row stays selectable so the detail pane can say why; for an owned or ship
 module that line replaces the "fitting it is free" price line. The detail header's
-accent, like the row, is judged against the target slot (`ShopEntry.isDone(slot)`).
+accent, like the row, is judged against the target slot (`ShopEntry.isDone(slot)`), and
+so is its subtitle: it names the target as "FITTING SLOT n" unless the module is already
+in that slot, and goes green only when it is. A module fitted in the rig's other slot
+reads grey there, matching its grey row, and the subtitle names both slots.
 A ship module shows "SHIP" where an owned module shows "OWNED".
 
 Treasure result rows normally use the chest rarity colour, read from

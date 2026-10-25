@@ -11,9 +11,11 @@ public enum ShopGroup {
     DRONES("Drones", "Drones", "shop_rod", "catchrelease_rod"),
     HARPOON("Harpoon", "Harpoon", "shop_harpoon", "catchrelease_harpoon"),
     THE_CATCH("The catch", "Catch", "pane_fish"),
+    // declaration order is category-row order: the module shelves follow the same rig order as the
+    // upgrade shelves above them, so the two rows do not present the same three rigs differently
+    SEARCHLIGHT_RIG("Lens Arrays", "Lens Arrays", "shop_lights_modifiers", "catchrelease_searchlights"),
     DRONE_TACKLE("Drone Cores", "Drone Cores", "shop_rod_modifiers", "catchrelease_rod"),
-    HARPOON_TIPS("Harpoon Tips", "Harpoon Tips", "shop_harpoon", "catchrelease_harpoon"),
-    SEARCHLIGHT_RIG("Lens Arrays", "Lens Arrays", "shop_lights_modifiers", "catchrelease_searchlights");
+    HARPOON_TIPS("Harpoon Tips", "Harpoon Tips", "shop_harpoon", "catchrelease_harpoon");
 
     public final String title;
     public final String tabTitle;
