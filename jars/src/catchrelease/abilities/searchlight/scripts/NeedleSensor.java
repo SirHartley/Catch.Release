@@ -32,8 +32,8 @@ import java.util.Set;
 public class NeedleSensor {
 
     public static final float CHECK_SECONDS = 0.5f;
-    public static final float INTERVAL_MIN = 6f;
-    public static final float INTERVAL_MAX = 12f;
+    public static final float INTERVAL_MIN = 10f;
+    public static final float INTERVAL_MAX = 20f;
     // Rings stay where they were emitted. A mote circling an anchor laps its circle fast enough that rings this far
     // apart land at scattered points on it; closer ones trace the orbit.
     public static final float CIRCLING_INTERVAL_MIN = 1.5f;
@@ -41,7 +41,7 @@ public class NeedleSensor {
 
     public static final float RADIUS = 180f;
     public static final float RIPPLE_SECONDS = 5f;
-    public static final float RING_WIDTH = 4f;
+    public static final float RING_WIDTH = 3f;
     public static final Color RIPPLE_COLOR = new Color(170, 200, 230);
 
     private final SearchlightAbilityPlugin owner;
@@ -77,7 +77,7 @@ public class NeedleSensor {
         @Override
         public void render(CampaignEngineLayers layer, ViewportAPI viewport) {
             if (isExpired() || !viewport.isNearViewport(location, size)) return;
-            float alpha = Math.max(0f, Math.min(1f, viewport.getAlphaMult()));
+            float alpha = Math.max(0f, Math.min(0.7f, viewport.getAlphaMult()));
             if (alpha <= 0f) return;
             color = new Color(RIPPLE_COLOR.getRed(), RIPPLE_COLOR.getGreen(), RIPPLE_COLOR.getBlue(),
                     Math.min(255, Math.round(RIPPLE_COLOR.getAlpha() * alpha * Setting.NEEDLE_VISIBILITY.mult())));

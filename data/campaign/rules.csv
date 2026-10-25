@@ -2632,9 +2632,9 @@ catchrelease_t1Offer,CatchReleaseT1Offer,"$catchreleaseChainT1Offer
 $catchreleaseChainT1Placed","CatchReleaseCMD highlightFishText $catchreleaseChainT1System ""treasure""
 CatchReleaseCMD showChainMap t1 ""Target: $catchreleaseChainT1System""","""The $catchreleaseChainT1System. The crews working there have been bringing up a lot more treasure than usual.""
 
-""There's also a bit of a personal request. The fabric took something of mine in that place.""
+""I'd like you to look for something of mine while you're there. Lost it to the fabric.""
 
-""It won't release it to me, but you got better odds. You'll find it under the lights, coming up with the catch. Bring it back to me and there's some very worthwhile equipment in it for you. No hurry on it.""","catchrelease_t1Accept:""I'll look for it.""
+""I haven't been able to get it back myself. You might have better luck. Work under the lights and watch what comes up with the catch. Bring it back and I'll see you're properly equipped for the trouble. No hurry on it.""","catchrelease_t1Accept:""I'll look for it.""
 catchrelease_t1Decline:""Not right now.""",
 catchrelease_t1OfferNone,CatchReleaseT1Offer,,,"""Nothing worth sending you after.""",catchrelease_fisherBack:Continue,
 catchrelease_t1Accept,DialogOptionSelected,$option == catchrelease_t1Accept,"HideMapMarker
@@ -2732,7 +2732,7 @@ catchrelease_t2CaptainLost,CatchReleaseT2Captain,$catchreleaseChainT2Lost,,"The 
 
 ""Still, you found her, that's more than I've managed in a long while. The crew have your whole run on the plot now. She'll turn up again. Always does, and I'll be there.""",catchrelease_t2CaptainLostPay:Continue,
 catchrelease_t2CaptainLostPay,DialogOptionSelected,$option == catchrelease_t2CaptainLostPay,"CatchReleaseCMD t2Complete
-SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""I'll be travelin' light for the next chapter. Care for an extra boat? It's a special one, made for harpoonin', and honed across many years of hunting. Got a history, that one.""",100:catchrelease_fleetResolutionLeave:Leave,
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""I'll be travelin' light for the next chapter. Take the harpoon boat. I've spent years getting her how I want her, and what good's it done me? You got closer in a day. Go on, before I change my mind.""",100:catchrelease_fleetResolutionLeave:Leave,
 catchrelease_t2CaptainNone,CatchReleaseT2Captain,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is busy getting his fleet under way. He raises a hand to the pickup.
 
 ""Tell the old man I'm obliged to him.""",100:catchrelease_fleetResolutionLeave:Leave,
@@ -2761,7 +2761,7 @@ CatchReleaseCMD t2Debrief","""You've a Needle Sensor on your lights already, I s
 catchrelease_t2SensorGive,CatchReleaseT2Sensor,,"CatchReleaseCMD highlightFishText ""Needle Sensor"" ""Come back and see me once you have it.""
 CatchReleaseCMD t2Debrief","A deckhand brings up a data chip and passes it across.
 
-""Here, that's a Needle Sensor. It'll tell you where the rarer patterns are sitting while the lights are off. The Outfitter can build it. Come back and see me once you have it built. I've something I'd like you to look at.""",catchrelease_fisherBack:Continue,
+""Plans for a Needle Sensor. It'll find the rarer patterns with your lights off. Have the Outfitter build you one. Come back and see me once you have it. There's something I'd like you to look at.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman chain T3: the wounded epic,,,,,,
 catchrelease_fisherOptT3,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
@@ -2794,20 +2794,20 @@ catchrelease_t3HandInTrade,CatchReleaseT3HandIn,$catchreleaseChainT3MarketPlaced
 CatchReleaseCMD showChainMap t3trade ""Target: $catchreleaseChainT3Market""
 CatchReleaseCMD t3Complete","""Did you, now? Good work. That one would have kept a lesser crew busy for months.""
 
-A deckhand passes you a data chip. ""That's range data. Somewhere to go next.""
+A deckhand passes you a data chip. ""Range data, somewhere to go next.""
 
-""I got something else for you, if you're interested. A man on $catchreleaseChainT3Market in the $catchreleaseChainT3MarketSystem sent word asking for my help. He's sitting on an old Reliquary-Class drone tender, and he's no use for her. I'd say he'd trade her for that fish in your hold. You'll find him in the bar. Most nights, by the sound of him.""",catchrelease_fisherBack:Continue,
+""There's an old acquaintance on $catchreleaseChainT3Market in the $catchreleaseChainT3MarketSystem trying to sell a drone tender you could use. Go and hear what he's asking. You'll find him in the bar. Most nights, by the sound of him.""",catchrelease_fisherBack:Continue,
 catchrelease_t3HandInNone,CatchReleaseT3HandIn,,,"""Did you, now? Good work. Give me a little while to settle what you're owed, and ask me again.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman chain T3: the Reliquary trade,,,,,,
-catchrelease_t3DrunkAdd,AddBarEvents,CatchReleaseCMD t3TradeHere,"AddBarEvent catchrelease_t3Drunk ""Approach the Reliquary's owner"" ""The man who sent for the Fisherman is at the bar, leaning heavily on one elbow. He is trying to sell the bartender a ship. The bartender asks him to pay for his drink."" highlight",,,
+catchrelease_t3DrunkAdd,AddBarEvents,CatchReleaseCMD t3TradeHere,"AddBarEvent catchrelease_t3Drunk ""Approach the sloshed spacer"" ""The man who sent for the Fisherman is at the bar, leaning heavily on one elbow. He is trying to sell the bartender a ship. The bartender is asking him to pay for his drink instead."" highlight",,,
 catchrelease_t3Drunk,DialogOptionSelected,$option == catchrelease_t3Drunk,"CatchReleaseCMD tokens
 FireBest CatchReleaseT3DrunkGreeting",,,
 catchrelease_t3DrunkGreetFirst,CatchReleaseT3DrunkGreeting,!$market.catchrelease_t3DrunkMet,"$market.catchrelease_t3DrunkMet = true
 CatchReleaseCMD highlightFishText ""Three trophy fish""
 FireAll CatchReleaseT3DrunkOptions","""There he is!"" The man reaches for your hand and catches your sleeve. ""No. You're not him. Sorry, Captain. Did he send you? I asked him to send someone.""
 
-""I've a Reliquary to sell. She's old, but she's... well, she's old. I've asked everyone in here. Nobody wants her."" He tries to straighten on the stool. ""Fish, though. People want fish. Those trophy ones you spend months chasing. Get the right buyer and I'd be set. Worth more than I'd ever get for her.""
+""I've a drone tender to sell. She's old, but she's... well, she's old. I've asked everyone in here. Nobody wants her."" He tries to straighten on the stool. ""Fish, though. People want fish. Those trophy ones you spend months chasing. Get the right buyer and I'd be set. Worth more than I'd ever get for her.""
 
 ""Three trophy fish. You bring me those, you can have the ship. All of her. I'm finished with ships.""",,
 catchrelease_t3DrunkGreetAgain,CatchReleaseT3DrunkGreeting,$market.catchrelease_t3DrunkMet,"CatchReleaseCMD highlightFishText $catchreleaseChainT3Price
@@ -2820,7 +2820,7 @@ catchrelease_t3DrunkOptLeave,CatchReleaseT3DrunkOptions,,SetShortcut catchreleas
 catchrelease_t3DrunkHaggle,DialogOptionSelected,$option == catchrelease_t3DrunkHaggle,"CatchReleaseCMD highlightFishText ""Two fish""
 CatchReleaseCMD t3Haggle
 CatchReleaseCMD tokens
-FireAll CatchReleaseT3DrunkOptions","He begins telling you what he paid for the Reliquary, but loses the figure halfway through. ""That was before... never mind what I paid. Two fish. You take her, I get the fish. Yes. I can live with two.""",,
+FireAll CatchReleaseT3DrunkOptions","He begins telling you what he paid for the tender, but loses the figure halfway through. ""That was before... never mind what I paid. Two fish. You take her, I get the fish. Yes. I can live with two.""",,
 catchrelease_t3DrunkPay,DialogOptionSelected,$option == catchrelease_t3DrunkPay,"CatchReleaseCMD t3Trade
 SetShortcut catchrelease_t3DrunkLeave ESCAPE","He takes a data chip from under his glass and wipes it on his sleeve. ""Transfer codes. There's her berth number, too. You'll need that. She's yours now.""
 
@@ -3458,14 +3458,14 @@ catchrelease_introCuriousIntercepted,DialogOptionSelected,"$option == catchrelea
 $entity.catchrelease_intercepted",,"""It's a patch of unstable realspace. We use it to fish. Come alongside and I'll get you equipped, if you want. You can have a look at our catch while the deck crews are busy, but you'll learn more bringing in one of your own.""","catchrelease_intro_rod:""All right. Bring the rig over.""
 catchrelease_fisherBack:""No, thanks. I was only curious.""",
 catchrelease_introCuriousFish,DialogOptionSelected,"$option == catchrelease_introCuriousFish
-!$entity.catchrelease_intercepted",,"""We fish for fish. Didn't see that one coming, did you?"" he grins at you with the satisfaction of having landed a joke told a thousand times before, then settles back into a stoic demeanor.
+!$entity.catchrelease_intercepted",,"""Fish, Captain. Says so on the crates."" He grins and lets you look at the loading deck behind him.
 
 ""We trawl the breaches and pull up fish using heavy equipment. It's not glorious, but it pays the bills.""","catchrelease_intro_rod:""Okay. Got a spare rig?""
 catchrelease_fisherBack:""That's not for me.""",
 catchrelease_introCurious,DialogOptionSelected,"$option == catchrelease_introCurious
 !$entity.catchrelease_intercepted",,"""Fishing. There's a market for what comes through a breach, if you can get it aboard. Want to try? I've got a rig you can use.""","catchrelease_intro_rod:""I'll try it. Bring the rig over.""
 catchrelease_fisherBack:""No, thanks. I was only curious.""",
-catchrelease_introSpawnQuestion,DialogOptionSelected,$option == catchrelease_introSpawnQuestion,,"""I was nearby. A fishing fleet is small and hard to spot, your sensor officer probably just missed our signature. Now, about the ruputre.""","10:catchrelease_introCurious:""What is this place?""
+catchrelease_introSpawnQuestion,DialogOptionSelected,$option == catchrelease_introSpawnQuestion,,"""Nearby. We're easy to miss with the rigs stowed. Your sensor officer has plenty else to watch out here. Were you going to try the rupture?""","10:catchrelease_introCurious:""What is this place?""
 100:catchrelease_fisherBack:""I'm not interested.""",
 catchrelease_introRodQuestion,DialogOptionSelected,$option == catchrelease_introRodQuestion,,"""ROD device.""
 
@@ -3487,11 +3487,9 @@ catchrelease_introRodOperateOption,CatchReleaseIntroRodQuestions,!$catchrelease_
 catchrelease_introRodTrustOption,CatchReleaseIntroRodQuestions,!$catchrelease_introAskedRodTrust,,,"catchrelease_introRodTrust:""You hand this to anyone who asks?""",
 catchrelease_introRodContinueOption,CatchReleaseIntroRodQuestions,,,,"100:catchrelease_introRodGo:""I'll bring you a fish.""",
 catchrelease_introRodOperate,DialogOptionSelected,$option == catchrelease_introRodOperate,"$catchrelease_introAskedRodOperate = true
-FireAll CatchReleaseIntroRodQuestions","Availability is confirmed and your ops chief starts barking commands to receive the new equipment. The LYNE drone coming across on the trawler's cargo boom is the size of a medium fighter, maneuvering gear built around an arcane-looking central assembly.
+FireAll CatchReleaseIntroRodQuestions","""Bring the fleet close to a rupture and activate the ROD. Let it finish opening, then pick a spot inside and activate it again to send the drone in. It'll go after the fish nearby and bring the catch back.""
 
-""Yes, that's the right figure,"" the Fisherman tells your officer doing a double take on the emissions profile. ""Give it some room on the working deck. You'll want that clear when it launches; the exhaust isn't good for your health.""
-
-He sends your helm a nav mark. ""There's a patch nearby you can start with. Bring back a fish and we'll go over the retrieval.""",,
+He has the controls sent to your helm. ""Activate it while the drone's hunting if you want to recall it. Give it room to come home.""",,
 catchrelease_introRodTrust,DialogOptionSelected,$option == catchrelease_introRodTrust,"$catchrelease_introAskedRodTrust = true
 FireAll CatchReleaseIntroRodQuestions","""No. I give it to captains that will not squander it. You've got a working ship and a crew who can handle it, and the rig won't earn either of us much sitting on my deck and taking up space.""",,
 catchrelease_introRodGo,DialogOptionSelected,$option == catchrelease_introRodGo,"FireBest CatchReleaseIntroBrief
@@ -3553,7 +3551,7 @@ CatchReleaseCMD tokens
 $catchreleaseStage == 3
 $catchreleaseDeepHandoff","$option = catchrelease_introDeepGear 0
 FireBest DialogOptionSelected",,,
-catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,FireAll ShopIntroQuestions,"""A place to buy parts, upgrades and rig modules. Every fishing fleet worth their salt has one aboard; as does this one. You'll have a better idea what you want now you've done some fishing. Have a look through it; ask if something isn't clear.""",,
+catchrelease_introShopLook,DialogOptionSelected,$option == catchrelease_introShopLook,FireAll ShopIntroQuestions,"""Our workshop. We can build modules for your rig and improve the equipment you've already got. You'll find the prices listed. Have a look through it; ask if something isn't clear.""",,
 catchrelease_introAskTackleOption,ShopIntroQuestions,!$catchrelease_introAskedTackle,,,"0:catchrelease_introAskTackle:""What are rig modules?""",
 catchrelease_introAskUpgradeOption,ShopIntroQuestions,!$catchrelease_introAskedUpgrade,,,"0:catchrelease_introAskUpgrade:""What is an upgrade?""",
 catchrelease_introAskWhereOption,ShopIntroQuestions,!$catchrelease_introAskedWhere,,,"0:catchrelease_introAskWhere:""Where can I find schematics?""",

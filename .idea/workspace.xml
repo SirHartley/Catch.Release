@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="fixed reliquary sprite &amp; lyne drone">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="ruuuules">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Changelog" beforeDir="false" afterPath="$PROJECT_DIR$/Changelog" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data/campaign/rules.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/campaign/rules.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/scripts/NeedleSensor.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/abilities/searchlight/scripts/NeedleSensor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/chain/ReliquaryTrade.java" beforeDir="false" afterPath="$PROJECT_DIR$/jars/src/catchrelease/campaign/fish/fisherman/chain/ReliquaryTrade.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,7 +146,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="todos" />
     <MESSAGE value="trail adjutments" />
     <MESSAGE value="adjustments" />
     <MESSAGE value="Removed leftover files" />
@@ -168,7 +170,8 @@
     <MESSAGE value="boat setup" />
     <MESSAGE value="sprite and wep fixes" />
     <MESSAGE value="fixed reliquary sprite &amp; lyne drone" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed reliquary sprite &amp; lyne drone" />
+    <MESSAGE value="ruuuules" />
+    <option name="LAST_COMMIT_MESSAGE" value="ruuuules" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

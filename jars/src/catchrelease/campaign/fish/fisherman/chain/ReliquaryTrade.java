@@ -85,8 +85,6 @@ public final class ReliquaryTrade {
                 info.addPara("Return to the nearest fishing boat", text, pad);
             } else {
                 info.addPara("Find the man in the bar on %s", pad, text, h, getMarketName());
-                info.addPara("Trade him %s epic fish for his %s", 0f, text, h, String.valueOf(getPrice()),
-                        getShipName()).setHighlightColors(FishRarity.EPIC.color, h);
             }
             unindent(info);
         }
