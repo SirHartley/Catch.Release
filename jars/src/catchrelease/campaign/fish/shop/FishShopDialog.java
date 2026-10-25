@@ -890,8 +890,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
+            // an upgrade carries no tackle, so an unguarded blocker == entry.tackle matched null to null
             Tackle blocker = entry.getBlocker(slot);
-            if (blocker == entry.tackle) {
+            if (blocker != null && blocker == entry.tackle) {
                 info.addPara("Fitted in slot %s. A module can fill only one slot of a rig.", 16f, Misc.getGrayColor(),
                         Misc.getHighlightColor(), String.valueOf(2 - slot));
             } else if (blocker != null) {
