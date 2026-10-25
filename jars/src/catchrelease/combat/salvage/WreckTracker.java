@@ -48,6 +48,8 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
     // The wing id is read while the fighter is alive; whether a wreck keeps its wing is unverified.
     private final Map<ShipAPI, String> candidates = new LinkedHashMap<>();
     private final List<Wreck> wrecks = new ArrayList<>();
+    // Salvaged wrecks fading out at the dock.
+    private final List<ShipAPI> fading = new ArrayList<>();
     private float topUp;
 
     private static final class Wreck {
@@ -88,15 +90,26 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
 
     // Raises the wreck chance of an eligible enemy fighter just before its hull is damaged, so it is in place if the
     // hit kills it. An override someone else already set, such as 0 on fighters a Reliquary launches, is kept.
+    // A wreck in a drone's clamps or fading out aboard takes no hull damage (true negates it): all of a hulk's hull
+    // damage is overkill, and past three times its hitpoints the engine blows it up (Ship.applyDamageInner,
+    // 0.98a-RC8). Pinned at the dock it keeps touching the tender, and a fighter with dead engines collides as SHIP
+    // whatever class it is given.
     @Override
     public boolean notifyAboutToTakeHullDamage(Object param, ShipAPI ship, Vector2f point, float damageAmount) {
-        if (!ship.isFighter() || ship.isHulk() || candidates.containsKey(ship) || ship.getHulkChanceOverride() >= 0f) {
+        if (ship.isHulk()) return isHeld(ship);
+        if (!ship.isFighter() || candidates.containsKey(ship) || ship.getHulkChanceOverride() >= 0f) {
             return false;
         }
         if (!hasEnemyTender(ship.getOwner()) || !isSalvageable(ship) || ship.getWing() == null) return false;
         ship.setHulkChanceOverride(Setting.LYNE_WRECK_CHANCE.mult());
         candidates.put(ship, ship.getWing().getWingId());
         return false;
+    }
+
+    private boolean isHeld(ShipAPI wreck) {
+        if (fading.contains(wreck)) return true;
+        Wreck entry = find(wreck);
+        return entry != null && entry.claimant != null;
     }
 
     private boolean hasEnemyTender(int owner) {
@@ -126,6 +139,7 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
     public void advance(float amount, List<InputEventAPI> events) {
         if (engine.isPaused()) return;
         tenders.removeIf(tender -> !tender.isAlive() || !engine.isEntityInPlay(tender));
+        fading.removeIf(wreck -> !engine.isEntityInPlay(wreck));
 
         for (Iterator<Map.Entry<ShipAPI, String>> it = candidates.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<ShipAPI, String> entry = it.next();
@@ -151,7 +165,7 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
             if (wreck.claimant != null && (!wreck.claimant.isAlive() || !engine.isEntityInPlay(wreck.claimant))) {
                 release(wreck);
             }
-            if (topUpNow && shouldTopUp(wreck.age, wreck.claimant != null)) holdFade(wreck.ship);
+            if (topUpNow && shouldTopUp(wreck.age, wreck.claimant != null)) setFadeTimer(wreck.ship, FADE_TIMER);
         }
     }
 
@@ -160,8 +174,9 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
         return claimed || age < HOLD_TIME - FADE_TIMER;
     }
 
-    private static void holdFade(ShipAPI wreck) {
-        if (fadeFieldMissing) return;
+    // Whether the timer could be set.
+    private static boolean setFadeTimer(ShipAPI wreck, float seconds) {
+        if (fadeFieldMissing) return false;
         try {
             if (fadeField == null) {
                 List<ReflectedField> fields = ReflectionUtils.getFieldsMatching(wreck.getClass(), FADE_FIELD,
@@ -170,14 +185,16 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
                     fadeFieldMissing = true;
                     Global.getLogger(WreckTracker.class).warn("No " + FADE_FIELD + " on "
                             + wreck.getClass().getName() + "; fighter wrecks fade at the normal time");
-                    return;
+                    return false;
                 }
                 fadeField = fields.get(0);
             }
-            fadeField.set(wreck, FADE_TIMER);
+            fadeField.set(wreck, seconds);
+            return true;
         } catch (RuntimeException e) {
             fadeFieldMissing = true;
-            Global.getLogger(WreckTracker.class).warn("Could not hold fighter wreck fade", e);
+            Global.getLogger(WreckTracker.class).warn("Could not set fighter wreck fade", e);
+            return false;
         }
     }
 
@@ -227,14 +244,17 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
         wreck.claimant = null;
     }
 
-    // The wreck is aboard: it leaves the battle and its fighter goes into the tender's store.
+    // The wreck is aboard: its fighter goes into the tender's store and the wreck fades out through the engine's
+    // own 0.5 s hulk fade (timer at 0), which removes it when done; it is only removed outright if the timer cannot
+    // be set.
     public void salvaged(ShipAPI tender, ShipAPI wreck) {
         Wreck entry = find(wreck);
         if (entry != null) {
             wrecks.remove(entry);
             FighterStore.forBattle(engine, tender.getFleetMemberId()).add(entry.wingId, FighterStore.getCap());
         }
-        engine.removeEntity(wreck);
+        fading.add(wreck);
+        if (!setFadeTimer(wreck, 0f)) engine.removeEntity(wreck);
     }
 
     // Whether the tender's store has room for one more wreck, counting the wrecks its drones already hold.

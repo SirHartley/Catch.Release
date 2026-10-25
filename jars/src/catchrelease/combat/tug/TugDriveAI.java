@@ -49,18 +49,29 @@ public class TugDriveAI implements ShipSystemAIScript {
             Vector2f point = tether.getTargetPoint(new Vector2f());
             Vector2f rope = Vector2f.sub(point, mount, null);
             float distance = rope.length();
+            // The catch's own speed away along the rope: on a taut rope the two move together, so their relative
+            // speed reads near zero while a light catch drags the tug.
             float separating = 0f;
             if (distance > 0f) {
                 rope.scale(1f / distance);
-                separating = Vector2f.dot(Vector2f.sub(caught.getVelocity(), ship.getVelocity(), null), rope);
+                separating = Vector2f.dot(caught.getVelocity(), rope);
             }
-            use = caught.getOwner() != ship.getOwner() && shouldHaul(distance >= tether.getLength() * TAUT_SHARE,
+            use = isTowing(tether) && shouldHaul(distance >= tether.getLength() * TAUT_SHARE,
                     caught.getMass() / Math.max(1f, ship.getMass()), separating);
         } else {
             use = shouldEscape(ship.getHullLevel(), flags.hasFlag(AIFlags.BACKING_OFF)
                     || flags.hasFlag(AIFlags.NEEDS_HELP) || missileDangerDir != null);
         }
         if (use) ship.giveCommand(ShipCommand.USE_SYSTEM, null, 0);
+    }
+
+    // TugPilot lets go of a catch it does not want, a friend hooked by chance among them, in the frame it decides;
+    // until it has, the drive waits. The pilot runs after this AI in the frame, so that is at most one interval.
+    private boolean isTowing(Tether tether) {
+        for (TugPilot pilot : ship.getListeners(TugPilot.class)) {
+            if (pilot.getTowing() == tether) return true;
+        }
+        return false;
     }
 
     private boolean isUsable() {
