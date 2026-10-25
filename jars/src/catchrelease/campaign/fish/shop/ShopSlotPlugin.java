@@ -1,6 +1,8 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.config.FishingSounds;
 import catchrelease.rendering.helper.RoundedBorder;
 import catchrelease.ui.ShopUi;
@@ -24,11 +26,13 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
 
     protected final int slot;
     protected final Tackle fitted;
+    protected final boolean shipModule;
     protected final Host host;
     protected PositionAPI pos;
 
     protected transient LazyFont.DrawableString label;
     protected transient LazyFont.DrawableString content;
+    protected transient LazyFont.DrawableString origin;
 
     public interface Host {
 
@@ -41,6 +45,10 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         this.slot = slot;
         this.fitted = fitted == null ? Tackle.NONE : fitted;
         this.host = host;
+        // the distinction the rows draw as SHIP against OWNED: a module that comes with the ship is not the
+        // player's, and a cell that shows both alike cannot say which one it is holding
+        this.shipModule = this.fitted != Tackle.NONE && FishingShips.isShipModule(this.fitted)
+                && !TackleManager.isOwned(this.fitted);
     }
 
     @Override
@@ -91,6 +99,16 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         Color color = fitted == Tackle.NONE ? Misc.getGrayColor() : Misc.getPositiveHighlightColor();
         content.setBaseColor(ShopUi.withAlpha(color, alphaMult));
         content.draw(Math.round(x + TEXT_PAD), Math.round(y + 6f + content.getHeight()));
+
+        if (!shipModule) return;
+
+        if (origin == null) {
+            origin = ShopUi.createText(small, "SHIP");
+            origin.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
+        }
+
+        origin.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
+        origin.draw(Math.round(x + width - TEXT_PAD), Math.round(y + height - 5f));
     }
 
     @Override

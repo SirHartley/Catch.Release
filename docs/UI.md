@@ -40,7 +40,9 @@ shows two `ShopSlotPlugin` cells above the module list: half the list width each
 is a black well with a dark-player tint and a full `RoundedBorder` outline, bright and
 2px while it is the target slot. It carries no bottom accent bar, because the category
 tabs directly above it are a flat fill plus that accent and no outline; the two rows
-pick different things and must not read as one control. The selected cell is the target slot; FIT reads "FIT IN SLOT n"
+pick different things and must not read as one control. A cell holding a module that
+came with the ship, and that the player does not own a copy of, carries a small grey
+"SHIP" in its top right, the same distinction the rows draw. The selected cell is the target slot; FIT reads "FIT IN SLOT n"
 and every row and the detail pane are judged against it. Without a second slot the
 shelf looks as it did with one slot. A module fitted in the other slot, or one that
 shares an exclusion group with it, is blocked for the target slot: its row name is
