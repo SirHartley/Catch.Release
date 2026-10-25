@@ -129,6 +129,8 @@ public final class FishermanChain {
         public String t3PlanetId;
         public String t3PlanetName;
         public String t3SpeciesId;
+        // degrees round the planet where the epic was first placed; every respawn starts there
+        public Float t3SpawnAngle;
         // the Reliquary's owner drinks at this market's bar; a story point brings his price down once
         public String t3MarketId;
         public String t3MarketName;
