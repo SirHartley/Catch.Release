@@ -1195,7 +1195,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
             if (receipt.marked) ShopMarks.mark(receipt.markKey);
 
             selectedKey = receipt.entryKey;
-            showSelected(entry);
+            showSelected(entry, receipt.slot);
             refreshWallet();
             rebuild(true);
 
@@ -1210,12 +1210,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
          * {@code selectedKey}: the pane then fell back to the first visible entry while nothing
          * matched for highlighting.
          */
-        protected void showSelected(ShopEntry entry) {
+        protected void showSelected(ShopEntry entry, int slot) {
             if (entry == null) return;
 
             mainTab = entry.kind;
             category = entry.group;
-            targetSlot = 0;
+            // the slot the refund put the previous module back into; getTargetSlot clamps it if that slot has gone
+            targetSlot = slot;
         }
 
         protected ShopEntry findEntry(String key) {
