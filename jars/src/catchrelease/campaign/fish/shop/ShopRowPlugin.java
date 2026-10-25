@@ -17,7 +17,8 @@ public class ShopRowPlugin extends ListRow {
     public static final float PIP_GAP = 3f;
     public static final float PAD_SIDE = 10f;
 
-    public static final float MARK_SLOT = 18f;
+    // the whole gap between the accent bar and the name, so the ring sits centred in it
+    public static final float MARK_SLOT = 22f;
     public static final float MARK_RADIUS = 5f;
 
     protected final ShopEntry entry;
@@ -127,7 +128,7 @@ public class ShopRowPlugin extends ListRow {
         name.setBaseColor(ShopUi.withAlpha(color, (isBlocked() ? 0.6f : 1f) * alphaMult));
 
         // rounded to the pixel - bitmap fonts blur off-pixel. Indented past the ring's slot whether or not this row draws one, so the names stay in a column
-        name.draw(Math.round(x + ACCENT_WIDTH + MARK_SLOT + 4f),
+        name.draw(Math.round(x + ACCENT_WIDTH + MARK_SLOT),
                 Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
     }
 
