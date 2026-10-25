@@ -175,7 +175,7 @@ invalid-position recovery, overlapping and companion stars, long-frame dashes,
 buried movement, formation clearance, and the False Dawn/ordinary-fish exclusions.
 `tools/LonglinerHauntChecks` covers segmented-shield
 geometry, swept harpoon hits through gaps, explosive adjacency, shield persistence,
-decoy start/stop at section hits, lamp-bound shield visibility through dives,
+decoy start/stop at section hits, shield visibility from lamps and the dive fade,
 independent swirling movement, separation/replenishment, opposite rotation and encounter cleanup.
 `tools/LonglinerCleanupChecks` covers immediate relocation on failure or a missing
 revealed mote, held-catch deferral, no-alternative suppression, boat/light teardown,
@@ -767,7 +767,7 @@ from the player with stellar clearance, and each swim segment avoids coronae.
 Held catches cannot be moved by the school; copies keep swimming without teleporting
 when the harpoon drags the real fish. Phantoms have no targetable body or shield, and their dive
 visibility comes from the real fish. Lamp visibility remains local to each mote.
-Shields stay visible through dives while lit; their drawing contract is in
+Shields fade out with the body during a dive; their drawing contract is in
 [UI.md](UI.md#drawing-gotchas).
 
 The Moray keeps its mixed campaign movement and fleeing weave. `FishEntityPlugin`
