@@ -2721,20 +2721,18 @@ catchrelease_t2CaptainSearching,CatchReleaseT2Captain,$catchreleaseChainT2Search
 catchrelease_t2CaptainHunt,CatchReleaseT2Captain,$catchreleaseChainT2Hunt,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is leaning over the plot table when the link opens. Your lamp returns are up on his display.
 
 ""That's her, right enough. What are you doing on the comms? Away and get a harpoon in her before she's off again.""",100:catchrelease_fleetResolutionLeave:Leave,
-catchrelease_t2CaptainCaught,CatchReleaseT2Captain,$catchreleaseChainT2Caught,"CatchReleaseCMD t2Complete
-SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The link opens on a bridge full of noise. Somebody behind the captain is singing, badly.
+catchrelease_t2CaptainCaught,CatchReleaseT2Captain,$catchreleaseChainT2Caught,,"The link opens on a bridge full of noise. Somebody behind the captain is singing, badly.
 
-""You got her! Near twenty year, and you landed her in an afternoon!"" He has to stop and wipe his eyes. ""I'm too old for this. That's me done, so it is. I'm away home to put my leg up. The one I've got left.""
-
-""You'll be wanting paid. Take the boat, she's earned a better captain than me. And the crew have dug out a few things they'll not be needing now.""",100:catchrelease_fleetResolutionLeave:Leave,
-catchrelease_t2CaptainLost,CatchReleaseT2Captain,$catchreleaseChainT2Lost,"CatchReleaseCMD t2Complete
-SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain hears you out without interrupting. When you're done he nods slowly.
+""You got her! Near twenty year, and you landed her in an afternoon!"" He has to stop and wipe his eyes. ""I'm too old for this. That's me done, so it is. I'm away home to put my leg up. The one I've got left.""",catchrelease_t2CaptainCaughtPay:Continue,
+catchrelease_t2CaptainCaughtPay,DialogOptionSelected,$option == catchrelease_t2CaptainCaughtPay,"CatchReleaseCMD t2Complete
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""You'll be wanting paid. Take the boat, she's earned a better captain than me. And the crew have dug out a few things they'll not be needing now.""",100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2CaptainLost,CatchReleaseT2Captain,$catchreleaseChainT2Lost,,"The captain hears you out without interrupting. When you're done he nods slowly.
 
 ""Aye, that's her all over. Twenty year near enough, and I've never once got her aboard.""
 
-""Still, you found her, that's more than I've managed in a long while. The crew have your whole run on the plot now. She'll turn up again. Always does, and I'll be there.""
-
-""I'll be travelin' light for the next chapter. Care for an extra boat? It's a special one, made for harpoonin', and honed across many years of hunting. Got a history, that one.""",100:catchrelease_fleetResolutionLeave:Leave,
+""Still, you found her, that's more than I've managed in a long while. The crew have your whole run on the plot now. She'll turn up again. Always does, and I'll be there.""",catchrelease_t2CaptainLostPay:Continue,
+catchrelease_t2CaptainLostPay,DialogOptionSelected,$option == catchrelease_t2CaptainLostPay,"CatchReleaseCMD t2Complete
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""I'll be travelin' light for the next chapter. Care for an extra boat? It's a special one, made for harpoonin', and honed across many years of hunting. Got a history, that one.""",100:catchrelease_fleetResolutionLeave:Leave,
 catchrelease_t2CaptainNone,CatchReleaseT2Captain,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is busy getting his fleet under way. He raises a hand to the pickup.
 
 ""Tell the old man I'm obliged to him.""",100:catchrelease_fleetResolutionLeave:Leave,
