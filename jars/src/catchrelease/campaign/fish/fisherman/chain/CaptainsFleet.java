@@ -94,6 +94,8 @@ public final class CaptainsFleet {
     public static final float VANISH_GRACE = 5f;
 
     public static final int RANGE_DATA = 3;
+    // epics never chosen as T2's or T3's quarry
+    public static final Set<String> EXCLUDED_SPECIES = Set.of("alfonzo_dopefish");
 
     // LunaLib renderers do not survive a load; register() adds it again
     protected static FleetMarkerRenderer marker;
@@ -774,9 +776,11 @@ public final class CaptainsFleet {
         return picker.pick();
     }
 
-    // An ordinary epic the lamps can find there; Lantern Jack and the other legendaries never qualify.
+    // An ordinary epic the lamps can find there; Lantern Jack and the other legendaries never qualify, and neither
+    // does the Dopefish, a deliberately poor fish that makes no hunt.
     protected static boolean isTarget(FishSpec spec, StarSystemAPI system) {
         if (spec == null || system == null || spec.rarity != FishRarity.EPIC) return false;
+        if (EXCLUDED_SPECIES.contains(spec.id)) return false;
         if (spec.spawnWeight <= 0f || !spec.hasHabitat()) return false;
 
         return FishRanges.matches(spec, system, CatchImplement.BREACH_LAMP);

@@ -120,7 +120,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **The fleet**
 - Spawned in a nearby system with **zero markets and no colonies**, preferably adjacent. The system must have a star; nebulae are never chosen.
-- It is following a rumour of an epic seen in that system. The target is an **existing epic species** whose range includes that system. It is not Lantern Jack or any other legendary.
+- It is following a rumour of an epic seen in that system. The target is an **existing epic species** whose range includes that system. It is not Lantern Jack or any other legendary, and never the Dopefish, a deliberately poor fish (`CaptainsFleet.EXCLUDED_SPECIES`). T3 uses the same rule.
 - Their Breach Lights have malfunctioned, so they cannot find it.
 
 **The captain**
