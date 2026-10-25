@@ -2,10 +2,11 @@ package catchrelease.combat.tug;
 
 import org.lwjgl.util.vector.Vector2f;
 
-// The harpoon rope's shape, the campaign harpoon's spring-driven quadratic curve and wobble (HarpoonEntityPlugin
-// advanceSlack, getRestPoint and getLinePath): the curve's middle springs toward the chord's midpoint, so it only
-// bends while the ends move, and slack shows as wobble, never as a belly to one side. No engine calls, so
-// tools/TetherRopeChecks can run it headless.
+// The harpoon rope's shape in flight, the campaign harpoon's spring-driven quadratic curve and wobble
+// (HarpoonEntityPlugin advanceSlack, getRestPoint and getLinePath): the curve's middle springs toward the chord's
+// midpoint, so it only bends while the ends move, and the line paid out ahead of the shot shows as wobble, never as a
+// belly to one side. Once the harpoon bites, RopeChain takes over. No engine calls, so tools/TetherRopeChecks can run
+// it headless.
 public class RopeCurve {
 
     public static final int SEGMENTS = 32;
@@ -18,8 +19,6 @@ public class RopeCurve {
     public static final float WAVE_DAMPING = 0.5f;
     public static final float WAVE_REFERENCE_SPEED = 500f;
     public static final float WAVE_EXCESS_FULL = 0.12f;
-    // The campaign's HAUL_SHIVER: with a ship on the end the rope is a cable, so it mostly follows the swing term.
-    public static final float HELD_SHIVER = 0.3f;
 
     private final Vector2f[] points = new Vector2f[SEGMENTS + 1];
     private Vector2f slack;
@@ -50,14 +49,14 @@ public class RopeCurve {
 
     // Quadratic Bézier through the slack point at its middle, with a wobble across the chord that is zero at both
     // ends. The returned points are reused by the next call.
-    public Vector2f[] getPath(Vector2f a, Vector2f b, float ropeLength, boolean held) {
+    public Vector2f[] getPath(Vector2f a, Vector2f b, float ropeLength) {
         float chord = Vector2f.sub(b, a, null).length();
         Vector2f across = getAcross(a, b, chord);
         float middleX = slack == null ? (a.x + b.x) * 0.5f : slack.x;
         float middleY = slack == null ? (a.y + b.y) * 0.5f : slack.y;
         float controlX = middleX * 2f - (a.x + b.x) * 0.5f;
         float controlY = middleY * 2f - (a.y + b.y) * 0.5f;
-        float shiver = chord * WAVE_AMPLITUDE * getShiver(chord, ropeLength, held);
+        float shiver = chord * WAVE_AMPLITUDE * getShiver(chord, ropeLength);
         for (int i = 0; i <= SEGMENTS; i++) {
             float t = i / (float) SEGMENTS;
             float inverse = 1f - t;
@@ -70,12 +69,11 @@ public class RopeCurve {
         return points;
     }
 
-    private float getShiver(float chord, float ropeLength, boolean held) {
+    private float getShiver(float chord, float ropeLength) {
         float excess = chord <= 0f ? 0f : Math.max(0f, ropeLength - chord) / chord / WAVE_EXCESS_FULL;
         float thrown = (float) Math.exp(-age / WAVE_DAMPING);
         float swung = slackVelocity.length() / WAVE_REFERENCE_SPEED;
-        float shiver = Math.min(1f, Math.max(excess, Math.max(thrown, swung)));
-        return held ? shiver * HELD_SHIVER : shiver;
+        return Math.min(1f, Math.max(excess, Math.max(thrown, swung)));
     }
 
     private static Vector2f getAcross(Vector2f a, Vector2f b, float chord) {
