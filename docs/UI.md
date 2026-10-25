@@ -494,7 +494,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   with a white flash and five `spawnEmpArcVisual` arcs along the rope (both skipped under
   `Setting.REDUCED_EFFECTS`), and fades over 0.3 s after release. The harpoon head is drawn here with
   normal blending, because a projectile's `bulletSprite` is always additive; the `.proj` colours are
-  transparent. The shape is `RopeCurve`, the campaign rope's spring and wobble plus a sag.
+  transparent. The shape is `RopeCurve`, the campaign line's spring and wobble: its middle springs toward the
+  chord's midpoint, so it bends only while the ends move and slack shows as wobble, never as a sideways belly.
   Viewport alpha applies, and pause freezes it (the engine does not advance entities while paused).
 - Exhaust smoke belongs below the ships. The engine draws every `CombatEngineAPI` particle (`addSmokeParticle`,
   the `addNebula*` calls) after the layered renderer, above every hull and flame; only the engines' own `SMOKE`

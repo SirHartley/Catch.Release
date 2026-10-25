@@ -209,7 +209,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - Check: the constraint maths, i.e. mass split, slack, and no pull while slack.
   - Done when: the tug can hook and drag a frigate, struggles with a cruiser, and the rope behaves when slack.
 - [x] 2.4 Rope rendering: `combat/tug/TetherRenderer`, a `BaseCombatLayeredRenderingPlugin` per tether, its entity kept at the rope's midpoint with a render radius covering the rope.
-  - **Look:** about 2 px wide, beige-white centre, brown edges, as a feathered quad strip along the campaign rope's curve and slack maths, ported from `HarpoonEntityPlugin`.
+  - **Look:** about 2 px wide, beige-white centre, brown edges, as a feathered quad strip along the campaign rope's curve and slack maths, ported from `HarpoonEntityPlugin`. It behaves like the campaign line: no sideways bow in flight or when slack.
   - **Flight and bite:** low alpha in flight, then it "materialises" on the bite, with EMP arcs racing along the rope.
   - Done when: the rope reads clearly at all zooms and looks right slack and taut.
   - Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug) and [UI.md](UI.md#drawing-gotchas). The renderer also draws the harpoon head, since a bullet sprite is always additive.
