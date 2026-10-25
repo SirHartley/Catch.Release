@@ -16,7 +16,7 @@ All three are midline. Stats for the Stigmata and Reliquary are set in `ship_dat
 
 ## Stigmata: harpoon tug
 
-A fast destroyer with classic midline stats, one modular launch bay, three small ballistic turrets and a built-in medium mount for the harpoon (`WS0001`: angle −59.5, arc 190). The mount's default angle lets the rope run past the hull while the tug burns straight away from its target.
+A fast destroyer with classic midline stats, a 180° omni shield (it hauls with its stern to the catch, so the shield must swing round), one modular launch bay, three small ballistic turrets and a built-in medium mount for the harpoon (`WS0001`: angle −59.5, arc 190). The mount's default angle lets the rope run past the hull while the tug burns straight away from its target.
 
 ### Tug hullmod
 
