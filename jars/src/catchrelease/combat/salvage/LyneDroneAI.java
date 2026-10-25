@@ -132,11 +132,11 @@ public class LyneDroneAI implements ShipAIPlugin {
         mode = Mode.IDLE;
     }
 
-    // The wreck trails behind the drone and swings round to follow it.
+    // The wreck is held in front of the drone, which pushes it home, and swings round with it.
     private void pinWreck(float amount) {
         float gap = 0.6f * (ship.getCollisionRadius() + wreck.getCollisionRadius());
-        Vector2f back = Misc.getUnitVectorAtDegreeAngle(ship.getFacing() + 180f);
-        wreck.getLocation().set(ship.getLocation().x + back.x * gap, ship.getLocation().y + back.y * gap);
+        Vector2f ahead = Misc.getUnitVectorAtDegreeAngle(ship.getFacing());
+        wreck.getLocation().set(ship.getLocation().x + ahead.x * gap, ship.getLocation().y + ahead.y * gap);
         wreck.getVelocity().set(ship.getVelocity());
         wreck.setAngularVelocity(0f);
         float step = Math.min(1f, TOW_TURN_RATE * amount);
