@@ -158,7 +158,7 @@ public class TugPilot implements AdvanceableListener {
 
     // The rope gives a dragged ship a top-speed allowance that follows its speed (see Tether), so thrust is held at the
     // hull's own top speed along the heading; past that it would build speed without end and fling the catch past
-    // friendly guns.
+    // friendly guns. The hull spec's value leaves out the Haul Drive's top-speed bonus, which is for the player.
     private void steer(float heading) {
         float difference = turnToward(heading);
         Vector2f velocity = ship.getVelocity();
