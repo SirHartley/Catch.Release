@@ -2803,40 +2803,40 @@ A deckhand passes you a data chip. ""That's range data. Somewhere to go next.""
 catchrelease_t3HandInNone,CatchReleaseT3HandIn,,,"""Did you, now? Good work. Give me a little while to settle what you're owed, and ask me again.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman chain T3: the Reliquary trade,,,,,,
-catchrelease_t3DrunkAdd,AddBarEvents,CatchReleaseCMD t3TradeHere,"AddBarEvent catchrelease_t3Drunk ""Talk to the man who sent for the Fisherman"" ""A man at the end of the bar has his head down beside a row of empty glasses. Every so often he lifts it to tell the bartender about a ship."" highlight",,,
+catchrelease_t3DrunkAdd,AddBarEvents,CatchReleaseCMD t3TradeHere,"AddBarEvent catchrelease_t3Drunk ""Approach the Reliquary's owner"" ""The man who sent for the Fisherman is at the bar, leaning heavily on one elbow. He is trying to sell the bartender a ship. The bartender asks him to pay for his drink."" highlight",,,
 catchrelease_t3Drunk,DialogOptionSelected,$option == catchrelease_t3Drunk,"CatchReleaseCMD tokens
 FireBest CatchReleaseT3DrunkGreeting",,,
 catchrelease_t3DrunkGreetFirst,CatchReleaseT3DrunkGreeting,!$market.catchrelease_t3DrunkMet,"$market.catchrelease_t3DrunkMet = true
 CatchReleaseCMD highlightFishText ""Three trophy fish""
-FireAll CatchReleaseT3DrunkOptions","He takes a while to find your face. ""The Fisherman sent you? Good. Good man, the Fisherman, depending on the man! Hah!""
+FireAll CatchReleaseT3DrunkOptions","""There he is!"" The man reaches for your hand and catches your sleeve. ""No. You're not him. Sorry, Captain. Did he send you? I asked him to send someone.""
 
-""I've got a Reliquary. Old clanker. Nobody wants her, I've tried. Everybody wants trophy fish, though. The kind a crew chases for months. Worth a lot more to the right buyer than she'll ever fetch."" He holds up three fingers and checks them. ""Three trophy fish. I sell them on, I live off it, and I never look at that ship again.""",,
+""I've a Reliquary to sell. She's old, but she's... well, she's old. I've asked everyone in here. Nobody wants her."" He tries to straighten on the stool. ""Fish, though. People want fish. Those trophy ones you spend months chasing. Get the right buyer and I'd be set. Worth more than I'd ever get for her.""
+
+""Three trophy fish. You bring me those, you can have the ship. All of her. I'm finished with ships.""",,
 catchrelease_t3DrunkGreetAgain,CatchReleaseT3DrunkGreeting,$market.catchrelease_t3DrunkMet,"CatchReleaseCMD highlightFishText $catchreleaseChainT3Price
-FireAll CatchReleaseT3DrunkOptions","He is in the same seat, or back in it. ""You again. Got my $catchreleaseChainT3Price fish?""",,
-catchrelease_t3DrunkOptPay,CatchReleaseT3DrunkOptions,,,,catchrelease_t3DrunkPay:Hand over $catchreleaseChainT3Price epic fish,
+FireAll CatchReleaseT3DrunkOptions","""I know you. We talked about..."" He catches your sleeve again. ""Don't tell me. The ship. $catchreleaseChainT3Price fish, we said. Have you brought them?""",,
+catchrelease_t3DrunkOptPay,CatchReleaseT3DrunkOptions,,,,catchrelease_t3DrunkPay:Trade $catchreleaseChainT3Price epic fish for the Reliquary,
 catchrelease_t3DrunkOptPayShort,CatchReleaseT3DrunkOptions,!$catchreleaseChainT3CanPay,"SetEnabled catchrelease_t3DrunkPay false
-SetTooltip catchrelease_t3DrunkPay ""You need $catchreleaseChainT3Price epic fish in your cargo.""",,,
-catchrelease_t3DrunkOptHaggle,CatchReleaseT3DrunkOptions,!$catchreleaseChainT3Haggled,"SetStoryOption catchrelease_t3DrunkHaggle 1 avoidCargoScan ui_char_spent_story_point ""Talked a drunk down to two epics for his Reliquary""",,"catchrelease_t3DrunkHaggle:""Three is steep for a ship nobody wants.""",
+SetTooltip catchrelease_t3DrunkPay ""Requires $catchreleaseChainT3Price epic fish in your cargo.""",,,
+catchrelease_t3DrunkOptHaggle,CatchReleaseT3DrunkOptions,!$catchreleaseChainT3Haggled,"SetStoryOption catchrelease_t3DrunkHaggle 1 avoidCargoScan ui_char_spent_story_point ""Negotiated a price of two epic fish for the Reliquary""",,"catchrelease_t3DrunkHaggle:""I'll give you two. You haven't had a better offer.""",
 catchrelease_t3DrunkOptLeave,CatchReleaseT3DrunkOptions,,SetShortcut catchrelease_t3DrunkLeave ESCAPE,,100:catchrelease_t3DrunkLeave:Leave him to his drink,
 catchrelease_t3DrunkHaggle,DialogOptionSelected,$option == catchrelease_t3DrunkHaggle,"CatchReleaseCMD highlightFishText ""Two fish""
 CatchReleaseCMD t3Haggle
 CatchReleaseCMD tokens
-FireAll CatchReleaseT3DrunkOptions","He thinks about it long enough that you wonder whether he has fallen asleep. ""Two fish. You're robbing me. I don't care. Two.""",,
+FireAll CatchReleaseT3DrunkOptions","He begins telling you what he paid for the Reliquary, but loses the figure halfway through. ""That was before... never mind what I paid. Two fish. You take her, I get the fish. Yes. I can live with two.""",,
 catchrelease_t3DrunkPay,DialogOptionSelected,$option == catchrelease_t3DrunkPay,"CatchReleaseCMD t3Trade
-SetShortcut catchrelease_t3DrunkLeave ESCAPE","He doesn't look at the fish. He pushes the ship's codes across the bar and waves for another drink.
+SetShortcut catchrelease_t3DrunkLeave ESCAPE","He takes a data chip from under his glass and wipes it on his sleeve. ""Transfer codes. There's her berth number, too. You'll need that. She's yours now.""
 
-""She's yours. Treat her better than I did. Wouldn't be hard.""",catchrelease_t3DrunkLeave:Leave him to his drink,
+He settles back against the bar. ""Look after her, will you? I haven't been much good at that.""",catchrelease_t3DrunkLeave:Leave him to his drink,
 catchrelease_t3DrunkLeave,DialogOptionSelected,$option == catchrelease_t3DrunkLeave,BarCMD returnFromEvent false,,,
 catchrelease_fisherOptT3Traded,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainT3Traded",SetOptionColor catchrelease_t3Traded highlight,,"36:catchrelease_t3Traded:""I've got the Reliquary.""",
 catchrelease_t3Traded,DialogOptionSelected,$option == catchrelease_t3Traded,"CatchReleaseCMD highlightFishText ""Lifting Rig""
-CatchReleaseCMD t3Done","The Fisherman looks the ship over on his display for longer than he needs to.
+CatchReleaseCMD t3Done","""Good. She ought to be working, not sitting in a berth while he drinks her value away. There's a Lifting Rig aboard for your drones. You'll bring up more bycatch with it, including the odd hull worth keeping.""
 
-""She'll do. She carries a Lifting Rig for your drones. It brings up more bycatch, and now and then a hull worth keeping.""
+""And that fish you landed wasn't the only one of its kind. Rare enough that some crews never see one, but you can find others. You've shown you can do the work.""
 
-""You've landed a special pattern now. There are others out there like it, but not many. You'll go a long while between them, and some crews never see one.""
-
-""There are stranger things out there, too. Talk gets round, and most of it is nonsense. Once your gear is good, very good, it's worth following anyway.""",catchrelease_fisherBack:Continue,
+""Have your gear in good order before you follow the stranger stories. Best you can afford. Most of what you'll hear is somebody improving on the telling, but I've had good fishing from a bad story. Keep an ear out.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 # fisherman chain T4 and legendary reports,,,,,,
 catchrelease_fisherOptLegendarySkip,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
@@ -2844,31 +2844,33 @@ $catchreleaseChainLegendaryReport
 $catchreleaseChainReportSkip",SetOptionColor catchrelease_legendaryReport highlight,,"36:catchrelease_legendaryReport:""I landed something you'll want to hear about.""",
 catchrelease_fisherOptLegendaryFirst,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainLegendaryReport
-$catchreleaseChainReportFirst",SetOptionColor catchrelease_legendaryReport highlight,,"36:catchrelease_legendaryReport:""I caught one of those stranger things.""",
+$catchreleaseChainReportFirst",SetOptionColor catchrelease_legendaryReport highlight,,"36:catchrelease_legendaryReport:""I think you'll want to hear about this catch.""",
 catchrelease_fisherOptLegendaryMore,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseChainLegendaryReport
-$catchreleaseChainReportMore",SetOptionColor catchrelease_legendaryReport highlight,,"36:catchrelease_legendaryReport:""I've landed another of the strange ones.""",
+$catchreleaseChainReportMore",SetOptionColor catchrelease_legendaryReport highlight,,"36:catchrelease_legendaryReport:""I've another catch to tell you about.""",
 catchrelease_legendaryReport,DialogOptionSelected,$option == catchrelease_legendaryReport,FireBest CatchReleaseLegendaryReport,,,
-catchrelease_legendaryReportSkip,CatchReleaseLegendaryReport,$catchreleaseChainReportSkip,CatchReleaseCMD legendaryReport,"The Fisherman hears you out, then laughs.
+catchrelease_legendaryReportSkip,CatchReleaseLegendaryReport,$catchreleaseChainReportSkip,CatchReleaseCMD legendaryReport,"""Well, I'd meant to work you up to that."" The Fisherman laughs. ""Had a few more jobs in mind first. No point sending you through those now, is there? I'll have what I put aside for them brought across. You've earned it.""
 
-""You've gone and skipped to the end. Everything I had lined up for you was to get you ready for one of those, and you didn't wait for it."" He calls a deckhand over. ""You can have what it would all have paid. No sense making you earn it twice.""
-
-""There's more than one of them, and no two alike. The talk about each is as bad as the last. Keep listening.""",catchrelease_fisherBack:Continue,
+""Keep listening when people tell those stories. There are others out there, all different. You'll have to learn each one for yourself.""",catchrelease_fisherBack:Continue,
 catchrelease_legendaryReportFirst,CatchReleaseLegendaryReport,$catchreleaseChainReportFirst,"CatchReleaseCMD highlightFishText ""Fanned Array""
-CatchReleaseCMD legendaryReport","""Then you know what I meant."" He doesn't ask which one it was. ""There's more than one of them, and no two alike. The talk about each is as bad as the last. Keep listening.""
+CatchReleaseCMD legendaryReport","""And you brought it in. Well done, Captain. I hope you gave your crew time to enjoy it before setting off again. There are others out there, all different. Keep listening for them; knowing how you landed this one won't tell you how to land the next.""
 
-While he talks, a ship detaches from his fleet and falls in with yours.
+A lamp ship leaves his formation to join your fleet.
 
-""She's a lamp ship, and she's yours. She carries a Fanned Array for your Breach Lights. Your lamps will cover a good deal more ground with it, but the range is shorter.""",catchrelease_fisherBack:Continue,
+""Take her with you. She's fitted with a Fanned Array for your Breach Lights. You'll lose some reach, but the beams spread wider. You should get some use out of that.""",catchrelease_fisherBack:Continue,
 catchrelease_legendaryReport2,CatchReleaseLegendaryReport,$catchreleaseChainReportIndex == 1,"CatchReleaseCMD highlightFishText ""Stigmata""
-CatchReleaseCMD legendaryReport","""Another one. Not many crews can say that.""
+CatchReleaseCMD legendaryReport","""You've got a taste for it, haven't you? That's two catches most crews wouldn't believe.""
 
-A deckhand hands you a data chip. ""Blueprint for the Stigmata. If you want more tugs, you'll need someone with a yard.""",catchrelease_fisherBack:Continue,
+A deckhand brings over the Stigmata plans. ""Take these to a yard if you want more tugs built. You've earned them.""",catchrelease_fisherBack:Continue,
 catchrelease_legendaryReport3,CatchReleaseLegendaryReport,$catchreleaseChainReportIndex == 2,"CatchReleaseCMD highlightFishText ""Reliquary""
-CatchReleaseCMD legendaryReport","""That makes three. You'll want more drone tenders before long."" He passes you a chip. ""Blueprint for the Reliquary. Same as before: find a yard.""",catchrelease_fisherBack:Continue,
+CatchReleaseCMD legendaryReport","""Three of them. I'd say you've enough for a few evenings in port. Let somebody buy you a drink for the telling.""
+
+He has the Reliquary plans sent to your ship. ""For the next time you need a tender. Have a yard build one to your liking.""",catchrelease_fisherBack:Continue,
 catchrelease_legendaryReport4,CatchReleaseLegendaryReport,$catchreleaseChainReportIndex == 3,"CatchReleaseCMD highlightFishText ""Monstrance""
-CatchReleaseCMD legendaryReport","""Four, then."" He sends a deckhand for a data chip. ""Blueprint for the Monstrance. That's the last of the ship plans I have for you.""",catchrelease_fisherBack:Continue,
-catchrelease_legendaryReportLater,CatchReleaseLegendaryReport,,CatchReleaseCMD legendaryReport,"""Another."" He shakes his head. ""I've nothing left to pay you with for these, Captain. You're doing it for the fishing now.""",catchrelease_fisherBack:Continue,
+CatchReleaseCMD legendaryReport","The Fisherman calls a deckhand over. ""Fetch the Monstrance plans for the Captain, would you?""
+
+""Four of those catches, and you've earned the full set. Those are the last ship plans I have for you. After this you'll have to make do with telling me how it went.""",catchrelease_fisherBack:Continue,
+catchrelease_legendaryReportLater,CatchReleaseLegendaryReport,,CatchReleaseCMD legendaryReport,"""Pull up a chair, Captain. I'd like to hear how you managed this one. I've nothing more to give you for it, I'm afraid, but I doubt that's why you're still going out.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,
