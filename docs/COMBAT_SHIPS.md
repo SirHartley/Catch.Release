@@ -113,13 +113,6 @@ Engine limits:
 - **Persistence:** the store carries over between battles, kept per ship. Variant ids are shared by every ship of a stock variant, so key it by fleet member id. Purge it when the ship leaves the player's fleet, for example into storage.
 - **AI:** fire when enough fighters are stored and a target in range is worth it.
 
-### Early Reliquary
-
-The player gets a version of the Reliquary early, with no blueprint. In combat it is the same ship: same hull, wings, salvage, store, launch system and refit display. It differs only in the campaign, where it does not unlock the Reployment Bays (see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#ships)).
-
-- **Form:** a hull skin (`.skin`) of `catchrelease_rod_ship` that changes nothing for combat. Its own hull id is what lets the campaign tell it apart.
-- **Combat code must treat it as a Reliquary:** a skin inherits the base hull's built-in hullmods, wings, system and stats, so the combat and refit code finds every Reliquary by its built-in Salvage Bays hullmod, never by hull id. That covers the salvage and store, the launch system, the refit swap and the discard panel; the store is keyed by fleet member id either way. A skin does not inherit tags, so it repeats `no_drop`, `no_sell` and `no_bp_drop`.
-
 ## Monstrance: Breach Trawler (later)
 
 Lower priority; the hull art does not exist yet. Real breach-light projectors on the ship. The system spools the reactor and turns on the lights for a time, with cone visuals and sounds exactly as in the campaign. The number of cones depends on the projectors fitted. The cones sweep in a circle as in the campaign, with some targeting movement.
@@ -168,7 +161,6 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 | `data/weapons/weapon_data.csv`, `data/weapons/catchrelease_harpoon.wpn`, `data/weapons/proj/catchrelease_harpoon_shot.proj` | harpoon weapon and projectile |
 | `data/shipsystems/ship_systems.csv`, `data/shipsystems/catchrelease_tug_drive.system`, `catchrelease_salvage_launch.system` | Stigmata drive, Reliquary launch |
 | `data/hulls/wing_data.csv`, `data/hulls/catchrelease_lyne_drone.ship`, a `ship_data.csv` row, `data/variants/fighters/catchrelease_lyne_drone_wing.variant` | LYNE drone wing |
-| `data/hulls/skins/catchrelease_rod_ship_early.skin` | early Reliquary |
 | `data/hulls/catchrelease_harpoon_ship.ship`, `catchrelease_rod_ship.ship` | `builtInWeapons`, `builtInMods`, `builtInWings`; these are the author's files, edited only for those keys |
 | `data/strings/descriptions.csv`, `data/config/settings.json`, `sounds.json`, `LunaSettings.csv` | descriptions, sprites, sounds, settings |
 
@@ -288,11 +280,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   3. Check: revert leaves no stored wing ids in the variant.
 - [x] 6.6 Salvage hullmod tooltip listing the store, the fallback display. Implemented in `SalvageBaysHullmod`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
 - [x] 6.7 LunaLib refit button and panel to discard stored fighters (`BaseRefitButton`). Afterwards, `refreshVariant()`. Implemented as `FighterStoreRefitButton`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). After a discard `RefitStoreView.rebuild` runs Luna's `refreshVariant` sequence itself, since it also has to put the new spec on the shown variant first.
-- [x] 6.8 Early Reliquary skin. Combat code matches it through its inherited Salvage Bays hullmod. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishships). Campaign:
-  - a `FishingShips` entry with the ROD rig's second slot and no module;
-  - +1 drone in `FishingDroneSwarmScript`.
-
-  Where the player gets it is still open, so no grant yet.
+- [x] 6.8 Early Reliquary skin: since removed.
 - Done when: fighters are salvaged in one battle, show in the refit, can be discarded, launch in the next battle and return.
 
 ### Stage 7: Monstrance
