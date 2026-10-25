@@ -35,6 +35,7 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
     private static final float FLASH_HALF_WIDTH = 1.5f;
     private static final float FLIGHT_CORE_ALPHA = 0.35f;
     private static final float FLIGHT_EDGE_ALPHA = 0.25f;
+    private static final float CONNECTED_ALPHA = 0.8f;
     private static final float MATERIALISE_TIME = 0.25f;
     private static final float FLASH_TIME = 0.2f;
     private static final float FADE_TIME = 0.3f;
@@ -177,8 +178,8 @@ public class TetherRenderer extends BaseCombatLayeredRenderingPlugin {
         if (alpha <= 0f) return;
 
         float materialised = biteTime < 0f ? 0f : (float) Math.sqrt(Math.min(1f, biteTime / MATERIALISE_TIME));
-        float coreAlpha = alpha * (FLIGHT_CORE_ALPHA + (1f - FLIGHT_CORE_ALPHA) * materialised);
-        float edgeAlpha = alpha * (FLIGHT_EDGE_ALPHA + (1f - FLIGHT_EDGE_ALPHA) * materialised);
+        float coreAlpha = alpha * (FLIGHT_CORE_ALPHA + (CONNECTED_ALPHA - FLIGHT_CORE_ALPHA) * materialised);
+        float edgeAlpha = alpha * (FLIGHT_EDGE_ALPHA + (CONNECTED_ALPHA - FLIGHT_EDGE_ALPHA) * materialised);
 
         // Pixel widths, a little wider when zoomed far out so the rope stays legible.
         float pixel = viewport.convertScreenWidthToWorldWidth(1f)
