@@ -1220,6 +1220,12 @@ He is an ordinary observer. Working on the Fisherman's boat did not give him the
 
 These show the dialect density and his habit of turning a request into a story. They are not lines to reuse.
 
+### The Reliquary's owner
+
+The man in T3's follow-up (see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#t3-the-wounded-epic)) drinks in the bar of an independent Core world. He sent word to the Fisherman asking for help, and he owns an old Reliquary he cannot sell. He is very drunk every time the player meets him. He wants epic fish to sell on and live off: nobody wants the old ship, everybody wants epic fish, and to the right buyer they are worth far more than she will ever fetch. He asks for three and can be talked down to two, never fewer.
+
+He is an ordinary observer. He knows the trade's prices and that the Fisherman is someone to ask, nothing about the Fisherman's nature, the fabric or why epics are valuable beyond what buyers pay. His drunkenness is in his rhythm and his attention (losing the player's face, checking his own fingers, agreeing with himself), not in slurred spelling. He is tired of the ship rather than bitter about it.
+
 ### The young factor
 
 The startup factor in the bar speaks in models, projections, baselines, volume and the financing case. Every delivery becomes a data point that lets them build a larger forecast, and they never notice that the customers are still projected. Keep them bright, quick and sincere; the joke is the pale forecast lines, not a sneer at the character.

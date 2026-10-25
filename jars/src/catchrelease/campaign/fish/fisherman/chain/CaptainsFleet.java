@@ -440,10 +440,34 @@ public final class CaptainsFleet {
         FishermanChain.Saved saved = FishermanChain.get(false);
         if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T2_REPORT)) return false;
 
+        List<FishReward.Receipt> receipts = grantRewards(saved.t2Caught);
+
+        releaseFleet();
+        FishermanChain.setStage(FishermanChain.Stage.T2_DEBRIEF);
+        register();
+        FishReward.showReceipts(text, receipts);
+        updateIntel();
+
+        return true;
+    }
+
+    // A legendary reported before the captain has paid (LegendaryHunt.skipChain): his reward as for a lost epic,
+    // or a landed one he has not heard about yet, and the fleet heads home.
+    public static void skip(List<FishReward.Receipt> receipts) {
+        if (!FishermanChain.isBefore(FishermanChain.Stage.T2_DEBRIEF)) return;
+
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        receipts.addAll(grantRewards(FishermanChain.isAt(FishermanChain.Stage.T2_REPORT) && saved != null
+                && saved.t2Caught));
+        releaseFleet();
+        clearEpic();
+    }
+
+    protected static List<FishReward.Receipt> grantRewards(boolean caught) {
         Random random = new Random();
         List<FishReward.Receipt> receipts = new ArrayList<>();
         receipts.add(FishReward.ship(FishingShips.Ship.HARPOON.hullId).grantWithReceipt());
-        if (saved.t2Caught) {
+        if (caught) {
             FishReward schematic = pickSchematic(random);
             if (schematic != null) receipts.add(schematic.grantWithReceipt());
 
@@ -453,13 +477,7 @@ public final class CaptainsFleet {
             }
         }
 
-        releaseFleet();
-        FishermanChain.setStage(FishermanChain.Stage.T2_DEBRIEF);
-        register();
-        FishReward.showReceipts(text, receipts);
-        updateIntel();
-
-        return true;
+        return receipts;
     }
 
     // A harpoon module the player has no schematic for; failing that, any module. Ship modules are never stocked,

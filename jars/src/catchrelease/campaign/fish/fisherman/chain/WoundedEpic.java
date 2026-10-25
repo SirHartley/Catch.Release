@@ -19,7 +19,6 @@ import catchrelease.campaign.fish.data.FishLog;
 import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.campaign.fish.legendary.LegendaryStarAvoidance;
 import catchrelease.campaign.fish.legendary.QuestEpicListener;
-import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.loading.FishSpecLoader;
@@ -37,7 +36,6 @@ import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
 import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.characters.AbilityPlugin;
-import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
 import com.fs.starfarer.api.ui.IntelUIAPI;
@@ -55,7 +53,7 @@ import java.util.Random;
 import java.util.Set;
 
 // T3: the wounded epic. It circles a planet while buried and hunts at half speed once woken; any hunt that does not
-// land it sends it back to the planet, so the quest cannot be lost.
+// land it sends it back to the planet, so the quest cannot be lost. Its hand-in leads on to ReliquaryTrade.
 public final class WoundedEpic {
 
     public static final String PLANTER = "catchrelease_chainT3";
@@ -143,22 +141,17 @@ public final class WoundedEpic {
         }
     }
 
-    // One intel for all of T3; its title, lines and map target follow the stage.
+    // The hunt and the report; ReliquaryTrade.TradeIntel takes over from the hand-in.
     public static class WoundedIntel extends BaseIntelPlugin {
 
         protected static boolean isReturning() {
-            return FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT)
-                    || FishermanChain.isAt(FishermanChain.Stage.T3_BUILT);
-        }
-
-        protected static boolean isBuilding() {
-            return FishermanChain.isAt(FishermanChain.Stage.T3_BUILD);
+            return FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT);
         }
 
         @Override
         public boolean shouldRemoveIntel() {
             if (isEnded()) return true;
-            if (!isHunting() && !isReturning() && !isBuilding()) endImmediately();
+            if (!isHunting() && !isReturning()) endImmediately();
 
             return isEnded();
         }
@@ -167,8 +160,6 @@ public final class WoundedEpic {
         public String getName() {
             return switch (FishermanChain.getStage()) {
                 case T3_CAUGHT -> "An Epic tale: report to the Fisherman";
-                case T3_BUILD -> "Build the " + getLampShipName();
-                case T3_BUILT -> getLampShipName() + ": report to the Fisherman";
                 default -> "An Epic tale: Chapter 2";
             };
         }
@@ -194,8 +185,6 @@ public final class WoundedEpic {
             bullet(info);
             if (isReturning()) {
                 info.addPara("Return to the nearest fishing boat", text, pad);
-            } else if (isBuilding()) {
-                info.addPara("Learn the blueprint and have a %s built", pad, text, h, getLampShipName());
             } else {
                 info.addPara("Find the %s circling %s in %s", pad, text, h, getSpeciesName(), getPlanetName(),
                         getSystemName()).setHighlightColors(FishRarity.EPIC.color, h, h);
@@ -213,22 +202,6 @@ public final class WoundedEpic {
             FactionAPI faction = Global.getSector().getFaction(FishermanConstants.FACTION);
 
             info.addImages(width, 128, opad, opad, FishermanIdentity.getPortrait(0f), faction.getCrest());
-
-            if (isBuilding()) {
-                info.addPara("The Fisherman gave you the blueprint for the %s. It brings a second Lens Array slot "
-                        + "and the %s while it is in your fleet.", opad, h,
-                        getLampShipName(), Tackle.FANNED_ARRAY.name);
-                addBulletPoints(info, ListInfoMode.IN_DESC);
-                return;
-            }
-
-            if (FishermanChain.isAt(FishermanChain.Stage.T3_BUILT)) {
-                info.addPara("Your %s is in the fleet. The Fisherman will want to see it.", opad, h,
-                        getLampShipName());
-                addBulletPoints(info, ListInfoMode.IN_DESC);
-                FishIntelMapButton.addSetAutopilot(info, width, FishingIntro.getNearestBoat());
-                return;
-            }
 
             if (isReturning()) {
                 info.addPara("You landed the wounded %s. The Fisherman will want to hear about it.", opad,
@@ -379,52 +352,33 @@ public final class WoundedEpic {
         return true;
     }
 
-    // The lamp ship's blueprint and range data on an epic the player has neither caught nor charted; with none left,
-    // RANGE_DATA_CREDITS instead.
+    // Range data on an epic the player has neither caught nor charted, or RANGE_DATA_CREDITS with none left. The
+    // trade's market is already picked (ReliquaryTrade.prepare), since the hand-in text names it.
     public static boolean complete(TextPanelAPI text) {
-        if (!FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT)) return false;
+        if (!FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT) || ReliquaryTrade.getMarket() == null) return false;
 
         List<FishReward.Receipt> receipts = new ArrayList<>();
-        receipts.add(FishReward.shipBlueprint(FishingShips.Ship.LAMP.hullId).grantWithReceipt());
+        receipts.add(grantRangeData());
 
-        FishSpec epic = pickRangeData(new Random());
-        receipts.add(epic == null ? FishReward.credits(RANGE_DATA_CREDITS).grantWithReceipt()
-                : FishReward.locationData(epic.id, RANGE_DATA_CREDITS).grantWithReceipt());
-
-        FishermanChain.setStage(FishermanChain.Stage.T3_BUILD);
-        register();
         FishReward.showReceipts(text, receipts);
+        ReliquaryTrade.start(text);
+        register();
         updateIntel();
-        checkBuilt();
 
         return true;
     }
 
-    // The follow-up ends once a lamp ship joins the fleet; FishingShips.reconcile runs this after every presence
-    // check. Custom production delivers to storage, so a built ship counts when it is taken out of storage.
-    public static void checkBuilt() {
-        if (!FishermanChain.isAt(FishermanChain.Stage.T3_BUILD)
-                || !FishingShips.hasSecondSlot(FishingShips.Ship.LAMP.rig)) return;
-
-        FishermanChain.setStage(FishermanChain.Stage.T3_BUILT);
-        updateIntel();
+    // A legendary reported before the hand-in (LegendaryHunt.skipChain): its range data. The epic is cleared once
+    // the stage has moved on (register).
+    public static void skip(List<FishReward.Receipt> receipts) {
+        if (FishermanChain.isBefore(FishermanChain.Stage.T3_TRADE)) receipts.add(grantRangeData());
     }
 
-    // The closing conversation ends T3 and starts T4, which it introduces.
-    public static void finish(TextPanelAPI text) {
-        if (FishermanChain.isAt(FishermanChain.Stage.T3_BUILT)) LegendaryHunt.start(text);
-    }
+    protected static FishReward.Receipt grantRangeData() {
+        FishSpec epic = pickRangeData(new Random());
 
-    public static String getLampShipName() {
-        ShipHullSpecAPI spec = Global.getSettings().getHullSpec(FishingShips.Ship.LAMP.hullId);
-
-        return spec == null ? "Breach Trawler" : spec.getHullName();
-    }
-
-    public static String getLampShipFullName() {
-        ShipHullSpecAPI spec = Global.getSettings().getHullSpec(FishingShips.Ship.LAMP.hullId);
-
-        return spec == null ? "Breach Trawler" : spec.getNameWithDesignationWithDashClass();
+        return epic == null ? FishReward.credits(RANGE_DATA_CREDITS).grantWithReceipt()
+                : FishReward.locationData(epic.id, RANGE_DATA_CREDITS).grantWithReceipt();
     }
 
     protected static FishSpec pickRangeData(Random random) {

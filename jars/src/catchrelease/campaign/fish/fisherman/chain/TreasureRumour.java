@@ -486,6 +486,20 @@ public final class TreasureRumour {
         if (FishermanChain.isAt(FishermanChain.Stage.T1_BOUGHT)) FishermanChain.setStage(FishermanChain.Stage.T1_DONE);
     }
 
+    // A legendary reported before T1 is over (LegendaryHunt.skipChain): the Fisherman takes his compass back and
+    // pays T1's rewards if they are still owed, and the rumour runs out as it would after the lens.
+    public static void skip(List<FishReward.Receipt> receipts) {
+        if (!FishermanChain.isBefore(FishermanChain.Stage.T1_DONE)) return;
+
+        if (FishermanChain.isBefore(FishermanChain.Stage.T1_LENS)) {
+            CargoAPI cargo = getPlayerCargo();
+            if (cargo != null && isCarried()) cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, compass(), 1f);
+            CompassWatcher.unregister();
+            receipts.addAll(grantRewards());
+        }
+        FishRumors.release(getRumour(), EXTENSION_DAYS);
+    }
+
     // The Glitter Lens schematic and the means to buy it: the specimens its saved fish payment asks for, plus its
     // credit price after the player's cost setting. Without a payment that specimens can meet, credits alone. A
     // player who already owns the lens gets its credit price only.

@@ -153,6 +153,13 @@ public final class SensorBuild {
         return true;
     }
 
+    // A legendary reported before the debrief is over (LegendaryHunt.skipChain): the schematic, unless known.
+    public static void skip(List<FishReward.Receipt> receipts) {
+        if (FishermanChain.isBefore(FishermanChain.Stage.T2_SENSOR) && !ShopSchematics.has(Tackle.NEEDLE_SENSOR)) {
+            receipts.add(FishReward.tackleSchematic(Tackle.NEEDLE_SENSOR).grantWithReceipt());
+        }
+    }
+
     public static boolean isOwned() {
         return TackleManager.isOwned(Tackle.NEEDLE_SENSOR);
     }

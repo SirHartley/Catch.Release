@@ -10,6 +10,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 
 // The post-tutorial Fisherman quests, one saved stage for the whole chain. Rows read it only through the Boolean tokens
 // written here; the quests' own state (targets, counters, claims) lives on Saved beside the stage.
@@ -34,11 +35,10 @@ public final class FishermanChain {
         T2_SENSOR_BOUGHT,
         T3_HUNT,
         T3_CAUGHT,
-        T3_BUILD,
-        T3_BUILT,
-        // T4 starts in T3's closing conversation
+        T3_TRADE,
+        T3_TRADED,
+        // T4 starts in T3's closing conversation; the first legendary reported ends it
         T4_LISTEN,
-        T4_LANDED,
         // "Hunting the legendary fish", until every legendary is caught
         HUNTING,
         HUNT_DONE
@@ -81,9 +81,20 @@ public final class FishermanChain {
     public static final String T3_SPECIES = "$catchreleaseChainT3Species";
     public static final String T3_HUNT = "$catchreleaseChainT3Hunt";
     public static final String T3_CAUGHT = "$catchreleaseChainT3Caught";
-    public static final String T3_BUILT = "$catchreleaseChainT3Built";
+    public static final String T3_MARKET_PLACED = "$catchreleaseChainT3MarketPlaced";
+    public static final String T3_MARKET = "$catchreleaseChainT3Market";
+    public static final String T3_MARKET_SYSTEM = "$catchreleaseChainT3MarketSystem";
+    public static final String T3_PRICE = "$catchreleaseChainT3Price";
+    public static final String T3_HAGGLED = "$catchreleaseChainT3Haggled";
+    public static final String T3_CAN_PAY = "$catchreleaseChainT3CanPay";
+    public static final String T3_TRADED = "$catchreleaseChainT3Traded";
 
-    public static final String T4_LANDED = "$catchreleaseChainT4Landed";
+    // a caught legendary the Fisherman has not heard about yet, and which of his rows answers it
+    public static final String REPORT = "$catchreleaseChainLegendaryReport";
+    public static final String REPORT_SKIP = "$catchreleaseChainReportSkip";
+    public static final String REPORT_FIRST = "$catchreleaseChainReportFirst";
+    public static final String REPORT_MORE = "$catchreleaseChainReportMore";
+    public static final String REPORT_INDEX = "$catchreleaseChainReportIndex";
 
     // a quest step waits on an Outfitter purchase: the Fisherman's Outfitter option is highlighted
     public static final String OUTFITTER_WANTED = "$catchreleaseChainOutfitterWanted";
@@ -118,9 +129,16 @@ public final class FishermanChain {
         public String t3PlanetId;
         public String t3PlanetName;
         public String t3SpeciesId;
+        // the Reliquary's owner drinks at this market's bar; a story point brings his price down once
+        public String t3MarketId;
+        public String t3MarketName;
+        public String t3MarketSystemName;
+        public boolean t3Haggled;
 
         // legendary id to the name its latest rumour used
         public Map<String, String> toldNames;
+        // legendaries the Fisherman has heard about, in the order they were reported
+        public Set<String> reportedLegendaries;
     }
 
     private FishermanChain() {
@@ -143,6 +161,11 @@ public final class FishermanChain {
 
     public static void setStage(Stage stage) {
         get(true).stage = stage;
+    }
+
+    // The enum lists the stages in chain order.
+    public static boolean isBefore(Stage stage) {
+        return getStage().ordinal() < stage.ordinal();
     }
 
     // The tutorial's end, finished or skipped, opens the chain; a chain already under way is left alone.
@@ -173,6 +196,12 @@ public final class FishermanChain {
 
         ShopEntry entry = ShopEntry.of(wanted);
         if (ShopMarks.isMarkable(entry)) ShopMarks.mark(ShopMarks.getMarkKey(entry));
+    }
+
+    // A step skipped before its purchase leaves nothing on the shopping list.
+    public static void unlistWantedPurchase() {
+        Tackle wanted = getWantedPurchase();
+        if (wanted != null) ShopMarks.unmark(ShopMarks.getMarkKey(ShopEntry.of(wanted)));
     }
 
     // Display values for one dialog; expiry 0 as every CatchReleaseCMD token.
@@ -216,9 +245,22 @@ public final class FishermanChain {
         local.set(T3_SPECIES, WoundedEpic.getSpeciesName(), 0);
         local.set(T3_HUNT, stage == Stage.T3_HUNT, 0);
         local.set(T3_CAUGHT, stage == Stage.T3_CAUGHT, 0);
-        local.set(T3_BUILT, stage == Stage.T3_BUILT, 0);
+        local.set(T3_MARKET_PLACED, ReliquaryTrade.getMarket() != null, 0);
+        local.set(T3_MARKET, saved == null || saved.t3MarketName == null ? "" : saved.t3MarketName, 0);
+        local.set(T3_MARKET_SYSTEM, saved == null || saved.t3MarketSystemName == null ? ""
+                : saved.t3MarketSystemName, 0);
+        local.set(T3_PRICE, ReliquaryTrade.getPrice() == ReliquaryTrade.HAGGLED_PRICE ? "two" : "three", 0);
+        local.set(T3_HAGGLED, saved != null && saved.t3Haggled, 0);
+        local.set(T3_CAN_PAY, ReliquaryTrade.canPay(), 0);
+        local.set(T3_TRADED, stage == Stage.T3_TRADED, 0);
 
-        local.set(T4_LANDED, stage == Stage.T4_LANDED, 0);
+        boolean report = LegendaryHunt.getPendingReport() != null;
+        int reported = LegendaryHunt.getReportCount();
+        local.set(REPORT, report, 0);
+        local.set(REPORT_SKIP, report && isBefore(Stage.T4_LISTEN), 0);
+        local.set(REPORT_FIRST, report && !isBefore(Stage.T4_LISTEN) && reported == 0, 0);
+        local.set(REPORT_MORE, report && reported > 0, 0);
+        local.set(REPORT_INDEX, String.valueOf(reported), 0);
         local.set(OUTFITTER_WANTED, getWantedPurchase() != null, 0);
     }
 
