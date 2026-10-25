@@ -61,6 +61,7 @@ Changed - An equipment slot cell marks a module that came with the ship, so it i
 Fixed - Hovering the equipment slot already selected no longer tells you to click it
 Changed - The Outfitter's slot, conflict and shopping-list hovers use one title style
 Fixed - Undoing an equipment purchase made in a rig's second slot now leaves the Outfitter aimed at that slot, not the first
+Fixed - A long module name no longer puts the two equipment slot cells in different typefaces, and the cells' two lines are spaced evenly
 
 Development
 Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete

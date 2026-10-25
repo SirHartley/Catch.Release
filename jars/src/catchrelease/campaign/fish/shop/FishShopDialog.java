@@ -558,7 +558,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
             if (!hasTwoSlots()) return top;
 
             Tackle.Fit rig = getShelfRig();
-            float cellWidth = (LIST_WIDTH - TAB_GAP) / 2f;
+            float cellWidth = (LIST_WIDTH - TAB_GAP) / RigLoadout.SLOTS;
+            boolean compact = needsCompactSlotText(rig, cellWidth);
 
             CustomPanelAPI holder = panel.createCustomPanel(LIST_WIDTH, SLOT_HEIGHT, new BaseCustomUIPanelPlugin() {
             });
@@ -567,7 +568,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
                 CustomPanelAPI cell = holder.createCustomPanel(cellWidth, SLOT_HEIGHT,
-                        new ShopSlotPlugin(slot, TackleManager.getSlot(rig, slot), this));
+                        new ShopSlotPlugin(slot, TackleManager.getSlot(rig, slot), compact, this));
                 holder.addComponent(cell).inTL(slot * (cellWidth + TAB_GAP), 0f);
                 tooltipHost.addTooltipTo(createSlotTooltip(rig, slot), cell,
                         TooltipMakerAPI.TooltipLocation.BELOW, false);
@@ -577,6 +578,24 @@ public class FishShopDialog implements InteractionDialogPlugin {
             added.add(holder);
 
             return top + SLOT_HEIGHT + 8f;
+        }
+
+        // One font for the whole row. Each cell used to measure only its own module, so a single long name put the
+        // two cells in different typefaces side by side.
+        protected boolean needsCompactSlotText(Tackle.Fit rig, float cellWidth) {
+            LazyFont body = ShopUi.getBodyFont();
+            if (body == null) return false;
+
+            float room = cellWidth - ShopSlotPlugin.TEXT_PAD * 2f;
+
+            for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
+                Tackle fitted = TackleManager.getSlot(rig, slot);
+                String name = fitted == Tackle.NONE ? "Empty" : fitted.name;
+
+                if (body.calcWidth(name, body.getBaseHeight()) > room) return true;
+            }
+
+            return false;
         }
 
         protected TooltipMakerAPI.TooltipCreator createSlotTooltip(Tackle.Fit rig, int slot) {

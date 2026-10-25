@@ -22,11 +22,15 @@ import java.util.List;
 public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
 
     public static final float TEXT_PAD = 10f;
+    public static final float TEXT_GAP = 4f;
+    public static final float LINE_GAP = 3f;
     public static final float BORDER_RADIUS = 3f;
 
     protected final int slot;
     protected final Tackle fitted;
     protected final boolean shipModule;
+    // decided for the row, not the cell: see FishShopDialog.needsCompactSlotText
+    protected final boolean compact;
     protected final Host host;
     protected PositionAPI pos;
 
@@ -41,9 +45,10 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         void onSlotClicked(int slot);
     }
 
-    public ShopSlotPlugin(int slot, Tackle fitted, Host host) {
+    public ShopSlotPlugin(int slot, Tackle fitted, boolean compact, Host host) {
         this.slot = slot;
         this.fitted = fitted == null ? Tackle.NONE : fitted;
+        this.compact = compact;
         this.host = host;
         // the distinction the rows draw as SHIP against OWNED: a module that comes with the ship is not the
         // player's, and a cell that shows both alike cannot say which one it is holding
@@ -87,18 +92,21 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
             label.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
         if (content == null) {
-            String name = fitted == Tackle.NONE ? "Empty" : fitted.name;
-            content = ShopUi.createText(body, name);
-            if (content.getWidth() > width - TEXT_PAD * 2f) content = ShopUi.createText(small, name);
+            content = ShopUi.createText(compact ? small : body,
+                    fitted == Tackle.NONE ? "Empty" : fitted.name);
             content.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
+        // both lines measured from the caption: the two line boxes used to meet with no leading between them while
+        // five pixels went spare above and below
+        float captionTop = y + height - TEXT_GAP;
+
         label.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
-        label.draw(Math.round(x + TEXT_PAD), Math.round(y + height - 5f));
+        label.draw(Math.round(x + TEXT_PAD), Math.round(captionTop));
 
         Color color = fitted == Tackle.NONE ? Misc.getGrayColor() : Misc.getPositiveHighlightColor();
         content.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-        content.draw(Math.round(x + TEXT_PAD), Math.round(y + 6f + content.getHeight()));
+        content.draw(Math.round(x + TEXT_PAD), Math.round(captionTop - label.getHeight() - LINE_GAP));
 
         if (!shipModule) return;
 
@@ -108,7 +116,7 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         }
 
         origin.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), alphaMult));
-        origin.draw(Math.round(x + width - TEXT_PAD), Math.round(y + height - 5f));
+        origin.draw(Math.round(x + width - TEXT_PAD), Math.round(captionTop));
     }
 
     @Override

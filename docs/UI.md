@@ -42,7 +42,10 @@ is a black well with a dark-player tint and a full `RoundedBorder` outline, brig
 tabs directly above it are a flat fill plus that accent and no outline; the two rows
 pick different things and must not read as one control. A cell holding a module that
 came with the ship, and that the player does not own a copy of, carries a small grey
-"SHIP" in its top right, the same distinction the rows draw. The selected cell is the target slot; FIT reads "FIT IN SLOT n"
+"SHIP" in its top right, the same distinction the rows draw. `needsCompactSlotText`
+measures every slot's name with `LazyFont.calcWidth` and picks one font for the whole
+row, so a name too long for the body font never leaves the two cells in different
+typefaces. The selected cell is the target slot; FIT reads "FIT IN SLOT n"
 and every row and the detail pane are judged against it. Without a second slot the
 shelf looks as it did with one slot. A module fitted in the other slot, or one that
 shares an exclusion group with it, is blocked for the target slot: its row name is
