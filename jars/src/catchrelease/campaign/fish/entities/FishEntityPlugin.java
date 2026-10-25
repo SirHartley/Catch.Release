@@ -1114,15 +1114,13 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
                 .SearchlightAbilityPlugin.getBeamStrengthAt(entity.getLocation()) * 3f);
 
         // decays like a buried pattern's lamp mark (SearchlightImpressionRenderer.advanceMarks), so the tracking
-        // upgrade keeps a surfaced lamp fish in view and within reach for as long as it would a buried one
-        if (lampSurfaced) {
+        // upgrade keeps a surfaced lamp fish, or a harpoon-woken epic, in view and within reach for as long as it
+        // would a buried one
+        if (lampSurfaced || EpicHunt.applies(this)) {
             float trackTime = UpgradeManager.getValue(StatIds.SEARCHLIGHT_TRACK_TIME, 0f);
             lampHold = trackTime > 0f ? Math.max(target, lampHold - amount / trackTime) : target;
             target = lampHold;
         }
-
-        // the harpoon surfaced an awake epic: it stays in view and in reach with the lamps off or past the beam
-        if (EpicHunt.isActive(this)) target = 1f;
 
         lampFade += (target - lampFade) * Math.min(1f, amount * 4f);
     }
