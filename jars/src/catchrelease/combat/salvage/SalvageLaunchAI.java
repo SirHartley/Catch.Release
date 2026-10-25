@@ -10,7 +10,8 @@ import com.fs.starfarer.api.combat.ShipwideAIFlags.AIFlags;
 import org.lwjgl.util.vector.Vector2f;
 
 // Salvage Launch's system AI, run by the default ship AI and rebuilt with it, so it keeps only a timer. Launches when
-// a target is in reach and enough fighters are ready: two, or all there are once nothing else is restoring.
+// a target is in reach and enough fighters are ready: two, or all there are once nothing else is restoring. Never while
+// the ship pulls its fighters back, since they would turn straight round.
 public class SalvageLaunchAI implements ShipSystemAIScript {
 
     public static final float INTERVAL = 0.5f;
@@ -37,7 +38,8 @@ public class SalvageLaunchAI implements ShipSystemAIScript {
         if (timer > 0f) return;
         timer = INTERVAL;
         if (system.isActive() || system.isOutOfAmmo() || system.getCooldownRemaining() > 0f
-                || ship.getFluxTracker().isOverloadedOrVenting() || ship.getCurrentCR() <= 0f) {
+                || ship.getFluxTracker().isOverloadedOrVenting() || ship.getCurrentCR() <= 0f
+                || ship.isPullBackFighters()) {
             return;
         }
         FighterStore store = FighterStore.forBattle(engine, ship.getFleetMemberId());
