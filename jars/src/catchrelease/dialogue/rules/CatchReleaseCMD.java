@@ -299,8 +299,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
             case "t3Done":
                 ReliquaryTrade.finish(text(dialog));
                 return true;
-            case "t4Complete":
-                return LegendaryHunt.complete(text(dialog));
+            case "legendaryReport":
+                return LegendaryHunt.report(text(dialog));
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);

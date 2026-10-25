@@ -1,6 +1,6 @@
 # Fisherman follow-up chain
 
-**Status: approved design, implemented in Stages 0–5.** The player-facing text of Stages 1–5 still awaits the Editor pass (subtasks 1.9, 3.10, 4.7, 5.7), and one open question remains. This document records the author's decisions for the quest chain that follows the tutorial, plus the open questions and the work each step needed. Read it before revising any of these quests.
+**Status: approved design, implemented in Stages 0–5.** The player-facing text of Stages 1–5 still awaits the Editor pass (subtasks 1.9, 3.10, 4.7, 5.7), and two open questions remain. This document records the author's decisions for the quest chain that follows the tutorial, plus the open questions and the work each step needed. Read it before revising any of these quests.
 
 It does not govern lore, prose or rules structure. [LORE.md](LORE.md) remains the authority on facts, knowledge limits and voice. [DIALOGUE.md](DIALOGUE.md) owns the text workflow, and [RULES_WRITING.md](RULES_WRITING.md) owns conversation structure. Text described here is a brief, not approved dialogue. The deferred [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) follows after this chain; see [Ships](#ships).
 
@@ -178,10 +178,10 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 **Decided**
 - The Fisherman tells the player to improve their gear and listen for rumours. He stays vague about *what* they are hunting.
 - The intel's title is along the lines of "Listen for rumours". It is a permanent reminder that there is more to find. Neither it nor the Fisherman mentions a reward or names legendaries.
-- It is a long-term quest: no deadline. It completes on the first legendary catch, whenever that happens.
+- It is a long-term quest: no deadline. It completes when the first legendary catch is reported to the Fisherman, whenever that happens.
 - It starts in T3's closing conversation, after the Reliquary trade, which already gives the Fisherman's advice; there is no separate offer.
 - There is no gear checkpoint. Player skill is part of how hard a legendary is.
-- The lamp ship (Monstrance hull) is the reward on completion. Nothing announces it beforehand. The Fisherman hands it over at the next visit after the catch, not at the catch itself.
+- The lamp ship (Monstrance hull) is the reward on completion, the first of the [legendary reports](#legendary-reports). Nothing announces it beforehand. The Fisherman hands it over at the next visit after the catch, not at the catch itself.
 
 **After the first legendary: hunting the legendary fish**
 - When T4 completes, the player learns there is more than one legendary. The intel changes to "Hunting the legendary fish".
@@ -196,19 +196,39 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 
 **Work.** Implemented in Stage 5 (`LegendaryHunt`, `FishRumors.Saved.toldName`, Reployment Bays); see [ARCHITECTURE.md](ARCHITECTURE.md).
 
+## Legendary reports
+
+Each caught legendary is reported to the Fisherman during a later visit, one conversation per legendary. After one report the player is back in his menu, where the next pending report is a highlighted option, so several legendaries landed before a visit play out in turns, not in one chain. The fish is kept.
+
+**Rewards, in report order**
+1. The Monstrance hull (completes T4).
+2. The Stigmata blueprint.
+3. The Reliquary blueprint.
+4. The Monstrance blueprint.
+5. Nothing yet.
+6. Nothing yet.
+
+**Skipping the chain.** A legendary reported before T4 skips every chain step still open and pays what those steps would have paid, plus the first report's Monstrance hull. The skipped steps are marked complete and never come up again. For example:
+- After T1: T2's Stigmata and Needle Sensor schematic, T3's range data and the Reliquary hull, then the Monstrance hull.
+- After T2: T3's range data and the Reliquary hull, then the Monstrance hull.
+- During T1: also T1's Glitter Lens schematic and the fish and credits to buy it; the Fisherman takes his compass back.
+
+A step half done pays only what it still owes: T2 skipped after its debrief gives the Needle Sensor schematic only if it is not known yet, and an epic landed for the captain but not yet reported also pays his catch extras.
+
 ## Ships
 
 | Ship | Rig | Given by | Ship module ([second slot](#shared-mechanic-ship-bound-equipment)) |
 |---|---|---|---|
-| Stigmata-class Harpoon Tug, destroyer ("opens wounds") | Harpoon | T2, either outcome | Retrieval Head: a hit restores the spent harpoon charge |
-| Monstrance-class Breach Trawler, cruiser ("presents the sacred for all to see") | Breach Lights | T4, first legendary | Fanned Array: each Breach Light becomes a wide fan |
-| Reliquary-class LYNE Tender, cruiser ("keeps implements") | ROD drones | T3, traded at a Core bar for epic fish | Lifting Rig (moved from the shop). It was the Reployment Bays (new Drone Core module, now commented out): each time every drone has returned, the drones deploy again, until the player recalls them or they can no longer fish there (both the pond swarm and the roaming swarm) |
+| Stigmata-class Harpoon Tug, destroyer ("opens wounds") | Harpoon | T2, either outcome; blueprint at the second legendary report | Retrieval Head: a hit restores the spent harpoon charge |
+| Monstrance-class Breach Trawler, cruiser ("presents the sacred for all to see") | Breach Lights | T4, first legendary report; blueprint at the fourth | Fanned Array: each Breach Light becomes a wide fan |
+| Reliquary-class LYNE Tender, cruiser ("keeps implements") | ROD drones | T3, traded at a Core bar for epic fish; blueprint at the third legendary report | Lifting Rig (moved from the shop). It was the Reployment Bays (new Drone Core module, now commented out): each time every drone has returned, the drones deploy again, until the player recalls them or they can no longer fish there (both the pond swarm and the roaming swarm) |
 
 The names are decided; the quoted notes are the author's meaning for each name, not player-facing text. The Stigmata (`catchrelease_harpoon_ship`) and Reliquary (`catchrelease_rod_ship`) have their real hulls and stats; the Monstrance (`catchrelease_lamp_ship`) stays a full copy of the vanilla Nebula until its art exists. See [ARCHITECTURE.md](ARCHITECTURE.md) for their data and [COMBAT_SHIPS.md](COMBAT_SHIPS.md) for their combat design. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 
 ## Open questions
 
 1. **What concluding "Hunting the legendary fish" brings.** It ends once every legendary is caught; the payoff is decided later.
+2. **The fifth and sixth legendary report rewards.** Both are empty for now.
 
 ## Implementation plan
 
@@ -294,8 +314,8 @@ Each stage is one pull request and depends on the stages before it. Within a sta
   - redeploying at the swarm's "every drone returned" branch in `FishingDroneSwarmScript.advance`, after re-checking `shouldRecall()`, and never after a manual recall.
 - [x] 5.2 Told names: one per rumour, including the story-drawn names, recorded in `FishRumors.publish`.
 - [x] 5.3 The existing legendary rumour intel shows the told name.
-- [x] 5.4 The "Listen for rumours" intel, completed by `LegendaryChases.noteCaught` or by an earlier catch.
-- [x] 5.5 The ship grant, now the lamp ship.
+- [x] 5.4 The "Listen for rumours" intel, completed by the first legendary report.
+- [x] 5.5 Legendary reports: one per caught legendary in turns, the ordered rewards, and skipping the open chain steps.
 - [x] 5.6 "Hunting the legendary fish": the question-mark list, told and real names, and concluding once every legendary is caught. The payoff is still open.
 - [ ] 5.7 Text through the Editor process, then the dialogue and rules checks. The checks pass; the Editor pass is pending.
 

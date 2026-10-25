@@ -358,9 +358,7 @@ public final class WoundedEpic {
         if (!FishermanChain.isAt(FishermanChain.Stage.T3_CAUGHT) || ReliquaryTrade.getMarket() == null) return false;
 
         List<FishReward.Receipt> receipts = new ArrayList<>();
-        FishSpec epic = pickRangeData(new Random());
-        receipts.add(epic == null ? FishReward.credits(RANGE_DATA_CREDITS).grantWithReceipt()
-                : FishReward.locationData(epic.id, RANGE_DATA_CREDITS).grantWithReceipt());
+        receipts.add(grantRangeData());
 
         FishReward.showReceipts(text, receipts);
         ReliquaryTrade.start(text);
@@ -368,6 +366,19 @@ public final class WoundedEpic {
         updateIntel();
 
         return true;
+    }
+
+    // A legendary reported before the hand-in (LegendaryHunt.skipChain): its range data. The epic is cleared once
+    // the stage has moved on (register).
+    public static void skip(List<FishReward.Receipt> receipts) {
+        if (FishermanChain.isBefore(FishermanChain.Stage.T3_TRADE)) receipts.add(grantRangeData());
+    }
+
+    protected static FishReward.Receipt grantRangeData() {
+        FishSpec epic = pickRangeData(new Random());
+
+        return epic == null ? FishReward.credits(RANGE_DATA_CREDITS).grantWithReceipt()
+                : FishReward.locationData(epic.id, RANGE_DATA_CREDITS).grantWithReceipt();
     }
 
     protected static FishSpec pickRangeData(Random random) {

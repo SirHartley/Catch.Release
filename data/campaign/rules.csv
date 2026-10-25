@@ -2838,15 +2838,37 @@ CatchReleaseCMD t3Done","The Fisherman looks the ship over on his display for lo
 
 ""There are stranger things out there, too. Talk gets round, and most of it is nonsense. Once your gear is good, very good, it's worth following anyway.""",catchrelease_fisherBack:Continue,
 ,,,,,,
-# fisherman chain T4: listen for rumours,,,,,,
-catchrelease_fisherOptT4Landed,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
-$catchreleaseChainT4Landed",SetOptionColor catchrelease_t4Landed highlight,,"36:catchrelease_t4Landed:""I caught one of those stranger things.""",
-catchrelease_t4Landed,DialogOptionSelected,$option == catchrelease_t4Landed,"CatchReleaseCMD highlightFishText ""Fanned Array""
-CatchReleaseCMD t4Complete","""Then you know what I meant."" He doesn't ask which one it was. ""There's more than one of them, and no two alike. The talk about each is as bad as the last. Keep listening.""
+# fisherman chain T4 and legendary reports,,,,,,
+catchrelease_fisherOptLegendarySkip,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainLegendaryReport
+$catchreleaseChainReportSkip",SetOptionColor catchrelease_legendaryReport highlight,,"36:catchrelease_legendaryReport:""I landed something you'll want to hear about.""",
+catchrelease_fisherOptLegendaryFirst,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainLegendaryReport
+$catchreleaseChainReportFirst",SetOptionColor catchrelease_legendaryReport highlight,,"36:catchrelease_legendaryReport:""I caught one of those stranger things.""",
+catchrelease_fisherOptLegendaryMore,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseChainLegendaryReport
+$catchreleaseChainReportMore",SetOptionColor catchrelease_legendaryReport highlight,,"36:catchrelease_legendaryReport:""I've landed another of the strange ones.""",
+catchrelease_legendaryReport,DialogOptionSelected,$option == catchrelease_legendaryReport,FireBest CatchReleaseLegendaryReport,,,
+catchrelease_legendaryReportSkip,CatchReleaseLegendaryReport,$catchreleaseChainReportSkip,CatchReleaseCMD legendaryReport,"The Fisherman hears you out, then laughs.
+
+""You've gone and skipped to the end. Everything I had lined up for you was to get you ready for one of those, and you didn't wait for it."" He calls a deckhand over. ""You can have what it would all have paid. No sense making you earn it twice.""
+
+""There's more than one of them, and no two alike. The talk about each is as bad as the last. Keep listening.""",catchrelease_fisherBack:Continue,
+catchrelease_legendaryReportFirst,CatchReleaseLegendaryReport,$catchreleaseChainReportFirst,"CatchReleaseCMD highlightFishText ""Fanned Array""
+CatchReleaseCMD legendaryReport","""Then you know what I meant."" He doesn't ask which one it was. ""There's more than one of them, and no two alike. The talk about each is as bad as the last. Keep listening.""
 
 While he talks, a ship detaches from his fleet and falls in with yours.
 
 ""She's a lamp ship, and she's yours. She carries a Fanned Array for your Breach Lights. Your lamps will cover a good deal more ground with it, but the range is shorter.""",catchrelease_fisherBack:Continue,
+catchrelease_legendaryReport2,CatchReleaseLegendaryReport,$catchreleaseChainReportIndex == 1,"CatchReleaseCMD highlightFishText ""Stigmata""
+CatchReleaseCMD legendaryReport","""Another one. Not many crews can say that.""
+
+A deckhand hands you a data chip. ""Blueprint for the Stigmata. If you want more tugs, you'll need someone with a yard.""",catchrelease_fisherBack:Continue,
+catchrelease_legendaryReport3,CatchReleaseLegendaryReport,$catchreleaseChainReportIndex == 2,"CatchReleaseCMD highlightFishText ""Reliquary""
+CatchReleaseCMD legendaryReport","""That makes three. You'll want more drone tenders before long."" He passes you a chip. ""Blueprint for the Reliquary. Same as before: find a yard.""",catchrelease_fisherBack:Continue,
+catchrelease_legendaryReport4,CatchReleaseLegendaryReport,$catchreleaseChainReportIndex == 3,"CatchReleaseCMD highlightFishText ""Monstrance""
+CatchReleaseCMD legendaryReport","""Four, then."" He sends a deckhand for a data chip. ""Blueprint for the Monstrance. That's the last of the ship plans I have for you.""",catchrelease_fisherBack:Continue,
+catchrelease_legendaryReportLater,CatchReleaseLegendaryReport,,CatchReleaseCMD legendaryReport,"""Another."" He shakes his head. ""I've nothing left to pay you with for these, Captain. You're doing it for the fishing now.""",catchrelease_fisherBack:Continue,
 ,,,,,,
 ,,,,,,
 # fisherman questions,,,,,,

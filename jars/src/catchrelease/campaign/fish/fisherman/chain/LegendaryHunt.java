@@ -25,12 +25,13 @@ import com.fs.starfarer.api.util.Misc;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-// T4 and the legendary list. Every legendary rumour carries the name its teller used; the latest one heard for each
-// species is kept, from the first rumour on, so the list can show it once it appears.
+// T4, the legendary reports and the legendary list. Every legendary rumour carries the name its teller used; the
+// latest one heard for each species is kept, from the first rumour on, so the list can show it once it appears.
 public final class LegendaryHunt {
 
     // The bar spacer's tellings (CatchReleaseRatingLegendaryReport rows). Three of them name nothing, so their names
@@ -61,7 +62,8 @@ public final class LegendaryHunt {
         @Override
         public String getName() {
             return switch (FishermanChain.getStage()) {
-                case T4_LANDED -> "Listen for rumours: report to the Fisherman";
+                case T4_LISTEN -> isReporting() ? "Listen for rumours: report to the Fisherman"
+                        : "Listen for rumours";
                 case HUNTING -> "Hunting the legendary fish";
                 case HUNT_DONE -> "Hunting the legendary fish: every one caught";
                 default -> "Listen for rumours";
@@ -86,13 +88,14 @@ public final class LegendaryHunt {
             float pad = mode == ListInfoMode.IN_DESC ? 10f : 3f;
 
             bullet(info);
-            switch (FishermanChain.getStage()) {
-                case T4_LANDED -> info.addPara("Return to the nearest fishing boat", text, pad);
-                case HUNTING, HUNT_DONE -> addHuntingLines(info, text, pad);
-                default -> {
-                    info.addPara("Improve your gear", text, pad);
-                    info.addPara("Listen for rumours", text, 0f);
-                }
+            if (isReporting()) {
+                info.addPara("Return to the nearest fishing boat", text, pad);
+            } else if (FishermanChain.isAt(FishermanChain.Stage.HUNTING)
+                    || FishermanChain.isAt(FishermanChain.Stage.HUNT_DONE)) {
+                addHuntingLines(info, text, pad);
+            } else {
+                info.addPara("Improve your gear", text, pad);
+                info.addPara("Listen for rumours", text, 0f);
             }
             unindent(info);
         }
@@ -122,7 +125,7 @@ public final class LegendaryHunt {
 
             info.addImages(width, 128, opad, opad, FishermanIdentity.getPortrait(0f), faction.getCrest());
 
-            if (FishermanChain.isAt(FishermanChain.Stage.T4_LANDED)) {
+            if (isReporting()) {
                 info.addPara("You landed one of the stranger things the Fisherman told you about. He will want to "
                         + "hear about it.", opad);
                 addBulletPoints(info, ListInfoMode.IN_DESC);
@@ -150,8 +153,7 @@ public final class LegendaryHunt {
 
         @Override
         public void buttonPressConfirmed(Object buttonId, IntelUIAPI ui) {
-            if (FishermanChain.isAt(FishermanChain.Stage.T4_LANDED)
-                    && FishIntelMapButton.handleSetAutopilot(buttonId, FishingIntro.getNearestBoat())) {
+            if (isReporting() && FishIntelMapButton.handleSetAutopilot(buttonId, FishingIntro.getNearestBoat())) {
                 return;
             }
 
@@ -161,6 +163,11 @@ public final class LegendaryHunt {
         @Override
         public String getIcon() {
             return FishermanIdentity.getPortrait(0f);
+        }
+
+        // T4's last step: a legendary is landed and the Fisherman has not heard yet.
+        protected static boolean isReporting() {
+            return FishermanChain.isAt(FishermanChain.Stage.T4_LISTEN) && getPendingReport() != null;
         }
 
         @Override
@@ -184,39 +191,96 @@ public final class LegendaryHunt {
         }
     }
 
-    // A long-term quest: no deadline, and a legendary landed before it starts completes it at once.
+    // A long-term quest: no deadline. A legendary landed before it starts is reported like any other.
     public static void start(TextPanelAPI text) {
         FishermanChain.setStage(FishermanChain.Stage.T4_LISTEN);
         FishIntelNotifications.queue(new HuntIntel(), text);
-        checkLanded();
     }
 
-    // The lamp ship, unannounced until now, and the news that there is more than one legendary.
-    public static boolean complete(TextPanelAPI text) {
-        if (!FishermanChain.isAt(FishermanChain.Stage.T4_LANDED)) return false;
+    // One Fisherman conversation per caught legendary; the menu offers the next one after each. The first report
+    // ends T4, and one made before the chain reached T4 also pays every step still owed (skipChain).
+    public static boolean report(TextPanelAPI text) {
+        FishSpec spec = getPendingReport();
+        FishermanChain.Saved saved = FishermanChain.get(true);
+        if (spec == null || saved == null) return false;
+        if (saved.reportedLegendaries == null) saved.reportedLegendaries = new LinkedHashSet<>();
 
         List<FishReward.Receipt> receipts = new ArrayList<>();
-        receipts.add(FishReward.ship(FishingShips.Ship.LAMP.hullId).grantWithReceipt());
+        if (FishermanChain.isBefore(FishermanChain.Stage.T4_LISTEN)) skipChain(receipts);
 
-        FishermanChain.setStage(FishermanChain.Stage.HUNTING);
+        FishReward reward = getReportReward(saved.reportedLegendaries.size());
+        if (reward != null) receipts.add(reward.grantWithReceipt());
+        saved.reportedLegendaries.add(spec.id);
+
+        if (FishermanChain.isAt(FishermanChain.Stage.T4_LISTEN)) FishermanChain.setStage(FishermanChain.Stage.HUNTING);
         FishReward.showReceipts(text, receipts);
+        if (Global.getSector().getIntelManager().getIntel(HuntIntel.class).isEmpty()) {
+            FishIntelNotifications.queue(new HuntIntel(), text);
+        }
         updateIntel();
         checkAllCaught();
 
         return true;
     }
 
+    // In report order: the lamp ship, then the Stigmata, Reliquary and Monstrance blueprints, then nothing.
+    protected static FishReward getReportReward(int index) {
+        return switch (index) {
+            case 0 -> FishReward.ship(FishingShips.Ship.LAMP.hullId);
+            case 1 -> FishReward.shipBlueprint(FishingShips.Ship.HARPOON.hullId);
+            case 2 -> FishReward.shipBlueprint(FishingShips.Ship.ROD.hullId);
+            case 3 -> FishReward.shipBlueprint(FishingShips.Ship.LAMP.hullId);
+            default -> null;
+        };
+    }
+
+    // Every step from the current stage to T4 is closed with what it still owed, as if played, and the chain moves
+    // to HUNTING. Each quest reads the stage before any of them changes it; register then clears what their stages
+    // kept alive (planted epics, listeners).
+    protected static void skipChain(List<FishReward.Receipt> receipts) {
+        FishermanChain.unlistWantedPurchase();
+        TreasureRumour.skip(receipts);
+        CaptainsFleet.skip(receipts);
+        SensorBuild.skip(receipts);
+        WoundedEpic.skip(receipts);
+        ReliquaryTrade.skip(receipts);
+
+        FishermanChain.setStage(FishermanChain.Stage.HUNTING);
+        FishermanChain.register();
+    }
+
+    // The first caught legendary, in fish.csv order, the Fisherman has not heard about. None before the tutorial is
+    // done, since the chain has not opened.
+    public static FishSpec getPendingReport() {
+        if (!FishingIntro.isComplete()) return null;
+
+        for (FishSpec spec : getLegendaries()) {
+            if (LegendaryChases.isCaught(spec.id) && !isReported(spec.id)) return spec;
+        }
+        return null;
+    }
+
+    public static int getReportCount() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+
+        return saved == null || saved.reportedLegendaries == null ? 0 : saved.reportedLegendaries.size();
+    }
+
+    protected static boolean isReported(String legendaryId) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+
+        return saved != null && saved.reportedLegendaries != null && saved.reportedLegendaries.contains(legendaryId);
+    }
+
     public static boolean isActive() {
         FishermanChain.Stage stage = FishermanChain.getStage();
 
-        return stage == FishermanChain.Stage.T4_LISTEN || stage == FishermanChain.Stage.T4_LANDED
-                || stage == FishermanChain.Stage.HUNTING;
+        return stage == FishermanChain.Stage.T4_LISTEN || stage == FishermanChain.Stage.HUNTING;
     }
 
     // Called by LegendaryChases.noteCaught for every legendary catch.
     public static void noteCaught(String legendaryId) {
-        checkLanded();
-        if (FishermanChain.isAt(FishermanChain.Stage.HUNTING)) updateIntel();
+        if (isActive()) updateIntel();
         checkAllCaught();
     }
 
@@ -232,14 +296,6 @@ public final class LegendaryHunt {
             Global.getSector().addScript((HuntIntel) intel);
             FishIntelNotifications.update((HuntIntel) intel, null);
         }
-    }
-
-    protected static void checkLanded() {
-        if (!FishermanChain.isAt(FishermanChain.Stage.T4_LISTEN) || getLegendaries().stream()
-                .noneMatch(spec -> LegendaryChases.isCaught(spec.id))) return;
-
-        FishermanChain.setStage(FishermanChain.Stage.T4_LANDED);
-        updateIntel();
     }
 
     public static void updateIntel() {

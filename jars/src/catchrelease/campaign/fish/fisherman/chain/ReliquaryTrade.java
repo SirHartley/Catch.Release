@@ -227,6 +227,13 @@ public final class ReliquaryTrade {
         return true;
     }
 
+    // A legendary reported before the trade (LegendaryHunt.skipChain): the Reliquary all the same.
+    public static void skip(List<FishReward.Receipt> receipts) {
+        if (FishermanChain.isBefore(FishermanChain.Stage.T3_TRADED)) {
+            receipts.add(FishReward.ship(FishingShips.Ship.ROD.hullId).grantWithReceipt());
+        }
+    }
+
     // The closing conversation ends T3 and starts T4, which it introduces.
     public static void finish(TextPanelAPI text) {
         if (FishermanChain.isAt(FishermanChain.Stage.T3_TRADED)) LegendaryHunt.start(text);
