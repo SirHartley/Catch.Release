@@ -1,7 +1,5 @@
 package catchrelease.combat.tug;
 
-import catchrelease.config.Setting;
-import com.fs.starfarer.api.combat.BoundsAPI;
 import com.fs.starfarer.api.combat.CombatEngineAPI;
 import com.fs.starfarer.api.combat.CombatEntityAPI;
 import com.fs.starfarer.api.combat.DamagingProjectileAPI;
@@ -9,7 +7,6 @@ import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.WeaponAPI;
 import com.fs.starfarer.api.util.Misc;
-import org.lazywizard.lazylib.CollisionUtils;
 import org.lwjgl.util.vector.Vector2f;
 
 // One harpoon line: in flight from the mount to the shot, then attached at a point fixed in the target's frame with
@@ -24,9 +21,6 @@ public class Tether {
     public static final float CORRECTION_RATE = 4f;
     public static final float MAX_CORRECTION_SPEED = 200f;
     public static final float MAX_SPIN_CHANGE = 30f;
-    // The mount sits inside the hull bounds, so the rope always enters the hull just before it; only an entry
-    // further from the mount than this means the rope runs through the ship.
-    public static final float HULL_MARGIN = 40f;
     public static final float SPEED_MARGIN = 5f;
     public static final float SPEED_ALLOWANCE_DECAY = 200f;
 
@@ -104,12 +98,6 @@ public class Tether {
 
         getMountPoint(mount);
         getTargetPoint(point);
-        boolean taut = Misc.getDistance(point, mount) > length;
-        if (taut && Setting.HARPOON_ROPE_HULL_BREAK.enabled() && crossesTugHull(point, mount)) {
-            release();
-            return;
-        }
-
         float impulse = solve(mount, point, tug.getVelocity(), target.getVelocity(),
                 inverseMass(tug), inverseMass(target), length, normal);
         if (impulse > 0f) {
@@ -118,16 +106,6 @@ public class Tether {
         }
         tugAllowance = updateAllowance(tug, tugAllowance, impulse > 0f, amount);
         targetAllowance = updateAllowance(target, targetAllowance, impulse > 0f, amount);
-    }
-
-    // The test runs from the target end, outside the tug: LazyLib reports a line that starts inside the bounds as a
-    // hit at its start.
-    private boolean crossesTugHull(Vector2f point, Vector2f mount) {
-        BoundsAPI bounds = tug.getExactBounds();
-        if (bounds == null) return false;
-        bounds.update(tug.getLocation(), tug.getFacing());
-        Vector2f entry = CollisionUtils.getCollisionPoint(point, mount, tug);
-        return entry != null && Vector2f.sub(entry, mount, null).length() > HULL_MARGIN;
     }
 
     // Velocity constraint for a rope from a to b: the impulse to add to A along outNormal (the unit vector from A to
