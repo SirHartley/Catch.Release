@@ -2705,12 +2705,11 @@ HailPlayer",,,
 catchrelease_t2Comms,OpenCommLink,$entity.catchrelease_t2Captain score:1200,"ShowPersonVisual
 CatchReleaseCMD chainTokens
 FireBest CatchReleaseT2Captain",,,
-catchrelease_t2CaptainMeet,CatchReleaseT2Captain,$catchreleaseChainT2Meet,"CatchReleaseCMD highlightFishText $catchreleaseChainT2Species
-SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The link opens on a cramped bridge. The captain is an old man with a grey beard, propped on a crutch beside the plot table.
+catchrelease_t2CaptainMeet,CatchReleaseT2Captain,$catchreleaseChainT2Meet,,"The link opens on a cramped bridge. The captain is an old man with a grey beard, propped on a crutch beside the plot table.
 
-""You'll be the one the Fisherman sent. Good. I was starting to think he'd forgotten me.""
-
-""There's a $catchreleaseChainT2Species out there. I've been on her tail near twenty year. First time I got a harpoon in her, she had my leg off at the knee. I've no had a decent night's sleep since.""
+""You'll be the one the Fisherman sent. Good. I was starting to think he'd forgotten me.""",catchrelease_t2CaptainMeet2:Continue,
+catchrelease_t2CaptainMeet2,DialogOptionSelected,$option == catchrelease_t2CaptainMeet2,"CatchReleaseCMD highlightFishText $catchreleaseChainT2Species
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""There's a $catchreleaseChainT2Species out there. I've been on her tail near twenty year. First time I got a harpoon in her, she had my leg off at the knee. I've no had a decent night's sleep since.""
 
 ""My lamps are finished. Burnt out the lot of them last week, and we can't raise a thing without them. Run yours close in round the star and keep them lit till she shows. When she does, put a harpoon in her. Ludd knows she deserves it.""","catchrelease_t2Search:""I'll find her.""
 100:catchrelease_fleetResolutionLeave:Leave",
