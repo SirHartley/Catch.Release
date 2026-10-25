@@ -38,10 +38,15 @@ public class TugTethers extends BaseEveryFrameCombatPlugin {
         return tethers;
     }
 
-    // Firing again releases the weapon's current line, whether it is still in flight or attached.
+    // Firing with a line out, in flight or attached, only lets go of it: the new shot is removed and its charge given
+    // back. The engine deducts the ammo, and plays the shot's sound and smoke, before it calls onFire.
     void fire(WeaponAPI weapon, DamagingProjectileAPI shot) {
-        for (Tether tether : tethers) {
-            if (tether.getWeapon() == weapon) tether.release();
+        Tether line = getLine(weapon);
+        if (line != null) {
+            line.release();
+            engine.removeEntity(shot);
+            weapon.setAmmo(Math.min(weapon.getMaxAmmo(), weapon.getAmmo() + 1));
+            return;
         }
         tethers.add(new Tether(engine, weapon, shot));
     }
