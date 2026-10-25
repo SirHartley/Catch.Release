@@ -12,44 +12,70 @@ public final class TugAIChecks {
     }
 
     public static void main(String[] args) {
-        float exposed = HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 0, false, 0.5f);
-        float flanked = HarpoonAutofireAI.score(Shield.FLANKED, false, false, 1f, 200f, 0, false, 0.5f);
-        float facing = HarpoonAutofireAI.score(Shield.FACING, false, false, 1f, 200f, 0, false, 0.5f);
+        float exposed = HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 4f, 0.5f);
+        float flanked = HarpoonAutofireAI.score(Shield.FLANKED, false, false, 1f, 200f, 4f, 0.5f);
+        float facing = HarpoonAutofireAI.score(Shield.FACING, true, true, 0.2f, 200f, 8f, 0f);
         require(exposed > flanked && flanked > facing, "Shield state does not order the targets");
-        require(facing < HarpoonAutofireAI.MIN_SCORE, "Would fire into a frigate's facing shield");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 2, false, 0.5f) < exposed / 2f,
-                "Ships already under friendly attack are not passed over");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, true, 1f, 200f, 0, false, 0.5f) > exposed,
+        require(facing < HarpoonAutofireAI.MIN_SCORE, "Would fire into a facing shield, even of a crippled frigate");
+        require(HarpoonAutofireAI.score(Shield.DOWN, true, true, 0.2f, 200f, 0f, 0f) < HarpoonAutofireAI.MIN_SCORE,
+                "Would harpoon a ship with no friendly guns near the tug");
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 1f, 0.5f) < exposed / 2f,
+                "A catch with little friendly firepower near the tug is not passed over");
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 8f, 0.5f) == exposed,
+                "Support past FULL_SUPPORT still counts");
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 600f, 4f, 0.5f)
+                        >= HarpoonAutofireAI.MIN_SCORE * 2f,
+                "A destroyer with its shield down near friends is not an easy pick");
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, true, 1f, 200f, 4f, 0.5f) > exposed,
                 "A fleeing ship is not preferred");
-        require(HarpoonAutofireAI.score(Shield.DOWN, true, false, 1f, 200f, 0, false, 0.5f) > exposed,
+        require(HarpoonAutofireAI.score(Shield.DOWN, true, false, 1f, 200f, 4f, 0.5f) > exposed,
                 "An overloaded ship is not preferred");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 3500f, 0, false, 0.5f) < exposed,
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 3500f, 4f, 0.5f) < exposed,
                 "A capital scores as well as a frigate");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 0.3f, 200f, 0, false, 0.5f) > exposed,
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 0.3f, 200f, 4f, 0.5f) > exposed,
                 "A damaged ship is not preferred");
-        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 0, false, 0f) > exposed,
+        require(HarpoonAutofireAI.score(Shield.DOWN, false, false, 1f, 200f, 4f, 0f) > exposed,
                 "A nearer ship is not preferred");
+
+        require(!HarpoonAutofireAI.inPinch(0f, 2f, true, 1f, 0.1f), "A friend with no enemies near is in a pinch");
+        require(HarpoonAutofireAI.inPinch(4f, 2f, false, 0f, 1f), "A swarmed friend is not in a pinch");
+        require(!HarpoonAutofireAI.inPinch(3f, 2f, false, 0f, 1f), "A sound friend outweighed less than twice over is"
+                + " in a pinch");
+        require(HarpoonAutofireAI.inPinch(2f, 2f, true, 0f, 1f) && HarpoonAutofireAI.inPinch(2f, 2f, false, 0.9f, 1f)
+                && HarpoonAutofireAI.inPinch(2f, 2f, false, 0f, 0.3f), "A matched friend in trouble is not in a pinch");
+        require(!HarpoonAutofireAI.inPinch(2f, 4f, true, 1f, 0.1f), "A covered friend is in a pinch");
+        float rescue = HarpoonAutofireAI.rescueScore(Shield.DOWN, 800f, 0.5f);
+        require(rescue > exposed, "Rescuing a destroyer ranks below an exposed frigate");
+        require(rescue < HarpoonAutofireAI.score(Shield.DOWN, true, true, 1f, 200f, 4f, 0.5f),
+                "Rescuing a destroyer ranks above an overloaded frigate on the run");
+        require(HarpoonAutofireAI.rescueScore(Shield.FACING, 200f, 0f) == 0f, "Would fire into a friend's facing shield");
 
         Vector2f a = new Vector2f(0f, 0f);
         Vector2f b = new Vector2f(100f, 0f);
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(50f, 30f), a, b) == 30f, "Segment middle");
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(-40f, 30f), a, b) == 50f, "Segment start");
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(130f, 40f), a, b) == 50f, "Segment end");
+        float contact = HarpoonAutofireAI.shieldContact(new Vector2f(60f, 0f), 20f, a, b);
+        require(Math.abs(contact - 0.4f) < 1e-4f, "Shield met at " + contact + " of the line, expected 0.4");
+        require(HarpoonAutofireAI.shieldContact(new Vector2f(50f, 30f), 20f, a, b) < 0f,
+                "A shield beside the line met it");
+        require(HarpoonAutofireAI.shieldContact(new Vector2f(200f, 0f), 20f, a, b) < 0f,
+                "A shield past the target met it");
+        contact = HarpoonAutofireAI.shieldContact(new Vector2f(0f, 0f), 30f, a, b);
+        require(Math.abs(contact - 0.3f) < 1e-4f, "A line from inside a shield should meet it where it leaves");
 
-        Vector2f tug = new Vector2f(0f, 0f);
-        Vector2f catchPoint = new Vector2f(-500f, 0f);
-        Vector2f straight = TugPilot.dragDirection(tug, catchPoint, new Vector2f());
-        require(near(straight, 1f, 0f), "No bias did not pull straight away");
-        Vector2f towardFriends = TugPilot.dragDirection(tug, catchPoint, new Vector2f(0f, 3f));
-        require(towardFriends.y > 0.3f && towardFriends.x > 0f, "Did not bend toward friendly ships");
-        Vector2f awayFromEnemies = TugPilot.dragDirection(tug, catchPoint, new Vector2f(0f, -5f));
-        require(awayFromEnemies.y < -0.3f, "Did not bend away from enemies");
+        // The rope runs from the catch to the tug along 0 degrees.
+        float swing = TugPilot.MAX_SWING;
+        require(TugPilot.dragHeading(0f, 0f, 1f) == 0f, "Did not head straight on with the goal past the tug");
+        require(TugPilot.dragHeading(0f, 40f, -1f) == 40f, "Did not head for a goal within MAX_SWING of the rope");
+        require(TugPilot.dragHeading(0f, 120f, -1f) == swing && TugPilot.dragHeading(0f, -120f, 1f) == -swing,
+                "Did not swing round the catch toward a goal off to one side");
+        require(TugPilot.dragHeading(0f, 180f, 1f) == swing && TugPilot.dragHeading(0f, 180f, -1f) == -swing,
+                "Did not keep its side with the catch between the tug and its goal");
         for (int angle = 0; angle < 360; angle += 15) {
-            Vector2f bias = new Vector2f((float) Math.cos(Math.toRadians(angle)) * 9f,
-                    (float) Math.sin(Math.toRadians(angle)) * 9f);
-            Vector2f heading = TugPilot.dragDirection(tug, catchPoint, bias);
-            require(heading.x > 0.4f, "Heading closes on the catch for bias at " + angle + " degrees");
-            require(Math.abs(heading.length() - 1f) < 1e-4f, "Heading is not a unit vector");
+            float heading = TugPilot.dragHeading(0f, angle, 1f);
+            require(Math.cos(Math.toRadians(heading)) >= Math.cos(Math.toRadians(swing)) - 1e-4,
+                    "Heading slackens the rope for a goal at " + angle + " degrees");
         }
 
         require(!TugDriveAI.shouldHaul(false, 5f, 200f), "Hauled on a slack line");
@@ -59,12 +85,8 @@ public final class TugAIChecks {
         require(TugDriveAI.shouldEscape(0.2f, true) && !TugDriveAI.shouldEscape(0.2f, false)
                 && !TugDriveAI.shouldEscape(0.9f, true), "Escape rule changed");
 
-        System.out.println("Tug AI checks: harpoon target scoring, line-of-fire distance, drag heading and drive"
-                + " use passed");
-    }
-
-    private static boolean near(Vector2f v, float x, float y) {
-        return Math.abs(v.x - x) < 1e-4f && Math.abs(v.y - y) < 1e-4f;
+        System.out.println("Tug AI checks: harpoon target and rescue scoring, line-of-fire distance, shield contact,"
+                + " drag heading and drive use passed");
     }
 
     private static void require(boolean condition, String message) {
