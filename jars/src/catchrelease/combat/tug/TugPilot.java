@@ -136,8 +136,10 @@ public class TugPilot implements AdvanceableListener {
         ship.blockCommandForOneFrame(ShipCommand.STRAFE_RIGHT);
     }
 
-    // The plugin only advances while its group is on autofire, so off autofire its answer is stale.
+    // The plugin only advances while its group is on autofire, so off autofire its answer is stale. A tug in trouble
+    // would let go of the line at once, so it does not spend a charge on one.
     private boolean wantsToFire(WeaponAPI weapon) {
+        if (isInTrouble()) return false;
         WeaponGroupAPI group = ship.getWeaponGroupFor(weapon);
         if (group == null || !group.isAutofiring()) return false;
         AutofireAIPlugin plugin = group.getAutofirePlugin(weapon);
@@ -148,11 +150,14 @@ public class TugPilot implements AdvanceableListener {
     // in trouble or out of drive charges.
     private boolean isWorthHolding(Tether tether) {
         ShipAPI target = tether.getTarget();
-        if (target.isHulk() || target.getOwner() == ship.getOwner()) return false;
-        if (ship.getHullLevel() < DANGER_HULL || ship.getFluxTracker().getFluxLevel() > DANGER_FLUX) return false;
+        if (target.isHulk() || target.getOwner() == ship.getOwner() || isInTrouble()) return false;
         boolean hopeless = target.getMass() > ship.getMass() * HOPELESS_MASS_RATIO
                 && (ship.getSystem() == null || ship.getSystem().isOutOfAmmo());
         return !(hopeless && tether.getAge() > HOPELESS_TIME);
+    }
+
+    private boolean isInTrouble() {
+        return ship.getHullLevel() < DANGER_HULL || ship.getFluxTracker().getFluxLevel() > DANGER_FLUX;
     }
 
     private WeaponAPI getHarpoon() {
