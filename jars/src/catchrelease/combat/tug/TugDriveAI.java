@@ -45,8 +45,8 @@ public class TugDriveAI implements ShipSystemAIScript {
         boolean use;
         if (tether != null) {
             ShipAPI caught = tether.getTarget();
-            Vector2f mount = tether.getMountPoint();
-            Vector2f point = tether.getTargetPoint();
+            Vector2f mount = tether.getMountPoint(new Vector2f());
+            Vector2f point = tether.getTargetPoint(new Vector2f());
             Vector2f rope = Vector2f.sub(point, mount, null);
             float distance = rope.length();
             float separating = 0f;

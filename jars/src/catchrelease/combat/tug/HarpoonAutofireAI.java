@@ -8,7 +8,11 @@ import com.fs.starfarer.api.combat.ShieldAPI;
 import com.fs.starfarer.api.combat.ShipAPI;
 import com.fs.starfarer.api.combat.ShipwideAIFlags.AIFlags;
 import com.fs.starfarer.api.combat.WeaponAPI;
+import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 // Harpoon targeting, picked in ModPlugin.pickWeaponAutofireAI. The engine only asks it while the weapon's group is
 // on autofire; TugPilot stops the ship AI firing the harpoon by hand when this plugin would not.
@@ -25,11 +29,15 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
     // Friendly ships and wrecks closer than this share of their radius to the line of fire block the shot; the
     // weapon itself has no friendly-fire check, and the vanilla autofire AI's is not reachable.
     public static final float BLOCK_SHARE = 0.8f;
+    // A blocked line is checked again after this long; a clear one fires at once and puts a line out.
+    public static final float BLOCKED_RECHECK = 0.1f;
 
     private final WeaponAPI weapon;
+    private final Map<ShipAPI, Integer> helpers = new IdentityHashMap<>();
     private ShipAPI target;
     private Vector2f aim;
     private float rescore;
+    private float blocked;
     private boolean fire;
 
     public HarpoonAutofireAI(WeaponAPI weapon) {
@@ -50,19 +58,27 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
                 : engine.getAimPointWithLeadForAutofire(ship, 1f, target, weapon.getProjectileSpeed());
         TugTethers tethers = TugTethers.peek(engine);
         boolean lineOut = tethers != null && tethers.getLine(weapon) != null;
-        fire = aim != null && !lineOut && isAimed(aim) && isClear(engine, ship, aim);
+        blocked -= amount;
+        fire = aim != null && !lineOut && isAimed(aim) && blocked <= 0f;
+        if (fire && !isClear(engine, ship, aim)) {
+            fire = false;
+            blocked = BLOCKED_RECHECK;
+        }
     }
 
+    // List passes, not the ship grid: a grid query copies every object in its 300-unit cells into a new set, which
+    // costs more at weapon and helper range.
     private ShipAPI pickTarget(CombatEngineAPI engine, ShipAPI ship) {
+        countHelpers(engine, ship);
         Vector2f mount = weapon.getLocation();
         ShipAPI best = null;
         float bestScore = MIN_SCORE;
         for (ShipAPI other : engine.getShips()) {
             if (!isCandidate(engine, ship, other)) continue;
-            float distance = Vector2f.sub(other.getLocation(), mount, null).length() - other.getCollisionRadius();
+            float distance = Misc.getDistance(other.getLocation(), mount) - other.getCollisionRadius();
             if (distance > weapon.getRange() || weapon.distanceFromArc(other.getLocation()) > 0f) continue;
             float score = score(getShield(other, mount), isDisabled(other), isFleeing(other), other.getHullLevel(),
-                    other.getMass(), countHelpers(engine, ship, other),
+                    other.getMass(), helpers.getOrDefault(other, 0),
                     other.getSinceLastDamageTaken() < RECENT_HIT, Math.max(0f, distance) / weapon.getRange());
             if (score > bestScore) {
                 bestScore = score;
@@ -113,20 +129,23 @@ public class HarpoonAutofireAI implements AutofireAIPlugin {
                 || other.getAIFlags().hasFlag(AIFlags.RUN_QUICKLY));
     }
 
-    private static int countHelpers(CombatEngineAPI engine, ShipAPI ship, ShipAPI other) {
-        int helpers = 0;
+    // Friendly ships targeting each ship from within HELPER_RANGE of it.
+    private void countHelpers(CombatEngineAPI engine, ShipAPI ship) {
+        helpers.clear();
         for (ShipAPI ally : engine.getShips()) {
-            if (ally == ship || ally.getOwner() != ship.getOwner() || !ally.isAlive() || ally.isFighter()) continue;
-            if (ally.getShipTarget() != other) continue;
-            if (Vector2f.sub(ally.getLocation(), other.getLocation(), null).length() < HELPER_RANGE) helpers++;
+            if (ally == ship || ally.isFighter() || ally.getOwner() != ship.getOwner() || !ally.isAlive()) continue;
+            ShipAPI other = ally.getShipTarget();
+            if (other == null) continue;
+            float dx = ally.getLocation().x - other.getLocation().x;
+            float dy = ally.getLocation().y - other.getLocation().y;
+            if (dx * dx + dy * dy < HELPER_RANGE * HELPER_RANGE) helpers.merge(other, 1, Integer::sum);
         }
-        return helpers;
     }
 
     private boolean isAimed(Vector2f point) {
         Vector2f mount = weapon.getLocation();
         float wanted = (float) Math.toDegrees(Math.atan2(point.y - mount.y, point.x - mount.x));
-        float distance = Math.max(1f, Vector2f.sub(point, mount, null).length());
+        float distance = Math.max(1f, Misc.getDistance(point, mount));
         float tolerance = Math.max(AIM_TOLERANCE,
                 (float) Math.toDegrees(Math.atan(target.getCollisionRadius() * 0.5f / distance)));
         return Math.abs(angleDifference(weapon.getCurrAngle(), wanted)) <= tolerance;

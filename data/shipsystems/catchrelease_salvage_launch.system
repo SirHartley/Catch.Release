@@ -1,0 +1,13 @@
+{
+	"id":"catchrelease_salvage_launch",
+	"type":"STAT_MOD",
+	"aiType":"CUSTOM",
+	"aiScript":"catchrelease.combat.salvage.SalvageLaunchAI",
+
+	"runScriptWhileIdle":true,
+
+	"statsScript":"catchrelease.combat.salvage.SalvageLaunchStats",
+
+	"useSound":"system_reserve_wing",
+	"outOfUsesSound":"gun_out_of_ammo",
+}

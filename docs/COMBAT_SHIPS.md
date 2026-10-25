@@ -12,7 +12,7 @@ Engine facts below are from Starsector 0.98a-RC8 (the `starsector-knowledge` ski
 | Reliquary | `catchrelease_rod_ship` | Cruiser | LYNE Tender | `graphics/catchrelease/ships/done_boat.png` |
 | Monstrance | `catchrelease_lamp_ship` | Cruiser | Breach Trawler | none yet; the hull is still a Nebula copy |
 
-All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`. The Stigmata has its Haul Drive; the Reliquary's system is a vanilla placeholder (`targetingfeed`) until its launch system exists.
+All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`. The Stigmata has its Haul Drive and the Reliquary its Salvage Launch.
 
 ## Stigmata: harpoon tug
 
@@ -29,7 +29,7 @@ Built in as the Tug Drive Field (`catchrelease_tug_field`), placeholder icon (va
 
 Vanilla reference: the Ox tug's burn comes from the hidden Drive Field Stabilizer (+1 fleet burn and +200 sensor profile, `api/impl/hullmods/DriveFieldStabilizer.java:10-16`). Augmented Drive Field is a different hullmod (+2 to the ship's own burn). No vanilla hullmod changes campaign acceleration.
 
-Implementation route: `HullModFleetEffect.advanceInCampaign(fleet)` writes `getFleetwideMaxBurnMod().modifyFlat` and `getAccelerationMult().modifyMult` under one key, or removes both, each frame. Those fleet stats take effect in the same frame (`obf/campaign/fleet/FleetData.java:798-823`, `CampaignFleet.java:794-795`). A ship-stat bonus would only reach the fleet at the next fleet sync, so it could not follow Sustained Burn. The hook runs for every fleet every frame, so it must exit at once for fleets without a tug. Sustained Burn: `fleet.getAbility(Abilities.SUSTAINED_BURN)`, `isActive()`.
+Implementation route: `HullModFleetEffect.onFleetSync(fleet)` writes `getFleetwideMaxBurnMod().modifyFlat` and `getAccelerationMult().modifyMult` under one key, or removes both. Those fleet stats take effect in the same frame (`obf/campaign/fleet/FleetData.java:798-823`, `CampaignFleet.java:794-795`). A ship-stat bonus would only reach the fleet at the next fleet sync, so it could not follow Sustained Burn. A campaign listener reapplies the player's bonus when Sustained Burn is toggled (`reportPlayerActivatedAbility`/`reportPlayerDeactivatedAbility`), so nothing runs every frame. Sustained Burn: `fleet.getAbility(Abilities.SUSTAINED_BURN)`, `isActive()`.
 
 ### Harpoon
 
@@ -39,14 +39,14 @@ A built-in weapon on `WS0001` with regenerating charges (`ammo`, `ammo/sec`, `re
 - **Hits:** a shield hit glances off; only a hull or armour hit attaches. A deflected harpoon is a new projectile spawned at the hit point (`engine.spawnProjectile`); vanilla has no ricochet.
 - **Targets:** anything with a hull: enemies, friendly ships and wrecks.
 - **While attached:** the rope keeps its length. When taut it pulls both ships along the rope, split by mass, so lighter hulls are dragged more easily. Mass is a plain field (`CombatEntityAPI.getMass/setMass`), not a stat. LazyLib `CombatUtils.applyForce` does not scale by frame time. A ship above its top speed brakes on its own unless it is accelerating, decelerating or strafing (`obf/combat/entities/Ship.java:2031-2039`), and those commands clamp to top speed too (`obf/combat/entities/ship/null.java:740-815`); `blockCommandForOneFrame` cannot stop the brake. So a dragged ship needs a temporary top-speed allowance. The rope can go slack; slack must never pull.
-- **Release:** firing again releases the current rope. The rope also breaks when its duration runs out, when the target is destroyed or removed, and, probably, when the rope crosses the tug's own hull while it turns (LazyLib `CollisionUtils`; start the test outside the hull, since a line starting inside the bounds reports a hit at its start, whatever its javadoc says).
+- **Release:** firing again releases the current rope. The rope also breaks when its duration runs out and when the target is destroyed or removed. It does not break when it crosses the tug's own hull: that rule was tried and removed as unintuitive.
 - **Turret return:** after firing or release the mount turns back fast but smoothly, never snapping.
 - **Rope look:** about 2 px wide, a beige-white centre with brown edges, using half-pixel widths where that helps. Drawn as a feathered quad strip from a `CombatLayeredRenderingPlugin`, with its entity kept at the rope's midpoint and a render radius covering the rope (vanilla `NeuralTransferVisual` draws between two ships this way). The campaign harpoon's curve, spring slack and wobble maths in `HarpoonEntityPlugin` are portable; its classes are not.
 - **Connection:** the line flies out at low alpha and "materialises" when the harpoon bites, possibly with EMP arcs racing along it.
 
 ### Drive system
 
-Replaces the placeholder system. It uses the tug drive's field: while active it raises the tug's mass (restored when it ends), acceleration, turn acceleration and turn rate, so a hooked target can be hauled. Visuals: longer engine plumes (`ShipEngineControllerAPI.extendFlame`, `fadeToOtherColor`) spewing dirty black smoke (`engine.addNebulaSmokeParticle`). Charges and regeneration come from the system's `max uses` and `regen` (charges per second).
+Replaces the placeholder system. It uses the tug drive's field: while active it raises the tug's mass (restored when it ends), acceleration, turn acceleration and turn rate, so a hooked target can be hauled. Visuals: longer engine plumes (`ShipEngineControllerAPI.extendFlame`, `fadeToOtherColor`) spewing dirty black smoke, drawn below the ships (a MagicLib trail ribbon per nozzle plus the engines' own smoke contrail, darkened). Charges and regeneration come from the system's `max uses` and `regen` (charges per second).
 
 ### AI
 
@@ -88,18 +88,18 @@ Engine limits:
 - **Restoration:** a recovered fighter is restored like a normal replacement (its wing's refit time and the ship's refit modifiers, with the usual CR rules), then waits in the store.
 - **Launch system:** launches every stored fighter at the target for an attack run. Fighters of one type form wings up to their wing size, and never more instances than were recovered: one recovered Broadsword launches as one, two as two.
 - **After launch:** they behave like normal fighters, return and land. A destroyed one is gone and leaves no wreck (`setHulkChanceOverride(0)` on every fighter the Reliquary launches), so no fighter is salvaged twice.
-- **Bays cannot rebuild them.** A launch bay only builds its own wing's type (`obf/combat/entities/ship/A/C.java:47, 63, 346-410`) and deletes a fighter that lands. So the system spawns them itself:
-  - spawn with `CombatFleetManagerAPI.spawnShipOrWing`;
-  - set the Reliquary as source ship;
-  - remove surplus members;
-  - set their CR;
-  - count landed fighters back into the store.
-  - Vanilla `SwarmLauncherEffect.java:148-180` does the same, including `removeDeployed` cleanup.
+- **Bays must not rebuild them.** A bay builds whatever wing asks it for a replacement, using the requesting wing's variant and its own refit time (`obf/combat/entities/ship/A/C.java:161, 362`), and any wing with a source bay asks when it is under strength (`obf/combat/ai/M.java:260-272`). A recovered wing with a Reliquary bay as its source would be rebuilt endlessly. So the system spawns them itself and gives them a source ship but no source bay:
+  - spawn with `CombatFleetManagerAPI.spawnShipOrWing` (only ids ending in `_wing` are treated as wings; other ids go through `createFleetMember(FIGHTER_WING, …)` and `spawnFleetMember`);
+  - set the Reliquary as source ship (`setSourceShip`, never `setSourceBay`);
+  - remove surplus members (`removeMember` plus `removeEntity`);
+  - give each fighter what a bay would: the ship's CR through the CR plugin and its hullmods' `applyEffectsToFighterSpawnedByShip`;
+  - `removeDeployed(wing, false)`, so the wing costs no deployment points and is cleaned up, as vanilla `SwarmLauncherEffect.java:152-178` does (which moves its members into another wing rather than trimming or setting CR).
+  - Without a bay, vanilla never brings them home, so the mod lands them itself and counts landed fighters back into the store.
 - **Status display:** the store shows on the combat screen where terrain effects live. `engine.maintainStatusForPlayerShip` gives one line per entry. A richer display can be drawn in `renderInUICoords`, or MagicLib's `MagicSubsystem` can host the launch ability with its own HUD bars and AI hook (`shouldActivateAI`).
 - **Refit display:** while the refit screen is open, each Reliquary with stored fighters shows them as filled, locked built-in bays. The swap exists only while the refit is open, so saves, D-mod changes and carrier skill counts never see it. Engine facts below are from the 0.98a-RC8 refit, variant and hull-spec code (`obf/coreui/refit/`, `obf/loading/specs/`).
   - **Why a hull spec copy:** a fighter bay is locked only when the hull spec says it is built-in (`isBuiltInWing`). No variant flag is consulted. A copy of the spec with the stored wings appended to its built-in list shows them filled, locked and free of OP. Being built-in also keeps them out of the loot, scuttle and sell paths, which only take non-built-in wings.
   - **Making the copy:** the API has no clone, but the concrete spec class has a public `clone()` that copies the built-in wing list. Call it through `MethodHandles` (mods may not use `java.lang.reflect`) and set it with `ShipVariantAPI.setHullSpecAPI`. The variant must belong to this ship alone, since the refit reloads a stock variant from the registry. Clone it, set its source to `REFIT` and call `member.setVariant(v, false, true)`, as vanilla `PKDefenderPluginImpl` does.
-  - **Open:** `CoreUITabListener.reportAboutToOpenCoreTab(REFIT, …)` builds the copy from the current store, with the LYNE wings first, then the stored wings. It calls `refreshBuiltInWings()`, and the built-in Reliquary hullmod adds one bay per stored wing while the swap is active.
+  - **Open:** `CoreUITabListener.reportAboutToOpenCoreTab(REFIT, …)` builds the copy from the current store, with the LYNE wings first, then the stored wings (`setHullSpecAPI` re-adds built-in wings itself, so `refreshBuiltInWings()` is not needed), and the built-in Reliquary hullmod adds one bay per stored wing while the swap is active, for stats built without an entity. The callback fires after the refit already shows a clone of the first ship's variant (`obf/ui/newui/L.java:337-339`), so the displayed variant is swapped too and the refit panel resynced, as LunaLib's `refreshVariant` does. Leaving the display unswapped is not an option: a field-refit save compares wings by reference and charges CR for each one the saved variant lacks (`obf/loading/specs/HullVariantSpec.java:1594-1612`).
   - **Close:** no callback reports the refit closing. A script added on open checks each frame whether the refit is still the current tab (`CampaignUIAPI.getCurrentCoreTab`) and removes itself on revert, so this polling exists only while the swap does. On close it reverts whatever variant the member holds at that moment: the refit's undo history clones variants that share the copy. It restores the normal spec and removes the stored wing ids from the variant's wing list.
   - **Restore guard:** restoring a hull (removing D-mods) happens inside the refit and calls `setHullSpecAPI` with the normal spec. The same script re-applies the copy whenever the variant's spec is no longer the copy. Otherwise the extra bays would become modular and a stored fighter could be stripped into a free LPC.
   - **Combat:** the hullmod adds the extra bays only outside combat. Bays are created from the variant's wings at ship creation, after `applyEffectsBeforeShipCreation` has run with `stats.getEntity()` set (`Ship.java:841-850`, `obf/loading/specs/_.java:107-133`). So the stored wings never get bays, and only the launch system spawns them.
@@ -107,7 +107,7 @@ Engine limits:
   - **Refitting is otherwise unaffected:** weapons, hullmods, S-mods and OP are identical on the copy. Autofit fills only modular bays. Saving a variant skips built-in wings. The stats panel shows the extra bays while the refit is open.
   - **Fallback:** the built-in hullmod's tooltip (`HullModEffect.addPostDescriptionSection`, with the refit `ShipAPI` and its `getFleetMemberId()`) also lists the store, with sprites, counts and restoration progress. It is the fallback whenever the swap is not in place.
   - **Rejected:** drawing on the refit screen has no API hook. A PatchLib redirect of `isBuiltInWing` would need many fragile call-site patches.
-- **Discarding stored fighters:** the player removes fighters they do not want through a LunaLib refit button on each Reliquary. LunaLib 2.0.1 (`lib/Lazylib_lunalib.zip`) has `lunalib.lunaRefit.BaseRefitButton`, registered with `LunaRefitManager.addRefitButton`. Its `shouldShow(member, variant, market)` limits it to Reliquaries, and `hasPanel`/`initPanel(CustomPanelAPI, …)` opens a custom panel listing the store with a discard control per fighter. After a change, `refreshVariant()` updates the ship, so the refit swap is rebuilt from the new store. A discarded fighter is gone; it gives no LPC. The panel is player-facing UI, so `UI.md` and the text route apply. The button's `advance` and `onPanelClose` may also be usable to detect the refit closing in place of the polling script; that is unverified.
+- **Discarding stored fighters:** the player removes fighters they do not want through a LunaLib refit button on each Reliquary. LunaLib 2.0.1 (`lib/Lazylib_lunalib.zip`) has `lunalib.lunaRefit.BaseRefitButton`, registered with `LunaRefitManager.addRefitButton`. Its `shouldShow(member, variant, market)` limits it to Reliquaries, and `hasPanel`/`initPanel(CustomPanelAPI, …)` opens a custom panel listing the store with a discard control per fighter. After a change, `refreshVariant()` updates the ship, so the refit swap is rebuilt from the new store. A discarded fighter is gone; it gives no LPC. The panel is player-facing UI, so `UI.md` and the text route apply. The button's `advance` runs only while Luna's options list is open, and `onPanelClose` does not run when the refit closes with the panel open, so neither can replace the polling script (LunaLib 2.0.1 `RefitButtonAdder.kt`).
 - **Persistence:** the store carries over between battles, kept per ship. Variant ids are shared by every ship of a stock variant, so key it by fleet member id. Purge it when the ship leaves the player's fleet, for example into storage.
 - **AI:** fire when enough fighters are stored and a target in range is worth it.
 
@@ -116,7 +116,7 @@ Engine limits:
 The player gets a version of the Reliquary early, with no blueprint. In combat it is the same ship: same hull, wings, salvage, store, launch system and refit display. It differs only in the campaign, where it does not unlock the Reployment Bays (see [FISHERMAN_CHAIN.md](FISHERMAN_CHAIN.md#ships)).
 
 - **Form:** a hull skin (`.skin`) of `catchrelease_rod_ship` that changes nothing for combat. Its own hull id is what lets the campaign tell it apart.
-- **Combat code must treat it as a Reliquary:** match the Reliquary by base hull id (`ShipHullSpecAPI.getBaseHullId`, which a skin points at its base hull), not by the exact hull id. That covers the built-in hullmod, the salvage and store, the launch system, the refit swap and the store's fleet-member key.
+- **Combat code must treat it as a Reliquary:** a skin inherits the base hull's built-in hullmods, wings, system and stats, so the combat and refit code finds every Reliquary by its built-in Salvage Bays hullmod, never by hull id. That covers the salvage and store, the launch system, the refit swap and the discard panel; the store is keyed by fleet member id either way. A skin does not inherit tags, so it repeats `no_drop`, `no_sell` and `no_bp_drop`.
 
 ## Monstrance: Breach Trawler (later)
 
@@ -180,8 +180,8 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 ### Stage 1: tug hullmod
 
 - [x] 1.1 `combat/tug/TugDriveHullmod` (Tug Drive Field, `catchrelease_tug_field`): a `BaseHullMod` that also implements `HullModFleetEffect`, built into the Stigmata. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug).
-  - `advanceInCampaign(fleet)` exits at once when the fleet has no non-mothballed tug (counted on fleet sync). Each frame:
-    - count the tugs: +1 burn per tug through `getFleetwideMaxBurnMod().modifyFlat`;
+  - On fleet sync, and for the player when Sustained Burn is toggled:
+    - count the non-mothballed tugs: +1 burn per tug through `getFleetwideMaxBurnMod().modifyFlat`;
     - acceleration through `getAccelerationMult().modifyMult` with 20% × (1 + ½ + ¼ …);
     - remove both under the same key while `Abilities.SUSTAINED_BURN` is active.
   - The tooltip states the numbers and the Sustained Burn rule.
@@ -199,17 +199,16 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
   - A shield hit (`shieldHit`, reliable because the shot does damage) spawns a deflected copy.
   - A hull or armour hit on any ship or wreck creates a `Tether`: target, attachment point in the target's local frame, rope length = distance at impact.
   - Firing again releases the current tether.
-- [x] 2.3 Tether physics: `combat/tug/Tether`, advanced by one `EveryFrameCombatPlugin` that owns every live tether. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). Duration 20 s; the hull-break setting is `catchrelease_harpoon_rope_hull_break`, on by default.
+- [x] 2.3 Tether physics: `combat/tug/Tether`, advanced by one `EveryFrameCombatPlugin` that owns every live tether. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug). Duration 20 s.
   - **Pull:** when taut, remove the outward velocity along the rope and add an impulse split by mass, so the lighter ship moves more. Slack never pulls.
   - **Top speed:** a temporary max-speed allowance on a dragged target so its auto-brake does not fight the rope.
   - **Breaks** on:
     - duration;
-    - target destroyed or removed;
-    - the rope crossing the tug's hull (LazyLib `CollisionUtils`, tested from outside the hull) — behind a setting, off if it plays badly.
+    - target destroyed or removed.
   - Check: the constraint maths, i.e. mass split, slack, and no pull while slack.
   - Done when: the tug can hook and drag a frigate, struggles with a cruiser, and the rope behaves when slack.
 - [x] 2.4 Rope rendering: `combat/tug/TetherRenderer`, a `BaseCombatLayeredRenderingPlugin` per tether, its entity kept at the rope's midpoint with a render radius covering the rope.
-  - **Look:** about 2 px wide, beige-white centre, brown edges, as a feathered quad strip along the campaign rope's curve and slack maths, ported from `HarpoonEntityPlugin`.
+  - **Look:** about 2 px wide, beige-white centre, brown edges, as a feathered quad strip along the campaign rope's curve and slack maths, ported from `HarpoonEntityPlugin`. In flight it behaves like the campaign line, with no sideways bow. Once the harpoon bites it is a simulated rope: straight when taut, and when slack it keeps its momentum and folds and loops, as a loose line in space does.
   - **Flight and bite:** low alpha in flight, then it "materialises" on the bite, with EMP arcs racing along the rope.
   - Done when: the rope reads clearly at all zooms and looks right slack and taut.
   - Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug) and [UI.md](UI.md#drawing-gotchas). The renderer also draws the harpoon head, since a bullet sprite is always additive.
@@ -219,7 +218,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 - [x] 3.1 `catchrelease_tug_drive` (Haul Drive) with `combat/tug/TugDriveStats` (`BaseShipSystemScript`). Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#combattug).
   - **Stats while active:** raised mass (`setMass`, restored in `unapply`), acceleration, turn acceleration and turn rate.
-  - **Visuals:** `extendFlame` and `fadeToOtherColor` on the engines, dark `addNebulaSmokeParticle` smoke from the nozzles.
+  - **Visuals:** `extendFlame` and `fadeToOtherColor` on the engines; a soot ribbon per nozzle below the ships (`MagicTrailPlugin`, `base_trail_heavySmoke`) and the engines' smoke contrail darkened.
   - **Uses:** charges through `max uses`/`regen`.
   - It replaces `maneuveringjets` in `ship_data.csv`.
   - Done when: a hooked cruiser can be hauled with the drive on, and the smoke and plumes look right.
@@ -263,19 +262,19 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 6: recovered fighters
 
-- [ ] 6.1 `combat/salvage/FighterStore`, saved per fleet member id, on the sector's persistent data.
+- [x] 6.1 `combat/salvage/FighterStore`, saved per fleet member id, on the sector's persistent data. Implemented with `TenderBays`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). Restoration runs in combat only and keeps partial progress; fighters still out when a battle ends count as returned; the simulator works on a copy.
   - Wing id, count and restoration progress per entry.
   - Cap 10 (setting), counting fighters still restoring.
   - Restoration at the wing's refit time with the ship's refit modifiers.
   - Purged when the member leaves the player's fleet: a fleet callback, as `FishingShips` uses.
   - Check: cap, restoration and grouping into wings no larger than the wing size.
-- [ ] 6.2 Launch system: `catchrelease_salvage_launch` with `combat/salvage/SalvageLaunchStats`. It replaces `targetingfeed`.
-  - Spawns every restored fighter with `spawnShipOrWing`, groups them into wings, removes surplus members, sets the source ship and CR, and calls `removeDeployed` on the spawned wing, as `SwarmLauncherEffect` does.
+- [x] 6.2 Launch system: `catchrelease_salvage_launch` with `combat/salvage/SalvageLaunchStats`. It replaces `targetingfeed`. Implemented with `RecoveredWings`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
+  - Spawns every restored fighter with `spawnShipOrWing`, groups them into wings, removes surplus members, sets the source ship (no source bay) and CR, and calls `removeDeployed` on the spawned wing.
   - Every launched fighter gets `setHulkChanceOverride(0)`.
   - Landed fighters go back into the store; destroyed ones are gone.
-- [ ] 6.3 `ShipSystemAIScript` for the launch: fire when enough fighters are restored and a target in range is worth it.
-- [ ] 6.4 Combat status display: one `maintainStatusForPlayerShip` line per stored type, or a richer `renderInUICoords` panel. Fable research first.
-- [ ] 6.5 Refit display, in this order:
+- [x] 6.3 `ShipSystemAIScript` for the launch: fire when enough fighters are restored and a target in range is worth it. Implemented as `SalvageLaunchAI`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
+- [x] 6.4 Combat status display: one `maintainStatusForPlayerShip` line per stored type, or a richer `renderInUICoords` panel. Fable research first. Implemented with status lines in `SalvageBaysHullmod`; see [UI.md](UI.md#drawing-gotchas). MagicLib's `MagicSubsystem` HUD was not used: it would replace the vanilla ship system.
+- [x] 6.5 Refit display, in this order (implemented as `RefitStoreView`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage)). The spike in item 1 could not be run here; the author confirms the swap in game. A failed spec copy leaves the tooltip as the only display, and a failed display refresh reverts the swap:
   1. **Spike** the spec `clone()` through `MethodHandles` and whether `reportAboutToOpenCoreTab` fires when the core UI opens straight into the refit.
   2. `combat/salvage/RefitStoreView`:
      - takes the variant for this member alone;
@@ -285,9 +284,9 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
      - the restore guard;
      - strips stray wings on load and on leaving the fleet.
   3. Check: revert leaves no stored wing ids in the variant.
-- [ ] 6.6 Salvage hullmod tooltip listing the store, the fallback display.
-- [ ] 6.7 LunaLib refit button and panel to discard stored fighters (`BaseRefitButton`). Afterwards, `refreshVariant()`.
-- [ ] 6.8 Early Reliquary skin. Combat code matches it through `getBaseHullId`. Campaign:
+- [x] 6.6 Salvage hullmod tooltip listing the store, the fallback display. Implemented in `SalvageBaysHullmod`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage).
+- [x] 6.7 LunaLib refit button and panel to discard stored fighters (`BaseRefitButton`). Afterwards, `refreshVariant()`. Implemented as `FighterStoreRefitButton`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage). After a discard `RefitStoreView.rebuild` runs Luna's `refreshVariant` sequence itself, since it also has to put the new spec on the shown variant first.
+- [x] 6.8 Early Reliquary skin. Combat code matches it through its inherited Salvage Bays hullmod. Implemented; see [ARCHITECTURE.md](ARCHITECTURE.md#campaignfishships). Campaign:
   - a `FishingShips` entry with the ROD rig's second slot and no module;
   - +1 drone in `FishingDroneSwarmScript`.
 

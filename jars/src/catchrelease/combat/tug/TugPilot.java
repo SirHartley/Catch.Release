@@ -28,9 +28,14 @@ public class TugPilot implements AdvanceableListener {
     public static final float TURN_GAIN = 2f;
     public static final float TURN_DEADBAND = 2f;
     public static final float THRUST_ARC = 60f;
+    // How often the pull of nearby ships is re-summed; the heading itself follows the catch every frame.
+    public static final float BIAS_INTERVAL = 0.25f;
 
     private final ShipAPI ship;
     private WeaponAPI harpoon;
+    private final Vector2f bias = new Vector2f();
+    private final Vector2f catchPoint = new Vector2f();
+    private float biasAge = BIAS_INTERVAL;
 
     public TugPilot(ShipAPI ship) {
         this.ship = ship;
@@ -52,29 +57,42 @@ public class TugPilot implements AdvanceableListener {
             tethers.release(tether);
             tether = null;
         }
-        if (tether != null) tow(engine, tether);
+        if (tether == null) {
+            biasAge = BIAS_INTERVAL;
+            return;
+        }
+        tow(engine, tether, amount);
     }
 
     // Drags the catch toward friendly ships and away from enemies, overriding the ship AI's movement: the wanted
     // commands are given and every other movement command blocked, since the engine drops a blocked type even
     // when given.
-    private void tow(CombatEngineAPI engine, Tether tether) {
-        Vector2f bias = new Vector2f();
+    private void tow(CombatEngineAPI engine, Tether tether, float amount) {
+        biasAge += amount;
+        if (biasAge >= BIAS_INTERVAL) {
+            biasAge = 0f;
+            sumBias(engine, tether.getTarget());
+        }
+        Vector2f heading = dragDirection(ship.getLocation(), tether.getTargetPoint(catchPoint), bias);
+        steer((float) Math.toDegrees(Math.atan2(heading.y, heading.x)));
+    }
+
+    // Friendly weight minus enemy weight by direction, over ships within SCAN_RANGE. A list pass, not the ship grid:
+    // a grid query copies every object in its 300-unit cells into a new set, which costs more at this range.
+    private void sumBias(CombatEngineAPI engine, ShipAPI towed) {
+        bias.set(0f, 0f);
         for (ShipAPI other : engine.getShips()) {
-            if (other == ship || other == tether.getTarget() || !other.isAlive() || other.isHulk()
-                    || other.isFighter()) {
-                continue;
-            }
-            Vector2f offset = Vector2f.sub(other.getLocation(), ship.getLocation(), null);
-            float distance = offset.length();
+            if (other == ship || other == towed || other.isFighter() || !other.isAlive() || other.isHulk()) continue;
+            float dx = other.getLocation().x - ship.getLocation().x;
+            float dy = other.getLocation().y - ship.getLocation().y;
+            float distance = (float) Math.sqrt(dx * dx + dy * dy);
             if (distance > SCAN_RANGE || distance < 1f) continue;
             boolean friendly = other.getOwner() == ship.getOwner();
             if (!friendly && !engine.isAwareOf(ship.getOwner(), other)) continue;
-            offset.scale((friendly ? 1f : -1f) * Misc.getShipWeight(other) / distance);
-            Vector2f.add(bias, offset, bias);
+            float weight = (friendly ? 1f : -1f) * Misc.getShipWeight(other) / distance;
+            bias.x += dx * weight;
+            bias.y += dy * weight;
         }
-        Vector2f heading = dragDirection(ship.getLocation(), tether.getTargetPoint(), bias);
-        steer((float) Math.toDegrees(Math.atan2(heading.y, heading.x)));
     }
 
     // The unit heading for the tug: away from the catch, bent toward the bias (friendly weight minus enemy weight,

@@ -1,9 +1,10 @@
 id,type,text1,text2,text3,text4,text5,notes
 catchrelease_harpoon_ship,SHIP,"A heavy tug refitted around a fishing harpoon launcher and the deck crews who keep it working. Its recovery gear turns a spent harpoon round in the time it takes to bring the catch aboard, so a crew that finds its mark rarely waits on the launcher.",,,,,
-catchrelease_harpoon,WEAPON,"A fishing harpoon launcher built up for a tug's work. The ROD in the head takes hold of whatever the harpoon bites, and the return trace holds the catch at the distance it struck from. A ship on the other end can be dragged, or can drag the tug.
+catchrelease_harpoon,WEAPON,"The Stigmata's fishing harpoon is quite capable of punching through a ship's armour. Once embedded, its ROD head anchors a tether between the two ships. The line pays out no further than the distance at impact; which ship ends up towing the other depends on their mass and thrust.
 
-The deck crew fire it again to let go. The round is heavy enough to hole a hull on its own, so gunnery treats it as a weapon.",,,,,
-catchrelease_tug_drive,SHIP_SYSTEM,"Pushes the tug's drive field to its hauling rating. For a few seconds the ship gains mass, thrust and turning, enough to hold a catch on the harpoon tether or drag it where it is wanted. The engines run dirty while it lasts.",Movement,"Briefly increases mass, acceleration and turning, for hauling a tethered catch.",,,
+Shields deflect the head. Firing again releases the tether.",,,,,
+catchrelease_tug_drive,SHIP_SYSTEM,"Briefly increases the tug's mass, acceleration and turning ability, helping it pull a tethered ship off course. The extra power comes with a conspicuous engine flare.",Movement,Increases mass and manoeuvrability for towing.,,,
 catchrelease_lamp_ship,SHIP,"A trawler rebuilt to carry Breach Lights well beyond what an ordinary rig can power. Its lens arrays spread each beam into a wide fan, opening a broad stretch of open space for every crew in the fleet to work.",,,,,
 catchrelease_rod_ship,SHIP,"A tender with deep bays, handling frames and launch racks for a full swarm of LYNE drones. Its deck crews service every drone that comes home and send the whole swarm straight back out.",,,,,
-catchrelease_lyne_drone,SHIP,"A fighter-sized LYNE drone fitted with salvage clamps. In combat its tender sends it after the wrecks of enemy fighters, to haul them aboard before they drift off.",,,,,
+catchrelease_lyne_drone,SHIP,"This fighter-sized LYNE drone retrieves wrecked enemy fighters for its tender. Salvage clamps hold the wreck during the tow; repairs are left to the crew aboard ship.",,,,,
+catchrelease_salvage_launch,SHIP_SYSTEM,"Launches all repaired fighters from the salvage bays. They form wings of the usual size, or smaller wings if too few are available. They return for rearming or when recalled, and can be launched again. Destroyed fighters are not replaced.",Fighters,Launches all repaired salvage fighters.,,,

@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.ships;
 import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
+import catchrelease.combat.salvage.FighterStore;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.BattleAPI;
@@ -19,6 +20,7 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,9 @@ public final class FishingShips {
 
         HARPOON("catchrelease_harpoon_ship", Tackle.Fit.HARPOON, Tackle.RETRIEVAL_HEAD),
         LAMP("catchrelease_lamp_ship", Tackle.Fit.SEARCHLIGHT, Tackle.FANNED_ARRAY),
-        ROD("catchrelease_rod_ship", Tackle.Fit.DRONE, Tackle.REPLOYMENT_BAYS);
+        ROD("catchrelease_rod_ship", Tackle.Fit.DRONE, Tackle.REPLOYMENT_BAYS),
+        // The early Reliquary, a skin: the same ROD second slot, no module, and one more ROD drone instead.
+        ROD_EARLY("catchrelease_rod_ship_early", Tackle.Fit.DRONE, null);
 
         public final String hullId;
         public final Tackle.Fit rig;
@@ -137,20 +141,32 @@ public final class FishingShips {
     protected static void registerVariants() {
         for (Ship ship : Ship.values()) {
             List<String> variants = Global.getSettings().getHullIdToVariantListMap().get(ship.hullId);
-            if (variants.isEmpty()) variants.add(ship.hullId + "_Hull");
+            if (variants != null && variants.isEmpty()) variants.add(ship.hullId + "_Hull");
         }
     }
 
+    // Two ships can serve one rig (the Reliquary and its early skin); either one gives the slot.
     public static boolean hasSecondSlot(Tackle.Fit rig) {
-        Ship ship = forRig(rig);
+        Set<String> present = getPresent();
+        for (Ship ship : Ship.values()) {
+            if (ship.rig == rig && present.contains(ship.name())) return true;
+        }
 
-        return ship != null && getPresent().contains(ship.name());
+        return false;
     }
 
-    public static Tackle getShipModule(Tackle.Fit rig) {
-        Ship ship = forRig(rig);
+    public static boolean isPresent(Ship ship) {
+        return getPresent().contains(ship.name());
+    }
 
-        return ship == null ? null : ship.module;
+    // The module a present ship brings to the rig; null when none of the present ships brings one.
+    public static Tackle getShipModule(Tackle.Fit rig) {
+        Set<String> present = getPresent();
+        for (Ship ship : Ship.values()) {
+            if (ship.rig == rig && ship.module != null && present.contains(ship.name())) return ship.module;
+        }
+
+        return null;
     }
 
     public static boolean isShipModule(Tackle tackle) {
@@ -171,7 +187,9 @@ public final class FishingShips {
 
         Set<Ship> aboard = scan(fleet);
         Set<String> present = getPresent();
+        tidyFighterStores(fleet);
 
+        Set<String> before = new LinkedHashSet<>(present);
         for (Ship ship : Ship.values()) {
             boolean was = present.contains(ship.name());
             boolean is = aboard.contains(ship);
@@ -179,10 +197,12 @@ public final class FishingShips {
 
             if (is) {
                 present.add(ship.name());
-                join(ship);
+                if (hasSibling(ship, before)) joinSibling(ship);
+                else join(ship);
             } else {
                 present.remove(ship.name());
-                leave(ship);
+                if (hasSibling(ship, names(aboard))) leaveSibling(ship);
+                else leave(ship);
             }
         }
 
@@ -197,6 +217,36 @@ public final class FishingShips {
         }
     }
 
+    protected static boolean hasSibling(Ship ship, Set<String> names) {
+        for (Ship other : Ship.values()) {
+            if (other != ship && other.rig == ship.rig && names.contains(other.name())) return true;
+        }
+
+        return false;
+    }
+
+    protected static Set<String> names(Set<Ship> ships) {
+        Set<String> names = new LinkedHashSet<>();
+        for (Ship ship : ships) names.add(ship.name());
+        return names;
+    }
+
+    // The rig already has its second slot from the other ship: keep what is fitted, and fill an empty slot with
+    // this ship's module.
+    protected static void joinSibling(Ship ship) {
+        if (ship.module != null && TackleManager.getSlot(ship.rig, 1) == Tackle.NONE) {
+            TackleManager.fit(ship.rig, 1, ship.module);
+        }
+    }
+
+    // The other ship keeps the slot; only this ship's module leaves the rig, unless the player owns a copy.
+    protected static void leaveSibling(Ship ship) {
+        if (ship.module == null || TackleManager.isOwned(ship.module)) return;
+        for (int slot = 0; slot < 2; slot++) {
+            if (TackleManager.getSlot(ship.rig, slot) == ship.module) TackleManager.fit(ship.rig, slot, Tackle.NONE);
+        }
+    }
+
     // The second slot goes with the ship. Its module also leaves the first slot unless the player owns a copy.
     protected static void leave(Ship ship) {
         TackleManager.fit(ship.rig, 1, Tackle.NONE);
@@ -205,6 +255,13 @@ public final class FishingShips {
                 && TackleManager.getSlot(ship.rig, 0) == ship.module) {
             TackleManager.fit(ship.rig, 0, Tackle.NONE);
         }
+    }
+
+    // A Reliquary's recovered fighters go with the ship: a store whose ship left the fleet is dropped.
+    protected static void tidyFighterStores(CampaignFleetAPI fleet) {
+        Set<String> ids = new HashSet<>();
+        for (FleetMemberAPI member : fleet.getFleetData().getMembersListCopy()) ids.add(member.getId());
+        FighterStore.tidy(ids);
     }
 
     protected static Set<Ship> scan(CampaignFleetAPI fleet) {
@@ -229,12 +286,17 @@ public final class FishingShips {
         return null;
     }
 
+    // A present ship of the rig if there is one, else the rig's first ship.
     public static Ship forRig(Tackle.Fit rig) {
+        Ship first = null;
+        Set<String> present = getPresent();
         for (Ship ship : Ship.values()) {
-            if (ship.rig == rig) return ship;
+            if (ship.rig != rig) continue;
+            if (present.contains(ship.name())) return ship;
+            if (first == null) first = ship;
         }
 
-        return null;
+        return first;
     }
 
     public static Ship forModule(Tackle tackle) {

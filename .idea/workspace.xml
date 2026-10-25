@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="intel writing rework&#10;more rules work">
+    <list default="true" id="8c14accf-0ea3-4177-9e06-b2086b7f10c0" name="Changes" comment="boat setup">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/hulls/catchrelease_harpoon_ship.ship" beforeDir="false" afterPath="$PROJECT_DIR$/data/hulls/catchrelease_harpoon_ship.ship" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/hulls/catchrelease_rod_ship.ship" beforeDir="false" afterPath="$PROJECT_DIR$/data/hulls/catchrelease_rod_ship.ship" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/config/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/config/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/weapons/catchrelease_harpoon.wpn" beforeDir="false" afterPath="$PROJECT_DIR$/data/weapons/catchrelease_harpoon.wpn" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/weapons/weapon_data.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/weapons/weapon_data.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/ships/done_boat.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/ships/done_boat.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/ships/lyne_drone.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/ships/lyne_drone.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/weapons/harpoon_harpoon.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/weapons/harpoon_harpoon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/catchrelease/weapons/harpoon_projectile.png" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/catchrelease/weapons/harpoon_projectile.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +149,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="rules work" />
     <MESSAGE value="fleet visibility indicator work" />
     <MESSAGE value="tooltip formatting updates" />
     <MESSAGE value="todos" />
@@ -169,7 +173,8 @@
     <MESSAGE value="sprite updates" />
     <MESSAGE value="rules dialogue desloppification" />
     <MESSAGE value="intel writing rework&#10;more rules work" />
-    <option name="LAST_COMMIT_MESSAGE" value="intel writing rework&#10;more rules work" />
+    <MESSAGE value="boat setup" />
+    <option name="LAST_COMMIT_MESSAGE" value="boat setup" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -45,7 +45,9 @@ came with the ship, and that the player does not own a copy of, carries a small 
 "SHIP" in its top right, the same distinction the rows draw. `needsCompactSlotText`
 measures every slot's name with `LazyFont.calcWidth` and picks one font for the whole
 row, so a name too long for the body font never leaves the two cells in different
-typefaces. The selected cell is the target slot; FIT reads "FIT IN SLOT n"
+typefaces.
+
+The selected cell is the target slot; FIT reads "FIT IN SLOT n"
 and every row and the detail pane are judged against it. Without a second slot the
 shelf looks as it did with one slot. A module fitted in the other slot, or one that
 shares an exclusion group with it, is blocked for the target slot: its row name is
@@ -505,8 +507,44 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   with a white flash and five `spawnEmpArcVisual` arcs along the rope (both skipped under
   `Setting.REDUCED_EFFECTS`), and fades over 0.3 s after release. The harpoon head is drawn here with
   normal blending, because a projectile's `bulletSprite` is always additive; the `.proj` colours are
-  transparent. The shape is `RopeCurve`, the campaign rope's spring and wobble plus a sag.
+  transparent. In flight the shape is `RopeCurve`, the campaign line's spring and wobble: its middle springs toward
+  the chord's midpoint, so it bends only while the ends move and never bows to one side while the shot flies. From
+  the bite it is `RopeChain`, a simulated rope as long as the tether plus its slack, drawn as a Catmull-Rom curve, so a
+  slack rope floats, folds and loops as a line in space does, and a taut one is straight.
   Viewport alpha applies, and pause freezes it (the engine does not advance entities while paused).
+- Exhaust smoke belongs below the ships. The engine draws every `CombatEngineAPI` particle (`addSmokeParticle`,
+  the `addNebula*` calls) after the layered renderer, above every hull and flame; only the engines' own `SMOKE`
+  contrails draw underneath (`obf/combat/CombatEngine.java:921-953`). Dark smoke also needs normal blending: of
+  the nebula calls only `addNebulaSmokeParticle` has it, the other positive ones are additive and draw nothing in
+  dark colours, and the negative ones subtract. The Haul Drive (`combat/tug/TugDriveStats`) lays one MagicLib
+  trail per nozzle on `BELOW_SHIPS_LAYER` with MagicLib's `base_trail_heavySmoke` texture and `additive` false,
+  starting inside the flame so the hull and flame cover its root. Its pieces slow from 70-100 to 15 and widen
+  from 1.2 to 5 times the slot width over 2.45 s, dark soot cooling to grey, at 55% opacity scaled by the effect
+  level; a quarter of the ship's velocity carries over. The engines' `LOW_TECH` contrail is recoloured toward
+  soot with `fadeToOtherColor`, under its own key so the flame keeps its blend. MagicLib stores a trail's
+  `offsetVelocity` by reference, so each piece gets a new vector; a piece added under the id of a trail that is
+  still fading joins it, so each activation and each restarted nozzle takes a new id
+  (`MagicTrailPlugin.addTrailMemberAdvanced`, `MagicTrailTracker`).
+- The Reliquary's recovered-fighter store shows in combat through `maintainStatusForPlayerShip`, the list above
+  the player ship's info widget where terrain effects show (`SalvageBaysHullmod.advanceInCombat`, player ship only).
+  The list draws each icon as a 25×25 tinted schematic, so the line uses a fixed glyph (vanilla's
+  `icon_tactical_bdeck` for now), never the fighter's sprite. Title: the fighter hull's name; data: upper-case
+  ready and restoring counts, as vanilla status lines are; a type with nothing ready is drawn as a debuff. A line
+  fades 0.25 s after the first unpaused frame it is not maintained, so nothing is removed by hand. One key per
+  wing type keeps lines from reshuffling. The lines are maintained every frame but rebuilt from the store every
+  0.25 s, kept in the ship's custom data.
+- The refit shows a Reliquary's stored fighters as locked built-in bays by swapping a hull-spec copy into the
+  member's and the displayed variant while the refit is open (`combat/salvage/RefitStoreView`). The displayed
+  variant is reached as LunaLib reaches it, through the refit panel's stable method names, and resynced after
+  each change; [ARCHITECTURE.md](ARCHITECTURE.md#combatsalvage) owns the sequence and its safeguards.
+  The Salvage Bays tooltip lists the same store with a 32-px fighter sprite per type (`beginImageWithText`),
+  values in the highlight colour and no red, since restoring is not a failure.
+  The discard panel is a LunaLib refit option (`FighterStoreRefitButton`). Luna hosts it on a background panel
+  whose plugin ignores button presses, so the content is a child panel with its own plugin; rows and the footer
+  route presses to it and it applies them in `advance`, outside input dispatch. The list and footer are disposable
+  panels rebuilt after every change ([Rebuilding lists](#rebuilding-lists)). Destructive actions take a second press
+  ("Confirm") on the same button. Luna closes the panel on Esc or a click outside; its `advance` and `onPanelClose`
+  do not run when the refit itself closes, so they cannot replace `RefitStoreView`'s tab polling.
 - `Stencil.startStencil()` is deprecated because it breaks campaign radar. Use
   the depth-mask pair in `rendering/helper/Stencil`.
 - `GL_LINE_STIPPLE` restarts on each `GL_LINES` segment and is unusable for short
