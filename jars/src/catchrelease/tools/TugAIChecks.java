@@ -36,20 +36,18 @@ public final class TugAIChecks {
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(-40f, 30f), a, b) == 50f, "Segment start");
         require(HarpoonAutofireAI.distanceToSegment(new Vector2f(130f, 40f), a, b) == 50f, "Segment end");
 
-        Vector2f tug = new Vector2f(0f, 0f);
-        Vector2f catchPoint = new Vector2f(-500f, 0f);
-        Vector2f straight = TugPilot.dragDirection(tug, catchPoint, new Vector2f());
-        require(near(straight, 1f, 0f), "No bias did not pull straight away");
-        Vector2f towardFriends = TugPilot.dragDirection(tug, catchPoint, new Vector2f(0f, 3f));
-        require(towardFriends.y > 0.3f && towardFriends.x > 0f, "Did not bend toward friendly ships");
-        Vector2f awayFromEnemies = TugPilot.dragDirection(tug, catchPoint, new Vector2f(0f, -5f));
-        require(awayFromEnemies.y < -0.3f, "Did not bend away from enemies");
+        // The rope runs from the catch to the tug along 0 degrees.
+        float swing = TugPilot.MAX_SWING;
+        require(TugPilot.dragHeading(0f, 0f, 1f) == 0f, "Did not head straight on with the goal past the tug");
+        require(TugPilot.dragHeading(0f, 40f, -1f) == 40f, "Did not head for a goal within MAX_SWING of the rope");
+        require(TugPilot.dragHeading(0f, 120f, -1f) == swing && TugPilot.dragHeading(0f, -120f, 1f) == -swing,
+                "Did not swing round the catch toward a goal off to one side");
+        require(TugPilot.dragHeading(0f, 180f, 1f) == swing && TugPilot.dragHeading(0f, 180f, -1f) == -swing,
+                "Did not keep its side with the catch between the tug and its goal");
         for (int angle = 0; angle < 360; angle += 15) {
-            Vector2f bias = new Vector2f((float) Math.cos(Math.toRadians(angle)) * 9f,
-                    (float) Math.sin(Math.toRadians(angle)) * 9f);
-            Vector2f heading = TugPilot.dragDirection(tug, catchPoint, bias);
-            require(heading.x > 0.4f, "Heading closes on the catch for bias at " + angle + " degrees");
-            require(Math.abs(heading.length() - 1f) < 1e-4f, "Heading is not a unit vector");
+            float heading = TugPilot.dragHeading(0f, angle, 1f);
+            require(Math.cos(Math.toRadians(heading)) >= Math.cos(Math.toRadians(swing)) - 1e-4,
+                    "Heading slackens the rope for a goal at " + angle + " degrees");
         }
 
         require(!TugDriveAI.shouldHaul(false, 5f, 200f), "Hauled on a slack line");
@@ -61,10 +59,6 @@ public final class TugAIChecks {
 
         System.out.println("Tug AI checks: harpoon target scoring, line-of-fire distance, drag heading and drive"
                 + " use passed");
-    }
-
-    private static boolean near(Vector2f v, float x, float y) {
-        return Math.abs(v.x - x) < 1e-4f && Math.abs(v.y - y) < 1e-4f;
     }
 
     private static void require(boolean condition, String message) {

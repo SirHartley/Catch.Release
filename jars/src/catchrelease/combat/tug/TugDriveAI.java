@@ -49,10 +49,12 @@ public class TugDriveAI implements ShipSystemAIScript {
             Vector2f point = tether.getTargetPoint(new Vector2f());
             Vector2f rope = Vector2f.sub(point, mount, null);
             float distance = rope.length();
+            // The catch's own speed away along the rope: on a taut rope the two move together, so their relative
+            // speed reads near zero while a light catch drags the tug.
             float separating = 0f;
             if (distance > 0f) {
                 rope.scale(1f / distance);
-                separating = Vector2f.dot(Vector2f.sub(caught.getVelocity(), ship.getVelocity(), null), rope);
+                separating = Vector2f.dot(caught.getVelocity(), rope);
             }
             use = caught.getOwner() != ship.getOwner() && shouldHaul(distance >= tether.getLength() * TAUT_SHARE,
                     caught.getMass() / Math.max(1f, ship.getMass()), separating);

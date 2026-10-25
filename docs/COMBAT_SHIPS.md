@@ -51,7 +51,8 @@ Replaces the placeholder system. It uses the tug drive's field: while active it 
 ### AI
 
 - **Harpoon targets:** prefer vulnerable targets (hull exposed, shields down or flanked) that are not already being hammered by friendly ships, or that are fleeing.
-- **Towing:** no vanilla AI tows. Keep the default ship AI and override its movement afterwards from an `AdvanceableListener` on the ship (give the wanted commands, block the rest with `blockCommandForOneFrame`), as Knights of Ludd does; choose where to drag the target. A first version can pull toward friendly ships and away from the strongest enemy group. A later one makes a quick firepower estimate of the surroundings and drags the target into friendly firing arcs. This needs workshopping.
+- **Positioning:** the Stigmata has no guns to fight with and must not charge in. Without a catch it keeps with a friendly combat ship and holds off at harpoon range from its targets, so it hooks what comes at its friends.
+- **Towing:** no vanilla AI tows. Keep the default ship AI and override its movement afterwards from an `AdvanceableListener` on the ship (give the wanted commands, block the rest with `blockCommandForOneFrame`), as Knights of Ludd does. Drag the catch toward friendly ships and away from enemies, swinging round it when it lies between the tug and its friends, and hold it once it is within friendly guns. A later version could make a quick firepower estimate of the surroundings and drag the target into friendly firing arcs.
 - **Drive system:** fire it when the rope is taut and the target resists, or to escape.
 - References: Ed Shipyards (https://bitbucket.org/NickWWest/edshipyard/src/develop/) and Knights of Ludd (https://github.com/Dal-041/Knights_of_Ludd) have some of the best combat code to learn from.
 
