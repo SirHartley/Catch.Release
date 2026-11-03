@@ -304,6 +304,11 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
         this.color = resolveColor();
     }
 
+    public static boolean hasQuestColor(SectorEntityToken mote) {
+        // the chain plants only its epics, which keep the epic colour
+        return QuestPond.isQuestMote(mote) && !FishermanChain.isPlanter(QuestPond.getPlanter(mote));
+    }
+
     public Color getMoteColor() {
         return color;
     }
@@ -325,9 +330,7 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected Color resolveColor() {
-        // the chain plants only its epics, which keep the epic colour
-        if (entity != null && QuestPond.isQuestMote(entity)
-                && !FishermanChain.isPlanter(QuestPond.getPlanter(entity))) return QUEST_COLOR;
+        if (hasQuestColor(entity)) return QUEST_COLOR;
 
         // a shell-game decoy glows in the real one's colours, never its own row's
         if (decoyAnchor != null) return FishRarity.LEGENDARY.color;
