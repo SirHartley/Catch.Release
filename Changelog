@@ -64,6 +64,7 @@ Changed - The Equipment help text no longer refers to a single-use marker that w
 
 Text and UI
 Adjusted - Clearer fishing settings and AddFish help
+Fixed - Chart requests now describe the marked specimen's mote as gold, not cyan
 
 Development
 Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete
