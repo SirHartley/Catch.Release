@@ -537,13 +537,13 @@ public abstract class FishReward {
             };
         }
 
-        // Named and at full readiness the way FleetFactoryV3 adds a member; the game generates the empty _Hull variant
-        // for every hull.
+        // Named and at full readiness the way FleetFactoryV3 adds a member.
         protected FleetMemberAPI addToPlayerFleet() {
             CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
             if (fleet == null || getSpec() == null) return null;
 
-            FleetMemberAPI member = Global.getFactory().createFleetMember(FleetMemberType.SHIP, hullId + "_Hull");
+            FleetMemberAPI member = Global.getFactory().createFleetMember(FleetMemberType.SHIP,
+                    FishingShips.getStockVariant(hullId));
             member.setShipName(fleet.getFleetData().pickShipName(member, null));
             fleet.getFleetData().addFleetMember(member);
             member.getRepairTracker().setCR(member.getRepairTracker().getMaxCR());
