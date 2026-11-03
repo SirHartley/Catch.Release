@@ -7,6 +7,7 @@ import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishMotion;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.data.FishSpec;
+import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.jobs.QuestPond;
 import catchrelease.campaign.fish.legendary.EpicHunt;
 import catchrelease.campaign.fish.legendary.LegendaryShields;
@@ -324,7 +325,9 @@ public class FishEntityPlugin extends BaseCustomEntityPlugin {
     }
 
     protected Color resolveColor() {
-        if (entity != null && QuestPond.isQuestMote(entity)) return QUEST_COLOR;
+        // the chain plants only its epics, which keep the epic colour
+        if (entity != null && QuestPond.isQuestMote(entity)
+                && !FishermanChain.isPlanter(QuestPond.getPlanter(entity))) return QUEST_COLOR;
 
         // a shell-game decoy glows in the real one's colours, never its own row's
         if (decoyAnchor != null) return FishRarity.LEGENDARY.color;
