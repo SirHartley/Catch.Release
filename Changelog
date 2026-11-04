@@ -12,7 +12,7 @@ None
 1.0.d - UNRELEASED
 Adjusted - Tidied several Fisherman tutorial exchanges and the old captain's farewell; the Reliquary lead no longer suggests one fish will cover the price
 Fixed - Asking how to use the ROD now explains opening a rupture, sending the drone and recalling it instead of repeating the delivery scene
-Added - Two fishing ships with their own hulls: the Stigmata-class Harpoon Tug, a fast midline destroyer as heavy as a small cruiser, with a 180° omni shield, a fighter bay and a built-in harpoon mount, and the Reliquary-class LYNE Tender, a slow midline carrier cruiser with one fighter bay, meant for a built-in wing of LYNE drones
+Added - Two fishing ships with their own hulls: the Stigmata-class Harpoon Tug, a fast midline destroyer as heavy as a small cruiser, with a 180° omni shield, a fighter bay and a built-in harpoon mount, and the Reliquary-class LYNE Tender, a slow midline carrier cruiser with one fighter bay, meant for a built-in wing of LYNE drones. All three fishing ships, the Monstrance included, come with a Standard loadout of machine guns, which custom production and autofit also use
 Added - The Stigmata-class Harpoon Tug has a built-in Tug Drive Field: each one in your fleet (not mothballed) adds 1 to the fleet's maximum burn level, and the first adds 20% campaign acceleration, each further one half the previous bonus (+10%, +5%, ...). It does nothing while Sustained Burn is on
 Added - The Stigmata-class Harpoon Tug has a built-in Tug Harpoon: 2 charges, one regained every 12 seconds, 400 kinetic damage (none to friendly ships) and 900 range. A harpoon that hits a ship's hull or armour, friend, foe or wreck, tethers it for 20 seconds at the distance it struck from: a taut tether drags both ships, the lighter one more. A harpoon that hits a shield glances off at reduced speed, at most twice. Firing again lets go, without launching another harpoon or spending a charge. The tether is drawn as a thin rope that flies straight out with the harpoon, flashes into place at 80% opacity when it bites, and floats loose and loops when slack. Both ends of the rope fade to half opacity over their last 50 pixels. After a shot the launcher swings smoothly back to its resting angle
 Added - The Reliquary-class LYNE Tender carries one built-in wing of five LYNE drones: unarmed, very fast salvage drones
@@ -46,6 +46,7 @@ Changed - Fight Night's fee option now reads "Take the rewards." and lists the r
 Changed - Every equipment module costs one price tier more (25,000 to 45,000 credits), and none can be paid for with common fish alone
 Added - Glitter Lens, a Lens Array module that doubles the chance of bycatch on catches made under Breach Lights. Its schematic comes only from the Fisherman's treasure rumour, never from job or distress rewards
 Changed - The Neutrino Lens only shows its spikes while the Breach Lights are on as well as the Neutrino Detector
+Added - The Neutrino Lens shows quest fish as gold spikes, whatever their rarity
 Removed - The Breach Coupler is withdrawn for now: it is no longer sold or awarded, and one already fitted does nothing; ROD drones fish ruptures only
 Changed - Every epic fish now comes up only under Breach Lights; ruptures fished with the ROD no longer hold them
 Changed - Epic fish are now hunted in two stages: they drift slowly until a harpoon hit inside a lit Breach Light beam wakes them, then raise a one-charge shield that never comes back and swim more erratically; like other lamp fish, they stay in view and in reach only while lit; one that gets more than 3,000 units away drifts off and fades, with a notice that it was lost, and an awake epic is gone once you leave the system. Only the harpoon lands one: ROD drones leave epics alone
@@ -65,6 +66,7 @@ Changed - The Equipment help text no longer refers to a single-use marker that w
 
 Text and UI
 Adjusted - Clearer fishing settings and AddFish help
+Fixed - Chart requests now describe the marked specimen's mote as gold, not cyan
 
 Development
 Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete

@@ -499,7 +499,7 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   retained lamp reveals suppress them too. Pause freezes both cadence and rings.
   Each ring respects viewport alpha and culling. Load restores the passive controller
   through the lamp ability's existing advance; it does not save timers or renderers.
-- Neutrino Lens spikes reuse vanilla's detector drawing (`abilities/neutrino_detector` texture, two bands, pulse and outward extrusion), one pass per rarity tinted with `FishRarity.color`; rare is lifted 35% toward white (`RARE_LIFT`) so it shows against space and the cyan ring. Per-vertex alpha follows that rarity's signal and is zero elsewhere. Constants copied from `GraviticScanAbility.render` (0.98a-RC8) must track vanilla if it changes.
+- Neutrino Lens spikes reuse vanilla's detector drawing (`abilities/neutrino_detector` texture, two bands, pulse and outward extrusion), one pass per rarity tinted with `FishRarity.color` and one for gold quest motes in `FishEntityPlugin.QUEST_COLOR`; rare is lifted 35% toward white (`RARE_LIFT`) so it shows against space and the cyan ring. Per-vertex alpha follows that rarity's signal and is zero elsewhere. Constants copied from `GraviticScanAbility.render` (0.98a-RC8) must track vanilla if it changes.
 - The Stigmata's combat harpoon rope (`combat/tug/TetherRenderer`) is the mod's only combat-layer
   renderer: one `BaseCombatLayeredRenderingPlugin` per line on `ABOVE_SHIPS_LAYER`, added with
   `engine.addLayeredRenderingPlugin`. The engine culls on the returned entity's location and the render
