@@ -2579,8 +2579,8 @@ catchrelease_rumorUnavailable,CatchReleaseRumorText,CatchReleaseCMD tokens,,"""N
 catchrelease_fisherRumorNo,DialogOptionSelected,"$option == catchrelease_fisherRumor score:5
 CatchReleaseCMD tokens
 !$catchreleaseRumor",,"""Nothing worth sending you after.""",100:catchrelease_fisherBack:Continue,
-catchrelease_workPondInstructions,CatchReleaseWorkPondInstructions,,,"At the marked rupture, look for the bright cyan mote that identifies the requested specimen. Retrieve that specimen with the ROD/LYNE rig. Ordinary catches of the same pattern do not qualify.",,
-catchrelease_workLampInstructions,CatchReleaseWorkLampInstructions,,,"At the marked open-space point, use Breach Lights first. Once the breach is open, look for the bright cyan mote that identifies the requested specimen and retrieve it with the Harpoon. Ordinary catches of the same pattern do not qualify.",,
+catchrelease_workPondInstructions,CatchReleaseWorkPondInstructions,,,"At the marked rupture, look for the bright gold mote that identifies the requested specimen. Retrieve that specimen with the ROD/LYNE rig. Ordinary catches of the same pattern do not qualify.",,
+catchrelease_workLampInstructions,CatchReleaseWorkLampInstructions,,,"At the marked open-space point, use Breach Lights first. Once the breach is open, look for the bright gold mote that identifies the requested specimen and retrieve it with the Harpoon. Ordinary catches of the same pattern do not qualify.",,
 catchrelease_workOffer,DialogOptionSelected,"$option == catchrelease_fisherWork score:20
 CatchReleaseCMD tokens
 !$catchreleaseWork","CatchReleaseCMD rollWork

@@ -32,8 +32,9 @@ import java.util.Iterator;
 import java.util.List;
 
 // Coloured contacts on the vanilla Neutrino Detector ring. Vanilla pings carry no colour and the ring colour is a local
-// in GraviticScanAbility.render, so this keeps its own pings per rarity and redraws only their spikes with vanilla's
-// ping model (GraviticScanData) and band geometry, texture and pulse (GraviticScanAbility.render), 0.98a-RC8.
+// in GraviticScanAbility.render, so this keeps its own pings per rarity, plus one gold band for quest motes, and redraws
+// only their spikes with vanilla's ping model (GraviticScanData) and band geometry, texture and pulse
+// (GraviticScanAbility.render), 0.98a-RC8.
 public class NeutrinoLens implements LunaCampaignRenderingPlugin {
 
     public static final int RESOLUTION = 360;
@@ -44,6 +45,7 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
     public static final String PING_SOUND = "ui_neutrino_detector_ping";
 
     public static final FishRarity[] SHOWN = {FishRarity.RARE, FishRarity.EPIC, FishRarity.LEGENDARY};
+    public static final int QUEST_BAND = SHOWN.length;
 
     // the rare rarity blue is too dark against space and next to the cyan ring, so its spikes are tinted toward white
     public static final float RARE_LIFT = 0.35f;
@@ -66,7 +68,7 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
     }
 
     private final List<List<Ping>> pings = new ArrayList<>();
-    private final float[][] data = new float[SHOWN.length][];
+    private final float[][] data = new float[QUEST_BAND + 1][];
     // vanilla's special-ping cadence: every contact flashes once per interval
     private final IntervalUtil pingInterval = new IntervalUtil(0.075f, 0.125f);
     private float phaseAngle;
@@ -74,7 +76,7 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
     private boolean expired;
 
     public NeutrinoLens() {
-        for (int i = 0; i < SHOWN.length; i++) pings.add(new ArrayList<>());
+        for (int i = 0; i <= QUEST_BAND; i++) pings.add(new ArrayList<>());
     }
 
     public static boolean isFitted() {
@@ -116,7 +118,7 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
         pingInterval.advance(days);
         if (pingInterval.intervalElapsed()) ping(player);
 
-        for (int i = 0; i < SHOWN.length; i++) data[i] = fold(pings.get(i));
+        for (int i = 0; i <= QUEST_BAND; i++) data[i] = fold(pings.get(i));
     }
 
     protected void ping(CampaignFleetAPI player) {
@@ -128,15 +130,15 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
 
         Vector2f loc = player.getLocation();
         for (SectorEntityToken mote : motes) {
-            FishRarity rarity = getRarity(mote, here);
-            if (rarity == null) continue;
+            int band = getBand(mote, here);
+            if (band < 0) continue;
 
             float dist = Misc.getDistance(loc, mote.getLocation());
             float arc = Math.max(MIN_ARC, Math.min(150f, Misc.computeAngleSpan(mote.getRadius(), dist) * 2f));
             float in = (0.05f + 0.1f * (float) Math.random()) * 0.25f;
 
-            pings.get(indexOf(rarity)).add(new Ping(Misc.getAngleInDegrees(loc, mote.getLocation()), arc,
-                    getGravity(rarity) * getRangeGMult(dist), in, in * 2f));
+            pings.get(band).add(new Ping(Misc.getAngleInDegrees(loc, mote.getLocation()), arc,
+                    getGravity(getSpec(mote).rarity) * getRangeGMult(dist), in, in * 2f));
         }
     }
 
@@ -183,8 +185,10 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
         texture.bindTexture();
         GL11.glEnable(GL11.GL_BLEND);
 
-        for (int i = 0; i < SHOWN.length; i++) {
-            if (data[i] != null) renderBand(player, data[i], getTint(SHOWN[i]), level, alphaMult);
+        for (int i = 0; i <= QUEST_BAND; i++) {
+            if (data[i] == null) continue;
+            renderBand(player, data[i], i == QUEST_BAND ? FishEntityPlugin.QUEST_COLOR : getTint(SHOWN[i]),
+                    level, alphaMult);
         }
 
         GL11.glPopMatrix();
@@ -276,23 +280,29 @@ public class NeutrinoLens implements LunaCampaignRenderingPlugin {
         return ability == null ? 0f : Math.max(0f, Math.min(1f, ability.getProgressFraction()));
     }
 
-    // null when the mote should not show: the Needle Sensor's exclusions, without its lamp conditions
-    protected static FishRarity getRarity(SectorEntityToken mote, LocationAPI here) {
-        if (mote == null || mote.isExpired() || mote.getContainingLocation() != here) return null;
+    // -1 when the mote should not show: the Needle Sensor's exclusions, without its lamp conditions;
+    // a gold quest mote shows at any rarity, in a pond too
+    protected static int getBand(SectorEntityToken mote, LocationAPI here) {
+        if (mote == null || mote.isExpired() || mote.getContainingLocation() != here) return -1;
 
-        FishSpec spec;
-        if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) {
-            spec = buried.getFishSpec();
-        } else if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) {
-            if (fish.isHeld() || fish.isFromPond() || fish.isPhantom() || fish.isDecoy()
-                    || fish.getOrbitAnchor() != null) return null;
-            spec = fish.getFishSpec();
-        } else return null;
+        boolean quest = FishEntityPlugin.hasQuestColor(mote);
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) {
+            if (fish.isHeld() || (fish.isFromPond() && !quest) || fish.isPhantom() || fish.isDecoy()
+                    || fish.getOrbitAnchor() != null) return -1;
+        }
 
-        if (spec == null || LonglinerDecoy.spawnsAsBoat(spec)) return null;
-        if (spec.rarity == FishRarity.LEGENDARY && LegendaryChases.isCaught(spec.id)) return null;
+        FishSpec spec = getSpec(mote);
+        if (spec == null || LonglinerDecoy.spawnsAsBoat(spec)) return -1;
+        if (quest) return QUEST_BAND;
+        if (spec.rarity == FishRarity.LEGENDARY && LegendaryChases.isCaught(spec.id)) return -1;
 
-        return indexOf(spec.rarity) >= 0 ? spec.rarity : null;
+        return indexOf(spec.rarity);
+    }
+
+    protected static FishSpec getSpec(SectorEntityToken mote) {
+        if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) return buried.getFishSpec();
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) return fish.getFishSpec();
+        return null;
     }
 
     protected static int indexOf(FishRarity rarity) {

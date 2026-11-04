@@ -46,6 +46,7 @@ Changed - Fight Night's fee option now reads "Take the rewards." and lists the r
 Changed - Every equipment module costs one price tier more (25,000 to 45,000 credits), and none can be paid for with common fish alone
 Added - Glitter Lens, a Lens Array module that doubles the chance of bycatch on catches made under Breach Lights. Its schematic comes only from the Fisherman's treasure rumour, never from job or distress rewards
 Changed - The Neutrino Lens only shows its spikes while the Breach Lights are on as well as the Neutrino Detector
+Added - The Neutrino Lens shows quest fish as gold spikes, whatever their rarity
 Removed - The Breach Coupler is withdrawn for now: it is no longer sold or awarded, and one already fitted does nothing; ROD drones fish ruptures only
 Changed - Every epic fish now comes up only under Breach Lights; ruptures fished with the ROD no longer hold them
 Changed - Epic fish are now hunted in two stages: they drift slowly until a harpoon hit inside a lit Breach Light beam wakes them, then raise a one-charge shield that never comes back and swim more erratically; like other lamp fish, they stay in view and in reach only while lit; one that gets more than 3,000 units away drifts off and fades, with a notice that it was lost, and an awake epic is gone once you leave the system. Only the harpoon lands one: ROD drones leave epics alone
@@ -64,6 +65,7 @@ Changed - The Equipment help text no longer refers to a single-use marker that w
 
 Text and UI
 Adjusted - Clearer fishing settings and AddFish help
+Fixed - Chart requests now describe the marked specimen's mote as gold, not cyan
 
 Development
 Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete
