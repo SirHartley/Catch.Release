@@ -1,0 +1,27 @@
+{
+    "displayName": "Standard",
+    "fluxCapacitors": 25,
+    "fluxVents": 30,
+    "goalVariant": true,
+    "hullId": "catchrelease_rod_ship",
+    "hullMods": [],
+    "permaMods": [],
+    "variantId": "catchrelease_rod_ship_Standard",
+    "weaponGroups": [
+        {
+            "autofire": true,
+            "mode": "LINKED",
+            "weapons": {"WS0002": "heavymg"}
+        },
+        {
+            "autofire": true,
+            "mode": "LINKED",
+            "weapons": {
+                "WS0001": "lightdualmg",
+                "WS0003": "lightdualmg",
+                "WS0004": "lightdualmg"
+            }
+        }
+    ],
+    "wings": []
+}

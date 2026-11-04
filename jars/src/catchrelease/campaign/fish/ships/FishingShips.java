@@ -48,6 +48,7 @@ public final class FishingShips {
     }
 
     public static final String PRESENT_KEY = "$catchrelease_fishingShipsPresent";
+    public static final String STOCK_VARIANT_SUFFIX = "_Standard";
 
     // Market trades and storage transfers, battle losses and recovery are reported; scuttling, mothballing, rule
     // commands and other mods' fleet changes are not (FleetData calls no listener). Watcher covers those.
@@ -132,14 +133,21 @@ public final class FishingShips {
         reconcile();
     }
 
-    // Colony custom production builds a hull from its variant list (CoreScript.doCustomProduction). A hull with no
-    // listed variant gets the empty _Hull added on its first order, which is charged but builds nothing. Settings
-    // data is rebuilt on every launch, so this runs on every load.
+    // Colony custom production builds a hull from its variant list (CoreScript.doCustomProduction), which only
+    // default_ship_roles.json fills, not the .variant files. A hull with no listed variant gets the empty _Hull added
+    // on its first order, which is charged but builds nothing. Settings data is rebuilt on every launch, so this runs
+    // on every load.
     protected static void registerVariants() {
         for (Ship ship : Ship.values()) {
             List<String> variants = Global.getSettings().getHullIdToVariantListMap().get(ship.hullId);
-            if (variants != null && variants.isEmpty()) variants.add(ship.hullId + "_Hull");
+            if (variants != null && variants.isEmpty()) variants.add(getStockVariant(ship.hullId));
         }
+    }
+
+    public static String getStockVariant(String hullId) {
+        String id = hullId + STOCK_VARIANT_SUFFIX;
+
+        return Global.getSettings().doesVariantExist(id) ? id : hullId + "_Hull";
     }
 
     public static boolean hasSecondSlot(Tackle.Fit rig) {

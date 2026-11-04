@@ -1,0 +1,27 @@
+{
+    "displayName": "Standard",
+    "fluxCapacitors": 15,
+    "fluxVents": 20,
+    "goalVariant": true,
+    "hullId": "catchrelease_harpoon_ship",
+    "hullMods": [],
+    "permaMods": [],
+    "variantId": "catchrelease_harpoon_ship_Standard",
+    "weaponGroups": [
+        {
+            "autofire": true,
+            "mode": "LINKED",
+            "weapons": {"WS0001": "catchrelease_harpoon"}
+        },
+        {
+            "autofire": true,
+            "mode": "LINKED",
+            "weapons": {
+                "WS0002": "lightdualmg",
+                "WS0003": "lightdualmg",
+                "WS0004": "lightdualmg"
+            }
+        }
+    ],
+    "wings": ["mining_drone_wing"]
+}
