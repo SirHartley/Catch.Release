@@ -301,7 +301,7 @@ bonus requires the upper two-fifths of the species' length range, ignoring weigh
 | File | Owner / connection |
 |---|---|
 | `CampedSpotJob.java` | Two independent completion conditions: camper gone + post-acceptance fish from exact rupture. Creates fleet/claim on acceptance; qualifying proof releases mark; loss restores it. Receipt requirements are set at creation and timestamped at acceptance. |
-| `CampedSpot.java` | Spawns and holds the camper, forces one warning hail, allows disengagement, removes cut-link without a Continue step, and locks the R.O.D. only while the camp remains. |
+| `CampedSpot.java` | Spawns and holds the camper (factions flagged `spawnsAsIndependent`, the mercenaries, fly as independent), forces one warning hail, allows disengagement, removes cut-link without a Continue step, and locks the R.O.D. only while the camp remains. |
 
 ### `campaign/fish/jobs/fleet`
 
