@@ -69,6 +69,11 @@ public class HarpoonConstants {
     public static final String HAULED_FLAG = "$catchrelease_hauled";
     public static final float HAULED_FLAG_EXPIRY_DAYS = 1f;
 
+    // industrial evolution meteors by string, no dependency: IE MeteorSwarmManager.METEOR_TAG, MissileMemFlags.MEM_CAUGHT_BY_MISSILE
+    public static final String IE_METEOR_TAG = "IndEvo_MeteorSwarm";
+    public static final String IE_METEOR_HIT = "$missile_bonked";
+    public static final float IE_METEOR_HIT_EXPIRY_DAYS = 1f;
+
     public static final float RETRACT_DONE = 4f;
     public static final float RETRACT_MAX_TIME = 0.5f;
     public static final float RETRACT_FADE = 0.07f;
