@@ -75,6 +75,29 @@ public final class HarpoonAimCheck {
         }
     }
 
+    private static final class Meteor {
+
+        final Vector2f at;
+        final Map<String, Object> memory = new HashMap<>();
+        final SectorEntityToken api;
+
+        Meteor(float x, float y, float radius) {
+            at = new Vector2f(x, y);
+            MemoryAPI mem = proxy(MemoryAPI.class, (self, method, args) -> switch (method.getName()) {
+                case "contains" -> memory.containsKey(args[0]);
+                case "set" -> { memory.put((String) args[0], args[1]); yield null; }
+                default -> throw new AssertionError(method);
+            });
+            api = proxy(CustomCampaignEntityAPI.class, (self, method, args) -> switch (method.getName()) {
+                case "getLocation" -> at;
+                case "getRadius" -> radius;
+                case "isExpired", "hasTag" -> false;
+                case "getMemoryWithoutUpdate" -> mem;
+                default -> throw new AssertionError(method);
+            });
+        }
+    }
+
     private static final class Mote extends FishEntityPlugin {
 
         final FishSpec spec = new FishSpec();
@@ -282,6 +305,7 @@ public final class HarpoonAimCheck {
             checkFlights(f);
             checkReach(f);
             checkContacts(f);
+            checkMeteors(f);
             checkHauntShield(f);
         }
         System.out.println("Harpoon aim: " + checks + " checks passed");
@@ -558,6 +582,29 @@ public final class HarpoonAimCheck {
         shot = new Shot(head, atAngle(0f));
         shot.step(0.1f);
         require(minePlugin.detonations == 1 && shot.sounds == 1, "Unshielded mine still detonates once");
+    }
+
+    private static void checkMeteors(Fixture f) {
+        f.motes.clear();
+        Meteor meteor = new Meteor(60f, 0f, 30f);
+        f.motes.computeIfAbsent(HarpoonConstants.IE_METEOR_TAG, k -> new ArrayList<>()).add(meteor.api);
+        Mote behind = new Mote(f.token(FishEntityPlugin.MOTE_TAG, 120f, 0f));
+        Token head = f.token(null, 0f, 0f);
+        Shot shot = new Shot(head, atAngle(0f));
+        shot.step(0.2f);
+        require(shot.getState() == HarpoonEntityPlugin.State.RETURNING && shot.sounds == 1 && shot.deflects == 0,
+                "Meteor returns the head with the hit sound");
+        same(head.at, new Vector2f(30f, 0f), "Meteor stops the head at its rim");
+        Object hit = meteor.memory.get(HarpoonConstants.IE_METEOR_HIT);
+        require(hit instanceof Vector2f, "Meteor gets the hit point");
+        same((Vector2f) hit, new Vector2f(30f, 0f), "Hit point is the contact");
+        require(!behind.isHeld(), "Meteor shields the fish behind it");
+        head = f.token(null, 0f, 0f);
+        shot = new Shot(head, atAngle(0f));
+        shot.step(0.2f);
+        require(shot.getState() == HarpoonEntityPlugin.State.PUSHING && behind.isHeld(),
+                "A struck meteor no longer blocks");
+        f.motes.clear();
     }
 
     private static void checkHauntShield(Fixture f) {

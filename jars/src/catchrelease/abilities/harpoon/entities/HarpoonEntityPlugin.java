@@ -40,6 +40,7 @@ import com.fs.starfarer.api.impl.campaign.ExplosionEntityPlugin.ExplosionFleetDa
 import com.fs.starfarer.api.impl.campaign.ExplosionEntityPlugin.ExplosionParams;
 import com.fs.starfarer.api.impl.campaign.ids.Entities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
@@ -197,6 +198,12 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
             if (handleShieldContact(shield.mote, shield.shieldSection)) return;
         }
 
+        SectorEntityToken meteor = findMeteor(from, entity.getLocation(), distance);
+        if (meteor != null) {
+            breakMeteor(meteor);
+            return;
+        }
+
         // a mine answers to a thrown head - clearing the field from range is the
         // counterplay - and it goes off before any fish behind it is considered
         SectorEntityToken mine = findMine();
@@ -295,6 +302,15 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         }
 
         return false;
+    }
+
+    // handled like a deflecting shield: the head returns, explosive and retrieval heads do not apply
+    protected void breakMeteor(SectorEntityToken meteor) {
+        meteor.getMemoryWithoutUpdate().set(HarpoonConstants.IE_METEOR_HIT, new Vector2f(entity.getLocation()),
+                HarpoonConstants.IE_METEOR_HIT_EXPIRY_DAYS);
+
+        playMoteHitSound();
+        enter(State.RETURNING);
     }
 
     protected void beginHaul(CampaignFleetAPI struck) {
@@ -806,6 +822,27 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
         if (!(mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried)) return mote;
 
         return buried.unearth();
+    }
+
+    protected SectorEntityToken findMeteor(Vector2f from, Vector2f to, float distance) {
+        SectorEntityToken first = null;
+        float firstFraction = Float.MAX_VALUE;
+
+        for (SectorEntityToken meteor : entity.getContainingLocation()
+                .getEntitiesWithTag(HarpoonConstants.IE_METEOR_TAG)) {
+            if (meteor.isExpired() || meteor.hasTag(Tags.FADING_OUT_AND_EXPIRING)) continue;
+            if (meteor.getMemoryWithoutUpdate().contains(HarpoonConstants.IE_METEOR_HIT)) continue;
+
+            float fraction = getCircleEntry(from, to, meteor.getLocation(), meteor.getRadius());
+            if (fraction < 0f || fraction >= firstFraction) continue;
+
+            first = meteor;
+            firstFraction = fraction;
+        }
+
+        if (first != null) moveToContact(new MoteContact(first, firstFraction), from, to, distance);
+
+        return first;
     }
 
     protected void moveToContact(MoteContact contact, Vector2f from, Vector2f to, float distance) {
