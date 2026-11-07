@@ -68,6 +68,8 @@ Changed - The Equipment help text no longer refers to a single-use marker that w
 
 Text and UI
 Adjusted - Clearer fishing settings and AddFish help
+Adjusted - Fisherman sale screen: "Pack into crates" moved down to the Sell button row
+Note - Catch.Release now requires PatchLib
 Fixed - Chart requests now describe the marked specimen's mote as gold, not cyan
 
 Development

@@ -4,20 +4,17 @@ import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.items.FishItems;
 import catchrelease.campaign.fish.shop.ShopMarks;
-import catchrelease.reflection.ReflectionUtils;
+import catchrelease.ui.CargoPickerButtonListener;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
-import com.fs.starfarer.api.campaign.CargoPickerListener;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.BaseCustomDialogDelegate;
-import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CustomDialogDelegate.CustomDialogCallback;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.OptionPanelAPI;
 import com.fs.starfarer.api.campaign.SpecialItemData;
-import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
@@ -98,42 +95,20 @@ public class FishBuyer {
         FishRarity rarity;
     }
 
-    protected static final class PickerPackingSession {
-
-        protected static final float BUTTON_WIDTH = 250f;
-        protected static final float BUTTON_HEIGHT = 24f;
+    protected static final class PickerPacking {
 
         protected final CargoAPI offer;
         protected boolean packed;
-        protected boolean toggleRequested;
 
-        PickerPackingSession(CargoAPI offer) {
+        PickerPacking(CargoAPI offer) {
             this.offer = offer;
         }
 
-        void addButton(TooltipMakerAPI panel, CargoAPI selected, CargoStackAPI pickedUp) {
-            if (panel == null) return;
-
-            // The picker's outer tooltip blocks input to its children by default.
-            ReflectionUtils.invoke(panel, "setForceProcessInput", true);
-            PackToggleButton plugin = new PackToggleButton(this, selected);
-            CustomPanelAPI custom = Global.getSettings().createCustom(
-                    BUTTON_WIDTH, BUTTON_HEIGHT + 10f, plugin);
-            plugin.panel = custom;
-            TooltipMakerAPI element = custom.createUIElement(
-                    BUTTON_WIDTH, BUTTON_HEIGHT + 10f, false);
-            plugin.button = element.addButton(packed ? "Unpack from crates" : "Pack into crates", plugin.buttonId,
-                    BUTTON_WIDTH, BUTTON_HEIGHT, 10f);
-            // Vanilla rebuilds this tooltip every frame, before a later mouse-up.
-            plugin.button.setQuickMode(true);
-            // Each rebuilt button sees the cursor arrive, so a hover sound would replay every frame.
-            plugin.button.setMouseOverSound(null);
-            plugin.button.setEnabled(pickedUp == null && !toggleRequested);
-            custom.addUIElement(element).inTL(0f, 0f);
-            panel.addCustom(custom, 0f);
+        String getButtonText() {
+            return packed ? "Unpack from crates" : "Pack into crates";
         }
 
-        void toggle(CargoAPI selected, CargoAPI playerCargo) {
+        void toggle(CargoAPI playerCargo) {
             if (packed) {
                 FishItems.unbox(playerCargo);
             } else {
@@ -141,90 +116,10 @@ public class FishBuyer {
             }
 
             // Copy the hold so crate contents have identical ordering for sale removal.
-            selected.clear();
             offer.clear();
             offer.addAll(FishItems.copyFishStacks(playerCargo));
             offer.sort();
             packed = !packed;
-        }
-    }
-
-    protected static final class PackToggleButton extends BaseCustomUIPanelPlugin {
-
-        protected final Object buttonId = new Object();
-        protected final PickerPackingSession session;
-        protected final CargoAPI selected;
-
-        protected CustomPanelAPI panel;
-        protected ButtonAPI button;
-
-        PackToggleButton(PickerPackingSession session, CargoAPI selected) {
-            this.session = session;
-            this.selected = selected;
-        }
-
-        @Override
-        public void buttonPressed(Object buttonId) {
-            if (buttonId != this.buttonId || !button.isEnabled()) return;
-
-            session.toggleRequested = true;
-            button.setEnabled(false);
-        }
-
-        @Override
-        public void advance(float amount) {
-            if (!session.toggleRequested) return;
-            session.toggleRequested = false;
-
-            try {
-                Object tradePanel = PickerCargoAccess.findTradePanel(panel, session.offer);
-                Object transfers = ReflectionUtils.invoke(tradePanel, "getTransferHandler");
-                if (ReflectionUtils.invoke(transfers, "getPickedUpStack") != null) return;
-
-                // Forget pending transfers before replacing the picker cargo.
-                ReflectionUtils.invoke(transfers, "resetTransaction");
-                session.toggle(selected, Global.getSector().getPlayerFleet().getCargo());
-                ReflectionUtils.invoke(tradePanel, "updateCargoViews");
-            } catch (RuntimeException ex) {
-                Global.getLogger(FishBuyer.class).warn("Could not pack or unpack fish in cargo picker", ex);
-            }
-        }
-    }
-
-    protected static final class PickerCargoAccess {
-
-        protected static final int MAX_PARENT_DEPTH = 16;
-
-        static Object findTradePanel(Object panel, CargoAPI offer) {
-            Object current = panel;
-
-            for (int depth = 0; current != null && depth < MAX_PARENT_DEPTH; depth++) {
-                if (ownsOffer(current, offer)) {
-                    Object tradePanel = null;
-                    for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
-                            current, null, null, null, null, false)) {
-                        if (ReflectionUtils.getMethodsMatching(field.type,
-                                "updateCargoViews", null, 0, null).size() != 1) continue;
-                        if (tradePanel != null) throw new IllegalStateException("Ambiguous cargo panel");
-                        tradePanel = field.get(current);
-                    }
-                    if (tradePanel != null) return tradePanel;
-                    break;
-                }
-
-                current = ReflectionUtils.invokeIfExists(current, "getParent");
-            }
-            throw new IllegalStateException("Fish cargo picker not found");
-        }
-
-        protected static boolean ownsOffer(Object candidate, CargoAPI offer) {
-            if (!ReflectionUtils.hasFieldOfType(candidate, CargoPickerListener.class)) return false;
-
-            for (ReflectionUtils.ReflectedField field : ReflectionUtils.getFieldsMatching(
-                    candidate, null, null, CargoAPI.class, null, false)) {
-                if (field.get(candidate) == offer) return true;
-            }
-            return false;
         }
     }
 
@@ -343,10 +238,10 @@ public class FishBuyer {
             offer.addSpecial(held.data, FishItems.isContainer(held.data) ? 1 : held.count);
         }
 
-        final PickerPackingSession packing = new PickerPackingSession(offer);
+        final PickerPacking packing = new PickerPacking(offer);
 
         dialog.showCargoPickerDialog("Select specimens to sell", "Sell", "Never mind",
-                false, 330f, offer, new CargoPickerListener() {
+                false, 330f, offer, new CargoPickerButtonListener() {
                     @Override
                     public void pickedCargo(CargoAPI picked) {
                         sellPicked(dialog, picked);
@@ -371,8 +266,16 @@ public class FishBuyer {
 
                         panel.addPara("Total: %s", 10f, Misc.getHighlightColor(),
                                 Misc.getDGSCredits(valueOf(combined)));
+                    }
 
-                        packing.addButton(panel, cargo, pickedUp);
+                    @Override
+                    public String getPickerButtonText() {
+                        return packing.getButtonText();
+                    }
+
+                    @Override
+                    public void pickerButtonPressed() {
+                        packing.toggle(Global.getSector().getPlayerFleet().getCargo());
                     }
                 });
 

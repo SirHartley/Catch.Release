@@ -184,31 +184,46 @@ the [fleet and bar exit paths](RULES.md#fleet-and-bar-exits) for teardown.
 ## Cargo pickers
 
 The description panel passed to `CargoPickerListener.recreateTextPanel` is a
-tooltip, not an interactive UI element. Its outer `setForceProcessInput(true)`
-must be called through `ReflectionUtils` before nested buttons can receive input.
-The nested custom panel's normal `buttonPressed` callback then works. Set its
-button to quick mode: vanilla rebuilds this tooltip every frame, so a button
-waiting for mouse-up can be replaced between press and release. Clear its
-mouse-over sound with `setMouseOverSound(null)`: each new button sees the cursor
-enter, so the hover click would replay every frame. The button skips a null
-sound (0.98a-RC8 `ui.newui` button class).
+tooltip that vanilla rebuilds every frame. Do not put controls in it.
 
-`FishBuyer`'s one button toggles between "Pack into crates" and "Unpack from
-crates"; the picker opens unpacked. It queues the toggle for the button panel's
-`advance`, outside input dispatch. It finds only the ancestor picker holding its
-exact offer cargo, then that picker's cargo panel by `updateCargoViews`; no
-obfuscated names or global UI search. The toggle waits until no stack is held by
-the cursor and clears the transfer handler's ledger with `resetTransaction`
-before replacing either grid. Otherwise, cancel would replay transfers using
-obsolete fish or crate identities. Copy the packed or unpacked player cargo into
+A picker whose listener implements `ui/CargoPickerButtonListener` gets one more
+button from `ui/CargoPickerButtonAdder`, a PatchLib patch on vanilla's picker
+dialog. PatchLib finds the patch in the jar; nothing registers it.
+
+- `@After` the picker's constructor, it adds a 200 by 25 Orbitron 20 button with
+  vanilla's player colours and `TL_BR` cut to the picker's inner panel,
+  `inBL(10, 10)`, level with the confirm and cancel buttons at `inBR(10, 10)`.
+  It is an ordinary child panel, so normal input and hover sound work.
+- `@After` the picker's `advance`, it disables the button while a stack is on
+  the cursor and runs a press outside input dispatch. A press made while a stack
+  is held or the picker is being dismissed is dropped. Otherwise the cargo
+  panel's `cancelTransaction` returns the selection to the offer and clears the
+  transfer ledger, which names the current stacks; then the listener's
+  `pickerButtonPressed` runs, `updateCargoViews` rebuilds both grids and the
+  label is read again. No callback reports a stack picked up or put down, so the
+  cursor check runs every frame while a picker is open.
+- The plugin is stored in the picker's `getData()` with `putWeak`: it reaches
+  back to the picker through the cargo panel.
+
+Targets, all inferred and the first thing to check after a game update: the
+picker class by package `com.fs.starfarer.ui.newui`, `UIPanelAPI` and its only
+`CargoPickerListener` field; `getInnerPanel`, `isBeingDismissed` and `advance`
+on the picker; the cargo panel is the inner panel child (`getChildrenCopy`) with
+`updateCargoViews`, `cancelTransaction` and `getTransferHandler`;
+`getPickedUpStack` on the transfer handler. The constructor hook checks each
+with `hasMethod`; if one is missing it logs a warning and the picker opens
+without the button.
+
+`FishBuyer`'s button toggles between "Pack into crates" and "Unpack from
+crates"; the picker opens unpacked. Copy the packed or unpacked player cargo into
 the offer instead of changing both independently: crate contents must have
 identical ordering for item removal on sale. Confirm and cancel both restore the
 crates the hold had before the picker opened.
 
-Sources (0.98a-RC8): cargo picker and custom-panel implementations in
-`sources-obf/ui.newui.java`; `StandardTooltipV2.processInputImpl` in
-`sources-obf/ui.impl.java`; cargo panel `updateCargoViews` and transfer handler
-`resetTransaction/cancelTransaction` in `sources-obf/campaign.ui.java`.
+Sources (0.98a-RC8): the picker dialog and its base classes in
+`sources-obf/ui.newui.java` and `ui.impl.java`; cargo panel `setPickerMode`,
+`updateCargoViews` and `cancelTransaction`, transfer handler
+`getPickedUpStack/cancelTransaction` in `sources-obf/campaign.ui.java`.
 
 ## Hover tooltips
 
