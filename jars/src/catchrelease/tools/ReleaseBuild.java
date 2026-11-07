@@ -35,7 +35,7 @@ public final class ReleaseBuild {
             "^(" + VERSION + ")(?:[ \\t]*-[ \\t]*(UNRELEASED|CURRENT PUBLIC VERSION))?[ \\t]*$");
 
     static final List<String> LIBRARIES = List.of("starfarer.api.jar", "GraphicsLib.zip",
-            "Lazylib_lunalib.zip", "MagicLib.zip");
+            "Lazylib_lunalib.zip", "MagicLib.zip", "PatchLibAPI.jar");
 
     static final Set<String> NOTICES = Set.of(
             "graphics/catchrelease/fish/AA_LICENSED ICONS look inside.txt",
@@ -77,6 +77,7 @@ public final class ReleaseBuild {
         Path classes = Files.createDirectory(work.resolve("classes"));
         List<Path> dependencies = new ArrayList<>();
         dependencies.add(root.resolve("lib/starfarer.api.jar"));
+        dependencies.add(root.resolve("lib/PatchLibAPI.jar"));
         for (String name : List.of("lwjgl.jar", "lwjgl_util.jar", "json.jar", "log4j-1.2.9.jar")) {
             dependencies.add(game.resolve(name));
         }

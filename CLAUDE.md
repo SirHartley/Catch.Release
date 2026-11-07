@@ -16,6 +16,7 @@ Reviews, explanations, audits, and proposals are read-only unless the user reque
    - `starfarer.api.zip` contains the official game API source.
    - `GraphicsLib.zip`, `Lazylib_lunalib.zip`, and `MagicLib.zip` contain dependency sources and jars.
    - For GraphicsLib, LazyLib, LunaLib, and MagicLib, `lib/` is the primary source because the Starsector skill covers vanilla only.
+   - `PatchLibAPI.jar` is PatchLib's API jar with its sources (licence in `PatchLib-LICENSE.txt`). Use the `patchlib` skill for patch work and take signatures from this jar when the skill's version differs.
 4. Select the required guides using [Which guide to read](#which-guide-to-read). Apply every matching row, including for reviews and fixes to existing behavior. Follow required skill reading as well; this table does not waive full-reference reads required by a skill.
 
 ### Which guide to read
@@ -264,11 +265,12 @@ Required compile dependencies:
 - `Graphics.jar` from `lib/GraphicsLib.zip`;
 - `LazyLib.jar` and `LunaLib.jar` from `lib/Lazylib_lunalib.zip`;
 - `MagicLib.jar` from `lib/MagicLib.zip`;
+- `lib/PatchLibAPI.jar`;
 - `lwjgl.jar`, `lwjgl_util.jar`, `json.jar` and `log4j-1.2.9.jar` from the target game's `starsector-core` directory.
 
 Use the game's bundled libraries for both compilation and checks. Do not substitute Maven versions or put a second JSON jar on the classpath: Starsector's `JSONException` is checked, while newer JSON versions make it unchecked and can hide build errors. `PlayerSettingsChecks` rejects that incompatible JSON exception type.
 
-These dependencies provide `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json`, and `Global.getLogger()`. GraphicsLib, LazyLib, LunaLib, and MagicLib are also the declared runtime dependencies in `mod_info.json`. `starfarer_obf.jar` is not required; the source compiles against the API jar alone.
+These dependencies provide `org.lwjgl.util.vector`, `org.lwjgl.opengl`, `org.json`, and `Global.getLogger()`. GraphicsLib, LazyLib, LunaLib, MagicLib and PatchLib are also the declared runtime dependencies in `mod_info.json`. `PatchLibAPI.jar` registers PatchLib's annotation processor, so javac checks `@Patch` handler shapes during the build. `starfarer_obf.jar` is not required; the source compiles against the API jar alone.
 
 Optional: `lw_Console.jar` compiles the Console Commands classes in `jars/src/catchrelease/commands/`. Only Console Commands loads them, so the mod runs without them.
 

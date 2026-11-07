@@ -39,6 +39,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Map/Codex/intel handoff | `FishIntelMapButton/FishCodex -> FishMapFilterScript -> FishMapPane/FishPresence` |
 | Stale campaign effect | Owner location/ability validity -> cleanup; shared renderer registration in `rendering/` |
 | Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; [Java UI contracts](UI.md). Minigame rendering is separate. |
+| Extra button in a vanilla cargo picker | `ui/CargoPickerButtonListener -> CargoPickerButtonAdder` (PatchLib); [cargo pickers](UI.md#cargo-pickers) |
 | Map / planner list rebuilds | `FishMapPane` and `FishRoutePopup` replace the list's owning custom panel; [lifetime contract](UI.md#rebuilding-lists) |
 | Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*` |
 | Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel`; [backdrop dimensions](UI.md#portraits-and-sprites) |
@@ -48,6 +49,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | Registry / hook | Owners |
 |---|---|
 | `ModPlugin.onApplicationLoad()` | Player settings; `combat/salvage/FighterStoreRefitButton` registered once with LunaLib's static `LunaRefitManager` |
+| PatchLib `@Patch` classes | `ui/CargoPickerButtonAdder`; PatchLib finds them in the jar at startup, no registration |
 | `ModPlugin.pickShipAI()` | `combat/salvage/LyneDroneAI` for fighters tagged `catchrelease_lyne_drone`, at `MOD_SPECIFIC` |
 | `ModPlugin.pickWeaponAutofireAI()` | `combat/tug/HarpoonAutofireAI` for `catchrelease_harpoon`, at `MOD_SPECIFIC` |
 | `ModPlugin.onCodexDataGenerated()` | `FishCodex`, only while Codex data is generated |
@@ -399,7 +401,7 @@ Use [RULES_AUTHORING.md](RULES_AUTHORING.md) when working on the command bridge 
 | `CatchReleaseCMD.java` | Single rules bridge: temporary tokens, conditions, actions, custom panels, highlights, question paging and fleet teardown. Restores prior rules plugin and options once after panels. |
 | `QuestTextHighlights.java` | Splits explicit dialogue highlights into fish/rarity colours and ordinary requirement/reward emphasis. Preserves surrounding terms, displayed casing and repeated occurrences. Text rows supply values in display order before reward cards or other text. |
 | `QuestDialogMap.java` | Shared temporary sidebar map for local and remote dialogue targets, matching vanilla mission icons, tags, and colours. `showIntroMap`, `showWorkMap`, `showChainMap` (a Fisherman chain offer's target before its intel exists: `t1`, `t2`, `t3`) and FishJob's `showRemoteMap` action use `show()`; unresolved targets clear the preview. |
-| `FishBuyer.java` | Immutable bulk-sale preview, revalidated before sale; protects active FishAsker and marked-gear specimens. Picker packing uses scoped reflection for input and transfer reset, copies the packed hold into the offer, and restores surviving original containers on exit. See [cargo pickers](UI.md#cargo-pickers). |
+| `FishBuyer.java` | Immutable bulk-sale preview, revalidated before sale; protects active FishAsker and marked-gear specimens. Its sale picker's listener implements `ui/CargoPickerButtonListener` for the pack/unpack button; packing copies the packed hold into the offer and restores surviving original containers on exit. See [cargo pickers](UI.md#cargo-pickers). |
 
 Chart offer/reminder tokens share `CatchReleaseCMD.setWorkTokens()`. `$catchreleaseWorkInstructions` reads a Text-only `CatchReleaseWorkPondInstructions` or `CatchReleaseWorkLampInstructions` row from `rules.csv`, chosen by the saved source before outer Text replacement; these private lookups do not execute scripts or add options.
 
