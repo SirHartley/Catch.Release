@@ -208,7 +208,10 @@ Both paths ask `showReticuleOnActivation()` first and do nothing themselves if i
 **Click** — `BaseSkillshotAbility.pressButton()` starts a per-session `OnClickSkillshotListener`.
 Registration is deferred by one frame via `DelayedActionScriptRunWhilePaused`, because the UI outranks
 priority-0 listeners and the new listener would otherwise eat the very click that created it. The next
-left click on the map fires.
+left click on the map fires. The listener is transient and removes itself on every exit (fire, abort,
+dialog, reset). Input listeners run from a copy of the listener list
+(`ListenerUtil.getSortedInputListeners`, `ListenerManager.getListeners`), so it can remove itself
+during input.
 
 `SkillshotActivationManager` is an `EveryFrameScript` (running while paused) that allows exactly one
 live session, clears it when it goes inactive and holds the cross-mod lock while it is live.

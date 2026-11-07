@@ -16,22 +16,19 @@ import java.util.List;
 
 public class OnClickSkillshotListener implements SkillshotInputListener, CampaignInputListener {
 
-    protected boolean active = false;
-    protected SkillshotRenderer renderer;
     protected SkillshotAbility ability;
+    protected SkillshotRenderer renderer;
 
     public OnClickSkillshotListener(SkillshotAbility ability) {
         this.ability = ability;
     }
 
     public void activate() {
-        SkillshotActivationManager.getInstanceOrRegister().setCurrentListener(this);
-        Global.getSector().getListenerManager().addListener(this);
-
-        active = true;
-
         renderer = ability.createReticule();
         LunaCampaignRenderer.addRenderer(renderer);
+
+        Global.getSector().getListenerManager().addListener(this, true);
+        SkillshotActivationManager.getInstanceOrRegister().setCurrentListener(this);
     }
 
     @Override
@@ -41,7 +38,7 @@ public class OnClickSkillshotListener implements SkillshotInputListener, Campaig
 
     @Override
     public void processCampaignInputPreCore(List<InputEventAPI> events) {
-        if (!active) return;
+        if (!isActive()) return;
 
         if (Global.getSector().getCampaignUI().getCurrentInteractionDialog() != null) {
             reset();
@@ -51,7 +48,6 @@ public class OnClickSkillshotListener implements SkillshotInputListener, Campaig
         for (InputEventAPI input : events) {
             if (input.getEventType().equals(InputEventType.KEY_DOWN)
                     && input.getEventValue() != Keyboard.KEY_SPACE && input.getEventValue() != Keyboard.KEY_LSHIFT) {
-                SkillshotActivationManager.getInstanceOrRegister().deregisterListenerOnNextTick(this);
                 reset();
                 return;
             }
@@ -63,9 +59,10 @@ public class OnClickSkillshotListener implements SkillshotInputListener, Campaig
             }
 
             if (input.getEventType().equals(InputEventType.MOUSE_UP) && input.getEventValue() == InputEventMouseButton.LEFT) {
+                input.consume();
+
                 if (!renderer.isValidPosition()) {
                     Global.getSoundPlayer().playUISound(SkillshotSettings.SOUND_INVALID_TARGET, 1f, 1f);
-                    input.consume();
                     return;
                 }
 
@@ -73,12 +70,7 @@ public class OnClickSkillshotListener implements SkillshotInputListener, Campaig
 
                 ability.forceActivation();
                 ability.setCooldownLeft(ability.getSpec().getDeactivationCooldown());
-
-                active = false;
-                renderer.setDone();
-                renderer = null;
-
-                input.consume();
+                reset();
                 return;
             }
         }
@@ -86,14 +78,16 @@ public class OnClickSkillshotListener implements SkillshotInputListener, Campaig
 
     @Override
     public void reset() {
-        active = false;
         if (renderer != null) renderer.setDone();
         renderer = null;
+
+        // input listeners run from a copy of the listener list, removing during input is safe
+        Global.getSector().getListenerManager().removeListener(this);
     }
 
     @Override
     public boolean isActive() {
-        return active;
+        return renderer != null;
     }
 
     @Override

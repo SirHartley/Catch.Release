@@ -8,7 +8,6 @@ import catchrelease.skillshot.SkillshotLock;
 public class SkillshotActivationManager implements EveryFrameScript {
 
     protected SkillshotInputListener currentListener = null;
-    protected SkillshotInputListener forceDeregisterNextTick = null;
 
     public static SkillshotActivationManager getInstanceOrRegister() {
         SkillshotActivationManager manager = null;
@@ -40,11 +39,6 @@ public class SkillshotActivationManager implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (forceDeregisterNextTick != null) {
-            Global.getSector().getListenerManager().removeListener(forceDeregisterNextTick);
-            forceDeregisterNextTick = null;
-        }
-
         if (currentListener != null && !currentListener.isActive()) {
             currentListener = null;
             SkillshotLock.release();
@@ -69,10 +63,6 @@ public class SkillshotActivationManager implements EveryFrameScript {
 
         currentListener = listener;
         SkillshotLock.acquire();
-    }
-
-    public void deregisterListenerOnNextTick(SkillshotInputListener listener) {
-        forceDeregisterNextTick = listener;
     }
 
     public void reset() {
