@@ -1083,7 +1083,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - The distress framework follows the live vanilla `NearbyEventsEvent` timer. If the bridge cannot read that state, it fails closed instead of starting an independent scheduler.
 - The framework owns entity, route, breadcrumb intel, reservations, and dialogue trigger only. Providers own eligibility, content, quest creation, expiry, and resolution.
 - Distress CSV IDs must be namespaced so several mods can merge rows and providers without collisions.
-- The framework yields whenever vanilla creates a distress call and shares system reservations to avoid concurrent duplicate events.
+- The framework yields whenever vanilla creates a distress call and shares system reservations to avoid concurrent duplicate events. Copies of the framework in other mods share the `$sirhartley_distressActive` lock ([Distress README](../jars/src/catchrelease/distress/README.md#vanilla-integration)).
 - Skillshot and distress registration must remain idempotent and save-safe. Transient listeners are rebuilt on load and skillshot targeting resets before save.
 
 

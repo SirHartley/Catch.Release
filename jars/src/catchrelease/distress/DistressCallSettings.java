@@ -11,6 +11,8 @@ public class DistressCallSettings {
     public static final String ENTITY_FLAG = "$distressFramework";
     public static final String INSTANCE_REF = "$distressFrameworkRef";
     public static final String EVENT_ID = "$distressFrameworkEventId";
+    // shared with every copy of this framework in other mods: clock timestamp of the last live refresh
+    public static final String CROSS_MOD_LOCK = "$sirhartley_distressActive";
 
     public static int GLOBAL_MAX_ACTIVE = 1;
     public static float ACTIVE_RESERVATION_DAYS = 2f;

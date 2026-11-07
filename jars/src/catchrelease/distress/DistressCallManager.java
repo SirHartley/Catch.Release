@@ -108,6 +108,7 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         boolean frameworkActive = !active.isEmpty();
 
         if (frameworkActive) {
+            refreshCrossModLock();
             reserveEligibleSystems(DistressCallSettings.ACTIVE_RESERVATION_DAYS);
             rememberIntel(currentIntel);
             sawElapsed = vanilla.isCheckElapsed();
@@ -124,7 +125,7 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         // Vanilla reserves every candidate before its probability roll, so retain the pre-check pool.
         if (!elapsed) cachedCandidates = getEligibleSystems(true);
 
-        if (elapsed && !sawElapsed && !hasNewVanillaIntel(currentIntel)) {
+        if (elapsed && !sawElapsed && !hasNewVanillaIntel(currentIntel) && !isCrossModLocked()) {
             trySpawnFrom(cachedCandidates);
         }
 
@@ -280,6 +281,7 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         active.add(instance);
         cooldowns.put(spec.id, spec.cooldownDays);
         vanilla.reserve(system.getId(), DistressCallSettings.REPEAT_RESERVATION_DAYS);
+        refreshCrossModLock();
 
         SpawnData data = new SpawnData();
         data.instanceId = instance.id;
@@ -445,6 +447,17 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         }
 
         return Misc.getDistressJumpPoint(system) != null;
+    }
+
+    private void refreshCrossModLock() {
+        Global.getSector().getMemoryWithoutUpdate().set(DistressCallSettings.CROSS_MOD_LOCK,
+                Global.getSector().getClock().getTimestamp());
+    }
+
+    private boolean isCrossModLocked() {
+        Object timestamp = Global.getSector().getMemoryWithoutUpdate().get(DistressCallSettings.CROSS_MOD_LOCK);
+        return timestamp instanceof Long && Global.getSector().getClock()
+                .getElapsedDaysSince((Long) timestamp) < DistressCallSettings.ACTIVE_RESERVATION_DAYS;
     }
 
     private void reserveEligibleSystems(float days) {

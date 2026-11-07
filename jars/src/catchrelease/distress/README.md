@@ -63,12 +63,19 @@ when that check created no vanilla distress call. Both selectors use vanilla's s
 tracker. While a framework call is live, short reservations keep vanilla from opening a concurrent
 call; they expire naturally when the framework stops refreshing them.
 
+Other mods may ship their own copy of this framework under their own package and ids. All copies
+share the sector memory key `$sirhartley_distressActive`, which holds the clock timestamp of the
+last refresh. A copy sets it when it starts a call and refreshes it every frame while one is live,
+and skips its own roll while less than `ACTIVE_RESERVATION_DAYS` have passed since that timestamp.
+Keep the key name and meaning identical in every copy.
+
 The bridge does not replace `nearby_events`, call its event picker, or claim a vanilla-created
 entity. If the expected vanilla fields are unavailable, the framework fails closed and spawns
 nothing.
 
 ## Maintenance
 
-Update this README when provider hooks, registration, CSV fields or reservation behavior change.
+Update this README when provider hooks, registration, CSV fields, reservation behavior or the
+cross-mod lock change.
 Keep quest-specific rules and copy in the consuming mod. See
 [CLAUDE.md](../../../../CLAUDE.md#documentation-upkeep) for repository maintenance.
