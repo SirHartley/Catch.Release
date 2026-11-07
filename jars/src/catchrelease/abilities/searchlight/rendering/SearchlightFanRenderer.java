@@ -122,7 +122,11 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         float distance = Misc.getDistance(origin, aim);
         if (distance < 1f) return;
 
-        drawWedge(Misc.getAngleInDegrees(origin, aim), distance + getSize(), distance, alpha);
+        float length = distance + getSize();
+        // luna draws every renderer in the sector each frame, the Fisherman's lamps included
+        if (!viewport.isNearViewport(origin, length)) return;
+
+        drawWedge(Misc.getAngleInDegrees(origin, aim), length, distance, alpha);
     }
 
     protected void drawWedge(float direction, float length, float aimDistance, float alpha) {
