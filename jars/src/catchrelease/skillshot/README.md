@@ -4,7 +4,9 @@ Aimed campaign abilities for Starsector. Hold an ability hotkey to aim and relea
 Clicking the ability instead starts aiming; the next map click fires.
 
 The framework was extracted from Industrial.Evolution's consumable missiles. Its Java source is
-in this package; assets and registration entries are in the Catch.Release mod root.
+in this package; assets and registration entries are in the Catch.Release mod root. Industrial
+Evolution keeps a copy under `indevo.skillshot` with the same file layout, so fixes port by renaming
+the package. The two copies share one [cross-mod lock](#cross-mod-lock).
 
 Shared drawing gotchas are in [UI.md](../../../../docs/UI.md#drawing-gotchas).
 Reticule hooks and targeting lifecycle stay here.
@@ -53,8 +55,11 @@ integration, not a separate text standard.
    }
    ```
 
-   `register()` installs the hotkey listener and is idempotent. `reset()` cancels any half-aimed
-   shot so it never ends up in the save.
+   `register()` installs the hotkey listener and is idempotent. It also clears the cross-mod lock.
+   `reset()` cancels any half-aimed shot so it never ends up in the save, and releases the lock.
+
+Never ship another mod's copy under its package name: all mod jars share one classloader, so a
+second `catchrelease.skillshot` would collide with Catch.Release's.
 
 ## Writing an ability
 
@@ -182,7 +187,7 @@ the current aim point and is safe to read from `isValidPosition()`.
 ## Configuration
 
 `SkillshotSettings` holds every sprite id, sound id, size and colour, plus the ability tag name.
-All fields are writable — rewrite them once during startup to point at your own assets:
+All fields except `LOCK_KEY` are writable. Rewrite them once during startup to point at your own assets:
 
 ```java
 SkillshotSettings.SPRITE_DIRECTION_ARROW = "mymod_arrow";
@@ -206,11 +211,32 @@ priority-0 listeners and the new listener would otherwise eat the very click tha
 left click on the map fires.
 
 `SkillshotActivationManager` is an `EveryFrameScript` (running while paused) that allows exactly one
-live session and clears it when it goes inactive — that's what makes `isTargetingBlocked()` work
-across abilities.
+live session, clears it when it goes inactive and holds the cross-mod lock while it is live.
+`hasActiveSession()` (an own live session, or the lock held by another mod) backs
+`isTargetingBlocked()` and the "Conflicting ability in use!" tooltip line across abilities and mods.
 
 Either path cancels cleanly on an opened dialog, on ctrl (the vanilla slot-reassign modifier), or on
 any stray keypress. Firing at a position the reticule rejects plays `skillshot_denied` instead.
+
+## Cross-mod lock
+
+Industrial Evolution ships the same framework under `indevo.skillshot` and also listens to keys 1
+to 9. One sector memory key stops the two from aiming at once. Plain values only, so neither mod
+references the other's classes. Keep the key name and meaning identical in every copy.
+
+| Key | Value | Set | Read |
+| --- | --- | --- | --- |
+| `$sirhartley_skillshotActive` | Owner mod id: `catchrelease` or `IndEvo` | `SkillshotActivationManager.setCurrentListener` (session start) | `hasActiveSession()`: a value that is not the own id blocks targeting and shows "Conflicting ability in use!" |
+
+- A mod unsets the key only when the value is its own id: on the manager `advance` after its
+  session goes inactive, and in `reset()` before a save.
+- `register()` clears the key on load whatever its value; nothing aims during a load, so a key found
+  then is stale.
+- No memory expiry: it does not tick while the game is paused, and aiming is mostly done paused.
+- The tags differ (`skillshot`, Industrial Evolution `IndEvo_skillshot`) and both check
+  `instanceof SkillshotAbility` of their own package, so each framework only handles its own
+  abilities.
+- Owner: `SkillshotLock`. `SkillshotSettings.LOCK_KEY` is final; `LOCK_OWNER` is the id a copy writes.
 
 ## Extension boundaries
 
@@ -219,5 +245,6 @@ through `PositionValidator`. Validation uses the current frame's cursor position
 resolve the same slotted ability, including in hyperspace. Consumers implement cargo or charge
 spending through `onConsume()`; the framework does not own inventory.
 
-Update this README with changes to those hooks, registration, assets or lifecycle. Follow
+Update this README with changes to those hooks, registration, assets, the cross-mod lock or
+lifecycle. Follow
 [CLAUDE.md](../../../../CLAUDE.md#documentation-upkeep) for repository maintenance.

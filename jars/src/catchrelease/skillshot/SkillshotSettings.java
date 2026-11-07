@@ -4,6 +4,10 @@ import java.awt.*;
 
 public class SkillshotSettings {
 
+    // shared with indevo, never rename
+    public static final String LOCK_KEY = "$sirhartley_skillshotActive";
+
+    public static String LOCK_OWNER = "catchrelease";
     public static String TAG_SKILLSHOT = "skillshot";
     public static String SPRITE_CATEGORY = "fx";
     public static String SPRITE_FLEET_RETICULE = "skillshot_direction_reticule";

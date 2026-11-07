@@ -3,6 +3,7 @@ package catchrelease.skillshot.input;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import catchrelease.skillshot.SkillshotFramework;
+import catchrelease.skillshot.SkillshotLock;
 
 public class SkillshotActivationManager implements EveryFrameScript {
 
@@ -39,18 +40,23 @@ public class SkillshotActivationManager implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (currentListener == null) return;
-
         if (forceDeregisterNextTick != null) {
             Global.getSector().getListenerManager().removeListener(forceDeregisterNextTick);
             forceDeregisterNextTick = null;
         }
 
-        if (!currentListener.isActive()) currentListener = null;
+        if (currentListener != null && !currentListener.isActive()) {
+            currentListener = null;
+            SkillshotLock.release();
+        }
     }
 
     public boolean hasActiveListener() {
         return currentListener != null && currentListener.isActive();
+    }
+
+    public boolean hasActiveSession() {
+        return hasActiveListener() || SkillshotLock.isHeldByOtherMod();
     }
 
     public SkillshotInputListener getCurrentListener() {
@@ -62,9 +68,17 @@ public class SkillshotActivationManager implements EveryFrameScript {
                 + ", current: " + (currentListener != null ? currentListener.getClass().getName() : "null"));
 
         currentListener = listener;
+        SkillshotLock.acquire();
     }
 
     public void deregisterListenerOnNextTick(SkillshotInputListener listener) {
         forceDeregisterNextTick = listener;
+    }
+
+    public void reset() {
+        if (currentListener != null) currentListener.reset();
+        currentListener = null;
+
+        SkillshotLock.release();
     }
 }

@@ -7,15 +7,14 @@ import catchrelease.skillshot.input.SkillshotActivationManager;
 public class SkillshotFramework {
 
     public static void register() {
+        SkillshotLock.clear();
         OnKeyPressSkillshotListener.getInstanceOrRegister();
         SkillshotActivationManager.getInstanceOrRegister();
     }
 
     public static void reset() {
         OnKeyPressSkillshotListener.getInstanceOrRegister().reset();
-
-        SkillshotActivationManager manager = SkillshotActivationManager.getInstanceOrRegister();
-        if (manager.getCurrentListener() != null) manager.getCurrentListener().reset();
+        SkillshotActivationManager.getInstanceOrRegister().reset();
     }
 
     public static void log(String message) {

@@ -33,7 +33,7 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
     }
 
     public boolean isTargetingBlocked() {
-        if (SkillshotActivationManager.getInstanceOrRegister().hasActiveListener()) return true;
+        if (SkillshotActivationManager.getInstanceOrRegister().hasActiveSession()) return true;
 
         return Global.getSector().getCampaignUI().getCurrentInteractionDialog() != null
                 || Global.getSector().getCampaignUI().getCurrentCoreTab() != null;
@@ -64,7 +64,7 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
         Global.getSector().getScripts().add(new DelayedActionScriptRunWhilePaused(0f) {
             @Override
             public void doAction() {
-                if (SkillshotActivationManager.getInstanceOrRegister().hasActiveListener()) return;
+                if (SkillshotActivationManager.getInstanceOrRegister().hasActiveSession()) return;
                 new OnClickSkillshotListener(self).activate();
             }
         });
@@ -123,7 +123,7 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
 
         float opad = 10f;
 
-        if (SkillshotActivationManager.getInstanceOrRegister().hasActiveListener()) {
+        if (SkillshotActivationManager.getInstanceOrRegister().hasActiveSession()) {
             tooltip.addPara("Conflicting ability in use!", opad, Misc.getNegativeHighlightColor());
         }
 

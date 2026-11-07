@@ -56,6 +56,8 @@ Fixed - Epic and legendary shields now fade out with the fish when it dives, ins
 Fixed - Attacking a mercenary camp now costs reputation with the independents
 Fixed - Distress calls more than 1.6 LY away now show in intel instead of vanishing unseen after 5 days
 Adjusted - Distress calls no longer open while another mod using the same distress framework has one live
+Adjusted - The Harpoon and ROD can no longer be aimed while an Industrial Evolution missile is being aimed
+Note - Needs Industrial Evolution 4.2.a or newer
 Changed - Ships and ship blueprints given as rewards announce themselves the way vanilla does: "Acquired" with the ship's name and class, "Gained" with the blueprint's name
 Added - Version Checker support: update notices, plus the changelog and direct download for LunaLib's update screen and mod managers such as triOS
 Fixed - Ripples and ruptures no longer compile a new shader each (stutter and growing video memory)
