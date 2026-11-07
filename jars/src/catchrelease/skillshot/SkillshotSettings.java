@@ -30,5 +30,5 @@ public class SkillshotSettings {
     public static float GUIDE_LINE_DOT_GAP_PX = 28f;
 
     public static Color INVALID_COLOR = Color.RED.darker();
-    public static boolean LOG_DEBUG = true;
+    public static boolean LOG_DEBUG = false;
 }

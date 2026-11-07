@@ -4,26 +4,20 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import catchrelease.skillshot.SkillshotFramework;
 import catchrelease.skillshot.SkillshotLock;
+import catchrelease.skillshot.ability.SkillshotAbility;
 
 public class SkillshotActivationManager implements EveryFrameScript {
 
     protected SkillshotInputListener currentListener = null;
+    protected SkillshotAbility pendingClick = null;
 
     public static SkillshotActivationManager getInstanceOrRegister() {
-        SkillshotActivationManager manager = null;
-
-        for (EveryFrameScript s : Global.getSector().getScripts()) {
-            if (s instanceof SkillshotActivationManager) {
-                manager = (SkillshotActivationManager) s;
-                break;
-            }
+        for (EveryFrameScript s : Global.getSector().getTransientScripts()) {
+            if (s instanceof SkillshotActivationManager manager) return manager;
         }
 
-        if (manager == null) {
-            manager = new SkillshotActivationManager();
-            Global.getSector().addScript(manager);
-        }
-
+        SkillshotActivationManager manager = new SkillshotActivationManager();
+        Global.getSector().addTransientScript(manager);
         return manager;
     }
 
@@ -43,6 +37,18 @@ public class SkillshotActivationManager implements EveryFrameScript {
             currentListener = null;
             SkillshotLock.release();
         }
+
+        if (pendingClick == null) return;
+
+        SkillshotAbility ability = pendingClick;
+        pendingClick = null;
+
+        if (!hasActiveSession()) new OnClickSkillshotListener(ability).activate();
+    }
+
+    // started from advance, a listener added inside pressButton eats the bar click that opened it
+    public void queueClickSession(SkillshotAbility ability) {
+        pendingClick = ability;
     }
 
     public boolean hasActiveListener() {
@@ -66,6 +72,8 @@ public class SkillshotActivationManager implements EveryFrameScript {
     }
 
     public void reset() {
+        pendingClick = null;
+
         if (currentListener != null) currentListener.reset();
         currentListener = null;
 

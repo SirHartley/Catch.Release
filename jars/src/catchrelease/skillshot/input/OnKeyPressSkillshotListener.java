@@ -22,19 +22,17 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
     public static final int LAST_SLOT_KEY = Keyboard.KEY_9;
 
     protected int heldSlotKey = -1;
-    protected boolean active = false;
+    protected SkillshotAbility heldAbility;
     protected SkillshotRenderer renderer;
 
     public static OnKeyPressSkillshotListener getInstanceOrRegister() {
         ListenerManagerAPI manager = Global.getSector().getListenerManager();
+        List<OnKeyPressSkillshotListener> listeners = manager.getListeners(OnKeyPressSkillshotListener.class);
+        if (!listeners.isEmpty()) return listeners.get(0);
 
-        if (!manager.hasListenerOfClass(OnKeyPressSkillshotListener.class)) {
-            OnKeyPressSkillshotListener listener = new OnKeyPressSkillshotListener();
-            manager.addListener(listener, false);
-            return listener;
-        }
-
-        return manager.getListeners(OnKeyPressSkillshotListener.class).get(0);
+        OnKeyPressSkillshotListener listener = new OnKeyPressSkillshotListener();
+        manager.addListener(listener, true);
+        return listener;
     }
 
     @Override
@@ -81,39 +79,29 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
 
         SkillshotFramework.log("Starting hotkey targeting for " + ability.getId());
 
-        active = true;
         heldSlotKey = keyValue;
-        SkillshotActivationManager.getInstanceOrRegister().setCurrentListener(this);
+        heldAbility = ability;
 
         renderer = ability.createReticule();
         LunaCampaignRenderer.addRenderer(renderer);
+
+        SkillshotActivationManager.getInstanceOrRegister().setCurrentListener(this);
 
         input.consume();
     }
 
     protected void onSlotKeyUp(InputEventAPI input) {
-        SkillshotAbility ability = getSlottedSkillshotAbility(heldSlotKey - FIRST_SLOT_KEY);
-
-        if (ability == null) {
-            reset();
-            return;
-        }
-
         if (!renderer.isValidPosition()) {
             Global.getSoundPlayer().playUISound(SkillshotSettings.SOUND_INVALID_TARGET, 1f, 1f);
             reset();
             return;
         }
 
-        SkillshotFramework.log("Firing skillshot on key release: " + ability.getId());
+        SkillshotFramework.log("Firing skillshot on key release: " + heldAbility.getId());
 
-        ability.forceActivation();
-        ability.setCooldownLeft(ability.getSpec().getDeactivationCooldown());
-
-        active = false;
-        heldSlotKey = -1;
-        renderer.setDone();
-        renderer = null;
+        // fires the ability seen on key down, the slot can change while held (hyperspace transit)
+        heldAbility.forceActivation();
+        reset();
 
         input.consume();
     }
@@ -138,15 +126,16 @@ public class OnKeyPressSkillshotListener implements SkillshotInputListener, Camp
 
     @Override
     public void reset() {
-        active = false;
         heldSlotKey = -1;
+        heldAbility = null;
+
         if (renderer != null) renderer.setDone();
         renderer = null;
     }
 
     @Override
     public boolean isActive() {
-        return active;
+        return heldAbility != null;
     }
 
     @Override

@@ -69,7 +69,6 @@ public class OnClickSkillshotListener implements SkillshotInputListener, Campaig
                 SkillshotFramework.log("Firing skillshot on click: " + ability.getId());
 
                 ability.forceActivation();
-                ability.setCooldownLeft(ability.getSpec().getDeactivationCooldown());
                 reset();
                 return;
             }

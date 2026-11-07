@@ -6,7 +6,10 @@ Clicking the ability instead starts aiming; the next map click fires.
 The framework was extracted from Industrial.Evolution's consumable missiles. Its Java source is
 in this package; assets and registration entries are in the Catch.Release mod root. Industrial
 Evolution keeps a copy under `indevo.skillshot` with the same file layout, so fixes port by renaming
-the package. The two copies share one [cross-mod lock](#cross-mod-lock).
+the package. The two copies share one [cross-mod lock](#cross-mod-lock). Apart from the ids and
+assets in `SkillshotSettings`, they differ only in that Industrial Evolution throws on a tagged
+ability whose plugin is not a `SkillshotAbility` (Catch.Release ignores it) and has no
+`PondProximityValidator`.
 
 Shared drawing gotchas are in [UI.md](../../../../docs/UI.md#drawing-gotchas).
 Reticule hooks and targeting lifecycle stay here.
@@ -55,7 +58,9 @@ integration, not a separate text standard.
    }
    ```
 
-   `register()` installs the hotkey listener and is idempotent. It also clears the cross-mod lock.
+   `register()` adds the hotkey listener and the activation manager and is idempotent. Both are
+   transient and found by type on each load, so nothing of the framework is saved. It also clears
+   the cross-mod lock.
    `reset()` cancels any half-aimed shot so it never ends up in the save, and releases the lock.
 
 Never ship another mod's copy under its package name: all mod jars share one classloader, so a
@@ -122,8 +127,9 @@ firing at the cursor would just shoot wherever the mouse happened to sit.
 
 While it returns **true** everything behaves as described above.
 
-The `deactivationCooldown` column in `abilities.csv` is the rearm time — the framework applies it on
-fire, not on button press.
+The `deactivationCooldown` column in `abilities.csv` is the rearm time. `forceActivation()` fires:
+`activateImpl()` (cursor position and angle into `onSkillshotFired`), `onConsume()`, then that
+cooldown. It starts on fire, not on button press.
 
 ## Reticules
 
@@ -194,27 +200,30 @@ SkillshotSettings.SPRITE_DIRECTION_ARROW = "mymod_arrow";
 SkillshotSettings.LOG_DEBUG = true; // state transitions to starsector.log
 ```
 
+`LOG_DEBUG` defaults to false.
+
 ## How it works
 
 Two input paths lead to the same place.
 
-**Hotkey** — `OnKeyPressSkillshotListener` is a single long-lived `CampaignInputListener` at priority
+**Hotkey.** `OnKeyPressSkillshotListener` is a single transient `CampaignInputListener` at priority
 0. It intercepts the 1-9 keys before the UI can turn them into a button press (a button press would
 fire the ability instantly, leaving nothing to aim), checks the slotted ability for the skillshot tag,
-and opens a session. Releasing the same key fires.
+and opens a session. Releasing the same key fires the ability seen on key down, even if the slot
+changed while the key was held (hyperspace transit).
 
 Both paths ask `showReticuleOnActivation()` first and do nothing themselves if it says no.
 
-**Click** — `BaseSkillshotAbility.pressButton()` starts a per-session `OnClickSkillshotListener`.
-Registration is deferred by one frame via `DelayedActionScriptRunWhilePaused`, because the UI outranks
-priority-0 listeners and the new listener would otherwise eat the very click that created it. The next
-left click on the map fires. The listener is transient and removes itself on every exit (fire, abort,
+**Click.** `BaseSkillshotAbility.pressButton()` plays the activation sound and queues the ability on
+`SkillshotActivationManager`, which starts a per-session `OnClickSkillshotListener` on its next
+`advance`. A listener added inside `pressButton()` would eat the bar click that opened it, because the
+UI outranks priority-0 listeners. The next left click on the map fires. The listener is transient and removes itself on every exit (fire, abort,
 dialog, reset). Input listeners run from a copy of the listener list
 (`ListenerUtil.getSortedInputListeners`, `ListenerManager.getListeners`), so it can remove itself
 during input.
 
-`SkillshotActivationManager` is an `EveryFrameScript` (running while paused) that allows exactly one
-live session, clears it when it goes inactive and holds the cross-mod lock while it is live.
+`SkillshotActivationManager` is a transient `EveryFrameScript` (running while paused) that allows
+exactly one live session, clears it when it goes inactive and holds the cross-mod lock while it is live.
 `hasActiveSession()` (an own live session, or the lock held by another mod) backs
 `isTargetingBlocked()` and the "Conflicting ability in use!" tooltip line across abilities and mods.
 
@@ -244,8 +253,8 @@ references the other's classes. Keep the key name and meaning identical in every
 ## Extension boundaries
 
 The framework chooses reticules through `SkillshotAbility.createReticule()` and target restrictions
-through `PositionValidator`. Validation uses the current frame's cursor position. Both hotkey edges
-resolve the same slotted ability, including in hyperspace. Consumers implement cargo or charge
+through `PositionValidator`. Validation uses the current frame's cursor position. The hotkey fires
+the ability resolved on key down, including in hyperspace. Consumers implement cargo or charge
 spending through `onConsume()`; the framework does not own inventory.
 
 Update this README with changes to those hooks, registration, assets, the cross-mod lock or

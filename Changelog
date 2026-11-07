@@ -59,6 +59,8 @@ Adjusted - Distress calls no longer open while another mod using the same distre
 Adjusted - The Harpoon and ROD can no longer be aimed while an Industrial Evolution missile is being aimed
 Note - Needs Industrial Evolution 4.2.a or newer
 Fixed - Aiming the Harpoon or ROD by clicking its button no longer leaves dead data in the save
+Fixed - A held Harpoon or ROD hotkey now fires that ability on release, even if the ability bar changed
+Removed - Harpoon and ROD aiming debug lines in starsector.log
 Changed - Ships and ship blueprints given as rewards announce themselves the way vanilla does: "Acquired" with the ship's name and class, "Gained" with the blueprint's name
 Added - Version Checker support: update notices, plus the changelog and direct download for LunaLib's update screen and mod managers such as triOS
 Fixed - Ripples and ruptures no longer compile a new shader each (stutter and growing video memory)
