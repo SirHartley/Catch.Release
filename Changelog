@@ -60,6 +60,7 @@ Changed - Ships and ship blueprints given as rewards announce themselves the way
 Added - Version Checker support: update notices, plus the changelog and direct download for LunaLib's update screen and mod managers such as triOS
 Fixed - Ripples and ruptures no longer compile a new shader each (stutter and growing video memory)
 Fixed - Closed ruptures no longer keep every ripple they made in memory and in the save
+Fixed - The aquarium no longer slows every campaign frame while it looks for the colony screen
 
 Outfitter
 Fixed - The Outfitter no longer opens on a locked shelf with an empty list and no category selected, which happened on every visit before the Breach Lights were unlocked
