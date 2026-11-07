@@ -3,27 +3,21 @@ package catchrelease.skillshot.input;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import catchrelease.skillshot.SkillshotFramework;
+import catchrelease.skillshot.SkillshotLock;
+import catchrelease.skillshot.ability.SkillshotAbility;
 
 public class SkillshotActivationManager implements EveryFrameScript {
 
     protected SkillshotInputListener currentListener = null;
-    protected SkillshotInputListener forceDeregisterNextTick = null;
+    protected SkillshotAbility pendingClick = null;
 
     public static SkillshotActivationManager getInstanceOrRegister() {
-        SkillshotActivationManager manager = null;
-
-        for (EveryFrameScript s : Global.getSector().getScripts()) {
-            if (s instanceof SkillshotActivationManager) {
-                manager = (SkillshotActivationManager) s;
-                break;
-            }
+        for (EveryFrameScript s : Global.getSector().getTransientScripts()) {
+            if (s instanceof SkillshotActivationManager manager) return manager;
         }
 
-        if (manager == null) {
-            manager = new SkillshotActivationManager();
-            Global.getSector().addScript(manager);
-        }
-
+        SkillshotActivationManager manager = new SkillshotActivationManager();
+        Global.getSector().addTransientScript(manager);
         return manager;
     }
 
@@ -39,18 +33,30 @@ public class SkillshotActivationManager implements EveryFrameScript {
 
     @Override
     public void advance(float amount) {
-        if (currentListener == null) return;
-
-        if (forceDeregisterNextTick != null) {
-            Global.getSector().getListenerManager().removeListener(forceDeregisterNextTick);
-            forceDeregisterNextTick = null;
+        if (currentListener != null && !currentListener.isActive()) {
+            currentListener = null;
+            SkillshotLock.release();
         }
 
-        if (!currentListener.isActive()) currentListener = null;
+        if (pendingClick == null) return;
+
+        SkillshotAbility ability = pendingClick;
+        pendingClick = null;
+
+        if (!hasActiveSession()) new OnClickSkillshotListener(ability).activate();
+    }
+
+    // started from advance, a listener added inside pressButton eats the bar click that opened it
+    public void queueClickSession(SkillshotAbility ability) {
+        pendingClick = ability;
     }
 
     public boolean hasActiveListener() {
         return currentListener != null && currentListener.isActive();
+    }
+
+    public boolean hasActiveSession() {
+        return hasActiveListener() || SkillshotLock.isHeldByOtherMod();
     }
 
     public SkillshotInputListener getCurrentListener() {
@@ -62,9 +68,15 @@ public class SkillshotActivationManager implements EveryFrameScript {
                 + ", current: " + (currentListener != null ? currentListener.getClass().getName() : "null"));
 
         currentListener = listener;
+        SkillshotLock.acquire();
     }
 
-    public void deregisterListenerOnNextTick(SkillshotInputListener listener) {
-        forceDeregisterNextTick = listener;
+    public void reset() {
+        pendingClick = null;
+
+        if (currentListener != null) currentListener.reset();
+        currentListener = null;
+
+        SkillshotLock.release();
     }
 }

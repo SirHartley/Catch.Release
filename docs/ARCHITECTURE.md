@@ -54,7 +54,7 @@ Technical routing for the current implementation. Java paths below are relative 
 | `ModPlugin.pickWeaponAutofireAI()` | `combat/tug/HarpoonAutofireAI` for `catchrelease_harpoon`, at `MOD_SPECIFIC` |
 | `ModPlugin.onCodexDataGenerated()` | `FishCodex`, only while Codex data is generated |
 | `ModPlugin.onGameLoad()` | Idempotent script/listener registration and current-state cleanup; order below |
-| `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting; remove False Dawn's owned coronal flares before serialization |
+| `ModPlugin.beforeGameSave()` | Reset transient skillshot targeting and release its cross-mod lock; remove False Dawn's owned coronal flares before serialization |
 | `data/campaign/fish.csv` | Species; `FishSpecLoader`. The `icon` column is a literal asset path loaded by `SpriteLoader`, shared by cargo, Codex, map, shop and aquarium; no `settings.json` sprite registration. Fish PNG filenames use lowercase with underscores; paths must match case exactly. Match `spriteDirection` to replacement art for aquarium swimming. |
 | `data/campaign/abilities.csv` | catchrelease_searchlights, catchrelease_rod, catchrelease_harpoon |
 | `data/config/settings.json` | `catchrelease.dialogue.rules` command package and sprites; black-hole warp settings belong to the deprecated test below |
@@ -1084,7 +1084,7 @@ Java custom-panel behavior, sprite state, drawing gotchas and minigame UI timing
 - The framework owns entity, route, breadcrumb intel, reservations, and dialogue trigger only. Providers own eligibility, content, quest creation, expiry, and resolution.
 - Distress CSV IDs must be namespaced so several mods can merge rows and providers without collisions.
 - The framework yields whenever vanilla creates a distress call and shares system reservations to avoid concurrent duplicate events. Copies of the framework in other mods share the `$sirhartley_distressActive` lock ([Distress README](../jars/src/catchrelease/distress/README.md#vanilla-integration)).
-- Skillshot and distress registration must remain idempotent and save-safe. Transient listeners are rebuilt on load and skillshot targeting resets before save.
+- Skillshot and distress registration must remain idempotent and save-safe. Transient listeners are rebuilt on load and skillshot targeting resets before save. Copies of the skillshot framework in other mods share the `$sirhartley_skillshotActive` lock ([Skillshot README](../jars/src/catchrelease/skillshot/README.md#cross-mod-lock)).
 
 
 ### Shared cross-file constraints

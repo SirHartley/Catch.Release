@@ -7,9 +7,7 @@ import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 import catchrelease.skillshot.SkillshotFramework;
-import catchrelease.skillshot.input.OnClickSkillshotListener;
 import catchrelease.skillshot.input.SkillshotActivationManager;
-import catchrelease.skillshot.util.DelayedActionScriptRunWhilePaused;
 import catchrelease.skillshot.util.SkillshotUtils;
 
 public abstract class BaseSkillshotAbility extends BaseDurationAbility implements SkillshotAbility {
@@ -33,8 +31,12 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
     }
 
     public boolean isTargetingBlocked() {
-        if (SkillshotActivationManager.getInstanceOrRegister().hasActiveListener()) return true;
+        if (SkillshotActivationManager.getInstanceOrRegister().hasActiveSession()) return true;
 
+        return isUIBlocking();
+    }
+
+    protected boolean isUIBlocking() {
         return Global.getSector().getCampaignUI().getCurrentInteractionDialog() != null
                 || Global.getSector().getCampaignUI().getCurrentCoreTab() != null;
     }
@@ -57,17 +59,8 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
 
         playActivationSound();
 
-        final SkillshotAbility self = this;
         SkillshotFramework.log("Starting click targeting for " + getId());
-
-        // delayed one frame - registering the listener now would let the UI's own priority-0 click handling eat this very click
-        Global.getSector().getScripts().add(new DelayedActionScriptRunWhilePaused(0f) {
-            @Override
-            public void doAction() {
-                if (SkillshotActivationManager.getInstanceOrRegister().hasActiveListener()) return;
-                new OnClickSkillshotListener(self).activate();
-            }
-        });
+        SkillshotActivationManager.getInstanceOrRegister().queueClickSession(this);
     }
 
     protected float getActivationVolume() {
@@ -89,6 +82,7 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
     public void forceActivation() {
         activateImpl();
         onConsume();
+        setCooldownLeft(getSpec().getDeactivationCooldown());
     }
 
     @Override
@@ -123,14 +117,11 @@ public abstract class BaseSkillshotAbility extends BaseDurationAbility implement
 
         float opad = 10f;
 
-        if (SkillshotActivationManager.getInstanceOrRegister().hasActiveListener()) {
+        if (SkillshotActivationManager.getInstanceOrRegister().hasActiveSession()) {
             tooltip.addPara("Conflicting ability in use!", opad, Misc.getNegativeHighlightColor());
         }
 
-        boolean uiBlocking = Global.getSector().getCampaignUI().getCurrentInteractionDialog() != null
-                || Global.getSector().getCampaignUI().getCurrentCoreTab() != null;
-
-        if (uiBlocking) {
+        if (isUIBlocking()) {
             tooltip.addPara("Can only be activated from the ability bar.", opad, Misc.getNegativeHighlightColor());
         }
     }
