@@ -442,6 +442,7 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         }
         if (!validTheme || !Misc.getMarketsInLocation(system).isEmpty()) return false;
 
+        // reverse of vanilla's check on purpose, see the distress README
         for (CampaignFleetAPI fleet : system.getFleets()) {
             if (fleet.getFaction().isHostileTo("independent")) return false;
         }
