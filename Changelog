@@ -62,6 +62,7 @@ Fixed - Ripples and ruptures no longer compile a new shader each (stutter and gr
 Fixed - Closed ruptures no longer keep every ripple they made in memory and in the save
 Fixed - The aquarium no longer slows every campaign frame while it looks for the colony screen
 Adjusted - Off-screen ripples and Fisherman lamps are no longer drawn
+Adjusted - Lower frame cost for legendary and epic trails outside the lamps' light
 
 Outfitter
 Fixed - The Outfitter no longer opens on a locked shelf with an empty list and no category selected, which happened on every visit before the Breach Lights were unlocked

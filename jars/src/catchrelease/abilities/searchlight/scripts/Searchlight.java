@@ -511,6 +511,15 @@ public class Searchlight implements EveryFrameScript {
             return loc;
         }
 
+        // false only where getLitStrength is 0 for every point within radius of x, y
+        public boolean mayLight(float x, float y, float radius) {
+            Vector2f center = fanned ? origin : loc;
+            float reach = (fanned ? length : size) + radius;
+            float dx = x - center.x;
+            float dy = y - center.y;
+            return dx * dx + dy * dy <= reach * reach;
+        }
+
         public float getLitStrength(Vector2f at) {
             if (!fanned) {
                 float distance = Misc.getDistance(loc, at);
