@@ -3,8 +3,8 @@ package catchrelease.distress;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
-import com.fs.starfarer.api.campaign.comm.IntelInfoPlugin;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.impl.campaign.intel.misc.DistressCallIntel;
 import com.fs.starfarer.api.impl.campaign.rulecmd.CallEvent.CallableEvent;
 import com.fs.starfarer.api.impl.campaign.rulecmd.FireAll;
 import com.fs.starfarer.api.util.Misc;
@@ -20,7 +20,8 @@ public class DistressCallInstance implements CallableEvent {
 
     StarSystemAPI system;
     CampaignFleetAPI fleet;
-    IntelInfoPlugin intel;
+    DistressCallIntel intel;
+    float waitDays;
     float pendingDays;
     boolean spawned;
     boolean resolved;

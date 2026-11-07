@@ -163,7 +163,7 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
             CampaignFleetAPI fleet = instance.fleet;
             if (!instance.spawned) {
                 instance.pendingDays += days;
-                if (instance.pendingDays <= 5f) continue;
+                if (instance.pendingDays <= instance.waitDays) continue;
             }
 
             boolean expired = fleet == null || fleet.isExpired() || !fleet.isAlive()
@@ -272,7 +272,11 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         SectorEntityToken jumpPoint = Misc.getDistressJumpPoint(system);
         if (jumpPoint == null) return null;
 
+        DistressCallProvider provider = DistressCallFramework.getProvider(spec.providerId);
+        if (provider == null) return null;
+
         DistressCallInstance instance = new DistressCallInstance(spec.id, system);
+        instance.waitDays = 30f + random.nextFloat() * 10f;
         active.add(instance);
         cooldowns.put(spec.id, spec.cooldownDays);
         vanilla.reserve(system.getId(), DistressCallSettings.REPEAT_RESERVATION_DAYS);
@@ -288,7 +292,13 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
 
         RouteData route = RouteManager.getInstance().addRoute(
                 DistressCallSettings.ROUTE_SOURCE_ID, null, Misc.genRandomSeed(), optional, this, data);
-        route.addSegment(new RouteSegment(30f + random.nextFloat() * 10f, jumpPoint));
+        route.addSegment(new RouteSegment(instance.waitDays, jumpPoint));
+
+        // the route only spawns its fleet within RouteManager.SPAWN_DIST_LY, so the intel cannot wait for it
+        DistressCallIntel intel = new DistressCallIntel(system);
+        setIntelText(intel, provider.getIntelText(instance, null));
+        instance.intel = intel;
+        Global.getSector().getIntelManager().addIntel(intel);
 
         return instance;
     }
@@ -358,15 +368,15 @@ public class DistressCallManager implements EveryFrameScript, RouteFleetSpawner 
         fleet.setLocation(anchor.getLocation().x + offset, anchor.getLocation().y);
         fleet.addScript(new DistressCallNormalAssignmentAI(fleet, data.system, anchor));
 
-        DistressCallIntel intel = new DistressCallIntel(data.system);
-        String intelText = provider.getIntelText(instance, fleet);
-        if (intelText != null && !intelText.isEmpty()) intel.setText(intelText);
-        instance.intel = intel;
-        Global.getSector().getIntelManager().addIntel(intel);
+        if (instance.intel != null) setIntelText(instance.intel, provider.getIntelText(instance, fleet));
 
         DistressCallFramework.log("Spawned " + spec.id + " in " + data.system.getName());
 
         return fleet;
+    }
+
+    private static void setIntelText(DistressCallIntel intel, String text) {
+        if (text != null && !text.isEmpty()) intel.setText(text);
     }
 
     private DistressCallInstance find(String id) {

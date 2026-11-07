@@ -49,6 +49,12 @@ framework flag, and the saved instance verifies the exact fleet and instance ref
 fires the provider trigger. Call `DistressCallFramework.resolve(fleet)` when the encounter has
 finished.
 
+The framework adds the distress call intel when the call starts, as vanilla does, because the route
+spawns its fleet only within `RouteManager.SPAWN_DIST_LY` of the player. `getIntelText` is called
+then with a null fleet, and again with the fleet once it spawns; null keeps the current text, which
+starts as vanilla's default. The route waits 30 to 40 days at the jump point. A call whose fleet has
+not spawned by then expires, and `onExpired` receives a null fleet.
+
 ## Vanilla integration
 
 `NearbyEventsBridge` binds to the live 0.98a `NearbyEventsEvent`. The framework has no independent
