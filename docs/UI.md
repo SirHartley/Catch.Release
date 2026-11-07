@@ -420,6 +420,11 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
+- `NoiseMappedCircularRingRenderer`, `MaskGlowRenderer` and `MaskedWarpedSpriteRenderer`
+  share one static program each, compiled on first use and kept for the session.
+  Never hold a program per instance: there is one ring renderer per ripple, each
+  compile reads both shader files and links, and nothing deletes the program or the
+  two shader objects GraphicsLib's `ShaderLib.loadShader` leaves behind.
 - Shields use red for timed regeneration and blue for Quorum's escort-dependent
   immunity. Purple (`LegendaryShields.SHIELD_ORANGE`, an older name) marks shields
   that do not regenerate on a timer: Moray's one-off shield, Lantern Jack's and

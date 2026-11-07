@@ -13,17 +13,18 @@ import java.io.IOException;
 public class MaskedWarpedSpriteRenderer {
 
     private final WarpGrid warp;
-    private transient int program = 0;
-    private transient int uTex = -1;
-    private transient int uMaskTex = -1;
-    private transient int uAlphaMult = -1;
-    private transient int uMaskThreshold = -1;
-    private transient int uSwirl = -1;
-    private transient int uSwirlEdge = -1;
-    private transient int uWell = -1;
-    private transient int uWellGamma = -1;
-    private transient int uWellDim = -1;
-    private transient int uMaskToFill = -1;
+    private static boolean attempted = false;
+    private static int program = 0;
+    private static int uTex = -1;
+    private static int uMaskTex = -1;
+    private static int uAlphaMult = -1;
+    private static int uMaskThreshold = -1;
+    private static int uSwirl = -1;
+    private static int uSwirlEdge = -1;
+    private static int uWell = -1;
+    private static int uWellGamma = -1;
+    private static int uWellDim = -1;
+    private static int uMaskToFill = -1;
     private float maskThreshold = 0f;
 
     private float swirl = 0f;
@@ -199,8 +200,10 @@ public class MaskedWarpedSpriteRenderer {
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
     }
 
-    private void ensureShader() {
-        if (program != 0) return;
+    // one program for every instance, compiled once per session
+    private static void ensureShader() {
+        if (attempted) return;
+        attempted = true;
 
         final String vert;
         final String frag;
