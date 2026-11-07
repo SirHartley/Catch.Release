@@ -63,6 +63,12 @@ when that check created no vanilla distress call. Both selectors use vanilla's s
 tracker. While a framework call is live, short reservations keep vanilla from opening a concurrent
 call; they expire naturally when the framework stops refreshing them.
 
+System eligibility follows vanilla's distress check except for hostility. The framework skips a
+system that holds any fleet hostile to independents. Vanilla's check in 0.98a-RC8 is the reverse: it
+skips a system that holds any fleet *not* hostile to independents, so independent scavengers block a
+call while pirate-only systems pass. That reads as a vanilla bug, and the framework keeps its own
+direction on purpose. Copies in other mods use the same direction.
+
 Other mods may ship their own copy of this framework under their own package and ids. All copies
 share the sector memory key `$sirhartley_distressActive`, which holds the clock timestamp of the
 last refresh. A copy sets it when it starts a call and refreshes it every frame while one is live,
