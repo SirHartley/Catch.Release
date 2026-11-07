@@ -59,6 +59,7 @@ Adjusted - Distress calls no longer open while another mod using the same distre
 Changed - Ships and ship blueprints given as rewards announce themselves the way vanilla does: "Acquired" with the ship's name and class, "Gained" with the blueprint's name
 Added - Version Checker support: update notices, plus the changelog and direct download for LunaLib's update screen and mod managers such as triOS
 Fixed - Ripples and ruptures no longer compile a new shader each (stutter and growing video memory)
+Fixed - Closed ruptures no longer keep every ripple they made in memory and in the save
 
 Outfitter
 Fixed - The Outfitter no longer opens on a locked shelf with an empty list and no category selected, which happened on every visit before the Breach Lights were unlocked
