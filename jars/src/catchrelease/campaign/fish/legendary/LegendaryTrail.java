@@ -158,6 +158,9 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
             float dy = to.at.y - from.at.y;
             float distance = (float) Math.sqrt(dx * dx + dy * dy);
             if (distance <= 0f || !viewport.isNearViewport(from.at, distance + WIDTH)) continue;
+            // unlit segments and quads draw at zero alpha, skip them
+            if (!beams.mayLight((from.at.x + to.at.x) * 0.5f, (from.at.y + to.at.y) * 0.5f,
+                    distance * 0.5f + WIDTH)) continue;
             float nx = -dy / distance;
             float ny = dx / distance;
             int steps = Math.max(1, (int) Math.ceil(distance / LIGHT_SAMPLE_SPACING));
@@ -165,10 +168,12 @@ public class LegendaryTrail implements LunaCampaignRenderingPlugin {
             edge(from, to, 0f, nx, ny, beams, viewportAlpha, startEdge);
             for (int step = 0; step < steps; step++) {
                 edge(from, to, (float) (step + 1) / steps, nx, ny, beams, viewportAlpha, endEdge);
-                drawVertex(startEdge[0], startEdge[1], 0f, startEdge[6], startEdge[2]);
-                drawVertex(startEdge[3], startEdge[4], 1f, startEdge[6], startEdge[5]);
-                drawVertex(endEdge[3], endEdge[4], 1f, endEdge[6], endEdge[5]);
-                drawVertex(endEdge[0], endEdge[1], 0f, endEdge[6], endEdge[2]);
+                if (startEdge[2] > 0f || startEdge[5] > 0f || endEdge[2] > 0f || endEdge[5] > 0f) {
+                    drawVertex(startEdge[0], startEdge[1], 0f, startEdge[6], startEdge[2]);
+                    drawVertex(startEdge[3], startEdge[4], 1f, startEdge[6], startEdge[5]);
+                    drawVertex(endEdge[3], endEdge[4], 1f, endEdge[6], endEdge[5]);
+                    drawVertex(endEdge[0], endEdge[1], 0f, endEdge[6], endEdge[2]);
+                }
                 float[] swap = startEdge;
                 startEdge = endEdge;
                 endEdge = swap;

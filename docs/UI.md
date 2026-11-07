@@ -420,6 +420,15 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
 
 ### Drawing gotchas
 
+- `NoiseMappedCircularRingRenderer`, `MaskGlowRenderer` and `MaskedWarpedSpriteRenderer`
+  share one static program each, compiled on first use and kept for the session.
+  Never hold a program per instance: there is one ring renderer per ripple, each
+  compile reads both shader files and links, and nothing deletes the program or the
+  two shader objects GraphicsLib's `ShaderLib.loadShader` leaves behind.
+- LunaLib draws every registered renderer on each of its layers every frame, in
+  every location, with no viewport test. Renderers that can sit off screen return
+  early on `viewport.isNearViewport`: `RippleRingRenderer`, and `SearchlightFanRenderer`,
+  which also draws the Fisherman's lamps anywhere in his system.
 - Shields use red for timed regeneration and blue for Quorum's escort-dependent
   immunity. Purple (`LegendaryShields.SHIELD_ORANGE`, an older name) marks shields
   that do not regenerate on a timer: Moray's one-off shield, Lantern Jack's and
@@ -474,7 +483,9 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   retained contact marks. `render` takes `SearchlightAbilityPlugin.snapshotBeams()`
   once per pass. Each `Searchlight.Beam` freezes that frame's position, area, fan
   state and Manta alpha, so vertices only do distance and angle maths. Neighbouring
-  quads reuse their shared edge. Keep upgrade, tackle, ownership and haunt lookups
+  quads reuse their shared edge. Segments beyond every beam's reach
+  (`BeamSnapshot.mayLight`) and quads with four unlit vertices are skipped, since
+  they would draw at zero alpha. Keep upgrade, tackle, ownership and haunt lookups
   out of the per-vertex path: profiling showed them taking over 90% of trail
   render time. Lamps off means no visible trail, and an empty snapshot skips the
   geometry entirely. Viewport alpha and culling still apply. Pause freezes sampling and ageing; GL and shared sprite

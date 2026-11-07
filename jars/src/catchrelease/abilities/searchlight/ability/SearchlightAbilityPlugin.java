@@ -170,6 +170,13 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
             return beams.length == 0;
         }
 
+        public boolean mayLight(float x, float y, float radius) {
+            for (int i = 0; i < beams.length; i++) {
+                if (alphas[i] > 0f && beams[i].mayLight(x, y, radius)) return true;
+            }
+            return false;
+        }
+
         public float getVisibilityAt(Vector2f at) {
             if (at == null) return 0f;
 

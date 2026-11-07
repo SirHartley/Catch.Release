@@ -13,14 +13,15 @@ import java.io.IOException;
 
 public class MaskGlowRenderer {
 
-    private transient int program = 0;
-    private transient int uMaskTex = -1;
-    private transient int uGlowColor = -1;
-    private transient int uGlowAlpha = -1;
-    private transient int uThreshold = -1;
-    private transient int uRadiusOutPx = -1;
-    private transient int uRadiusInPx = -1;
-    private transient int uMaskTexelSize = -1;
+    private static boolean attempted = false;
+    private static int program = 0;
+    private static int uMaskTex = -1;
+    private static int uGlowColor = -1;
+    private static int uGlowAlpha = -1;
+    private static int uThreshold = -1;
+    private static int uRadiusOutPx = -1;
+    private static int uRadiusInPx = -1;
+    private static int uMaskTexelSize = -1;
     private float threshold = 0f;
 
     public void setThreshold(float threshold) {
@@ -92,8 +93,10 @@ public class MaskGlowRenderer {
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
     }
 
-    private void ensureShader() {
-        if (program != 0) return;
+    // one program for every instance, compiled once per session
+    private static void ensureShader() {
+        if (attempted) return;
+        attempted = true;
 
         final String vert;
         final String frag;

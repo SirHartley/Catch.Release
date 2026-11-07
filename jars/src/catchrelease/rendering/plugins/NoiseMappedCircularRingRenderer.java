@@ -13,19 +13,20 @@ import java.io.IOException;
 
 public class NoiseMappedCircularRingRenderer {
 
-    private transient int program = 0;
-    private transient int uNoiseTex = -1;
-    private transient int uTime = -1;
-    private transient int uAlphaMult = -1;
-    private transient int uRadius = -1;
-    private transient int uRingWidth = -1;
-    private transient int uFeather = -1;
-    private transient int uAngularTiling = -1;
-    private transient int uRadialTiling = -1;
-    private transient int uNoiseScroll = -1;
-    private transient int uNoiseCutoff = -1;
-    private transient int uNoiseSoft = -1;
-    private transient int uRingColor = -1;
+    private static boolean attempted = false;
+    private static int program = 0;
+    private static int uNoiseTex = -1;
+    private static int uTime = -1;
+    private static int uAlphaMult = -1;
+    private static int uRadius = -1;
+    private static int uRingWidth = -1;
+    private static int uFeather = -1;
+    private static int uAngularTiling = -1;
+    private static int uRadialTiling = -1;
+    private static int uNoiseScroll = -1;
+    private static int uNoiseCutoff = -1;
+    private static int uNoiseSoft = -1;
+    private static int uRingColor = -1;
 
     public void renderRing(SpriteAPI noiseSprite,
                            Vector2f center,
@@ -116,8 +117,10 @@ public class NoiseMappedCircularRingRenderer {
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
     }
 
-    private void ensureShader() {
-        if (program != 0) return;
+    // one program for every instance, compiled once per session
+    private static void ensureShader() {
+        if (attempted) return;
+        attempted = true;
 
         final String vert;
         final String frag;

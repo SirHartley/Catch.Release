@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.colony;
 
 import catchrelease.reflection.ReflectionUtils;
 import com.fs.starfarer.api.EveryFrameScript;
+import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
@@ -15,8 +16,6 @@ import java.util.List;
 
 public class AquariumTankScript implements EveryFrameScript {
 
-    public static final String APP_DRIVER = "com.fs.state.AppDriver";
-    public static final String CAMPAIGN_STATE = "com.fs.starfarer.campaign.CampaignState";
     public static final float COVERED = 0.999f;
     public static final float GAP = 8f;
     public static final float TANK_HEIGHT = 170f;
@@ -74,15 +73,9 @@ public class AquariumTankScript implements EveryFrameScript {
     }
 
     protected Object findDialog() {
-        try {
-            Object driver = ReflectionUtils.invokeStatic(Class.forName(APP_DRIVER), "getInstance");
-            Object state = ReflectionUtils.invokeIfExists(driver, "getCurrentState");
-            if (state == null || !CAMPAIGN_STATE.equals(state.getClass().getName())) return null;
+        if (Global.getCurrentState() != GameState.CAMPAIGN) return null;
 
-            return ReflectionUtils.invokeIfExists(state, "getEncounterDialog");
-        } catch (Throwable t) {
-            return null;
-        }
+        return Global.getSector().getCampaignUI().getCurrentInteractionDialog();
     }
 
     protected BreachConservatory getConservatory(Object dialog) {

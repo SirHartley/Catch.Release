@@ -52,6 +52,9 @@ public class RippleData {
             return;
         }
 
+        // an infinite ripple never clears its list, and the list is saved with the pond
+        renderers.removeIf(RippleRingRenderer::isExpired);
+
         interval.advance(amt);
 
         if (interval.intervalElapsed()) {

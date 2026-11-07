@@ -113,10 +113,10 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         if (home != null && home != Global.getSector().getCurrentLocation()) return;
 
         loadSpritesIfNeeded();
-        renderGrowingFadingRing(location);
+        renderGrowingFadingRing(location, viewport);
     }
 
-    private void renderGrowingFadingRing(Vector2f center) {
+    private void renderGrowingFadingRing(Vector2f center, ViewportAPI viewport) {
         if (ringRenderer == null) ringRenderer = new NoiseMappedCircularRingRenderer();
 
         float maxRadius = size;
@@ -129,6 +129,7 @@ public class RippleRingRenderer implements LunaCampaignRenderingPlugin {
         float maxRadiusPx = Math.max(minRadius, maxRadius);
         float halfExtent = maxRadiusPx + (currentWidth * 0.5f) + FEATHER_PX + 2f;
         float sizePx = halfExtent * 2f;
+        if (!viewport.isNearViewport(center, halfExtent)) return;
 
         float rT = smootherStep(t);
         float radiusPx = lerp(minRadius, maxRadius, rT);
