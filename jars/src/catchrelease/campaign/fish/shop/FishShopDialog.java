@@ -747,6 +747,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
                     tooltip.addPara("Eligible fish are marked with a %s and listed first in"
                                     + " the route planner.", 6f,
                             Misc.getGrayColor(), Misc.getHighlightColor(), "yellow dot");
+                    tooltip.addPara("If the upgrade is locked, schematics offered by quests will also be marked by the %s in dialogue.", 6f,
+                            Misc.getGrayColor(), Misc.getHighlightColor(), "yellow dot");
                 }
             };
         }
