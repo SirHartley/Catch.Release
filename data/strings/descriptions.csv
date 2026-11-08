@@ -4,6 +4,7 @@ catchrelease_harpoon,WEAPON,"The Stigmata's fishing harpoon is quite capable of 
 
 Shields deflect the head. Firing again releases the tether.",,,,,
 catchrelease_tug_drive,SHIP_SYSTEM,"Briefly increases the tug's mass, acceleration and turning ability, helping it pull a tethered ship off course. The extra power comes with a conspicuous engine flare.",Movement,Increases mass and manoeuvrability for towing.,,,
+catchrelease_breach_lights,SHIP_SYSTEM,"Spools the reactor to drive the ship's Breach Lights, which open a breach along each beam. Patterns surface in the light and drift for a few seconds. An enemy ship that touches one loses its shield or phase cloak and cannot raise it again for a second. Enemy fighters and missiles that touch one are destroyed. The lights build hard flux while they are on.",Special,Patterns in the beams drop enemy shields and phase cloaks.,,,
 catchrelease_lamp_ship,SHIP,"A trawler rebuilt to carry Breach Lights well beyond what an ordinary rig can power. Its lens arrays spread each beam into a wide fan, opening a broad stretch of open space for every crew in the fleet to work.",,,,,
 catchrelease_rod_ship,SHIP,"A tender with deep bays, handling frames and launch racks for a full swarm of LYNE drones. Its deck crews service every drone that comes home and send the whole swarm straight back out.",,,,,
 catchrelease_lyne_drone,SHIP,"This fighter-sized LYNE drone retrieves wrecked enemy fighters for its tender. Salvage clamps hold the wreck during the tow; repairs are left to the crew aboard ship.",,,,,
