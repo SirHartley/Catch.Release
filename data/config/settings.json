@@ -6,6 +6,8 @@
           "hs_bg":"graphics/catchrelease/background/hyperspace_bg_cool_tileable.jpg",
           "pond_1":"graphics/catchrelease/effects/fishing_hole_1.png",
           "spotlight_circle":"graphics/catchrelease/effects/spotlight_circle.png",
+          "breach_hull_glow":"graphics/catchrelease/ships/lightbulb_glow.png",
+          "breach_lens_glow":"graphics/catchrelease/weapons/spotlight_glow.png",
           "trail_foggy": "graphics/catchrelease/fx/trails_foggy.png",
           "ring_noise":"graphics/catchrelease/effects/ripple_map_1.png",
           "drone":"graphics/catchrelease/ships/lyne_drone.png",

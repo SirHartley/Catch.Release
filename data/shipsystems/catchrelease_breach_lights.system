@@ -1,0 +1,10 @@
+{
+	"id":"catchrelease_breach_lights",
+	"type":"STAT_MOD",
+	"aiType":"CUSTOM",
+	"aiScript":"catchrelease.combat.lights.BreachLightsAI",
+
+	"statsScript":"catchrelease.combat.lights.BreachLightsStats",
+
+	"outOfUsesSound":"gun_out_of_ammo",
+}

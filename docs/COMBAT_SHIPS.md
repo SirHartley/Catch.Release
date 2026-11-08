@@ -10,9 +10,9 @@ Engine facts below are from Starsector 0.98a-RC8 (the `starsector-knowledge` ski
 |---|---|---|---|---|
 | Stigmata | `catchrelease_harpoon_ship` | Destroyer | Harpoon Tug | `graphics/catchrelease/ships/harpoon_boat.png`; harpoon weapon `graphics/catchrelease/weapons/harpoon_harpoon.png` |
 | Reliquary | `catchrelease_rod_ship` | Cruiser | LYNE Tender | `graphics/catchrelease/ships/done_boat.png` |
-| Monstrance | `catchrelease_lamp_ship` | Cruiser | Breach Trawler | none yet; the hull is still a Nebula copy |
+| Monstrance | `catchrelease_lamp_ship` | Cruiser | Breach Trawler | `graphics/catchrelease/ships/lightbulb.png` with `lightbulb_glow.png`; Breach Light weapon `graphics/catchrelease/weapons/spotlight.png` with `spotlight_glow.png` |
 
-All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`. The Stigmata has its Haul Drive and the Reliquary its Salvage Launch.
+All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`; the Monstrance still has the Nebula's numbers. The Stigmata has its Haul Drive, the Reliquary its Salvage Launch and the Monstrance its Breach Lights.
 
 ## Stigmata: harpoon tug
 
@@ -113,19 +113,19 @@ Engine limits:
 - **Persistence:** the store carries over between battles, kept per ship. Variant ids are shared by every ship of a stock variant, so key it by fleet member id. Purge it when the ship leaves the player's fleet, for example into storage.
 - **AI:** fire when enough fighters are stored and a target in range is worth it.
 
-## Monstrance: Breach Trawler (later)
+## Monstrance: Breach Trawler
 
-Lower priority; the hull art does not exist yet. Real breach-light projectors on the ship. The system spools the reactor and turns on the lights for a time, with cone visuals and sounds exactly as in the campaign. The number of cones depends on the projectors fitted. The cones sweep in a circle as in the campaign, with some targeting movement.
+Two Breach Lights are built into the hull, on the round housings either side of the reactor bulb. The ship system turns them on.
 
-- **Effects:** ships in the light suffer soft flux build-up, a lower vent rate, faster CR loss and a higher malfunction chance.
-  - Flux: `FluxTrackerAPI.increaseFlux(amount, false)`.
-  - Vent rate: `getVentRateMult`.
-  - Malfunctions: the weapon, engine and critical malfunction chance stats.
-  - CR loss: the stat only takes effect after peak time runs out (`Ship.java:2374-2376`), so lower CR directly.
-- **AI avoidance:** an invisible missile flagged as a primed mine with an inert AI, so ship AI steers around the lights (vanilla precedent `RealityDisruptorEffect.java:54-58`). Untested: whether point defence shoots it, and whether collision class `NONE` hides it from the AI.
-- **System AI:** angle the lights away from friendly ships and toward hostile ones.
-- **Rendering:** the campaign light renderers' GL bodies are portable; their LunaLib campaign base, `CampaignEngineLayers` and sector calls are not.
-- **Open:** it is meant as a dodgeable debuff, and whether it is fun needs more design work.
+- **System:** a toggle. It charges up over 1.5 s, builds hard flux at 5% of the ship's flux capacity per second while on, takes 1 s to shut down and has a 4 s cooldown. While it runs, the reactor glow sprite shows over the hull, flickering in during the charge-up, and the hull jitters, hard through the charge-up and slightly once lit. The lights come on with the campaign beam's flash when the charge-up ends, and each lamp's lens glow lights with them. Sounds as in the campaign: each light plays the beam toggle sound, and the player's own ship the ability's on and off sounds.
+- **Lights:** each light throws the campaign's fan beam: its fill, light and distortion lenses, drawn under the ships. It sweeps back and forth across its mount's 180° arc, with the campaign's sine wobble, and leans onto an enemy ship within its reach and arc for a few seconds, as the campaign beam locks onto a contact.
+- **Motes:** while the system is fully on, each light surfaces about one mote a second at a random point in its cone, up to 8 per ship. A mote lives 6 s, drifts slowly and is drawn like a campaign mote in a `FishRarity` colour, never quest gold. They only affect the other side:
+  - an enemy ship it touches drops its shield or phase cloak and cannot raise it for 1 s;
+  - an enemy fighter it touches is destroyed;
+  - an enemy missile that reaches it is destroyed with it.
+- **AI avoidance and counterplay:** motes are mine-flagged missiles, so ship AI steers around them and point defence can shoot them.
+- **System AI:** turns the lights on with an enemy in reach and flux below 60%, and off above 85% flux or after 3 s with no enemy near.
+- **Dropped:** the earlier idea of debuffing ships inside the light (flux build-up, vent rate, CR loss, malfunctions); the motes are the only effect.
 
 ## Dependencies
 
@@ -139,6 +139,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 - Harpoon: rope length, duration, charge count, break-on-own-hull or not, and how mass ratios map to pull strength.
 - Does the harpoon fire as a plain weapon, or through a `MagicSubsystem` with charges, a key binding and an AI hook?
 - Do spawned recovered wings count toward deployment points?
+- Do point defence weapons shoot at mine-flagged motes, and does the fan's resting brightness read over combat backgrounds?
 - Refit swap: does the spec `clone()` work through `MethodHandles` at runtime, does `reportAboutToOpenCoreTab` fire when the core UI opens straight into the refit (if not, the close script also has to notice the refit opening), and do fighter wings change the crew figures shown while the swap is active?
 
 ## Implementation plan
@@ -161,6 +162,7 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 | `data/weapons/weapon_data.csv`, `data/weapons/catchrelease_harpoon.wpn`, `data/weapons/proj/catchrelease_harpoon_shot.proj` | harpoon weapon and projectile |
 | `data/shipsystems/ship_systems.csv`, `data/shipsystems/catchrelease_tug_drive.system`, `catchrelease_salvage_launch.system` | Stigmata drive, Reliquary launch |
 | `data/hulls/wing_data.csv`, `data/hulls/catchrelease_lyne_drone.ship`, a `ship_data.csv` row, `data/variants/fighters/catchrelease_lyne_drone_wing.variant` | LYNE drone wing |
+| `data/weapons/catchrelease_breach_light.wpn`, `catchrelease_breach_mote.wpn`, `proj/catchrelease_breach_mote.proj`, `data/shipsystems/catchrelease_breach_lights.system` | Monstrance lights, motes and system |
 | `data/hulls/catchrelease_harpoon_ship.ship`, `catchrelease_rod_ship.ship` | `builtInWeapons`, `builtInMods`, `builtInWings`; these are the author's files, edited only for those keys |
 | `data/strings/descriptions.csv`, `data/config/settings.json`, `sounds.json`, `LunaSettings.csv` | descriptions, sprites, sounds, settings |
 
@@ -285,5 +287,5 @@ Lower priority; the hull art does not exist yet. Real breach-light projectors on
 
 ### Stage 7: Monstrance
 
-- [ ] 7.1 Hull art and data, cruiser.
-- [ ] 7.2 Light projectors and the light system: cone rendering ported from the campaign renderers, effects, mine-flagged invisible missiles for AI avoidance, and system AI. Revisit the design first; it is a dodgeable debuff whose fun is unproven.
+- [x] 7.1 Hull art and data, cruiser. Stats are still the Nebula's.
+- [x] 7.2 Light projectors and the light system: cone rendering ported from the campaign renderers, motes as mine-flagged missiles, and system AI. Implemented in `combat/lights`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatlights).
