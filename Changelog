@@ -77,7 +77,7 @@ Note - Discarded fighters are gone for good and give no LPC
 Added - Setting for Reliquary recovered fighter capacity (10 by default)
 Added - Setting for Reliquary fighter wreck chance (75% by default)
 Added - Breach Lights (Monstrance system): toggle, 1.5s charge-up, 4s cooldown, 5% hard flux/s
-Added - Breach Lights: two lights sweep out to 900 units and hold on enemy ships
+Added - Breach Lights: two lights sweep a 108° arc out to 900 units and hold on enemy ships
 Added - Breach Lights: each light raises a mote about once a second (max 8, 6s each)
 Added - Breach Lights: enemy ships touching a mote lose shield or phase for 1s
 Added - Breach Lights: motes destroy enemy fighters and missiles

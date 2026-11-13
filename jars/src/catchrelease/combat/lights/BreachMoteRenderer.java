@@ -22,8 +22,8 @@ public class BreachMoteRenderer extends BaseCombatLayeredRenderingPlugin {
 
     private static final String KEY = "catchrelease_breachMotes";
 
-    // campaign FishEntityPlugin glow stack, scaled up for combat zoom
-    public static final float GLOW_SIZE = 36f;
+    // campaign FishEntityPlugin glow stack
+    public static final float GLOW_SIZE = 22f;
     public static final int GLOW_LAYERS = 6;
     public static final float GLOW_SHRINK = 0.3f;
     // a mote leaving play brighter than this was hit or shot down, not faded out
@@ -31,12 +31,12 @@ public class BreachMoteRenderer extends BaseCombatLayeredRenderingPlugin {
 
     public static final int POP_PIECES = 8;
     public static final float POP_SECONDS = 0.6f;
-    public static final float POP_SPEED_MIN = 150f;
-    public static final float POP_SPEED_MAX = 300f;
+    public static final float POP_SPEED_MIN = 90f;
+    public static final float POP_SPEED_MAX = 180f;
     public static final float POP_DRAG_TAU = 0.2f;
-    public static final float POP_SIZE = 18f;
+    public static final float POP_SIZE = 11f;
     public static final float POP_CORE_SHARE = 0.35f;
-    public static final float POP_FLASH_SIZE = 45f;
+    public static final float POP_FLASH_SIZE = 27f;
     public static final float POP_REACH = POP_SPEED_MAX * POP_DRAG_TAU;
 
     private record Tracked(MissileAPI mote, BreachMoteAI ai) {
