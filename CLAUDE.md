@@ -52,7 +52,7 @@ The dictionaries distinguish checked recipes from extracted names, expressions a
 
 - Use one task branch for the user's message.
 - Make one commit per requested change. If one message contains several changes, commit them separately in the requested order.
-- Keep each commit message to one short, plain-English summary. Do not include testing notes, agent or model names, co-author trailers, session metadata, links, formatting, or session URLs.
+- Commit messages are as short as possible: all lowercase, at most 8 words, programmer speak (`fix shield fade on dive`). Imperative or past tense, one line only. No body, no conventional-commit prefix, no testing notes, agent or model names, co-author trailers, session metadata, links or trailing full stop.
 - Update the affected documentation in the same commit, following [Documentation upkeep](#documentation-upkeep). Do this without a separate user request.
 - Update `Changelog` in the same commit, using [CHANGELOG.md](docs/CHANGELOG.md). Agents write the change notes; do not leave that work for the user.
 - Rebuild and commit `jars/release/catchrelease.jar`, and publish a release, only when the user explicitly asks; follow [RELEASE.md](docs/RELEASE.md). Ordinary changes, including runtime Java, do not rebuild the jar. Never replace it with the IDE artifact.
@@ -68,7 +68,9 @@ The dictionaries distinguish checked recipes from extracted names, expressions a
 - Build the exact final remote task-branch revision. Earlier builds, partial builds, IDE analysis, and static checks do not satisfy the gate.
 - Missing compilers or required dependencies are merge blockers. Documentation-only changes do not require a Java build.
 - A change to `data/campaign/rules.csv` Text, or to a `rules.csv` line quoted in `docs/LORE.md`, must pass the [dialogue check](docs/DIALOGUE.md#dialogue-check) against the base branch and on the whole file. Claude sessions run it with the `dialogue-check` skill (`.claude/skills/dialogue-check/SKILL.md`).
+- No CI runs on pushes or pull requests. The release workflow runs only when started by hand on request; do not add triggers or check workflows.
 - Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
+- Pull request titles follow the commit message rule. The body has a Changes section (what changed, with classes, data rows and constants; docs and changelog entries updated) and a Validation section (build command, revision, Java version, check results, what was not tested in game), in terse bullets.
 - Use the connected GitHub app to create, inspect, and merge pull requests. Use `gh` only if the app is unavailable. A broken `gh` login is not a blocker when the app works.
 - Fetch current remote `master` before branching and again before merging. Integrate intervening changes, push the exact final commit, and verify the merged remote revision.
 
@@ -88,7 +90,7 @@ Update documents automatically as part of each relevant change, not by a backgro
 |---|---|---|
 | `AGENTS.md` | Codex discovery | Keep it a short pointer to this file. Do not copy workflow policy into it. |
 | `CLAUDE.md` | Task scope, subagent instructions, tools, commits, PRs, builds, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
-| `docs/RELEASE.md` | Version numbers, release builds, package contents and publishing | Keep the workflow, builder and release instructions aligned. Do not publish tags without a release request. |
+| `docs/RELEASE.md` | Version numbers, release builds, package contents and publishing | Keep the workflow, builder and release instructions aligned. Do not start the release workflow or publish a release without a release request. |
 | `Changelog` and `docs/CHANGELOG.md` | Shipped change notes and how agents write them | Add or amend unreleased entries with each implementation task; preserve published entries. Keep formatting compatible with release-note extraction. |
 | `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No lore, writing advice, release history, or duplicate policy. |
 | `docs/UI.md` | Java-bound custom UI: panels, widgets, renderers, sprites, tooltips, lifetime, layout and input | Update implementation contracts and source evidence. Link to `DIALOGUE.md` for shared text guidelines; do not put rules-dialogue guidance here. |
@@ -109,18 +111,23 @@ Give each fact one home. Move useful detail to its proper owner and link to it; 
 
 For a new or renamed guide, update the required-reading table, this ownership table and relevant architecture/guide links in the same commit. State when to read it and what it does not govern. Keep `AGENTS.md` as the entry pointer, not a duplicate index. During navigation or wording cleanup, preserve technical bodies and examples; any intended technical correction needs separate source evidence and an explicit review of the changed contract.
 
-Write documentation in ordinary English. Use direct verbs and concrete nouns; remove slogans, inflated claims, repeated contrasts, and commentary about how important the document is. Keep identifiers exact. Tables and short technical fragments are appropriate in architecture. Examples demonstrate a technique, not a sentence pattern to repeat everywhere. Preserve the distinction between absolute restrictions and defaults such as “normally” or “prefer.” For lore voice examples, quote useful existing mod exchanges where possible, identify their rule IDs and context, and explain what they demonstrate. Recheck those excerpts when their source changes; quoting a row does not approve its entire dialogue tree.
+Write documentation in ordinary English. Use direct verbs and concrete nouns; remove slogans, inflated claims, repeated contrasts, and commentary about how important the document is. Keep identifiers exact. Tables and short technical fragments are appropriate in architecture. Examples demonstrate a technique, not a sentence pattern to repeat everywhere. Preserve the distinction between absolute restrictions and defaults such as "normally" or "prefer." For lore voice examples, quote useful existing mod exchanges where possible, identify their rule IDs and context, and explain what they demonstrate. Recheck those excerpts when their source changes; quoting a row does not approve its entire dialogue tree.
 
-`LORE.md` is an explicit author reference, not player-facing fiction. Never apply the mod's ambiguity, understatement or omission of explanations to the document itself. Distinguish established facts, character knowledge, narration restrictions and deliberately unanswered questions. State absolutes directly; do not replace “cannot” or “never” with a preference to “avoid.” Explain what to write, what not to write, why the distinction exists and how to apply it. Shortening must not remove those instructions or examples. After reorganizing lore, compare the old and new versions for facts, prohibition strength, exceptions, examples and definition order; word retention alone is not a sufficient check. Keep text-production workflow in `DIALOGUE.md` and link to lore for prose and characterization rules.
+`LORE.md` is an explicit author reference, not player-facing fiction. Never apply the mod's ambiguity, understatement or omission of explanations to the document itself. Distinguish established facts, character knowledge, narration restrictions and deliberately unanswered questions. State absolutes directly; do not replace "cannot" or "never" with a preference to "avoid." Explain what to write, what not to write, why the distinction exists and how to apply it. Shortening must not remove those instructions or examples. After reorganizing lore, compare the old and new versions for facts, prohibition strength, exceptions, examples and definition order; word retention alone is not a sufficient check. Keep text-production workflow in `DIALOGUE.md` and link to lore for prose and characterization rules.
+
+## Answers and wording
+
+- Keep answers short: lead with the result, no preamble, recap or sign-off. A yes/no question gets yes or no first, then the reason. Detailed evidence goes in the pull request.
+- Programming-related text (commits, PRs, comments, identifiers, log messages, technical docs) uses the vocabulary programmers have used for the last 20 years. Prefer the old word: use, fix, add, show, make sure, pass, merge; not leverage, address, introduce, surface, ensure, plumb, land. Drop robust, seamless, holistic and polished.
+- No em dashes and no hyphen used as a dash. No emojis unless topical.
 
 ## Comments and documentation
 
-- Comment constraints that code cannot express: engine quirks, required ordering, lifecycle rules, save compatibility, serialization, reflection, obfuscation, units, invariants, non-obvious math, and cross-file coupling.
-- Do not comment visible operations. Prefer clear names and structure.
-- Do not add Javadoc to self-explanatory classes, methods, fields, parameters, or return values.
-- Keep necessary comments short and direct. Comments are not tutorials, release notes, bug histories, or implementation narratives.
-- Delete commented-out code.
-- Keep a TODO only when it names a concrete unfinished action. Include the blocker when it is not obvious.
+- Default to no comments. Add one only where it explains what the code cannot show: engine quirks, required ordering, lifecycle rules, save compatibility, serialization, reflection, obfuscation, units, invariants, non-obvious math, cross-file coupling.
+- Comments are minimal, all lowercase, terse programmer speak, one line where possible and no trailing full stop (`// also called for refit previews, listener never advances there`). Code identifiers keep their exact spelling.
+- Add no other comments: no javadoc, section headers, restated code, history, TODO or FIXME, or commented-out code. Record unfinished work in the design document or tell the user.
+- `#` comment lines in data files follow the same rule. Feature block headers in `rules.csv` (`# bar job: chef`) are layout rows, not comments.
+- Fix or remove a comment your change makes stale; leave untouched comments alone.
 - Documentation records current architecture, contracts, entry points, and live hazards. It must not become a development diary, pull-request history, or postmortem.
 - Give each fact one home. `docs/ARCHITECTURE.md` is the compact file and feature map; broader stable explanations belong in focused documents.
 - Update or remove stale comments and documentation in the same commit as the behavior change.
@@ -141,7 +148,7 @@ Write documentation in ordinary English. Use direct verbs and concrete nouns; re
 - Group fields by responsibility. Put one blank line between groups and no blank lines inside one group.
 - Leave one blank line after a class, enum, interface, or record opening brace.
 - Use one blank line between methods and major sections. Do not stack empty lines.
-- Use short section headers such as `// Rendering` only when names and ordering do not make a long class's groups clear.
+- No section header comments; split or reorder a class that needs them.
 
 ## Codex and ChatGPT app tools
 
@@ -236,7 +243,7 @@ Subagents perform research and scoping, not shipped code. The UI assignment take
 
 ## Version names
 
-Versions use major.minor.patch-letter, starting at `1.0.a`. The release tag sets
+Versions use major.minor.letter, starting at `1.0.a`. The release version sets
 both packaged version files. See [RELEASE.md](docs/RELEASE.md#versions); do not
 bump versions or publish tags as part of ordinary task work.
 

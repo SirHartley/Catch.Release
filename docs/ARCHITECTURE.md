@@ -118,10 +118,10 @@ and writes the tracked runtime-only `jars/release/catchrelease.jar`. Its source
 hash covers runtime Java, the builder and the bundled compile libraries.
 `tools/ReleaseBuildChecks` tests version/changelog parsing, metadata stamping,
 archive filtering, freshness and reproducibility without game dependencies.
-`.github/workflows/release.yml` verifies that jar and packages allowlisted
-tracked resources into `out/release/`; only tag pushes publish.
-Packaging maps the jar to `Catch.Release/jars/catchrelease.jar` and stamps
-both version files from the tag. [Release procedure and contents](RELEASE.md).
+`.github/workflows/release.yml` runs only by hand: it verifies that jar and
+packages allowlisted tracked resources into `out/release/`, and publishes only
+when given a version. Packaging maps the jar to `Catch.Release/jars/catchrelease.jar`
+and stamps both version files from that version. [Release procedure and contents](RELEASE.md).
 
 Optional Console Commands entry points: `AllFish`, `AddFish`, `SpawnFish`, `HauntStatus`, `SpawnFisherman`, `SpawnFleetQuest`, `SpawnDistressCall`. They live in `commands/`, are the only classes that need `lw_Console.jar`, and nothing else references them; a build without the jar leaves them out ([Building](../CLAUDE.md#building)).
 

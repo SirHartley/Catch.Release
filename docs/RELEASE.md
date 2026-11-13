@@ -19,7 +19,7 @@ Reset the lower parts when a higher one changes. Use lowercase letters and no
 `v` prefix. Do not bump a version or publish a tag for every task. Work goes into
 the newest, unreleased changelog section until a release is requested.
 
-The tag is the released version. Packaging copies it into `mod_info.json` and
+The release version becomes its tag. Packaging copies it into `mod_info.json` and
 the major/minor/patch fields of `catchrelease.version` inside the ZIP. It does
 not edit the working files. The only change committed back to master is the
 version file update described under [Version Checker](#version-checker).
@@ -38,8 +38,8 @@ Version Checker, LunaLib's bundled checker and mod managers such as triOS. It fo
 
 Packaging stamps the version numbers and `directDownloadURL` into the ZIP's copy, and
 writes the same stamped file to `out/release/catchrelease.version`. After the release
-action creates the GitHub release for a tag, it commits that stamped file to master as
-"Update the version file to <version>". Master therefore advertises a version only once
+workflow creates the GitHub release, it commits that stamped file to master as
+`update version file to <version>`. Master therefore advertises a version only once
 its download exists. Do not bump this file by hand for unreleased work. If the commit
 step fails, for example because branch protection blocks the action, commit the stamped
 file to master manually; until then, installed copies are not told about the release.
@@ -66,9 +66,9 @@ Rebuild and commit `jars/release/catchrelease.jar` only when the user explicitly
 asks, normally before a release. Ordinary changes to runtime Java, the build tool
 or dependencies leave the committed jar stale; they still need the compile gate in
 [CLAUDE.md](../CLAUDE.md#building). The jar's manifest records a hash of those
-inputs. Packaging a tagged release rejects a missing or stale jar. A preview
-(branch push, pull request or local run without a version) accepts a stale jar
-and prints a warning, so it packages the last rebuilt runtime.
+inputs. Packaging a release (with a version) rejects a missing or stale jar. A
+preview (a local or workflow run without a version) accepts a stale jar and
+prints a warning, so it packages the last rebuilt runtime.
 
 The release jar is separate from IntelliJ's ignored `jars/catchrelease.jar`.
 An ordinary IDE build cannot accidentally replace it with tool classes.
@@ -84,7 +84,7 @@ java jars/src/catchrelease/tools/ReleaseBuild.java package 1.0.a
 
 Without a version, packaging previews the newest changelog section, including
 one marked `- UNRELEASED`. With a version, it applies the release checks: an
-exact tag such as `1.0.a`, a matching newest changelog section, at least one
+exact version such as `1.0.a`, a matching newest changelog section, at least one
 change, no duplicate version headings, and no `UNRELEASED` label.
 
 Outputs go to `out/release/`: `Catch.Release-<version>.zip`, release notes and a
@@ -105,17 +105,26 @@ version file. The ZIP contains one `Catch.Release/` folder, ready for `mods/`.
 Only Git-tracked files are candidates for packaging. Stage new assets and the
 release jar before a local preview; commit them before a remote build.
 
-The [Release action](../.github/workflows/release.yml) checks and packages on
-branch pushes, pull requests and manual runs. These runs only keep a preview
-artifact. A pushed version tag publishes the checked ZIP as a GitHub release.
-Its body is that version's Changelog text, in a plain-text block to retain line
+There is no CI: nothing runs on pushes, pull requests or tags, because Actions
+minutes cost money. The local compile gate and checks are the merge gate. Do not
+add triggers, check workflows or required status checks unless the user asks.
+
+The [Release workflow](../.github/workflows/release.yml) runs only when started
+by hand, and only when the user asks: Actions tab, Release, Run workflow, or
+`gh workflow run release.yml --ref master -f version=<version>`. It checks the
+release tooling and packages. Without a version it keeps a preview artifact and
+publishes nothing. With a version it publishes the checked ZIP as a GitHub
+release and creates the version tag on the packaged commit, so nobody pushes a
+tag by hand; run on an existing version tag, it publishes that tag. The release
+body is that version's Changelog text, in a plain-text block to retain line
 breaks and headings. It never generates notes from commits.
 
-Before tagging, finish the changelog, remove `UNRELEASED`, merge the tested
-revision, and verify its package check. Push a tag only when the user requests
-a release. No deployment or separate download-host upload is part of this
-workflow. An existing release is never overwritten; a rerun stops with an
-error instead.
+To release: finish the changelog and remove `UNRELEASED`, rebuild and commit
+the release jar, run `package <version>` locally as the preview check, merge,
+then start the workflow on master with exactly that version. Verify the GitHub
+release and that master's version file names it. No deployment or separate
+download-host upload is part of this workflow. An existing release is never
+overwritten; a rerun stops with an error instead.
 
 This follows [Foilers' release workflow](https://github.com/SirHartley/Foilers-Backgrounds/blob/main/.github/workflows/release.yml)
 and its source-checked, committed jar. GitHub needs only Java and the repository
