@@ -930,6 +930,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
             if (FishCurrency.count(price.fish) < price.fish.count) {
                 status(y, "Not enough matching fish aboard.", Misc.getNegativeHighlightColor());
+                return;
+            }
+
+            if (credits < price.credits) {
+                status(y, "Not enough credits.", Misc.getNegativeHighlightColor());
             }
         }
 

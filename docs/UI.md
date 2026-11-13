@@ -65,7 +65,8 @@ panel tree never changes during input dispatch.
 - Price, Fish required and Matching aboard are a label column of 132 with icon and
   value after it. The buttons are a bank: the main action 160 (green when it costs
   something and can be bought, neutral when free, grey when not live), Select 120. One
-  status or reason line is reserved 32 under the buttons. Undo last purchase sits
+  status or reason line is reserved 32 under the buttons; short on both, it names the
+  fish before the credits. Undo last purchase sits
   bottom left, Leave bottom right.
 
 ### Outfitter second slot
