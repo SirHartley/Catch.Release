@@ -39,6 +39,9 @@ Added - The next three legendary reports pay the three fishing ship blueprints
 Added - An early legendary report ends the earlier jobs and pays their rewards
 Added - "Hunting the legendary fish" intel lists the legendaries you know
 Adjusted - Tidied Fisherman tutorial lines and the old captain's farewell
+Adjusted - Range data: picture tiles and a card for the selected chart
+Adjusted - Range data: a click selects a chart, the Buy button buys it
+Adjusted - Range data: closes with the game's Return button
 Fixed - Asking about the ROD now explains it instead of repeating a scene
 
 Fishing ships

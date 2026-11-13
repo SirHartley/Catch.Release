@@ -203,6 +203,9 @@ Fisherman identity and vanilla person-panel setup are covered by
   `showCustomVisualDialog()` when the panel must have none.
 - `FishShopDialog` takes an optional close callback. Colony use may dismiss the
   interaction; Fisherman use must restore the conversation.
+- `FishermanSurveyDialog` (range data) uses `showCustomDialog(712, 437)`: the
+  game's frame and its Return button, which, like Escape, closes it through the
+  same callback.
 
 Use the [project routing](RULES.md#project-routing) for Fisherman panel returns and
 the [fleet and bar exit paths](RULES.md#fleet-and-bar-exits) for teardown.
@@ -212,7 +215,7 @@ the [fleet and bar exit paths](RULES.md#fleet-and-bar-exits) for teardown.
 `ui/UiKit` builds panels from the game's own controls: section headings,
 `addButton` buttons with cuts, area checkboxes, checkboxes and settings labels,
 placed with absolute `inTL` positions. New panels use it. `PaneWidgets`,
-`ShopUi` and `ListRow` remain for the Outfitter's painted rows and tabs, range data and map
+`ShopUi` and `ListRow` remain for the Outfitter's painted rows and tabs and the map
 widgets.
 
 - A `TooltipMakerAPI` element places its first item five units right of its own
@@ -240,6 +243,32 @@ widgets.
 The offsets were measured on 0.98a-RC8 for the Starsector UI design skill
 (`references/traps.md` and `recipes.md` there). They have not been rechecked
 against the decompiled source for this guide.
+
+### Range data
+
+`FishermanSurveyDialog` follows the Aquarium scheme with `UiKit`: title with the
+`?` legend, `FishPurse` on the next line, a "Charts" heading with the count, picture
+tiles on the left and the selected chart's card on the right of a `UiKit.vrule`. It
+does not use the Outfitter's filled bars: tiles are `UiKit.row` area checkboxes, the
+picture, facts and price sit in 1 px bordered boxes on black.
+
+- Tiles are 116 x 168, three per row, two rows visible. The grid's scroll element
+  starts two units in and its bar sits left of the divider. `advance` snaps the
+  offset to whole rows: a wheel step moves to the next row in its direction, a
+  dragged bar settles on the nearest row when the button is released. No callback
+  reports a scroll, so the offset is compared each frame while the panel is open.
+- A tile is the backlit silhouette, the name in rarity colour on up to two lines
+  (split where the longer line is shortest, then shortened with `...`), a short
+  rule, and the price: a fish icon in the asked rarity's colour and the count,
+  red when short. A click only selects; the green Buy in the card's strip buys.
+  After a purchase the neighbour of the bought chart is selected, after undo the
+  returned one.
+- The card is the name bar, the line "Charts this species' habitat on your map.",
+  a 72 picture with Type, Rarity and Aboard, the price strip with Buy, a line kept
+  for "Not enough specimens aboard.", and the bottom row behind a rule: Undo last
+  purchase with the name of the chart it would return.
+- Every change replaces the body panel from queued actions in `advance`; the grid's
+  offset is read before and restored on a whole row after.
 
 ### Aquarium manage panel
 
@@ -316,7 +345,7 @@ hover.
 Map and planner help, category descriptions, chart-shop help, outfitter help,
 the outfitter's fish counts and intel navigation tips use this
 non-rebuilding mode. Fish-row selection hints,
-chart affordability, shop marks, tier status and payment details keep live updates.
+shop marks, tier status and payment details keep live updates.
 Do not cache a tooltip that reads changing state unless its owner refreshes it.
 
 `FishPurse.add` draws the fish counts on the outfitter's tab line and puts a
