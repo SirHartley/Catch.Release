@@ -10,84 +10,147 @@ None
 --------------------------- Changelog -----------------------------
 
 1.0.d - UNRELEASED
-Adjusted - Tidied several Fisherman tutorial exchanges and the old captain's farewell; the Reliquary lead no longer suggests one fish will cover the price
-Fixed - Asking how to use the ROD now explains opening a rupture, sending the drone and recalling it instead of repeating the delivery scene
-Added - Three fishing ships with their own hulls: the Stigmata-class Harpoon Tug, a fast midline destroyer as heavy as a small cruiser, with a 180° omni shield, a fighter bay and a built-in harpoon mount, the Reliquary-class LYNE Tender, a slow midline carrier cruiser with one fighter bay, meant for a built-in wing of LYNE drones, and the Monstrance-class Breach Trawler, a midline cruiser with two built-in Breach Lights. All three come with a Standard loadout of machine guns, which custom production and autofit also use
-Added - The Stigmata-class Harpoon Tug has a built-in Tug Drive Field: each one in your fleet (not mothballed) adds 1 to the fleet's maximum burn level, and the first adds 20% campaign acceleration, each further one half the previous bonus (+10%, +5%, ...). It does nothing while Sustained Burn is on
-Added - The Stigmata-class Harpoon Tug has a built-in Tug Harpoon: 2 charges, one regained every 12 seconds, 400 kinetic damage (none to friendly ships) and 900 range. A harpoon that hits a ship's hull or armour, friend, foe or wreck, tethers it for 20 seconds at the distance it struck from: a taut tether drags both ships, the lighter one more. A harpoon that hits a shield glances off at reduced speed, at most twice. Firing again lets go, without launching another harpoon or spending a charge. The tether is drawn as a thin rope that flies straight out with the harpoon, flashes into place at 80% opacity when it bites, and floats loose and loops when slack. Both ends of the rope fade to half opacity over their last 50 pixels. After a shot the launcher swings smoothly back to its resting angle
-Added - The Reliquary-class LYNE Tender carries one built-in wing of five LYNE drones: unarmed, very fast salvage drones
-Added - While a Reliquary is in a battle, enemy fighters it can salvage leave wrecks 75% of the time instead of half, and their wrecks hold for 30 seconds instead of about 10. Fighters the Reliquary launches never leave a wreck. Its LYNE drones fly out to wrecks within 8,000 units, tow them back and land with them in the forward bay. Each salvaged fighter goes into the Reliquary's store, up to 10, and is restored in combat at its wing's refit time; the drones leave wrecks alone while the store is full. The store stays with the ship between battles and is emptied if the ship leaves your fleet
-Note - Fighters recovered in a simulator battle never reach the store
-Added - The Reliquary's system, Salvage Launch, sends out every restored fighter in its store at once, in wings of their usual size. They fight as normal fighters, come back to the store to rearm or when fighters are called in, and are gone if destroyed. AI-flown Reliquaries launch once two fighters are ready, or all of them, with an enemy in reach
-Added - In combat, a Reliquary you fly lists its recovered fighters above the ship display, where terrain effects show: how many of each type are ready or still being restored
-Added - In the refit screen, a Reliquary's recovered fighters show as extra locked fighter bays, one per wing, up to four, and the Salvage Bays tooltip lists them with their restoration
-Added - "Recovered fighters" under the refit screen's Additional Options on each Reliquary: lists its stored fighters and discards the ones you don't want. Discarded fighters are gone for good and give no LPC
-Added - "Reliquary recovered fighter capacity" setting in Fishing Equipment (10 by default)
-Added - "Reliquary fighter wreck chance (%)" setting in Fishing Equipment (75% by default)
-Added - AI-flown Stigmatas harpoon enemy ships to drag them into the guns of nearby friendly ships, and hold the harpoon with no friends near. They prefer ships with shields down or turned away, that are overloaded, damaged or running and light enough to drag. They never fire into a shield facing them, past a friendly ship or into any other raised shield in the way, and let go of a tether that is no longer worth holding. Once hooked, they drag their catch toward friendly ships and away from enemies and hold it once it is within friendly guns, firing the Haul Drive when the catch is heavy or pulls away, and to escape when badly damaged. They also hook friendly ships that are swarmed, or outnumbered while overloaded or badly damaged, and drag them back to friendly lines. When swarmed they hold the harpoon, and one towing lets go and runs, firing the Haul Drive
-Added - The Stigmata's system, the Haul Drive, raises the ship's mass up to 2.5 times for 5 seconds, with +150% acceleration, +150% turn acceleration, +50% turn rate and +50% top speed, for hauling a tethered catch. Longer flames and a long trail of dark smoke while it runs. 3 charges, one regained every 20 seconds
-Added - The Monstrance's system, Breach Lights: a toggle with a 1.5 second charge-up and a 4 second cooldown that builds 5% hard flux per second. Its two lights sweep each side of the ship out to 900 units and hold on enemy ships for a few seconds. Each light surfaces a mote about once a second, up to 8 at a time, which drifts for 6 seconds. An enemy ship that touches one loses its shield or phase cloak and cannot raise it for 1 second. Enemy fighters and missiles that touch one are destroyed. Ship AI steers around them.
-Added - AI-flown Monstrances turn the lights on with an enemy in reach below 60% flux, and off above 85% flux or with no enemy near for 3 seconds
-Added - Harpoon breaks an Industrial Evolution meteor on impact and returns to the fleet
-Note - Needs Industrial Evolution 4.2.a or newer
-Fixed - Fleets already offering a quest, or whose commander is marked important for a mission, no longer take on a fishing job as well
-Changed - The marker beside a fleet whose fishing job you have accepted is now a steady gold instead of pulsing; offers still pulse light blue
-Changed - Codex entries known only from range data show no fish icon, in the list or on their page, until you catch the fish
-Fixed - A fish's codex list icon no longer stays blank until its art has been shown elsewhere, such as on its codex page
-Changed - The Retrieval Head, Fanned Array and Lifting Rig are no longer sold or given as rewards. They come with the fishing ships, which add a second equipment slot to their rig while they are in your fleet. Copies you already own are kept
-Added - After the tutorial, the Fisherman has a treasure rumour for a nearby system in place of the free lead, and shows the system on the map as he offers it. He has lost a golden chest there: it can come up in the catch window on lamp catches in that system (30% each, and certain on the 4th, then every 2nd, until taken). Bring back the compass inside for the Glitter Lens schematic plus the fish and credits to buy it. The rumour's bycatch boost lasts until you return the compass, then another two months once you buy the lens; an intel entry tracks buying it, the lens goes on your Outfitter shopping list, and his Outfitter option is highlighted until you buy it
-Added - If you lose the Fisherman's compass, tell him: he remembers where it was sold, checks your storage, and if it is gone for good he pays you anyway
-Added - Once the Glitter Lens is built, the Fisherman passes on a request from an old crewman: a captain hunting an epic (never the Dopefish) in a nearby system with no markets, whose Breach Lights have failed; the system shows on the map as he asks. His fleet carries the fishing-job marker, light blue until you have met him and yellow after, never takes on a fishing job of its own, and once met stays on the map. Keep your lights on within 6,000 units of the star's surface for 15 seconds without a break to find the epic, then harpoon it. Either way he gives you a Stigmata-class Harpoon Tug, with its second Harpoon slot and the Retrieval Head; landing the epic also pays a harpoon module schematic and three range-data entries
-Added - Report back to the Fisherman afterwards for a word on hunting epics and the Needle Sensor schematic. An intel entry tracks building it, the sensor goes on your Outfitter shopping list, and his Outfitter option is highlighted until you buy it
-Added - With the Needle Sensor built, the Fisherman sends you after a wounded epic circling a planet about 1,000 units out in a nearby empty system, never the captain's system or species; the planet shows on the map as he offers it. Its Needle Sensor ripples trace its circle. It swims at half speed once woken and is the only one of its species in that system while you hunt it. A hunt that loses it, or putting your Breach Lights out while it is awake, starts the chase over: a fresh one, shield up, waits where you first found it. Landing it pays range data on an epic. He then sends you to a drunk in the bar of an independent Core world, highlighted there, who will trade his old Reliquary-class LYNE Tender for three epic fish, or two if you spend a story point haggling; it brings a second Drone Core slot and the Lifting Rig. Show the Fisherman the ship for a last word
-Added - After the Reliquary, the Fisherman tells you to improve your gear and listen for rumours. Landing your first legendary completes it, and he hands over a Monstrance-class Breach Trawler, with a second Lens Array slot and the Fanned Array. The Lifting Rig and the Salvage Trawl cannot share the rig. From then on a "Hunting the legendary fish" intel lists every legendary: question marks until you hear of one, the name its teller used after that, and its real name once caught
-Added - Report each legendary you land to the Fisherman, one conversation at a time: the option comes back highlighted in his menu while another is waiting. The first completes "Listen for rumours" and pays the Monstrance; the next three pay the Stigmata, Reliquary and Monstrance blueprints. A legendary reported before his earlier jobs are done ends them and pays what they would have paid
-Changed - Legendary rumour intel shows the name the teller used. The bar spacer's stories that name nothing go by a name from the story until you catch the fish
-Added - "Surfaced lamp-fish speed (%)" setting in Ruptures & Exploration: the speed of fish that surface in your Breach Lights, as a percentage of their normal speed (100% by default). Lower it to make them easier to chase down
-Changed - Ordinary fish now surface as soon as your Breach Lights reach them and swim in their own style until caught or gone; epic and legendary fish still stay hidden until harpooned. Turn this off with "Surface fish in breach lights" in the Ruptures & Exploration settings, or turn on "Straight lamp-fish movement" to have surfaced fish swim the old straight course with a gentle weave instead of their own style
-Changed - The Tracking Gimbal also follows fish your Breach Lights have surfaced, and the tracking upgrade keeps them visible and in reach after the beam moves on
-Changed - Fight Night's fee option now reads "Take the rewards." and lists the rewards in its tooltip
-Changed - Every equipment module costs one price tier more (25,000 to 45,000 credits), and none can be paid for with common fish alone
-Added - Glitter Lens, a Lens Array module that doubles the chance of bycatch on catches made under Breach Lights. Its schematic comes only from the Fisherman's treasure rumour, never from job or distress rewards
-Changed - The Neutrino Lens only shows its spikes while the Breach Lights are on as well as the Neutrino Detector
-Added - The Neutrino Lens shows quest fish as gold spikes, whatever their rarity
-Removed - The Breach Coupler is withdrawn for now: it is no longer sold or awarded, and one already fitted does nothing; ROD drones fish ruptures only
-Changed - Every epic fish now comes up only under Breach Lights; ruptures fished with the ROD no longer hold them
-Changed - Epic fish are now hunted in two stages: they drift slowly until a harpoon hit inside a lit Breach Light beam wakes them, then raise a one-charge shield that never comes back and swim more erratically; like other lamp fish, they stay in view and in reach only while lit; one that gets more than 3,000 units away drifts off and fades, with a notice that it was lost, and an awake epic is gone once you leave the system. Only the harpoon lands one: ROD drones leave epics alone
-Fixed - Epic and legendary shields now fade out with the fish when it dives, instead of staying on screen while it is out of reach
-Fixed - Attacking a mercenary camp now costs reputation with the independents
-Fixed - Distress calls more than 1.6 LY away now show in intel instead of vanishing unseen after 5 days
-Adjusted - Distress calls no longer open while another mod using the same distress framework has one live
-Adjusted - The Harpoon and ROD can no longer be aimed while an Industrial Evolution missile is being aimed
-Note - Needs Industrial Evolution 4.2.a or newer
-Fixed - Aiming the Harpoon or ROD by clicking its button no longer leaves dead data in the save
-Fixed - A held Harpoon or ROD hotkey now fires that ability on release, even if the ability bar changed
-Removed - Harpoon and ROD aiming debug lines in starsector.log
-Changed - Ships and ship blueprints given as rewards announce themselves the way vanilla does: "Acquired" with the ship's name and class, "Gained" with the blueprint's name
-Added - Version Checker support: update notices, plus the changelog and direct download for LunaLib's update screen and mod managers such as triOS
-Fixed - Ripples and ruptures no longer compile a new shader each (stutter and growing video memory)
-Fixed - Closed ruptures no longer keep every ripple they made in memory and in the save
-Fixed - The aquarium no longer slows every campaign frame while it looks for the colony screen
+
+General
+Added - Version Checker support (changelog and download in LunaLib and triOS)
 Adjusted - Off-screen ripples and Fisherman lamps are no longer drawn
-Adjusted - Lower frame cost for legendary and epic trails outside the lamps' light
+Adjusted - Lower frame cost for epic and legendary trails out of lamplight
+Fixed - Ripple and rupture shaders no longer cause stutter and VRAM growth
+Fixed - Closed ruptures no longer keep their ripples in memory and the save
+Fixed - The aquarium no longer slows every frame looking for the colony screen
+
+Fisherman
+Added - Treasure rumour: after the tutorial, find the Fisherman's lost chest
+Added - Treasure rumour: the chest comes up on lamp catches there (30% each, certain on the 4th, then every 2nd)
+Added - Treasure rumour: the compass inside earns the Glitter Lens schematic
+Added - Treasure rumour: more bycatch until the compass is back, then for two months after buying the lens
+Added - Lose the compass and the Fisherman tracks it down or pays you anyway
+Added - Captain's epic: a captain whose Breach Lights failed needs yours
+Added - Captain's epic: keep your lights on within 6,000 units of the star for 15s, then harpoon it
+Added - Captain's epic: pays a Stigmata, plus a harpoon schematic and 3 range data if landed
+Added - Report back to the Fisherman for the Needle Sensor schematic
+Added - Wounded epic: hunt one circling a planet in a nearby empty system
+Added - Wounded epic: it swims at half speed once woken
+Added - Wounded epic: losing it or your lights restarts the hunt
+Added - Wounded epic: pays epic range data and a lead on a Reliquary for sale
+Added - A bar drunk trades his Reliquary for 3 epic fish, 2 with a story point
+Added - Listen for rumours: report your first legendary for a Monstrance
+Added - The next three legendary reports pay the three fishing ship blueprints
+Added - An early legendary report ends the earlier jobs and pays their rewards
+Added - "Hunting the legendary fish" intel lists the legendaries you know
+Adjusted - Tidied Fisherman tutorial lines and the old captain's farewell
+Fixed - Asking about the ROD now explains it instead of repeating a scene
+
+Fishing ships
+Added - Stigmata-class Harpoon Tug: fast, heavy destroyer, 180° omni shield, fighter bay
+Added - Reliquary-class LYNE Tender: slow carrier cruiser, LYNE salvage drones
+Added - Monstrance-class Breach Trawler: cruiser with two built-in Breach Lights
+Added - Standard machine gun loadouts, used by custom production and autofit
+Added - Fishing ships add a second Harpoon, Drone Core or Lens Array slot
+Added - They come with the Retrieval Head, Lifting Rig and Fanned Array
+Note - The Lifting Rig and the Salvage Trawl cannot share the rig
+Added - Tug Drive Field: +1 maximum burn per active Stigmata in your fleet
+Added - Tug Drive Field: +20% acceleration for the first Stigmata, half that for each next one
+Note - No effect during Sustained Burn
+Added - Tug Harpoon: 2 charges (12s each), 400 kinetic damage, 900 range, no friendly damage
+Added - Tug Harpoon: a hull hit tethers any ship or wreck for 20s, dragging the lighter one more
+Added - Tug Harpoon: glances off shields, at most twice
+Added - Tug Harpoon: firing again lets go without spending a charge
+Added - Haul Drive (Stigmata system): up to 2.5x mass for 5s, +150% acceleration, +50% turn rate and speed
+Added - Haul Drive: 3 charges, one back every 20s
+Added - AI Stigmatas harpoon exposed or fleeing enemies into friendly guns
+Added - AI Stigmatas never fire into facing shields or past friends
+Added - AI Stigmatas use the Haul Drive on heavy catches and to escape
+Added - AI Stigmatas drag swarmed or overloaded friends back to safety
+Added - With a Reliquary in battle, enemy fighters leave wrecks 75% of the time for 30s
+Added - LYNE drones tow fighter wrecks within 8,000 units to the Reliquary's store (max 10)
+Added - Stored fighters restore in combat and stay aboard between battles
+Note - The store empties if the Reliquary leaves your fleet
+Note - Fighters recovered in a simulator battle never reach the store
+Added - Salvage Launch (Reliquary system): launches every restored fighter
+Added - Launched fighters return to rearm and are lost if destroyed
+Added - AI Reliquaries launch with two fighters ready and an enemy in reach
+Added - Flying a Reliquary lists its recovered fighters above the ship display
+Added - Refit shows recovered fighters as up to 4 locked bays
+Added - Reliquary refit option "Recovered fighters" lists and discards them
+Note - Discarded fighters are gone for good and give no LPC
+Added - Setting for Reliquary recovered fighter capacity (10 by default)
+Added - Setting for Reliquary fighter wreck chance (75% by default)
+Added - Breach Lights (Monstrance system): toggle, 1.5s charge-up, 4s cooldown, 5% hard flux/s
+Added - Breach Lights: two lights sweep out to 900 units and hold on enemy ships
+Added - Breach Lights: each light raises a mote about once a second (max 8, 6s each)
+Added - Breach Lights: enemy ships touching a mote lose shield or phase for 1s
+Added - Breach Lights: motes destroy enemy fighters and missiles
+Added - AI Monstrances use the lights below 60% flux with an enemy in reach, stop above 85%
+
+Epic and legendary fish
+Adjusted - Epic fish come up only under Breach Lights, no longer in ROD ruptures
+Adjusted - Epic fish drift slowly until a harpoon hit in a lit beam wakes them
+Adjusted - Awake epics raise a one-charge shield and swim more erratically
+Adjusted - Epics stay in reach only while lit and drift off past 3,000 units
+Adjusted - An awake epic is gone once you leave the system
+Adjusted - Only the harpoon lands epics, ROD drones leave them alone
+Adjusted - Legendary rumour intel shows the told name until you catch the fish
+Fixed - Epic and legendary shields now fade out with the fish when it dives
+
+Breach Lights
+Added - Setting for surfaced lamp-fish speed (100% by default)
+Added - Settings to turn off fish surfacing or keep the old straight course
+Adjusted - Ordinary fish surface in Breach Lights and swim in their own style
+Adjusted - The Tracking Gimbal and its upgrade follow surfaced fish
+
+Equipment
+Added - Glitter Lens: Lens Array module, doubles bycatch under Breach Lights
+Note - Its schematic comes only from the Fisherman's treasure rumour
+Added - The Neutrino Lens shows quest fish as gold spikes, whatever their rarity
+Adjusted - Equipment modules cost one tier more (now 25,000 to 45,000 credits)
+Adjusted - Equipment modules can no longer be paid for with common fish alone
+Adjusted - The Retrieval Head, Fanned Array and Lifting Rig are no longer sold
+Note - They come with the fishing ships now, copies you own are kept
+Adjusted - Neutrino Lens spikes also need the Breach Lights on
+Removed - Breach Coupler (withdrawn for now, a fitted one does nothing)
+
+Harpoon and ROD
+Added - The Harpoon breaks Industrial Evolution meteors and returns to the fleet
+Note - Needs Industrial Evolution 4.2.a or newer
+Adjusted - Harpoon and ROD aiming is blocked while an IE missile is aimed
+Note - Needs Industrial Evolution 4.2.a or newer
+Fixed - Aiming the Harpoon or ROD from its button no longer leaves save data
+Fixed - Held Harpoon and ROD hotkeys fire on release, even if the bar changed
+Removed - Harpoon and ROD aiming debug lines in starsector.log
+
+Fishing jobs
+Adjusted - Accepted job markers are steady gold (offers still pulse)
+Adjusted - Fight Night: fee option reads "Take the rewards." and lists them
+Fixed - Fleets with a quest or marked important no longer take fishing jobs too
+Fixed - Attacking a mercenary camp now costs reputation with the independents
+
+Distress calls
+Adjusted - Distress calls wait while another mod's distress call is live
+Fixed - Distress calls over 1.6 LY away now show in intel instead of vanishing
+
+Codex
+Adjusted - Codex entries from range data alone show no fish icon until caught
+Fixed - Codex list icons no longer stay blank until shown elsewhere
 
 Outfitter
-Fixed - The Outfitter no longer opens on a locked shelf with an empty list and no category selected, which happened on every visit before the Breach Lights were unlocked
-Fixed - Undoing a purchase made on another tab now brings that item's shelf to the front instead of describing one row while highlighting none
-Fixed - Buying a module that fits both rigs now clears its mark on the other rig's shelf, and the route planner no longer lists the same module twice
-Fixed - Equipment with no fish price now says it is not for sale, instead of showing a price with a FIT button that does nothing
-Changed - The Equipment category tabs follow the same rig order as the Upgrades tabs
-Adjusted - The shopping-list dot in Outfitter rows sits centred between the row's edge and its name
-Changed - The Equipment help text no longer refers to a single-use marker that was never drawn; equipment consumed on use says so in its description
+Adjusted - Equipment tabs follow the same rig order as the Upgrades tabs
+Adjusted - Shopping list dot centred between the row's edge and its name
+Fixed - The Outfitter no longer opens on a locked shelf with an empty list
+Fixed - Undoing a purchase from another tab now shows that item's shelf
+Fixed - Buying a module for both rigs now clears its mark on the other shelf
+Fixed - The route planner no longer lists the same module twice
+Fixed - Equipment with no fish price no longer shows a dead FIT button
+Fixed - Equipment help no longer mentions an undrawn single-use marker
 
 Text and UI
 Adjusted - Clearer fishing settings and AddFish help
-Adjusted - Fisherman sale screen: "Pack into crates" moved down to the Sell button row
+Adjusted - Fisherman sale screen: "Pack into crates" moved to the Sell row
 Note - Catch.Release now requires PatchLib
 Fixed - Chart requests now describe the marked specimen's mote as gold, not cyan
 
 Development
-Adjusted - AddFish accepts a fish ID or full name, followed by quantity, quality and coherence; quantity defaults to 1 and names autocomplete
+Adjusted - AddFish takes an ID or name, then quantity, quality and coherence
 
 1.0.c
 
