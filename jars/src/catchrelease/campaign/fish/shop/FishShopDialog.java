@@ -633,13 +633,13 @@ public class FishShopDialog implements InteractionDialogPlugin {
             boolean marked = ShopMarks.isMarked(entry);
 
             tooltip.addPara("Shopping list", Misc.getHighlightColor(), 0f);
-            tooltip.addPara(marked ? "Click the ring to remove this from your list."
-                    : "Click the ring to add this to your list.", 6f);
+            tooltip.addPara(marked ? "Click the star to remove this from your list."
+                    : "Click the star to add this to your list.", 6f);
             tooltip.addPara("Eligible fish are marked with a %s and listed first in"
                             + " the route planner.", 6f,
-                    Misc.getGrayColor(), Misc.getHighlightColor(), "yellow dot");
+                    Misc.getGrayColor(), Misc.getHighlightColor(), "star");
             tooltip.addPara("If the upgrade is locked, schematics offered by quests will also be marked by the %s in dialogue.", 6f,
-                    Misc.getGrayColor(), Misc.getHighlightColor(), "yellow dot");
+                    Misc.getGrayColor(), Misc.getHighlightColor(), "star");
         }
 
         protected void describePip(TooltipMakerAPI tooltip, ShopEntry entry, int rung) {

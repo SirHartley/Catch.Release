@@ -254,8 +254,8 @@ public abstract class FishReward {
             if (pos == null || alphaMult <= 0f) return;
             if (!marked.getAsBoolean()) return;
 
-            ShopMarks.drawDot(pos.getX() + pos.getWidth() - ShopMarks.DOT_INSET,
-                    pos.getY() + ShopMarks.DOT_INSET, ShopMarks.DOT_RADIUS, alphaMult);
+            ShopMarks.drawStar(pos.getX() + pos.getWidth() - ShopMarks.STAR_INSET,
+                    pos.getY() + ShopMarks.STAR_INSET, ShopMarks.STAR_SIZE, alphaMult);
         }
     }
 

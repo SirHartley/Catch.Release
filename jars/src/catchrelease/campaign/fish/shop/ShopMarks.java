@@ -7,7 +7,6 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
-import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.opengl.GL11;
@@ -21,8 +20,10 @@ import java.util.Set;
 public class ShopMarks {
 
     public static final String KEY = "$catchrelease_shop_marks";
-    public static final float DOT_RADIUS = 3.5f;
-    public static final float DOT_INSET = 8f;
+    // the mark on wanted fish and marked offers outside the shop, centred this far in from its corner
+    public static final float STAR_SIZE = 14f;
+    public static final float STAR_SMALL = 12f;
+    public static final float STAR_INSET = 8f;
 
     // ten points of a star in an 18 unit box, y up, from the top tip
     protected static final float[] STAR = {9f, 18f, 11.2f, 12f, 17.6f, 11.8f, 12.5f, 7.9f,
@@ -397,10 +398,7 @@ public class ShopMarks {
         GL11.glEnd();
     }
 
-    public static void drawDot(float centerX, float centerY, float radius, float alphaMult) {
-        Disc.draw(centerX, centerY, radius + 1.2f, java.awt.Color.BLACK,
-                0.85f * alphaMult, 0.85f * alphaMult, false);
-        Disc.draw(centerX, centerY, radius, Misc.getHighlightColor(),
-                0.95f * alphaMult, 0.95f * alphaMult, false);
+    public static void drawStar(float centerX, float centerY, float size, float alphaMult) {
+        drawStar(centerX, centerY, size, true, Misc.getHighlightColor(), alphaMult);
     }
 }

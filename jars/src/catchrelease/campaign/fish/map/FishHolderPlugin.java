@@ -62,7 +62,7 @@ public class FishHolderPlugin extends BaseCustomUIPanelPlugin {
 
         if (ShopMarks.isWanted(spec)) {
             float off = radius * 0.707f;
-            ShopMarks.drawDot(x + off, y - off, ShopMarks.DOT_RADIUS, alphaMult);
+            ShopMarks.drawStar(x + off, y - off, ShopMarks.STAR_SMALL, alphaMult);
         }
     }
 
