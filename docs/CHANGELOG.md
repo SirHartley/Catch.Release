@@ -165,10 +165,10 @@ The newest section holds work for the next release and is marked
 for every commit. See [RELEASE.md](RELEASE.md#versions) for the major/minor/letter
 scheme and ask if the next version has not been chosen after a published release.
 
-For release, remove `UNRELEASED`, check any compatibility notes, and use exactly
-that version as the tag. Never claim save compatibility without evidence. Leave
+For release, remove `UNRELEASED`, check any compatibility notes, and start the
+release workflow with exactly that version. Never claim save compatibility without evidence. Leave
 older release sections unchanged.
 
-The action uses only the newest matching version section as the release body,
+The workflow uses only the newest matching version section as the release body,
 preserving its text and layout. The full Changelog remains inside the ZIP.
 There is no separate release summary to keep in sync.

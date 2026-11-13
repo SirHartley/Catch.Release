@@ -68,6 +68,7 @@ The dictionaries distinguish checked recipes from extracted names, expressions a
 - Build the exact final remote task-branch revision. Earlier builds, partial builds, IDE analysis, and static checks do not satisfy the gate.
 - Missing compilers or required dependencies are merge blockers. Documentation-only changes do not require a Java build.
 - A change to `data/campaign/rules.csv` Text, or to a `rules.csv` line quoted in `docs/LORE.md`, must pass the [dialogue check](docs/DIALOGUE.md#dialogue-check) against the base branch and on the whole file. Claude sessions run it with the `dialogue-check` skill (`.claude/skills/dialogue-check/SKILL.md`).
+- No CI runs on pushes or pull requests. The release workflow runs only when started by hand on request; do not add triggers or check workflows.
 - Open a pull request and merge it when the work is complete. Do not leave finished work on an unmerged branch.
 - Pull request titles follow the commit message rule. The body has a Changes section (what changed, with classes, data rows and constants; docs and changelog entries updated) and a Validation section (build command, revision, Java version, check results, what was not tested in game), in terse bullets.
 - Use the connected GitHub app to create, inspect, and merge pull requests. Use `gh` only if the app is unavailable. A broken `gh` login is not a blocker when the app works.
@@ -89,7 +90,7 @@ Update documents automatically as part of each relevant change, not by a backgro
 |---|---|---|
 | `AGENTS.md` | Codex discovery | Keep it a short pointer to this file. Do not copy workflow policy into it. |
 | `CLAUDE.md` | Task scope, subagent instructions, tools, commits, PRs, builds, comments, document maintenance | Replace changed policies here and update links. Keep provider-specific instructions explicitly scoped. |
-| `docs/RELEASE.md` | Version numbers, release builds, package contents and publishing | Keep the workflow, builder and release instructions aligned. Do not publish tags without a release request. |
+| `docs/RELEASE.md` | Version numbers, release builds, package contents and publishing | Keep the workflow, builder and release instructions aligned. Do not start the release workflow or publish a release without a release request. |
 | `Changelog` and `docs/CHANGELOG.md` | Shipped change notes and how agents write them | Add or amend unreleased entries with each implementation task; preserve published entries. Keep formatting compatible with release-note extraction. |
 | `docs/ARCHITECTURE.md` | Technical routing: owners, registrations, data flow, lifecycle and cross-system constraints | Update the affected route or contract; remove obsolete owners. Use exact paths and symbols. No lore, writing advice, release history, or duplicate policy. |
 | `docs/UI.md` | Java-bound custom UI: panels, widgets, renderers, sprites, tooltips, lifetime, layout and input | Update implementation contracts and source evidence. Link to `DIALOGUE.md` for shared text guidelines; do not put rules-dialogue guidance here. |
@@ -242,7 +243,7 @@ Subagents perform research and scoping, not shipped code. The UI assignment take
 
 ## Version names
 
-Versions use major.minor.letter, starting at `1.0.a`. The release tag sets
+Versions use major.minor.letter, starting at `1.0.a`. The release version sets
 both packaged version files. See [RELEASE.md](docs/RELEASE.md#versions); do not
 bump versions or publish tags as part of ordinary task work.
 

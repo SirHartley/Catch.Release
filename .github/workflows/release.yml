@@ -1,11 +1,14 @@
 name: Release
 
+# manual only, actions minutes cost money: no version packages a preview, a version publishes that release
+# and tags the packaged commit, so no tag has to be pushed first; a run on an existing version tag publishes it
 on:
-  push:
-    branches: ["**"]
-    tags: ["*"]
-  pull_request:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, such as 1.0.a. Leave empty for a preview package."
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -19,7 +22,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.package.outputs.version }}
+      release: ${{ steps.package.outputs.release }}
     steps:
+      # pin actions by commit sha, version in the trailing comment
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -39,11 +44,20 @@ jobs:
         env:
           REF_TYPE: ${{ github.ref_type }}
           REF_NAME: ${{ github.ref_name }}
+          VERSION: ${{ inputs.version }}
         run: |
+          if [ "$REF_TYPE" = tag ]; then
+            if [ -n "$VERSION" ] && [ "$VERSION" != "$REF_NAME" ]; then
+              echo "::error::Version $VERSION does not match tag $REF_NAME."
+              exit 1
+            fi
+            VERSION="$REF_NAME"
+          fi
           args=()
-          if [ "$REF_TYPE" = tag ]; then args+=("$REF_NAME"); fi
+          if [ -n "$VERSION" ]; then args+=("$VERSION"); fi
           java -cp out/release-tools catchrelease.tools.ReleaseBuild package "${args[@]}"
           echo "version=$(cat out/release/version.txt)" >> "$GITHUB_OUTPUT"
+          if [ -n "$VERSION" ]; then echo "release=true" >> "$GITHUB_OUTPUT"; fi
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: Catch.Release-${{ steps.package.outputs.version }}
@@ -55,7 +69,7 @@ jobs:
           retention-days: 14
 
   publish:
-    if: github.event_name == 'push' && github.ref_type == 'tag'
+    if: needs.package.outputs.release == 'true'
     needs: package
     runs-on: ubuntu-latest
     permissions:
@@ -68,17 +82,27 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
           VERSION: ${{ needs.package.outputs.version }}
+          REF_TYPE: ${{ github.ref_type }}
+          SHA: ${{ github.sha }}
         run: |
           gh run download "$RUN_ID" --repo "$GH_REPO" --name "Catch.Release-$VERSION" --dir release
           if gh release view "$VERSION" --repo "$GH_REPO" >/dev/null 2>&1; then
             echo "::error::Release $VERSION already exists; published releases are never overwritten."
             exit 1
           fi
+          # from a branch the release creates the tag on the packaged commit; an existing tag would point elsewhere
+          if [ "$REF_TYPE" = tag ]; then
+            target=(--verify-tag)
+          elif gh api "repos/$GH_REPO/git/ref/tags/$VERSION" >/dev/null 2>&1; then
+            echo "::error::Tag $VERSION already exists; run the workflow on that tag instead."
+            exit 1
+          else
+            target=(--target "$SHA")
+          fi
           gh release create "$VERSION" "release/Catch.Release-$VERSION.zip" \
-            --repo "$GH_REPO" --verify-tag --title "Catch.Release $VERSION" \
+            --repo "$GH_REPO" "${target[@]}" --title "Catch.Release $VERSION" \
             --notes-file release/release-notes.md
-      # Master's catchrelease.version is the online version file that Version Checker, LunaLib and triOS read: it must
-      # name the newest release and its download, so it is updated only after that release exists.
+      # master's version file is the online one, so only point it at a release that exists
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: master
@@ -92,5 +116,5 @@ jobs:
           if git diff --quiet -- catchrelease.version; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Update the version file to $VERSION" -- catchrelease.version
+          git commit -m "update version file to $VERSION" -- catchrelease.version
           git push origin HEAD:master
