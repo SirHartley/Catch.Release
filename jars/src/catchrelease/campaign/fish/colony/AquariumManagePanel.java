@@ -247,6 +247,13 @@ public class AquariumManagePanel extends BaseCustomUIPanelPlugin {
 
         UiKit.textIn(tile.panel, 4f, nameY, TILE_WIDTH - 8f, TILE_HEIGHT - nameY,
                 backdrop.getDisplayName(), UiKit.BODY, backdrop.rarity.color, Alignment.MID);
+
+        if (!hanging) return;
+
+        // the picture hides most of the checked fill, which then reads like a hovered tile
+        Color ring = UiKit.bright();
+        UiKit.painted(tile.panel, 0f, 0f, TILE_WIDTH, TILE_HEIGHT, null, (pos, alpha) -> UiKit.outline(
+                pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), ring, alpha));
     }
 
     protected Backdrop findHovered() {

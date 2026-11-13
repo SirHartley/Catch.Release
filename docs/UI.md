@@ -282,6 +282,8 @@ picture, facts and price sit in 1 px bordered boxes on black.
 - The backdrop grid shows three rows of tiles on screens at least 850 units
   high and two below that; the viewport always ends on a whole row.
 - Hovering a tile previews its backdrop through `AquariumTankPanel.setPreview`.
+  The hanging tile has a 1 px outline in the bright UI colour; the picture hides most
+  of the checked fill.
   The plugin compares the mouse with the tile positions inside the grid viewport
   every frame; no callback reports hover on an area checkbox.
 - Add and Take open the `AquariumTransfers` pickers from `advance`. The picker
