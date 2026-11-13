@@ -253,10 +253,8 @@ does not use the Outfitter's filled bars: tiles are `UiKit.row` area checkboxes,
 picture, facts and price sit in 1 px bordered boxes on black.
 
 - Tiles are 116 x 168, three per row, two rows visible. The grid's scroll element
-  starts two units in and its bar sits left of the divider. `advance` snaps the
-  offset to whole rows: a wheel step moves to the next row in its direction, a
-  dragged bar settles on the nearest row when the button is released. No callback
-  reports a scroll, so the offset is compared each frame while the panel is open.
+  starts two units in and its bar sits left of the divider. The viewport is two
+  whole rows high and scrolls freely.
 - A tile is the backlit silhouette, the name in rarity colour on up to two lines
   (split where the longer line is shortest, then shortened with `...`), a short
   rule, and the price: a fish icon in the asked rarity's colour and the count,
@@ -268,7 +266,7 @@ picture, facts and price sit in 1 px bordered boxes on black.
   for "Not enough specimens aboard.", and the bottom row behind a rule: Undo last
   purchase with the name of the chart it would return.
 - Every change replaces the body panel from queued actions in `advance`; the grid's
-  offset is read before and restored on a whole row after.
+  offset is read before and restored after.
 
 ### Aquarium manage panel
 

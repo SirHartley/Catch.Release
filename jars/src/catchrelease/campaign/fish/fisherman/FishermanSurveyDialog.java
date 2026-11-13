@@ -33,7 +33,6 @@ import com.fs.starfarer.api.ui.ScrollPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipLocation;
 import com.fs.starfarer.api.util.Misc;
-import org.lwjgl.input.Mouse;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -111,8 +110,6 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         protected CustomPanelAPI body;
         protected TooltipMakerAPI grid;
         protected float gridOffset;
-        protected float lastOffset;
-        protected float gridMax;
 
         protected final List<Runnable> pending = new ArrayList<>();
         protected boolean dirty;
@@ -188,33 +185,10 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                 dirty = false;
                 rebuild();
             }
-
-            snapToRow();
         }
 
         protected Runnable later(Runnable action) {
             return () -> pending.add(action);
-        }
-
-        // no callback reports a scroll, so the offset is checked here: a wheel step moves on to the next whole row in
-        // its direction, and a dragged bar settles on the nearest row once the button is up
-        protected void snapToRow() {
-            ScrollPanelAPI scroller = grid == null ? null : grid.getExternalScroller();
-            if (scroller == null) return;
-
-            float offset = scroller.getYOffset();
-            if (Mouse.isButtonDown(0)) {
-                lastOffset = offset;
-                return;
-            }
-
-            float rows = offset / TILE_PITCH_Y;
-            float snapped = offset > lastOffset + 0.5f ? (float) Math.ceil(rows)
-                    : offset < lastOffset - 0.5f ? (float) Math.floor(rows) : Math.round(rows);
-            snapped = Math.max(0f, Math.min(gridMax, snapped * TILE_PITCH_Y));
-
-            if (snapped != offset) scroller.setYOffset(snapped);
-            lastOffset = snapped;
         }
 
         protected List<FishermanShelf.SurveyOffer> getOffers() {
@@ -301,12 +275,9 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             body.addUIElement(grid).inTL(-UiKit.INSET, GRID_Y);
 
             ScrollPanelAPI scroller = grid.getExternalScroller();
-            gridMax = Math.max(0f, grid.getHeightSoFar() - GRID_HEIGHT);
             if (scroller != null) {
-                float offset = Math.round(gridOffset / TILE_PITCH_Y) * TILE_PITCH_Y;
-                offset = Math.max(0f, Math.min(gridMax, offset));
-                scroller.setYOffset(offset);
-                lastOffset = offset;
+                float max = Math.max(0f, grid.getHeightSoFar() - GRID_HEIGHT);
+                scroller.setYOffset(Math.max(0f, Math.min(max, gridOffset)));
             }
         }
 
