@@ -133,6 +133,10 @@ Codex
 Adjusted - Codex entries from range data alone show no fish icon until caught
 Fixed - Codex list icons no longer stay blank until shown elsewhere
 
+Aquarium
+Adjusted - Manage the aquarium is one panel: tank, counts, display switch, backdrops
+Adjusted - Backdrops are picked from picture tiles, the paged menu is gone
+
 Outfitter
 Adjusted - Equipment tabs follow the same rig order as the Upgrades tabs
 Adjusted - Shopping list dot centred between the row's edge and its name

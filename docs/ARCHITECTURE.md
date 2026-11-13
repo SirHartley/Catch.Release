@@ -38,11 +38,11 @@ Technical routing for the current implementation. Java paths below are relative 
 | Legendary reveal / cleanup | `LegendaryChases -> LegendaryHaunt/LonglinerDecoy -> HauntModule/LegendaryShields` |
 | Map/Codex/intel handoff | `FishIntelMapButton/FishCodex -> FishMapFilterScript -> FishMapPane/FishPresence` |
 | Stale campaign effect | Owner location/ability validity -> cleanup; shared renderer registration in `rendering/` |
-| Shared UI widgets / fish icons | `ui/PaneWidgets`, `ShopUi`, `ListRow`, `FishIcons`; [Java UI contracts](UI.md). Minigame rendering is separate. |
+| Shared UI widgets / fish icons | `ui/UiKit` (vanilla controls, [contract](UI.md#vanilla-style-panels)); hand-drawn `ui/PaneWidgets`, `ShopUi`, `ListRow`; `FishIcons`; [Java UI contracts](UI.md). Minigame rendering is separate. |
 | Extra button in a vanilla cargo picker | `ui/CargoPickerButtonListener -> CargoPickerButtonAdder` (PatchLib); [cargo pickers](UI.md#cargo-pickers) |
 | Map / planner list rebuilds | `FishMapPane` and `FishRoutePopup` replace the list's owning custom panel; [lifetime contract](UI.md#rebuilding-lists) |
 | Campaign distortion / masking | `rendering/distortion/CampaignDistortionRenderer`, `rendering/helper/Stencil`, `rendering/plugins/*` |
-| Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel`; [backdrop dimensions](UI.md#portraits-and-sprites) |
+| Aquarium | `BreachConservatory -> AquariumTransfers/Backdrops -> AquariumTankScript/Panel`; management `ConservatoryOptionProvider -> AquariumManageDialog -> AquariumManagePanel` ([panel contract](UI.md#aquarium-manage-panel)); [backdrop dimensions](UI.md#portraits-and-sprites) |
 
 ## Registration and lifecycle
 
@@ -352,6 +352,8 @@ retain the shared acceptance and decline handlers.
 |---|---|
 | `BreachConservatory.java` | Industry definition and aquarium state: stock, enabled state, and selected backdrop. |
 | `AquariumTransfers.java` | Vanilla cargo pickers for transfers. |
+| `AquariumManageDialog.java` | "Manage the aquarium" dialog: prose, result lines and the Leave option; hosts `AquariumManagePanel`. |
+| `AquariumManagePanel.java` | Side panel built with `ui/UiKit`: live tank, specimen counts with the transfer pickers, display checkbox and the backdrop tile grid. |
 | `AquariumTankScript.java` | Mounts the tank below the colony image whenever no covering visual is open, and removes it when another visual takes over. |
 | `FishSpritePose.java` | Converts native image coordinates into a head-right mesh using precise `spriteDirection`; `AquariumTankPanel` bends that mesh and applies swimming turns. |
 | `AquariumFishShader.java` | Aquarium-only filter around that mesh; lazy shared shader from `data/catchrelease/shaders/aquarium_fish_*`. Per-specimen coherence controls digital displacement, pixel breakup and dropouts, without chromatic separation. No sprite mutation or screen capture; drawing contracts are in [UI.md](UI.md#portraits-and-sprites). |

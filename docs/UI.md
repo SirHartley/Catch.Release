@@ -181,6 +181,58 @@ Fisherman identity and vanilla person-panel setup are covered by
 Use the [project routing](RULES.md#project-routing) for Fisherman panel returns and
 the [fleet and bar exit paths](RULES.md#fleet-and-bar-exits) for teardown.
 
+## Vanilla-style panels
+
+`ui/UiKit` builds panels from the game's own controls: section headings,
+`addButton` buttons with cuts, area checkboxes, checkboxes and settings labels,
+placed with absolute `inTL` positions. New panels use it. `PaneWidgets`,
+`ShopUi` and `ListRow` remain for the hand-drawn Outfitter, range data and map
+widgets.
+
+- A `TooltipMakerAPI` element places its first item five units right of its own
+  left edge. `UiKit.button`, `checkbox` and `row` create the element five units
+  wider and place it five units left (`UiKit.INSET`), so the control sits at the
+  x it was given.
+- `addSectionHeading` draws ten units wider than the width it gets and has no
+  inset for left-aligned text. `UiKit.title` passes `width - 10`;
+  `UiKit.heading` paints the bar itself and places the label eight units in.
+- One-line text goes through `UiKit.fit`, which shortens with `...` and keeps
+  two units of slack; `UiKit.text` adds the full text as a tooltip when it was
+  shortened. Centre text in a box with `UiKit.textIn`, which rounds the offset
+  down as the engine does.
+- Buttons carry a `Runnable` as their id. `UiKit.Canvas.buttonPressed` runs it,
+  so create every sub-panel with `UiKit.plain`, `painted` or `row`. An action
+  that rebuilds the panel only queues itself; the owning plugin runs the queue
+  and the rebuild from `advance`, after input dispatch.
+- `UiKit.row` is a panel filled by an area checkbox. Labels, sprites and painted
+  panels added on top never take the click. Start a grid of rows inside a
+  scroll element two units from its left edge, or the clip removes the first
+  column's left border.
+- `UiKit.sprite` sets the size and colour of a shared `SpriteAPI` before each
+  draw. Another owner of the same sprite must do the same.
+
+The offsets were measured on 0.98a-RC8 for the Starsector UI design skill
+(`references/traps.md` and `recipes.md` there). They have not been rechecked
+against the decompiled source for this guide.
+
+### Aquarium manage panel
+
+`AquariumManageDialog` keeps the prose, the result lines and the Leave option.
+`AquariumManagePanel` is its side panel, shown with
+`VisualPanelAPI.showCustomPanel` (590 wide, to the right of the text panel).
+
+- The root panel and the `AquariumTankPanel` child live as long as the dialog.
+  Every change replaces the body panel; the backdrop grid's scroll offset is
+  read before and restored after. With the display off the tank child is removed
+  and an empty frame is drawn.
+- The backdrop grid shows three rows of tiles on screens at least 850 units
+  high and two below that; the viewport always ends on a whole row.
+- Hovering a tile previews its backdrop through `AquariumTankPanel.setPreview`.
+  The plugin compares the mouse with the tile positions inside the grid viewport
+  every frame; no callback reports hover on an area checkbox.
+- Add and Take open the `AquariumTransfers` pickers from `advance`. The picker
+  callback prints the result line and marks the panel for a rebuild.
+
 ## Cargo pickers
 
 The description panel passed to `CargoPickerListener.recreateTextPanel` is a
