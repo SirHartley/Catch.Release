@@ -258,13 +258,18 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
                 List<Tackle> options = TackleManager.getOptions(rig);
                 options.remove(Tackle.NONE);
-                options.removeIf(tackle -> !ShopSchematics.has(tackle));
+
+                // a module never offered keeps its place at the end of the list, nameless
+                List<Tackle> undiscovered = new ArrayList<>(options);
+                undiscovered.removeIf(tackle -> ShopSchematics.has(tackle) || ShopSchematics.isSeen(tackle));
+                options.removeAll(undiscovered);
 
                 if (options.isEmpty()) continue;
 
                 entries.add(ShopEntry.of(Tackle.NONE, rig));
 
                 for (Tackle tackle : options) entries.add(ShopEntry.of(tackle, rig));
+                for (Tackle tackle : undiscovered) entries.add(ShopEntry.of(tackle, rig));
             }
 
             for (CrabWares ware : CrabWares.getSwitchable()) entries.add(ShopEntry.of(ware));
@@ -392,13 +397,9 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         protected void selectFirstVisible() {
-            List<ShopEntry> visible = getVisible();
+            ShopEntry selected = getSelected();
 
-            for (ShopEntry entry : visible) {
-                if (entry.getKey().equals(selectedKey)) return;
-            }
-
-            selectedKey = visible.isEmpty() ? null : visible.get(0).getKey();
+            selectedKey = selected == null ? null : selected.getKey();
         }
 
         // the extras have one shelf and no rig, so their list starts under the tab line
@@ -564,6 +565,17 @@ public class FishShopDialog implements InteractionDialogPlugin {
 
         // transparent hotspots over the drawn parts, so each tooltip covers only its part of the row
         protected void addRowTooltips(CustomPanelAPI row, ShopEntry entry) {
+            if (entry.isUndiscovered()) {
+                CustomPanelAPI spot = UiKit.plain(row, LIST_WIDTH, ROW_HEIGHT);
+                row.addComponent(spot).inTL(0f, 0f);
+
+                UiKit.tooltip(body, spot, TOOLTIP_WIDTH, TooltipLocation.BELOW, false, tooltip -> {
+                    tooltip.addPara(ShopRowPlugin.UNDISCOVERED, Misc.getHighlightColor(), 0f);
+                    tooltip.addPara("You have not come across this schematic yet.", 6f);
+                });
+                return;
+            }
+
             if (ShopMarks.isMarked(entry) || ShopMarks.isMarkable(entry)) {
                 CustomPanelAPI mark = UiKit.plain(row, ShopRowPlugin.MARK_SLOT, ROW_HEIGHT);
                 row.addComponent(mark).inTL(ListRow.ACCENT_WIDTH, 0f);
@@ -901,7 +913,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
                 return;
             }
 
-            if (entry.isLocked()) {
+            if (entry.isPurchaseLocked()) {
                 status(y, "Schematic required.", Misc.getNegativeHighlightColor());
                 return;
             }
@@ -1148,13 +1160,15 @@ public class FishShopDialog implements InteractionDialogPlugin {
         }
 
         protected ShopEntry getSelected() {
-            List<ShopEntry> visible = getVisible();
+            ShopEntry first = null;
 
-            for (ShopEntry entry : visible) {
+            for (ShopEntry entry : getVisible()) {
+                if (entry.isUndiscovered()) continue;
                 if (entry.getKey().equals(selectedKey)) return entry;
+                if (first == null) first = entry;
             }
 
-            return visible.isEmpty() ? null : visible.get(0);
+            return first;
         }
 
         @Override

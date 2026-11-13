@@ -483,7 +483,7 @@ remains covered by `FishingParityChecks` and `MantaMinigameChecks`.
 | `FishAsker.java` | Interface implemented by jobs, tutorial intel, and chart-request intel so the shop, cargo, and route planner can read fish requirements uniformly. |
 | `FishCurrency.java` | Counts and spends matching fish; `countSpecies` feeds the `FishPurse` tooltips. |
 | `FishRequirement.java` | Describes and evaluates count, rarity, grade, species, region, source rupture, timestamp, coherence, method, and implement. |
-| `ShopSchematics.java` | Saves quest-earned permissions for stocked modules and the last two tiers of each upgrade. |
+| `ShopSchematics.java` | Saves quest-earned permissions for stocked modules and the last two tiers of each upgrade. `SEEN_KEY` saves the modules whose schematic offer the player has seen: `FishReward.TackleSchematic.addOfferDetails`, which every job and fleet-quest offer shows, calls `see`. The Outfitter lists a stocked module it can neither sell nor name as Undiscovered at the end of its shelf (`ShopEntry.isUndiscovered`), and a seen one by name, Locked and markable. |
 
 ### `campaign/fish/items`
 

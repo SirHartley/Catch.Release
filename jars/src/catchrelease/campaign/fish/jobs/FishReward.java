@@ -40,6 +40,7 @@ import java.awt.Color;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 public abstract class FishReward {
 
@@ -212,10 +213,7 @@ public abstract class FishReward {
             item.addPara(stat.description, 6f);
             addSchematicPurchase(item, ShopPricing.getPrice(stat, targetLevel), "upgrade tier");
             UIPanelAPI card = tooltip.addImageWithText(pad);
-            CustomPanelAPI mark = Global.getSettings().createCustom(48f, 48f,
-                    new SchematicMarkOverlay(statId, targetLevel));
-            card.addComponent(mark).inLMid(0f);
-            card.bringComponentToTop(mark);
+            addMarkOverlay(card, () -> ShopMarks.isMarkedUpgrade(statId, targetLevel));
 
             return true;
         }
@@ -231,15 +229,19 @@ public abstract class FishReward {
         }
     }
 
+    protected static void addMarkOverlay(UIPanelAPI card, BooleanSupplier marked) {
+        CustomPanelAPI mark = Global.getSettings().createCustom(48f, 48f, new SchematicMarkOverlay(marked));
+        card.addComponent(mark).inLMid(0f);
+        card.bringComponentToTop(mark);
+    }
+
     protected static class SchematicMarkOverlay extends BaseCustomUIPanelPlugin {
 
-        protected final String statId;
-        protected final int targetLevel;
+        protected final BooleanSupplier marked;
         protected PositionAPI pos;
 
-        protected SchematicMarkOverlay(String statId, int targetLevel) {
-            this.statId = statId;
-            this.targetLevel = targetLevel;
+        protected SchematicMarkOverlay(BooleanSupplier marked) {
+            this.marked = marked;
         }
 
         @Override
@@ -250,7 +252,7 @@ public abstract class FishReward {
         @Override
         public void render(float alphaMult) {
             if (pos == null || alphaMult <= 0f) return;
-            if (!ShopMarks.isMarkedUpgrade(statId, targetLevel)) return;
+            if (!marked.getAsBoolean()) return;
 
             ShopMarks.drawDot(pos.getX() + pos.getWidth() - ShopMarks.DOT_INSET,
                     pos.getY() + ShopMarks.DOT_INSET, ShopMarks.DOT_RADIUS, alphaMult);
@@ -279,6 +281,9 @@ public abstract class FishReward {
         public boolean addOfferDetails(TooltipMakerAPI tooltip, float pad) {
             if (tooltip == null) return false;
 
+            // the player has now seen this module offered, so the outfitter can name it
+            ShopSchematics.see(tackle);
+
             ShopEntry entry = ShopEntry.of(tackle);
             TooltipMakerAPI item = tooltip.beginImageWithText(entry.getIconName(), 48f);
             item.addPara("Fishing Outfitter schematic", Misc.getBasePlayerColor(), 0f);
@@ -288,7 +293,8 @@ public abstract class FishReward {
             item.addPara(tackle.description, 6f);
             addSchematicPurchase(item, ShopPricing.getPrice(tackle),
                     ShopGroup.getModuleType(tackle.fit));
-            tooltip.addImageWithText(pad);
+            UIPanelAPI card = tooltip.addImageWithText(pad);
+            addMarkOverlay(card, () -> ShopMarks.isMarkedTackle(tackle));
 
             return true;
         }

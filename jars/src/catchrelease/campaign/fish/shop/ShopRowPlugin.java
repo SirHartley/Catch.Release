@@ -5,11 +5,13 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.ui.ListRow;
 import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
+import java.util.List;
 
 public class ShopRowPlugin extends ListRow {
 
@@ -21,6 +23,9 @@ public class ShopRowPlugin extends ListRow {
     public static final float OPEN_PIP_ALPHA = 0.6f;
     public static final float PRICE_SHORT_ALPHA = 0.35f;
     public static final float BLOCKED_TEXT_ALPHA = 0.6f;
+    public static final float UNDISCOVERED_ACCENT_ALPHA = 0.5f;
+    public static final float UNDISCOVERED_TEXT_ALPHA = 0.6f;
+    public static final String UNDISCOVERED = "Undiscovered";
 
     // the gap between the accent bar and the name; the star sits in it and takes its clicks
     public static final float NAME_LEFT = 30f;
@@ -93,12 +98,13 @@ public class ShopRowPlugin extends ListRow {
 
     // fitted elsewhere on the rig, or clashing with what is: greyed out for this slot only
     protected boolean isBlocked() {
-        return entry.kind == ShopEntry.Kind.TACKLE && !entry.isFittedIn(slot()) && !entry.canFitIn(slot());
+        return entry.kind == ShopEntry.Kind.TACKLE && !entry.isUndiscovered() && !entry.isFittedIn(slot())
+                && !entry.canFitIn(slot());
     }
 
     @Override
     protected Color getAccentColor() {
-        if (isBlocked()) return Misc.getGrayColor();
+        if (isBlocked() || entry.isUndiscovered()) return Misc.getGrayColor();
 
         FishRarity tier = entry.getPriceRarity();
         return tier == null ? Misc.getBasePlayerColor() : tier.color;
@@ -107,6 +113,13 @@ public class ShopRowPlugin extends ListRow {
     @Override
     protected void renderBackground(float x, float y, float width, float height,
                                     boolean selected, boolean hovered, float alphaMult) {
+        if (entry.isUndiscovered()) {
+            ShopUi.drawQuad(x, y, width, height, ShopUi.fill(), ShopUi.FILL_FAINT * alphaMult);
+            ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, getAccentColor(),
+                    UNDISCOVERED_ACCENT_ALPHA * alphaMult);
+            return;
+        }
+
         float fill = selected ? ShopUi.FILL_SELECTED : isBlocked() ? ShopUi.FILL_DIM
                 : hovered ? ShopUi.FILL_HOVER : ShopUi.FILL_IDLE;
 
@@ -117,6 +130,11 @@ public class ShopRowPlugin extends ListRow {
     @Override
     protected void renderContent(float x, float y, float width, float height,
                                  boolean selected, boolean hovered, float alphaMult) {
+        if (entry.isUndiscovered()) {
+            renderUndiscovered(x, y, height, alphaMult);
+            return;
+        }
+
         renderMark(x, y, height, alphaMult);
         renderName(x, y, height, selected, alphaMult);
         renderState(x, y, width, height, alphaMult);
@@ -134,6 +152,20 @@ public class ShopRowPlugin extends ListRow {
                 alphaMult);
     }
 
+    // no name, mark or price: the player has not come across the schematic
+    protected void renderUndiscovered(float x, float y, float height, float alphaMult) {
+        LazyFont font = ShopUi.getBodyFont();
+        if (font == null) return;
+
+        if (name == null) {
+            name = ShopUi.createText(font, UNDISCOVERED);
+            name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
+        }
+
+        name.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), UNDISCOVERED_TEXT_ALPHA * alphaMult));
+        name.draw(Math.round(x + NAME_LEFT), top(y, height, name.getHeight()));
+    }
+
     protected void renderName(float x, float y, float height, boolean selected, float alphaMult) {
         LazyFont font = ShopUi.getBodyFont();
         if (font == null) return;
@@ -145,7 +177,7 @@ public class ShopRowPlugin extends ListRow {
 
         // fitted gear reads as good news, not as spent; a maxed ladder and a locked rung stay quiet
         Color color = entry.isFittedIn(slot()) ? Misc.getPositiveHighlightColor()
-                : entry.isDone(slot()) || entry.isLocked() || isBlocked() || (entry.isCurio() && !entry.isOn())
+                : entry.isDone(slot()) || entry.isPurchaseLocked() || isBlocked() || (entry.isCurio() && !entry.isOn())
                 ? Misc.getGrayColor()
                 : selected ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
@@ -193,7 +225,7 @@ public class ShopRowPlugin extends ListRow {
             return;
         }
 
-        if (entry.isLocked()) {
+        if (entry.isPurchaseLocked()) {
             drawMark("Locked", Misc.getGrayColor(), right, y, height, alphaMult);
             return;
         }
@@ -245,6 +277,14 @@ public class ShopRowPlugin extends ListRow {
 
         mark.setBaseColor(ShopUi.withAlpha(color, alphaMult));
         mark.draw(Math.round(right), top(y, height, mark.getHeight()));
+    }
+
+    // an undiscovered row cannot be selected, so it takes no click and plays no sound
+    @Override
+    public void processInput(List<InputEventAPI> events) {
+        if (entry.isUndiscovered()) return;
+
+        super.processInput(events);
     }
 
     @Override

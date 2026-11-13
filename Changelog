@@ -144,6 +144,9 @@ Adjusted - Outfitter look: the game's tabs, buttons and filled bars, same layout
 Adjusted - Outfitter: fish and credits sit at the right of the tab line
 Adjusted - Outfitter: price, fish required and matching fish line up in a table
 Adjusted - Outfitter: one line under the buttons says why one is grey
+Adjusted - Outfitter: modules without a schematic show as Undiscovered, not hidden
+Adjusted - Outfitter: a module once offered by a job shows its name and price, Locked
+Note - It can go on the shopping list until you learn its schematic
 Fixed - The Outfitter no longer opens on a locked shelf with an empty list
 Fixed - Undoing a purchase from another tab now shows that item's shelf
 Fixed - Buying a module for both rigs now clears its mark on the other shelf

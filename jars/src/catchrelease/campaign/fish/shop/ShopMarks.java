@@ -102,6 +102,17 @@ public class ShopMarks {
         return isMarked(getUpgradeMarkKey(statId, targetLevel));
     }
 
+    // marked on any rig's shelf
+    public static boolean isMarkedTackle(Tackle tackle) {
+        if (tackle == null) return false;
+
+        for (Tackle.Fit rig : Tackle.Fit.values()) {
+            if (rig.isRig() && isMarked("tackle:" + rig.name() + ":" + tackle.name())) return true;
+        }
+
+        return false;
+    }
+
     public static boolean mark(String entryKey) {
         if (entryKey == null) return false;
 
@@ -146,7 +157,7 @@ public class ShopMarks {
 
     public static boolean isMarkable(ShopEntry entry) {
         if (entry == null) return false;
-        if (entry.isPurchaseLocked() && !entry.isUpgrade()) return false;
+        if (entry.isUndiscovered()) return false;
 
         ShopPricing.Price price = entry.getPrice();
 

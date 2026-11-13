@@ -53,6 +53,11 @@ panel tree never changes during input dispatch.
   rarity, grey when blocked), the shopping-list star (`ShopMarks.drawStar`), the name at
   30, then pips (8 px, 11 apart: highlight bought, light open, black for a tier waiting
   for its schematic) or a state word in orbitron12, and "New!" before them.
+- An Undiscovered row (`ShopEntry.isUndiscovered`) has the faint fill (0.14), a grey
+  accent at 0.5 and "Undiscovered" in grey at 0.6, with no mark, state or price. It
+  takes no click and is never selected; a hotspot over the whole row carries its
+  tooltip. A seen module whose schematic is not learned reads "Locked" and shows its
+  price with grey buttons and "Schematic required."
 - `UiKit.vrule` at 332 divides list and detail. The detail head is a 1 px outline
   box of 72 with a 64 filled tile 4 inside it and the icon fitted to 56, tinted base;
   the name in orbitron20 bold and the sub-line (pips and "Tier n / m", or the group)
