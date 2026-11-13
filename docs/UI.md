@@ -346,6 +346,9 @@ non-rebuilding mode. Fish-row selection hints,
 shop marks, tier status and payment details keep live updates.
 Do not cache a tooltip that reads changing state unless its owner refreshes it.
 
+`UiKit.tooltip` sets the tooltip's background alpha to 1. At the engine default of
+0.85 (`StandardTooltipV2.bgAlpha`) the text of filled rows shows through.
+
 `FishPurse.add` draws the fish counts on the outfitter's tab line and puts a
 transparent hotspot over each icon and count. Each tooltip lists the species aboard
 from `FishCurrency.countSpecies`, most-held first, as up to two rows of `FishIcons`

@@ -240,6 +240,8 @@ public final class UiKit {
             @Override
             public void createTooltip(TooltipMakerAPI tooltip, boolean expanded,
                                       Object tooltipParam) {
+                // the default 0.85 lets the text of filled rows show through
+                tooltip.setBgAlpha(1f);
                 content.create(tooltip);
             }
         }, target, location, live);
