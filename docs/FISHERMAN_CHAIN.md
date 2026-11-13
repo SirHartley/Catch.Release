@@ -246,7 +246,7 @@ Six stages, done in order (see [Stages](#stages)). Stage 0 changes no visible be
 | Ships | `FishingShips` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Fleet presence | `FishingShips.Listener`, `FishingShips.Watcher` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Hull ids | Placeholder hulls `catchrelease_harpoon_ship`, `catchrelease_lamp_ship`, `catchrelease_rod_ship` | Added; see [Ships](#ships). A D-modded ship becomes `<id>_default_D`, so match `spec.isDefaultDHull() ? spec.getDParentHullId() : spec.getHullId()`. |
-| Outfitter | `FishShopDialog`, `ShopSlotPlugin`, `ShopRowPlugin`, `ShopEntry`, `ShopDetailHeaderPlugin` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md) and [UI.md](UI.md#outfitter-second-slot). |
+| Outfitter | `FishShopDialog`, `ShopSlotPlugin`, `ShopRowPlugin`, `ShopEntry` | Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md) and [UI.md](UI.md#outfitter-second-slot). |
 | Quest motes | `BuriedMoteEntityPlugin`, `BuriedMoteSpawner` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Epic hooks | `QuestEpicListener`, `EpicHunt` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |
 | Ship rewards | `FishReward.Ship` | Implemented in Stage 0; see [ARCHITECTURE.md](ARCHITECTURE.md). |

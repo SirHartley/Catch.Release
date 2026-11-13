@@ -32,36 +32,57 @@ Do not maintain separate wording or formatting standards for Java strings.
 In the outfitter, a null module price can mean an empty slot, an already-owned
 module or a ship module that comes with a fishing ship. UI text must distinguish them.
 
+### Outfitter look
+
+`FishShopDialog` keeps its 920 x 640 custom visual dialog and builds one body panel
+(`UiKit.plain`, 896 x 616 at 12) that it removes and rebuilds on every change. The
+list's scroll offset is read before the rebuild and clamped after it, and it is kept
+across the payment picker's reopen; a new tab or rig resets it. Button actions and the
+painted tabs, rows and slots only queue work; `advance` runs it and rebuilds, so the
+panel tree never changes during input dispatch.
+
+- Header: `UiKit.title` "Outfitter" with the help `?`, vanilla `CutStyle.TOP` tabs
+  (`UiKit.tab`, 104 wide, 108 apart) and `UiKit.rule` under them. The credits counter
+  (18 px icon, clear of the rule) ends at the right edge; `FishPurse.add` puts the fish
+  per rarity to its left, each count with its species tooltip.
+- Rig tabs (`ShopTabPlugin`, 104 x 44, icon over an orbitron12 label) sit under the rule
+  except on Extras, whose list starts there. Rows (`ShopRowPlugin`) are 26 high, 30
+  apart, 320 wide; the list ends on a whole row above the divider's end.
+- Fills are the opaque dark player colour at `ShopUi.FILL_*`: idle 0.42, hover 0.55,
+  selected solid, blocked 0.22. Rows have no border. A row is the 3 px accent (price
+  rarity, grey when blocked), the shopping-list star (`ShopMarks.drawStar`), the name at
+  30, then pips (8 px, 11 apart: highlight bought, light open, black for a tier waiting
+  for its schematic) or a state word in orbitron12, and "New!" before them.
+- `UiKit.vrule` at 332 divides list and detail. The detail head is a 1 px outline
+  box of 72 with a 64 filled tile 4 inside it and the icon fitted to 56, tinted base;
+  the name in orbitron20 bold and the sub-line (pips and "Tier n / m", or the group)
+  sit 84 right of the box.
+- Price, Fish required and Matching aboard are a label column of 132 with icon and
+  value after it. The buttons are a bank: the main action 160 (green when it costs
+  something and can be bought, neutral when free, grey when not live), Select 120. One
+  status or reason line is reserved 32 under the buttons. Undo last purchase sits
+  bottom left, Leave bottom right.
+
 ### Outfitter second slot
 
 While a rig has its second slot (`FishingShips.hasSecondSlot`), the Equipment shelf
-shows two `ShopSlotPlugin` cells above the module list: half the list width each,
-`SLOT_HEIGHT` tall, the slot's module or "Empty" beneath a small "SLOT n" label. A cell
-is drawn like the module rows beneath it, in the Outfitter's flat style: the rows'
-dark-player fill (0.12, 0.3 hovered, 0.5 as the target slot) and a 3px bright left accent
-(0.3, 0.6, 0.9), with its text in the rows' name column (`TEXT_LEFT`) and the label
-bright while it is the target. It has no outline and no bottom accent, which the
-category tabs directly above carry, so the cells read as part of the list rather than
-as a second row of tabs. A cell holding a module that
-came with the ship, and that the player does not own a copy of, carries a small grey
-"SHIP" in its top right, the same distinction the rows draw. `needsCompactSlotText`
-measures every slot's name with `LazyFont.calcWidth` and picks one font for the whole
-row, so a name too long for the body font never leaves the two cells in different
+shows two `ShopSlotPlugin` tiles above the module list, 158 x 46 and 162 apart: a 1 px
+outline (base on the target slot, the dark fill colour otherwise) with a filled bar 4
+inside it, "Slot n" in orbitron12 and the module or "Empty" beneath. A tile holding a
+module that came with the ship, and that the player does not own a copy of, carries a
+grey "Ship" in its top right, the same distinction the rows draw.
+`needsCompactSlotText` measures every slot's name with `LazyFont.calcWidth` and picks
+one font for the whole row, so a long name never leaves the two tiles in different
 typefaces.
 
-The selected cell is the target slot; FIT reads "FIT IN SLOT n"
-and every row and the detail pane are judged against it. Without a second slot the
-shelf looks as it did with one slot. A module fitted in the other slot, or one that
-shares an exclusion group with it, is blocked for the target slot: its row name is
-grey at 0.6 alpha with an "IN SLOT n" or "CONFLICT" mark, FIT and SELECT are not
-live, and a hotspot past the mark ring carries a hover naming the slot or the
-conflicting module. A blocked row stays selectable so the detail pane can say why; for an owned or ship
-module that line replaces the "fitting it is free" price line. The detail header's
-accent, like the row, is judged against the target slot (`ShopEntry.isDone(slot)`), and
-so is its subtitle: it names the target as "FITTING SLOT n" unless the module is already
-in that slot, and goes green only when it is. A module fitted in the rig's other slot
-reads grey there, matching its grey row, and the subtitle names both slots.
-A ship module shows "SHIP" where an owned module shows "OWNED".
+The selected tile is the target slot; the main button reads "Fit in slot n" and every
+row and the detail are judged against it. Without a second slot the shelf looks as it
+did with one slot. A module fitted in the other slot, or one that shares an exclusion
+group with it, is blocked for the target slot: its row name is grey at 0.6 alpha with
+an "In slot n" or "Conflict" mark and the dimmer fill, Fit and Select are not live, and
+a hotspot past the star carries a hover naming the slot or the conflicting module. A
+blocked row stays selectable so the detail can say why: the reason is the line under
+the buttons. A ship module shows "Ship" where an owned module shows "Owned".
 
 Treasure result rows normally use the chest rarity colour, read from
 `TreasureAward.color`; a quest chest such as T1's golden chest sets its own label and
@@ -186,7 +207,7 @@ the [fleet and bar exit paths](RULES.md#fleet-and-bar-exits) for teardown.
 `ui/UiKit` builds panels from the game's own controls: section headings,
 `addButton` buttons with cuts, area checkboxes, checkboxes and settings labels,
 placed with absolute `inTL` positions. New panels use it. `PaneWidgets`,
-`ShopUi` and `ListRow` remain for the hand-drawn Outfitter, range data and map
+`ShopUi` and `ListRow` remain for the Outfitter's painted rows and tabs, range data and map
 widgets.
 
 - A `TooltipMakerAPI` element places its first item five units right of its own
@@ -288,18 +309,16 @@ content when the tooltip is shown; this only stops rebuilding it throughout the
 hover.
 
 Map and planner help, category descriptions, chart-shop help, outfitter help,
-the outfitter's rarity-count chips and intel navigation tips use this
+the outfitter's fish counts and intel navigation tips use this
 non-rebuilding mode. Fish-row selection hints,
 chart affordability, shop marks, tier status and payment details keep live updates.
 Do not cache a tooltip that reads changing state unless its owner refreshes it.
 
-The outfitter header draws its rarity chips in `ShopHeaderPlugin.render`;
-`FishShopDialog.buildHeader` places hotspots from the same
-`ShopHeaderPlugin.getChipLeft/getChipTop` offsets. Each chip's tooltip lists the
-species aboard from `FishCurrency.countSpecies`, most-held first, as up to two
-rows of `FishIcons` with an "xN" count for duplicates. Species past those rows
-are summarized as "... and N other species." so the grid never outgrows the
-320-pixel tooltip.
+`FishPurse.add` draws the fish counts on the outfitter's tab line and puts a
+transparent hotspot over each icon and count. Each tooltip lists the species aboard
+from `FishCurrency.countSpecies`, most-held first, as up to two rows of `FishIcons`
+with an "xN" count for duplicates. Species past those rows are summarized as "... and
+N other species." so the grid never outgrows the 320-pixel tooltip.
 
 Source: `StandardTooltipV2Expandable.addTooltipTo/addTooltipToPrevious`,
 `beforeShown` and `advanceImpl` in the knowledge base's `sources-obf/ui.impl.java`.

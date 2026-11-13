@@ -10,7 +10,9 @@ import catchrelease.memory.upgrades.UpgradeStat;
 import catchrelease.rendering.helper.Disc;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.util.Misc;
+import org.lwjgl.opengl.GL11;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,6 +23,18 @@ public class ShopMarks {
     public static final String KEY = "$catchrelease_shop_marks";
     public static final float DOT_RADIUS = 3.5f;
     public static final float DOT_INSET = 8f;
+
+    // ten points of a star in an 18 unit box, y up, from the top tip
+    protected static final float[] STAR = {9f, 18f, 11.2f, 12f, 17.6f, 11.8f, 12.5f, 7.9f,
+            14.3f, 1.7f, 9f, 5.3f, 3.7f, 1.7f, 5.5f, 7.9f, 0.4f, 11.8f, 6.8f, 12f};
+    protected static final float STAR_BOX = 18f;
+    protected static final float STAR_MID_X = 9f;
+    protected static final float STAR_MID_Y = 9.85f;
+    // the fan's hub; the star is star-shaped around it, so one fan covers it
+    protected static final float STAR_FAN_Y = 9.4f;
+    protected static final float STAR_OUTLINE = 2f;
+    protected static final float STAR_RIM = 1f;
+    protected static final int STAR_STAMPS = 12;
 
     protected static final long WANTED_CACHE_MS = 250L;
     protected static final catchrelease.helper.cache.TimedValue<List<Ask>> wantedAsks =
@@ -324,6 +338,52 @@ public class ShopMarks {
         }
 
         return out;
+    }
+
+    // set: filled in highlight; not set: a rim in the given colour. both inside a black outline of the star's own shape
+    public static void drawStar(float centerX, float centerY, float size, boolean set, Color rim,
+                                float alphaMult) {
+        if (alphaMult <= 0f || size <= 0f) return;
+
+        float scale = size / STAR_BOX;
+        Color face = set ? Misc.getHighlightColor() : rim;
+
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+        stampStar(centerX, centerY, scale, STAR_OUTLINE, Color.BLACK, alphaMult);
+        stampStar(centerX, centerY, scale, STAR_RIM, face, alphaMult);
+        fanStar(centerX, centerY, scale, set ? face : Color.BLACK, alphaMult);
+
+        GL11.glPopAttrib();
+    }
+
+    protected static void stampStar(float centerX, float centerY, float scale, float offset,
+                                    Color color, float alphaMult) {
+        for (int i = 0; i < STAR_STAMPS; i++) {
+            double angle = Math.PI * 2.0 * i / STAR_STAMPS;
+
+            fanStar(centerX + (float) Math.cos(angle) * offset,
+                    centerY + (float) Math.sin(angle) * offset, scale, color, alphaMult);
+        }
+    }
+
+    protected static void fanStar(float centerX, float centerY, float scale, Color color,
+                                  float alphaMult) {
+        GL11.glColor4f(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f,
+                color.getAlpha() / 255f * alphaMult);
+
+        GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+        GL11.glVertex2f(centerX, centerY + (STAR_FAN_Y - STAR_MID_Y) * scale);
+        for (int i = 0; i <= STAR.length / 2; i++) {
+            int j = (i % (STAR.length / 2)) * 2;
+
+            GL11.glVertex2f(centerX + (STAR[j] - STAR_MID_X) * scale,
+                    centerY + (STAR[j + 1] - STAR_MID_Y) * scale);
+        }
+        GL11.glEnd();
     }
 
     public static void drawDot(float centerX, float centerY, float radius, float alphaMult) {

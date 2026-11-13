@@ -43,6 +43,9 @@ public final class UiKit {
     public static final float SECTION_GAP = 16f;
     public static final float HEADING_GAP = 20f;
 
+    public static final float TAB_ALPHA = 0.6f;
+    public static final float RULE_ALPHA = 0.3f;
+
     public static final Color GREEN = new Color(50, 130, 0);
     public static final Color RED = new Color(160, 30, 20);
     public static final Color AMBER = new Color(200, 160, 10);
@@ -304,6 +307,63 @@ public final class UiKit {
     public static ButtonAPI button(CustomPanelAPI parent, float x, float y, float width,
                                    String label, CutStyle cut, Runnable action) {
         return button(parent, x, y, width, BUTTON_HEIGHT, label, base(), dark(), cut, action);
+    }
+
+    public static ButtonAPI tab(CustomPanelAPI parent, float x, float y, float width, String label,
+                                boolean selected, Runnable action) {
+        return button(parent, x, y, width, BUTTON_HEIGHT, label, selected ? bright() : base(),
+                selected ? Misc.setAlpha(dark(), 255) : Misc.scaleAlpha(dark(), TAB_ALPHA),
+                CutStyle.TOP, action);
+    }
+
+    public static void rule(CustomPanelAPI parent, float x, float y, float width) {
+        Color line = base();
+
+        painted(parent, x, y, width, 1f, (pos, alpha) -> quad(pos.getX(), pos.getY(),
+                pos.getWidth(), 1f, line, RULE_ALPHA * alpha), null);
+    }
+
+    public static void vrule(CustomPanelAPI parent, float x, float y, float height) {
+        Color line = base();
+
+        painted(parent, x, y, 1f, height, (pos, alpha) -> quad(pos.getX(), pos.getY(), 1f,
+                pos.getHeight(), line, RULE_ALPHA * alpha), null);
+    }
+
+    // a value that ends at right with its icon gap units before it, centred in a line of the given height; returns the icon's left edge
+    public static float iconValue(CustomPanelAPI parent, float right, float y, float height,
+                                  SpriteAPI icon, Color tint, float iconSize, float gap,
+                                  String value, Color color) {
+        float valueWidth = (float) Math.ceil(width(value, BODY)) + 2f;
+        float iconX = right - valueWidth - gap - iconSize;
+
+        textIn(parent, right - valueWidth, y, valueWidth, height, value, BODY, color,
+                Alignment.RMID);
+        sprite(parent, iconX, y + (float) Math.floor((height - iconSize) / 2f), iconSize,
+                iconSize, icon, tint);
+
+        return iconX;
+    }
+
+    // a one line label that ends at right; returns its left edge
+    public static float labelLeftOf(CustomPanelAPI parent, float right, float y, float height,
+                                    String label, Color color) {
+        float labelWidth = (float) Math.ceil(width(label, BODY)) + 2f;
+
+        textIn(parent, right - labelWidth, y, labelWidth, height, label, BODY, color,
+                Alignment.RMID);
+
+        return right - labelWidth;
+    }
+
+    // a wrapped paragraph with %s values in the highlight colour; returns its height
+    public static float para(CustomPanelAPI parent, float x, float y, float width, String format,
+                             Color color, Color highlight, String... values) {
+        TooltipMakerAPI element = parent.createUIElement(width + INSET, 0f, false);
+        element.addPara(format, 0f, color, highlight, values);
+        parent.addUIElement(element).inTL(x - INSET, y);
+
+        return element.getHeightSoFar();
     }
 
     public static ButtonAPI checkbox(CustomPanelAPI parent, float x, float y, float width,
