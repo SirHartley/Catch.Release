@@ -23,7 +23,7 @@ public class BreachLightEffect implements EveryFrameWeaponEffectPlugin {
     // the engine pivots a hardpoint sprite a quarter up its height; the lens is the top of the body
     public static final float LENS_OFFSET = 14f;
 
-    public static final float SWEEP_SPEED = 18f;
+    public static final float SWEEP_SPEED = 11f;
     public static final float WOBBLE = 6f;
     public static final float WOBBLE_RATE = 0.7f;
     public static final float RETURN_RATE = 4f;
