@@ -33,7 +33,6 @@ public class ShopMarks {
     protected static final float STAR_MID_Y = 9.85f;
     // the fan's hub; the star is star-shaped around it, so one fan covers it
     protected static final float STAR_FAN_Y = 9.4f;
-    protected static final float STAR_OUTLINE = 2f;
     protected static final float STAR_RIM = 1f;
     protected static final int STAR_STAMPS = 12;
 
@@ -352,7 +351,7 @@ public class ShopMarks {
         return out;
     }
 
-    // set: filled in highlight; not set: a rim in the given colour. both inside a black outline of the star's own shape
+    // set: filled in highlight; not set: a rim in the given colour around a black face
     public static void drawStar(float centerX, float centerY, float size, boolean set, Color rim,
                                 float alphaMult) {
         if (alphaMult <= 0f || size <= 0f) return;
@@ -365,7 +364,6 @@ public class ShopMarks {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-        stampStar(centerX, centerY, scale, STAR_OUTLINE, Color.BLACK, alphaMult);
         stampStar(centerX, centerY, scale, STAR_RIM, face, alphaMult);
         fanStar(centerX, centerY, scale, set ? face : Color.BLACK, alphaMult);
 
