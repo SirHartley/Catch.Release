@@ -17,6 +17,13 @@ public class ShopUi {
     public static final String FONT_BODY = FishConstants.MINIGAME_RESULT_FONT;
     public static final String FONT_SMALL = "graphics/fonts/orbitron12condensed.fnt";
 
+    // the outfitter's fills are the player's dark ui colour, opaque, at these alphas
+    public static final float FILL_SELECTED = 1f;
+    public static final float FILL_HOVER = 0.55f;
+    public static final float FILL_IDLE = 0.42f;
+    public static final float FILL_DIM = 0.22f;
+    public static final float FILL_FAINT = 0.14f;
+
     protected static LazyFont title;
     protected static LazyFont body;
     protected static LazyFont small;
@@ -52,6 +59,10 @@ public class ShopUi {
 
     public static LazyFont.DrawableString createText(LazyFont font, String text) {
         return font.createText(text, java.awt.Color.WHITE, font.getBaseHeight());
+    }
+
+    public static Color fill() {
+        return Misc.setAlpha(Misc.getDarkPlayerColor(), 255);
     }
 
     public static Color withAlpha(Color color, float alpha) {
@@ -137,34 +148,6 @@ public class ShopUi {
         RoundedBorder.draw(x - offset, y - offset, width + offset * 2f, height + offset * 2f,
                 FishConstants.MINIGAME_BORDER_RADIUS + offset, color, alpha,
                 FishConstants.MINIGAME_BORDER_WIDTH);
-    }
-
-    public static void drawPips(float x, float y, float size, float gap,
-                                int level, int max, Color lit, float alpha) {
-        drawPips(x, y, size, gap, level, max, lit, alpha, null);
-    }
-
-    public static void drawPips(float x, float y, float size, float gap,
-                                int level, int max, Color lit, float alpha,
-                                java.util.function.IntPredicate missingSchematic) {
-        for (int i = 0; i < max; i++) {
-            float px = x + i * (size + gap);
-
-            if (i < level) {
-                drawQuad(px, y, size, size, lit, alpha);
-                continue;
-            }
-
-            Color box = missingSchematic != null && missingSchematic.test(i + 1)
-                    ? Misc.getGrayColor() : Misc.getDarkPlayerColor();
-
-            drawQuad(px, y, size, size, box, 0.35f * alpha);
-            RoundedBorder.draw(px, y, size, size, 1f, box, 0.8f * alpha, 1f);
-        }
-    }
-
-    public static float getPipRowWidth(int max, float size, float gap) {
-        return max <= 0 ? 0f : max * size + (max - 1) * gap;
     }
 
     public static void startClip(float x, float y, float width, float height) {

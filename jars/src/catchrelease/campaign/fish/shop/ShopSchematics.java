@@ -15,6 +15,8 @@ public class ShopSchematics {
 
     public static final String KEY = "$catchrelease_shop_schematics";
     public static final String FRESH_KEY = "$catchrelease_shop_schematics_fresh";
+    // modules whose schematic a job has shown the player; the outfitter names them instead of Undiscovered
+    public static final String SEEN_KEY = "$catchrelease_shop_schematics_seen";
 
     public static String getKey(Tackle tackle) {
         return tackle == null ? null : "tackle:" + tackle.name();
@@ -37,6 +39,17 @@ public class ShopSchematics {
     public static void unlock(Tackle tackle) {
         String key = getKey(tackle);
         if (key != null && tackle != Tackle.NONE && getKnown().add(key)) getFresh().add(key);
+    }
+
+    public static void see(Tackle tackle) {
+        String key = getKey(tackle);
+        if (key != null && tackle != Tackle.NONE) getStored(SEEN_KEY).add(key);
+    }
+
+    public static boolean isSeen(Tackle tackle) {
+        String key = getKey(tackle);
+
+        return key != null && getStored(SEEN_KEY).contains(key);
     }
 
     public static boolean requires(UpgradeStat stat, int targetLevel) {
@@ -124,31 +137,25 @@ public class ShopSchematics {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     protected static Set<String> getFresh() {
-        if (Global.getSector() == null) return new LinkedHashSet<>();
+        return getStored(FRESH_KEY);
+    }
 
-        Map<String, Object> data = Global.getSector().getPersistentData();
-        Object stored = data.get(FRESH_KEY);
-        if (stored instanceof Set) return (Set<String>) stored;
-
-        Set<String> fresh = new LinkedHashSet<>();
-        data.put(FRESH_KEY, fresh);
-
-        return fresh;
+    protected static Set<String> getKnown() {
+        return getStored(KEY);
     }
 
     @SuppressWarnings("unchecked")
-    protected static Set<String> getKnown() {
+    protected static Set<String> getStored(String key) {
         if (Global.getSector() == null) return new LinkedHashSet<>();
 
         Map<String, Object> data = Global.getSector().getPersistentData();
-        Object stored = data.get(KEY);
+        Object stored = data.get(key);
         if (stored instanceof Set) return (Set<String>) stored;
 
-        Set<String> known = new LinkedHashSet<>();
-        data.put(KEY, known);
+        Set<String> set = new LinkedHashSet<>();
+        data.put(key, set);
 
-        return known;
+        return set;
     }
 }

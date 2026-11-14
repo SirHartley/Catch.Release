@@ -5,21 +5,33 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.ui.ListRow;
 import catchrelease.ui.ShopUi;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.ui.PositionAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.ui.LazyFont;
 
 import java.awt.Color;
+import java.util.List;
 
 public class ShopRowPlugin extends ListRow {
 
     public static final float PIP_SIZE = 8f;
-    public static final float PIP_GAP = 3f;
+    public static final float PIP_PITCH = 11f;
     public static final float PAD_SIDE = 10f;
+    public static final float FRESH_GAP = 6f;
+    public static final float PRICE_GAP = 12f;
+    public static final float OPEN_PIP_ALPHA = 0.6f;
+    public static final float PRICE_SHORT_ALPHA = 0.35f;
+    public static final float BLOCKED_TEXT_ALPHA = 0.6f;
+    public static final float UNDISCOVERED_ACCENT_ALPHA = 0.5f;
+    public static final float UNDISCOVERED_TEXT_ALPHA = 0.6f;
+    public static final String UNDISCOVERED = "Undiscovered";
 
-    // the whole gap between the accent bar and the name, so the ring sits centred in it
-    public static final float MARK_SLOT = 22f;
-    public static final float MARK_RADIUS = 5f;
+    // the gap between the accent bar and the name; the star sits in it and takes its clicks
+    public static final float NAME_LEFT = 30f;
+    public static final float MARK_SLOT = NAME_LEFT - ACCENT_WIDTH;
+    public static final float MARK_LEFT = 8f;
+    public static final float MARK_SIZE = 16f;
 
     protected final ShopEntry entry;
     protected final Host host;
@@ -37,13 +49,37 @@ public class ShopRowPlugin extends ListRow {
 
         PositionAPI getListViewport();
 
-        // the slot FIT puts a module into: 0, or 1 while the rig has its second slot
+        // the slot Fit puts a module into: 0, or 1 while the rig has its second slot
         int getTargetSlot();
     }
 
     public ShopRowPlugin(ShopEntry entry, Host host) {
         this.entry = entry;
         this.host = host;
+    }
+
+    public static float getPipRowWidth(int max) {
+        return max <= 0 ? 0f : (max - 1) * PIP_PITCH + PIP_SIZE;
+    }
+
+    // bought tiers in highlight, open ones light; a tier still waiting for its schematic takes the hole colour
+    public static void drawPips(float x, float y, ShopEntry entry, Color hole, float holeAlpha,
+                                float alphaMult) {
+        int level = entry.getLevel();
+
+        for (int rung = 1; rung <= entry.getMaxLevel(); rung++) {
+            float px = x + (rung - 1) * PIP_PITCH;
+
+            if (rung <= level) {
+                ShopUi.drawQuad(px, y, PIP_SIZE, PIP_SIZE, Misc.getHighlightColor(), alphaMult);
+            } else if (ShopSchematics.requires(entry.stat, rung)
+                    && !ShopSchematics.has(entry.stat, rung)) {
+                ShopUi.drawQuad(px, y, PIP_SIZE, PIP_SIZE, hole, holeAlpha * alphaMult);
+            } else {
+                ShopUi.drawQuad(px, y, PIP_SIZE, PIP_SIZE, Misc.getBasePlayerColor(),
+                        OPEN_PIP_ALPHA * alphaMult);
+            }
+        }
     }
 
     @Override
@@ -56,58 +92,78 @@ public class ShopRowPlugin extends ListRow {
         return host.isSelected(entry);
     }
 
-    @Override
-    protected float getSelectedFieldAlpha() {
-        return 0.5f;
-    }
-
     protected int slot() {
         return host.getTargetSlot();
     }
 
     // fitted elsewhere on the rig, or clashing with what is: greyed out for this slot only
     protected boolean isBlocked() {
-        return entry.kind == ShopEntry.Kind.TACKLE && !entry.isFittedIn(slot()) && !entry.canFitIn(slot());
+        return entry.kind == ShopEntry.Kind.TACKLE && !entry.isUndiscovered() && !entry.isFittedIn(slot())
+                && !entry.canFitIn(slot());
     }
 
     @Override
     protected Color getAccentColor() {
-        if (isBlocked()) return Misc.getGrayColor();
+        if (isBlocked() || entry.isUndiscovered()) return Misc.getGrayColor();
 
         FishRarity tier = entry.getPriceRarity();
         return tier == null ? Misc.getBasePlayerColor() : tier.color;
     }
 
     @Override
+    protected void renderBackground(float x, float y, float width, float height,
+                                    boolean selected, boolean hovered, float alphaMult) {
+        if (entry.isUndiscovered()) {
+            ShopUi.drawQuad(x, y, width, height, ShopUi.fill(), ShopUi.FILL_FAINT * alphaMult);
+            ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, getAccentColor(),
+                    UNDISCOVERED_ACCENT_ALPHA * alphaMult);
+            return;
+        }
+
+        float fill = selected ? ShopUi.FILL_SELECTED : isBlocked() ? ShopUi.FILL_DIM
+                : hovered ? ShopUi.FILL_HOVER : ShopUi.FILL_IDLE;
+
+        ShopUi.drawQuad(x, y, width, height, ShopUi.fill(), fill * alphaMult);
+        ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, getAccentColor(), alphaMult);
+    }
+
+    @Override
     protected void renderContent(float x, float y, float width, float height,
                                  boolean selected, boolean hovered, float alphaMult) {
-        renderMarkRing(x, y, height, alphaMult);
+        if (entry.isUndiscovered()) {
+            renderUndiscovered(x, y, height, alphaMult);
+            return;
+        }
+
+        renderMark(x, y, height, alphaMult);
         renderName(x, y, height, selected, alphaMult);
         renderState(x, y, width, height, alphaMult);
     }
 
-    protected void renderMarkRing(float x, float y, float height, float alphaMult) {
-        // a row that cannot be marked must not draw a saving-for-this ring, marked or not: a
-        // BOTH-fit module bought on one shelf used to keep a lit ring on the other
+    protected void renderMark(float x, float y, float height, float alphaMult) {
+        // a row that cannot be marked must not draw a saving-for-this star, marked or not: a
+        // BOTH-fit module bought on one shelf used to keep a lit mark on the other
         if (!ShopMarks.isMarkable(entry)) return;
 
-        boolean marked = ShopMarks.isMarked(entry);
+        Color rim = isMouseOverMark() ? Misc.getBasePlayerColor() : Misc.getGrayColor();
 
-        float cx = x + ACCENT_WIDTH + MARK_SLOT * 0.5f;
-        float cy = y + height * 0.5f;
+        ShopMarks.drawStar(Math.round(x + MARK_LEFT + MARK_SIZE * 0.5f),
+                Math.round(y + height * 0.5f), MARK_SIZE, ShopMarks.isMarked(entry), rim,
+                alphaMult);
+    }
 
-        boolean hovered = isMouseOverMark();
+    // no name, mark or price: the player has not come across the schematic
+    protected void renderUndiscovered(float x, float y, float height, float alphaMult) {
+        LazyFont font = ShopUi.getBodyFont();
+        if (font == null) return;
 
-        if (marked) {
-            catchrelease.rendering.helper.Disc.draw(cx, cy, MARK_RADIUS,
-                    Misc.getHighlightColor(), 0.95f * alphaMult, 0.95f * alphaMult, false);
+        if (name == null) {
+            name = ShopUi.createText(font, UNDISCOVERED);
+            name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        Color rim = marked ? Misc.getHighlightColor()
-                : hovered ? Misc.getBrightPlayerColor() : Misc.getGrayColor();
-
-        catchrelease.rendering.helper.Disc.drawOutline(cx, cy, MARK_RADIUS, rim,
-                (marked ? 0.95f : hovered ? 0.9f : 0.6f) * alphaMult, 1.2f);
+        name.setBaseColor(ShopUi.withAlpha(Misc.getGrayColor(), UNDISCOVERED_TEXT_ALPHA * alphaMult));
+        name.draw(Math.round(x + NAME_LEFT), top(y, height, name.getHeight()));
     }
 
     protected void renderName(float x, float y, float height, boolean selected, float alphaMult) {
@@ -121,95 +177,91 @@ public class ShopRowPlugin extends ListRow {
 
         // fitted gear reads as good news, not as spent; a maxed ladder and a locked rung stay quiet
         Color color = entry.isFittedIn(slot()) ? Misc.getPositiveHighlightColor()
-                : entry.isDone(slot()) || entry.isLocked() || isBlocked() || (entry.isCurio() && !entry.isOn())
+                : entry.isDone(slot()) || entry.isPurchaseLocked() || isBlocked() || (entry.isCurio() && !entry.isOn())
                 ? Misc.getGrayColor()
                 : selected ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
 
-        name.setBaseColor(ShopUi.withAlpha(color, (isBlocked() ? 0.6f : 1f) * alphaMult));
+        name.setBaseColor(ShopUi.withAlpha(color, (isBlocked() ? BLOCKED_TEXT_ALPHA : 1f) * alphaMult));
 
-        // rounded to the pixel - bitmap fonts blur off-pixel. Indented past the ring's slot whether or not this row draws one, so the names stay in a column
-        name.draw(Math.round(x + ACCENT_WIDTH + MARK_SLOT),
-                Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
+        // indented past the star's slot whether or not this row draws one, so the names stay in a column
+        name.draw(Math.round(x + NAME_LEFT), top(y, height, name.getHeight()));
+    }
+
+    // the engine puts the odd unit of centred text below, so round the gap above down
+    protected static float top(float y, float height, float textHeight) {
+        return y + height - (float) Math.floor((height - textHeight) / 2f);
     }
 
     protected void renderState(float x, float y, float width, float height, float alphaMult) {
         float right = x + width - PAD_SIDE;
 
         if (entry.isUpgrade() && !entry.isMaxed()) {
-            float pipsWidth = ShopUi.getPipRowWidth(entry.getMaxLevel(), PIP_SIZE, PIP_GAP);
-            float pipsLeft = right - pipsWidth;
+            float pipsLeft = right - getPipRowWidth(entry.getMaxLevel());
 
-            // bought rungs always in the player's own colour; an unbought rung is grey only while its schematic is missing, and an ordinary dark square once it can be bought
-            ShopUi.drawPips(Math.round(pipsLeft), Math.round(y + (height - PIP_SIZE) * 0.5f),
-                    PIP_SIZE, PIP_GAP, entry.getLevel(), entry.getMaxLevel(),
-                    Misc.getBasePlayerColor(), alphaMult,
-                    rung -> ShopSchematics.requires(entry.stat, rung)
-                            && !ShopSchematics.has(entry.stat, rung));
-
-            drawFresh(pipsLeft - 6f, y, height, alphaMult);
+            drawPips(Math.round(pipsLeft), Math.round(y + (height - PIP_SIZE) * 0.5f), entry,
+                    Color.BLACK, 1f, alphaMult);
+            drawFresh(pipsLeft - FRESH_GAP, y, height, alphaMult);
             return;
         }
 
-        right = drawFresh(right, y, height, alphaMult);
-
-        // a switch says which way it is thrown, both ways - OFF has to be as readable as ON, since an unmarked row would look like the shelf had simply not loaded
+        // a switch says which way it is thrown, both ways - Off has to be as readable as On, since an unmarked row would look like the shelf had simply not loaded
         if (entry.isCurio()) {
-            drawMark(entry.isOn() ? "ON" : "OFF",
+            drawMark(entry.isOn() ? "On" : "Off",
                     entry.isOn() ? Misc.getPositiveHighlightColor() : Misc.getGrayColor(),
                     right, y, height, alphaMult);
             return;
         }
 
         if (entry.isDone(slot())) {
-            drawMark(entry.isUpgrade() ? "MAX" : "FITTED", Misc.getPositiveHighlightColor(),
+            drawMark(entry.isUpgrade() ? "Max" : "Fitted", Misc.getPositiveHighlightColor(),
                     right, y, height, alphaMult);
             return;
         }
 
         if (isBlocked()) {
             Tackle blocker = entry.getBlocker(slot());
-            drawMark(blocker == entry.tackle ? "IN SLOT " + (2 - slot()) : "CONFLICT", Misc.getGrayColor(),
+            drawMark(blocker == entry.tackle ? "In slot " + (2 - slot()) : "Conflict", Misc.getGrayColor(),
                     right, y, height, alphaMult);
             return;
         }
 
-        if (entry.isLocked()) {
-            drawMark("LOCKED", Misc.getGrayColor(), right, y, height, alphaMult);
+        if (entry.isPurchaseLocked()) {
+            drawMark("Locked", Misc.getGrayColor(), right, y, height, alphaMult);
             return;
         }
 
         if (entry.isOwned() && entry.tackle != Tackle.NONE) {
-            drawMark("OWNED", Misc.getGrayColor(), right, y, height, alphaMult);
+            drawMark("Owned", Misc.getGrayColor(), right, y, height, alphaMult);
             return;
         }
 
         if (entry.isShipModule()) {
-            drawMark("SHIP", Misc.getGrayColor(), right, y, height, alphaMult);
+            drawMark("Ship", Misc.getGrayColor(), right, y, height, alphaMult);
             return;
         }
 
         FishRarity rarity = entry.getPriceRarity();
         if (rarity == null) return;
 
-        ShopUi.drawQuad(right - PIP_SIZE, y + (height - PIP_SIZE) * 0.5f, PIP_SIZE, PIP_SIZE,
-                rarity.color, (entry.canAfford() ? 0.9f : 0.35f) * alphaMult);
+        ShopUi.drawQuad(Math.round(right - PIP_SIZE), Math.round(y + (height - PIP_SIZE) * 0.5f),
+                PIP_SIZE, PIP_SIZE, rarity.color,
+                (entry.canAfford() ? 1f : PRICE_SHORT_ALPHA) * alphaMult);
+        drawFresh(right - PIP_SIZE - PRICE_GAP, y, height, alphaMult);
     }
 
-    protected float drawFresh(float right, float y, float height, float alphaMult) {
-        if (!ShopSchematics.isFresh(entry)) return right;
+    protected void drawFresh(float right, float y, float height, float alphaMult) {
+        if (!ShopSchematics.isFresh(entry)) return;
 
-        LazyFont small = ShopUi.getSmallFont();
-        if (small == null) return right;
+        LazyFont body = ShopUi.getBodyFont();
+        if (body == null) return;
 
         if (fresh == null) {
-            fresh = ShopUi.createText(small, "New!");
+            fresh = ShopUi.createText(body, "New!");
             fresh.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
         }
 
         fresh.setBaseColor(ShopUi.withAlpha(Misc.getHighlightColor(), alphaMult));
-        fresh.draw(Math.round(right), Math.round(y + height * 0.5f + fresh.getHeight() * 0.5f));
-
-        return right - fresh.getWidth() - 6f;
+        fresh.draw(Math.round(right), top(y, height, fresh.getHeight()));
     }
 
     protected void drawMark(String text, Color color, float right, float y, float height,
@@ -224,7 +276,15 @@ public class ShopRowPlugin extends ListRow {
         }
 
         mark.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-        mark.draw(Math.round(right), Math.round(y + height * 0.5f + mark.getHeight() * 0.5f));
+        mark.draw(Math.round(right), top(y, height, mark.getHeight()));
+    }
+
+    // an undiscovered row cannot be selected, so it takes no click and plays no sound
+    @Override
+    public void processInput(List<InputEventAPI> events) {
+        if (entry.isUndiscovered()) return;
+
+        super.processInput(events);
     }
 
     @Override
@@ -240,7 +300,7 @@ public class ShopRowPlugin extends ListRow {
 
     protected boolean isInMarkSlot(float pointX) {
         return pointX >= pos.getX() + ACCENT_WIDTH
-                && pointX <= pos.getX() + ACCENT_WIDTH + MARK_SLOT;
+                && pointX < pos.getX() + NAME_LEFT;
     }
 
     protected boolean isMouseOverMark() {
