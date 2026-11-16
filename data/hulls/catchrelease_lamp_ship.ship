@@ -1,155 +1,125 @@
 {
-    "bounds": [
-        118,
-        -22,
-        100,
-        -40,
-        88,
-        -47,
-        58,
-        -49,
-        37,
-        -42,
-        3,
-        -47,
-        -31,
-        -68,
-        -47,
-        -48,
-        -61,
-        -64,
-        -118,
-        -30,
-        -118,
-        30,
-        -61,
-        64,
-        -47,
-        48,
-        -31,
-        68,
-        3,
-        47,
-        37,
-        42,
-        58,
-        49,
-        88,
-        47,
-        100,
-        40,
-        118,
-        22
-    ],
-    "builtInMods": [
-        "civgrade"
-    ],
-    "builtInWeapons": {
-        "WS 004": "catchrelease_breach_light",
-        "WS 005": "catchrelease_breach_light"
+  "hullName": "Monstrance",
+  "hullId": "catchrelease_lamp_ship",
+  "hullSize": "CRUISER",
+  "spriteName": "graphics/catchrelease/ships/lightbulb.png",
+  "style": "MIDLINE",
+  "height": 245,
+  "width": 140,
+  "center": [70, 107.5],
+  "collisionRadius": 168,
+  "shieldCenter": [12.5, 0],
+  "shieldRadius": 135.5,
+  "viewOffset": 0,
+  "builtInMods": [
+    "civgrade"
+  ],
+  "builtInWeapons": {
+    "WS 004": "catchrelease_breach_light",
+    "WS 005": "catchrelease_breach_light"
+  },
+  "weaponSlots": [
+    {
+      "angle": 0,
+      "arc": 240,
+      "id": "WS 001",
+      "locations": [87.5, 0],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "BALLISTIC"
     },
-    "center": [
-        70,
-        120
-    ],
-    "collisionRadius": 130,
-    "engineSlots": [
-        {
-            "angle": 180,
-            "contrailSize": 40,
-            "length": 40,
-            "location": [
-                -118,
-                23
-            ],
-            "style": "MIDLINE",
-            "width": 14
-        },
-        {
-            "angle": 180,
-            "contrailSize": 40,
-            "length": 40,
-            "location": [
-                -118,
-                -22
-            ],
-            "style": "MIDLINE",
-            "width": 14
-        }
-    ],
-    "height": 245,
-    "hullId": "catchrelease_lamp_ship",
-    "hullName": "Monstrance",
-    "hullSize": "CRUISER",
-    "shieldCenter": [
-        0,
-        0
-    ],
-    "shieldRadius": 128,
-    "spriteName": "graphics/catchrelease/ships/lightbulb.png",
-    "style": "MIDLINE",
-    "viewOffset": 0,
-    "weaponSlots": [
-        {
-            "angle": 0,
-            "arc": 240,
-            "id": "WS 001",
-            "locations": [
-                80,
-                0
-            ],
-            "mount": "TURRET",
-            "size": "SMALL",
-            "type": "BALLISTIC"
-        },
-        {
-            "angle": 45,
-            "arc": 200,
-            "id": "WS 002",
-            "locations": [
-                47,
-                36
-            ],
-            "mount": "TURRET",
-            "size": "SMALL",
-            "type": "BALLISTIC"
-        },
-        {
-            "angle": -45,
-            "arc": 200,
-            "id": "WS 003",
-            "locations": [
-                47,
-                -36
-            ],
-            "mount": "TURRET",
-            "size": "SMALL",
-            "type": "BALLISTIC"
-        },
-        {
-            "angle": 90,
-            "arc": 108,
-            "id": "WS 004",
-            "locations": [
-                -24,
-                46
-            ],
-            "mount": "HARDPOINT",
-            "size": "SMALL",
-            "type": "DECORATIVE"
-        },
-        {
-            "angle": -90,
-            "arc": 108,
-            "id": "WS 005",
-            "locations": [
-                -24,
-                -46
-            ],
-            "mount": "HARDPOINT",
-            "size": "SMALL",
-            "type": "DECORATIVE"
-        }
-    ],
-    "width": 140
+    {
+      "angle": 45,
+      "arc": 200,
+      "id": "WS 002",
+      "locations": [59.5, 33.5],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "BALLISTIC"
+    },
+    {
+      "angle": -45,
+      "arc": 200,
+      "id": "WS 003",
+      "locations": [59.5, -33.5],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "BALLISTIC"
+    },
+    {
+      "angle": 90,
+      "arc": 108,
+      "id": "WS 004",
+      "locations": [-11.5, 46],
+      "mount": "HARDPOINT",
+      "size": "SMALL",
+      "type": "DECORATIVE"
+    },
+    {
+      "angle": -90,
+      "arc": 108,
+      "id": "WS 005",
+      "locations": [-11.5, -46],
+      "mount": "HARDPOINT",
+      "size": "SMALL",
+      "type": "DECORATIVE"
+    },
+    {
+      "angle": 0,
+      "arc": 360,
+      "id": "LB 1",
+      "locations": [50.5, 0.5],
+      "mount": "HIDDEN",
+      "size": "LARGE",
+      "type": "LAUNCH_BAY"
+    }
+  ],
+  "engineSlots": [
+    {
+      "angle": 180,
+      "contrailSize": 40,
+      "length": 40,
+      "location": [-105.5, 23],
+      "style": "MIDLINE",
+      "width": 14
+    },
+    {
+      "angle": 180,
+      "contrailSize": 40,
+      "length": 40,
+      "location": [-105.5, -22],
+      "style": "MIDLINE",
+      "width": 14
+    }
+  ],
+  "bounds": [
+    110.5, -38.5,
+    98.5, -29,
+    78.5, -35.5,
+    70.5, -49,
+    49.5, -42,
+    11, -44.5,
+    -18.5, -68,
+    -34.5, -48,
+    -47, -60.5,
+    -93.5, -31,
+    -106, -30.5,
+    -106, -15,
+    -88, -11,
+    -88, 11,
+    -106, 15,
+    -106, 30.5,
+    -93.5, 31,
+    -47, 60.5,
+    -34.5, 48,
+    -18.5, 68,
+    11, 44.5,
+    49.5, 42,
+    70.5, 49,
+    78.5, 35.5,
+    98.5, 29,
+    110.5, 38.5,
+    123, 27.5,
+    123, -27.5
+  ]
 }
