@@ -3,6 +3,7 @@ package catchrelease.tools;
 import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.legendary.FakeWrecksModule;
 import com.fs.starfarer.api.EveryFrameScript;
+import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.*;
@@ -131,6 +132,7 @@ public final class HauntWreckChecks {
                 case "getFloat" -> 1f;
                 case "getInt" -> 1;
                 case "getBoolean", "isDevMode" -> false;
+                case "getCurrentState" -> GameState.CAMPAIGN;
                 case "getColor" -> java.awt.Color.WHITE;
                 case "getAngleInDegreesFast" -> {
                     Vector2f from = a.length == 1 ? new Vector2f() : (Vector2f) a[0];
@@ -143,6 +145,7 @@ public final class HauntWreckChecks {
                     new JSONObject().put("id", "wreck").put("stationRole", ""));
             Global.setSector(proxy(SectorAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getPlayerFleet" -> player;
+                case "isExtMode" -> false;
                 case "getClock" -> clock;
                 case "getFaction" -> proxy(FactionAPI.class, (fp, fm, fa) -> switch (fm.getName()) {
                     case "pickRandomShipName" -> "Test wreck";

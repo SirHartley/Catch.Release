@@ -24,7 +24,7 @@ import patchlib.api.spec.MethodQuerySpec;
 
 import java.util.List;
 
-// 0.98a-RC8: the picker is com.fs.starfarer.ui.newui._, the only class there holding a CargoPickerListener
+// 0.98.5a-RC7: the picker is com.fs.starfarer.ui.newui.I, the only class there holding a CargoPickerListener
 @Patch(target = @ClassMatch(subtype = UIPanelAPI.class, packageName = "com.fs.starfarer.ui.newui",
         fieldMatches = @FieldMatch(type = CargoPickerListener.class)))
 public class CargoPickerButtonAdder {
