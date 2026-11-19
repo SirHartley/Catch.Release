@@ -13,6 +13,7 @@ None
 
 General
 Added - Version Checker support (changelog and download in LunaLib and triOS)
+Adjusted - Updated to Starsector 0.98.5a
 Adjusted - Off-screen ripples and Fisherman lamps are no longer drawn
 Adjusted - Lower frame cost for epic and legendary trails out of lamplight
 Fixed - Ripple and rupture shaders no longer cause stutter and VRAM growth

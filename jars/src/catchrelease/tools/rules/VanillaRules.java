@@ -12,70 +12,78 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 // What vanilla fires and handles, so mod rows that join vanilla triggers are not reported. Two sources:
-// ENGINE lists the triggers the 0.98a-RC8 game code fires with a literal name; the index lists what vanilla
+// ENGINE lists the triggers the 0.98.5a-RC7 game code fires with a literal name; the index lists what vanilla
 // rules.csv rows use and fire, generated from the vanilla file by "RulesCheck --index" (RULES.md "Rules check tool").
 final class VanillaRules {
 
     // Kept outside jars/src: IntelliJ copies every non-Java file of a source root into catchrelease.jar.
     static final String INDEX = "docs/rules-reference/vanilla-rules-index.txt";
 
-    // Every call in the 0.98a-RC8 sources that fires or opens a trigger given as a string literal: FireBest.fire,
+    // Every call in the 0.98.5a-RC7 sources that fires or opens a trigger given as a string literal: FireBest.fire,
     // FireAll.fire, the dialog plugins' fireBest/fireAll, getBestMatching and RuleBasedInteractionDialogPluginImpl.
-    // Found by searching sources-api/*.java and sources-obf/*.java of the starsector-knowledge skill; references
-    // are bundle file and line. Triggers fired from a variable (defeat triggers, raid triggers, "<creator>OfferDesc")
-    // are vanilla-specific and covered by the index, because vanilla rows use them.
+    // Found by searching starfarer.api.zip and starfarer_obf.jar decompiled with Vineflower 1.11.2; references are
+    // file and line under com/fs/starfarer/api, or "obf" and the class under com.fs.starfarer. Triggers fired from
+    // a variable (defeat triggers, raid triggers, "<creator>OfferDesc") are vanilla-specific and covered by the
+    // index, because vanilla rows use them.
     record EngineTrigger(String trigger, boolean fireAll, String source) {
     }
 
     static final List<EngineTrigger> ENGINE = List.of(
-            new EngineTrigger("OpenInteractionDialog", false, "impl.campaign.java:20289 RuleBasedInteractionDialogPluginImpl() default initial trigger"),
-            new EngineTrigger("DialogOptionSelected", false, "impl.campaign.java:20409 RuleBasedInteractionDialogPluginImpl.optionSelected"),
-            new EngineTrigger("NewGameOptionSelected", false, "impl.campaign.java:19227 NewGameDialogPluginImpl"),
-            new EngineTrigger("BeginNewGameCreation", false, "impl.campaign.java:19243 NewGameDialogPluginImpl"),
-            new EngineTrigger("OpenCDE", false, "ui.newui.java:3988 O0Oo (comm directory entry)"),
-            new EngineTrigger("TradePanelFlavorText", false, "campaign.ui.java:5462"),
-            new EngineTrigger("BeginFleetEncounter", false, "impl.campaign.java:12886, 12906, 12997 FleetInteractionDialogPluginImpl"),
-            new EngineTrigger("BeginFleetEncounter2", false, "impl.campaign.java:12904, 12995 FleetInteractionDialogPluginImpl"),
-            new EngineTrigger("OngoingBattleEncounter", false, "impl.campaign.java:13001 FleetInteractionDialogPluginImpl"),
-            new EngineTrigger("OpenCommLink", false, "impl.campaign.java:13843 FleetInteractionDialogPluginImpl"),
-            new EngineTrigger("MarketPostOpen", true, "impl.campaign.java:257 AbandonMarketPluginImpl, 166180 MarketCMD (FireAll); 154093 EndConversation (FireBest)"),
-            new EngineTrigger("PopulateOptions", true, "impl.campaign.java:261 AbandonMarketPluginImpl, 126015 BaseMissionHub, 154095 EndConversation, 158295 OpenCoreTab, 166196 MarketCMD"),
-            new EngineTrigger("FireAllIntercept", false, "impl.campaign.java:154165 FireAll"),
-            new EngineTrigger("AddBarEvents", true, "impl.campaign.java:161515 BarCMD"),
-            new EngineTrigger("ReturnFromBar", false, "impl.campaign.java:161708 BarCMD"),
-            new EngineTrigger("BarEventFinished", false, "impl.campaign.java:73212 BarEventDialogPlugin"),
-            new EngineTrigger("BarEventFinishedNoContinue", false, "impl.campaign.java:73214 BarEventDialogPlugin"),
-            new EngineTrigger("HistorianBackstoryBlurb", false, "impl.campaign.java:79256 HistorianBarEvent"),
-            new EngineTrigger("AddMHCloseOption", false, "impl.campaign.java:126050 BaseMissionHub"),
-            new EngineTrigger("MHPostMissionListText", false, "impl.campaign.java:126057 BaseMissionHub"),
-            new EngineTrigger("SOEDuelFinished", false, "impl.campaign.java:41907 DuelDialogDelegate"),
-            new EngineTrigger("SOETutorialFinished", false, "impl.campaign.java:41909 DuelDialogDelegate"),
-            new EngineTrigger("FoodShortageEndedByPlayerSale", false, "impl.campaign.java:44373 FoodShortageEvent"),
-            new EngineTrigger("CPCBlueprintsPicked", false, "impl.campaign.java:109694 CustomProductionContract"),
-            new EngineTrigger("SubstrateWeaponsPicked", false, "impl.campaign.java:153843 DwellerCMD"),
-            new EngineTrigger("SalvageSpecialFinished", false, "impl.campaign.java:169179 SalvageSpecialInteraction"),
-            new EngineTrigger("SalvageSpecialFinishedNoContinue", false, "impl.campaign.java:161456 BarCMD, 169181 SalvageSpecialInteraction"),
-            new EngineTrigger("AICoresTurnedIn", false, "impl.campaign.java:162737 AICores, 163550 DemandCargo"),
-            new EngineTrigger("CargoPodsOptions", true, "impl.campaign.java:163365 CargoPods"),
-            new EngineTrigger("CargoPodsOptionsUpdate", true, "impl.campaign.java:163366 CargoPods"),
-            new EngineTrigger("PostGroundRaid", false, "impl.campaign.java:165541 MarketCMD"),
-            new EngineTrigger("BeatDefendersContinue", false, "impl.campaign.java:165651 MarketCMD, 167602 SalvageDefenderInteraction"),
-            new EngineTrigger("WormholeDeploymentFinished", false, "impl.campaign.java:167215 Objectives"),
-            new EngineTrigger("PerformSalvage", false, "impl.campaign.java:167938 SalvageEntity"),
-            new EngineTrigger("ZGRItemsTurnedIn", false, "impl.campaign.java:169364 ZGRTurnIn"),
-            new EngineTrigger("ShipRecoveryCustomText", false, "impl.campaign.java:171103 ShipRecoverySpecial"),
-            new EngineTrigger("PostShipRecoverySpecial", true, "impl.campaign.java:171441 ShipRecoverySpecial"),
-            new EngineTrigger("AfterZigguratDefeat", false, "impl.campaign.java:207764 TTBlackSite dialog"),
-            new EngineTrigger("ShroudedSubstrateRightClick", false, "campaign.impl.java:1994 ShroudedSubstratePlugin dialog"),
-            new EngineTrigger("RemoveAICoreAdmin", false, "campaign.command.java:634 AdminPickerDialog dialog"),
-            new EngineTrigger("OutpostEstablished", false, "campaign.ui.java:20247 PlanetSurveyPanel dialog"));
+            new EngineTrigger("OpenInteractionDialog", false, "impl/campaign/RuleBasedInteractionDialogPluginImpl.java:65 default initial trigger"),
+            new EngineTrigger("DialogOptionSelected", false, "impl/campaign/RuleBasedInteractionDialogPluginImpl.java:215 optionSelected"),
+            new EngineTrigger("NewGameOptionSelected", false, "impl/campaign/NewGameDialogPluginImpl.java:120"),
+            new EngineTrigger("BeginNewGameCreation", false, "impl/campaign/NewGameDialogPluginImpl.java:140"),
+            new EngineTrigger("BeginNewGameCreationExt", false, "impl/campaign/NewGameDialogPluginImpl.java:138"),
+            new EngineTrigger("OpenCDE", false, "obf ui.newui.O0Oo:300 (comm directory entry)"),
+            new EngineTrigger("TradePanelFlavorText", false, "obf campaign.ui.E:830 (trade panel)"),
+            new EngineTrigger("BeginFleetEncounter", false, "impl/campaign/FleetInteractionDialogPluginImpl.java:273, 296, 401"),
+            new EngineTrigger("BeginFleetEncounter2", false, "impl/campaign/FleetInteractionDialogPluginImpl.java:294, 399"),
+            new EngineTrigger("OngoingBattleEncounter", false, "impl/campaign/FleetInteractionDialogPluginImpl.java:405 (commented out)"),
+            new EngineTrigger("OpenCommLink", false, "impl/campaign/FleetInteractionDialogPluginImpl.java:1340"),
+            new EngineTrigger("MarketPostOpen", true, "impl/campaign/AbandonMarketPluginImpl.java:139, impl/campaign/rulecmd/salvage/MarketCMD.java:2980 (FireAll, commented out); impl/campaign/rulecmd/EndConversation.java:54 (FireBest)"),
+            new EngineTrigger("PopulateOptions", true, "impl/campaign/rulecmd/salvage/MarketCMD.java:2997, impl/campaign/rulecmd/OpenCoreTab.java:52, impl/campaign/rulecmd/EndConversation.java:56, impl/campaign/missions/hub/BaseMissionHub.java:216"),
+            new EngineTrigger("FireAllIntercept", false, "impl/campaign/rulecmd/FireAll.java:75"),
+            new EngineTrigger("AddBarEvents", true, "impl/campaign/rulecmd/missions/BarCMD.java:225"),
+            new EngineTrigger("ReturnFromBar", false, "impl/campaign/rulecmd/missions/BarCMD.java:454"),
+            new EngineTrigger("BarEventFinished", false, "impl/campaign/intel/bar/BarEventDialogPlugin.java:67 (commented out)"),
+            new EngineTrigger("BarEventFinishedNoContinue", false, "impl/campaign/intel/bar/BarEventDialogPlugin.java:69 (commented out)"),
+            new EngineTrigger("HistorianBackstoryBlurb", false, "impl/campaign/intel/bar/events/historian/HistorianBarEvent.java:259, 264"),
+            new EngineTrigger("AddMHCloseOption", false, "impl/campaign/missions/hub/BaseMissionHub.java:257"),
+            new EngineTrigger("MHPostMissionListText", false, "impl/campaign/missions/hub/BaseMissionHub.java:266"),
+            new EngineTrigger("SOEDuelFinished", false, "impl/campaign/eventide/DuelDialogDelegate.java:75"),
+            new EngineTrigger("SOETutorialFinished", false, "impl/campaign/eventide/DuelDialogDelegate.java:77"),
+            new EngineTrigger("FoodShortageEndedByPlayerSale", false, "impl/campaign/events/FoodShortageEvent.java:469, 490"),
+            new EngineTrigger("PersonnelOfficerPicksMade", false, "impl/campaign/events/OfficerManagerEvent.java:771"),
+            new EngineTrigger("CPCBlueprintsPicked", false, "impl/campaign/missions/CustomProductionContract.java:629, 659"),
+            new EngineTrigger("SubstrateWeaponsPicked", false, "impl/campaign/rulecmd/DwellerCMD.java:263"),
+            new EngineTrigger("SalvageSpecialFinished", false, "impl/campaign/rulecmd/salvage/SalvageSpecialInteraction.java:101"),
+            new EngineTrigger("SalvageSpecialFinishedNoContinue", false, "impl/campaign/rulecmd/salvage/SalvageSpecialInteraction.java:103, 152"),
+            new EngineTrigger("AICoresTurnedIn", false, "impl/campaign/rulecmd/salvage/AICores.java:165"),
+            new EngineTrigger("CargoPodsOptions", true, "impl/campaign/rulecmd/salvage/CargoPods.java:338"),
+            new EngineTrigger("CargoPodsOptionsUpdate", true, "impl/campaign/rulecmd/salvage/CargoPods.java:339"),
+            new EngineTrigger("CallFleetTargetSelected", false, "impl/campaign/rulecmd/salvage/MiscCMD.java:400"),
+            new EngineTrigger("SellToFleetFinished", false, "impl/campaign/rulecmd/salvage/SellToFleet.java:256"),
+            new EngineTrigger("PostGroundRaid", false, "impl/campaign/rulecmd/salvage/MarketCMD.java:2179"),
+            new EngineTrigger("BeatDefendersContinue", false, "impl/campaign/rulecmd/salvage/SalvageDefenderInteraction.java:115"),
+            new EngineTrigger("WormholeDeploymentFinished", false, "impl/campaign/rulecmd/salvage/Objectives.java:722"),
+            new EngineTrigger("PerformSalvage", false, "impl/campaign/rulecmd/salvage/SalvageEntity.java:289, 290 (commented out)"),
+            new EngineTrigger("ZGRItemsTurnedIn", false, "impl/campaign/rulecmd/salvage/ZGRTurnIn.java:159"),
+            new EngineTrigger("ShipRecoveryCustomText", false, "impl/campaign/rulecmd/salvage/special/ShipRecoverySpecial.java:296"),
+            new EngineTrigger("PostShipRecoverySpecial", true, "impl/campaign/rulecmd/salvage/special/ShipRecoverySpecial.java:711"),
+            new EngineTrigger("AfterZigguratDefeat", false, "impl/campaign/world/TTBlackSite.java:176 dialog"),
+            new EngineTrigger("SD7SQarasAgentDefeated", false, "impl/campaign/missions/askonia/SDSevenSons.java:1581 dialog"),
+            new EngineTrigger("SevenSonsAndradaFileBegin", false, "impl/campaign/intel/misc/SevenSonsIntel.java:485, impl/campaign/missions/askonia/SDSevenSons.java:325 dialog"),
+            new EngineTrigger("SevenSonsAndradaDecryptBegin", false, "impl/campaign/intel/misc/SevenSonsIntel.java:498, impl/campaign/missions/askonia/SDSevenSons.java:335 dialog"),
+            new EngineTrigger("ShroudedSubstrateRightClick", false, "campaign/impl/items/ShroudedSubstratePlugin.java:94 dialog"),
+            new EngineTrigger("RemoveAICoreAdmin", false, "obf campaign.command.AdminPickerDialog:722 dialog"),
+            new EngineTrigger("OutpostEstablished", false, "obf campaign.ui.marketinfo.PlanetSurveyPanel:561 dialog"));
 
-    // Hub missions fire "<missionId>_blurb" and "_option" (BaseMissionHub, impl.campaign.java:126026-126045),
-    // "_blurbBar" and "_optionBar" (HubMissionBarEventWrapper 126407, HubMissionWithBarEvent 126490) and
-    // "_startBar" (HubMissionWithBarEvent 126474). The mission id is not known here, so the suffix is accepted.
+    // Hub missions fire "<missionId>_blurb" and "_option" (BaseMissionHub.java:247, 251), "_blurbBar" and
+    // "_optionBar" (HubMissionBarEventWrapper.java:107, 108) and "_startBar" (HubMissionWithBarEvent.java:34,
+    // commented out). The mission id is not known here, so the suffix is accepted.
     static final List<String> ENGINE_SUFFIXES = List.of("_blurb", "_option", "_blurbBar", "_optionBar", "_startBar");
 
-    // ruleCommandPackages in starsector-core data/config/settings.json (skill data/config.txt:3924).
+    // ruleCommandPackages in starsector-core data/config/settings.json (line 1303).
     static final List<String> COMMAND_PACKAGES = List.of(
             "com.fs.starfarer.api.impl.campaign.rulecmd",
             "com.fs.starfarer.api.impl.campaign.rulecmd.salvage",
@@ -83,7 +91,7 @@ final class VanillaRules {
             "com.fs.starfarer.api.impl.campaign.rulecmd.missions",
             "com.fs.starfarer.api.impl.campaign.rulecmd.academy");
 
-    // Triggers whose rows option clicks select; PaginatedOptions fires one or the other (impl.campaign.java:158610).
+    // Triggers whose rows option clicks select; PaginatedOptions fires one or the other (PaginatedOptions.java:154).
     static final Set<String> OPTION_TRIGGERS = Set.of("DialogOptionSelected", "NewGameOptionSelected");
 
     private static final String[] SECTIONS = {"triggers", "fireAll", "fireBest", "options", "keys"};
