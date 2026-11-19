@@ -61,14 +61,14 @@ public abstract class FishListRow extends ListRow {
                     Math.round(y + height * 0.5f + name.getHeight() * 0.5f));
         }
 
-        // the wanted dot at the row's right end, centred on the row's own midline - asked of everything that wants a fish, errands included, not the shopping list alone
+        // the wanted star at the row's right end, centred on the row's own midline - asked of everything that wants a fish, errands included, not the shopping list alone
         boolean marked = ShopMarks.isWanted(spec);
 
         renderTag(x, y, width, height, marked, alphaMult);
 
         if (marked) {
-            ShopMarks.drawDot(x + width - 8f, y + height * 0.5f,
-                    ShopMarks.DOT_RADIUS - 0.5f, alphaMult);
+            ShopMarks.drawStar(x + width - ShopMarks.STAR_INSET, y + height * 0.5f,
+                    ShopMarks.STAR_SMALL, alphaMult);
         }
     }
 

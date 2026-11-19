@@ -32,36 +32,63 @@ Do not maintain separate wording or formatting standards for Java strings.
 In the outfitter, a null module price can mean an empty slot, an already-owned
 module or a ship module that comes with a fishing ship. UI text must distinguish them.
 
+### Outfitter look
+
+`FishShopDialog` keeps its 920 x 640 custom visual dialog and builds one body panel
+(`UiKit.plain`, 896 x 616 at 12) that it removes and rebuilds on every change. The
+list's scroll offset is read before the rebuild and clamped after it, and it is kept
+across the payment picker's reopen; a new tab or rig resets it. Button actions and the
+painted tabs, rows and slots only queue work; `advance` runs it and rebuilds, so the
+panel tree never changes during input dispatch.
+
+- Header: `UiKit.title` "Outfitter" with the help `?`, vanilla `CutStyle.TOP` tabs
+  (`UiKit.tab`, 104 wide, 108 apart) and `UiKit.rule` under them. The credits counter
+  (18 px icon, clear of the rule) ends at the right edge; `FishPurse.add` puts the fish
+  per rarity to its left, each count with its species tooltip.
+- Rig tabs (`ShopTabPlugin`, 104 x 44, icon over an orbitron12 label) sit under the rule
+  except on Extras, whose list starts there. Rows (`ShopRowPlugin`) are 26 high, 30
+  apart, 320 wide; the list ends on a whole row above the divider's end.
+- Fills are the opaque dark player colour at `ShopUi.FILL_*`: idle 0.42, hover 0.55,
+  selected solid, blocked 0.22. Rows have no border. A row is the 3 px accent (price
+  rarity, grey when blocked), the shopping-list star (`ShopMarks.drawStar`), the name at
+  30, then pips (8 px, 11 apart: highlight bought, light open, black for a tier waiting
+  for its schematic) or a state word in orbitron12, and "New!" before them.
+- An Undiscovered row (`ShopEntry.isUndiscovered`) has the faint fill (0.14), a grey
+  accent at 0.5 and "Undiscovered" in grey at 0.6, with no mark, state or price. It
+  takes no click and is never selected; a hotspot over the whole row carries its
+  tooltip. A seen module whose schematic is not learned reads "Locked" and shows its
+  price with grey buttons and "Schematic required."
+- `UiKit.vrule` at 332 divides list and detail. The detail head is a 1 px outline
+  box of 72 with a 64 filled tile 4 inside it and the icon fitted to 56, tinted base;
+  the name in orbitron20 bold and the sub-line (pips and "Tier n / m", or the group)
+  sit 84 right of the box.
+- Price, Fish required and Matching aboard are a label column of 132 with icon and
+  value after it. The buttons are a bank: the main action 160 (green when it costs
+  something and can be bought, neutral when free, grey when not live), Select 120. One
+  status or reason line is reserved 32 under the buttons; short on both, it names the
+  fish before the credits. Undo last purchase sits
+  bottom left, Leave bottom right.
+
 ### Outfitter second slot
 
 While a rig has its second slot (`FishingShips.hasSecondSlot`), the Equipment shelf
-shows two `ShopSlotPlugin` cells above the module list: half the list width each,
-`SLOT_HEIGHT` tall, the slot's module or "Empty" beneath a small "SLOT n" label. A cell
-is drawn like the module rows beneath it, in the Outfitter's flat style: the rows'
-dark-player fill (0.12, 0.3 hovered, 0.5 as the target slot) and a 3px bright left accent
-(0.3, 0.6, 0.9), with its text in the rows' name column (`TEXT_LEFT`) and the label
-bright while it is the target. It has no outline and no bottom accent, which the
-category tabs directly above carry, so the cells read as part of the list rather than
-as a second row of tabs. A cell holding a module that
-came with the ship, and that the player does not own a copy of, carries a small grey
-"SHIP" in its top right, the same distinction the rows draw. `needsCompactSlotText`
-measures every slot's name with `LazyFont.calcWidth` and picks one font for the whole
-row, so a name too long for the body font never leaves the two cells in different
+shows two `ShopSlotPlugin` tiles above the module list, 158 x 46 and 162 apart: a 1 px
+outline (base on the target slot, the dark fill colour otherwise) with a filled bar 4
+inside it, "Slot n" in orbitron12 and the module or "Empty" beneath. A tile holding a
+module that came with the ship, and that the player does not own a copy of, carries a
+grey "Ship" in its top right, the same distinction the rows draw.
+`needsCompactSlotText` measures every slot's name with `LazyFont.calcWidth` and picks
+one font for the whole row, so a long name never leaves the two tiles in different
 typefaces.
 
-The selected cell is the target slot; FIT reads "FIT IN SLOT n"
-and every row and the detail pane are judged against it. Without a second slot the
-shelf looks as it did with one slot. A module fitted in the other slot, or one that
-shares an exclusion group with it, is blocked for the target slot: its row name is
-grey at 0.6 alpha with an "IN SLOT n" or "CONFLICT" mark, FIT and SELECT are not
-live, and a hotspot past the mark ring carries a hover naming the slot or the
-conflicting module. A blocked row stays selectable so the detail pane can say why; for an owned or ship
-module that line replaces the "fitting it is free" price line. The detail header's
-accent, like the row, is judged against the target slot (`ShopEntry.isDone(slot)`), and
-so is its subtitle: it names the target as "FITTING SLOT n" unless the module is already
-in that slot, and goes green only when it is. A module fitted in the rig's other slot
-reads grey there, matching its grey row, and the subtitle names both slots.
-A ship module shows "SHIP" where an owned module shows "OWNED".
+The selected tile is the target slot; the main button reads "Fit in slot n" and every
+row and the detail are judged against it. Without a second slot the shelf looks as it
+did with one slot. A module fitted in the other slot, or one that shares an exclusion
+group with it, is blocked for the target slot: its row name is grey at 0.6 alpha with
+an "In slot n" or "Conflict" mark and the dimmer fill, Fit and Select are not live, and
+a hotspot past the star carries a hover naming the slot or the conflicting module. A
+blocked row stays selectable so the detail can say why: the reason is the line under
+the buttons. A ship module shows "Ship" where an owned module shows "Owned".
 
 Treasure result rows normally use the chest rarity colour, read from
 `TreasureAward.color`; a quest chest such as T1's golden chest sets its own label and
@@ -177,9 +204,90 @@ Fisherman identity and vanilla person-panel setup are covered by
   `showCustomVisualDialog()` when the panel must have none.
 - `FishShopDialog` takes an optional close callback. Colony use may dismiss the
   interaction; Fisherman use must restore the conversation.
+- `FishermanSurveyDialog` (range data) uses `showCustomDialog(712, 437)`: the
+  game's frame and its Return button, which, like Escape, closes it through the
+  same callback.
 
 Use the [project routing](RULES.md#project-routing) for Fisherman panel returns and
 the [fleet and bar exit paths](RULES.md#fleet-and-bar-exits) for teardown.
+
+## Vanilla-style panels
+
+`ui/UiKit` builds panels from the game's own controls: section headings,
+`addButton` buttons with cuts, area checkboxes, checkboxes and settings labels,
+placed with absolute `inTL` positions. New panels use it. `PaneWidgets`,
+`ShopUi` and `ListRow` remain for the Outfitter's painted rows and tabs and the map
+widgets.
+
+- A `TooltipMakerAPI` element places its first item five units right of its own
+  left edge. `UiKit.button`, `checkbox` and `row` create the element five units
+  wider and place it five units left (`UiKit.INSET`), so the control sits at the
+  x it was given.
+- `addSectionHeading` draws ten units wider than the width it gets and has no
+  inset for left-aligned text. `UiKit.title` passes `width - 10`;
+  `UiKit.heading` paints the bar itself and places the label eight units in.
+- One-line text goes through `UiKit.fit`, which shortens with `...` and keeps
+  two units of slack; `UiKit.text` adds the full text as a tooltip when it was
+  shortened. Centre text in a box with `UiKit.textIn`, which rounds the offset
+  down as the engine does.
+- Buttons carry a `Runnable` as their id. `UiKit.Canvas.buttonPressed` runs it,
+  so create every sub-panel with `UiKit.plain`, `painted` or `row`. An action
+  that rebuilds the panel only queues itself; the owning plugin runs the queue
+  and the rebuild from `advance`, after input dispatch.
+- `UiKit.row` is a panel filled by an area checkbox. Labels, sprites and painted
+  panels added on top never take the click. Start a grid of rows inside a
+  scroll element two units from its left edge, or the clip removes the first
+  column's left border.
+- `UiKit.sprite` sets the size and colour of a shared `SpriteAPI` before each
+  draw. Another owner of the same sprite must do the same.
+
+The offsets were measured on 0.98a-RC8 for the Starsector UI design skill
+(`references/traps.md` and `recipes.md` there). They have not been rechecked
+against the decompiled source for this guide.
+
+### Range data
+
+`FishermanSurveyDialog` follows the Aquarium scheme with `UiKit`: title with the
+`?` legend, `FishPurse` on the next line, a "Charts" heading with the count, picture
+tiles on the left and the selected chart's card on the right of a `UiKit.vrule`. It
+does not use the Outfitter's filled bars: tiles are `UiKit.row` area checkboxes, the
+picture, facts and price sit in 1 px bordered boxes on black.
+
+- Tiles are 116 x 168, three per row, two rows visible. The grid's scroll element
+  starts two units in and its bar sits left of the divider. The viewport is two
+  whole rows high and scrolls freely.
+- A tile is the backlit silhouette, the name in rarity colour on up to two lines
+  (split where the longer line is shortest, then shortened with `...`), a short
+  rule, and the price: a fish icon in the asked rarity's colour and the count,
+  red when short. A click only selects; the green Buy in the card's strip buys.
+  After a purchase the neighbour of the bought chart is selected, after undo the
+  returned one.
+- The card is the name bar, the line "Charts this species' habitat on your map.",
+  a 72 picture with Type, Rarity and Aboard, the price strip with Buy, a line kept
+  for "Not enough specimens aboard.", and the bottom row behind a rule: Undo last
+  purchase with the name of the chart it would return.
+- Every change replaces the body panel from queued actions in `advance`; the grid's
+  offset is read before and restored after.
+
+### Aquarium manage panel
+
+`AquariumManageDialog` keeps the prose, the result lines and the Leave option.
+`AquariumManagePanel` is its side panel, shown with
+`VisualPanelAPI.showCustomPanel` (590 wide, to the right of the text panel).
+
+- The root panel and the `AquariumTankPanel` child live as long as the dialog.
+  Every change replaces the body panel; the backdrop grid's scroll offset is
+  read before and restored after. With the display off the tank child is removed
+  and an empty frame is drawn.
+- The backdrop grid shows three rows of tiles on screens at least 850 units
+  high and two below that; the viewport always ends on a whole row.
+- Hovering a tile previews its backdrop through `AquariumTankPanel.setPreview`.
+  The hanging tile has a 1 px outline in the bright UI colour; the picture hides most
+  of the checked fill.
+  The plugin compares the mouse with the tile positions inside the grid viewport
+  every frame; no callback reports hover on an area checkbox.
+- Add and Take open the `AquariumTransfers` pickers from `advance`. The picker
+  callback prints the result line and marks the panel for a rebuild.
 
 ## Cargo pickers
 
@@ -236,18 +344,19 @@ content when the tooltip is shown; this only stops rebuilding it throughout the
 hover.
 
 Map and planner help, category descriptions, chart-shop help, outfitter help,
-the outfitter's rarity-count chips and intel navigation tips use this
+the outfitter's fish counts and intel navigation tips use this
 non-rebuilding mode. Fish-row selection hints,
-chart affordability, shop marks, tier status and payment details keep live updates.
+shop marks, tier status and payment details keep live updates.
 Do not cache a tooltip that reads changing state unless its owner refreshes it.
 
-The outfitter header draws its rarity chips in `ShopHeaderPlugin.render`;
-`FishShopDialog.buildHeader` places hotspots from the same
-`ShopHeaderPlugin.getChipLeft/getChipTop` offsets. Each chip's tooltip lists the
-species aboard from `FishCurrency.countSpecies`, most-held first, as up to two
-rows of `FishIcons` with an "xN" count for duplicates. Species past those rows
-are summarized as "... and N other species." so the grid never outgrows the
-320-pixel tooltip.
+`UiKit.tooltip` sets the tooltip's background alpha to 1. At the engine default of
+0.85 (`StandardTooltipV2.bgAlpha`) the text of filled rows shows through.
+
+`FishPurse.add` draws the fish counts on the outfitter's tab line and puts a
+transparent hotspot over each icon and count. Each tooltip lists the species aboard
+from `FishCurrency.countSpecies`, most-held first, as up to two rows of `FishIcons`
+with an "xN" count for duplicates. Species past those rows are summarized as "... and
+N other species." so the grid never outgrows the 320-pixel tooltip.
 
 Source: `StandardTooltipV2Expandable.addTooltipTo/addTooltipToPrevious`,
 `beforeShown` and `advanceImpl` in the knowledge base's `sources-obf/ui.impl.java`.
