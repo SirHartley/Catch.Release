@@ -3,12 +3,15 @@ package catchrelease.campaign.fish.spawner;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRarity;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.BuriedMoteEntityPlugin;
 import catchrelease.campaign.fish.fisherman.chain.WoundedEpic;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.campaign.fish.legendary.EpicHunt;
+import catchrelease.campaign.fish.legendary.LegendaryHaunt;
 import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import com.fs.starfarer.api.EveryFrameScript;
@@ -16,6 +19,8 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.campaign.listeners.CurrentLocationChangedListener;
+import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import org.lazywizard.lazylib.MathUtils;
@@ -29,12 +34,60 @@ public class BuriedMoteSpawner implements EveryFrameScript {
     protected IntervalUtil interval = new IntervalUtil(
             FishConstants.BURIED_CHECK_INTERVAL * 0.75f, FishConstants.BURIED_CHECK_INTERVAL * 1.25f);
 
+    // the spawner only culls around the player, so wild motes in a system left behind would stay in the save
+    public static class DeparturePurge implements CurrentLocationChangedListener {
+
+        @Override
+        public void reportCurrentLocationChanged(LocationAPI prev, LocationAPI curr) {
+            if (prev == null || prev == curr) return;
+
+            purge(prev, BuriedMoteEntityPlugin.BURIED_TAG);
+            purge(prev, FishEntityPlugin.MOTE_TAG);
+        }
+
+        protected void purge(LocationAPI location, String tag) {
+            for (SectorEntityToken mote : new ArrayList<>(location.getEntitiesWithTag(tag))) {
+                if (mote.isExpired() || !isWild(mote)) continue;
+
+                remove(mote);
+            }
+        }
+    }
+
     public static void register() {
+        ListenerManagerAPI listeners = Global.getSector().getListenerManager();
+        listeners.removeListenerOfClass(DeparturePurge.class);
+        listeners.addListener(new DeparturePurge(), true);
+
         for (EveryFrameScript script : Global.getSector().getScripts()) {
             if (script instanceof BuriedMoteSpawner) return;
         }
 
         Global.getSector().addScript(new BuriedMoteSpawner());
+    }
+
+    // legendaries, their haunt pieces and quest motes have owners that respawn or clean them up
+    public static boolean isWild(SectorEntityToken mote) {
+        if (QuestPond.isQuestMote(mote) || mote.hasTag(LegendaryHaunt.HAUNT_TAG)) return false;
+
+        if (mote.getCustomPlugin() instanceof BuriedMoteEntityPlugin buried) {
+            return buried.getRarity() != FishRarity.LEGENDARY;
+        }
+
+        if (mote.getCustomPlugin() instanceof FishEntityPlugin fish) {
+            FishSpec spec = fish.getFishSpec();
+            // awake epics are left to EpicHunt.DepartureCleanup, which reports the reset
+            return spec != null && spec.rarity != FishRarity.LEGENDARY && !fish.isHeld() && !fish.isPhantom()
+                    && !fish.isDecoy() && fish.getOrbitAnchor() == null && !EpicHunt.isActive(fish);
+        }
+
+        return false;
+    }
+
+    protected static void remove(SectorEntityToken mote) {
+        // removeEntity does not expire it, and an epic's trail renderer retires on expiry
+        mote.setExpired(true);
+        mote.getContainingLocation().removeEntity(mote);
     }
 
     @Override
@@ -107,11 +160,7 @@ public class BuriedMoteSpawner implements EveryFrameScript {
         for (SectorEntityToken buried : location.getEntitiesWithTag(BuriedMoteEntityPlugin.BURIED_TAG)) {
             if (buried.isExpired() || isLegendary(buried) || QuestPond.isQuestMote(buried)) continue;
 
-            if (Misc.getDistance(around, buried.getLocation()) > FishConstants.BURIED_CULL_RANGE) {
-                // removeEntity does not expire it, and an epic's trail renderer retires on expiry
-                buried.setExpired(true);
-                buried.getContainingLocation().removeEntity(buried);
-            }
+            if (Misc.getDistance(around, buried.getLocation()) > FishConstants.BURIED_CULL_RANGE) remove(buried);
         }
     }
 
