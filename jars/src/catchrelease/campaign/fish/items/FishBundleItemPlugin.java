@@ -122,8 +122,8 @@ public class FishBundleItemPlugin extends BaseSpecialItemPlugin {
 
         for (FishCatch entry : contents) {
             if (ShopMarks.isWanted(entry)) {
-                ShopMarks.drawDot(x + w - ShopMarks.DOT_INSET, y + ShopMarks.DOT_INSET,
-                        ShopMarks.DOT_RADIUS, alphaMult);
+                ShopMarks.drawStar(x + w - ShopMarks.STAR_INSET, y + ShopMarks.STAR_INSET,
+                        ShopMarks.STAR_SIZE, alphaMult);
                 break;
             }
         }

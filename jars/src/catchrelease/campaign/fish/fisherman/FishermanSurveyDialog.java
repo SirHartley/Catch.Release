@@ -1,73 +1,122 @@
 package catchrelease.campaign.fish.fisherman;
 
-import catchrelease.config.FishingSounds;
 import catchrelease.campaign.fish.data.FishLog;
+import catchrelease.campaign.fish.data.FishSpec;
 import catchrelease.campaign.fish.items.FishItems;
-import catchrelease.ui.FishIcons;
-import catchrelease.ui.PaneWidgets;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.shop.FishShopDialog;
-import catchrelease.ui.ShopUi;
+import catchrelease.config.FishingSounds;
+import catchrelease.helper.loading.FishSpecLoader;
+import catchrelease.helper.loading.SpriteLoader;
+import catchrelease.ui.FishIcons;
+import catchrelease.ui.FishPurse;
+import catchrelease.ui.UiKit;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.CargoAPI.CargoItemType;
 import com.fs.starfarer.api.campaign.CargoStackAPI;
+import com.fs.starfarer.api.campaign.CustomDialogDelegate;
 import com.fs.starfarer.api.campaign.CustomUIPanelPlugin;
-import com.fs.starfarer.api.campaign.CustomVisualDialogDelegate;
 import com.fs.starfarer.api.campaign.InteractionDialogAPI;
 import com.fs.starfarer.api.campaign.InteractionDialogPlugin;
 import com.fs.starfarer.api.campaign.SpecialItemData;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.EngagementResultAPI;
-import com.fs.starfarer.api.input.InputEventAPI;
-import com.fs.starfarer.api.ui.BaseTooltipCreator;
+import com.fs.starfarer.api.graphics.SpriteAPI;
+import com.fs.starfarer.api.ui.Alignment;
+import com.fs.starfarer.api.ui.ButtonAPI;
 import com.fs.starfarer.api.ui.CustomPanelAPI;
-import com.fs.starfarer.api.ui.PositionAPI;
+import com.fs.starfarer.api.ui.CutStyle;
+import com.fs.starfarer.api.ui.Fonts;
+import com.fs.starfarer.api.ui.ScrollPanelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
-import com.fs.starfarer.api.ui.UIComponentAPI;
+import com.fs.starfarer.api.ui.TooltipMakerAPI.TooltipLocation;
 import com.fs.starfarer.api.util.Misc;
-import org.lazywizard.lazylib.ui.LazyFont;
-import org.lwjgl.input.Keyboard;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 public class FishermanSurveyDialog implements InteractionDialogPlugin {
 
-    public static final float WIDTH = 700f;
-    public static final float HEIGHT = 540f;
-    public static final float PAD = 16f;
-
-    public static final float TITLE_HEIGHT = 20f;
-    public static final float CLOSE_WIDTH = 20f;
-    public static final float HELP_WIDTH = 20f;
-    public static final int COLUMNS = 3;
-
-    public static final float CARD_GAP = 12f;
-    public static final float CARD_HEIGHT = 200f;
-
-    public static final float DISC_RADIUS = 56f;
-    public static final float ART_SIZE = 78f;
-
-    public static final float UNDO_WIDTH = 200f;
-    public static final float UNDO_HEIGHT = 26f;
-    public static final float LEAVE_WIDTH = 120f;
+    // showCustomDialog adds 20 across and 55 down for its frame and the Return button
+    public static final float WIDTH = 712f;
+    public static final float HEIGHT = 437f;
+    public static final String TITLE = "Range data";
     public static final String SOUND_UNDONE = "ui_cancel_construction_or_upgrade_industry";
+
+    public static final float PURSE_Y = 28f;
+    public static final float TOP = 64f;
+    public static final int COLUMNS = 3;
+    public static final int VISIBLE_ROWS = 2;
+    public static final float TILE_WIDTH = 116f;
+    public static final float TILE_HEIGHT = 168f;
+    public static final float TILE_GAP = 5f;
+    public static final float TILE_PITCH_X = TILE_WIDTH + TILE_GAP;
+    public static final float TILE_PITCH_Y = TILE_HEIGHT + TILE_GAP;
+    public static final float LIST_WIDTH = COLUMNS * TILE_WIDTH + (COLUMNS - 1) * TILE_GAP;
+    public static final float GRID_Y = TOP + UiKit.HEADING_HEIGHT + UiKit.ROW_GAP;
+    public static final float GRID_HEIGHT = VISIBLE_ROWS * TILE_PITCH_Y - TILE_GAP;
+    // a tile at the left edge of a scroll area loses its left border to the clip
+    public static final float GRID_MARGIN = 2f;
+    public static final float DIVIDER_X = LIST_WIDTH + 11f;
+
+    public static final float SILHOUETTE_X = 18f;
+    public static final float SILHOUETTE_Y = 5f;
+    public static final float SILHOUETTE_SIZE = 80f;
+    public static final float SILHOUETTE_ART = 76f;
+    public static final float NAME_Y = 90f;
+    public static final float NAME_LINE = 19f;
+    public static final float NAME_SIDE = 4f;
+    public static final float TILE_RULE_Y = 134f;
+    public static final float COST_ICON_X = 40f;
+    public static final float COST_ICON_Y = 141f;
+    public static final float COST_ICON = 20f;
+    public static final float COST_TEXT_X = 63f;
+
+    public static final float CARD_X = DIVIDER_X + 11f;
+    public static final float CARD_WIDTH = WIDTH - CARD_X;
+    public static final float NAME_BAR_HEIGHT = 26f;
+    public static final float TAGLINE_Y = TOP + 34f;
+    public static final float PICTURE_Y = TAGLINE_Y + 19f;
+    public static final float PICTURE_SIZE = 72f;
+    public static final float PICTURE_ART = 60f;
+    public static final float PICTURE_INSET = 4f;
+    public static final float FACTS_X = CARD_X + PICTURE_SIZE + 12f;
+    public static final float FACTS_Y = PICTURE_Y + 9f;
+    public static final float FACT_ROW = 18f;
+    public static final float STRIP_Y = PICTURE_Y + PICTURE_SIZE + 16f;
+    public static final float STRIP_HEIGHT = 40f;
+    public static final float STRIP_ICON_X = 10f;
+    public static final float STRIP_TEXT_X = 36f;
+    public static final float BUY_WIDTH = 96f;
+    public static final float STRIP_INSET = 8f;
+    public static final float REASON_Y = STRIP_Y + STRIP_HEIGHT + 4f;
+    public static final float UNDO_Y = HEIGHT - UiKit.BUTTON_HEIGHT;
+    public static final float UNDO_WIDTH = 168f;
+    public static final float UNDO_TOOLTIP_WIDTH = 260f;
+    public static final float LEGEND_WIDTH = 320f;
 
     protected InteractionDialogAPI dialog;
     protected final FishShopDialog.OnClose onClose;
     protected boolean closed;
 
-    protected class Delegate implements CustomVisualDialogDelegate, CustomUIPanelPlugin {
+    protected class Delegate extends BaseCustomUIPanelPlugin implements CustomDialogDelegate {
 
         protected CustomPanelAPI panel;
-        protected DialogCallbacks callbacks;
+        protected CustomPanelAPI body;
+        protected TooltipMakerAPI grid;
+        protected float gridOffset;
 
-        protected PositionAPI pos;
-        protected final List<UIComponentAPI> gridParts = new ArrayList<>();
-        // Newest last; undo takes them back in reverse order, each restoring the hold as it was before.
+        protected final List<Runnable> pending = new ArrayList<>();
+        protected boolean dirty;
+
+        protected String selectedId;
+        protected int selectedIndex;
+        // newest last; undo takes them back in reverse order, each restoring the hold as it was before
         protected final List<Receipt> purchases = new ArrayList<>();
 
         protected static class Receipt {
@@ -77,103 +126,37 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             List<Object[]> fishAboard;
         }
 
-        protected class CardPlugin extends com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin {
+        @Override
+        public void createCustomDialog(CustomPanelAPI panel, CustomDialogCallback callback) {
+            this.panel = panel;
 
-            protected final FishermanShelf.SurveyOffer offer;
-            protected PositionAPI cardPos;
-
-            protected transient LazyFont.DrawableString name;
-            protected transient LazyFont.DrawableString price;
-            protected transient String pricedAs;
-
-            public CardPlugin(FishermanShelf.SurveyOffer offer) {
-                this.offer = offer;
-            }
-
-            @Override
-            public void positionChanged(PositionAPI position) {
-                cardPos = position;
-            }
-
-            @Override
-            public void render(float alphaMult) {
-                if (cardPos == null || alphaMult <= 0f) return;
-
-                LazyFont small = ShopUi.getSmallFont();
-                if (small == null) return;
-
-                float x = cardPos.getX();
-                float y = cardPos.getY();
-                float w = cardPos.getWidth();
-                float h = cardPos.getHeight();
-
-                int have = FishCurrency.count(offer.costRarity);
-                boolean afford = have >= offer.costCount;
-                boolean hovered = ShopUi.contains(x, y, w, h,
-                        Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
-
-                ShopUi.drawQuad(x, y, w, h, Misc.getDarkPlayerColor(),
-                        (hovered && afford ? 0.35f : 0.15f) * alphaMult);
-                ShopUi.drawQuad(x, y, w, 2f, offer.spec.rarity.color,
-                        (afford ? 0.95f : 0.35f) * alphaMult);
-
-                float cx = x + w * 0.5f;
-                float discY = y + h - PAD - DISC_RADIUS;
-
-                FishIcons.drawBacklit(offer.spec, cx, discY, DISC_RADIUS, ART_SIZE, alphaMult);
-
-                if (name == null) {
-                    name = small.createText(offer.spec.getDisplayName(), Color.WHITE,
-                            small.getBaseHeight(), w - 12f);
-                    name.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-                }
-
-                name.setBaseColor(ShopUi.withAlpha(offer.spec.rarity.color, alphaMult));
-                name.draw(Math.round(cx - name.getWidth() * 0.5f),
-                        Math.round(discY - DISC_RADIUS - 8f));
-
-                // the price alone - what is aboard lives in the tooltip, where it cannot wrap the label onto a second line
-                String cost = describeCost(offer);
-                if (price == null || !cost.equals(pricedAs)) {
-                    pricedAs = cost;
-                    price = small.createText(cost, Color.WHITE, small.getBaseHeight(), w - 12f);
-                    price.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
-                }
-
-                // the cost speaks in the rarity it is asking for; red stays what can't be paid
-                price.setBaseColor(ShopUi.withAlpha(afford ? offer.costRarity.color
-                        : Misc.getNegativeHighlightColor(), alphaMult));
-                price.draw(Math.round(cx - price.getWidth() * 0.5f),
-                        Math.round(y + PAD + 14f));
-            }
-
-            @Override
-            public void processInput(List<InputEventAPI> events) {
-                if (cardPos == null) return;
-
-                for (InputEventAPI event : events) {
-                    if (event.isConsumed() || !event.isLMBDownEvent()) continue;
-                    if (!ShopUi.contains(cardPos.getX(), cardPos.getY(), cardPos.getWidth(),
-                            cardPos.getHeight(), event.getX(), event.getY())) {
-                        continue;
-                    }
-
-                    event.consume();
-                    buy(offer);
-
-                    return;
-                }
-            }
+            rebuild();
         }
 
         @Override
-        public void init(CustomPanelAPI panel, DialogCallbacks callbacks) {
-            this.panel = panel;
-            this.callbacks = callbacks;
+        public boolean hasCancelButton() {
+            return false;
+        }
 
-            buildHeader();
-            buildFooter();
-            rebuildGrid();
+        @Override
+        public String getConfirmText() {
+            return "Return";
+        }
+
+        @Override
+        public String getCancelText() {
+            return null;
+        }
+
+        // escape cancels; both ways out go back to the Fisherman
+        @Override
+        public void customDialogConfirm() {
+            FishermanSurveyDialog.this.close();
+        }
+
+        @Override
+        public void customDialogCancel() {
+            FishermanSurveyDialog.this.close();
         }
 
         @Override
@@ -182,205 +165,260 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         }
 
         @Override
-        public void positionChanged(PositionAPI position) {
-            pos = position;
-        }
-
-        @Override
-        public float getNoiseAlpha() {
-            return 0f;
+        public void buttonPressed(Object buttonId) {
+            if (buttonId instanceof Runnable action) action.run();
         }
 
         @Override
         public void advance(float amount) {
-        }
+            if (panel == null) return;
 
-        @Override
-        public void renderBelow(float alphaMult) {
-            if (pos == null || alphaMult <= 0f) return;
+            // actions change the panel tree, so they wait until input dispatch is over
+            if (!pending.isEmpty()) {
+                List<Runnable> actions = new ArrayList<>(pending);
+                pending.clear();
 
-            ShopUi.drawPanel(pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(),
-                    0.7f, alphaMult);
-        }
+                for (Runnable action : actions) action.run();
+            }
 
-        @Override
-        public void render(float alphaMult) {
-        }
-
-        @Override
-        public void reportDismissed(int option) {
-            FishermanSurveyDialog.this.close();
-        }
-
-        @Override
-        public void processInput(List<InputEventAPI> events) {
-            for (InputEventAPI event : events) {
-                if (event.isConsumed()) continue;
-
-                if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE) {
-                    event.consume();
-                    if (callbacks != null) callbacks.dismissDialog();
-                }
+            if (dirty) {
+                dirty = false;
+                rebuild();
             }
         }
 
-        @Override
-        public void buttonPressed(Object buttonId) {
+        protected Runnable later(Runnable action) {
+            return () -> pending.add(action);
         }
 
-        protected void buildHeader() {
-            float innerWidth = WIDTH - PAD * 2f;
-            TooltipMakerAPI header = panel.createUIElement(innerWidth, TITLE_HEIGHT, false);
-
-            CustomPanelAPI titleRow = panel.createCustomPanel(innerWidth, TITLE_HEIGHT,
-                    new PaneWidgets.TitleRow("RANGE DATA"));
-
-            CustomPanelAPI help = panel.createCustomPanel(HELP_WIDTH, TITLE_HEIGHT,
-                    new PaneWidgets.HelpMark());
-            titleRow.addComponent(help).inTR(CLOSE_WIDTH + 4f, 0f);
-
-            CustomPanelAPI close = panel.createCustomPanel(CLOSE_WIDTH, TITLE_HEIGHT,
-                    new PaneWidgets.TextButton(() -> "X", () -> true,
-                            () -> callbacks.dismissDialog()));
-            titleRow.addComponent(close).inTR(0f, 0f);
-
-            header.addCustom(titleRow, 0f);
-            header.addTooltipTo(createLegendTooltip(), help,
-                    TooltipMakerAPI.TooltipLocation.BELOW, false);
-            header.addTooltipTo(createSimpleTooltip(220f, "Back to the boat."),
-                    close, TooltipMakerAPI.TooltipLocation.BELOW, false);
-
-            panel.addUIElement(header).inTL(PAD, PAD);
+        protected List<FishermanShelf.SurveyOffer> getOffers() {
+            return FishermanShelf.getOffers(dialog.getInteractionTarget());
         }
 
-        protected void buildFooter() {
-            TooltipMakerAPI footer = panel.createUIElement(UNDO_WIDTH, UNDO_HEIGHT, false);
+        protected void rebuild() {
+            ScrollPanelAPI scroller = grid == null ? null : grid.getExternalScroller();
+            if (scroller != null) gridOffset = scroller.getYOffset();
 
-            CustomPanelAPI undo = panel.createCustomPanel(UNDO_WIDTH, UNDO_HEIGHT,
-                    new PaneWidgets.TextButton(() -> "UNDO LAST PURCHASE",
-                            () -> !purchases.isEmpty(), this::undoClicked));
-            footer.addCustom(undo, 0f);
-            footer.addTooltipToPrevious(createSimpleTooltip(260f,
-                    "Returns the last chart bought this visit and refunds the exact fish used"
-                            + " to pay for it."),
-                    TooltipMakerAPI.TooltipLocation.ABOVE, false);
+            if (body != null) panel.removeComponent(body);
 
-            panel.addUIElement(footer).inTL(PAD, HEIGHT - PAD - UNDO_HEIGHT);
+            grid = null;
+            body = UiKit.plain(panel, WIDTH, HEIGHT);
+            panel.addComponent(body).inTL(0f, 0f);
 
-            // the way out, bottom right - the same door every panel in the mod has
-            CustomPanelAPI leave = panel.createCustomPanel(LEAVE_WIDTH, UNDO_HEIGHT,
-                    new PaneWidgets.TextButton(() -> "LEAVE", () -> true,
-                            () -> callbacks.dismissDialog()));
-            panel.addComponent(leave).inTL(WIDTH - PAD - LEAVE_WIDTH, HEIGHT - PAD - UNDO_HEIGHT);
+            List<FishermanShelf.SurveyOffer> offers = getOffers();
+            FishermanShelf.SurveyOffer selected = resolveSelected(offers);
+
+            UiKit.title(body, WIDTH, TITLE, null, this::describeRangeData);
+            FishPurse.add(body, WIDTH, PURSE_Y, UiKit.BUTTON_HEIGHT, FishCurrency.count());
+
+            buildCharts(offers);
+            UiKit.vrule(body, DIVIDER_X, TOP, HEIGHT - TOP);
+            if (selected != null) buildCard(selected);
+            buildUndo();
         }
 
-        protected void rebuildGrid() {
-            for (UIComponentAPI part : gridParts) panel.removeComponent(part);
-            gridParts.clear();
+        protected FishermanShelf.SurveyOffer resolveSelected(List<FishermanShelf.SurveyOffer> offers) {
+            if (offers.isEmpty()) {
+                selectedId = null;
+                return null;
+            }
 
-            float innerWidth = WIDTH - PAD * 2f;
-            float gridHeight = HEIGHT - PAD * 2f - TITLE_HEIGHT - 8f - UNDO_HEIGHT - 8f;
+            for (int i = 0; i < offers.size(); i++) {
+                if (offers.get(i).spec.id.equals(selectedId)) {
+                    selectedIndex = i;
+                    return offers.get(i);
+                }
+            }
 
-            TooltipMakerAPI grid = panel.createUIElement(innerWidth, gridHeight, false);
+            // the chart just bought has left the shelf: its neighbour takes its place
+            selectedIndex = Math.max(0, Math.min(selectedIndex, offers.size() - 1));
+            selectedId = offers.get(selectedIndex).spec.id;
 
-            List<FishermanShelf.SurveyOffer> offers =
-                    FishermanShelf.getOffers(dialog.getInteractionTarget());
+            return offers.get(selectedIndex);
+        }
+
+        protected void describeRangeData(TooltipMakerAPI tooltip) {
+            tooltip.addPara("Range data", Misc.getBasePlayerColor(), 0f);
+
+            tooltip.addPara("Charts a species' range so you can plan a route to it. Also"
+                    + " adds habitat and movement details to the codex, and a species"
+                    + " indicator to the system map.", 8f);
+
+            tooltip.addPara("Stock refreshes periodically. Fishing boats outside the core"
+                    + " have their own stock.", 8f);
+        }
+
+        protected void buildCharts(List<FishermanShelf.SurveyOffer> offers) {
+            UiKit.heading(body, 0f, TOP, LIST_WIDTH, "Charts", String.valueOf(offers.size()));
 
             if (offers.isEmpty()) {
-                CustomPanelAPI note = panel.createCustomPanel(innerWidth, TITLE_HEIGHT,
-                        new PaneWidgets.Note("Nothing left on the shelf this visit."));
-                grid.addCustom(note, gridHeight * 0.4f);
+                UiKit.text(body, 0f, GRID_Y, LIST_WIDTH, "Nothing left on the shelf this visit.", UiKit.BODY,
+                        Misc.getGrayColor(), Alignment.LMID);
+                return;
             }
 
-            float cardWidth = (float) Math.floor(
-                    (innerWidth - CARD_GAP * (COLUMNS - 1)) / COLUMNS);
+            SpriteAPI fish = SpriteLoader.getSprite("pane_fish");
 
-            for (int from = 0; from < offers.size(); from += COLUMNS) {
-                CustomPanelAPI rank = panel.createCustomPanel(innerWidth, CARD_HEIGHT,
-                        new com.fs.starfarer.api.campaign.BaseCustomUIPanelPlugin() {
-                        });
+            // the scroll element reserves its last five units for the bar, which then sits clear of the divider
+            grid = body.createUIElement(DIVIDER_X - 1f + UiKit.INSET, GRID_HEIGHT, true);
 
-                for (int i = from; i < Math.min(from + COLUMNS, offers.size()); i++) {
-                    FishermanShelf.SurveyOffer offer = offers.get(i);
+            for (int first = 0; first < offers.size(); first += COLUMNS) {
+                CustomPanelAPI line = UiKit.plain(body, LIST_WIDTH + GRID_MARGIN, TILE_HEIGHT);
 
-                    CustomPanelAPI card = panel.createCustomPanel(cardWidth, CARD_HEIGHT,
-                            new CardPlugin(offer));
-
-                    rank.addComponent(card).inTL((i - from) * (cardWidth + CARD_GAP), 0f);
-                    grid.addTooltipTo(createCardTooltip(offer), card,
-                            TooltipMakerAPI.TooltipLocation.BELOW);
+                for (int column = 0; column < COLUMNS && first + column < offers.size(); column++) {
+                    addTile(line, GRID_MARGIN + column * TILE_PITCH_X, offers.get(first + column), fish);
                 }
 
-                grid.addCustom(rank, from == 0 ? 0f : CARD_GAP);
+                grid.addCustom(line, first == 0 ? 0f : TILE_GAP);
             }
 
-            panel.addUIElement(grid).inTL(PAD, PAD + TITLE_HEIGHT + 8f);
+            body.addUIElement(grid).inTL(-UiKit.INSET, GRID_Y);
 
-            gridParts.add(grid.getExternalScroller() != null
-                    ? (UIComponentAPI) grid.getExternalScroller() : grid);
+            ScrollPanelAPI scroller = grid.getExternalScroller();
+            if (scroller != null) {
+                float max = Math.max(0f, grid.getHeightSoFar() - GRID_HEIGHT);
+                scroller.setYOffset(Math.max(0f, Math.min(max, gridOffset)));
+            }
         }
 
-        protected TooltipMakerAPI.TooltipCreator createSimpleTooltip(float tooltipWidth, String text) {
-            return new BaseTooltipCreator() {
-                @Override
-                public float getTooltipWidth(Object tooltipParam) {
-                    return tooltipWidth;
-                }
+        protected void addTile(CustomPanelAPI line, float x, FishermanShelf.SurveyOffer offer, SpriteAPI fish) {
+            FishSpec spec = offer.spec;
+            boolean afford = FishCurrency.count(offer.costRarity) >= offer.costCount;
 
-                @Override
-                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    tooltip.addPara(text, 0f);
-                }
-            };
+            UiKit.Row tile = UiKit.row(line, x, 0f, TILE_WIDTH, TILE_HEIGHT, spec.id.equals(selectedId),
+                    later(() -> select(spec.id)));
+            CustomPanelAPI parent = tile.panel;
+
+            UiKit.painted(parent, SILHOUETTE_X, SILHOUETTE_Y, SILHOUETTE_SIZE, SILHOUETTE_SIZE, null,
+                    (pos, alpha) -> FishIcons.drawBacklit(spec, pos.getX() + SILHOUETTE_SIZE * 0.5f,
+                            pos.getY() + SILHOUETTE_SIZE * 0.5f, SILHOUETTE_SIZE * 0.5f, SILHOUETTE_ART, alpha));
+
+            float nameWidth = TILE_WIDTH - 2f * NAME_SIDE;
+            List<String> lines = splitName(spec.getDisplayName(), nameWidth);
+            for (int i = 0; i < lines.size(); i++) {
+                UiKit.text(parent, NAME_SIDE, NAME_Y + i * NAME_LINE, nameWidth, lines.get(i), UiKit.BODY,
+                        spec.rarity.color, Alignment.MID);
+            }
+
+            Color rule = UiKit.base();
+            UiKit.painted(parent, SILHOUETTE_X, TILE_RULE_Y, SILHOUETTE_SIZE, 1f, null,
+                    (pos, alpha) -> UiKit.quad(pos.getX(), pos.getY(), pos.getWidth(), 1f, rule,
+                            UiKit.RULE_ALPHA * alpha));
+
+            UiKit.sprite(parent, COST_ICON_X, COST_ICON_Y, COST_ICON, COST_ICON, fish, offer.costRarity.color);
+            UiKit.textIn(parent, COST_TEXT_X, COST_ICON_Y, TILE_WIDTH - COST_TEXT_X - NAME_SIDE, COST_ICON,
+                    String.valueOf(offer.costCount), UiKit.BODY,
+                    afford ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor(), Alignment.LMID);
         }
 
-        protected TooltipMakerAPI.TooltipCreator createLegendTooltip() {
-            return new BaseTooltipCreator() {
-                @Override
-                public float getTooltipWidth(Object tooltipParam) {
-                    return 320f;
+        // two lines at most, broken where the longer line is shortest; whatever still does not fit is shortened
+        protected List<String> splitName(String name, float width) {
+            List<String> out = new ArrayList<>();
+            String[] words = name.split(" ");
+
+            if (UiKit.width(name, UiKit.BODY) <= width - 2f || words.length < 2) {
+                out.add(name);
+                return out;
+            }
+
+            int best = 1;
+            float bestWidth = Float.MAX_VALUE;
+            for (int split = 1; split < words.length; split++) {
+                float longer = Math.max(UiKit.width(join(words, 0, split), UiKit.BODY),
+                        UiKit.width(join(words, split, words.length), UiKit.BODY));
+                if (longer < bestWidth) {
+                    bestWidth = longer;
+                    best = split;
                 }
+            }
 
-                @Override
-                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    tooltip.addPara("Range data", Misc.getBasePlayerColor(), 0f);
+            out.add(join(words, 0, best));
+            out.add(join(words, best, words.length));
 
-                    tooltip.addPara("Charts a species' range so you can plan a route to it. Also"
-                            + " adds habitat and movement details to the codex, and a species"
-                            + " indicator to the system map.", 8f);
-
-                    tooltip.addPara("Stock refreshes periodically. Fishing boats outside the core"
-                            + " have their own stock.", 8f);
-                }
-            };
+            return out;
         }
 
-        protected TooltipMakerAPI.TooltipCreator createCardTooltip(FishermanShelf.SurveyOffer offer) {
-            return new BaseTooltipCreator() {
-                @Override
-                public float getTooltipWidth(Object tooltipParam) {
-                    return 280f;
-                }
+        protected String join(String[] words, int from, int to) {
+            return String.join(" ", Arrays.copyOfRange(words, from, to));
+        }
 
-                @Override
-                public void createTooltip(TooltipMakerAPI tooltip, boolean expanded, Object tooltipParam) {
-                    tooltip.addPara(offer.spec.getDisplayName(), offer.spec.rarity.color, 0f);
-                    tooltip.addPara(offer.spec.getTypeName(), Misc.getGrayColor(), 2f);
+        protected void select(String specId) {
+            if (specId.equals(selectedId)) return;
 
-                    tooltip.addPara("Charts this species' habitat on your map.", 8f);
+            selectedId = specId;
+            dirty = true;
+        }
 
-                    int have = FishCurrency.count(offer.costRarity);
-                    boolean afford = have >= offer.costCount;
+        protected void buildCard(FishermanShelf.SurveyOffer offer) {
+            FishSpec spec = offer.spec;
+            int have = FishCurrency.count(offer.costRarity);
+            boolean afford = have >= offer.costCount;
+            Color dark = UiKit.dark();
 
-                    tooltip.addPara("Price: %s - %s aboard.", 8f, Misc.getGrayColor(),
-                            afford ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor(),
-                            describeCost(offer), String.valueOf(have));
+            UiKit.painted(body, CARD_X, TOP, CARD_WIDTH, NAME_BAR_HEIGHT, (pos, alpha) -> UiKit.quad(pos.getX(),
+                    pos.getY(), pos.getWidth(), pos.getHeight(), dark, alpha), null);
+            UiKit.textIn(body, CARD_X, TOP, CARD_WIDTH, NAME_BAR_HEIGHT, spec.getDisplayName(),
+                    Fonts.ORBITRON_20AABOLD, UiKit.bright(), Alignment.MID);
 
-                    tooltip.addPara(afford ? "Click to buy."
-                                    : "Not enough specimens aboard.",
-                            afford ? Misc.getTextColor() : Misc.getNegativeHighlightColor(), 8f);
-                }
-            };
+            UiKit.text(body, CARD_X, TAGLINE_Y, CARD_WIDTH, "Charts this species' habitat on your map.",
+                    UiKit.BODY, Misc.getGrayColor(), Alignment.MID);
+
+            UiKit.border(body, CARD_X, PICTURE_Y, PICTURE_SIZE, PICTURE_SIZE);
+            UiKit.painted(body, CARD_X, PICTURE_Y, PICTURE_SIZE, PICTURE_SIZE, null,
+                    (pos, alpha) -> FishIcons.drawBacklit(spec, pos.getX() + PICTURE_SIZE * 0.5f,
+                            pos.getY() + PICTURE_SIZE * 0.5f, PICTURE_SIZE * 0.5f - PICTURE_INSET, PICTURE_ART, alpha));
+
+            float factsWidth = WIDTH - FACTS_X;
+            addFact(0, factsWidth, "Type", spec.getTypeName(), Misc.getTextColor());
+            addFact(1, factsWidth, "Rarity", Misc.ucFirst(spec.rarity.name().toLowerCase()), spec.rarity.color);
+            addFact(2, factsWidth, "Aboard", String.valueOf(have),
+                    afford ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor());
+
+            UiKit.border(body, CARD_X, STRIP_Y, CARD_WIDTH, STRIP_HEIGHT);
+            UiKit.sprite(body, CARD_X + STRIP_ICON_X, STRIP_Y + (STRIP_HEIGHT - COST_ICON) / 2f, COST_ICON,
+                    COST_ICON, SpriteLoader.getSprite("pane_fish"), offer.costRarity.color);
+
+            float buyX = CARD_X + CARD_WIDTH - STRIP_INSET - BUY_WIDTH;
+            UiKit.textIn(body, CARD_X + STRIP_TEXT_X, STRIP_Y, buyX - CARD_X - STRIP_TEXT_X - STRIP_INSET,
+                    STRIP_HEIGHT, describeCost(offer), UiKit.BODY,
+                    afford ? Misc.getHighlightColor() : Misc.getNegativeHighlightColor(), Alignment.LMID);
+
+            String id = spec.id;
+            UiKit.button(body, buyX, STRIP_Y + (STRIP_HEIGHT - UiKit.BUTTON_HEIGHT) / 2f, BUY_WIDTH,
+                    UiKit.BUTTON_HEIGHT, "Buy", afford ? Misc.getTextColor() : UiKit.base(),
+                    afford ? UiKit.fill(UiKit.GREEN) : dark, CutStyle.ALL, afford ? later(() -> buy(id)) : null);
+
+            if (!afford) {
+                UiKit.text(body, CARD_X, REASON_Y, CARD_WIDTH, "Not enough specimens aboard.", UiKit.BODY,
+                        Misc.getNegativeHighlightColor(), Alignment.LMID);
+            }
+        }
+
+        protected void addFact(int row, float width, String label, String value, Color color) {
+            float y = FACTS_Y + row * FACT_ROW;
+
+            UiKit.text(body, FACTS_X, y, width * 0.6f, label, UiKit.BODY, Misc.getTextColor(), Alignment.LMID);
+            UiKit.text(body, FACTS_X + width * 0.4f, y, width * 0.6f, value, UiKit.BODY, color, Alignment.RMID);
+        }
+
+        // the bottom row of the card side, with the chart undo would hand back
+        protected void buildUndo() {
+            UiKit.rule(body, CARD_X, UNDO_Y - 12f, CARD_WIDTH);
+
+            ButtonAPI undo = UiKit.button(body, CARD_X, UNDO_Y, UNDO_WIDTH, "Undo last purchase", CutStyle.ALL,
+                    purchases.isEmpty() ? null : later(this::undo));
+            UiKit.tooltip(body, undo, UNDO_TOOLTIP_WIDTH, TooltipLocation.ABOVE, false,
+                    tooltip -> tooltip.addPara("Returns the last chart bought this visit and refunds the exact"
+                            + " fish used to pay for it.", 0f));
+
+            if (purchases.isEmpty()) return;
+
+            FishSpec last = FishSpecLoader.getFishSpec(purchases.get(purchases.size() - 1).specId);
+            if (last == null) return;
+
+            float x = CARD_X + UNDO_WIDTH + 10f;
+            UiKit.textIn(body, x, UNDO_Y, WIDTH - x, UiKit.BUTTON_HEIGHT, last.getDisplayName(), UiKit.BODY,
+                    Misc.getGrayColor(), Alignment.LMID);
         }
 
         protected String describeCost(FishermanShelf.SurveyOffer offer) {
@@ -388,14 +426,11 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
                     + (offer.costCount == 1 ? " specimen" : " specimens");
         }
 
-        protected void buy(FishermanShelf.SurveyOffer clicked) {
-            // re-resolved rather than trusted: the card's offer could be a frame stale
-            List<FishermanShelf.SurveyOffer> offers =
-                    FishermanShelf.getOffers(dialog.getInteractionTarget());
-
+        protected void buy(String specId) {
+            // re-resolved rather than trusted: the offer could be a frame stale
             FishermanShelf.SurveyOffer offer = null;
-            for (FishermanShelf.SurveyOffer candidate : offers) {
-                if (candidate.spec.id.equals(clicked.spec.id)) {
+            for (FishermanShelf.SurveyOffer candidate : getOffers()) {
+                if (candidate.spec.id.equals(specId)) {
                     offer = candidate;
                     break;
                 }
@@ -420,7 +455,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
                     "Purchased range data for " + offer.spec.getDisplayName());
 
-            rebuildGrid();
+            dirty = true;
         }
 
         protected List<Object[]> snapshotFish() {
@@ -436,11 +471,6 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             }
 
             return stacks;
-        }
-
-        protected void undoClicked() {
-            undo();
-            rebuildGrid();
         }
 
         protected void undo() {
@@ -465,14 +495,15 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
             FishermanShelf.putBack(dialog.getInteractionTarget(), receipt.specId,
                     receipt.stockIndex);
 
-            String name = catchrelease.helper.loading.FishSpecLoader
-                    .getFishSpec(receipt.specId) == null ? "the last chart"
-                    : catchrelease.helper.loading.FishSpecLoader
-                            .getFishSpec(receipt.specId).getDisplayName() + " range data";
+            FishSpec spec = FishSpecLoader.getFishSpec(receipt.specId);
+            String name = spec == null ? "the last chart" : spec.getDisplayName() + " range data";
             Global.getSector().getCampaignUI().getMessageDisplay()
                     .addMessage("Refunded " + name);
 
             FishingSounds.playUISound(SOUND_UNDONE, 1f, 1f);
+
+            selectedId = receipt.specId;
+            dirty = true;
         }
     }
 
@@ -491,7 +522,7 @@ public class FishermanSurveyDialog implements InteractionDialogPlugin {
         dialog.setBackgroundDimAmount(0.6f);
 
         dialog.getOptionPanel().clearOptions();
-        dialog.showCustomVisualDialog(WIDTH, HEIGHT, new Delegate());
+        dialog.showCustomDialog(WIDTH, HEIGHT, new Delegate());
     }
 
     protected void close() {

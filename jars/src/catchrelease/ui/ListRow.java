@@ -63,15 +63,19 @@ public abstract class ListRow extends BaseCustomUIPanelPlugin {
         boolean selected = isSelected();
         boolean hovered = !selected && isMouseOver();
 
+        renderBackground(x, y, width, height, selected, hovered, alphaMult);
+        renderContent(x, y, width, height, selected, hovered, alphaMult);
+
+        ShopUi.endClip();
+    }
+
+    protected void renderBackground(float x, float y, float width, float height,
+                                    boolean selected, boolean hovered, float alphaMult) {
         float field = selected ? getSelectedFieldAlpha() : hovered ? 0.3f : 0.12f;
         ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), field * alphaMult);
 
         ShopUi.drawQuad(x, y, ACCENT_WIDTH, height, getAccentColor(),
                 (selected ? 0.9f : hovered ? 0.6f : 0.3f) * alphaMult);
-
-        renderContent(x, y, width, height, selected, hovered, alphaMult);
-
-        ShopUi.endClip();
     }
 
     @Override

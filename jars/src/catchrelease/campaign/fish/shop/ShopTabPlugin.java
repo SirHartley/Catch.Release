@@ -16,17 +16,19 @@ import java.util.List;
 
 public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
 
-    public static final float ACCENT_HEIGHT = 2f;
-    public static final float ICON_SIZE = 18f;
-    public static final float ICON_GAP = 6f;
+    public static final float ICON_SIZE = 24f;
+    public static final float ICON_TOP = 3f;
+    public static final float LABEL_TOP = 28f;
 
     protected final Object id;
     protected final String label;
     protected final String iconId;
-    protected final boolean vertical;
     protected final Host host;
     protected PositionAPI pos;
     protected transient LazyFont.DrawableString text;
+
+    protected SpriteAPI cachedIcon;
+    protected boolean iconChecked;
 
     public interface Host {
 
@@ -35,11 +37,10 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
         void onTabClicked(Object id);
     }
 
-    public ShopTabPlugin(Object id, String label, String iconId, boolean vertical, Host host) {
+    public ShopTabPlugin(Object id, String label, String iconId, Host host) {
         this.id = id;
         this.label = label;
         this.iconId = iconId;
-        this.vertical = vertical;
         this.host = host;
     }
 
@@ -47,9 +48,6 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
     public void positionChanged(PositionAPI position) {
         pos = position;
     }
-
-    protected SpriteAPI cachedIcon;
-    protected boolean iconChecked;
 
     @Override
     public void render(float alphaMult) {
@@ -59,20 +57,26 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
         float y = pos.getY();
         float width = pos.getWidth();
         float height = pos.getHeight();
+        float top = Math.round(y + height);
 
         boolean active = host.isActiveTab(id);
         boolean hovered = !active && isMouseOver();
 
-        if (active) {
-            ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(), 0.5f * alphaMult);
-            ShopUi.drawQuad(x, y, width, ACCENT_HEIGHT, Misc.getBrightPlayerColor(), 0.95f * alphaMult);
-        } else {
-            ShopUi.drawQuad(x, y, width, height, Misc.getDarkPlayerColor(),
-                    (hovered ? 0.35f : 0.18f) * alphaMult);
-            ShopUi.drawQuad(x, y, width, ACCENT_HEIGHT, Misc.getBrightPlayerColor(), 0.35f * alphaMult);
+        ShopUi.drawQuad(x, y, width, height, ShopUi.fill(), (active ? ShopUi.FILL_SELECTED
+                : hovered ? ShopUi.FILL_HOVER : ShopUi.FILL_IDLE) * alphaMult);
+
+        Color color = active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
+
+        SpriteAPI icon = getIcon();
+        if (icon != null && icon.getWidth() > 0f) {
+            icon.setSize(ICON_SIZE, ICON_SIZE);
+            icon.setColor(color);
+            icon.setNormalBlend();
+            icon.setAlphaMult(alphaMult);
+            icon.render(Math.round(x + (width - ICON_SIZE) * 0.5f), top - ICON_TOP - ICON_SIZE);
         }
 
-        LazyFont font = ShopUi.getBodyFont();
+        LazyFont font = ShopUi.getSmallFont();
         if (font == null) return;
 
         if (text == null) {
@@ -80,37 +84,8 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
             text.setAnchor(LazyFont.TextAnchor.TOP_LEFT);
         }
 
-        SpriteAPI icon = getIcon();
-        Color color = active ? Misc.getBrightPlayerColor() : Misc.getBasePlayerColor();
         text.setBaseColor(ShopUi.withAlpha(color, alphaMult));
-
-        if (vertical && icon != null) {
-            icon.setSize(ICON_SIZE, ICON_SIZE);
-            icon.setColor(color);
-            icon.setNormalBlend();
-            icon.setAlphaMult(alphaMult);
-            icon.renderAtCenter(Math.round(x + width * 0.5f),
-                    Math.round(y + height - ACCENT_HEIGHT - 4f - ICON_SIZE * 0.5f));
-
-            text.draw(Math.round(x + (width - text.getWidth()) * 0.5f),
-                    Math.round(y + 3f + text.getHeight()));
-            return;
-        }
-
-        float contentWidth = text.getWidth() + (icon == null ? 0f : ICON_SIZE + ICON_GAP);
-        float left = x + (width - contentWidth) * 0.5f;
-
-        if (icon != null) {
-            icon.setSize(ICON_SIZE, ICON_SIZE);
-            icon.setColor(color);
-            icon.setNormalBlend();
-            icon.setAlphaMult(alphaMult);
-            icon.renderAtCenter(Math.round(left + ICON_SIZE * 0.5f), Math.round(y + height * 0.5f));
-
-            left += ICON_SIZE + ICON_GAP;
-        }
-
-        text.draw(Math.round(left), Math.round(y + height * 0.5f + text.getHeight() * 0.5f));
+        text.draw(Math.round(x + (width - text.getWidth()) * 0.5f), top - LABEL_TOP);
     }
 
     @Override
@@ -140,7 +115,7 @@ public class ShopTabPlugin extends BaseCustomUIPanelPlugin {
                 Global.getSettings().getMouseX(), Global.getSettings().getMouseY());
     }
 
-    /** Looked up once: every settings lookup allocates a fresh sprite, and this runs per frame. */
+    // looked up once: every settings lookup allocates a fresh sprite, and this runs per frame
     protected SpriteAPI getIcon() {
         if (iconChecked) return cachedIcon;
         iconChecked = true;

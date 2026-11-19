@@ -220,6 +220,11 @@ public class ShopEntry {
                 && !ShopSchematics.has(stat, targetLevel);
     }
 
+    // a module whose schematic the player has neither learned nor been offered
+    public boolean isUndiscovered() {
+        return kind == Kind.TACKLE && !ShopSchematics.has(tackle) && !ShopSchematics.isSeen(tackle);
+    }
+
     public boolean isPurchaseLocked() {
         return kind == Kind.TACKLE ? !ShopSchematics.has(tackle) : isLocked();
     }

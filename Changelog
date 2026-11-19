@@ -39,6 +39,9 @@ Added - The next three legendary reports pay the three fishing ship blueprints
 Added - An early legendary report ends the earlier jobs and pays their rewards
 Added - "Hunting the legendary fish" intel lists the legendaries you know
 Adjusted - Tidied Fisherman tutorial lines and the old captain's farewell
+Adjusted - Range data: picture tiles and a card for the selected chart
+Adjusted - Range data: a click selects a chart, the Buy button buys it
+Adjusted - Range data: closes with the game's Return button
 Fixed - Asking about the ROD now explains it instead of repeating a scene
 
 Fishing ships
@@ -133,14 +136,26 @@ Codex
 Adjusted - Codex entries from range data alone show no fish icon until caught
 Fixed - Codex list icons no longer stay blank until shown elsewhere
 
+Aquarium
+Adjusted - Manage the aquarium is one panel: tank, counts, display switch, backdrops
+Adjusted - Backdrops are picked from picture tiles, the paged menu is gone
+
 Outfitter
 Adjusted - Equipment tabs follow the same rig order as the Upgrades tabs
-Adjusted - Shopping list dot centred between the row's edge and its name
+Adjusted - Shopping list mark is a star, centred between the row's edge and its name
+Adjusted - Wanted fish and marked schematic offers show the same star, not a yellow dot
+Adjusted - Outfitter look: the game's tabs, buttons and filled bars, same layout
+Adjusted - Outfitter: fish and credits sit at the right of the tab line
+Adjusted - Outfitter: price, fish required and matching fish line up in a table
+Adjusted - Outfitter: one line under the buttons says why one is grey
+Adjusted - Outfitter: modules without a schematic show as Undiscovered, not hidden
+Adjusted - Outfitter: a module once offered by a job shows its name and price, Locked
+Note - It can go on the shopping list until you learn its schematic
 Fixed - The Outfitter no longer opens on a locked shelf with an empty list
 Fixed - Undoing a purchase from another tab now shows that item's shelf
 Fixed - Buying a module for both rigs now clears its mark on the other shelf
 Fixed - The route planner no longer lists the same module twice
-Fixed - Equipment with no fish price no longer shows a dead FIT button
+Fixed - Equipment with no fish price now says why it cannot be bought
 Fixed - Equipment help no longer mentions an undrawn single-use marker
 
 Text and UI
