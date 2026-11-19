@@ -1,6 +1,6 @@
 {
     "displayName": "Standard",
-    "fluxCapacitors": 30,
+    "fluxCapacitors": 22,
     "fluxVents": 30,
     "goalVariant": true,
     "hullId": "catchrelease_lamp_ship",
