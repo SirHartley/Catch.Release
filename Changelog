@@ -126,6 +126,7 @@ Added - The Harpoon breaks Industrial Evolution meteors and returns to the fleet
 Note - Needs Industrial Evolution 4.2.a or newer
 Adjusted - Harpoon and ROD aiming is blocked while an IE missile is aimed
 Note - Needs Industrial Evolution 4.2.a or newer
+Adjusted - Contract hunters are sized to your fleet as a hard fight, bribes follow their size
 Fixed - Aiming the Harpoon or ROD from its button no longer leaves save data
 Fixed - Held Harpoon and ROD hotkeys fire on release, even if the bar changed
 Removed - Harpoon and ROD aiming debug lines in starsector.log
@@ -138,6 +139,7 @@ Fixed - Attacking a mercenary camp now costs reputation with the independents
 Fixed - Talking a camp off its spot now gives the bonus XP for avoiding a fight
 Adjusted - Survival: job pay grows with distance from the core, as vanilla bounties do (up to +65%)
 Adjusted - Survival: blueprint job rewards are valued at their market price
+Adjusted - Camped spots are sized to your fleet as a normal fight, bribes follow their size
 
 Distress calls
 Adjusted - Distress calls wait while another mod's distress call is live

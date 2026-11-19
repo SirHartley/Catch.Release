@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs.camp;
 
+import catchrelease.helper.EncounterScaling;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetAssignment;
@@ -8,7 +9,6 @@ import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.ai.FleetAssignmentDataAPI;
 import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
-import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
@@ -45,20 +45,17 @@ public class CampedSpot {
         LocationAPI where = pond.getContainingLocation();
         if (where == null) return null;
 
-        float fp = size.rollFP(random);
-
-        FleetParamsV3 params = new FleetParamsV3(
-                null,
-                where.getLocation(),
-                type.factionId,
-                null,
-                type.fleetType,
-                fp,
-                0f,
-                fp * 0.1f,
-                0f, 0f, 0f, 0f);
-
-        CampaignFleetAPI fleet = FleetFactoryV3.createFleet(params);
+        CampaignFleetAPI fleet = EncounterScaling.create(type.factionId, size.rollStrength(random),
+                fp -> new FleetParamsV3(
+                        null,
+                        where.getLocation(),
+                        type.factionId,
+                        null,
+                        type.fleetType,
+                        fp,
+                        0f,
+                        fp * 0.1f,
+                        0f, 0f, 0f, 0f));
         if (fleet == null || fleet.isEmpty()) return null;
 
         // mercenary is a hidden doctrine faction, vanilla flies its fleets as independent
@@ -81,8 +78,9 @@ public class CampedSpot {
 
         mem.set(CAMP_FLAG, true);
         mem.set(WHO_KEY, type.token);
-        mem.set(BRIBE_KEY, type.getBribe(size));
-        mem.set(BRIBE_TEXT_KEY, Misc.getWithDGS(type.getBribe(size)));
+        int bribe = type.getBribe(fleet);
+        mem.set(BRIBE_KEY, bribe);
+        mem.set(BRIBE_TEXT_KEY, Misc.getWithDGS(bribe));
         mem.set(MemFlags.MEMORY_KEY_MAKE_ALLOW_DISENGAGE, true);
 
         // they came here to sit on this, and a fleet that wandered off after the first passing freighter would make the job describe something that is no longer true

@@ -6,26 +6,26 @@ import java.util.Random;
 
 public enum CampSize {
 
-    SMALL("a couple of hulls", 25f, 40f, 20000, 9000),
-    MEDIUM("the better part of a squadron", 55f, 85f, 45000, 18000),
-    LARGE("a raiding pack", 100f, 150f, 90000, 34000);
+    SMALL("a couple of hulls", 0.8f, 9000),
+    MEDIUM("the better part of a squadron", 1f, 18000),
+    LARGE("a raiding pack", 1.2f, 34000);
+
+    // a camp stays a normal fight, 3 skulls in vanilla's danger rating (0.67 to 1.33)
+    public static final float STRENGTH_SPREAD = 0.05f;
 
     public final String describe;
-    public final float minFP;
-    public final float maxFP;
-    public final int bribe;
+    // times the player's strength
+    public final float strength;
     public final int value;
 
-    CampSize(String describe, float minFP, float maxFP, int bribe, int value) {
+    CampSize(String describe, float strength, int value) {
         this.describe = describe;
-        this.minFP = minFP;
-        this.maxFP = maxFP;
-        this.bribe = bribe;
+        this.strength = strength;
         this.value = value;
     }
 
-    public float rollFP(Random random) {
-        return minFP + random.nextFloat() * (maxFP - minFP);
+    public float rollStrength(Random random) {
+        return strength * (1f - STRENGTH_SPREAD + random.nextFloat() * 2f * STRENGTH_SPREAD);
     }
 
     public static CampSize roll(Random random) {

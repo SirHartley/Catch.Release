@@ -307,7 +307,7 @@ bonus requires the upper two-fifths of the species' length range, ignoring weigh
 | File | Owner / connection |
 |---|---|
 | `CampedSpotJob.java` | Two independent completion conditions: camper gone + post-acceptance fish from exact rupture. Creates fleet/claim on acceptance; qualifying proof releases mark; loss restores it. Receipt requirements are set at creation and timestamped at acceptance. |
-| `CampedSpot.java` | Spawns and holds the camper (factions flagged `spawnsAsIndependent`, the mercenaries, fly as independent), forces one warning hail, allows disengagement, removes cut-link without a Continue step, and locks the R.O.D. only while the camp remains. |
+| `CampedSpot.java` | Spawns and holds the camper (factions flagged `spawnsAsIndependent`, the mercenaries, fly as independent), sized by `EncounterScaling` to `CampSize.strength` (0.8, 1 or 1.2, ±5%) times the player's strength, a normal fight; its bribe is `CampType.BRIBE_PER_FP` per fleet point times the type's multiplier. It forces one warning hail, allows disengagement, removes cut-link without a Continue step, and locks the R.O.D. only while the camp remains. |
 
 ### `campaign/fish/jobs/fleet`
 
@@ -834,7 +834,7 @@ charges, moving couriers, notice placement, pause and cleanup.
 | `HarpoonOffence.java` | Per-faction, per-system hit history, debts, reputation loss, witness state, and response ladders. The T2 captain's fleet (`CaptainsFleet.isCaptain`) is never recorded or turned hostile, so the harpoon comm rows (score 1200–1300) never take over his conversation. |
 | `HarpoonPatrolResponse.java` | Sends one collector at a time in the incident system; after a reported refusal, every eligible patrol there that sees the player. |
 | `HarpoonWitness.java` | Makes a civilian seek a patrol, after a first hit or a refused repair bill. |
-| `HarpoonHitman.java` | Revenge-contract roll for eligible colonial factions and eligible victims; the `CHANCE_*` constants set each trigger's odds. |
+| `HarpoonHitman.java` | Revenge-contract roll for eligible colonial factions and eligible victims; the `CHANCE_*` constants set each trigger's odds. The fleet is a hard fight: `EncounterScaling` at `STRENGTH_MIN` to `STRENGTH_MAX` (1.5 to 2.1) times the player's strength, with vanilla's mercenary-bounty quality and officers; its bribe is `BRIBE_PER_FP` per fleet point. |
 
 ### `combat/tug`
 
@@ -935,6 +935,7 @@ equipment in both slots, the rig fit rules and availability notices against
 | `memory/upgrades/UpgradeManager.java` | Saves purchased levels. |
 | `memory/charges/ChargeManager.java` | Persistent fractional charge pools. |
 | `reflection/ReflectionUtils.java` | `MethodHandle`-based reflection that avoids the script classloader's direct reflection ban. |
+| `helper/EncounterScaling.java` | Builds a hostile fleet at a ratio of the player's strength, the measure behind vanilla's skull rating (`Misc.getDangerLevel`: 0.67 to 1.33 is 3 skulls, 1.33 to 3 is 4). The first build takes the player's fleet points times the ratio; when the measured strength misses by more than `TOLERANCE` (15%), one rebuild corrects the points. Points stay between `MIN_FP` (10) and vanilla's largest mission fleet for the faction (`FleetSize.MAXIMUM`). Used by `HarpoonHitman` and `CampedSpot`. |
 
 ## Contracts
 

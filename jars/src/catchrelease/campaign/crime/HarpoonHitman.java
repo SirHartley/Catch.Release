@@ -1,5 +1,6 @@
 package catchrelease.campaign.crime;
 
+import catchrelease.helper.EncounterScaling;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -11,11 +12,11 @@ import com.fs.starfarer.api.campaign.ai.ModularFleetAIAPI;
 import com.fs.starfarer.api.campaign.econ.MarketAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.AutoDespawnScript;
-import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.FleetTypes;
 import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
+import com.fs.starfarer.api.impl.campaign.missions.hub.HubMissionWithTriggers.FleetQuality;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.TransmitterTrapSpecial;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
@@ -32,8 +33,7 @@ public class HarpoonHitman implements EveryFrameScript {
 
     public static final String BRIBE_KEY = "$catchrelease_harpoonHitmanBribe";
     public static final String BRIBE_TEXT_KEY = "$catchrelease_harpoonHitmanBribeDGS";
-    public static final int BRIBE_MIN = 80_000;
-    public static final int BRIBE_MAX = 120_000;
+    public static final int BRIBE_PER_FP = 2_400;
     public static final int BRIBE_STEP = 5_000;
     public static final String MAGIC_BOUNTY_TARGET_FLAG = "$MagicLib_Bounty_target_fleet";
 
@@ -43,8 +43,9 @@ public class HarpoonHitman implements EveryFrameScript {
     public static final String PENDING_KEY = "$catchrelease_harpoonHitmanPending";
     public static final float RESPONSE_DELAY_DAYS = 30f;
 
-    public static final float FP_MIN = 25f;
-    public static final float FP_MAX = 60f;
+    // times the player's strength: a hard fight, 4 skulls in vanilla's danger rating
+    public static final float STRENGTH_MIN = 1.5f;
+    public static final float STRENGTH_MAX = 2.1f;
 
     public static final float SPAWN_RANGE_MIN = 2500f;
     public static final float SPAWN_RANGE_MAX = 4500f;
@@ -160,20 +161,26 @@ public class HarpoonHitman implements EveryFrameScript {
     protected static CampaignFleetAPI create(CampaignFleetAPI player, String hiredBy,
                                               String victimName, String originName,
                                               boolean explosive) {
-        float fp = FP_MIN + (float) Math.random() * (FP_MAX - FP_MIN);
+        float ratio = STRENGTH_MIN + (float) Math.random() * (STRENGTH_MAX - STRENGTH_MIN);
 
-        FleetParamsV3 params = new FleetParamsV3(
-                null,
-                player.getLocationInHyperspace(),
-                Factions.MERCENARY,
-                null,
-                FleetTypes.MERC_BOUNTY_HUNTER,
-                fp,
-                0f,
-                fp * 0.1f,
-                0f, 0f, 0f, 0f);
+        CampaignFleetAPI fleet = EncounterScaling.create(Factions.MERCENARY, ratio, fp -> {
+            FleetParamsV3 params = new FleetParamsV3(
+                    null,
+                    player.getLocationInHyperspace(),
+                    Factions.MERCENARY,
+                    null,
+                    FleetTypes.MERC_BOUNTY_HUNTER,
+                    fp,
+                    0f,
+                    fp * 0.1f,
+                    0f, 0f, 0f, 0f);
+            // vanilla's mercenary bounties (CBMerc): very high quality, OfficerNum.MORE, OfficerQuality.HIGHER
+            params.qualityMod = FleetQuality.VERY_HIGH.qualityMod;
+            params.officerNumberMult = 1.5f;
+            params.officerLevelBonus = 2;
 
-        CampaignFleetAPI fleet = FleetFactoryV3.createFleet(params);
+            return params;
+        });
         if (fleet == null || fleet.isEmpty()) return null;
 
         // dark, because a contract is not a thing anybody files
@@ -200,7 +207,7 @@ public class HarpoonHitman implements EveryFrameScript {
                 originName == null ? "open space" : originName, INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(OFFENCE_KEY,
                 explosive ? "an explosive ROD charge" : "a ROD harpoon", INTERCEPT_DAYS);
-        int bribe = rollBribe();
+        int bribe = getBribe(fleet);
         fleet.getMemoryWithoutUpdate().set(BRIBE_KEY, bribe, INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(BRIBE_TEXT_KEY, Misc.getWithDGS(bribe), INTERCEPT_DAYS);
         fleet.getMemoryWithoutUpdate().set(MemFlags.MEMORY_KEY_MAKE_ALWAYS_PURSUE, true, INTERCEPT_DAYS);
@@ -208,9 +215,10 @@ public class HarpoonHitman implements EveryFrameScript {
         return fleet;
     }
 
-    protected static int rollBribe() {
-        int steps = (BRIBE_MAX - BRIBE_MIN) / BRIBE_STEP;
-        return BRIBE_MIN + (int) (Math.random() * (steps + 1)) * BRIBE_STEP;
+    protected static int getBribe(CampaignFleetAPI fleet) {
+        int steps = Math.round(fleet.getFleetPoints() * BRIBE_PER_FP / (float) BRIBE_STEP);
+
+        return Math.max(1, steps) * BRIBE_STEP;
     }
 
     public static boolean acceptBribe(CampaignFleetAPI fleet) {
