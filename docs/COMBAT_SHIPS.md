@@ -12,7 +12,7 @@ Engine facts below are from Starsector 0.98a-RC8 (the `starsector-knowledge` ski
 | Reliquary | `catchrelease_rod_ship` | Cruiser | LYNE Tender | `graphics/catchrelease/ships/done_boat.png` |
 | Monstrance | `catchrelease_lamp_ship` | Cruiser | Breach Trawler | `graphics/catchrelease/ships/lightbulb.png` with `lightbulb_glow.png`; Breach Light weapon `graphics/catchrelease/weapons/spotlight.png` with `spotlight_glow.png` |
 
-All three are midline. Stats for the Stigmata and Reliquary are set in `ship_data.csv`; the Monstrance still has the Nebula's numbers. The Stigmata has its Haul Drive, the Reliquary its Salvage Launch and the Monstrance its Breach Lights.
+All three are midline, with their stats in `ship_data.csv`. The Stigmata has its Haul Drive, the Reliquary its Salvage Launch and the Monstrance its Breach Lights.
 
 ## Stigmata: harpoon tug
 
@@ -115,8 +115,10 @@ Engine limits:
 
 ## Monstrance: Breach Trawler
 
-Two Breach Lights are built into the hull, on the round housings either side of the reactor bulb. The ship system turns them on.
+An escort cruiser for the battle line. Two Breach Lights are built into the hull, on the round housings either side of the reactor bulb, so the ship fights broadside on, its lights covering the line's flanks: the motes clear fighters and missiles and push enemy ships away. The ship system turns them on.
 
+- **Stats:** a sturdy, slow cruiser with a wide front shield, 3 small ballistic mounts and one modular bay. Dissipation stays above 5% of flux capacity so the lights can run while the guns fire. No `CIVILIAN` hint: the admiral AI keeps civilian hulls out of the fight (`obf/combat/ai/admiral/G.java`, 0.98.5a-RC4).
+- **Standard variant:** 3 light dual machine guns and a Xyphos wing for point defence.
 - **System:** a toggle. It charges up over 1.5 s, builds hard flux at 5% of the ship's flux capacity per second while on, takes 1 s to shut down and has a 4 s cooldown. While it runs, the reactor glow sprite shows over the hull, flickering in during the charge-up, and the hull jitters, hard through the charge-up and slightly once lit. The lights come on with the campaign beam's flash when the charge-up ends, and each lamp's lens glow lights with them. Sounds as in the campaign: each light plays the beam toggle sound, and the player's own ship the ability's on and off sounds.
 - **Lights:** each light throws the campaign's fan beam: its fill, light and distortion lenses, drawn under the ships. It sweeps back and forth across its mount's 108° arc, with the campaign's sine wobble, and leans onto an enemy ship within its reach and arc for a few seconds, as the campaign beam locks onto a contact.
 - **Motes:** while the system is fully on, each light surfaces about one mote a second at a random point in its cone, up to 8 per ship. A mote lives 6 s, drifts slowly and is drawn like a campaign mote in a `FishRarity` colour, never quest gold. They only affect the other side:
@@ -287,5 +289,5 @@ Two Breach Lights are built into the hull, on the round housings either side of 
 
 ### Stage 7: Monstrance
 
-- [x] 7.1 Hull art and data, cruiser. Stats are still the Nebula's.
+- [x] 7.1 Hull art and data, escort cruiser stats and one modular bay.
 - [x] 7.2 Light projectors and the light system: cone rendering ported from the campaign renderers, motes as mine-flagged missiles, and system AI. Implemented in `combat/lights`; see [ARCHITECTURE.md](ARCHITECTURE.md#combatlights).
