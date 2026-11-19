@@ -4175,7 +4175,7 @@ The payment figure appears.
 
 ""$entity.catchrelease_campBribeDGS credits buys our absence. It does not make you clean.""",,
 catchrelease_campOptPay,CatchReleaseCampOptions,,DoCanAffordCheck $entity.catchrelease_campBribe catchrelease_campPay,,0:catchrelease_campPay:Pay them to move on ($entity.catchrelease_campBribeDGS credits),
-catchrelease_campOptScare,CatchReleaseCampOptions,,"SetStoryOption catchrelease_campScare 1 avoidCargoScan ui_char_spent_story_point ""Talked a fleet off a fishing spot""",,5:catchrelease_campScare:Convince them to move on,
+catchrelease_campOptScare,CatchReleaseCampOptions,,"SetStoryOption catchrelease_campScare 1 cleanDisengage ui_char_spent_story_point ""Talked a fleet off a fishing spot""",,5:catchrelease_campScare:Convince them to move on,
 catchrelease_campOptLeave,CatchReleaseCampOptions,,,,100:cutCommLinkNoText:Cut the comm link,
 catchrelease_campPaySel,DialogOptionSelected,$option == catchrelease_campPay,"AddRemoveCommodity credits -$entity.catchrelease_campBribe true
 $entity.catchrelease_campCleared = true

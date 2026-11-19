@@ -132,6 +132,7 @@ Adjusted - Accepted job markers are steady gold (offers still pulse)
 Adjusted - Fight Night: fee option reads "Take the rewards." and lists them
 Fixed - Fleets with a quest or marked important no longer take fishing jobs too
 Fixed - Attacking a mercenary camp now costs reputation with the independents
+Fixed - Talking a camp off its spot now gives the bonus XP for avoiding a fight
 
 Distress calls
 Adjusted - Distress calls wait while another mod's distress call is live
