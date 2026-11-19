@@ -266,7 +266,7 @@ public class Searchlight implements EveryFrameScript {
                 LunaCampaignRenderer.addTransientRenderer(fanBreach);
             }
             if (fan == null) {
-                fan = new SearchlightFanRenderer(getOrigin(), currentRenderLoc, getArea(), COLOR);
+                fan = new SearchlightFanRenderer(getOrigin(), currentRenderLoc, COLOR);
                 LunaCampaignRenderer.addTransientRenderer(fan);
             }
         } else {

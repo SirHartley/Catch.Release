@@ -27,7 +27,8 @@ public class FishermanConstants {
             "phaeton_Standard",
             "shepherd_Frontier",
     };
-    public static final Color LIGHT_COLOR = new Color(255, 180, 50, 255);
+    public static final Color LIGHT_CORE_COLOR = new Color(230, 35, 255);
+    public static final Color LIGHT_EDGE_COLOR = new Color(255, 180, 50);
     public static final int LIGHTS = 3;
     public static final float LIGHT_AREA = 240f;
     public static final float LIGHT_HALF_ANGLE = 14.3f;

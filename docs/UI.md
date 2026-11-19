@@ -536,8 +536,8 @@ and button handling in `sources-obf/ui.java`; mouse-event predicates in
   two shader objects GraphicsLib's `ShaderLib.loadShader` leaves behind.
 - LunaLib draws every registered renderer on each of its layers every frame, in
   every location, with no viewport test. Renderers that can sit off screen return
-  early on `viewport.isNearViewport`: `RippleRingRenderer`, and `SearchlightFanRenderer`,
-  which also draws the Fisherman's lamps anywhere in his system.
+  early on `viewport.isNearViewport`: `RippleRingRenderer`, `SearchlightFanRenderer`,
+  and `FishermanLampRenderer`, which draws the Fisherman's lamps anywhere in his system.
 - Shields use red for timed regeneration and blue for Quorum's escort-dependent
   immunity. Purple (`LegendaryShields.SHIELD_ORANGE`, an older name) marks shields
   that do not regenerate on a timer: Moray's one-off shield, Lantern Jack's and
