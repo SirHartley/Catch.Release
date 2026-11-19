@@ -279,6 +279,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return true;
             case "t2Complete":
                 return CaptainsFleet.complete(text(dialog));
+            case "t2Buy":
+                return CaptainsFleet.buyShip(text(dialog));
             case "t2Debrief":
                 return SensorBuild.give(text(dialog));
             case "t3Prepare":

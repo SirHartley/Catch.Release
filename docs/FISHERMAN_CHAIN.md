@@ -140,6 +140,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
   - Extra rewards: one harpoon module schematic, or any module schematic if all harpoon ones are unlocked, plus three range-data entries. Ship modules are never offered.
 - **Not caught (expected).** The captain talks about his years-long chase and says it got away again, but he'll get it next time. He is grateful for the data the player gathered.
 - **Both outcomes:** the harpoon fishing ship. It brings a second Harpoon slot and the Retrieval Head (see [ship-bound equipment](#shared-mechanic-ship-bound-equipment)).
+- **Survival.** The captain sells the ship instead, at its normal-game value (`SurvivalMode.getShipPrice`, a fraction of the survival market price). He waits in his system with the ship until the player can pay; the chain moves on in the meantime.
 
 **Return to the Fisherman.** He thanks the player and explains how epics and legendaries behave when hunted. Optional questions add some background lore, which the mod is currently light on. His answers stay within his knowledge limits and his habit of not over-explaining (`LORE.md`). He gives the player the **Needle Sensor** schematic and tells them to build it.
 
@@ -167,6 +168,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - The man is a guaranteed, highlighted bar encounter there while the trade is open. He is very drunk and wants epic fish to sell and live off: nobody wants the old ship, but everybody wants epic fish, which are worth far more to the right buyer.
 - He asks for three epic fish. One story point haggles him down to two, never fewer. Where the player gets them does not matter.
 - The trade adds the Reliquary to the fleet. The player then reports back to the Fisherman.
+- **Survival.** The yard will not release the ship until its berth is paid, so he also asks for the berth fee: the Reliquary's normal-game value in credits. The haggle lowers only the fish.
 
 **Closing conversation**
 - Gist: "Rumours about the stranger fish are worth following once your gear is very good." He does not name legendaries, so T4 stays vague.

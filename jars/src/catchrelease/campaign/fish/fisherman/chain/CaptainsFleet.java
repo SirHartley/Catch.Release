@@ -29,6 +29,7 @@ import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.config.Setting;
+import catchrelease.config.SurvivalMode;
 import catchrelease.helper.loading.FishSpecLoader;
 import catchrelease.rendering.renderers.FleetMarkerRenderer;
 import com.fs.starfarer.api.Global;
@@ -46,6 +47,7 @@ import com.fs.starfarer.api.campaign.listeners.ListenerManagerAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.characters.FullName;
 import com.fs.starfarer.api.characters.PersonAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetFactoryV3;
 import com.fs.starfarer.api.impl.campaign.fleets.FleetParamsV3;
@@ -55,6 +57,7 @@ import com.fs.starfarer.api.impl.campaign.ids.MemFlags;
 import com.fs.starfarer.api.impl.campaign.ids.Ranks;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
+import com.fs.starfarer.api.impl.campaign.rulecmd.AddRemoveCommodity;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -269,7 +272,13 @@ public final class CaptainsFleet {
                 }
                 case T2_REPORT -> info.addPara("Report to the captain in %s", pad, text, h, getSystemName());
                 case T2_DEBRIEF -> info.addPara("Return to the nearest fishing boat", text, pad);
-                default -> info.addPara("Speak to the captain in %s", pad, text, h, getSystemName());
+                default -> {
+                    if (!isShipForSale()) info.addPara("Speak to the captain in %s", pad, text, h, getSystemName());
+                }
+            }
+            if (isShipForSale()) {
+                info.addPara("Buy the %s from the captain in %s for %s", pad, text, h, getShipName(), getSystemName(),
+                        Misc.getDGSCredits(getShipPrice()));
             }
             unindent(info);
         }
@@ -289,7 +298,10 @@ public final class CaptainsFleet {
                 return;
             }
 
-            if (FishermanChain.isAt(FishermanChain.Stage.T2_REPORT)) {
+            if (isShipForSale()) {
+                info.addPara("The captain is holding the %s for you in %s until you can pay for it.", opad, h,
+                        getShipName(), getSystemName());
+            } else if (FishermanChain.isAt(FishermanChain.Stage.T2_REPORT)) {
                 info.addPara("The hunt for the %s in %s is over. The captain is waiting to hear how it went.", opad,
                         new Color[]{FishRarity.EPIC.color, h}, getSpeciesName(), getSystemName());
             } else {
@@ -372,7 +384,27 @@ public final class CaptainsFleet {
         FishermanChain.Stage stage = FishermanChain.getStage();
 
         return stage == FishermanChain.Stage.T2_MEET || stage == FishermanChain.Stage.T2_LAMPS
-                || stage == FishermanChain.Stage.T2_HUNT || stage == FishermanChain.Stage.T2_REPORT;
+                || stage == FishermanChain.Stage.T2_HUNT || stage == FishermanChain.Stage.T2_REPORT
+                || isShipForSale();
+    }
+
+    public static boolean isShipForSale() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+
+        return saved != null && saved.t2ShipPrice > 0;
+    }
+
+    public static int getShipPrice() {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved != null && saved.t2ShipPrice > 0) return saved.t2ShipPrice;
+
+        return SurvivalMode.getShipPrice(FishingShips.Ship.HARPOON.hullId);
+    }
+
+    public static boolean canBuyShip() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+
+        return player != null && player.getCargo().getCredits().get() >= getShipPrice();
     }
 
     // Keeps the saved system and species while they still qualify, so a declined offer names the same place again.
@@ -438,13 +470,19 @@ public final class CaptainsFleet {
     }
 
     // Both outcomes pay the harpoon ship; a catch also pays a schematic and range data. The fleet then heads home.
+    // in survival the ship is sold instead, and the fleet waits for the money while the chain moves on
     public static boolean complete(TextPanelAPI text) {
         FishermanChain.Saved saved = FishermanChain.get(false);
         if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T2_REPORT)) return false;
 
-        List<FishReward.Receipt> receipts = grantRewards(saved.t2Caught);
+        boolean sell = SurvivalMode.isOn();
+        List<FishReward.Receipt> receipts = grantRewards(saved.t2Caught, !sell);
 
-        releaseFleet();
+        if (sell) {
+            saved.t2ShipPrice = SurvivalMode.getShipPrice(FishingShips.Ship.HARPOON.hullId);
+        } else {
+            releaseFleet();
+        }
         FishermanChain.setStage(FishermanChain.Stage.T2_DEBRIEF);
         register();
         FishReward.showReceipts(text, receipts);
@@ -460,15 +498,34 @@ public final class CaptainsFleet {
 
         FishermanChain.Saved saved = FishermanChain.get(false);
         receipts.addAll(grantRewards(FishermanChain.isAt(FishermanChain.Stage.T2_REPORT) && saved != null
-                && saved.t2Caught));
+                && saved.t2Caught, true));
         releaseFleet();
         clearEpic();
     }
 
-    protected static List<FishReward.Receipt> grantRewards(boolean caught) {
-        Random random = new Random();
+    public static boolean buyShip(TextPanelAPI text) {
+        FishermanChain.Saved saved = FishermanChain.get(false);
+        if (saved == null || !isShipForSale() || !canBuyShip()) return false;
+
+        int price = saved.t2ShipPrice;
+        Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(price);
+        if (text != null) AddRemoveCommodity.addCreditsLossText(price, text);
+        saved.t2ShipPrice = 0;
+
         List<FishReward.Receipt> receipts = new ArrayList<>();
         receipts.add(FishReward.ship(FishingShips.Ship.HARPOON.hullId).grantWithReceipt());
+        releaseFleet();
+        register();
+        FishReward.showReceipts(text, receipts);
+        updateIntel();
+
+        return true;
+    }
+
+    protected static List<FishReward.Receipt> grantRewards(boolean caught, boolean ship) {
+        Random random = new Random();
+        List<FishReward.Receipt> receipts = new ArrayList<>();
+        if (ship) receipts.add(FishReward.ship(FishingShips.Ship.HARPOON.hullId).grantWithReceipt());
         if (caught) {
             FishReward schematic = pickSchematic(random);
             if (schematic != null) receipts.add(schematic.grantWithReceipt());
@@ -721,6 +778,12 @@ public final class CaptainsFleet {
         FishermanChain.Saved saved = FishermanChain.get(false);
 
         return saved == null ? null : FishRumors.findSystem(saved.t2SystemId);
+    }
+
+    public static String getShipName() {
+        ShipHullSpecAPI spec = Global.getSettings().getHullSpec(FishingShips.Ship.HARPOON.hullId);
+
+        return spec == null ? "Stigmata" : spec.getHullName();
     }
 
     public static String getSpeciesName() {

@@ -3,10 +3,12 @@ package catchrelease.campaign.fish.fisherman.chain;
 import catchrelease.campaign.fish.shop.ShopEntry;
 import catchrelease.campaign.fish.shop.ShopMarks;
 import catchrelease.campaign.fish.tackle.Tackle;
+import catchrelease.config.SurvivalMode;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.util.Misc;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -47,6 +49,9 @@ public final class FishermanChain {
     public static final String KEY = "$catchrelease_fisherChain";
     public static final String PLANTER_PREFIX = "catchrelease_chain";
 
+    // survival rows sell the ships the chain gives away otherwise
+    public static final String SURVIVAL = "$catchreleaseChainSurvival";
+
     public static final String T1_OFFER = "$catchreleaseChainT1Offer";
     public static final String T1_ACTIVE = "$catchreleaseChainT1Active";
     public static final String T1_LENS = "$catchreleaseChainT1Lens";
@@ -73,6 +78,9 @@ public final class FishermanChain {
     public static final String T2_DEBRIEF = "$catchreleaseChainT2Debrief";
     public static final String T2_LANDED = "$catchreleaseChainT2Landed";
     public static final String T2_HAS_SENSOR = "$catchreleaseChainT2HasSensor";
+    public static final String T2_FOR_SALE = "$catchreleaseChainT2ForSale";
+    public static final String T2_SHIP_PRICE = "$catchreleaseChainT2ShipPrice";
+    public static final String T2_CAN_BUY = "$catchreleaseChainT2CanBuy";
 
     public static final String T3_OFFER = "$catchreleaseChainT3Offer";
     public static final String T3_PLACED = "$catchreleaseChainT3Placed";
@@ -87,6 +95,7 @@ public final class FishermanChain {
     public static final String T3_PRICE = "$catchreleaseChainT3Price";
     public static final String T3_HAGGLED = "$catchreleaseChainT3Haggled";
     public static final String T3_CAN_PAY = "$catchreleaseChainT3CanPay";
+    public static final String T3_CREDITS = "$catchreleaseChainT3Credits";
     public static final String T3_TRADED = "$catchreleaseChainT3Traded";
 
     // a caught legendary the Fisherman has not heard about yet, and which of his rows answers it
@@ -123,6 +132,8 @@ public final class FishermanChain {
         // the point the fleet circles; removed with the fleet
         public SectorEntityToken t2Hold;
         public boolean t2Caught;
+        // survival: the captain's asking price for the Stigmata while he holds it, 0 once bought or never offered
+        public int t2ShipPrice;
 
         public String t3SystemId;
         public String t3SystemName;
@@ -211,6 +222,8 @@ public final class FishermanChain {
         Saved saved = get(false);
         Stage stage = getStage();
 
+        local.set(SURVIVAL, SurvivalMode.isOn(), 0);
+
         local.set(T1_OFFER, stage == Stage.T1_OFFERED, 0);
         local.set(T1_ACTIVE, stage == Stage.T1_ACTIVE, 0);
         local.set(T1_LENS, stage == Stage.T1_LENS, 0);
@@ -239,6 +252,9 @@ public final class FishermanChain {
         local.set(T2_DEBRIEF, stage == Stage.T2_DEBRIEF, 0);
         local.set(T2_LANDED, stage == Stage.T2_DEBRIEF && saved != null && saved.t2Caught, 0);
         local.set(T2_HAS_SENSOR, SensorBuild.isOwned(), 0);
+        local.set(T2_FOR_SALE, CaptainsFleet.isShipForSale(), 0);
+        local.set(T2_SHIP_PRICE, Misc.getWithDGS(CaptainsFleet.getShipPrice()), 0);
+        local.set(T2_CAN_BUY, CaptainsFleet.canBuyShip(), 0);
 
         local.set(T3_OFFER, stage == Stage.T2_SENSOR_BOUGHT, 0);
         local.set(T3_PLACED, saved != null && saved.t3PlanetName != null, 0);
@@ -254,6 +270,7 @@ public final class FishermanChain {
         local.set(T3_PRICE, ReliquaryTrade.getPrice() == ReliquaryTrade.HAGGLED_PRICE ? "two" : "three", 0);
         local.set(T3_HAGGLED, saved != null && saved.t3Haggled, 0);
         local.set(T3_CAN_PAY, ReliquaryTrade.canPay(), 0);
+        local.set(T3_CREDITS, Misc.getWithDGS(ReliquaryTrade.getCredits()), 0);
         local.set(T3_TRADED, stage == Stage.T3_TRADED, 0);
 
         boolean report = LegendaryHunt.getPendingReport() != null;

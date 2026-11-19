@@ -2726,6 +2726,12 @@ catchrelease_t2CaptainCaught,CatchReleaseT2Captain,$catchreleaseChainT2Caught,,"
 ""You got her! Near twenty year, and you landed her in an afternoon!"" He has to stop and wipe his eyes. ""I'm too old for this. That's me done, so it is. I'm away home to put my leg up. The one I've got left.""",catchrelease_t2CaptainCaughtPay:Continue,
 catchrelease_t2CaptainCaughtPay,DialogOptionSelected,$option == catchrelease_t2CaptainCaughtPay,"CatchReleaseCMD t2Complete
 SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""You'll be wanting paid. Take the boat, she's earned a better captain than me. And the crew have dug out a few things they'll not be needing now.""",100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2CaptainCaughtPaySurvival,DialogOptionSelected,"$option == catchrelease_t2CaptainCaughtPay
+$catchreleaseChainSurvival","SetTextHighlights $catchreleaseChainT2ShipPrice
+CatchReleaseCMD t2Complete
+FireAll CatchReleaseT2SaleOptions","""You'll be wanting paid. The crew have dug out a few things they'll not be needing now.""
+
+He nods at the harpoon boat on his hangar feed. ""She's another matter. I'd give her you for nothing if I could, but the yards are charging a fortune these days and I've a crew to see home. $catchreleaseChainT2ShipPrice credits and she's yours. That's a friend's price. If you're short, nae bother, I'll wait on you.""",,
 catchrelease_t2CaptainLost,CatchReleaseT2Captain,$catchreleaseChainT2Lost,,"The captain hears you out without interrupting. When you're done he nods slowly.
 
 ""Aye, that's her all over. Twenty year near enough, and I've never once got her aboard.""
@@ -2733,6 +2739,18 @@ catchrelease_t2CaptainLost,CatchReleaseT2Captain,$catchreleaseChainT2Lost,,"The 
 ""Still, you found her, that's more than I've managed in a long while. The crew have your whole run on the plot now. She'll turn up again. Always does, and I'll be there.""",catchrelease_t2CaptainLostPay:Continue,
 catchrelease_t2CaptainLostPay,DialogOptionSelected,$option == catchrelease_t2CaptainLostPay,"CatchReleaseCMD t2Complete
 SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","""I'll be travelin' light for the next chapter. Take the harpoon boat. I've spent years getting her how I want her, and what good's it done me? You got closer in a day. Go on, before I change my mind.""",100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2CaptainLostPaySurvival,DialogOptionSelected,"$option == catchrelease_t2CaptainLostPay
+$catchreleaseChainSurvival","SetTextHighlights $catchreleaseChainT2ShipPrice
+CatchReleaseCMD t2Complete
+FireAll CatchReleaseT2SaleOptions","He nods at the harpoon boat holding off his bow. ""I'll be travelin' light for the next chapter, so she's going spare. I cannae give her away, mind, not with what the yards are charging. $catchreleaseChainT2ShipPrice credits and she's yours. That's a friend's price, and if you're short I'll hold her here till you've the money.""",,
+catchrelease_t2CaptainForSale,CatchReleaseT2Captain,$catchreleaseChainT2ForSale,"SetTextHighlights $catchreleaseChainT2ShipPrice
+FireAll CatchReleaseT2SaleOptions","The captain looks up from the plot table. ""Back for the boat? She's still here, and so am I. $catchreleaseChainT2ShipPrice credits, same as I said.""",,
+catchrelease_t2SaleOptBuy,CatchReleaseT2SaleOptions,,,,catchrelease_t2Buy:Pay $catchreleaseChainT2ShipPrice credits for the Stigmata,
+catchrelease_t2SaleOptBuyShort,CatchReleaseT2SaleOptions,!$catchreleaseChainT2CanBuy,"SetEnabled catchrelease_t2Buy false
+SetTooltip catchrelease_t2Buy ""Requires $catchreleaseChainT2ShipPrice credits.""",,,
+catchrelease_t2SaleOptLeave,CatchReleaseT2SaleOptions,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""",,100:catchrelease_fleetResolutionLeave:Leave,
+catchrelease_t2Buy,DialogOptionSelected,$option == catchrelease_t2Buy,"CatchReleaseCMD t2Buy
+SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","He signs the transfer over and sends it across. ""She's yours, then. Mind and look after her. Right, that's me away home.""",100:catchrelease_fleetResolutionLeave:Leave,
 catchrelease_t2CaptainNone,CatchReleaseT2Captain,,"SetShortcut catchrelease_fleetResolutionLeave ""ESCAPE""","The captain is busy getting his fleet under way. He raises a hand to the pickup.
 
 ""Tell the old man I'm obliged to him.""",100:catchrelease_fleetResolutionLeave:Leave,
@@ -2805,16 +2823,24 @@ catchrelease_t3Drunk,DialogOptionSelected,$option == catchrelease_t3Drunk,"Catch
 FireBest CatchReleaseT3DrunkGreeting",,,
 catchrelease_t3DrunkGreetFirst,CatchReleaseT3DrunkGreeting,!$market.catchrelease_t3DrunkMet,"$market.catchrelease_t3DrunkMet = true
 CatchReleaseCMD highlightFishText ""Three trophy fish""
+FireAll CatchReleaseT3DrunkFee
 FireAll CatchReleaseT3DrunkOptions","""There he is!"" The man reaches for your hand and catches your sleeve. ""No. You're not him. Sorry, Captain. Did he send you? I asked him to send someone.""
 
 ""I've a drone tender to sell. She's old, but she's... well, she's old. I've asked everyone in here. Nobody wants her."" He tries to straighten on the stool. ""Fish, though. People want fish. Those trophy ones you spend months chasing. Get the right buyer and I'd be set. Worth more than I'd ever get for her.""
 
 ""Three trophy fish. You bring me those, you can have the ship. All of her. I'm finished with ships.""",,
 catchrelease_t3DrunkGreetAgain,CatchReleaseT3DrunkGreeting,$market.catchrelease_t3DrunkMet,"CatchReleaseCMD highlightFishText $catchreleaseChainT3Price
+FireAll CatchReleaseT3DrunkFee
 FireAll CatchReleaseT3DrunkOptions","""I know you. We talked about..."" He catches your sleeve again. ""Don't tell me. The ship. $catchreleaseChainT3Price fish, we said. Have you brought them?""",,
-catchrelease_t3DrunkOptPay,CatchReleaseT3DrunkOptions,,,,catchrelease_t3DrunkPay:Trade $catchreleaseChainT3Price epic fish for the Reliquary,
-catchrelease_t3DrunkOptPayShort,CatchReleaseT3DrunkOptions,!$catchreleaseChainT3CanPay,"SetEnabled catchrelease_t3DrunkPay false
+catchrelease_t3DrunkFee,CatchReleaseT3DrunkFee,$catchreleaseChainSurvival,SetTextHighlights $catchreleaseChainT3Credits,"He holds up a finger and looks at it. ""The berth. The yard won't let her out till her berth's paid. $catchreleaseChainT3Credits credits. I haven't got it. Obviously. You pay that, and the fish, and she's yours.""",,
+catchrelease_t3DrunkOptPay,CatchReleaseT3DrunkOptions,!$catchreleaseChainSurvival,,,catchrelease_t3DrunkPay:Trade $catchreleaseChainT3Price epic fish for the Reliquary,
+catchrelease_t3DrunkOptPaySurvival,CatchReleaseT3DrunkOptions,$catchreleaseChainSurvival,,,catchrelease_t3DrunkPay:Trade $catchreleaseChainT3Price epic fish and $catchreleaseChainT3Credits credits for the Reliquary,
+catchrelease_t3DrunkOptPayShort,CatchReleaseT3DrunkOptions,"!$catchreleaseChainT3CanPay
+!$catchreleaseChainSurvival","SetEnabled catchrelease_t3DrunkPay false
 SetTooltip catchrelease_t3DrunkPay ""Requires $catchreleaseChainT3Price epic fish in your cargo.""",,,
+catchrelease_t3DrunkOptPayShortSurvival,CatchReleaseT3DrunkOptions,"!$catchreleaseChainT3CanPay
+$catchreleaseChainSurvival","SetEnabled catchrelease_t3DrunkPay false
+SetTooltip catchrelease_t3DrunkPay ""Requires $catchreleaseChainT3Price epic fish in your cargo and $catchreleaseChainT3Credits credits.""",,,
 catchrelease_t3DrunkOptHaggle,CatchReleaseT3DrunkOptions,!$catchreleaseChainT3Haggled,"SetStoryOption catchrelease_t3DrunkHaggle 1 avoidCargoScan ui_char_spent_story_point ""Negotiated a price of two epic fish for the Reliquary""",,"catchrelease_t3DrunkHaggle:""I'll give you two. You haven't had a better offer.""",
 catchrelease_t3DrunkOptLeave,CatchReleaseT3DrunkOptions,,SetShortcut catchrelease_t3DrunkLeave ESCAPE,,100:catchrelease_t3DrunkLeave:Leave him to his drink,
 catchrelease_t3DrunkHaggle,DialogOptionSelected,$option == catchrelease_t3DrunkHaggle,"CatchReleaseCMD highlightFishText ""Two fish""
