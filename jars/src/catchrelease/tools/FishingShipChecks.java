@@ -12,6 +12,7 @@ import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.fleet.RepairTrackerAPI;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ public final class FishingShipChecks {
 
         reconcileRules(fleet);
         readiness(fleet);
+        losses(fleet);
         matrix(fleet);
 
         System.out.println("Fishing ship checks passed: " + checks);
@@ -159,6 +161,40 @@ public final class FishingShipChecks {
         f.remove(tug);
         FishingShips.reconcile();
         require(!TackleManager.isIdle(Tackle.Fit.HARPOON, 1), "no idle slot without the ship");
+    }
+
+    // a ship that leaves other than to a market or storage is lost until one rejoins; one copy left is no loss
+    private static void losses(Fleet f) {
+        f.reset();
+        FleetMemberAPI tug = f.add("catchrelease_harpoon_ship", false);
+        FishingShips.reconcile();
+        require(!FishingShips.isLost(FishingShips.Ship.HARPOON), "a ship aboard is not lost");
+
+        f.remove(tug);
+        FishingShips.reconcile(EnumSet.of(FishingShips.Ship.HARPOON));
+        require(!FishingShips.isLost(FishingShips.Ship.HARPOON), "sold or stored is not lost");
+
+        f.add("catchrelease_harpoon_ship", false);
+        FleetMemberAPI spare = f.add("catchrelease_harpoon_ship", false);
+        FishingShips.reconcile();
+        f.remove(spare);
+        FishingShips.reconcile();
+        require(!FishingShips.isLost(FishingShips.Ship.HARPOON), "one copy left is no loss");
+
+        f.reset();
+        tug = f.add("catchrelease_harpoon_ship", false);
+        FleetMemberAPI tender = f.add("catchrelease_rod_ship", false);
+        FishingShips.reconcile();
+        f.remove(tug);
+        f.remove(tender);
+        FishingShips.reconcile(EnumSet.of(FishingShips.Ship.ROD));
+        require(FishingShips.isLost(FishingShips.Ship.HARPOON), "a ship gone without a sale is lost");
+        require(!FishingShips.isLost(FishingShips.Ship.ROD), "only the parted ship is excused");
+        require(!FishingShips.isLost(FishingShips.Ship.LAMP), "a ship never owned is not lost");
+
+        f.add("catchrelease_harpoon_ship_default_D", true);
+        FishingShips.reconcile();
+        require(!FishingShips.isLost(FishingShips.Ship.HARPOON), "rejoining clears the loss");
     }
 
     // Every pair of modules on every rig: only the same module or a shared exclusion group is refused.

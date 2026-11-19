@@ -4,6 +4,7 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.StarSystemAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.util.Misc;
 import org.lwjgl.util.vector.Vector2f;
 
@@ -20,6 +21,15 @@ public final class SurvivalMode {
     // the normal-mode value, a friend's price against ext_shipBuyPriceMult (5x to 8x) at a market
     public static int getShipPrice(String hullId) {
         return Math.round(Global.getSettings().getHullSpec(hullId).getBaseValue());
+    }
+
+    // what a market asks in survival; ext_shipBuyPriceMult starts at the frigate, HullSize ordinal 2, as vanilla reads it
+    public static int getMarketShipPrice(String hullId) {
+        ShipHullSpecAPI spec = Global.getSettings().getHullSpec(hullId);
+        float mult = isOn() ? Global.getSettings().optFloatFromArray("ext_shipBuyPriceMult",
+                spec.getHullSize().ordinal() - 2, 1f) : 1f;
+
+        return Math.round(spec.getBaseValue() * mult);
     }
 
     // Misc.getModifiedMissionReward's distance bonus as a multiplier, so it also covers pay that follows the fish

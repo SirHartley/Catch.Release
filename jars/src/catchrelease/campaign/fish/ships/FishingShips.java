@@ -48,6 +48,8 @@ public final class FishingShips {
     }
 
     public static final String PRESENT_KEY = "$catchrelease_fishingShipsPresent";
+    // ships that left other than through a market or storage transfer, until one rejoins
+    public static final String LOST_KEY = "$catchrelease_fishingShipsLost";
     public static final String STOCK_VARIANT_SUFFIX = "_Standard";
     // vanilla's floor for fleetwide hullmod effects (RecoveryShuttles, HighResSensors)
     public static final float MIN_CR = 0.1f;
@@ -56,9 +58,17 @@ public final class FishingShips {
     // commands and other mods' fleet changes are not (FleetData calls no listener). Watcher covers those.
     public static class Listener implements ColonyInteractionListener, FleetEventListener, ShipRecoveryListener {
 
+        // vanilla removes a sold or stored member before it reports the transaction, so this reconcile sees it gone
         @Override
         public void reportPlayerMarketTransaction(PlayerMarketTransaction transaction) {
-            if (!transaction.getShipsBought().isEmpty() || !transaction.getShipsSold().isEmpty()) reconcile();
+            if (transaction.getShipsBought().isEmpty() && transaction.getShipsSold().isEmpty()) return;
+
+            Set<Ship> parted = EnumSet.noneOf(Ship.class);
+            for (PlayerMarketTransaction.ShipSaleInfo sale : transaction.getShipsSold()) {
+                Ship ship = sale.getMember() == null ? null : forHull(sale.getMember().getHullSpec());
+                if (ship != null) parted.add(ship);
+            }
+            reconcile(parted);
         }
 
         @Override
@@ -194,6 +204,10 @@ public final class FishingShips {
         return member.canBeDeployedForCombat() && member.getRepairTracker().getCR() >= MIN_CR;
     }
 
+    public static boolean isLost(Ship ship) {
+        return ship != null && getSaved(LOST_KEY).contains(ship.name());
+    }
+
     public static boolean isShipModule(Tackle tackle) {
         return forModule(tackle) != null;
     }
@@ -207,11 +221,17 @@ public final class FishingShips {
     // Applies the leave and rejoin rules for every ship whose presence changed since the last call. Cheap enough to
     // call from any callback: one pass over the fleet's members.
     public static void reconcile() {
+        reconcile(EnumSet.noneOf(Ship.class));
+    }
+
+    // parted: ships that just went to a market or storage, so their leaving is no loss
+    public static void reconcile(Set<Ship> parted) {
         CampaignFleetAPI fleet = Global.getSector() == null ? null : Global.getSector().getPlayerFleet();
         if (fleet == null) return;
 
         Set<Ship> aboard = scan(fleet);
         Set<String> present = getPresent();
+        Set<String> lost = getSaved(LOST_KEY);
         tidyFighterStores(fleet);
 
         for (Ship ship : Ship.values()) {
@@ -221,9 +241,11 @@ public final class FishingShips {
 
             if (is) {
                 present.add(ship.name());
+                lost.remove(ship.name());
                 join(ship);
             } else {
                 present.remove(ship.name());
+                if (!parted.contains(ship)) lost.add(ship.name());
                 leave(ship);
             }
         }
@@ -294,16 +316,20 @@ public final class FishingShips {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     protected static Set<String> getPresent() {
+        return getSaved(PRESENT_KEY);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected static Set<String> getSaved(String key) {
         if (Global.getSector() == null) return new LinkedHashSet<>();
 
         Map<String, Object> data = Global.getSector().getPersistentData();
-        if (data.get(PRESENT_KEY) instanceof Set<?> stored) return (Set<String>) stored;
+        if (data.get(key) instanceof Set<?> stored) return (Set<String>) stored;
 
-        Set<String> present = new LinkedHashSet<>();
-        data.put(PRESENT_KEY, present);
+        Set<String> saved = new LinkedHashSet<>();
+        data.put(key, saved);
 
-        return present;
+        return saved;
     }
 }

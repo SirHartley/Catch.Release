@@ -228,6 +228,8 @@ A step half done pays only what it still owes: T2 skipped after its debrief give
 
 The names are decided; the quoted notes are the author's meaning for each name, not player-facing text. The Stigmata (`catchrelease_harpoon_ship`) and Reliquary (`catchrelease_rod_ship`) have their real hulls and stats; the Monstrance (`catchrelease_lamp_ship`) has its real hull and Breach Lights, with the vanilla Nebula's stats until its numbers are set. See [ARCHITECTURE.md](ARCHITECTURE.md) for their data and [COMBAT_SHIPS.md](COMBAT_SHIPS.md) for their combat design. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
 
+**Survival: lost ships.** The Fisherman sells a replacement for a fishing ship the player lost (a battle loss, death or any departure other than a sale or storage), and only for those, at the survival market price (Stigmata 190,000, Reliquary 570,000, Monstrance 780,000 credits). A ship sold or stored is not lost, and neither is one of two copies. In normal play he offers nothing.
+
 ## Open questions
 
 1. **What concluding "Hunting the legendary fish" brings.** It ends once every legendary is caught; the payoff is decided later.

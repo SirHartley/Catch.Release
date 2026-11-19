@@ -20,6 +20,7 @@ import catchrelease.campaign.fish.fisherman.FishermanIdentity;
 import catchrelease.campaign.fish.fisherman.FishermanQuest;
 import catchrelease.campaign.fish.fisherman.FishermanShelf;
 import catchrelease.campaign.fish.fisherman.FishermanSurveyDialog;
+import catchrelease.campaign.fish.fisherman.ShipReplacement;
 import catchrelease.campaign.fish.fisherman.chain.CaptainsFleet;
 import catchrelease.campaign.fish.fisherman.chain.FishermanChain;
 import catchrelease.campaign.fish.fisherman.chain.LegendaryHunt;
@@ -303,6 +304,8 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return true;
             case "legendaryReport":
                 return LegendaryHunt.report(text(dialog));
+            case "replaceShip":
+                return ShipReplacement.buy(arg, text(dialog));
 
             case "rescueCastaway":
                 return rescueCastaway(dialog);
@@ -833,6 +836,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
         setRumorTokens(local, FishRumors.getActive());
         local.set(BYCATCH_PENDING, FishermanBycatch.isPending(), 0);
         FishermanChain.writeTokens(local);
+        ShipReplacement.writeTokens(local);
 
         Backdrop scene = CrabBackdrops.getOffer(getMarket(dialog));
 

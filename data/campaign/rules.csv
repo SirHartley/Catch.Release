@@ -2435,6 +2435,8 @@ $catchreleaseStage >= 3
 $catchreleaseHoldHasFish",,,30:catchrelease_fisherSell:Sell fish,
 catchrelease_fisherOptRumor,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseStage >= 6",,,40:catchrelease_fisherRumor:Ask about rumors,
+catchrelease_fisherOptReplace,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
+$catchreleaseReplaceAny",,,"45:catchrelease_fisherReplace:""I've lost a ship. Can you replace it?""",
 catchrelease_fisherOptWork,CatchReleaseFisherOptions,"$menuState == catchreleaseFisher
 $catchreleaseStage >= 6
 !$catchreleaseWork
@@ -2477,6 +2479,31 @@ catchrelease_fisherSellCommon,DialogOptionSelected,$option == catchrelease_fishe
 catchrelease_fisherSellUncommon,DialogOptionSelected,$option == catchrelease_fisherSellUncommon,CatchReleaseCMD sellUpTo UNCOMMON,,,
 catchrelease_fisherSellRare,DialogOptionSelected,$option == catchrelease_fisherSellRare,CatchReleaseCMD sellUpTo RARE,,,
 catchrelease_fisherSellEpic,DialogOptionSelected,$option == catchrelease_fisherSellEpic,CatchReleaseCMD sellUpTo EPIC,,,
+catchrelease_fisherReplace,DialogOptionSelected,$option == catchrelease_fisherReplace,FireAll CatchReleaseFisherReplaceOptions,"""It happens. Spend long enough out there and everyone loses a boat. Better the boat than the crew.""
+
+""I can spare one of mine, but I'll want the yard price for her. Boats cost what they cost these days.""",,
+catchrelease_fisherReplaceOptHarpoon,CatchReleaseFisherReplaceOptions,$catchreleaseReplaceHarpoon,,,10:catchrelease_fisherReplaceHarpoon:Pay $catchreleaseReplaceHarpoonPrice credits for a Stigmata,
+catchrelease_fisherReplaceOptHarpoonShort,CatchReleaseFisherReplaceOptions,"$catchreleaseReplaceHarpoon
+!$catchreleaseReplaceHarpoonCanBuy","SetEnabled catchrelease_fisherReplaceHarpoon false
+SetTooltip catchrelease_fisherReplaceHarpoon ""Requires $catchreleaseReplaceHarpoonPrice credits.""",,,
+catchrelease_fisherReplaceOptRod,CatchReleaseFisherReplaceOptions,$catchreleaseReplaceRod,,,20:catchrelease_fisherReplaceRod:Pay $catchreleaseReplaceRodPrice credits for a Reliquary,
+catchrelease_fisherReplaceOptRodShort,CatchReleaseFisherReplaceOptions,"$catchreleaseReplaceRod
+!$catchreleaseReplaceRodCanBuy","SetEnabled catchrelease_fisherReplaceRod false
+SetTooltip catchrelease_fisherReplaceRod ""Requires $catchreleaseReplaceRodPrice credits.""",,,
+catchrelease_fisherReplaceOptLamp,CatchReleaseFisherReplaceOptions,$catchreleaseReplaceLamp,,,30:catchrelease_fisherReplaceLamp:Pay $catchreleaseReplaceLampPrice credits for a Monstrance,
+catchrelease_fisherReplaceOptLampShort,CatchReleaseFisherReplaceOptions,"$catchreleaseReplaceLamp
+!$catchreleaseReplaceLampCanBuy","SetEnabled catchrelease_fisherReplaceLamp false
+SetTooltip catchrelease_fisherReplaceLamp ""Requires $catchreleaseReplaceLampPrice credits.""",,,
+catchrelease_fisherReplaceOptBack,CatchReleaseFisherReplaceOptions,,"SetShortcut catchrelease_fisherBack ""ESCAPE""",,100:catchrelease_fisherBack:Return,
+catchrelease_fisherReplaceHarpoon,DialogOptionSelected,$option == catchrelease_fisherReplaceHarpoon,"FireBest CatchReleaseFisherReplaced
+CatchReleaseCMD replaceShip HARPOON",,,
+catchrelease_fisherReplaceRod,DialogOptionSelected,$option == catchrelease_fisherReplaceRod,"FireBest CatchReleaseFisherReplaced
+CatchReleaseCMD replaceShip ROD",,,
+catchrelease_fisherReplaceLamp,DialogOptionSelected,$option == catchrelease_fisherReplaceLamp,"FireBest CatchReleaseFisherReplaced
+CatchReleaseCMD replaceShip LAMP",,,
+catchrelease_fisherReplaced,CatchReleaseFisherReplaced,,"SetShortcut catchrelease_fisherBack ""ESCAPE""","One of his boats breaks formation and falls in with your fleet.
+
+""There she is. Try to bring this one home, Captain.""",100:catchrelease_fisherBack:Return,
 catchrelease_fisherBack,DialogOptionSelected,$option == catchrelease_fisherBack,"HideMapMarker
 $menuState = catchreleaseFisher 0
 CatchReleaseCMD tokens
