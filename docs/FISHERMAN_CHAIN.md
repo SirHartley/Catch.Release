@@ -34,6 +34,7 @@ Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md) (`FishingShips`, 
   - This happens once per rig. Two harpoon ships still give one extra harpoon slot.
 - **Fitting.** The second slot works like the first. The player can swap the ship's module out for any other module they own.
   - While the ship is in the fleet, its module can be fitted in either slot.
+- **Ship not ready.** While every ship of that kind is mothballed, short of the crew it needs to deploy or below 10% combat readiness (vanilla's floor for fleetwide hullmods such as Recovery Shuttles), the second slot and the ship's module stay fitted but do nothing. The Outfitter shows them greyed out as Inactive; nothing is unfitted.
 - **Ship leaves the fleet.** When the last ship of that kind leaves, the second slot is emptied at once. The ship's module is unfitted wherever it sits, because it is only available with the ship. A copy bought before the module moved onto the ship is the player's own and stays.
 - **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
 - **Two modules on one rig.**
@@ -139,6 +140,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
   - Extra rewards: one harpoon module schematic, or any module schematic if all harpoon ones are unlocked, plus three range-data entries. Ship modules are never offered.
 - **Not caught (expected).** The captain talks about his years-long chase and says it got away again, but he'll get it next time. He is grateful for the data the player gathered.
 - **Both outcomes:** the harpoon fishing ship. It brings a second Harpoon slot and the Retrieval Head (see [ship-bound equipment](#shared-mechanic-ship-bound-equipment)).
+- **Survival.** The captain sells the ship instead, at its normal-game value (`SurvivalMode.getShipPrice`, a fraction of the survival market price). He waits in his system with the ship until the player can pay; the chain moves on in the meantime.
 
 **Return to the Fisherman.** He thanks the player and explains how epics and legendaries behave when hunted. Optional questions add some background lore, which the mod is currently light on. His answers stay within his knowledge limits and his habit of not over-explaining (`LORE.md`). He gives the player the **Needle Sensor** schematic and tells them to build it.
 
@@ -166,6 +168,7 @@ Because no ship module is in a pair, the reset when a ship rejoins never meets a
 - The man is a guaranteed, highlighted bar encounter there while the trade is open. He is very drunk and wants epic fish to sell and live off: nobody wants the old ship, but everybody wants epic fish, which are worth far more to the right buyer.
 - He asks for three epic fish. One story point haggles him down to two, never fewer. Where the player gets them does not matter.
 - The trade adds the Reliquary to the fleet. The player then reports back to the Fisherman.
+- **Survival.** The yard will not release the ship until its berth is paid, so he also asks for the berth fee: the Reliquary's normal-game value in credits. The haggle lowers only the fish.
 
 **Closing conversation**
 - Gist: "Rumours about the stranger fish are worth following once your gear is very good." He does not name legendaries, so T4 stays vague.
@@ -224,6 +227,8 @@ A step half done pays only what it still owes: T2 skipped after its debrief give
 | Reliquary-class LYNE Tender, cruiser ("keeps implements") | ROD drones | T3, traded at a Core bar for epic fish; blueprint at the third legendary report | Lifting Rig (moved from the shop). It was the Reployment Bays (new Drone Core module, now commented out): each time every drone has returned, the drones deploy again, until the player recalls them or they can no longer fish there (both the pond swarm and the roaming swarm) |
 
 The names are decided; the quoted notes are the author's meaning for each name, not player-facing text. The Stigmata (`catchrelease_harpoon_ship`), Reliquary (`catchrelease_rod_ship`) and Monstrance (`catchrelease_lamp_ship`) have their real hulls and stats. See [ARCHITECTURE.md](ARCHITECTURE.md) for their data and [COMBAT_SHIPS.md](COMBAT_SHIPS.md) for their combat design. With all three ships allocated, the [Needle quest concept](NEEDLE_QUEST_CONCEPT.md) can be revisited.
+
+**Survival: lost ships.** The Fisherman sells a replacement for a fishing ship the player lost (a battle loss, death or any departure other than a sale or storage), and only for those, at the survival market price (Stigmata 190,000, Reliquary 570,000, Monstrance 780,000 credits). A ship sold or stored is not lost, and neither is one of two copies. In normal play he offers nothing.
 
 ## Open questions
 

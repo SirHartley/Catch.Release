@@ -127,6 +127,17 @@ public abstract class FishJob extends HubMissionWithBarEvent
         if (rolled != null) rewards.addAll(rolled);
     }
 
+    protected QuestRewards.Request rewardRequest(List<FishRequirement> asks) {
+        return new QuestRewards.Request(asks).at(getRewardLocation());
+    }
+
+    // the giver's market; survival pays more the farther it is from the core
+    protected SectorEntityToken getRewardLocation() {
+        MarketAPI market = getGiverMarket();
+
+        return market == null ? null : market.getPrimaryEntity();
+    }
+
     @Override
     public List<FishRequirement> getAsks() {
         return asks;

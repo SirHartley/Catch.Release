@@ -18,14 +18,4 @@ public class RigLoadout {
         if (slots == null) slots = new Tackle[SLOTS];
         slots[slot] = tackle == null ? Tackle.NONE : tackle;
     }
-
-    public TackleEffects getEffects(Tackle.Fit rig) {
-        Tackle[] fitted = new Tackle[SLOTS];
-        for (int slot = 0; slot < SLOTS; slot++) {
-            Tackle tackle = get(slot);
-            fitted[slot] = tackle.fits(rig) ? tackle : Tackle.NONE;
-        }
-
-        return TackleEffects.of(fitted);
-    }
 }

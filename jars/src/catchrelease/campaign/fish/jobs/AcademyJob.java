@@ -39,7 +39,7 @@ public class AcademyJob extends FishJob {
 
         if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
-                new QuestRewards.Request(asks).random(genRandom)).rewards);
+                rewardRequest(asks).random(genRandom)).rewards);
 
         setUpSpine();
 

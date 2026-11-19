@@ -26,7 +26,7 @@ public class CultJob extends FishJob {
         addAsk(ask);
 
         // Roll first so an empty prize pool does not block future offers.
-        List<FishReward> prizes = QuestRewards.roll(new QuestRewards.Request(asks)
+        List<FishReward> prizes = QuestRewards.roll(rewardRequest(asks)
                 .noCredits().tierFloor(DemandScore.Tier.MEDIUM)
                 .random(genRandom)).rewards;
         if (prizes.isEmpty()) return false;

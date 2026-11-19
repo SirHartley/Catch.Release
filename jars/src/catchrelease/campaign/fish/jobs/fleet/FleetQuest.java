@@ -400,7 +400,7 @@ public class FleetQuest extends FishJob {
         if (type.usesQuestPond()) ask.sourceId = questPond.getId();
         addAsk(ask);
 
-        addRewards(QuestRewards.roll(type.createRewardRequest(asks, random())).rewards);
+        addRewards(QuestRewards.roll(type.createRewardRequest(asks, random()).at(getRewardLocation())).rewards);
         if (type.hasCounteroffer()) rollCounterRewards();
 
         setUpSpine();
@@ -835,7 +835,7 @@ public class FleetQuest extends FishJob {
 
         for (int i = 0; i < 20; i++) {
             List<FishReward> candidate = QuestRewards.roll(
-                    type.createCounterRewardRequest(asks, random())).rewards;
+                    type.createCounterRewardRequest(asks, random()).at(getRewardLocation())).rewards;
             int value = rewardValue(candidate);
             if (value < lowestValue) {
                 lowest = candidate;
@@ -845,6 +845,12 @@ public class FleetQuest extends FishJob {
         }
 
         if (lowest != null) counterRewards.addAll(lowest);
+    }
+
+    // a fleet has no market; the distance bonus is measured where it was met
+    @Override
+    protected SectorEntityToken getRewardLocation() {
+        return giver;
     }
 
     protected int rewardValue(List<FishReward> offered) {
@@ -1139,7 +1145,7 @@ public class FleetQuest extends FishJob {
         followup.speciesId = followupSpeciesId;
         addAsk(followup);
         addRewards(QuestRewards.rollLaterStage(
-                type.createRewardRequest(asks, random(), round), previousRewards).rewards);
+                type.createRewardRequest(asks, random(), round).at(getRewardLocation()), previousRewards).rewards);
 
         float nearest = QuestDuration.nearestSatisfiableLY(giver, followup,
                 type.getMaximumTravelLY());

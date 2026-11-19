@@ -20,6 +20,7 @@ Fixed - Ripple and rupture shaders no longer cause stutter and VRAM growth
 Fixed - Closed ruptures no longer keep their ripples in memory and the save
 Fixed - The aquarium no longer slows every frame looking for the colony screen
 Fixed - Fish motes no longer pile up in systems you have left (legendaries stay)
+Fixed - Treasure no longer contains system weapons like the Minelayer
 
 Fisherman
 Added - Treasure rumour: after the tutorial, find the Fisherman's lost chest
@@ -30,21 +31,25 @@ Added - Lose the compass and the Fisherman tracks it down or pays you anyway
 Added - Captain's epic: a captain whose Breach Lights failed needs yours
 Added - Captain's epic: keep your lights on within 6,000 units of the star for 15s, then harpoon it
 Added - Captain's epic: pays a Stigmata, plus a harpoon schematic and 3 range data if landed
+Note - In survival the captain sells the Stigmata for 38,000 credits and waits until you can pay
 Added - Report back to the Fisherman for the Needle Sensor schematic
 Added - Wounded epic: hunt one circling a planet in a nearby empty system
 Added - Wounded epic: it swims at half speed once woken
 Added - Wounded epic: losing it or your lights restarts the hunt
 Added - Wounded epic: pays epic range data and a lead on a Reliquary for sale
 Added - A bar drunk trades his Reliquary for 3 epic fish, 2 with a story point
+Note - In survival he also wants the Reliquary's 95,000 credit berth fee
 Added - Listen for rumours: report your first legendary for a Monstrance
 Added - The next three legendary reports pay the three fishing ship blueprints
 Added - An early legendary report ends the earlier jobs and pays their rewards
 Added - "Hunting the legendary fish" intel lists the legendaries you know
+Added - Survival: the Fisherman replaces fishing ships you lost, at the market price
 Adjusted - Tidied Fisherman tutorial lines and the old captain's farewell
 Adjusted - New look for the Fisherman's lamps: gold beams with a purple heart, shadowed by planets
 Adjusted - Range data: picture tiles and a card for the selected chart
 Adjusted - Range data: a click selects a chart, the Buy button buys it
 Adjusted - Range data: closes with the game's Return button
+Adjusted - Survival: the tutorial wreck can no longer be recovered
 Fixed - Asking about the ROD now explains it instead of repeating a scene
 
 Fishing ships
@@ -53,6 +58,7 @@ Added - Reliquary-class LYNE Tender: slow carrier cruiser, LYNE salvage drones
 Added - Monstrance-class Breach Trawler: escort cruiser, two built-in Breach Lights, fighter bay
 Added - Standard machine gun loadouts, used by custom production and autofit
 Added - Fishing ships add a second Harpoon, Drone Core or Lens Array slot
+Note - Mothballed, uncrewed or under 10% CR, the ship's slot and module stay fitted but inactive
 Added - They come with the Retrieval Head, Lifting Rig and Fanned Array
 Note - The Lifting Rig and the Salvage Trawl cannot share the rig
 Added - Tug Drive Field: +1 maximum burn per active Stigmata in your fleet
@@ -121,6 +127,7 @@ Added - The Harpoon breaks Industrial Evolution meteors and returns to the fleet
 Note - Needs Industrial Evolution 4.2.a or newer
 Adjusted - Harpoon and ROD aiming is blocked while an IE missile is aimed
 Note - Needs Industrial Evolution 4.2.a or newer
+Adjusted - Contract hunters are sized to your fleet as a hard fight, bribes follow their size
 Fixed - Aiming the Harpoon or ROD from its button no longer leaves save data
 Fixed - Held Harpoon and ROD hotkeys fire on release, even if the bar changed
 Removed - Harpoon and ROD aiming debug lines in starsector.log
@@ -130,6 +137,10 @@ Adjusted - Accepted job markers are steady gold (offers still pulse)
 Adjusted - Fight Night: fee option reads "Take the rewards." and lists them
 Fixed - Fleets with a quest or marked important no longer take fishing jobs too
 Fixed - Attacking a mercenary camp now costs reputation with the independents
+Fixed - Talking a camp off its spot now gives the bonus XP for avoiding a fight
+Adjusted - Survival: job pay grows with distance from the core, as vanilla bounties do (up to +65%)
+Adjusted - Survival: blueprint job rewards are valued at their market price
+Adjusted - Camped spots are sized to your fleet as a normal fight, bribes follow their size
 
 Distress calls
 Adjusted - Distress calls wait while another mod's distress call is live

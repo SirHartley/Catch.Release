@@ -29,6 +29,8 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
     protected final int slot;
     protected final Tackle fitted;
     protected final boolean shipModule;
+    // the ship that lends this slot or module is mothballed, short of crew or under MIN_CR: fitted, but doing nothing
+    protected final boolean idle;
     // decided for the row, not the cell: see FishShopDialog.needsCompactSlotText
     protected final boolean compact;
     protected final Host host;
@@ -45,9 +47,10 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         void onSlotClicked(int slot);
     }
 
-    public ShopSlotPlugin(int slot, Tackle fitted, boolean compact, Host host) {
+    public ShopSlotPlugin(int slot, Tackle fitted, boolean idle, boolean compact, Host host) {
         this.slot = slot;
         this.fitted = fitted == null ? Tackle.NONE : fitted;
+        this.idle = idle;
         this.compact = compact;
         this.host = host;
         // the distinction the rows draw as Ship against Owned: a module that comes with the ship is not the
@@ -80,8 +83,8 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
         UiKit.outline(x, y, width, height, active ? Misc.getBasePlayerColor() : ShopUi.fill(),
                 alphaMult);
         ShopUi.drawQuad(x + INSET, y + INSET, width - 2f * INSET, height - 2f * INSET, ShopUi.fill(),
-                (active ? ShopUi.FILL_SELECTED : hovered ? ShopUi.FILL_HOVER : ShopUi.FILL_IDLE)
-                        * alphaMult);
+                (active ? ShopUi.FILL_SELECTED : hovered ? ShopUi.FILL_HOVER
+                        : idle ? ShopUi.FILL_DIM : ShopUi.FILL_IDLE) * alphaMult);
 
         LazyFont small = ShopUi.getSmallFont();
         LazyFont body = ShopUi.getBodyFont();
@@ -104,14 +107,14 @@ public class ShopSlotPlugin extends BaseCustomUIPanelPlugin {
                 alphaMult));
         label.draw(left, top - LABEL_TOP);
 
-        Color color = fitted == Tackle.NONE ? Misc.getGrayColor() : Misc.getTextColor();
-        content.setBaseColor(ShopUi.withAlpha(color, alphaMult));
+        Color color = fitted == Tackle.NONE || idle ? Misc.getGrayColor() : Misc.getTextColor();
+        content.setBaseColor(ShopUi.withAlpha(color, (idle ? ShopRowPlugin.BLOCKED_TEXT_ALPHA : 1f) * alphaMult));
         content.draw(left, top - NAME_TOP);
 
-        if (!shipModule) return;
+        if (!shipModule && !idle) return;
 
         if (origin == null) {
-            origin = ShopUi.createText(small, "Ship");
+            origin = ShopUi.createText(small, idle ? "Inactive" : "Ship");
             origin.setAnchor(LazyFont.TextAnchor.TOP_RIGHT);
         }
 

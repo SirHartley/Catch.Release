@@ -7,10 +7,13 @@ import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
+import com.fs.starfarer.api.combat.WeaponAPI.AIHints;
+import com.fs.starfarer.api.combat.WeaponAPI.WeaponType;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
 import com.fs.starfarer.api.loading.WeaponSpecAPI;
 import org.lazywizard.lazylib.MathUtils;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import static catchrelease.tools.FishingParityChecks.proxy;
@@ -35,7 +38,23 @@ public final class TreasureLootChecks extends TreasureRoller {
             });
             WeaponSpecAPI weapon = proxy(WeaponSpecAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "hasTag" -> false;
+                case "getAIHints" -> EnumSet.noneOf(AIHints.class);
+                case "getType" -> WeaponType.BALLISTIC;
                 case "getWeaponId", "getWeaponName", "getTurretSpriteName" -> "weapon";
+                default -> throw new AssertionError(m);
+            });
+            WeaponSpecAPI minelayer = proxy(WeaponSpecAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "hasTag" -> false;
+                case "getAIHints" -> EnumSet.of(AIHints.SYSTEM);
+                case "getType" -> WeaponType.MISSILE;
+                case "getWeaponId" -> "minelayer1";
+                default -> throw new AssertionError(m);
+            });
+            WeaponSpecAPI decorative = proxy(WeaponSpecAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "hasTag" -> false;
+                case "getAIHints" -> EnumSet.noneOf(AIHints.class);
+                case "getType" -> WeaponType.DECORATIVE;
+                case "getWeaponId" -> "lidardish";
                 default -> throw new AssertionError(m);
             });
             FighterWingSpecAPI wing = proxy(FighterWingSpecAPI.class, (p, m, a) -> switch (m.getName()) {
@@ -46,7 +65,7 @@ public final class TreasureLootChecks extends TreasureRoller {
             Global.setSettings(proxy(SettingsAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "getAllCommoditySpecs" -> List.of(commodity);
                 case "getCommoditySpec" -> commodity;
-                case "getAllWeaponSpecs" -> List.of(weapon);
+                case "getAllWeaponSpecs" -> List.of(weapon, minelayer, decorative);
                 case "getAllFighterWingSpecs" -> List.of(wing);
                 case "getVariant" -> null;
                 default -> throw new AssertionError(m);
@@ -58,6 +77,9 @@ public final class TreasureLootChecks extends TreasureRoller {
                     case "addFighters" -> 2;
                     default -> throw new AssertionError(m);
                 };
+                if (index == 1 && !"weapon".equals(a[0])) {
+                    throw new AssertionError("Treasure awarded a system or decorative weapon: " + a[0]);
+                }
                 if (((Number) a[1]).intValue() != (index == 0 ? 25 : 1)) {
                     throw new AssertionError("Award quantity changed: " + m.getName());
                 }

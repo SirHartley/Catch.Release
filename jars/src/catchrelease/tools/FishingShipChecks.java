@@ -9,8 +9,10 @@ import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.fleet.RepairTrackerAPI;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,8 @@ public final class FishingShipChecks {
         Fleet fleet = new Fleet();
 
         reconcileRules(fleet);
+        readiness(fleet);
+        losses(fleet);
         matrix(fleet);
 
         System.out.println("Fishing ship checks passed: " + checks);
@@ -116,6 +120,83 @@ public final class FishingShipChecks {
         require(TackleManager.fit(Tackle.Fit.DRONE, 1, Tackle.LIFTING_RIG), "Lifting Rig fits once the Trawl is out");
     }
 
+    // A ship that is mothballed, short of crew or under MIN_CR keeps its slot and modules fitted, but they do nothing.
+    private static void readiness(Fleet f) {
+        f.reset();
+        FleetMemberAPI tug = f.add("catchrelease_harpoon_ship", false);
+        FishingShips.reconcile();
+        require(TackleManager.effects(Tackle.Fit.HARPOON).has(Tackle.RETRIEVAL_HEAD), "ready ship lends its module");
+
+        f.state(tug, false, 0.7f);
+        FishingShips.reconcile();
+        require(FishingShips.hasSecondSlot(Tackle.Fit.HARPOON), "mothballed ship keeps its slot");
+        require(TackleManager.getSlot(Tackle.Fit.HARPOON, 1) == Tackle.RETRIEVAL_HEAD, "mothballing unfits nothing");
+        require(TackleManager.isIdle(Tackle.Fit.HARPOON, 1), "mothballed ship's slot is idle");
+        require(TackleManager.effects(Tackle.Fit.HARPOON).isEmpty(), "idle slot has no effect");
+        require(TackleManager.getIdle(Tackle.Fit.HARPOON).equals(List.of(Tackle.RETRIEVAL_HEAD)), "idle list");
+
+        f.state(tug, true, FishingShips.MIN_CR - 0.01f);
+        require(TackleManager.isIdle(Tackle.Fit.HARPOON, 1), "low CR idles the slot");
+        f.state(tug, true, FishingShips.MIN_CR);
+        require(!TackleManager.isIdle(Tackle.Fit.HARPOON, 1), "CR at the floor is ready");
+
+        TackleManager.fit(Tackle.Fit.HARPOON, 1, Tackle.FATHOM_HEAD);
+        TackleManager.fit(Tackle.Fit.HARPOON, 0, Tackle.RETRIEVAL_HEAD);
+        f.state(tug, false, 0.7f);
+        require(TackleManager.isIdle(Tackle.Fit.HARPOON, 0), "ship module idles in the first slot");
+        require(TackleManager.isIdle(Tackle.Fit.HARPOON, 1), "owned module in the ship's slot idles too");
+        require(TackleManager.effects(Tackle.Fit.HARPOON).isEmpty(), "both slots idle");
+
+        FleetMemberAPI spare = f.add("catchrelease_harpoon_ship", false);
+        FishingShips.reconcile();
+        require(!TackleManager.isIdle(Tackle.Fit.HARPOON, 1), "one ready copy is enough");
+        f.remove(spare);
+        FishingShips.reconcile();
+
+        TackleManager.own(Tackle.RETRIEVAL_HEAD);
+        require(!TackleManager.isIdle(Tackle.Fit.HARPOON, 0), "an owned copy never idles");
+        require(TackleManager.effects(Tackle.Fit.HARPOON).has(Tackle.RETRIEVAL_HEAD)
+                && !TackleManager.effects(Tackle.Fit.HARPOON).has(Tackle.FATHOM_HEAD), "only the ship's slot idles");
+
+        f.remove(tug);
+        FishingShips.reconcile();
+        require(!TackleManager.isIdle(Tackle.Fit.HARPOON, 1), "no idle slot without the ship");
+    }
+
+    // a ship that leaves other than to a market or storage is lost until one rejoins; one copy left is no loss
+    private static void losses(Fleet f) {
+        f.reset();
+        FleetMemberAPI tug = f.add("catchrelease_harpoon_ship", false);
+        FishingShips.reconcile();
+        require(!FishingShips.isLost(FishingShips.Ship.HARPOON), "a ship aboard is not lost");
+
+        f.remove(tug);
+        FishingShips.reconcile(EnumSet.of(FishingShips.Ship.HARPOON));
+        require(!FishingShips.isLost(FishingShips.Ship.HARPOON), "sold or stored is not lost");
+
+        f.add("catchrelease_harpoon_ship", false);
+        FleetMemberAPI spare = f.add("catchrelease_harpoon_ship", false);
+        FishingShips.reconcile();
+        f.remove(spare);
+        FishingShips.reconcile();
+        require(!FishingShips.isLost(FishingShips.Ship.HARPOON), "one copy left is no loss");
+
+        f.reset();
+        tug = f.add("catchrelease_harpoon_ship", false);
+        FleetMemberAPI tender = f.add("catchrelease_rod_ship", false);
+        FishingShips.reconcile();
+        f.remove(tug);
+        f.remove(tender);
+        FishingShips.reconcile(EnumSet.of(FishingShips.Ship.ROD));
+        require(FishingShips.isLost(FishingShips.Ship.HARPOON), "a ship gone without a sale is lost");
+        require(!FishingShips.isLost(FishingShips.Ship.ROD), "only the parted ship is excused");
+        require(!FishingShips.isLost(FishingShips.Ship.LAMP), "a ship never owned is not lost");
+
+        f.add("catchrelease_harpoon_ship_default_D", true);
+        FishingShips.reconcile();
+        require(!FishingShips.isLost(FishingShips.Ship.HARPOON), "rejoining clears the loss");
+    }
+
     // Every pair of modules on every rig: only the same module or a shared exclusion group is refused.
     private static void matrix(Fleet f) {
         f.reset();
@@ -165,6 +246,7 @@ public final class FishingShipChecks {
 
         private final Map<String, Object> data = new HashMap<>();
         private final List<FleetMemberAPI> members = new ArrayList<>();
+        private final Map<FleetMemberAPI, float[]> states = new HashMap<>();
 
         private Fleet() {
             FleetDataAPI fleetData = proxy(FleetDataAPI.class, (self, method, args) -> switch (method.getName()) {
@@ -187,20 +269,36 @@ public final class FishingShipChecks {
         private void reset() {
             data.clear();
             members.clear();
+            states.clear();
         }
 
+        // state: deployable (1 or 0), CR
         private FleetMemberAPI add(String hullId, boolean dHull) {
             ShipHullSpecAPI spec = spec(hullId, dHull);
+            float[] state = {1f, 0.7f};
+            RepairTrackerAPI repair = proxy(RepairTrackerAPI.class, (self, method, args) -> switch (method.getName()) {
+                case "getCR" -> state[1];
+                default -> throw new AssertionError(method);
+            });
             FleetMemberAPI member = proxy(FleetMemberAPI.class, (self, method, args) -> switch (method.getName()) {
                 case "getHullSpec" -> spec;
                 case "getId" -> "member" + System.identityHashCode(self);
+                case "canBeDeployedForCombat" -> state[0] > 0f;
+                case "getRepairTracker" -> repair;
                 case "equals" -> self == args[0];
                 case "hashCode" -> System.identityHashCode(self);
                 default -> throw new AssertionError(method);
             });
             members.add(member);
+            states.put(member, state);
 
             return member;
+        }
+
+        private void state(FleetMemberAPI member, boolean deployable, float cr) {
+            float[] state = states.get(member);
+            state[0] = deployable ? 1f : 0f;
+            state[1] = cr;
         }
 
         private void remove(FleetMemberAPI member) {

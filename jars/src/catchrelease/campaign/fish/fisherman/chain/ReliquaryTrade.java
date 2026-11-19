@@ -9,7 +9,9 @@ import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.ships.FishingShips;
 import catchrelease.campaign.fish.shop.FishCurrency;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
+import catchrelease.config.SurvivalMode;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FactionAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import com.fs.starfarer.api.campaign.TextPanelAPI;
@@ -19,6 +21,7 @@ import com.fs.starfarer.api.combat.ShipHullSpecAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.intel.BaseIntelPlugin;
+import com.fs.starfarer.api.impl.campaign.rulecmd.AddRemoveCommodity;
 import com.fs.starfarer.api.ui.IntelUIAPI;
 import com.fs.starfarer.api.ui.SectorMapAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -200,7 +203,15 @@ public final class ReliquaryTrade {
         return saved != null && saved.t3Haggled ? HAGGLED_PRICE : PRICE;
     }
 
+    // survival adds the berth fee the yard wants before it releases the ship
+    public static int getCredits() {
+        return SurvivalMode.isOn() ? SurvivalMode.getShipPrice(FishingShips.Ship.ROD.hullId) : 0;
+    }
+
     public static boolean canPay() {
+        CampaignFleetAPI player = Global.getSector().getPlayerFleet();
+        if (player == null || player.getCargo().getCredits().get() < getCredits()) return false;
+
         return FishCurrency.count(FishRarity.EPIC) >= getPrice();
     }
 
@@ -209,11 +220,16 @@ public final class ReliquaryTrade {
         if (!isTrading() || !canPay()) return false;
 
         int price = getPrice();
+        int credits = getCredits();
         if (!FishCurrency.spend(FishRarity.EPIC, price)) return false;
 
         List<FishReward.Receipt> lost = new ArrayList<>();
         lost.add(new FishReward.Receipt("Epic fish x" + price, "Epic fish", FishRarity.EPIC.color));
         FishReward.showReceipts(text, lost, "Lost");
+        if (credits > 0) {
+            Global.getSector().getPlayerFleet().getCargo().getCredits().subtract(credits);
+            if (text != null) AddRemoveCommodity.addCreditsLossText(credits, text);
+        }
 
         List<FishReward.Receipt> gained = new ArrayList<>();
         gained.add(FishReward.ship(FishingShips.Ship.ROD.hullId).grantWithReceipt());

@@ -44,7 +44,7 @@ public class StartupJob extends FishJob {
 
         addAsk(ask);
 
-        QuestRewards.Request request = new QuestRewards.Request(asks)
+        QuestRewards.Request request = rewardRequest(asks)
                 .budgetMult(1.2f).random(genRandom);
         QuestRewards.Result result = previousRewards == null
                 ? QuestRewards.roll(request)

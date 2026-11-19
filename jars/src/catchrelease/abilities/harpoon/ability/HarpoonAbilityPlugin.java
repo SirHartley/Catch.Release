@@ -1,5 +1,6 @@
 package catchrelease.abilities.harpoon.ability;
 
+import catchrelease.abilities.FishingRigs;
 import catchrelease.config.FishingSounds;
 import catchrelease.ModPlugin;
 import catchrelease.abilities.charges.BaseChargedSkillshotAbility;
@@ -179,6 +180,7 @@ public class HarpoonAbilityPlugin extends BaseChargedSkillshotAbility {
 
         TackleEffects fitted = TackleManager.effects(Tackle.Fit.HARPOON);
         if (!fitted.isEmpty()) tooltip.addPara("Fitted: %s", pad, highlight, fitted.getNames());
+        FishingRigs.addInactiveModules(tooltip, Tackle.Fit.HARPOON, 3f);
         if (fitted.explosive) {
             tooltip.addPara("Detonates instead of catching fish. Consumed on detonation;"
                     + " fleet hits cause damage and immediate hostility.", Misc.getNegativeHighlightColor(), 3f);
