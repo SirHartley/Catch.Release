@@ -22,9 +22,14 @@ public class TackleManager {
     }
 
     public static TackleEffects effects(Tackle.Fit rig) {
-        RigLoadout loadout = rig == null ? null : getLoadout(rig, false);
+        if (rig == null || getLoadout(rig, false) == null) return TackleEffects.NONE;
 
-        return loadout == null ? TackleEffects.NONE : loadout.getEffects(rig);
+        Tackle[] fitted = new Tackle[RigLoadout.SLOTS];
+        for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
+            fitted[slot] = isIdle(rig, slot) ? Tackle.NONE : getSlot(rig, slot);
+        }
+
+        return TackleEffects.of(fitted);
     }
 
     public static TackleEffects effects(FishLogEntry.Method method) {
@@ -36,6 +41,32 @@ public class TackleManager {
         Tackle fitted = loadout == null ? Tackle.NONE : loadout.get(slot);
 
         return fitted.fits(rig) ? fitted : Tackle.NONE;
+    }
+
+    // The fishing ship's slot, and its module in the first slot unless the player owns a copy, stay fitted but do
+    // nothing while the ship is present and not ready (FishingShips.isReady).
+    public static boolean isIdle(Tackle.Fit rig, int slot) {
+        if (rig == null) return false;
+
+        FishingShips.Ship ship;
+        if (slot == 1) {
+            ship = FishingShips.forRig(rig);
+        } else {
+            Tackle fitted = getSlot(rig, slot);
+            ship = isOwned(fitted) ? null : FishingShips.forModule(fitted);
+        }
+
+        return ship != null && FishingShips.isPresent(ship) && !FishingShips.isReady(ship);
+    }
+
+    public static List<Tackle> getIdle(Tackle.Fit rig) {
+        List<Tackle> idle = new ArrayList<>();
+        for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
+            Tackle fitted = getSlot(rig, slot);
+            if (fitted != Tackle.NONE && isIdle(rig, slot)) idle.add(fitted);
+        }
+
+        return idle;
     }
 
     public static boolean fit(Tackle.Fit rig, Tackle tackle) {

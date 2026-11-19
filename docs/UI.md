@@ -76,7 +76,11 @@ shows two `ShopSlotPlugin` tiles above the module list, 158 x 46 and 162 apart: 
 outline (base on the target slot, the dark fill colour otherwise) with a filled bar 4
 inside it, "Slot n" in orbitron12 and the module or "Empty" beneath. A tile holding a
 module that came with the ship, and that the player does not own a copy of, carries a
-grey "Ship" in its top right, the same distinction the rows draw.
+grey "Ship" in its top right, the same distinction the rows draw. An idle tile
+(`TackleManager.isIdle`: its fishing ship is mothballed, short of crew or under 10% CR)
+has the dim fill (0.22) unless selected or hovered, its module name in grey at 0.6 alpha
+and a grey "Inactive" in place of "Ship"; its hover names the ship and the three causes.
+It still takes a Fit.
 `needsCompactSlotText` measures every slot's name with `LazyFont.calcWidth` and picks
 one font for the whole row, so a long name never leaves the two tiles in different
 typefaces.
@@ -369,7 +373,8 @@ blocks with pad 10. Highlight values in the normal highlight colour; reserve red
 for current failures or explosive-head danger. Do not append module descriptions
 from the shop. Show the fitted modules in one `Fitted:` line, in slot order, and each
 module's change to targeting or operation on its own line, read from the rig's
-combined `TackleEffects`.
+combined `TackleEffects`. Idle ship modules are left out of both and listed after
+the Fitted line in one `Inactive:` line naming the ship (`FishingRigs.addInactiveModules`).
 Codex mode omits the repeated title and transient availability notices.
 
 Read current values through `UpgradeManager` and the runtime getters. ROD pursuit

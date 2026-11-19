@@ -1,5 +1,6 @@
 package catchrelease.abilities.rod.ability;
 
+import catchrelease.abilities.FishingRigs;
 import catchrelease.config.PlayerSettings;
 import catchrelease.ModPlugin;
 import catchrelease.abilities.rod.constants.RodConstants;
@@ -215,6 +216,7 @@ public class PondInteractionAbilityPlugin extends BaseSkillshotAbility {
 
         TackleEffects fitted = TackleManager.effects(Tackle.Fit.DRONE);
         if (!fitted.isEmpty()) tooltip.addPara("Fitted: %s", pad, highlight, fitted.getNames());
+        FishingRigs.addInactiveModules(tooltip, Tackle.Fit.DRONE, 3f);
         if (hasBreachCoupler()) {
             tooltip.addPara("With breach lamps on, drones follow the fleet and catch illuminated fish.", 3f);
         } else if (Tackle.BREACH_COUPLER.breachCoupling) {

@@ -15,9 +15,13 @@ import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
+import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
+import com.fs.starfarer.api.fleet.RepairTrackerAPI;
 import com.fs.starfarer.api.loading.AbilitySpecAPI;
 import com.fs.starfarer.api.ui.LabelAPI;
 import com.fs.starfarer.api.ui.TooltipMakerAPI;
@@ -141,6 +145,11 @@ public final class AbilityTooltipCheck {
         TackleManager.fit(Tackle.Fit.HARPOON, Tackle.FATHOM_HEAD);
         require(TackleManager.fit(Tackle.Fit.HARPOON, 1, Tackle.RETRIEVAL_HEAD), "second harpoon slot fits");
         includes(f.harpoon(), "Fitted: Fathom Head, Retrieval Head", "Can also hit diving fish", "A fish hit restores");
+        f.tugReady = false;
+        includes(f.harpoon(), "Fitted: Fathom Head", "Inactive: Retrieval Head. Your HARPOON is mothballed",
+                "below 10% combat readiness");
+        excludes(f.harpoon(), "A fish hit restores");
+        f.tugReady = true;
         TackleManager.fit(Tackle.Fit.SEARCHLIGHT, Tackle.TRACKING_GIMBAL);
         require(TackleManager.fit(Tackle.Fit.SEARCHLIGHT, 1, Tackle.FANNED_ARRAY), "second lamp slot fits");
         includes(f.lamps(), "Fitted: Tracking Gimbal, Fanned Array", "4 seconds; 4 seconds between locks",
@@ -192,6 +201,9 @@ public final class AbilityTooltipCheck {
         private final PondInteractionAbilityPlugin rod = new PondInteractionAbilityPlugin();
         private final HarpoonAbilityPlugin harpoon = new HarpoonAbilityPlugin();
         private final Lamps lamps = new Lamps();
+        private final List<FleetMemberAPI> ships = new ArrayList<>();
+        private final Map<String, ShipHullSpecAPI> hulls = new HashMap<>();
+        private boolean tugReady = true;
 
         private Fixture() throws Exception {
             List<List<FishCsv.Cell>> rows = FishCsv.parse(Files.readString(Path.of("data/config/UpgradeData.csv")));
@@ -216,7 +228,31 @@ public final class AbilityTooltipCheck {
                 case "isHyperspace" -> false;
                 default -> throw new AssertionError(method);
             });
+            RepairTrackerAPI repair = proxy(RepairTrackerAPI.class, (self, method, args) -> switch (method.getName()) {
+                case "getCR" -> 0.7f;
+                default -> throw new AssertionError(method);
+            });
+            for (FishingShips.Ship ship : FishingShips.Ship.values()) {
+                ShipHullSpecAPI hull = proxy(ShipHullSpecAPI.class, (self, method, args) -> switch (method.getName()) {
+                    case "getHullId" -> ship.hullId;
+                    case "isDefaultDHull" -> false;
+                    case "getHullName" -> ship.name();
+                    default -> throw new AssertionError(method);
+                });
+                hulls.put(ship.hullId, hull);
+                ships.add(proxy(FleetMemberAPI.class, (self, method, args) -> switch (method.getName()) {
+                    case "getHullSpec" -> hull;
+                    case "canBeDeployedForCombat" -> ship != FishingShips.Ship.HARPOON || tugReady;
+                    case "getRepairTracker" -> repair;
+                    default -> throw new AssertionError(method);
+                }));
+            }
+            FleetDataAPI fleetData = proxy(FleetDataAPI.class, (self, method, args) -> switch (method.getName()) {
+                case "getMembersListCopy" -> new ArrayList<>(ships);
+                default -> throw new AssertionError(method);
+            });
             CampaignFleetAPI fleet = proxy(CampaignFleetAPI.class, (self, method, args) -> switch (method.getName()) {
+                case "getFleetData" -> fleetData;
                 case "getContainingLocation" -> location;
                 case "getAbility" -> lamps;
                 case "getAbilities" -> Map.of();
@@ -241,6 +277,7 @@ public final class AbilityTooltipCheck {
                 case "getFloat" -> 1f;
                 case "getInt" -> 1;
                 case "getAbilitySpec" -> spec;
+                case "getHullSpec" -> hulls.get(args[0]);
                 default -> throw new AssertionError(method);
             });
             Global.setSector(sector);

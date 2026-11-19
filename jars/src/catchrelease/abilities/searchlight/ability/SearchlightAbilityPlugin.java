@@ -1,5 +1,6 @@
 package catchrelease.abilities.searchlight.ability;
 
+import catchrelease.abilities.FishingRigs;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
@@ -569,6 +570,7 @@ public class SearchlightAbilityPlugin extends BaseToggleAbility {
         }
 
         if (!fitted.isEmpty()) tooltip.addPara("Fitted: %s", pad, highlight, fitted.getNames());
+        FishingRigs.addInactiveModules(tooltip, Tackle.Fit.SEARCHLIGHT, 3f);
         if (fitted.lockTime > 0f) {
             tooltip.addPara("Tracks each contact for %s; %s between locks.", 3f, highlight,
                     Misc.getRoundedValueOneAfterDecimalIfNotWhole(fitted.lockTime) + " seconds",

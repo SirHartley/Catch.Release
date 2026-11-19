@@ -49,6 +49,8 @@ public final class FishingShips {
 
     public static final String PRESENT_KEY = "$catchrelease_fishingShipsPresent";
     public static final String STOCK_VARIANT_SUFFIX = "_Standard";
+    // vanilla's floor for fleetwide hullmod effects (RecoveryShuttles, HighResSensors)
+    public static final float MIN_CR = 0.1f;
 
     // Market trades and storage transfers, battle losses and recovery are reported; scuttling, mothballing, rule
     // commands and other mods' fleet changes are not (FleetData calls no listener). Watcher covers those.
@@ -171,6 +173,25 @@ public final class FishingShips {
         }
 
         return null;
+    }
+
+    // A present ship lends its slot and module only while one copy of it could fly: not mothballed, crewed enough
+    // to deploy and at MIN_CR or more. No callback reports mothballing, crew or CR changes, so this is read live.
+    public static boolean isReady(Ship ship) {
+        if (ship == null || !isPresent(ship)) return false;
+
+        CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+        if (fleet == null) return false;
+
+        for (FleetMemberAPI member : fleet.getFleetData().getMembersListCopy()) {
+            if (forHull(member.getHullSpec()) == ship && isReady(member)) return true;
+        }
+
+        return false;
+    }
+
+    public static boolean isReady(FleetMemberAPI member) {
+        return member.canBeDeployedForCombat() && member.getRepairTracker().getCR() >= MIN_CR;
     }
 
     public static boolean isShipModule(Tackle tackle) {

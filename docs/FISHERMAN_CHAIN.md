@@ -34,6 +34,7 @@ Implemented in Stage 2; see [ARCHITECTURE.md](ARCHITECTURE.md) (`FishingShips`, 
   - This happens once per rig. Two harpoon ships still give one extra harpoon slot.
 - **Fitting.** The second slot works like the first. The player can swap the ship's module out for any other module they own.
   - While the ship is in the fleet, its module can be fitted in either slot.
+- **Ship not ready.** While every ship of that kind is mothballed, short of the crew it needs to deploy or below 10% combat readiness (vanilla's floor for fleetwide hullmods such as Recovery Shuttles), the second slot and the ship's module stay fitted but do nothing. The Outfitter shows them greyed out as Inactive; nothing is unfitted.
 - **Ship leaves the fleet.** When the last ship of that kind leaves, the second slot is emptied at once. The ship's module is unfitted wherever it sits, because it is only available with the ship. A copy bought before the module moved onto the ship is the player's own and stays.
 - **Ship rejoins.** The second slot resets to the ship's module. It does not remember what was fitted before.
 - **Two modules on one rig.**

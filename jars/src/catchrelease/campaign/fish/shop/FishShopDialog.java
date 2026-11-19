@@ -475,7 +475,8 @@ public class FishShopDialog implements InteractionDialogPlugin {
             for (int slot = 0; slot < RigLoadout.SLOTS; slot++) {
                 int index = slot;
                 CustomPanelAPI cell = body.createCustomPanel(SLOT_WIDTH, SLOT_HEIGHT,
-                        new ShopSlotPlugin(slot, TackleManager.getSlot(rig, slot), compact, this));
+                        new ShopSlotPlugin(slot, TackleManager.getSlot(rig, slot), TackleManager.isIdle(rig, slot),
+                                compact, this));
                 body.addComponent(cell).inTL(slot * SLOT_PITCH, top);
 
                 UiKit.tooltip(body, cell, TOOLTIP_WIDTH, TooltipLocation.BELOW, false,
@@ -507,9 +508,19 @@ public class FishShopDialog implements InteractionDialogPlugin {
             tooltip.addPara(getTargetSlot() == slot
                     ? "Fit puts the selected module here."
                     : "Click to select this slot. Fit then puts the selected module here.", 6f);
-            if (slot == 0) return;
 
             String hull = getShipName(rig);
+            String minCr = Math.round(FishingShips.MIN_CR * 100f) + "%";
+            if (slot == 0) {
+                Tackle fitted = TackleManager.getSlot(rig, slot);
+                if (TackleManager.isIdle(rig, slot)) {
+                    tooltip.addPara("The %s comes with your %s, which is mothballed, short of crew or below %s"
+                            + " combat readiness. It stays fitted but does nothing until the ship is ready.", 6f,
+                            Misc.getHighlightColor(), fitted.name, hull, minCr);
+                }
+                return;
+            }
+
             Tackle module = FishingShips.getShipModule(rig);
             if (module == null) {
                 tooltip.addPara("Provided by your %s. If the ship leaves your fleet, this slot is emptied.",
@@ -517,6 +528,11 @@ public class FishShopDialog implements InteractionDialogPlugin {
             } else {
                 tooltip.addPara("Provided by your %s. If the ship leaves your fleet, this slot is emptied"
                         + " and the %s leaves the rig.", 6f, Misc.getHighlightColor(), hull, module.name);
+            }
+            if (TackleManager.isIdle(rig, slot)) {
+                tooltip.addPara("Your %s is mothballed, short of crew or below %s combat readiness. This slot"
+                        + " keeps its module but does nothing until the ship is ready.", 6f,
+                        Misc.getHighlightColor(), hull, minCr);
             }
         }
 
