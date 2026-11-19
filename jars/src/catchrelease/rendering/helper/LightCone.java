@@ -15,17 +15,16 @@ import java.util.List;
 // soft additive light cone with planet shadows, ported from Industrial Evolution's LightConeRenderer
 public final class LightCone {
 
-    // brightness = peak * across(angle / half arc) * along(distance / drawn length), minus the shadows
+    // one colour of the light across the cone: a bell around the middle ray, or the halo out to the edge for width 0
+    public record Layer(Color color, float peak, float width) {
+    }
+
+    // brightness = sum of layer peak * across(angle / half arc), times along(distance / drawn length), minus the shadows
     public static class Style {
 
-        public float peak = 0.2f;
+        public Layer[] layers = {};
         public float edgeStart = 0.4f;
         public float edgeEnd = 1.25f;
-        public float coreShare = 0f;
-        public float coreWidth = 0.2f;
-        public float tintWidth = 0.2f;
-        public float coreGain = 1f;
-        public float edgeGain = 1f;
         public float farShare = 0.3f;
         public float falloff = 8f;
         public float endStart = 0.55f;
@@ -33,28 +32,23 @@ public final class LightCone {
         public float shadow = 0.9f;
         public float sourceRadius = 50f;
         public float dustGain = 0f;
+        public Color dustColor = Color.WHITE;
+
+        public float across(Layer layer, float t) {
+            if (layer.width <= 0f) return layer.peak * (1f - smooth((t - edgeStart) / (edgeEnd - edgeStart)));
+
+            float x = t / layer.width;
+            return layer.peak * (float) Math.exp(-x * x);
+        }
 
         public float across(float t) {
-            float halo = 1f - smooth((t - edgeStart) / (edgeEnd - edgeStart));
-            if (coreShare <= 0f) return halo;
-
-            float core = t / coreWidth;
-            return (1f - coreShare) * halo + coreShare * (float) Math.exp(-core * core);
+            float sum = 0f;
+            for (Layer layer : layers) sum += across(layer, t);
+            return sum;
         }
 
         public float along(float r) {
             return (farShare + (1f - farShare) / (1f + falloff * r * r)) * (1f - smooth((r - endStart) / (1f - endStart))) * smooth(r / nearSoftShare);
-        }
-
-        // share of the core colour, 1 on the middle ray, the edge colour further out
-        public float tint(float t) {
-            float x = t / tintWidth;
-            return (float) Math.exp(-x * x);
-        }
-
-        // alpha mult for a tint, a saturated colour lights fewer channels than white
-        public float gain(float tint) {
-            return edgeGain + (coreGain - edgeGain) * tint;
         }
     }
 
@@ -81,17 +75,18 @@ public final class LightCone {
     private static final float MIN_EDGE_ARC = 0.3f;
     private static final float MAX_EDGE_ARC = 8f;
     private static final int MAX_BIG_DUST = 2048;
-    private static final float[] BIG_DUST = new float[MAX_BIG_DUST * 4];
+    private static final float[] BIG_DUST = new float[MAX_BIG_DUST * 3];
 
     // scratch for one cone, drawing runs on one thread
     private static final float[] COS = new float[MAX_RAYS];
     private static final float[] SIN = new float[MAX_RAYS];
-    private static final float[] TINT = new float[MAX_RAYS];
-    private static final float[] GAIN = new float[MAX_RAYS];
+    private static final float[] RED = new float[MAX_RAYS];
+    private static final float[] GREEN = new float[MAX_RAYS];
+    private static final float[] BLUE = new float[MAX_RAYS];
+    private static final float[] ACROSS = new float[MAX_RAYS];
     private static final int[] SAMPLES = new int[MAX_RAYS];
     private static final float[][] DIST = new float[MAX_RAYS][MAX_SAMPLES];
     private static final float[][] LIGHT = new float[MAX_RAYS][MAX_SAMPLES];
-    private static float pointTint;
 
     private LightCone() {
     }
@@ -111,9 +106,8 @@ public final class LightCone {
     // additive light with no outline; arc and length are the checked ones, the light is drawn past both so the checked edge sits inside the fade
     // a blocker takes style.shadow of the light behind it, the rest is drawn unblocked as fill
     public static void draw(Vector2f loc, float angle, float arc, float length, List<Blocker> blockers,
-                            Style style, Color core, Color edge, float alpha) {
-        float peak = alpha * style.peak;
-        if (peak <= 0f) return;
+                            Style style, float alpha) {
+        if (alpha <= 0f) return;
 
         float half = arc / 2f;
         float drawnHalf = Math.min(180f, half * style.edgeEnd);
@@ -125,10 +119,10 @@ public final class LightCone {
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
 
         if (inCone.isEmpty()) {
-            drawLight(loc, angle, half, drawnHalf, drawnLength, null, style, core, edge, peak);
+            drawLight(loc, angle, half, drawnHalf, drawnLength, null, style, alpha);
         } else {
-            drawLight(loc, angle, half, drawnHalf, drawnLength, inCone, style, core, edge, peak * style.shadow);
-            drawLight(loc, angle, half, drawnHalf, drawnLength, null, style, core, edge, peak * (1f - style.shadow));
+            drawLight(loc, angle, half, drawnHalf, drawnLength, inCone, style, alpha * style.shadow);
+            drawLight(loc, angle, half, drawnHalf, drawnLength, null, style, alpha * (1f - style.shadow));
         }
 
         GL11.glPopAttrib();
@@ -136,7 +130,7 @@ public final class LightCone {
 
     // dust that stays where it is in space and only shows inside the light; points keep their pixel size at every zoom
     public static void drawDust(ViewportAPI viewport, Vector2f loc, float[] angles, float[] lengths, float[] alphas, float arc,
-                                List<Blocker> blockers, Style style, Color core, Color edge, float time) {
+                                List<Blocker> blockers, Style style, float time) {
         if (style.dustGain <= 0f) return;
 
         float reach = 0f;
@@ -150,7 +144,9 @@ public final class LightCone {
         if (minX >= maxX || minY >= maxY) return;
 
         float scale = Global.getSettings().getScreenScaleMult();
-        float dustAlpha = style.peak * style.dustGain;
+        float r = style.dustColor.getRed() / 255f;
+        float g = style.dustColor.getGreen() / 255f;
+        float b = style.dustColor.getBlue() / 255f;
         int big = 0;
 
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_POINT_BIT | GL11.GL_CURRENT_BIT);
@@ -169,31 +165,25 @@ public final class LightCone {
                 float y = (cy + unit(hash, 1)) * DUST_CELL + DUST_WANDER * (float) Math.cos(time * (0.05f + 0.1f * unit(hash, 5)) + phase);
 
                 float light = 0f;
-                float tint = 0f;
                 for (int i = 0; i < angles.length; i++) {
                     if (alphas[i] <= 0f) continue;
 
-                    float lit = getLight(loc, angles[i], arc, lengths[i], blockers, style, x, y) * alphas[i];
-                    if (lit <= light) continue;
-
-                    light = lit;
-                    tint = pointTint;
+                    light = Math.max(light, getLight(loc, angles[i], arc, lengths[i], blockers, style, x, y) * alphas[i]);
                 }
                 if (light < DUST_MIN_LIGHT) continue;
 
                 float twinkle = 0.6f + 0.4f * (float) Math.sin(phase + time * (0.5f + 2f * unit(hash, 6)));
-                float a = Math.min(DUST_MAX_ALPHA, light * dustAlpha * style.gain(tint) * (0.4f + 0.8f * unit(hash, 2)) * twinkle);
+                float a = Math.min(DUST_MAX_ALPHA, light * style.dustGain * (0.4f + 0.8f * unit(hash, 2)) * twinkle);
 
                 if (unit(hash, 7) < DUST_BIG_SHARE && big < MAX_BIG_DUST) {
-                    BIG_DUST[big * 4] = x;
-                    BIG_DUST[big * 4 + 1] = y;
-                    BIG_DUST[big * 4 + 2] = a;
-                    BIG_DUST[big * 4 + 3] = tint;
+                    BIG_DUST[big * 3] = x;
+                    BIG_DUST[big * 3 + 1] = y;
+                    BIG_DUST[big * 3 + 2] = a;
                     big++;
                     continue;
                 }
 
-                color(core, edge, tint, a);
+                GL11.glColor4f(r, g, b, a);
                 GL11.glVertex2f(x, y);
             }
         }
@@ -204,8 +194,8 @@ public final class LightCone {
             GL11.glPointSize(Math.max(2f, Math.round(2f * scale)));
             GL11.glBegin(GL11.GL_POINTS);
             for (int i = 0; i < big; i++) {
-                color(core, edge, BIG_DUST[i * 4 + 3], BIG_DUST[i * 4 + 2]);
-                GL11.glVertex2f(BIG_DUST[i * 4], BIG_DUST[i * 4 + 1]);
+                GL11.glColor4f(r, g, b, BIG_DUST[i * 3 + 2]);
+                GL11.glVertex2f(BIG_DUST[i * 3], BIG_DUST[i * 3 + 1]);
             }
             GL11.glEnd();
         }
@@ -213,7 +203,7 @@ public final class LightCone {
         GL11.glPopAttrib();
     }
 
-    // light share at a point, 0 to 1 before peak and alpha; leaves the point's core share in pointTint
+    // light at a point before alpha
     private static float getLight(Vector2f loc, float angle, float arc, float length, List<Blocker> blockers,
                                   Style style, float x, float y) {
         float dx = x - loc.x;
@@ -226,7 +216,6 @@ public final class LightCone {
         float t = off / (arc / 2f);
         if (t >= style.edgeEnd) return 0f;
 
-        pointTint = style.tint(t);
         float light = style.across(t) * style.along(dist / drawnLength);
         if (light <= 0f || blockers == null) return light;
 
@@ -234,7 +223,7 @@ public final class LightCone {
     }
 
     private static void drawLight(Vector2f loc, float angle, float half, float drawnHalf, float drawnLength, List<Blocker> blockers,
-                                  Style style, Color core, Color edge, float alpha) {
+                                  Style style, float alpha) {
         float[] offsets = getRayOffsets(loc, angle, drawnHalf, drawnLength, blockers, style.sourceRadius);
         int rays = offsets.length;
 
@@ -242,18 +231,16 @@ public final class LightCone {
             double rad = Math.toRadians(angle + offsets[i]);
             COS[i] = (float) Math.cos(rad);
             SIN[i] = (float) Math.sin(rad);
-            float t = Math.abs(offsets[i]) / half;
-            TINT[i] = style.tint(t);
-            GAIN[i] = style.gain(TINT[i]);
-            setSamples(i, loc, drawnLength, blockers, style, style.across(t));
+            setColor(i, style, Math.abs(offsets[i]) / half);
+            setSamples(i, loc, drawnLength, blockers, style);
         }
 
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        drawMesh(loc, rays, core, edge, alpha);
+        drawMesh(loc, rays, alpha);
     }
 
     // every ray has its own sample distances, so the strip between two rays is stitched by distance
-    private static void drawMesh(Vector2f loc, int rays, Color core, Color edge, float alpha) {
+    private static void drawMesh(Vector2f loc, int rays, float alpha) {
         GL11.glBegin(GL11.GL_TRIANGLES);
         for (int ray = 0; ray < rays - 1; ray++) {
             int near = 0;
@@ -269,7 +256,7 @@ public final class LightCone {
                     int sample = corner == 0 ? near : corner == 1 ? far : stepNear ? near + 1 : far + 1;
                     float dist = DIST[at][sample];
 
-                    color(core, edge, TINT[at], Math.min(1f, alpha * GAIN[at] * LIGHT[at][sample]));
+                    GL11.glColor4f(RED[at], GREEN[at], BLUE[at], Math.min(1f, alpha * ACROSS[at] * LIGHT[at][sample]));
                     GL11.glVertex2f(loc.x + COS[at] * dist, loc.y + SIN[at] * dist);
                 }
 
@@ -280,16 +267,31 @@ public final class LightCone {
         GL11.glEnd();
     }
 
-    private static void color(Color core, Color edge, float tint, float alpha) {
-        GL11.glColor4f((edge.getRed() + (core.getRed() - edge.getRed()) * tint) / 255f,
-                (edge.getGreen() + (core.getGreen() - edge.getGreen()) * tint) / 255f,
-                (edge.getBlue() + (core.getBlue() - edge.getBlue()) * tint) / 255f,
-                alpha);
+    // a ray's colour is the layers' colours weighted by their light, its alpha their sum
+    private static void setColor(int ray, Style style, float t) {
+        float r = 0f;
+        float g = 0f;
+        float b = 0f;
+        float sum = 0f;
+
+        for (Layer layer : style.layers) {
+            float light = style.across(layer, t);
+            r += layer.color.getRed() * light;
+            g += layer.color.getGreen() * light;
+            b += layer.color.getBlue() * light;
+            sum += light;
+        }
+
+        float norm = sum > 0f ? 1f / (sum * 255f) : 0f;
+        RED[ray] = r * norm;
+        GREEN[ray] = g * norm;
+        BLUE[ray] = b * norm;
+        ACROSS[ray] = sum;
     }
 
     // samples sit on the rings, at the distance of each blocker, at the end of a blocked ray and where a shadow edge starts to fall on an open one
     // a planet is lit up to its middle with the light fading across the near side
-    private static void setSamples(int ray, Vector2f loc, float drawnLength, List<Blocker> blockers, Style style, float across) {
+    private static void setSamples(int ray, Vector2f loc, float drawnLength, List<Blocker> blockers, Style style) {
         float dirX = COS[ray];
         float dirY = SIN[ray];
         float reach = drawnLength;
@@ -352,7 +354,7 @@ public final class LightCone {
         }
 
         for (int i = 0; i < kept; i++) {
-            float light = across * style.along(dist[i] / drawnLength);
+            float light = style.along(dist[i] / drawnLength);
             if (reach < drawnLength) light *= smooth((reach - dist[i]) / soft);
             if (blockers != null && light > 0f) light *= getOpenShare(blockers, loc, dirX, dirY, dist[i], style.sourceRadius, false);
             LIGHT[ray][i] = light;
