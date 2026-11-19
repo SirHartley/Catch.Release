@@ -17,10 +17,7 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
 
     private final Vector2f origin;
     private final Vector2f aim;
-    private final float size;
-    private final float halfAngle;
     private final Color color;
-    private final boolean tracksPlayerScale;
 
     private boolean expired = false;
     private boolean fading = false;
@@ -31,23 +28,10 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
     private float extraAlphaMult = 1f;
     private FlickerUtilV2 flicker = new FlickerUtilV2(8f);
 
-    public SearchlightFanRenderer(Vector2f origin, Vector2f aim, float size, Color color) {
-        this(origin, aim, size, Searchlight.getFanHalfAngle(), color, true);
-    }
-
-    public SearchlightFanRenderer(Vector2f origin, Vector2f aim, float size,
-            float halfAngle, Color color) {
-        this(origin, aim, size, halfAngle, color, false);
-    }
-
-    protected SearchlightFanRenderer(Vector2f origin, Vector2f aim, float size,
-            float halfAngle, Color color, boolean tracksPlayerScale) {
+    public SearchlightFanRenderer(Vector2f origin, Vector2f aim, Color color) {
         this.origin = origin;
         this.aim = aim;
-        this.size = size;
-        this.halfAngle = halfAngle;
         this.color = color;
-        this.tracksPlayerScale = tracksPlayerScale;
     }
 
     @Override
@@ -111,19 +95,11 @@ public class SearchlightFanRenderer implements LunaCampaignRenderingPlugin {
         float distance = Misc.getDistance(origin, aim);
         if (distance < 1f) return;
 
-        float length = distance + getSize();
-        // luna draws every renderer in the sector each frame, the Fisherman's lamps included
+        float length = distance + Searchlight.getArea();
+        // luna draws every renderer each frame with no viewport test
         if (!viewport.isNearViewport(origin, length)) return;
 
-        FanWedge.drawLight(origin, Misc.getAngleInDegrees(origin, aim), length, distance, getHalfAngle(),
+        FanWedge.drawLight(origin, Misc.getAngleInDegrees(origin, aim), length, distance, Searchlight.getFanHalfAngle(),
                 Searchlight.FAN_TIP_STRENGTH, color, alpha);
-    }
-
-    protected float getSize() {
-        return tracksPlayerScale ? Searchlight.getArea() : size;
-    }
-
-    protected float getHalfAngle() {
-        return tracksPlayerScale ? Searchlight.getFanHalfAngle() : halfAngle;
     }
 }

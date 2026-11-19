@@ -1,7 +1,7 @@
 package catchrelease.tools;
 
-import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.campaign.fish.fisherman.FishermanBehavior;
+import catchrelease.campaign.fish.fisherman.FishermanLampRenderer;
 import catchrelease.campaign.fish.legendary.*;
 import catchrelease.campaign.fish.tutorial.FishingIntro;
 import catchrelease.helper.math.CircularArc;
@@ -11,7 +11,6 @@ import com.fs.starfarer.api.campaign.econ.EconomyAPI;
 import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import org.lwjgl.util.vector.Vector2f;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,23 +38,13 @@ public final class LonglinerCleanupChecks {
 
     private static class BoatOwner extends FishermanBehavior {
 
-        private static class LitLamp extends Lamp {
-
-            final SearchlightFanRenderer renderer;
-
-            LitLamp() {
-                super(new CircularArc(new Vector2f(), 100f, 0f, 90f));
-                renderer = new SearchlightFanRenderer(new Vector2f(), new Vector2f(100f, 0f),
-                        100f, 45f, Color.WHITE);
-                fan = renderer;
-            }
-        }
-
-        final LitLamp light = new LitLamp();
+        final FishermanLampRenderer light = new FishermanLampRenderer(null, new Vector2f(),
+                List.of(new Vector2f(100f, 0f)));
 
         BoatOwner(CampaignFleetAPI fleet) {
             super(fleet);
-            lamps = new ArrayList<>(List.of(light));
+            lamps = new ArrayList<>(List.of(new Lamp(new CircularArc(new Vector2f(), 100f, 0f, 90f))));
+            lampRenderer = light;
         }
     }
 
@@ -84,7 +73,7 @@ public final class LonglinerCleanupChecks {
                 case "setExpired" -> { expired = (boolean) a[0]; yield null; }
                 case "setAI" -> null;
                 case "despawn" -> {
-                    check(owner.isDone() && owner.light.renderer.isExpired(), "lights stop before despawn");
+                    check(owner.isDone() && owner.light.isExpired(), "lights stop before despawn");
                     despawns++;
                     alive = false;
                     yield null;
@@ -183,11 +172,11 @@ public final class LonglinerCleanupChecks {
             f.fish.setHeld(false);
             f.haunt.advance(0.1f);
             f.relocated();
-            check(stale.expired && stale.owner.isDone() && stale.owner.light.renderer.isExpired()
+            check(stale.expired && stale.owner.isDone() && stale.owner.light.isExpired()
                     && !f.env.fleets.contains(stale.fleet) && !f.env.sectorValues.containsKey(LonglinerDecoy.BOAT_KEY),
                     "failure removes stale disguise, lights and booking");
             stale.owner.advance(1f);
-            check(stale.owner.light.renderer.isExpired(), "removed boat cannot restart its lights");
+            check(stale.owner.light.isExpired(), "removed boat cannot restart its lights");
             check(!realFisherman.expired && !realFisherman.owner.isDone(), "real Fisherman is untouched");
         }
         for (boolean active : new boolean[]{false, true}) try (Fixture f = new Fixture(true)) {
@@ -219,7 +208,7 @@ public final class LonglinerCleanupChecks {
             booked.expired = true;
             f.state.caught = true;
             f.decoy.refresh();
-            check(booked.owner.light.renderer.isExpired() && booked.owner.isDone()
+            check(booked.owner.light.isExpired() && booked.owner.isDone()
                     && !f.env.fleets.contains(booked.fleet), "already-expired boats still clean up lights");
             check(f.decoy.spawnedIn == null, "caught Longliner never respawns");
         }

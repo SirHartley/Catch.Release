@@ -4,7 +4,6 @@ import catchrelease.config.FishingSounds;
 import catchrelease.campaign.crime.HarpoonOffence;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.abilities.harpoon.entities.HarpoonEntityPlugin;
-import catchrelease.abilities.searchlight.rendering.SearchlightFanRenderer;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
 import catchrelease.campaign.fish.entities.FishEntityPlugin;
 import catchrelease.campaign.fish.map.FleetMapVisibility;
@@ -45,6 +44,7 @@ public class FishermanBehavior implements EveryFrameScript {
     protected final IntervalUtil moteInterval = new IntervalUtil(
             FishermanConstants.MOTE_INTERVAL_MIN, FishermanConstants.MOTE_INTERVAL_MAX);
     protected transient List<Lamp> lamps;
+    protected transient FishermanLampRenderer lampRenderer;
 
     protected SectorEntityToken marker;
     protected transient boolean markerReconciled = false;
@@ -61,7 +61,6 @@ public class FishermanBehavior implements EveryFrameScript {
         protected float oscillation = 0f;
 
         protected final Vector2f renderLoc = new Vector2f();
-        protected transient SearchlightFanRenderer fan;
 
         public Lamp(CircularArc arc) {
             this.arc = arc;
@@ -86,44 +85,6 @@ public class FishermanBehavior implements EveryFrameScript {
 
             Vector2f at = MathUtils.getPointOnCircumference(base, offset, baseAngle + 90f);
             renderLoc.set(at);
-
-            if (fan == null) {
-                fan = new SearchlightFanRenderer(arc.center, renderLoc,
-                        FishermanConstants.LIGHT_AREA, FishermanConstants.LIGHT_HALF_ANGLE,
-                        FishermanConstants.LIGHT_COLOR);
-                LunaCampaignRenderer.addTransientRenderer(fan);
-            }
-        }
-
-        public float litStrength(Vector2f at) {
-            float size = FishermanConstants.LIGHT_AREA;
-            Vector2f origin = arc.center;
-
-            float length = Misc.getDistance(origin, renderLoc) + size;
-            if (length <= 1f) return 0f;
-
-            float distance = Misc.getDistance(origin, at);
-            if (distance > length) return 0f;
-
-            float off = Math.abs(Misc.getAngleDiff(
-                    Misc.getAngleInDegrees(origin, renderLoc),
-                    Misc.getAngleInDegrees(origin, at)));
-
-            if (off > FishermanConstants.LIGHT_HALF_ANGLE) return 0f;
-
-            float acrossShare = 1f - off / FishermanConstants.LIGHT_HALF_ANGLE;
-            float along = 1f - MathUtils.clamp(distance / length, 0f, 1f);
-
-            return acrossShare * acrossShare
-                    * (Searchlight.FAN_TIP_STRENGTH
-                    + (1f - Searchlight.FAN_TIP_STRENGTH) * along);
-        }
-
-        public void expire(float fadeSeconds) {
-            if (fan != null) {
-                fan.fadeAndExpire(fadeSeconds);
-                fan = null;
-            }
         }
     }
 
@@ -473,6 +434,12 @@ public class FishermanBehavior implements EveryFrameScript {
                     minAngle, minAngle + areaPerLamp)));
         }
 
+        List<Vector2f> aims = new ArrayList<>();
+        for (Lamp lamp : lamps) aims.add(lamp.renderLoc);
+
+        lampRenderer = new FishermanLampRenderer(fleet.getContainingLocation(), fleet.getLocation(), aims);
+        LunaCampaignRenderer.addTransientRenderer(lampRenderer);
+
         if (!litSoundPlayed) {
             litSoundPlayed = true;
             FishingSounds.playSound(FishermanConstants.SOUND_TOGGLE, 1.1f, 1f,
@@ -481,9 +448,8 @@ public class FishermanBehavior implements EveryFrameScript {
     }
 
     protected void expireLamps(float fadeSeconds) {
-        if (lamps == null) return;
-
-        for (Lamp lamp : lamps) lamp.expire(fadeSeconds);
+        if (lampRenderer != null) lampRenderer.fadeAndExpire(fadeSeconds);
+        lampRenderer = null;
         lamps = null;
     }
 
