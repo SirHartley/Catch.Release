@@ -12,6 +12,7 @@ import lunalib.lunaUtil.campaign.LunaCampaignRenderingPlugin;
 import org.lazywizard.lazylib.MathUtils;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.awt.Color;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -21,24 +22,28 @@ public class FishermanLampRenderer implements LunaCampaignRenderingPlugin {
     public static final float FADE_IN_SECONDS = 1f;
     public static final float BLOCKER_SECONDS = 0.1f;
     public static final float GLOW_SIZE = 80f;
-    public static final float GLOW_ALPHA = 0.4f;
+    public static final float GLOW_ALPHA = 0.45f;
+    public static final float GLOW_CORE_SIZE = 28f;
+    public static final float GLOW_CORE_ALPHA = 0.7f;
+    public static final Color GLOW_CORE_COLOR = new Color(255, 247, 230);
 
+    // gold out to the edge, a purple heart and a pale middle
     static {
-        LIGHT.peak = 0.13f;
-        LIGHT.edgeStart = 0.35f;
+        LIGHT.layers = new LightCone.Layer[]{
+                new LightCone.Layer(FishermanConstants.LIGHT_COLOR, 0.26f, 0f),
+                new LightCone.Layer(FishermanConstants.LIGHT_HEART_COLOR, 0.3f, 0.4f),
+                new LightCone.Layer(FishermanConstants.LIGHT_CENTER_COLOR, 0.1f, 0.2f),
+        };
+        LIGHT.edgeStart = 0.45f;
         LIGHT.edgeEnd = 1.2f;
-        LIGHT.coreShare = 0.65f;
-        LIGHT.coreWidth = 0.2f;
-        LIGHT.tintWidth = 0.2f;
-        LIGHT.coreGain = 2f;
-        LIGHT.edgeGain = 3f;
         LIGHT.farShare = 0.4f;
         LIGHT.falloff = 8f;
         LIGHT.endStart = 0.6f;
         LIGHT.nearSoftShare = 0.01f;
         LIGHT.shadow = 0.95f;
         LIGHT.sourceRadius = 50f;
-        LIGHT.dustGain = 2.5f;
+        LIGHT.dustGain = 8f;
+        LIGHT.dustColor = FishermanConstants.LIGHT_DUST_COLOR;
     }
 
     private final LocationAPI location;
@@ -141,19 +146,22 @@ public class FishermanLampRenderer implements LunaCampaignRenderingPlugin {
         for (int i = 0; i < aims.size(); i++) {
             if (alphas[i] <= 0f) continue;
 
-            LightCone.draw(origin, angles[i], arc, lengths[i], shadows, LIGHT,
-                    FishermanConstants.LIGHT_CORE_COLOR, FishermanConstants.LIGHT_EDGE_COLOR, alphas[i]);
+            LightCone.draw(origin, angles[i], arc, lengths[i], shadows, LIGHT, alphas[i]);
         }
 
-        LightCone.drawDust(viewport, origin, angles, lengths, alphas, arc, shadows, LIGHT,
-                FishermanConstants.LIGHT_CORE_COLOR, FishermanConstants.LIGHT_EDGE_COLOR, time);
+        LightCone.drawDust(viewport, origin, angles, lengths, alphas, arc, shadows, LIGHT, time);
 
         if (glow == null) glow = Global.getSettings().getSprite("campaignEntities", "fusion_lamp_glow");
         glow.setAdditiveBlend();
         glow.setAngle(0f);
         glow.setSize(GLOW_SIZE, GLOW_SIZE);
-        glow.setColor(FishermanConstants.LIGHT_EDGE_COLOR);
+        glow.setColor(FishermanConstants.LIGHT_COLOR);
         glow.setAlphaMult(alpha * GLOW_ALPHA);
+        glow.renderAtCenter(origin.x, origin.y);
+
+        glow.setSize(GLOW_CORE_SIZE, GLOW_CORE_SIZE);
+        glow.setColor(GLOW_CORE_COLOR);
+        glow.setAlphaMult(alpha * GLOW_CORE_ALPHA);
         glow.renderAtCenter(origin.x, origin.y);
     }
 
