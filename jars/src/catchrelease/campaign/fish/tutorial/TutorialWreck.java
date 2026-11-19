@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.tutorial;
 import catchrelease.ModPlugin;
 import catchrelease.campaign.fish.fisherman.OuterReaches;
 import catchrelease.campaign.fish.jobs.QuestPond;
+import catchrelease.config.SurvivalMode;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
@@ -11,6 +12,7 @@ import com.fs.starfarer.api.campaign.StarSystemAPI;
 import com.fs.starfarer.api.impl.campaign.DerelictShipEntityPlugin.DerelictShipData;
 import com.fs.starfarer.api.impl.campaign.ids.Entities;
 import com.fs.starfarer.api.impl.campaign.ids.Factions;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.BaseThemeGenerator;
 import com.fs.starfarer.api.impl.campaign.procgen.themes.SalvageSpecialAssigner.ShipRecoverySpecialCreator;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.special.ShipRecoverySpecial.PerShipData;
@@ -84,10 +86,15 @@ public class TutorialWreck {
                 pond.getRadius() + TutorialConstants.WRECK_ORBIT_RADIUS,
                 TutorialConstants.WRECK_ORBIT_DAYS);
 
-        // recoverable the way any found hulk is - through the salvage screen, story point and all
-        ShipRecoverySpecialCreator creator =
-                new ShipRecoverySpecialCreator(null, 0, 0, false, null, null);
-        Misc.setSalvageSpecial(wreck, creator.createSpecial(wreck, null));
+        if (SurvivalMode.isOn()) {
+            // also keeps vanilla's story point recovery option (SalvageEntity.canBeMadeRecoverable) off
+            wreck.addTag(Tags.UNRECOVERABLE);
+        } else {
+            // recoverable the way any found hulk is - through the salvage screen, story point and all
+            ShipRecoverySpecialCreator creator =
+                    new ShipRecoverySpecialCreator(null, 0, 0, false, null, null);
+            Misc.setSalvageSpecial(wreck, creator.createSpecial(wreck, null));
+        }
 
         wreck.getMemoryWithoutUpdate().set(TutorialConstants.WRECK_FLAG, true);
         Misc.makeImportant(wreck, TutorialConstants.WRECK_IMPORTANT);

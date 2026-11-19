@@ -422,7 +422,7 @@ one-time options. See [question routing](RULES.md#project-routing).
 | File | Owner / connection |
 |---|---|
 | `FishingIntro.java` | Six-stage tutorial, grants, target selection, save repair and IntroIntel. Shared requirement/currency path; fifth valid same-rarity miss substitutes the single lesson target; invalid locations pause the count. Final multi-species lesson is excluded. |
-| `TutorialWreck.java` | Creates a vanilla derelict cruiser beside the first suitable rupture. |
+| `TutorialWreck.java` | Creates a vanilla derelict cruiser beside the first suitable rupture. It carries a `ShipRecoverySpecial`, so it can be recovered like a found hulk; in survival it gets `Tags.UNRECOVERABLE` instead, which also hides vanilla's story point recovery option. |
 | `Castaway.java` | Stores planet eligibility and rescue state for the stranded crewman encounter. |
 
 Tutorial questions rebuild shared `FireAll` menus: `CatchReleaseIntroRodQuestions`,
