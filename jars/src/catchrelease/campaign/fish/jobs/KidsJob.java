@@ -159,7 +159,7 @@ public class KidsJob extends FishJob {
 
     // No credits or range data; the tier floor keeps low-score asks eligible for prizes.
     protected QuestRewards.Request prizeRequest(java.util.Random random) {
-        return new QuestRewards.Request(asks)
+        return rewardRequest(asks)
                 .noCredits()
                 .exclude(QuestRewards.Kind.RANGE_DATA)
                 .tierFloor(DemandScore.Tier.MEDIUM)

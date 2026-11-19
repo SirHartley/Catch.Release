@@ -61,7 +61,7 @@ public class MafiaJob extends FishJob {
 
         if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
-                new QuestRewards.Request(asks).random(genRandom)).rewards);
+                rewardRequest(asks).random(genRandom)).rewards);
 
         setUpSpine();
 
@@ -249,7 +249,7 @@ public class MafiaJob extends FishJob {
         rewards.clear();
 
         if (won) {
-            addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
+            addRewards(QuestRewards.roll(rewardRequest(asks)
                     .budgetMult(WIN_MULT).random(random())).rewards);
         }
     }

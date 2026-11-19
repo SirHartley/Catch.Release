@@ -32,7 +32,7 @@ public class TuberJob extends FishJob {
 
         if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
-                new QuestRewards.Request(asks).random(genRandom)).rewards);
+                rewardRequest(asks).random(genRandom)).rewards);
 
         setUpSpine();
 
@@ -52,7 +52,7 @@ public class TuberJob extends FishJob {
         grim.lowCoherence = true;
 
         addAsk(grim);
-        addRewards(QuestRewards.rollLaterStage(new QuestRewards.Request(asks)
+        addRewards(QuestRewards.rollLaterStage(rewardRequest(asks)
                 .budgetMult(1.6f).random(random()), previousRewards).rewards);
 
         return true;

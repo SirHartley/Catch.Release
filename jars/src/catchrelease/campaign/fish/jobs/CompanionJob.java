@@ -38,7 +38,7 @@ public class CompanionJob extends FishJob {
 
         if (!setDurationForAsks(createdAt)) return false;
         addRewards(QuestRewards.roll(
-                new QuestRewards.Request(asks).random(genRandom)).rewards);
+                rewardRequest(asks).random(genRandom)).rewards);
 
         setUpSpine();
 
@@ -49,7 +49,7 @@ public class CompanionJob extends FishJob {
     protected boolean payBonus(FishCatch offered, List<FishCatch> handedIn) {
         if (!earnsLengthBonus(offered)) return false;
 
-        for (FishReward extra : QuestRewards.roll(new QuestRewards.Request(asks)
+        for (FishReward extra : QuestRewards.roll(rewardRequest(asks)
                 .budgetMult(0.5f).random(random())).rewards) {
             grantReward(extra, handedIn);
             rewards.add(extra);

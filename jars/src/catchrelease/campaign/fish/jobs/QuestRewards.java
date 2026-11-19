@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.jobs;
 
 import catchrelease.config.Setting;
+import catchrelease.config.SurvivalMode;
 import catchrelease.campaign.fish.colony.Backdrop;
 import catchrelease.helper.loading.BackdropLoader;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -9,6 +10,10 @@ import catchrelease.campaign.fish.shop.ShopPricing;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import catchrelease.helper.loading.FishSpecLoader;
+import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.SettingsAPI;
+import com.fs.starfarer.api.campaign.SectorEntityToken;
+import com.fs.starfarer.api.impl.campaign.ids.Items;
 import com.fs.starfarer.api.util.WeightedRandomPicker;
 
 import java.util.ArrayList;
@@ -71,6 +76,8 @@ public class QuestRewards {
         public Set<Kind> excluded = EnumSet.noneOf(Kind.class);
         public boolean allowCredits = true;
         public Random random;
+        // where the job is offered; survival scales its credits by distance
+        public SectorEntityToken location;
 
         public Request(List<FishRequirement> asks) {
             this.asks = asks;
@@ -116,6 +123,11 @@ public class QuestRewards {
 
         public Request random(Random random) {
             this.random = random;
+            return this;
+        }
+
+        public Request at(SectorEntityToken location) {
+            this.location = location;
             return this;
         }
     }
@@ -203,7 +215,7 @@ public class QuestRewards {
         }
 
         FishRewardRoller.coalesceCredits(rewards);
-        float creditScale = Setting.QUEST_CREDITS.mult();
+        float creditScale = Setting.QUEST_CREDITS.mult() * SurvivalMode.getMissionRewardMult(request.location);
         for (int i = 0; i < rewards.size(); i++) {
             if (rewards.get(i) instanceof FishReward.Credits credits) {
                 rewards.set(i, new FishReward.Credits(Math.round(credits.amount * creditScale),
@@ -344,11 +356,28 @@ public class QuestRewards {
             int rank = backdrop == null ? 1 : backdrop.rarity.rank;
             return BACKDROP_VALUE_BASE + rank * BACKDROP_VALUE_PER_RANK;
         }
-        if (reward instanceof FishReward.Blueprint) {
-            return BLUEPRINT_VALUE;
+        if (reward instanceof FishReward.Blueprint blueprint) {
+            return SurvivalMode.isOn() ? blueprintPrice(blueprint) : BLUEPRINT_VALUE;
         }
 
         return SCHEMATIC_VALUE_FLOOR;
+    }
+
+    // vanilla's item price (WeaponBlueprintItemPlugin, FighterBlueprintItemPlugin); survival raises the spec values
+    protected static int blueprintPrice(FishReward.Blueprint blueprint) {
+        SettingsAPI settings = Global.getSettings();
+        float original;
+        if (Items.WEAPON_BP.equals(blueprint.itemId)) {
+            original = settings.getWeaponSpec(blueprint.data).getBaseValue();
+        } else if (Items.FIGHTER_BP.equals(blueprint.itemId)) {
+            original = settings.getFighterWingSpec(blueprint.data).getBaseValue();
+        } else {
+            return BLUEPRINT_VALUE;
+        }
+
+        float base = settings.getSpecialItemSpec(blueprint.itemId).getBasePrice();
+
+        return Math.round(base + original * settings.getFloat("blueprintPriceOriginalItemMult"));
     }
 
     protected static int totalValue(List<FishReward> rewards) {

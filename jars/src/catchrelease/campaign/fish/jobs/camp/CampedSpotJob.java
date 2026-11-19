@@ -76,7 +76,7 @@ public abstract class CampedSpotJob extends FishJob implements FleetEventListene
         // Add the camp's value to the receipt ask when scoring rewards.
         // Allow time for both the confrontation and the catch.
         float score = size.value / QuestRewards.CREDITS_PER_POINT + DemandScore.of(asks);
-        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
+        addRewards(QuestRewards.roll(rewardRequest(asks)
                 .score(score).random(genRandom)).rewards);
 
         float ly = Misc.getDistanceLY(createdAt.getLocationInHyperspace(),

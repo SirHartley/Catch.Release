@@ -50,7 +50,7 @@ public class ChefJob extends FishJob {
         // Reserve up to two unknown ranges; missing entries return to the roll budget.
         List<FishReward> locationData = FishRewardRoller.rollLocationData(
                 genRandom, 2, VALUE_PER_TYPE);
-        addRewards(QuestRewards.roll(new QuestRewards.Request(asks)
+        addRewards(QuestRewards.roll(rewardRequest(asks)
                 .fixAll(locationData)
                 .exclude(QuestRewards.Kind.RANGE_DATA)
                 .random(genRandom)).rewards);

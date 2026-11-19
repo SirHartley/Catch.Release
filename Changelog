@@ -135,6 +135,8 @@ Adjusted - Fight Night: fee option reads "Take the rewards." and lists them
 Fixed - Fleets with a quest or marked important no longer take fishing jobs too
 Fixed - Attacking a mercenary camp now costs reputation with the independents
 Fixed - Talking a camp off its spot now gives the bonus XP for avoiding a fight
+Adjusted - Survival: job pay grows with distance from the core, as vanilla bounties do (up to +65%)
+Adjusted - Survival: blueprint job rewards are valued at their market price
 
 Distress calls
 Adjusted - Distress calls wait while another mod's distress call is live
