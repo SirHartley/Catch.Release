@@ -10,8 +10,10 @@ import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.combat.WeaponAPI.AIHints;
 import com.fs.starfarer.api.fleet.FleetMemberType;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
+import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.procgen.SalvageEntityGenDataSpec.DropData;
 import com.fs.starfarer.api.impl.campaign.rulecmd.salvage.SalvageEntity;
 import com.fs.starfarer.api.loading.FighterWingSpecAPI;
@@ -131,10 +133,7 @@ public class TreasureRoller {
         WeightedRandomPicker<WeaponSpecAPI> picker = new WeightedRandomPicker<>();
 
         for (WeaponSpecAPI spec : Global.getSettings().getAllWeaponSpecs()) {
-            if (spec.getWeaponId() == null) continue;
-            if (spec.hasTag("restricted") || spec.hasTag("no_drop")) continue;
-
-            picker.add(spec, 1f);
+            if (isLootWeapon(spec)) picker.add(spec, 1f);
         }
 
         if (picker.isEmpty()) {
@@ -148,12 +147,23 @@ public class TreasureRoller {
         award.items.add(new TreasureAward.Item(spec.getWeaponName(), spec.getTurretSpriteName(), 1));
     }
 
+    protected static boolean isLootWeapon(WeaponSpecAPI spec) {
+        if (spec.getWeaponId() == null) return false;
+        if (spec.hasTag(Tags.RESTRICTED) || spec.hasTag(Tags.NO_DROP) || spec.hasTag(Tags.WEAPON_NO_SELL)) return false;
+        if (spec.getAIHints().contains(AIHints.SYSTEM)) return false;
+
+        return switch (spec.getType()) {
+            case BUILT_IN, DECORATIVE, SYSTEM, STATION_MODULE, LAUNCH_BAY -> false;
+            default -> true;
+        };
+    }
+
     protected static void awardFighter(TreasureAward award, CargoAPI cargo) {
         WeightedRandomPicker<FighterWingSpecAPI> picker = new WeightedRandomPicker<>();
 
         for (FighterWingSpecAPI spec : Global.getSettings().getAllFighterWingSpecs()) {
             if (spec.getId() == null) continue;
-            if (spec.hasTag("restricted") || spec.hasTag("no_drop")) continue;
+            if (spec.hasTag(Tags.RESTRICTED) || spec.hasTag(Tags.WING_NO_DROP) || spec.hasTag(Tags.WING_NO_SELL)) continue;
 
             picker.add(spec, 1f);
         }

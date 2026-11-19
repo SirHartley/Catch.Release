@@ -20,6 +20,7 @@ Fixed - Ripple and rupture shaders no longer cause stutter and VRAM growth
 Fixed - Closed ruptures no longer keep their ripples in memory and the save
 Fixed - The aquarium no longer slows every frame looking for the colony screen
 Fixed - Fish motes no longer pile up in systems you have left (legendaries stay)
+Fixed - Treasure no longer contains system weapons like the Minelayer
 
 Fisherman
 Added - Treasure rumour: after the tutorial, find the Fisherman's lost chest
