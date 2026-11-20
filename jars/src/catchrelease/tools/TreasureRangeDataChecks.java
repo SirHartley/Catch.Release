@@ -9,7 +9,9 @@ import catchrelease.campaign.fish.map.FishPresence;
 import catchrelease.campaign.fish.treasure.TreasureAward;
 import catchrelease.campaign.fish.treasure.TreasureRarity;
 import catchrelease.campaign.fish.treasure.TreasureRoller;
+import com.fs.starfarer.api.GameState;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.ModManagerAPI;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -57,8 +59,15 @@ public final class TreasureRangeDataChecks extends TreasureRoller {
                 return cargo;
             });
             SectorAPI baseSector = Global.getSector();
-            Global.setSector(proxy(SectorAPI.class, (p, m, a) ->
-                    m.getName().equals("getPlayerFleet") ? player : m.invoke(baseSector, a)));
+            Global.setSector(proxy(SectorAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getPlayerFleet" -> player;
+                case "isExtMode" -> false;
+                default -> m.invoke(baseSector, a);
+            }));
+            ModManagerAPI mods = proxy(ModManagerAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "isModEnabled" -> false;
+                default -> throw new AssertionError(m);
+            });
             CommoditySpecAPI commodity = proxy(CommoditySpecAPI.class, (p, m, a) -> switch (m.getName()) {
                 case "isNonEcon", "isMeta", "isPersonnel" -> false;
                 case "getBasePrice" -> 100f;
@@ -70,6 +79,8 @@ public final class TreasureRangeDataChecks extends TreasureRoller {
                 case "getAllCommoditySpecs" -> List.of(commodity);
                 case "getCommoditySpec" -> commodity;
                 case "getAllWeaponSpecs", "getAllFighterWingSpecs", "getAllShipHullSpecs" -> List.of();
+                case "getCurrentState" -> GameState.CAMPAIGN;
+                case "getModManager" -> mods;
                 default -> m.invoke(baseSettings, a);
             }));
 

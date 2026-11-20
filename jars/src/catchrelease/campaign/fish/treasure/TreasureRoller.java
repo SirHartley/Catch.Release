@@ -3,6 +3,7 @@ package catchrelease.campaign.fish.treasure;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.jobs.FishReward;
 import catchrelease.campaign.fish.jobs.FishRewardRoller;
+import catchrelease.config.SurvivalMode;
 import catchrelease.helper.loading.FishSpecLoader;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CargoAPI;
@@ -10,8 +11,11 @@ import com.fs.starfarer.api.campaign.CargoStackAPI;
 import com.fs.starfarer.api.campaign.econ.CommoditySpecAPI;
 import com.fs.starfarer.api.combat.ShipAPI.HullSize;
 import com.fs.starfarer.api.combat.ShipHullSpecAPI;
+import com.fs.starfarer.api.combat.ShipVariantAPI;
+import com.fs.starfarer.api.fleet.FleetMemberAPI;
 import com.fs.starfarer.api.combat.WeaponAPI.AIHints;
 import com.fs.starfarer.api.fleet.FleetMemberType;
+import com.fs.starfarer.api.impl.campaign.DModManager;
 import com.fs.starfarer.api.impl.campaign.ids.Commodities;
 import com.fs.starfarer.api.impl.campaign.ids.Tags;
 import com.fs.starfarer.api.impl.campaign.procgen.SalvageEntityGenDataSpec.DropData;
@@ -68,14 +72,15 @@ public class TreasureRoller {
         CargoAPI cargo = Global.getSector().getPlayerFleet().getCargo();
         if (cargo == null) return award;
 
+        boolean survival = SurvivalMode.isOn();
         switch (rarity) {
             case UNCOMMON:
-                if (hasShipTackle) awardHull(award, HullSize.CRUISER);
+                if (hasShipTackle) awardHull(award, survival ? HullSize.DESTROYER : HullSize.CRUISER);
                 else awardCommon(award, cargo);
                 awardRangeData(award, MathUtils.getRandom());
                 break;
             case RARE:
-                if (hasShipTackle) awardHull(award, HullSize.CAPITAL_SHIP);
+                if (hasShipTackle) awardHull(award, survival ? HullSize.CRUISER : HullSize.CAPITAL_SHIP);
                 else awardFromDropGroup(award, cargo, FishConstants.TREASURE_GROUP_BLUEPRINTS);
                 break;
             case EPIC:
@@ -84,6 +89,7 @@ public class TreasureRoller {
             default:
                 awardCommon(award, cargo);
         }
+        awardPet(award, cargo, rarity);
 
         return award;
     }
@@ -91,9 +97,24 @@ public class TreasureRoller {
     protected static void awardCommon(TreasureAward award, CargoAPI cargo) {
         float roll = MathUtils.getRandomNumberInRange(0f, 1f);
 
-        if (roll < 0.6f) awardCommodity(award, cargo);
-        else if (roll < 0.8f) awardWeapon(award, cargo);
-        else awardFighter(award, cargo);
+        if (roll >= 0.8f) {
+            if (survivalKeeps("ext_fighterSalvageDropFraction")) {
+                awardFighter(award, cargo);
+                return;
+            }
+        } else if (roll >= 0.6f) {
+            if (survivalKeeps("ext_weaponSalvageDropFraction")) {
+                awardWeapon(award, cargo);
+                return;
+            }
+        }
+        awardCommodity(award, cargo);
+    }
+
+    // survival keeps a weapon or LPC at vanilla's salvage drop fraction; the rest falls to a commodity
+    protected static boolean survivalKeeps(String fractionKey) {
+        return !SurvivalMode.isOn()
+                || MathUtils.getRandomNumberInRange(0f, 1f) < Global.getSettings().getFloat(fractionKey);
     }
 
     protected static void awardRangeData(TreasureAward award, Random random) {
@@ -195,6 +216,7 @@ public class TreasureRoller {
     }
 
     protected static void awardHull(TreasureAward award, HullSize maxSize) {
+        boolean survival = SurvivalMode.isOn();
         WeightedRandomPicker<ShipHullSpecAPI> picker =
                 new WeightedRandomPicker<>();
 
@@ -206,7 +228,8 @@ public class TreasureRoller {
             if (spec.getHullSize().ordinal() > maxSize.ordinal()) continue;
             if (spec.getHullSize().ordinal() < HullSize.FRIGATE.ordinal()) continue;
 
-            picker.add(spec, 1f / (float) Math.pow(2, spec.getHullSize().ordinal()));
+            picker.add(spec, survival ? 1f / Math.max(1f, spec.getBaseValue())
+                    : 1f / (float) Math.pow(2, spec.getHullSize().ordinal()));
         }
 
         if (picker.isEmpty()) {
@@ -215,16 +238,65 @@ public class TreasureRoller {
         }
 
         ShipHullSpecAPI spec = picker.pick();
+        int dMods = survival ? hullDMods(spec.getBaseValue(), MathUtils.getRandom()) : 0;
 
         Global.getSector().getPlayerFleet().getCargo().getMothballedShips()
-                .addFleetMember(Global.getFactory().createFleetMember(
-                        FleetMemberType.SHIP, spec.getHullId() + "_Hull"));
+                .addFleetMember(createHull(spec, dMods));
 
         award.items.add(new TreasureAward.Item(spec.getHullName() + "-class hull",
                 spec.getSpriteName(), 1));
     }
 
+    // cheaper hulls come clean; the cap stops a capital from rolling more than combat would add
+    protected static int hullDMods(float baseValue, Random random) {
+        if (baseValue < FishConstants.TREASURE_HULL_DMOD_VALUE) return 0;
+
+        float expected = baseValue / FishConstants.TREASURE_HULL_DMOD_VALUE;
+        int count = (int) expected;
+        if (random.nextFloat() < expected - count) count++;
+
+        return Math.min(count, FishConstants.TREASURE_HULL_MAX_DMODS);
+    }
+
+    // as vanilla's SurplusShipHull: a cloned _Hull variant turned into its d-hull before the d-mods go on
+    protected static FleetMemberAPI createHull(ShipHullSpecAPI spec, int dMods) {
+        if (dMods <= 0) return Global.getFactory().createFleetMember(FleetMemberType.SHIP, spec.getHullId() + "_Hull");
+
+        ShipVariantAPI variant = Global.getSettings().getVariant(spec.getHullId() + "_Hull").clone();
+        FleetMemberAPI member = Global.getFactory().createFleetMember(FleetMemberType.SHIP, variant);
+        DModManager.setDHull(variant);
+        DModManager.addDMods(member, true, dMods, MathUtils.getRandom());
+
+        return member;
+    }
+
+    // a pet is extra loot, so an empty roll gives nothing; generateSalvage applies survival's special item cut
+    protected static void awardPet(TreasureAward award, CargoAPI cargo, TreasureRarity rarity) {
+        if (!Global.getSettings().getModManager().isModEnabled(FishConstants.INDEVO_ID)) return;
+
+        String group = switch (rarity) {
+            case COMMON -> FishConstants.TREASURE_GROUP_PETS_LOW;
+            case UNCOMMON -> FishConstants.TREASURE_GROUP_PETS_NORMAL;
+            default -> FishConstants.TREASURE_GROUP_PETS_RARE;
+        };
+        CargoAPI salvage = rollDropGroup(group);
+        if (salvage != null && !salvage.isEmpty()) addSalvage(award, cargo, salvage);
+    }
+
     protected static void awardFromDropGroup(TreasureAward award, CargoAPI cargo, String group) {
+        CargoAPI salvage = rollDropGroup(group);
+
+        if (salvage == null || salvage.isEmpty()) {
+            // survival's salvage cut empties more of these; a full common roll would undo it
+            if (SurvivalMode.isOn()) awardCommodity(award, cargo);
+            else awardCommon(award, cargo);
+            return;
+        }
+
+        addSalvage(award, cargo, salvage);
+    }
+
+    protected static CargoAPI rollDropGroup(String group) {
         DropData drop = new DropData();
         drop.chances = 1;
         drop.group = group;
@@ -232,14 +304,10 @@ public class TreasureRoller {
         List<DropData> random = new ArrayList<>();
         random.add(drop);
 
-        CargoAPI salvage = SalvageEntity.generateSalvage(
-                new Random(), 1f, 1f, 1f, 1f, null, random);
+        return SalvageEntity.generateSalvage(new Random(), 1f, 1f, 1f, 1f, null, random);
+    }
 
-        if (salvage == null || salvage.isEmpty()) {
-            awardCommon(award, cargo);
-            return;
-        }
-
+    protected static void addSalvage(TreasureAward award, CargoAPI cargo, CargoAPI salvage) {
         cargo.addAll(salvage);
 
         for (CargoStackAPI stack : salvage.getStacksCopy()) {
