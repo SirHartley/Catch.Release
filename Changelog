@@ -135,12 +135,18 @@ Removed - Harpoon and ROD aiming debug lines in starsector.log
 Fishing jobs
 Adjusted - Accepted job markers are steady gold (offers still pulse)
 Adjusted - Fight Night: fee option reads "Take the rewards." and lists them
-Fixed - Fleets with a quest or marked important no longer take fishing jobs too
-Fixed - Attacking a mercenary camp now costs reputation with the independents
-Fixed - Talking a camp off its spot now gives the bonus XP for avoiding a fight
 Adjusted - Survival: job pay grows with distance from the core, as vanilla bounties do (up to +65%)
 Adjusted - Survival: blueprint job rewards are valued at their market price
 Adjusted - Camped spots are sized to your fleet as a normal fight, bribes follow their size
+Fixed - Fleets with a quest or marked important no longer take fishing jobs too
+Fixed - Attacking a mercenary camp now costs reputation with the independents
+Fixed - Talking a camp off its spot now gives the bonus XP for avoiding a fight
+
+Treasure
+Adjusted - Survival: treasure weapons and LPCs drop at vanilla's salvage rates, commodities otherwise
+Adjusted - Survival: empty caches and relics give commodities
+Adjusted - Survival: Lifting Rig hulls are destroyers at most from wreckage, cruisers from caches
+Adjusted - Survival: pricier Lifting Rig hulls are rarer and can come with d-mods
 
 Distress calls
 Adjusted - Distress calls wait while another mod's distress call is live
