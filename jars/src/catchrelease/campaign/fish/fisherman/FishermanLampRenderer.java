@@ -22,17 +22,17 @@ public class FishermanLampRenderer implements LunaCampaignRenderingPlugin {
     public static final float FADE_IN_SECONDS = 1f;
     public static final float BLOCKER_SECONDS = 0.1f;
     public static final float GLOW_SIZE = 80f;
-    public static final float GLOW_ALPHA = 0.45f;
+    public static final float GLOW_ALPHA = 0.4f;
     public static final float GLOW_CORE_SIZE = 28f;
-    public static final float GLOW_CORE_ALPHA = 0.7f;
-    public static final Color GLOW_CORE_COLOR = new Color(255, 247, 230);
+    public static final float GLOW_CORE_ALPHA = 0.6f;
+    public static final Color GLOW_CORE_COLOR = new Color(255, 252, 240);
 
-    // gold out to the edge, a purple heart and a pale middle
+    // warm white out to the edge, a pale purple heart and middle; saturation and peak sum near Industrial Evolution's lighthouse
     static {
         LIGHT.layers = new LightCone.Layer[]{
-                new LightCone.Layer(FishermanConstants.LIGHT_COLOR, 0.26f, 0f),
-                new LightCone.Layer(FishermanConstants.LIGHT_HEART_COLOR, 0.3f, 0.4f),
-                new LightCone.Layer(FishermanConstants.LIGHT_CENTER_COLOR, 0.1f, 0.2f),
+                new LightCone.Layer(FishermanConstants.LIGHT_COLOR, 0.08f, 0f),
+                new LightCone.Layer(FishermanConstants.LIGHT_HEART_COLOR, 0.1f, 0.4f),
+                new LightCone.Layer(FishermanConstants.LIGHT_CENTER_COLOR, 0.04f, 0.2f),
         };
         LIGHT.edgeStart = 0.45f;
         LIGHT.edgeEnd = 1.2f;
@@ -42,8 +42,8 @@ public class FishermanLampRenderer implements LunaCampaignRenderingPlugin {
         LIGHT.nearSoftShare = 0.01f;
         LIGHT.shadow = 0.95f;
         LIGHT.sourceRadius = 50f;
-        LIGHT.dustGain = 8f;
-        LIGHT.dustColor = FishermanConstants.LIGHT_DUST_COLOR;
+        LIGHT.dustGain = 4f;
+        LIGHT.dustColor = FishermanConstants.LIGHT_COLOR;
     }
 
     private final LocationAPI location;
