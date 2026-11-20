@@ -143,6 +143,7 @@ Fixed - Attacking a mercenary camp now costs reputation with the independents
 Fixed - Talking a camp off its spot now gives the bonus XP for avoiding a fight
 
 Treasure
+Added - With Industrial Evolution, treasure can hold a pet in a cryochamber
 Adjusted - Survival: treasure weapons and LPCs drop at vanilla's salvage rates, commodities otherwise
 Adjusted - Survival: empty caches and relics give commodities
 Adjusted - Survival: Lifting Rig hulls are destroyers at most from wreckage, cruisers from caches

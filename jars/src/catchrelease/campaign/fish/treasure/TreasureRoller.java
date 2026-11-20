@@ -89,6 +89,7 @@ public class TreasureRoller {
             default:
                 awardCommon(award, cargo);
         }
+        awardPet(award, cargo, rarity);
 
         return award;
     }
@@ -267,6 +268,19 @@ public class TreasureRoller {
         DModManager.addDMods(member, true, dMods, MathUtils.getRandom());
 
         return member;
+    }
+
+    // a pet is extra loot, so an empty roll gives nothing; generateSalvage applies survival's special item cut
+    protected static void awardPet(TreasureAward award, CargoAPI cargo, TreasureRarity rarity) {
+        if (!Global.getSettings().getModManager().isModEnabled(FishConstants.INDEVO_ID)) return;
+
+        String group = switch (rarity) {
+            case COMMON -> FishConstants.TREASURE_GROUP_PETS_LOW;
+            case UNCOMMON -> FishConstants.TREASURE_GROUP_PETS_NORMAL;
+            default -> FishConstants.TREASURE_GROUP_PETS_RARE;
+        };
+        CargoAPI salvage = rollDropGroup(group);
+        if (salvage != null && !salvage.isEmpty()) addSalvage(award, cargo, salvage);
     }
 
     protected static void awardFromDropGroup(TreasureAward award, CargoAPI cargo, String group) {
