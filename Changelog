@@ -13,6 +13,7 @@ None
 
 General
 Added - Version Checker support (changelog and download in LunaLib and triOS)
+Added - Achievements: 64 MagicLib achievements, some of them hidden
 Adjusted - Updated to Starsector 0.98.5a
 Adjusted - Off-screen ripples and Fisherman lamps are no longer drawn
 Adjusted - Lower frame cost for epic and legendary trails out of lamplight
@@ -186,6 +187,7 @@ Note - Catch.Release now requires PatchLib
 Fixed - Chart requests now describe the marked specimen's mote as gold, not cyan
 
 Development
+Added - AchievementChecks: checks the achievement table against the code
 Adjusted - AddFish takes an ID or name, then quantity, quality and coherence
 
 1.0.c

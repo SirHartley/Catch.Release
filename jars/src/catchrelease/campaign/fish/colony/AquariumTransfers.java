@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.colony;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.items.FishItems;
 import com.fs.starfarer.api.Global;
@@ -124,6 +125,7 @@ public final class AquariumTransfers {
                 for (FishCatch entry : going) conservatory.getAquariumFish().add(entry.encode());
             }
             moved += count * going.size();
+            Achievements.onTankFilled(going);
         }
 
         return moved;

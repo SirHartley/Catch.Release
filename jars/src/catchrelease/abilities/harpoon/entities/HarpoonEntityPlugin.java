@@ -1,5 +1,6 @@
 package catchrelease.abilities.harpoon.entities;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.config.FishingSounds;
 import catchrelease.abilities.harpoon.ability.HarpoonAbilityPlugin;
 import catchrelease.abilities.harpoon.constants.HarpoonConstants;
@@ -308,6 +309,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
     protected void breakMeteor(SectorEntityToken meteor) {
         meteor.getMemoryWithoutUpdate().set(HarpoonConstants.IE_METEOR_HIT, new Vector2f(entity.getLocation()),
                 HarpoonConstants.IE_METEOR_HIT_EXPIRY_DAYS);
+        Achievements.complete(Achievements.ROCK_FISHING);
 
         playMoteHitSound();
         enter(State.RETURNING);
@@ -324,6 +326,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
         // booked at the hit, not when the rope lets go - being harpooned is what they object to
         HarpoonOffence.record(struck);
+        Achievements.onHarpooned(!haulingTarget);
 
         enter(State.HAULING);
     }
@@ -351,6 +354,7 @@ public class HarpoonEntityPlugin extends BaseCustomEntityPlugin {
 
     protected void blastFleet(CampaignFleetAPI struck) {
         CrabWares.recordExplosiveUse(struck.getName());
+        Achievements.complete(Achievements.COLLATERAL_CATCH);
 
         if (HarpoonOffence.record(struck, true)) HarpoonOffence.turnHostile(struck);
 

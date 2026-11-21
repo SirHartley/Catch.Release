@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.fisherman.chain;
 
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -451,6 +452,7 @@ public final class WoundedEpic {
 
         clearEpic();
         FishermanChain.setStage(FishermanChain.Stage.T3_CAUGHT);
+        Achievements.complete(Achievements.OLD_WOUND);
         register();
         updateIntel();
     }

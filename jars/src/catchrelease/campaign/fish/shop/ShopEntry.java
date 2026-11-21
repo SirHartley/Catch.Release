@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.shop;
 
 import catchrelease.ModPlugin;
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.ships.FishingShips;
@@ -335,6 +336,7 @@ public class ShopEntry {
         // a curio is not handed over, it is flipped - it was already bought before the shop saw it
         if (isCurio()) {
             ware.setOn(!ware.isOn());
+            if (!ware.isOn()) Achievements.complete(Achievements.BUYERS_REMORSE);
 
             return;
         }

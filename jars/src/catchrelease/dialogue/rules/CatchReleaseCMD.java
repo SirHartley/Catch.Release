@@ -1,6 +1,7 @@
 package catchrelease.dialogue.rules;
 
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.crime.HarpoonHitman;
 import catchrelease.campaign.crime.LampOffence;
 import catchrelease.campaign.crime.LampPatrolResponse;
@@ -294,6 +295,9 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
                 return WoundedEpic.complete(text(dialog));
             case "t3TradeHere":
                 return ReliquaryTrade.isHere(getMarket(dialog));
+            case "t3Met":
+                ReliquaryTrade.met();
+                return true;
             case "t3Haggle":
                 ReliquaryTrade.haggle();
                 return true;
@@ -746,6 +750,7 @@ public class CatchReleaseCMD extends BaseCommandPlugin {
     protected boolean seizeFish(InteractionDialogAPI dialog) {
         int taken = FishCurrency.seizeAll();
         if (taken <= 0) return false;
+        Achievements.complete(Achievements.CONFISCATED);
 
         com.fs.starfarer.api.campaign.TextPanelAPI panel = text(dialog);
         if (panel == null) return true;

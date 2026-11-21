@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.legendary;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.config.FishingSounds;
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.campaign.fish.data.FishSpec;
@@ -231,6 +232,7 @@ public class LonglinerDecoy implements EveryFrameScript {
     protected void reveal(CampaignFleetAPI boat) {
         LocationAPI where = boat.getContainingLocation();
         if (where == null) return;
+        Achievements.complete(Achievements.WRONG_BOAT);
         Vector2f loc = new Vector2f(boat.getLocation());
         Vector2f driftVelocity = getRevealDriftVelocity(boat);
 

@@ -1,5 +1,6 @@
 package catchrelease.campaign.crime;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.helper.EncounterScaling;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
@@ -129,6 +130,7 @@ public class HarpoonHitman implements EveryFrameScript {
 
         location.addEntity(fleet);
         fleet.setLocation(at.x, at.y);
+        Achievements.complete(Achievements.SOMEBODY_IMPORTANT);
 
         TransmitterTrapSpecial.makeFleetInterceptPlayer(fleet, true, false, INTERCEPT_DAYS);
         Misc.makeNoRepImpact(fleet, "catchreleaseHarpoonHitman");
@@ -245,6 +247,7 @@ public class HarpoonHitman implements EveryFrameScript {
             modular.getTacticalModule().forceTargetReEval();
         }
 
+        Achievements.complete(Achievements.SETTLED_IN_FULL);
         return true;
     }
 

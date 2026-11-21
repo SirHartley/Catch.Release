@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
@@ -657,6 +658,7 @@ public class FishermanQuest {
                 "one additional range-data listing in the Fisherman's stock"));
 
         Global.getSector().getMemoryWithoutUpdate().set(ROUND_KEY, quest.round + 1);
+        Achievements.onChartRequest();
         Global.getSector().getPersistentData().put(LAST_COMPLETED_KEY,
                 Global.getSector().getClock().getTimestamp());
 

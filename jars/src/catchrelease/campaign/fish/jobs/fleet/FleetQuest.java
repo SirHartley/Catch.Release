@@ -1406,6 +1406,10 @@ public class FleetQuest extends FishJob {
         return type;
     }
 
+    public boolean isDistressOffer() {
+        return distressOffer;
+    }
+
     public CampaignFleetAPI getGiver() {
         return giver;
     }

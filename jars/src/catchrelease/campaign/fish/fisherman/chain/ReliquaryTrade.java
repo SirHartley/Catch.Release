@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman.chain;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.fisherman.FishermanConstants;
 import catchrelease.campaign.fish.fisherman.FishermanIdentity;
@@ -192,6 +193,13 @@ public final class ReliquaryTrade {
         return isTrading() && market != null && saved != null && market.getId().equals(saved.t3MarketId);
     }
 
+    // the first greeting, before he names a price or the player haggles
+    public static void met() {
+        if (isTrading() && FishCurrency.count(FishRarity.EPIC) >= PRICE) {
+            Achievements.complete(Achievements.COME_PREPARED);
+        }
+    }
+
     public static void haggle() {
         FishermanChain.Saved saved = FishermanChain.get(false);
         if (saved != null && isTrading()) saved.t3Haggled = true;
@@ -235,6 +243,7 @@ public final class ReliquaryTrade {
         gained.add(FishReward.ship(FishingShips.Ship.ROD.hullId).grantWithReceipt());
 
         FishermanChain.setStage(FishermanChain.Stage.T3_TRADED);
+        Achievements.complete(Achievements.NOBODY_WANTED);
         FishReward.showReceipts(text, gained);
         updateIntel();
 

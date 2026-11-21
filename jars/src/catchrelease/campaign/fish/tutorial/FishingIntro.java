@@ -1,6 +1,7 @@
 package catchrelease.campaign.fish.tutorial;
 
 import catchrelease.ModPlugin;
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.data.Aberration;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishCatch;
@@ -654,6 +655,7 @@ public class FishingIntro {
 
     public static void finish(TextPanelAPI text) {
         setStage(DONE);
+        Achievements.complete(Achievements.LESSONS_DONE);
 
         clearTarget();
         dropNote();

@@ -5,6 +5,8 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.SectorEntityToken;
 import org.lwjgl.util.vector.Vector2f;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,6 +58,10 @@ public class FishLog {
 
     public static FishLogEntry get(String speciesId) {
         return speciesId == null ? null : getLog().get(speciesId);
+    }
+
+    public static Collection<FishLogEntry> getEntries() {
+        return Collections.unmodifiableCollection(getLog().values());
     }
 
     public static boolean isCaught(String speciesId) {

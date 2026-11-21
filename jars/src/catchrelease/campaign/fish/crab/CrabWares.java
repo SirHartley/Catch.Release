@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.crab;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.colony.BreachConservatory;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.FishCatch;
@@ -247,6 +248,7 @@ public enum CrabWares {
         }
 
         grant();
+        Achievements.onCrabWareBought(this);
         Global.getSector().getCampaignUI().getMessageDisplay().addMessage(
                 "Traded crabs for " + name());
 
@@ -331,6 +333,7 @@ public enum CrabWares {
         String remembered = target == null || target.trim().isEmpty() ? "Something" : target.trim();
         Global.getSector().getMemoryWithoutUpdate().set(LAST_EXPLOSIVE_TARGET_KEY, remembered);
         Global.getSector().getMemoryWithoutUpdate().set(EXPLOSIVE_TARGET_PENDING_KEY, true);
+        Achievements.complete(Achievements.BLAST_FISHING);
     }
 
     public static boolean hasUnmentionedExplosiveUse() {
