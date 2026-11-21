@@ -29,7 +29,7 @@ catchrelease_lostAndFound,Lost and Found,Returned the Fisherman's compass.,,catc
 catchrelease_captainsFish,The Captain's Fish,Landed the fish the captain had chased for years.,,catchrelease.achievements.EventAchievement,,SPOILER,RARE
 catchrelease_oldWound,Old Wound,Landed the wounded fish for the Fisherman.,,catchrelease.achievements.EventAchievement,,SPOILER,RARE
 catchrelease_nobodyWanted,Nobody Wanted Her,Traded trophy fish for the Reliquary.,,catchrelease.achievements.EventAchievement,,SPOILER,UNCOMMON
-catchrelease_comePrepared,Came Prepared,Had three trophy fish on hand when you first met the Reliquary's owner.,,catchrelease.achievements.EventAchievement,,SPOILER,EPIC
+catchrelease_comePrepared,Came Prepared,Traded for the Reliquary on your first meeting with her owner.,,catchrelease.achievements.EventAchievement,,SPOILER,EPIC
 catchrelease_fishingFleet,Fishing Fleet,"Had the Stigmata, Reliquary and Monstrance in the fleet at once.",,catchrelease.achievements.EventAchievement,,SPOILER,EPIC
 catchrelease_legendary_lantern_jack,Lantern Jack,Landed Lantern Jack.,,catchrelease.achievements.EventAchievement,,SPOILER,LEGENDARY
 catchrelease_legendary_slipstream_moray,Slipstream Moray,Landed the Slipstream Moray.,,catchrelease.achievements.EventAchievement,,SPOILER,LEGENDARY

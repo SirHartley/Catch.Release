@@ -43,6 +43,8 @@ public final class ReliquaryTrade {
 
     // vanilla's marketOptBar hides the bar while this market flag is set
     public static final String NO_BAR = "$noBar";
+    // zero expiry: set by the first greeting, gone once time runs again, so it spans that one visit
+    public static final String FIRST_VISIT_KEY = "$catchrelease_t3FirstVisit";
 
     private ReliquaryTrade() {
     }
@@ -193,11 +195,8 @@ public final class ReliquaryTrade {
         return isTrading() && market != null && saved != null && market.getId().equals(saved.t3MarketId);
     }
 
-    // the first greeting, before he names a price or the player haggles
     public static void met() {
-        if (isTrading() && FishCurrency.count(FishRarity.EPIC) >= PRICE) {
-            Achievements.complete(Achievements.COME_PREPARED);
-        }
+        if (isTrading()) Global.getSector().getMemoryWithoutUpdate().set(FIRST_VISIT_KEY, true, 0f);
     }
 
     public static void haggle() {
@@ -244,6 +243,9 @@ public final class ReliquaryTrade {
 
         FishermanChain.setStage(FishermanChain.Stage.T3_TRADED);
         Achievements.complete(Achievements.NOBODY_WANTED);
+        if (Global.getSector().getMemoryWithoutUpdate().getBoolean(FIRST_VISIT_KEY)) {
+            Achievements.complete(Achievements.COME_PREPARED);
+        }
         FishReward.showReceipts(text, gained);
         updateIntel();
 
