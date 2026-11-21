@@ -2849,6 +2849,7 @@ catchrelease_t3DrunkAdd,AddBarEvents,CatchReleaseCMD t3TradeHere,"AddBarEvent ca
 catchrelease_t3Drunk,DialogOptionSelected,$option == catchrelease_t3Drunk,"CatchReleaseCMD tokens
 FireBest CatchReleaseT3DrunkGreeting",,,
 catchrelease_t3DrunkGreetFirst,CatchReleaseT3DrunkGreeting,!$market.catchrelease_t3DrunkMet,"$market.catchrelease_t3DrunkMet = true
+CatchReleaseCMD t3Met
 CatchReleaseCMD highlightFishText ""Three trophy fish""
 FireAll CatchReleaseT3DrunkFee
 FireAll CatchReleaseT3DrunkOptions","""There he is!"" The man reaches for your hand and catches your sleeve. ""No. You're not him. Sorry, Captain. Did he send you? I asked him to send someone.""

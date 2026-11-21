@@ -1,5 +1,6 @@
 package catchrelease.combat.tug;
 
+import catchrelease.achievements.Achievements;
 import com.fs.starfarer.api.combat.BaseEveryFrameCombatPlugin;
 import com.fs.starfarer.api.combat.CombatEngineAPI;
 import com.fs.starfarer.api.combat.DamagingProjectileAPI;
@@ -63,7 +64,10 @@ public class TugTethers extends BaseEveryFrameCombatPlugin {
 
     void attach(DamagingProjectileAPI shot, ShipAPI target, Vector2f point) {
         Tether tether = inFlight(shot);
-        if (tether != null) tether.attach(target, point, shot.getFacing());
+        if (tether == null) return;
+
+        tether.attach(target, point, shot.getFacing());
+        Achievements.onTugAttached(engine, shot.getSource(), target);
     }
 
     // The weapon's live line, in flight or attached.

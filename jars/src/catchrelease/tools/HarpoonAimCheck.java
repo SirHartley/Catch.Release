@@ -23,6 +23,7 @@ import catchrelease.memory.upgrades.StatIds;
 import catchrelease.memory.upgrades.UpgradeManager;
 import catchrelease.memory.upgrades.UpgradeStat;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.ModManagerAPI;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.SoundPlayerAPI;
 import com.fs.starfarer.api.combat.ViewportAPI;
@@ -244,7 +245,14 @@ public final class HarpoonAimCheck {
                 case "playUISound" -> null;
                 default -> throw new AssertionError(method);
             }));
+            // achievement hooks make magiclib read its specs from the enabled mods
+            ModManagerAPI mods = proxy(ModManagerAPI.class, (self, method, args) -> switch (method.getName()) {
+                case "getEnabledModsCopy" -> List.of();
+                case "isModEnabled" -> false;
+                default -> throw new AssertionError(method);
+            });
             Global.setSettings(proxy(SettingsAPI.class, (self, method, args) -> switch (method.getName()) {
+                case "getModManager" -> mods;
                 case "getFloat" -> 1f;
                 case "getInt" -> 1;
                 case "getBoolean", "isDevMode", "isInGame" -> false;

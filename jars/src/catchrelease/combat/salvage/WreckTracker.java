@@ -1,5 +1,6 @@
 package catchrelease.combat.salvage;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.config.Setting;
 import catchrelease.reflection.ReflectionUtils;
 import catchrelease.reflection.ReflectionUtils.ReflectedField;
@@ -252,6 +253,7 @@ public class WreckTracker extends BaseEveryFrameCombatPlugin implements HullDama
         if (entry != null) {
             wrecks.remove(entry);
             FighterStore.forBattle(engine, tender.getFleetMemberId()).add(entry.wingId, FighterStore.getCap());
+            Achievements.onWreckSalvaged(engine, tender);
         }
         fading.add(wreck);
         if (!setFadeTimer(wreck, 0f)) engine.removeEntity(wreck);

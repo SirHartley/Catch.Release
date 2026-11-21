@@ -2,6 +2,7 @@ package catchrelease.campaign.fish.fisherman.chain;
 
 import catchrelease.abilities.searchlight.ability.SearchlightAbilityPlugin;
 import catchrelease.abilities.searchlight.scripts.Searchlight;
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.constants.FishConstants;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRanges;
@@ -576,6 +577,7 @@ public final class CaptainsFleet {
         if (saved == null || !isSearching()) return;
 
         saved.t2Caught = caught;
+        if (caught) Achievements.complete(Achievements.CAPTAINS_FISH);
         clearEpic();
         FishermanChain.setStage(FishermanChain.Stage.T2_REPORT);
         Hunt.register();

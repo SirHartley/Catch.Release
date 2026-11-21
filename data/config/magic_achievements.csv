@@ -1,0 +1,65 @@
+id,name,description,tooltip,script,image,spoilerLevel,rarity
+catchrelease_firstCatch,First Catch,Landed a fish.,,catchrelease.achievements.EventAchievement,,VISIBLE,COMMON
+catchrelease_lessonsDone,Taking Work,Finished the Fisherman's lessons.,,catchrelease.achievements.EventAchievement,,VISIBLE,COMMON
+catchrelease_exceptional,Exceptional,Landed an Exceptional fish.,,catchrelease.achievements.EventAchievement,,VISIBLE,UNCOMMON
+catchrelease_trophyFish,Trophy Fish,Landed an Epic fish.,,catchrelease.achievements.EventAchievement,,VISIBLE,RARE
+catchrelease_barelyHolding,Barely Holding,Landed a fish with failing coherence.,,catchrelease.achievements.EventAchievement,,VISIBLE,UNCOMMON
+catchrelease_intoTheAbyss,Into the Abyss,Landed a fish from the Abyss.,,catchrelease.achievements.EventAchievement,,VISIBLE,UNCOMMON
+catchrelease_dopefish,Dopefish Lives,Landed the Dopefish.,,catchrelease.achievements.EventAchievement,,HIDDEN,RARE
+catchrelease_landed100,Steady Work,Landed 100 fish in one campaign.,,catchrelease.achievements.CountAchievement,,VISIBLE,UNCOMMON
+catchrelease_landed1000,Lifetime Supply,"Landed 1,000 fish in one campaign.",,catchrelease.achievements.CountAchievement,,VISIBLE,RARE
+catchrelease_species25,Field Notes,Landed 25 different species.,,catchrelease.achievements.CountAchievement,,VISIBLE,UNCOMMON
+catchrelease_species50,Reference Collection,Landed 50 different species.,,catchrelease.achievements.CountAchievement,,VISIBLE,RARE
+catchrelease_speciesAll,Complete Records,Landed every species except the legendaries.,,catchrelease.achievements.CountAchievement,,VISIBLE,EPIC
+catchrelease_fullyRigged,Fully Rigged,Bought every upgrade tier in the Outfitter.,,catchrelease.achievements.EventAchievement,,VISIBLE,RARE
+catchrelease_blastFishing,Blast Fishing,Set off an Explosive Head.,,catchrelease.achievements.EventAchievement,,SPOILER,UNCOMMON
+catchrelease_crabsAccepted,Crabs Accepted,Traded crabs with Crablobab.,,catchrelease.achievements.EventAchievement,,SPOILER,COMMON
+catchrelease_notAFish,Not a Fish,Bought the Chicken Profile.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON
+catchrelease_soldOut,Sold Out,Bought everything Crablobab had for sale.,,catchrelease.achievements.EventAchievement,,SPOILER,RARE
+catchrelease_onDisplay,On Display,Put a fish in a Breach Conservatory tank.,,catchrelease.achievements.EventAchievement,,SPOILER,UNCOMMON
+catchrelease_firstJob,Satisfied Customer,Completed a fishing job.,,catchrelease.achievements.EventAchievement,,VISIBLE,COMMON
+catchrelease_answeredCall,Answered the Call,Completed a job from a distress call.,,catchrelease.achievements.EventAchievement,,VISIBLE,UNCOMMON
+catchrelease_backToWork,Back to Work,Cleared a camp off a rupture and landed a fish there.,,catchrelease.achievements.EventAchievement,,VISIBLE,UNCOMMON
+catchrelease_backedWinner,Backed the Winner,Won a bet at Fight Night.,,catchrelease.achievements.EventAchievement,,VISIBLE,UNCOMMON
+catchrelease_everyBar,Known in Every Bar,Completed every kind of bar job.,,catchrelease.achievements.TallyAchievement,,VISIBLE,EPIC
+catchrelease_everyFleet,Flagged Down,Completed every kind of fleet job.,,catchrelease.achievements.TallyAchievement,,VISIBLE,EPIC
+catchrelease_chartRequest,On the Chart,Completed a chart request for the Fisherman.,,catchrelease.achievements.EventAchievement,,VISIBLE,COMMON
+catchrelease_chartRequests10,Trusted Hand,Completed 10 chart requests for the Fisherman in one campaign.,,catchrelease.achievements.CountAchievement,,VISIBLE,RARE
+catchrelease_lostAndFound,Lost and Found,Returned the Fisherman's compass.,,catchrelease.achievements.EventAchievement,,VISIBLE,UNCOMMON
+catchrelease_captainsFish,The Captain's Fish,Landed the fish the captain had chased for years.,,catchrelease.achievements.EventAchievement,,SPOILER,RARE
+catchrelease_oldWound,Old Wound,Landed the wounded fish for the Fisherman.,,catchrelease.achievements.EventAchievement,,SPOILER,RARE
+catchrelease_nobodyWanted,Nobody Wanted Her,Traded trophy fish for the Reliquary.,,catchrelease.achievements.EventAchievement,,SPOILER,UNCOMMON
+catchrelease_comePrepared,Came Prepared,Had three trophy fish on hand when you first met the Reliquary's owner.,,catchrelease.achievements.EventAchievement,,SPOILER,EPIC
+catchrelease_fishingFleet,Fishing Fleet,"Had the Stigmata, Reliquary and Monstrance in the fleet at once.",,catchrelease.achievements.EventAchievement,,SPOILER,EPIC
+catchrelease_legendary_lantern_jack,Lantern Jack,Landed Lantern Jack.,,catchrelease.achievements.EventAchievement,,SPOILER,LEGENDARY
+catchrelease_legendary_slipstream_moray,Slipstream Moray,Landed the Slipstream Moray.,,catchrelease.achievements.EventAchievement,,SPOILER,LEGENDARY
+catchrelease_legendary_quorum,The Quorum,Landed the Quorum.,,catchrelease.achievements.EventAchievement,,SPOILER,LEGENDARY
+catchrelease_legendary_false_dawn,False Dawn,Landed False Dawn.,,catchrelease.achievements.EventAchievement,,SPOILER,LEGENDARY
+catchrelease_legendary_longliner,The Imposter,Landed the Imposter.,,catchrelease.achievements.EventAchievement,,SPOILER,LEGENDARY
+catchrelease_legendary_abyssal_ghost_manta,Abyssal Ghost Manta,Landed the Abyssal Ghost Manta.,,catchrelease.achievements.EventAchievement,,SPOILER,LEGENDARY
+catchrelease_everyTale,Every Tale Told,Landed every legendary fish.,,catchrelease.achievements.EventAchievement,,VISIBLE,LEGENDARY
+catchrelease_notAScratch,Not a Scratch,Landed an Exceptional legendary fish.,,catchrelease.achievements.EventAchievement,,VISIBLE,EPIC
+catchrelease_wrongBoat,Wrong Boat,Unmasked the Imposter.,,catchrelease.achievements.EventAchievement,,SPOILER,RARE
+catchrelease_incidentReport,Incident Report,Put a harpoon into another ship.,,catchrelease.achievements.EventAchievement,,VISIBLE,COMMON
+catchrelease_confiscated,Confiscated,Had your catch seized over Breach Lights near a colony.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON
+catchrelease_somebodyImportant,Somebody Important,Had a contract taken out over a harpoon.,,catchrelease.achievements.EventAchievement,,HIDDEN,UNCOMMON
+catchrelease_heavyHaul,Heavy Haul,Hooked an enemy capital ship with the Tug Harpoon.,,catchrelease.achievements.EventAchievement,,SPOILER,RARE
+catchrelease_salvageRights,Salvage Rights,Brought an enemy fighter aboard with LYNE drones.,,catchrelease.achievements.EventAchievement,,SPOILER,UNCOMMON
+catchrelease_andRelease,And Release,Let a fish off the line.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON
+catchrelease_soClose,So Close,Let a fish go when it was nearly landed.,,catchrelease.achievements.EventAchievement,,HIDDEN,UNCOMMON
+catchrelease_oneThatGotAway,The One That Got Away,Lost an Epic or Legendary fish.,,catchrelease.achievements.EventAchievement,,HIDDEN,UNCOMMON
+catchrelease_skillIssue,Skill Issue,Lost 10 fish in a row.,,catchrelease.achievements.TallyAchievement,,HIDDEN,UNCOMMON
+catchrelease_throwItBack,Throw It Back,Landed a fish too small to keep.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON
+catchrelease_takingARide,Taking a Ride,Landed a Coach.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON
+catchrelease_oneLTooMany,One L Too Many,Landed a Skelleton.,,catchrelease.achievements.EventAchievement,,HIDDEN,UNCOMMON
+catchrelease_whichCameFirst,Which Came First,Landed an Egg with the Chicken Profile on.,,catchrelease.achievements.EventAchievement,,HIDDEN,RARE
+catchrelease_showSomeRespect,Show Some Respect,Landed a legendary fish to a party horn.,,catchrelease.achievements.EventAchievement,,HIDDEN,EPIC
+catchrelease_legalTender,Legal Tender,Sold a Credfish.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON
+catchrelease_marketPrice,Market Price,Sold a legendary fish.,,catchrelease.achievements.EventAchievement,,HIDDEN,RARE
+catchrelease_publicNuisance,Public Nuisance,Put a Stinkfish on display.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON
+catchrelease_wrongEnd,Wrong End of the Rope,Harpooned a stronger fleet and got reeled in.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON
+catchrelease_collateralCatch,Collateral Catch,Hit a fleet with an Explosive Head.,,catchrelease.achievements.EventAchievement,,HIDDEN,UNCOMMON
+catchrelease_settledInFull,Settled in Full,Paid a hitman to cancel the contract.,,catchrelease.achievements.EventAchievement,,HIDDEN,UNCOMMON
+catchrelease_badTip,Bad Tip,Lost a bet at Fight Night.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON
+catchrelease_rockFishing,Rock Fishing,Harpooned a meteor.,,catchrelease.achievements.EventAchievement,,HIDDEN,UNCOMMON
+catchrelease_buyersRemorse,Buyer's Remorse,Switched off something you paid Crablobab for.,,catchrelease.achievements.EventAchievement,,HIDDEN,COMMON

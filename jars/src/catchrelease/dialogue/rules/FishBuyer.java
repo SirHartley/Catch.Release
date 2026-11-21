@@ -1,5 +1,6 @@
 package catchrelease.dialogue.rules;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishRarity;
 import catchrelease.campaign.fish.items.FishItems;
@@ -298,6 +299,7 @@ public class FishBuyer {
             if (value <= 0f) continue;
 
             cargo.removeItems(CargoItemType.SPECIAL, data, stack.getSize());
+            Achievements.onSold(FishItems.read(data));
 
             credits += value;
             sold += FishItems.isContainer(data)
@@ -548,6 +550,7 @@ public class FishBuyer {
 
         for (SaleEntry entry : preview.entries) {
             cargo.removeItems(CargoItemType.SPECIAL, entry.data, entry.items);
+            Achievements.onSold(entry.sell);
 
             if (entry.keep != null) {
                 SpecialItemData rest = FishItems.repack(entry.data.getId(), entry.keep);

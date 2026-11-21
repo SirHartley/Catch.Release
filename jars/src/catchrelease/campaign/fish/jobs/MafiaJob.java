@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.shop.FishRequirement;
 import com.fs.starfarer.api.Global;
@@ -347,6 +348,7 @@ public class MafiaJob extends FishJob {
 
     @Override
     protected boolean onDelivered() {
+        if (wager != null) Achievements.complete(won ? Achievements.BACKED_WINNER : Achievements.BAD_TIP);
         if (!nightRecorded && Global.getSector() != null) {
             MemoryAPI memory = Global.getSector().getMemoryWithoutUpdate();
             memory.set(NIGHTS_SUPPLIED_KEY, Math.max(0,

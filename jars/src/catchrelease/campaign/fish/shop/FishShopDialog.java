@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.shop;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.crab.CrabWares;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.data.FishGrade;
@@ -1325,6 +1326,7 @@ public class FishShopDialog implements InteractionDialogPlugin {
         // ownership is final here: undo works only inside the session
         TreasureRumour.checkLensBought();
         SensorBuild.checkBought();
+        Achievements.onOutfitterClosed();
 
         if (onClose == null) {
             dialog.dismiss();

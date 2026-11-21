@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.fisherman.chain;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.data.CatchImplement;
 import catchrelease.campaign.fish.data.FishRanges;
 import catchrelease.campaign.fish.data.FishRarity;
@@ -450,7 +451,10 @@ public final class TreasureRumour {
         if (saved == null || !FishermanChain.isAt(FishermanChain.Stage.T1_ACTIVE)) return false;
 
         CargoAPI cargo = getPlayerCargo();
-        if (cargo != null && isCarried()) cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, compass(), 1f);
+        if (cargo != null && isCarried()) {
+            cargo.removeItems(CargoAPI.CargoItemType.SPECIAL, compass(), 1f);
+            Achievements.complete(Achievements.LOST_AND_FOUND);
+        }
 
         saved.lost = null;
         saved.lostMarketName = null;

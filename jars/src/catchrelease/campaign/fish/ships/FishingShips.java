@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.ships;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.campaign.fish.tackle.Tackle;
 import catchrelease.campaign.fish.tackle.TackleManager;
 import catchrelease.combat.salvage.FighterStore;
@@ -249,6 +250,8 @@ public final class FishingShips {
                 leave(ship);
             }
         }
+
+        if (aboard.size() == Ship.values().length) Achievements.complete(Achievements.FISHING_FLEET);
     }
 
     // The second slot starts with the ship's module, never with what was fitted before the ship left. A module the

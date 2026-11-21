@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.minigame;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.config.FishingSounds;
 import catchrelease.config.PlayerSettings;
 import catchrelease.config.Setting;
@@ -141,6 +142,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
     protected void beginFailure() {
         if (failedSoundPlayed) return;
         failedSoundPlayed = true;
+        Achievements.onLost(minigame.getFish());
         CatchCelebration.playHook(FishConstants.SOUND_FAILED);
         if (scars != null) {
             scars.failed(listener == null ? minigame.getScars() : listener.onMinigameFailed());
@@ -206,6 +208,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
             catchrelease.campaign.fish.intel.FishRouteIntel.onCatch(specimen);
             catchrelease.campaign.fish.legendary.LegendaryChases.onCatch(specimen);
             catchrelease.campaign.fish.legendary.LegendaryShields.onCatch(specimen);
+            Achievements.onCatch(specimen);
 
             if (!lootAwards.isEmpty()) lootResult = new LootResultPanel(lootAwards);
 
@@ -281,6 +284,7 @@ public class FishingMinigamePanel implements CustomUIPanelPlugin {
                 event.consume();
             } else if (event.isKeyDownEvent() && event.getEventValue() == Keyboard.KEY_ESCAPE){
                 event.consume();
+                if (minigame.isRunning()) Achievements.onLetGo(minigame.getProgress());
                 minigame.setEscaped();
                 endLingerLeft = 0f;
             }

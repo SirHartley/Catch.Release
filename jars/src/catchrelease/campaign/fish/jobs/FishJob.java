@@ -1,5 +1,6 @@
 package catchrelease.campaign.fish.jobs;
 
+import catchrelease.achievements.Achievements;
 import catchrelease.config.Setting;
 import catchrelease.campaign.fish.data.FishCatch;
 import catchrelease.campaign.fish.intel.FishIntelIcon;
@@ -151,6 +152,12 @@ public abstract class FishJob extends HubMissionWithBarEvent
     @Override
     public String getIcon() {
         return FishIntelIcon.get(asks);
+    }
+
+    @Override
+    protected void endSuccessImpl(InteractionDialogAPI dialog, Map<String, MemoryAPI> memoryMap) {
+        super.endSuccessImpl(dialog, memoryMap);
+        Achievements.onJobDone(this);
     }
 
     public List<FishReward> getRewards() {

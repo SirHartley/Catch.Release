@@ -15,6 +15,7 @@ import com.fs.starfarer.api.campaign.rules.MemoryAPI;
 import com.fs.starfarer.api.combat.ViewportAPI;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.ModManagerAPI;
 import com.fs.starfarer.api.SettingsAPI;
 import com.fs.starfarer.api.campaign.*;
 import com.fs.starfarer.api.impl.campaign.velfield.SlipstreamTerrainPlugin2;
@@ -275,7 +276,14 @@ public final class LegendaryEscapeChecks {
 
         Environment() {
             if (Global.getSector() != null) throw new IllegalStateException("Run outside Starsector.");
+            // achievement hooks make magiclib read its specs from the enabled mods
+            ModManagerAPI mods = api(ModManagerAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getEnabledModsCopy" -> List.of();
+                case "isModEnabled" -> false;
+                default -> throw new AssertionError(m);
+            });
             Global.setSettings(api(SettingsAPI.class, (p, m, a) -> switch (m.getName()) {
+                case "getModManager" -> mods;
                 case "getFloat" -> 1f;
                 case "getBaseTravelSpeed" -> 100f;
                 case "getSpeedPerBurnLevel" -> 20f;
